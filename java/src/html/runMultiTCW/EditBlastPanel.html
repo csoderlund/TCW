@@ -1,0 +1,44 @@
+<html>
+<title>Search Settings</title>
+<body style="padding:20px;width:650px;font-family:Times">
+<h2>Search Settings</h2>
+mTCW requires the AA hit file, which is the result of a file of sequences in the databases
+being searched against itself. The NT hit file is optional. The respective hit files
+are used to create pairs in the database, and the pairs are used 
+to compute the BBH and Closure clusters. For orthoMCL, the pairs are read from the AA blast file.
+ 
+<ul>
+<li>If the hit file (<tt>hitsAA.tab</tt>) does not exist:
+the main panel will say "&lt;Search-program&gt; AA file", where &lt;Search-program&gt; may be
+<tt>Blast</tt>, <tt>Diamond</tt> or <tt>Usearch</tt>. 
+Before executing "Run Search", you can
+set the search program (see www.agcol.arizona.edu/tcw/doc/Search.html), and you can change the 
+default parameters. 
+<p>
+<li><i>Important</i>. If the hit file <b>DOES</b> exist, then the main panel will say
+"Use existing file" and will not let you re-create the hit file. 
+To generate a different hit file, you need to remove
+the existing one, which can be done from the main panel with the "Remove..." button. Alternatively,
+you can rename the existing hit file.
+</ul>
+
+<p>These same instruction apply to the NT blast file, but you cannot select the
+search program as only Blastn can be used for the NT self-blast. 
+This option is NOT available if any of your input sTCWdbs are created from protein sequences.
+
+
+<h3>Running the search yourself</h3>
+If you want to run the search on a different machine (e.g. computed on an HPC cluster):
+<ol>
+<li>When the database is built, it creates a sub-directory <tt>projcmp/&lt;project name&gt;/hitResults</tt> which 
+contains the file of proteins sequences (<tt>combineAA.fasta</tt>).
+<li>Use the fasta file as input to blast and have it produce the tabular output.
+<li>Put the blast tabular formated file in the <tt>hitResults</tt> directory with the
+name <tt>hitsAA.tab</tt>.
+</ol>
+The same instructions apply generating the nucleotide blast file, where the input would
+be <tt>combineNT.fasta</tt> to produce the file <tt>hitsNT.tab</tt>; this only applies
+if none of the input sTCWdbs are created from protein sequences.
+
+
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<title>Annotation Options</title>
+	<body style="padding:20px;width:650px;font-family:Times;">
+	
+	Annotation, ORF finding, and similar sequences are computed when you click
+	"Annotate". Run only ORF finding or GO annotation with
+	with "ORFs only"and "GO only", respectively. The parameters on this panel
+	are used for these three tasks.
+	
+	<h3>ANNOTATION:</h3>
+	<table border=0 cellpadding=3>
+		<tr><td valign="top" nowrap>Best Anno - SwissProt preference</td> 
+		<td>The "Best Anno" is the best hit without a phrase in its description such as
+		"uncharacterized protein". If this option is selected, and if the best-anno is
+		not a SwissProt hit, then the best-anno SwissProt hit is used if the exponent of the
+		e-value is within 20% of the best-anno non-SwissProt hit. The purpose of this option is
+		to give preference to SwissProt since the descriptions tend to be better and they
+		are the most reliable protein sequences.
+		<tr><td valign="top" nowrap>GO Database*</td>
+		<td>By selecting a GO database, Gene Ontology information will be added.
+		
+		<tr><td valign="top" nowrap>Slims from GO database</td>
+		<td>The GO database has GO Slims identified for various groups, e.g. goslim_plants.
+		These are read when you select a GO database and you may select one, in which case,
+		the set will be identified in the TCW database for query. 
+		<tr><td valign="top" nowrap>Slims from OBO File</td>
+		<td>Slims can be read from a file, and the OBO file is the GO file format for slims
+		(goggle for "OBO file format").
+		</table>
+	*If you are not able to select one, then one needs to be downloaded and installed;
+		see online "Annotation Setup" (http://www.agcol.arizona.edu/software/tcw/doc/stcw/AnnoDBs.html).
+		
+	<h3>ORF finder:</h3>
+	See http://www.agcol.arizona.edu/software/tcw/doc/stcw/ORF.html for a full explanation
+	of TCW ORF finding and these parameters.
+	<p>Use Alternative Starts - By default, TCW only uses ATG. If you select this option, it will also use
+	CTG and TTG.
+	
+	<p>The best ORF must be selected for (i) each of the 6 frames and (ii) between the 6 frames. 
+	For both cases, the following
+	rules are used in order of precedence:
+	
+	<ul>
+	<li>Rule 1: <i>Best Hit.</i> 
+	<br>Parameter: E-value cutoff [default: 1E-03] or %Similarity [default: 95].
+	<br><br>The ORF with the best hit will be selected if the hit E-value &lt;= than the cutoff
+	or the similarity (also referred to as identity) is &gt;= than its cutoff. Note that the default E-value
+	cutoff is
+	1E-03, which is the lowest Diamond E-value. With Diamond hits and this cutoff, the similarity is not
+	necessary. However, if the E-value is set higher, it can miss some exact matches, hence, the
+	similarity parameter is available to catch them.
+	<br><br>
+	
+	<li>Rule 2: <i>Longest ORF.</i> 
+	<br>Parameter: cutoff [default: 0.3].
+	<br><br>If the lengths of two candidate ORFs are very different, than the longest ORF is used.
+	To determine if their lengths are 'very' different,
+	the log length ratio is compared to a user-supplied cutoff, e.g. 0.3. For example,
+	the log ratio of 3000:4500 is 0.405,
+	so the longest ORF would be used, 
+	but the log ratio of 3000:4000 is 0.288, so Rule 3 would be used.
+
+	<br><br>
+	<li>Rule 3: <i>Best Markov score.</i> 
+	<br>Parameters: Minimal Set [default: 50], CDS file [default: none].
+	<br><br>For 5th-order Markov model computation*, there are two options:
+	<ol>
+	<li> Train with hits: For the best hits identified in Rule 1,
+	the exact hit region of each sequence will be part of the training set. There must be at least N sequences
+	that pass the E-value test, where N is the user supplied 'Minimum Set'
+	<li> Train with CDS file:  This should be a fasta file of coding sequences. 
+	</ol>
+	*The Markov score was computed according to Hass et al. (2013) Nature Protocols 8:1494-1512 for Transcoder.
+	</ul>
+	
+	<h3>SIMILAR SEQUENCES: (nucleotide sequences only)</h3>
+		The sequences in the databases will be 
+		blasted against each other using megablast and/or tblastx. Then, TCW will use
+		dynamic programming on the top <i>Pairs limit</i> pairs based on the blast E-value.
+		The results are entered into the database and can be queried with <tt>viewSingleTCW</tt>.
+		<p>Instead of running dynamic programming using all 6 frames (36 possibilities), 
+		TCW uses the following heuristics:
+		<ol>
+		<li>Use assigned frames for the amino acid alignment.
+		<li>If the results of 1 are not good and tblastx was run, use tblastx frame.
+		<li>If 1 and 2 have poor alignment, check the nucleotide alignment in both orientation;
+		if the current orientation is the best, keep it and the best amino acid alignment from a 1 and 2.
+		<li>Try all 18 frames using the best orientation from the nucleotide alignment of 3.
+		</ol>
+		Basically, getting the nucleotide alignment right is most important for determining
+		similar sequences. <b>This is not threaded, so can take a while</b>: 
+		(1) If the sequences are well-annotated, the ORF prediction is typically good
+		and this is less likely to try the 18 frames, 
+		(2) set the Pairs Limit to just what you think will be of interest
+		to you, and (3) be prepared to run this overnight if your database
+		has many sequences.
+		
+		<p>If no options are selected, this step will be skipped.
+		<p>
+		<table border=0 cellspacing=5 cellpadding=3>
+		<tr>
+			<td valign="top" colspan=2><i>Nucleotide Self Blast (megablast or blastn)</i></td>
+		</tr>
+		<tr>
+			<td nowrap>&nbsp;&nbsp;&nbsp;&nbsp;1. Execute</t>
+			<td>TCW executes blasts with the provided parameters</td>
+		</tr>
+		<tr>
+			<td nowrap valign="top">&nbsp;&nbsp;&nbsp;&nbsp;2. Use existing</td>
+			<td>The filename of a megablast selfblast file in tabular (-m8, -outfmt 6) format </td>
+		</tr>
+		<tr>
+			<td valign="top" colspan=2><i>Translated Self Blast (tblastx)</i></td>
+		</tr>
+		<tr>
+			<td nowrap valign="top">&nbsp;&nbsp;&nbsp;&nbsp;1. Execute</td>
+			<td>TCW executes blasts with the provided parameters</td>
+		</tr>
+		<tr>
+			<td nowrap valign="top">&nbsp;&nbsp;&nbsp;&nbsp;2. Use existing</td>
+			<td>The filename of a tblastx selfblast file in tabular (-m8, -outfmt 6) format</td>
+		</tr>
+		<tr>
+			<td>Pairs limit</td>
+			<td>Limits the number of pairs produced</td>
+		</tr>
+	</table>
+	If TCW executes the blasts, the results will be in the project's hitResults directory.
+</body>
+</html>

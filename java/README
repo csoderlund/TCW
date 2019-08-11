@@ -1,0 +1,3 @@
+tar xvf classes_ext.tar.gz
+# Edit top line of Makefile for your JAVA_PATH
+make

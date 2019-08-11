@@ -1,0 +1,129 @@
+<html>
+<body style="padding:20px;width:650px;">
+<title>Cluster Table</title>
+<h2>Cluster Table</h2>
+
+
+<h3>Functions at the top</h3>
+<ul>
+<li><u>Sequences</u>:
+Select a cluster or clusters followed by this function to view the sequence table 
+of the members of the cluster(s). 
+<br>&nbsp;
+
+<li><u>Pair</u> Select a cluster followed by this function to view all pairs
+that have a hit, which are computed when the database is created. 
+The BBH and Closure clusters are guaranteed to have a
+hit for all possible pairs in the cluster, however, orthoMCL clusters do not have this
+requirement.
+<br>&nbsp;
+
+<li><u>Copy...</u>Copy to the clipboard the 
+Cluster ID, Hit ID or Hit Description.
+<br>&nbsp;
+
+<li><u>Table...</u>
+<ul>
+<li><b>Show Column Stats</b>: Popup a table of statistics for the numeric columns in the table. Note: if you Export the table and 
+compute the statistics, their results will not be as precise.
+<br>&nbsp;
+
+<li><b>Copy Table</b>: Copies the table to the clipboard either the entire table. 
+<br>&nbsp;
+
+<li><b>Export Table</b>: Exports the table to file in tab delimited file. 
+<br>&nbsp;
+
+<li><b>Export all cluster AA sequences</b>: Exports the AA sequences from all clusters in the table to a fasta formated file. 
+The description line for each sequence provides the sequence and cluster name. 
+<br>&nbsp;
+
+<li><b>Export all cluster NT sequences</b>: Same as above but output NT sequences.
+<br>&nbsp;
+
+<li><b>Export Cluster GOs:</b> list GOs associated with the cluster sequences in the table. 
+If any
+sequence in a cluster has a hit with a GO the passes the below filters, the cluster is
+counted as having the GO. NOTE: it does NOT use the Cluster "Best Anno Hit". The first three are filters::
+<ol>
+<li><i>GO Level</i>: 
+<ol type='a'>
+<li>Level 1 is the three domains. Level 2 are the GO terms directly beneath
+a domain, etc (see GO annotations 'GO Help' for more explanation). 
+<li>If you leave this blank, it will output all GOs. 
+<li>If you just want a couple of levels, e.g. 2 and 3, first export level 2, then export level 3
+to the same file and use the append option (there will be a pop-up asking whether you want to append).
+</ol>
+
+<li><i>Any domain</i>: This toggles through the three main domains. If you select one, it will only 
+export the GOs in that domain.
+
+<li><i>E-value</i>: If you leave this blank, it will ignore the E-value. Otherwise,
+at least one sequence in the cluster must have a seq-hit E-value&le; this value.
+
+<li><i>File Columns</i>:
+<ol type='a'>
+<li>Verbose: outputs columns 
+<tt>
+GOterm	#Cluster	Level	Term_type	Description
+</tt>
+<li>Count only: only outputs the <tt>GOterm</tt> and <tt>#Cluster</tt>. 
+<br>This can be used as input to input to REVIGO (http://revigo.irb.hr)
+</ol>
+</ul>
+</ul>
+
+<h3>Columns</h3>
+<ul> 
+<li>Columns can be added/removed using the <b>Select Columns</b> button below the table. 
+<li>Columns can
+also be rearranged (by dragging the headers) and sorted (by clicking the headers). 
+<li>Put the mouse over a column name in the <b>Select Columns</b> interface, and a full explanation of the column is shown
+in the lower left corner.
+<li>One or more cluster rows can be selected using mouse click, shift-click, or ctrl-click.
+</ul>
+<p> The following describes the columns that need more explanation then is provided by
+the mouse over and shown in the lower left corner.
+
+
+
+<table border=0 cellspacing=3>
+<tr><td colspan=2><i>General</i>
+<tr><td  valign="top">&nbsp;&nbsp;&nbsp;Taxa<td> Notation "nxN" where n is the number of distinct datasets included in the cluster,
+where N=1 if all the species are represented by single sequences and N="N" if any of the
+datasets have more than 1 member in the cluster.
+<tr><td  valign="top">&nbsp;&nbsp;&nbsp;perPCC<td> If the Pearson Correlation Coefficient of the RPKM values
+was computed during the database build, then this column contains the percentage that are >=0.8. See below for
+more detail explanation.
+<tr><td  valign="top">&nbsp;&nbsp;&nbsp;Score<td>The average of the sum of each column, where the sum is the Sum-of-pairs score.
+The Sum-of-pairs score compares each two characters in the column, where there are 22 possible characters (20 amino acids,
+gap '-', and leading/trailing space ' '). The comparison scores are: (aa,aa) is the BLOSUM68 score, (aa,'-') is -4, (aa,' ') is -1,
+('-','-') is 0, (' ',' ') is 0. A large score indicates greater similarity.
+<tr><td  valign="top">&nbsp;&nbsp;&nbsp;Trident<td>The Trident score is computed by the MstatX package (//github.com/gcollet/MstatX).
+This score is a function of normalized symbol
+diversity, sterochemical diversity and gaps (reviewed in Valdir 2002, Scoring Residue Conservation). A score of '1' is the most
+conserved.
+<tr><td colspan=2><i>Majority Annotation Hit</i>
+<tr><td  valign="top">&nbsp;&nbsp;&nbsp;%Hit<td>The percent of sequences that
+have the majority annotation hit as one of its top hits.
+<tr><td  valign="top">&nbsp;&nbsp;&nbsp;HitID<td>The majority hit is 
+computed based on initial substring of all descriptions of all sequences
+in the cluster. The rest of the columns in the section are associated with this HitID.
+<tr><td  valign="top">&nbsp;&nbsp;&nbsp;nGO<td>(If GOs are in the mTCWdb) The number of
+GOs directly assigned to the HitID.
+</table>
+
+
+<p>
+<i>Percent pairs with PCC>=0.8</i>
+<br>
+For each pair that has a hit, 
+the Pearson's Correlation Coefficient is computed from the
+RPKM values of the conditions shared between the two sequences, where conditions are 'shared' if
+they have the same name. The column perPCC is the percent of pairs that have PCC>=0.8. 
+For example, if a cluster has 4 sequences,
+it has (4*3)/2 = 6 pairs. If two of them have PCC>=0.8, then the perPCC will be 33%. A perPCC of
+100% means that their expression profiles on their shared conditions are highly correlated. 
+Select "Pairs" for a cluster to see the actual PCC values and "Sequences" to view the RPKM values.
+
+

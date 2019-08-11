@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<title>Assembly Options</title>
+	<body  style="padding:20px;width:650px;font-family:Times">
+	<h2>Assembly Options</h2>
+	The default assembly parameters have been tuned on a large variety of datasets. See online documentation
+	for more detailed information on the assembly process. Note that TCW can assemble Sanger and 454 raw reads, 
+	as well as existing transcript sets, but cannot assemble raw Illumina reads or similar datasets.
+	<table border=0 width="100%" cellpadding=3>
+			<tr>
+				<th colspan=2 align=left>
+					Assemble
+				</th>
+			</tr>
+		<tr>
+			<td  valign="top">Clique</td>
+			<td>
+				Determines which overlaps are accepted from the clique MegaBLAST output.<br>
+				Minimal overlap: minimum matching bases allowed.<br>
+				Minimal %identity: minimum identity of the match.<br>
+				Maximal overhang: maximum number of non-matching bases attached to the putative joining region.
+			</td>
+		</tr>
+
+
+		<tr>
+			<td  valign="top">Clique Blast Eval</td>
+			<td>E-value for MegaBLAST used to form cliques.</td>
+		</tr>
+		<tr>
+			<td  valign="top">Clique Blast Parameters</td>
+			<td>Additional parameters for MegaBLAST used to form cliques.</td>
+		</tr>
+		<tr>
+			<td  valign="top">Self Join</td>
+			<td>
+				Determines which MegaBLAST results are accepted for overlapping 5' and 3' mate pairs.
+				See description under "Clique" above.			
+			</td>
+		</tr>
+		<tr>
+			<td  valign="top">Bury Blast Eval</td>
+			<td>E-value for the initial bury blast. </td>
+		</tr>
+		<tr>
+			<td  valign="top">Bury Blast Identity</td>
+			<td>%Identity (-p) for the initial bury blast.</td>
+		</tr>
+		<tr>
+			<td  valign="top">Bury Blast Params</td>
+			<td>Additional parameters for the initial bury blast.</td>
+		</tr>
+		<tr>
+			<td valign="top">CAP Args</td>
+			<td>Parameters for running cap3 (also used for assembling cliques).</td>
+		</tr>
+		<tr>
+			<td valign="top">TC Blast Eval</td>
+			<td>E-value for blast overlaps during contig merge stages.</td>
+		</tr>
+		<tr>
+			<td valign="top">TC Blast Params</td>
+			<td>Additional parameters for blast overlaps during contig merge stages.</td>
+		</tr>
+		<tr>
+			<td valign="top">TC#N Table</td>
+			<td>
+				The table defines N rounds of blasting contigs and merging. 
+				The parameters are for loading 
+				the Nth MegaBLAST results, and are the same as described for "Clique" above.
+				<br>The last three cells can be edited; click in cell, hit backspace, and the
+				cell will turn white indicting it can be edited.
+			</td>
+		</tr>
+	</table>
+</body>
+</html>

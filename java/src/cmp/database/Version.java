@@ -1,0 +1,243 @@
+package cmp.database;
+
+import java.sql.ResultSet;
+import java.util.HashSet;
+
+import util.database.DBConn;
+import util.methods.ErrorReport;
+import util.methods.Out;
+import util.ui.UserPrompt;
+
+/***************************************************
+ * If columns are being added for a version, add them here and to schema
+ */
+public class Version {
+	public static final String DBver = "6.1"; 
+	private final double nVer=6.1;
+	
+	public Version (DBConn mDB, boolean force) { 
+		try {
+			if (mDB==null) return; 
+	
+			String ver = mDB.executeString("select schemver from info");
+			if (ver.equals(DBver)) return;
+			
+			Out.prt("mTCW database version db" + ver);
+			tooOldDie(mDB);
+			
+			double d = Double.parseDouble(ver);
+			if (d>nVer) {
+				Out.PrtError("The mTCW database was created with a newer version of TCW.");
+				Out.prt("   This version of the software uses database mdb" + DBver);
+				return;
+			}
+			if (!UserPrompt.showContinue("Database update", "The database needs a few small changes.")) 
+				return;
+			
+			if (d < 5.5) addv55(mDB);
+			if (d < 5.6) addv56(mDB);
+			if (d < 5.7) addv57(mDB);
+			if (d < 5.8) addv58(mDB);
+			if (d < 5.9) addv59(mDB);
+			if (d < 6.0) addv60(mDB);
+			if (d < 6.1) addv61(mDB);
+			Out.prt("Complete update for mdb" + DBver);
+		}
+		catch (Exception e) {ErrorReport.die(e, "Error checking schema");}
+	}
+	private void addv61(DBConn mDB) { // v2.15 5/15/19
+		try {
+			Out.PrtSpMsg(1, "Updating for mdb6.1");
+			Out.PrtWarn("Remove Pairs and re-add Pairs, Methods and Stats.");
+			mDB.tableCheckAddColumn("pairwise", "nSNPs", "int default -2", "pOlap2");
+			mDB.tableCheckAddColumn("pairwise", "cAlign", "int default -2", "aaBest"); 
+			mDB.executeUpdate("update info set schemver='6.1'");
+		}
+		catch (Exception e) {ErrorReport.die(e, "Updating for mdb6.0");}
+	}
+	private void addv60(DBConn mDB) { // 2/20/19
+		try {
+			Out.PrtSpMsg(1, "Updating for mdb6.0");
+			if (!UserPrompt.showContinue("Database update", "If GOs are in the database, they" +
+					"will be removed and need to be re-added.")) 
+				return;
+			Out.PrtSpMsg(2, "Removing GO sequences...");
+			mDB.tableDelete("go_seq");
+			Out.PrtSpMsg(2, "Removing GO info...");
+			mDB.tableDelete("go_info");
+			Out.PrtSpMsg(2, "Removing GO paths...");
+			mDB.tableDelete("go_graph_path");
+			Out.PrtSpMsg(2, "Add new columns...");
+			// bestEval can be double, or boolean 
+			mDB.tableCheckAddColumn("go_seq", "bestHITstr", "varchar(30)", "bestEval"); 
+			mDB.tableCheckAddColumn("unitrans_hits", "bestGO", "tinyint default 0", "bestEval");
+			mDB.executeUpdate("update info set schemver='6.0'");
+		}
+		catch (Exception e) {ErrorReport.die(e, "Updating for mdb6.0");}
+	}
+	private void addv59(DBConn mDB) {
+		try {
+			Out.PrtSpMsg(1, "Updating for db5.9 (slow on big databases)...");
+			mDB.executeUpdate("update info set schemver='5.9'");
+			
+			Out.r("add column 1 of 6");
+			mDB.tableCheckRenameColumn("pog_groups", "avgDiff", "score1", "float default -10000.0");
+			Out.r("add column 2 of 6");
+			mDB.tableCheckRenameColumn("pog_groups", "seDiff", "score2", "float default -10000.0");
+			Out.r("add column 3 of 6");
+			mDB.tableCheckAddColumn("pog_groups", "conSeq", "mediumText", "minPCC");
+			Out.r("add column 4 of 6");
+			mDB.tableCheckAddColumn("pog_groups", "conLen", "int default 0", "conSeq");
+			Out.r("add column 5 of 6");
+			mDB.tableCheckAddColumn("pog_groups", "sdLen", "float default -2.0", "conLen");
+			Out.r("add column 6 of 6");
+			mDB.tableCheckAddColumn("pog_members", "alignMap", "text", "UTstr");
+		}
+		catch (Exception e) {ErrorReport.die(e, "Update database v5.8");}
+	}	
+			
+	private void addv58(DBConn mDB) {
+		try {
+			Out.PrtSpMsg(1, "Updating for db5.8 (slow on big databases)...");
+			mDB.executeUpdate("update info set schemver='5.8'");
+			mDB.tableCheckAddColumn("pairwise", "aaBest", "tinyint default 0", "aaBit"); 
+			Out.PrtSpMsg(2, "Remove pairs and reload in order to create new BBH clusters");
+		}
+		catch (Exception e) {ErrorReport.die(e, "Update database v5.8");}
+	}	
+			
+	// 7/31/18
+	private void addv57(DBConn mDB) {
+		try {
+			Out.PrtSpMsg(1, "Updating for db5.7 (slow on big databases)...");
+			mDB.executeUpdate("update info set schemver='5.7'");
+			
+			// i knew i would live to regret making percentages tinyint and would change..
+			int cnt=1, tot=19;
+			Out.rp("Change column ", cnt++, tot);
+			mDB.tableCheckModifyColumn("pairwise", "ntSim", "float default -2.0");
+			Out.rp("Change column ", cnt++, tot);
+			mDB.tableCheckModifyColumn("pairwise", "ntOlap1", "float default -2.0");
+			Out.rp("Change column ", cnt++, tot);
+			mDB.tableCheckModifyColumn("pairwise", "ntOlap2", "float default -2.0");
+			Out.rp("Change column ", cnt++, tot);
+			mDB.tableCheckModifyColumn("pairwise", "aaSim", "float default -2.0");
+			Out.rp("Change column ", cnt++, tot);
+			mDB.tableCheckModifyColumn("pairwise", "aaOlap1", "float default -2.0");
+			Out.rp("Change column ", cnt++, tot);
+			mDB.tableCheckModifyColumn("pairwise", "aaOlap2", "float default -2.0");
+			Out.rp("Change column ", cnt++, tot);
+			mDB.tableCheckModifyColumn("pairwise", "pOlap1", "float default -2.0");
+			Out.rp("Change column ", cnt++, tot);
+			mDB.tableCheckModifyColumn("pairwise", "pOlap2", "float default -2.0");
+			Out.rp("Change column ", cnt++, tot);
+			mDB.tableCheckModifyColumn("pairwise", "pCmatch", "float default -2.0");
+			Out.rp("Change column ", cnt++, tot);
+			mDB.tableCheckModifyColumn("pairwise", "pCsyn", "float default -2.0");
+			Out.rp("Change column ", cnt++, tot);
+			mDB.tableCheckModifyColumn("pairwise", "pC4d", "float default -2.0");
+			Out.rp("Change column ", cnt++, tot);
+			mDB.tableCheckModifyColumn("pairwise", "pC2d", "float default -2.0");
+			Out.rp("Change column ", cnt++, tot);
+			mDB.tableCheckModifyColumn("pairwise", "pCnonsyn", "float default -2.0");
+			Out.rp("Change column ", cnt++, tot);
+			mDB.tableCheckModifyColumn("pairwise", "pAmatch", "float default -2.0");
+			Out.rp("Change column ", cnt++, tot);
+			mDB.tableCheckModifyColumn("pairwise", "pAsub", "float default -2.0");
+			Out.rp("Change column ", cnt++, tot);
+			mDB.tableCheckModifyColumn("pairwise", "pAmis", "float default -2.0");
+			Out.rp("Change column ", cnt++, tot);
+			mDB.tableCheckModifyColumn("pairwise", "pDiffCDS", "float default -2.0");
+			Out.rp("Change column ", cnt++, tot);
+			mDB.tableCheckModifyColumn("pairwise", "pDiffUTR5", "float default -2.0");
+			Out.rp("Change column ", cnt++, tot);
+			mDB.tableCheckModifyColumn("pairwise", "pDiffUTR3", "float default -2.0");
+		}
+		catch (Exception e) {ErrorReport.die(e, "Error updating schema");}
+	}	
+	private void addv56(DBConn mDB) {
+		try {
+			Out.PrtSpMsg(1, "Updating for db5.6...");
+			mDB.executeUpdate("update info set schemver='5.6'");
+			
+			// columns pGC, pCpG and nIndel are removed, but not bothering here
+			mDB.tableCheckAddColumn("pairwise", "GC", "float default -2.0", "tstv");
+			mDB.tableCheckAddColumn("pairwise", "CpGn", "float default -2.0", "GC");
+			mDB.tableCheckAddColumn("pairwise", "CpGc", "float default -2.0", "CpGn");
+			mDB.tableCheckAddColumn("pairwise", "nOpen", "smallint default -2", "nGap");
+			
+			String sqlU = "create table pairMap (" +
+					"PAIRid 		int, " +
+					"cds			text," +   // n-m:n-M###n-m   '###' delinates cds1 from cds2
+					"utr5		text," +
+					"utr3		text," +
+					"index idx1(PAIRid) " +
+				") ";
+			if (!mDB.tableExist("pairMap")) mDB.executeUpdate(sqlU);
+			
+		}
+		catch (Exception e) {ErrorReport.die(e, "Error updating schema");}
+	}
+	
+	/**********************************************************
+	 * These changes are part of v2.6. (post date 6/6/18 - first release of v2.6)
+	 * Was 5.3, made 5.4 for a few more changes
+	 */
+	private void addv55(DBConn mDB) {
+		try {
+			Out.PrtSpMsg(1, "Updating for db5.5...");
+			mDB.executeUpdate("update info set schemver='5.5'");
+			
+			// v5.5 
+			mDB.executeUpdate("alter table pairwise add index(HITid) ");
+			int max = mDB.executeCount("select MAX(HITid) from unique_hits");
+			int row = mDB.executeCount("select count(*) from unique_hits");
+			if (max==row) removeExtra(row, mDB);
+			
+			// v5.4
+			mDB.tableCheckAddColumn("info", "grpSQL", "text", "");
+			mDB.tableCheckAddColumn("info", "pairSQL", "text", "");
+			mDB.tableCheckAddColumn("info", "seqSQL",  "text", "");
+			
+			// not sure when I added these, but they were in Pairwise
+			mDB.tableCheckAddColumn("info", "aaPgm", "tinytext", "kaksInfo");
+			mDB.tableCheckAddColumn("info", "ntPgm", "tinytext", "aaPgm");
+			mDB.tableCheckAddColumn("info", "aaInfo", "tinytext", "kaksInfo");
+			mDB.tableCheckAddColumn("info", "ntInfo", "tinytext", "aaInfo");
+			
+			// v5.3
+			mDB.tableCheckAddColumn("pog_groups", "minPCC", "double default 0.0", "perPCC");
+			mDB.executeUpdate("ALTER TABLE pog_method MODIFY prefix VARCHAR(10)");
+		}
+		catch (Exception e) {ErrorReport.die(e, "Error updating schema");}
+	}
+	// remove all unique_hits not used - this  is also in LoadSingleTCW
+	private void removeExtra(int nRow, DBConn mDB) {
+		try {
+			Out.PrtSpMsg(1, "Removing unused hits from " + nRow);
+			HashSet <Integer> keep = new HashSet<Integer> ();
+			ResultSet rs = mDB.executeQuery("select unique_hits.HITid from unique_hits " +
+					"join unitrans_hits on unitrans_hits.HITid = unique_hits.HITid");
+			while (rs.next()) keep.add(rs.getInt(1));
+			int cnt=0;
+			for (int i=0; i<nRow; i++) {
+				if (!keep.contains(i)) {
+					mDB.executeUpdate("delete from unique_hits where HITid=" + i);
+					cnt++;
+					if (cnt%1000==0) Out.r("Remove " + cnt);
+				}
+			}
+			Out.PrtSpMsg(1, "Removed " + cnt);
+		}
+		catch (Exception e) {ErrorReport.die(e, "Error updating schema");}
+	}
+	private void tooOldDie(DBConn mDB) {
+		try {
+			if (mDB.tableColumnExists("pairwise", "alignCDS1")) 
+				ErrorReport.die("Database is too old to update - rebuild");
+			if (!mDB.tableExist("go_info"))  
+				ErrorReport.die("Database is too old to update - rebuild");
+		}
+		catch (Exception e) {ErrorReport.die(e, "Error updating schema");}
+	}
+}

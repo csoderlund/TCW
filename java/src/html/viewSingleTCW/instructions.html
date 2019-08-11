@@ -1,0 +1,87 @@
+<html>
+<title>singleTCW Instructions</title>
+<body style="padding:10px;width:550px;">
+<h2>Instructions</h2>
+Terminology:
+<ul>
+<li><i>Sequence:</i> The input may be TCW-assembled transcripts, transcript sequences, proteins or genes.
+<li><i>Conditions:</i>A condition may be a tissue type, treatment, etc.  
+<li><i>AnnoDB:</i> A database in FASTA format against which the sTCW sequences are searched against
+for annotation. The search is heuristic with a program such as <tt>Blast</tt>, <tt>Diamond</tt>
+or <tt>Usearch</tt>.
+<li><i>DB hit:</i> An alignment of an entry from an annoDB (e.g. UniProt) to an sequence. A given
+sequence can <i>hit</i> an annoDB multiple times (have alignments to multiple entries) and
+it can hit multiple different annoDBs (have alignments in more than one annoDB). 
+<li><i>Best Eval:</i> The hit with the best search e-value.
+<li><i>Best Anno:</i> From a list sorted on e-value, the first one with informative
+annotation, which is any description that does not contain 
+phrases such as "uncharacterized protein" (see 'Select Columns' Help for a more complete
+description).
+</ul>
+
+<hr>
+Detailed Help is provided on each page; the following provides an overview
+of what is available.
+<h3>Sequences</h3>
+
+<b>&gt;&gt;Show All</b> - A table of all sequences in the database. 
+<ul>
+<li>To view a sequence from the table, select the sequence and then "View Selected Sequence".
+<li>Change the columns in the table using "Columns" under "Sequence.
+</ul>
+
+<b>&gt;&gt;Columns</b> - Menu of columns for the sequence table.
+<ul>
+<li>Select or deselect columns.
+<li>The columns are not immediately changed for existing tables. Either select "Refresh All Existing Tables"
+or redisplay the table (listed on the left panel) and select "Refresh columns".
+</ul>
+
+<b>&gt;&gt;Filters</b> - A menu with specific filters for sequences.
+<ul>
+<li>Select one or more filters, then select "View Filtered Sequences". The sequences that pass all filters will
+be displayed in a table. 
+<li>If you are not seeing the columns you desire, go to the "Columns", change
+the columns, come back to the table (it will be listed on the left), and click "Refresh Columns".
+</ul>
+
+<b>&gt;&gt;Results</b> - List all Filter query results.
+<ul>
+<li>All queries that have been performed will be listed in a table. 
+<li>Selecting a label will redisplay it on the right, or select it from this Results table.
+<li>To remove a label, select the 'x' beside it on the left panel, or remove it from the Results
+table.
+</ul>
+
+<h3>Basic Queries</h3>
+<b>&gt;&gt;Sequences</b> - Search on Seq ID,
+Remarks or Read Names (for assembled contigs only).  
+<ul>
+<li> 
+This builds a table from the results of the selected filters.
+<li>The resulting sequences can be shown as "View Selected Sequence". 
+<li>Columns can be changed with "Select Columns". 
+
+</ul>
+
+<b>&gt;&gt;AnnoDB Hits</b> - Search on the Hit Id (e.g. UniProt ID) or description. 
+<ul>
+<li>It works like the basic Sequences.
+</ul>
+
+<b>&gt;&gt;GO Terms</b> - Search on the GO term or description. 
+<ul>
+<li>It works like the basic Sequences.
+</ul>
+<b>&gt;&gt;Find hits</b> - Search a sequence against the sequences in the database or a user
+selected protein database. This requires the <tt>Blast</tt> and optional <tt>Diamond</tt> paths to 
+be in the HOSTS.cfg file. 
+
+
+<hr>
+<h3>Similar Sequence Pairs</h3>
+This section will only exist if the database was built with the "Similar Pairs" option.
+All options are the same as above, except apply to sequence pairs. 
+
+</BODY>
+</HTML>

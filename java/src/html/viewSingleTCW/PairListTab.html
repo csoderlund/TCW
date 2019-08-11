@@ -1,0 +1,39 @@
+<html>
+<body style="padding:20px;width:650px;">
+<h1>Sequence Pairs</h1>
+The table shows similar-sequence pairs calculated during the annotation stage (see below).
+
+
+<p>
+Select <b>Pairs Columns</b> on the left panel to add/remove information columns from the table.
+After choosing columns, return to the table and use <b>Refresh Columns</b>. 
+<p>
+Columns may be sorted ascending or descending by clicking the headers, and may
+be rearranged by dragging the headers. 
+<p>Note: Since this is not used as much as the rest of TCW features, it is not quite as
+polished as the rest.
+
+<h2>Align sequence pair</h2>
+Results in the pair of sequences being aligned using a dynamic programming algorithm.
+The result page will have the following options:
+<ul>
+<li>Align in best frame (default): It aligns the nucleotide using 
+the pre-computed orientation and the amino acids
+using the pre-computed frame (as described below, it is not guaranteed that this
+is the best frame, not is it necessarily the same as the ORF frame).
+<li>Align in best orient frame: It determines the best orientation by computing the
+nucleotide alignment (typically, one is much better than the other); both will be shown. 
+It then computes amino acid alignment with the precomputed frames. Then it computes
+the 18 possibilities using the nucleotide determined orientation. 
+<li>Align in all frames: Align the nucleotide sequences in both orientations. Align
+the amino acid with the precomputed frame. Then compute the remaining 35 possibilities.
+<li>Align the top 3 shared hits: The 3 best hits shared between the two sequences will
+be aligned to each sequence, for a total of 6 alignments.
+</ul>
+
+<h2>View sequences</h2>
+This creates a sequence table of the two sequences.
+
+
+
+</html>

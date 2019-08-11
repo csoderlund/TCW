@@ -1,0 +1,34 @@
+<html>
+<body style="padding:20px;width:650px;">
+<title>Sequence Filter Help</title>
+<h2>Filter Sequences</h2>
+A sequence must pass ALL filters. The filters selected will be shown at the top
+of the resulting filtered Sequence table. Beware:
+<ul>
+<li>It is easy to forget to unset a filter, so execute "Clear"
+to clear all filters in order to start a brand new filter. 
+<li>If NO filters are set, all sequences will be displayed -- this can be a big
+set and may take wait time to display.
+</ul>
+
+<h3>+Basic</h3>
+<table border=1>
+<tr><td>SeqID<td>This is useful to find all sequences with a given prefix, or can
+be used to find a given sequence. 
+<tr><td>Hits to different dataset<td>This lists the sequences that have 
+a hit to a different dataset. 
+<tr><td>Has Annotation<td>Has at least one hitID.
+<tr><td>Has GO<td>Has at least one GO assignment.
+</table>
+<h3>+Cluster Sets</h3>
+The names of all computed cluster sets will be listed. 
+If you select "In" for one of the them,
+all sequences that are in a corresponding cluster of that method type will be listed.
+If you select "Not in", then all sequences that are not in a cluster of that
+method type is listed. You can select multiple "In", or "Not in" or a combination.
+<br><br>For example: if you have cluster types OM1 (created with inflation 1.5) and
+OM5 (created with inflation 5), then selecting "In" OM1 and "Not in" OM5, this will list
+all sequences that are in OM1 but not in OM5 clusters.
+<h3>+RPKM/FPKM</h3>
+If the input datasets had read counts, then their normalized values will be in the database.
+All conditions will be listed.

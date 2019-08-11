@@ -1,0 +1,69 @@
+<html>
+<body style="padding:20px;width:650px;font-family:Times">
+<title>Sequence Align Hits</title>
+<h1>Sequence Align Hits with DP</h1>
+Heuristic search versus dynamic programming, where this display show the results of 
+dynamic programming (DP):
+<ul>
+<li>Hits were assigned to sequences using heuristic search programs such as <tt>Blast</tt>, <tt>Diamond</tt>, 
+or <tt>Ublast</tt> when the database was build, and
+their coordinates stored in the database; any references to 'Hit' indicate these coordinates.
+<li>Dynamic programming is a slower search, but is considered more likely to get the correct alignment;
+this display uses a semi-global dynamic programming with 
+affine gaps algorithm. 
+<li>In the display, the percentage after "AA" is the similarity for the dynamic programming algorithm. The statistics
+after "Hit:" are from the search program results.
+</ul>
+
+<h2>Second row of buttons</h2>
+<p><b>View Bases</b> changes the display from a line drawing to the actual sequence.
+<p><b>Zoom</b> changes the horizontal zoom.
+
+<p><b>UTR</b> Highlights the UTRs in yellow (nucleotide databases only). 
+<br><i>Caveats:</i> The UTRs are not displayed if the RF is not the selected frame (this happens if there are hits
+in multiple frames). The UTR is not displayed for nucleotide hits. This is not
+available for "Selected hit(s) in all frames".
+
+<p><b>Hit</b> Highlights the region from the start to end using the sequence hit coordiates; if the
+sequence is nucleotide, they are 
+are converted to protein coordinates and shifted to take account of the gaps.
+
+<br><i>Caveats:</i>  (1) The alignment are occassionally off by plus one. (2) This is not
+available for "Selected hit(s) in all frames".
+
+<p><b>Alignment....</b> 
+This features requires that one of the alignment boxes be selected (anywhere in the rectangle). 
+It pops up with the following options (see last section for definition of terms):
+<ol>
+<li><b>Original semi-global  with affine gaps</b>: This shows the same alignment as
+you would see by selected <b>View Bases</b>, but its easier to read since its
+multi-line. Plus, you can simultaneously view where the alignment is on the graphical
+view.
+<li><b>Local</b>: This uses the "Gap" penalty, and does not try to cluster gaps.
+<li><b>Local with affine gaps</b>: This uses both the "Gap" and the "extend" penalties
+and tries to reduce the number of gap stretches.
+</ol>
+<p>The "Score" on the alignment popup is computed differently for local versus semi-global.
+
+<p>If you compare the alignment with the UniProt alignment for the selected sequence-hit pair, there may be
+some variation as it all depends on the Blosum matrix used and penalties set.
+
+<h2>Dynamic programming sequence alignment terms</h2>
+
+<ol>
+<li><b>Semi-global</b> find the alignment of the entire
+shorter string to the longer string. This works
+fine if they are almost the exact same gene.
+<li><b>Local</b> find the best substring in one sequence that aligns well with a substring in the other.
+<li><b>Affine gaps</b> instructs the algorithm to cluster gaps if possible
+instead of having them spread out. A simple nucleotide example is:
+<pre>
+--TCT-GAGG    or    TCT---GAGG
+TATCTAGAGG          TATCTAGAGG
+Two gap opens       One gap open
+</pre>
+<li>The <b>gap penalty</b> is the cost of
+opening up a gap and the affine extend is the penalty for extending a gap.
+</ol>
+
+</html>

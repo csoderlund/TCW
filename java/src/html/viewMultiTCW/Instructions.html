@@ -1,0 +1,47 @@
+<html>
+<body style="padding:20px;width:650px;">
+<title>viewMultiTCW</title>
+<h2>Instructions</h2>
+The multiTCW database is created from two or more singleTCW databases (datasets). 
+A dataset may have both DNA (NT) sequences and protein (AA) sequences, or only 
+protein (AA) sequences. A NT-only database is one that has NT sequences for all
+datasets.
+
+<br><br><b>Clusters</b>: There can be one or more clusters of type BBH (bi-directional best hit), Closure, orthoMCL
+or user-defined.
+
+<br><br><b>Pairs</b>: 
+There is a pair for two sequences if they have a AA or NT hit, where the hits are computed when
+the database is created by searching a file of all sequences
+in the database against itself using a heuristic search program
+such as <tt>Diamond</tt>, <tt>Blast</tt> or <tt>Usearch</tt>. 
+A NT-only databases will have additional information for NT pairs in a cluster, 
+such as number of synonymous, nonsynonymous codons.
+
+<hr>
+<br>A few general rules:
+<ol>
+<li><b>Sample List</b>: All tables (Cluster, Pair, Sequence) can be quite large, hence, the
+sample lists is a quick way to see the table without having a long wait time for it to display.
+<br><br>
+<li><b>Filter</b>: Click a (Cluster, Pair, Sequence) filter list on the right. 
+Select your filters and click the "View Filtered" button, which results in
+a table on the right and its <i>label</i> listed on the left. You can always go back
+to the table by clicking its <i>label</i>.
+<br><br>
+<li>Clicking on a function in the table often results in another <i>label</i> on the left.
+Functions that start with "Show" result in popup windows with the information.
+<br><br>
+<li>All panels have a <b>Help</b> to describe the options.
+<br><br>
+<li>All tables have a <b>Select Columns</b> that allows adding or removing columns from the table.
+Putting the mouse over a column name in the panel shows its description in the lower left corner.
+<br><br>
+<li><i>Labels</i> on the left can be removed by clicking the 'x' at the end.
+<br><br>
+<li><b>Results</b>: Lists of all <i>labels</i> under any of the ">" sections. They can all be removed
+together by clicking the "Remove All".
+</ol>
+
+</BODY>
+</HTML>

@@ -1,0 +1,31 @@
+<html>
+<body style="padding:20px;width:650px;font-family:Times">
+<title>Pairs Columns</title>
+<h1>Pairs Columns</h1>
+Use this interface to select columns for the results tables from pair queries. Note that
+sections are collapsible; to expand a section and see the column options,
+click on the "+". 
+<p>
+The description of each column is explained on the column page. 
+
+<h2>Blast results for the pair</h2>
+These three columns are from blasting all sequences against each other using megablast or
+tblastx (when viewing an alignment, if the Blast e-value is on the nucleotide alignment,
+the HSP is from megablast; if the Blast e-value is on the amino acid alignment, the HSP is
+from tblastx). 
+<h2>Total Coverage</h2>
+The "Total Coverage" columns are based on a semi-global dynamic programming algorithm,
+which allows one sequence to be shorter than the other, but then aligns the rest, even if there 
+are gaps. Hence, if "NT %Len" and/or ""AA %Len" is 100, the sequences align their entire length;
+if additionally, "NT %Sim" and/or ""AA %Sim" is 100, then they are the same sequence.
+<ul>
+<li><i>NT %Sim</i> - the number of match nucleotides divided by the alignment length.
+<li><i>NT Len</i> - the alignment length, which does not include overhangs at the beginning or end.
+<li><i>NT %Len</i> - the number of match nucleotides divided by the longest length.
+<li><i>AA %Sim</i> - the number of match amino acids divided by the alignment length; 
+both exact and amino acids substitutions (blosum score>0) are considered a match; 
+two aligned stop codons are not counted as a match.
+<li><i>AA Len</i> - the alignment length, which does not include overhangs at the beginning or end.
+<li><i>AA %Len</i> - the number of match amino acids divided by the longest length.
+</ul>
+</html>

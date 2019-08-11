@@ -1,0 +1,271 @@
+<html>
+<body style="padding:20px;width:650px;font-family:Times">
+<title>Basic Queries for GO Annotation</title>
+<h1>Basic Queries for GO Annotation</h1>
+Overview: 
+Select "Search" to search for the string in the text box, or select "Filters" to apply the
+filters set. Select a check box or radio button to enable the associated search or filter.
+<p>This is the main interface for queries related to gene ontology.
+See "GO Help" for a description of terms. First, a few facts:
+<ol>
+<li>A GO term is only in the TCW database if it has an assigned or inherited hit. 
+<li>The Gene Ontology is constantly evolving, hence, TCW will only be consistent with
+the Gene Ontology Amigo if TCW was built with the latest GO database from 
+www.geneontology.org 
+(the GO version is listed in the Overview).
+</ol>
+
+<hr>
+<h3>Search</h3>
+<ul>
+<li><b>GO term:</b> The GO number, e.g. GO:0003674, or 3674. 
+(<i>Must use one of these formats!</i>).
+<li><b>Description:</b> All GO descriptions are searched for the substring.
+</ul>
+<b>Load File</b>: The file should contain one GO term or one description per line,
+depending on whether <b>GO term</b> or <b>Description</b> is selected. <i>Description must
+be the exact text when loaded from file</i>.
+<hr>
+<h3>Filters</h3>
+<u>Seq-Hit</u>
+<ul>
+<li><b>Best E-val:</b> The best e-value is assigned to each GO. That is,
+the hits are associated with zero or more GOs, and the sequence-hit pairs 
+have e-values; this is the best sequence-hit e-value associated with the GO.
+<li><b>#Seqs:</b> By default, the number of sequences with at least one hit
+that is assigned the GO or a descendant GO of this GO. See <b>#Seqs</b> section towards
+the end, which explains how this will be different if the <b>DE #Seqs</b> is changed.
+<li><b>Evidence Codes</b>: Check the box, then select "Evidence Codes" to bring
+up a panel of available codes. The codes that are not found for any hit-to-GO
+assignment is listed but not selectable. The filter is passed if a GO
+has <b>any</b> of the selected ECs. 
+</ul>
+<u>Level</u>
+<br>See "GO Help" for a description of levels. 
+<ul>
+<li><b>All Top Level:</b> This toggles between "biological_process", "cellular_component"
+and "molecular_function".
+<li><b>Specific:</b> Specify a specific level.
+<li><b>Range:</b> Specify a range of levels.
+<li><b>Slim:</b> If GO slims were identified when the database was created, this option will be present.
+If checked, only the GO slims will be shown (plus filtered by any other option, e.g. E-value).
+The type of GO slims is shown on the overview, e.g. goslims_plant.
+</ul>
+
+<u>DE</u>
+<br>If differential expression p-values for GO have been computed using the GOseq package,
+then you will see a row labeled "DE" on the main window; otherwise, ignore this section.
+<p>
+Filter on the DE values as follows:
+<ol>
+<li>Check the box to the left of "Cutoff:" and adjust the cutoff in the text entry
+box on the right.
+<li>This is followed by "for" and a button, which has a different label based on what
+has been selected. To change the selection, select the button which will bring up
+a panel of all DE column names; select the DE names to query on. Choose one of the two
+options for applying the cutoff, either:
+<ol type="a">
+<li>Any: show results for which any of the selected DE columns passes the threshold,
+<li>Every: show results for which all columns pass.
+</ol>
+<li><b>#Seqs</b>: see the <b>#Seqs</b> section towards the end of this Help.
+</ol>
+
+<hr>
+<h3>Results</h3>
+Select one or more search criteria and click "BUILD TABLE" to execute the search.
+Columns can be added/removed ("Columns"), rearranged by dragging and sorted.
+
+<hr>
+<h3>Top row of options</h3>
+<p><u>View Sequences</u> view the sequences in the main table for the selected GO.
+
+<p><u>Copy...</u> to the clipboard, which can be pasted elsewhere
+<ol type='a'>
+<li><b>Go term</b> - from selected row
+<li><b>Table</b> - the entire table
+</ol>
+
+<p><u>Show...</u> the options will be provided to either show the results in
+a popup window or write the results to file. For the 4 middle options, there is
+also an option to only write the GO terms to file; this can be used with "Load File"
+on the "Basic GO Annotation" panel.
+
+<ol type='a'>
+<li><b>Hits - assigned</b>:
+All proteins in the database that have this GO directly assigned to them.
+<br>&nbsp;
+
+<li><b>Hits - inherited</b>:
+All proteins in the database that inherited the GO.
+NOTE: This query can be slow if there are many descendent GOs that have many assigned
+proteins; some have &gt; 1000.
+<br>&nbsp;
+
+<li><b>Sequences - has hit with GO </b>:
+This shows the sequences that have a hit that has been assigned or inherited
+the GO. If the sequence has multiple hits with the GO, only the one with the best E-value
+is shown. NOTE: If the "View Sequences" is used, 
+the resulting table only shows the GO hit if it is 'Best Eval' or 'Best Anno'. 
+This options makes it easy to directly see what sequence-hit pairs are
+responsible for the best E-value for the GO.
+<br>&nbsp;
+
+<li><b>Sequences with Best GO:</b> creates a text file of all sequences that have a Best GO, i.e.
+hit with GOs. The hit is assigned GOs from the UniProt .dat file; the assigned GOs are listed for
+each sequence.However, since there are generally other sequence-hit for the GO, it does not
+necessarily show all the ECs.
+<br>&nbsp;
+
+
+
+<li><b>GO - Ancestor list by level</b>: 
+All ancestors of the GO term sorted by level. 
+<br>&nbsp;
+
+<li><b>GO - Descendants list by level</b>:
+All descendants of the GO term sorted by level. 
+NOTE: if a descendent GO does not have any assigned or inherited hits, it is not in the
+database so is not shown. 
+<br>&nbsp;
+
+<li><b>GO - Neighbor list and relation</b>:
+The immediate parents and children of the GO term. 
+The relation of 'is_a' or 'part_of' is shown for this option.
+NOTE: same note as for descendants. 
+<br>&nbsp;
+
+<li><b>GO - Related in table by table order </b>:
+A list of the GOs ancestors and descendants will be listed IF they are also in the 
+table. The GOs will be listed in the same order as found in the table.
+<br>&nbsp;
+
+<li><b>GO - Ancestor list by distance and relation</b>:
+The Gene Ontology assigns a distance to each parent-child relation. This option orders
+the ancestors by this distance. The relation of 'is_a' or 'part_of' is shown for this option;
+a GO term can have both relations and a different distance for each. 
+
+<br>&nbsp;
+<li><b>GO - Ancestor path table</b>: 
+The same GOs as in the Ancestor List, but shows the paths in table form. If all paths have the 
+same GOs at the top and bottom of the graph, they are only shown once and the row will be gray.
+NOTE: Occasionally, this query may be slow when there are many paths for the GO; some GOs have over 1000 paths.
+<br>&nbsp;
+</ol>
+
+<u>Table...</u>: 
+<ol type='a'>
+<li><b>Copy Table</b>: Copy the table to the clipboard for pasting elsewhere.
+<br>&nbsp;
+
+<li><b>Show columns stats</b>: A popup window of statistics for the numeric columns.
+<br>&nbsp;
+
+<li><b>Export Table</b>: A tab-delimited file of the contents of the table.
+<br>If you just select two columns, (GO Term,#Seqs) or (GO Term, P-value), 
+the exported file can be used as input to REVIGO (http://revigo.irb.hr). 
+<br>&nbsp;
+
+<li><b>Export SeqIDs with GOs</b>: A tab-delimited file of each SeqID followed by
+its list of direct and indirect GOs. 
+<br>This can be used as input to WeGO (http://wego.genomics.org.cn/) using native format.
+<br>&nbsp;
+
+<li><b>Export/Merge #Seqs</b>: A tab-delimited file that contains
+the GOs grouped by domain, followed by the GO description and #Seqs. The merge
+allows multiple columns of #Seqs based on different queries (e.g. two different DE
+values).  The file must not be edited until
+all #Seqs columns are added (TCW needs the format exact). The resulting file can
+be used in Excel to make bar graphs.
+<br>&nbsp;
+
+<li>The last three options have a popup with a choice of viewing the results in a popup
+or have them written to file. The two path options can be written in a tab-delimited file
+or a html file.
+<ul>
+<li><b>All Ancestors</b>: All ancestors of the GOs in the table.
+<br>&nbsp;
+
+<li><b>Longest Paths</b>: The longest paths of the GOs in the table;
+that is, shorter paths that are contained in another will not be shown. NOTE: This can take minutes
+to compute and be large.
+<br>&nbsp;
+
+<li><b>All Paths</b>: All paths of the GOs in the table. NOTE: This can be a very large.
+
+</ul>
+</ol>
+<i>Processing details:</i> 
+The paths and neighbor database queries use the GO term2term table, where the path query is recursive.
+All other show/table queries use the GO graph_path table.
+
+
+<hr>
+<h3>#Seqs</h3>
+There are four occurrences that use <b>#Seqs</b> on this panel. 
+<ol>
+<li>Seq-hit: <b>#Seqs</b>: If this is set, the GOs displayed must
+have at least this many sequences associated with the GO term.
+<br>&nbsp;
+<li>Table Column: <b>#Seqs</b>: This is typically all sequences that have a hit
+associated with the GO, unless the "DE #Seqs" is changed from "All".
+<br>&nbsp;
+<li>DE: <b>#Seqs</b>: Briefly, if this is set to "DE", the count is all sequences with the
+GO that are considered DE for the selected set of p-values. If it is "upDE", it is
+the count of the sequences that are up-regulated, and dnDE is the count of the
+sequences that are down-regulated. The relation between the GOseq p-value and when
+a sequence is considered DE is explained below. NOTE: when this is it set to something
+other than "All", it is much slower!
+<br>&nbsp;
+<li><b>View Sequences</b>: This shows the sequences that correspond with the #Seqs column 
+in the table.
+</ol> 
+Each sequence has the following annotations:
+<ol>
+<li>Sequence length.
+<li>Zero or more hits, where many are associated with GO terms.
+<li>Read counts for different conditions along with DE values 
+between pairs of conditions.
+</ol>
+GOseq uses all these annotations to determine the over-represented GOs for
+two conditions using their DE value.
+For input to GOseq, a binary vector is created of N sequences (where N
+is the number of annotated sequences); the value for a sequence is a 1
+if it is DE, else it is 0. The scientist that executes GOseq via runDE sets 
+the cutoff for what is to be counted as DE, e.g. 0.05. The overview under 
+"Processing" states what the cutoff was, e.g. RoSt:0.05 indicates that the 
+corresponding DE p-values
+used a cutoff of 0.05. Hence, the DE count is the number that was used by GOseq
+to calculate the GO p-value. The upDE+dnDE=DE. TO BE CLEAR: The #DE sequences
+is not based on the cutoff from the panel, but based on the cutoff used for input to GOseq.
+<p>If you "and" two or more conditions, the #Seqs is an "or" of the individual conditions (
+this is confusing, but its done that way to account for the sequences that went into the GO P-values).
+
+<hr>
+<h3>DE-trim Algorithm</h3>
+In order to help identify the GOs most worthy of investigation, a
+DE-based trimmed subset of the GO terms is automatically computed, as follows:
+<ol>
+<li>Find all GO terms passing the specified DE filter.
+<li>For all passed GOs, compute the product of their p-values ("combDE").  
+For failed GOs, set combDE is set to 2.
+<li>Each GO term is examined, along with its children in the GO hierarchy. If there is a child with
+better combDE score than the parent, the parent is removed; otherwise, the children are removed. 
+<li>The remaining, non-removed GO terms are the DETrim subset. 
+</ol>
+
+<p>Justification:
+Higher level nodes contain transcripts found in lower levels, i.e. a lower level has
+either a 'part-of' or 'is-a' relation to the higher level. Therefore, there is considerable
+redundancy in DE enrichment scores between different levels of the hierarchy and it makes
+sense to single out those GOs which appear to be primarily responsible for the enrichment
+in a given sub-tree.
+<ul>
+<li>If a parent (i.e. higher level node) has a better DE score than any of its children, that
+indicates that the differential effect is happening biologically at the level of the parent, and
+being inherited by those children, if any, which also are DE-enriched.
+<li>Conversely, if a parent has a worse DE score than one of its children, it indicates that the
+differential effect is happening biologically at the child level (or below).
+</ul>
+
+</html>

@@ -1,0 +1,148 @@
+<html>
+<title>runAS</title>
+<body style="padding:20px;width:650px;font-family:Times">
+<h1>Annotation Setup</h1>
+This downloads and preprocessed the UniProt databases and creates a GO database.
+The UniProt FASTA files and GO database will be used in <tt>runSingleTCW</tt> to 
+annotate the sequences (e.g. transcripts). If sTCWdbs are being built for 
+multiple sets of transcripts, they can all use the same set (or subset) of the
+UniProts and the GO database.
+
+<p>Other 
+databases (e.g. Genbank nr) can also be used in <tt>runSingleTCW</tt> for annotation, 
+but will not have GO support, and need to be downloaded manually (see online documentation).
+
+<p>The download uses 'curl'. You can get this on most Linux machines with
+<tt>'sudo yum install curl'</tt>. If you cannot install it, <tt>runAS</tt> 
+can perform the download with its own Java code, though it may take longer and is not as robust, 
+i.e. could have potential problems due to network latency, etc.
+
+<p>If there are any problems with running any of these steps, see the 
+online documentation at <tt>www.agcol.arizona.edu/software/tcw/doc/AnnoDBs.html</tt>. If
+that does not help, email <tt>tcw@agcol.arizona.edu</tt>.
+
+
+<h2>TCW Annotation Directories</h2>
+<ol>
+<li>By default, the processing directories go in <tt>projects/DBfasta</tt>.
+<li><i>UniProt</i>: the name of the UniProt directory. The default name is
+<tt>projects/DBfasta/UniProt_&lt;current month and year&gt;</tt>.
+<li><i>GO</i>: the name of the temporary GO directory. The default name is
+<tt>projects/DBfasta/GO_&lt;current month and year&gt;</tt>. 
+<li>For <i>UniProt</i> and <i>GO</i>, the corresponding label will be 
+highlighted purple if the directory exists, 
+else it will be created. 
+</ol>
+
+<h2>1. Build Tax - UniProt taxonomic databases</h2>
+<p>Processing:
+<ol>
+<li>Create a directory &lt;UniProt/[sp|tr]_taxonomic&gt;,
+e.g. <tt>projects/DBfasta/UniProt_May2016/sp_plants</tt>.
+<li>Download the taxonomic .dat file to this directory.
+<li>Create a FASTA file.
+</ol>
+
+<p>Parameters:
+<ul>
+<li><i>Taxonomic</i>: To process a specific taxonomic SwissProt or TrEMBL, 
+select the corresponding check box
+under <i>Swiss</i> or <i>TrEMBL</i>, respectively.
+</ul>
+Execute <u>Build Tax</u> when all desired check boxes are selected.
+
+<p><b><i>Incremental processing</b></i>: 
+If you already ran <u>Build Full</u> and/or <u>Build GO</u>, 
+and then download additional taxonomic files, re-run these functions.
+</ol>
+
+<h2>2. Build Full - UniProt full databases</h2>
+<p>Processing:
+<ol>
+<li>A directory called "sp_fullSubset" or "tr_fullSubset" is 
+put under the directory specified by &lt;UniProt&gt;, e.g. 
+<tt>projects/DBfasta/UniProt_May2016/sp_fullSubset</tt>.
+<li>Download the full .dat file to this directory.
+<li>Create a subset .dat file that only contains records not found in any of the
+taxonomic .dat files in the UniProt taxonomic directories;. 
+<li>Create a FASTA file corresponding to the subset .dat file.
+</ol>
+<p>Parameters:
+<ul>
+<li><i>Full UniProt</i>: To process the full SwissProt or TrEMBL, select the
+corresponding <i>SwissProt</i> or <i>TrEMBL</i> check box.
+</ul>
+Execute <u>Build Full</u> when all desired check boxes are selected.
+
+<h2>3. Build GO - GO database</h2>
+Processing steps:
+<ol>
+<li>Download the GO tar file to <i>GO</i> directory and untars it.
+<li>Create the GO database, load the schema from the <i>GO</i> directory.
+<li>Modify the GO database for TCW. This step loads the UniProt IDs with GOs from the UniProt .dat files
+that exist under the specified UniProt directory, and creates the GO-UniProt mapping.
+<li> This uses the mySQL userid and password from the HOSTS.cfg file.
+</ol>
+
+<p>Parameters:
+<ul>
+<li><i>Database</i>: A local mySQL database will be created using this name, and will
+contain the GO schema and mappings from the .dat files in the UniProt directories. 
+</ul>
+Execute <u>Build GO</u> to perform the processing steps.
+
+<p><b><i>Important Note:</b></i> It is important that you create the GO database right after downloading the UniProt files
+so that they correspond.
+
+<h2>Check</h2> 
+Labels and check boxes are highlighted if the corresponding directory or file exists. The
+following provides details:
+<ul>
+<li>UniProt:
+<ul>
+<li>If the <i>UniProt</i> directory is highlighted, it exists.
+<li><i>Taxonomic</i> and <i>Full UniProt</i>: If a check box is highlighted blue, the corresponding FASTA file
+exists.
+</ul>
+<li>Gene Ontology: 
+<ul>
+<li>If the <i>GO</i> directory is highlighted in pink, it exists but the GO tables have not
+been downloaded. If it is highlighted in blue, the GO tables have been downloaded. 
+the directory exists but there is no subdirectory that corresponds to the <i>File Date</i>.
+<li>If the <i>Database</i> is highlighted, the database exists. 
+If the highlighting is pink instead of blue, see the online documentation for an explanation.
+</ul>
+</ul>
+This is automatically checked on startup, and when any of the three "Builds" are executed.
+If you change anything, select <u>Check</u> to update.
+
+<p><b><i>Downloads are never re-run</b></i>: 
+If you re-run a "Build" when the corresponding labels are highlighted, new files will
+not be downloaded but any processing will be redone. If you want to download new files,
+you must manually remove the corresponding directory.
+
+
+<h2>TCW.anno</h2>
+Creates a file called 'projects/TCW.anno.UniProt.&lt;date&gt;' that can be used to load the information
+into <tt>runSingleTCW</tt> using the <u>Import AnnoDBs</u> option. This saves you for having
+to input each UniProt database.
+
+<h2>Clean up</h2>
+<tt>runAS</tt> does not remove files that are no longer necessary, which are
+the files downloaded from the internet:
+<ul>
+<li>All "dat.gz" files in the UniProt directories, as the information has
+been transferred to the FASTA files and GO database, which is what <tt>runSingleTCW</tt>
+uses.
+<li>The GO directory, as the information has been transferred to the GO database. 
+</ul>
+However, if you
+do not have a space problem, keep them just for insurance. 
+When UniProt does the monthly update, your downloaded files will no longer available
+on their site. 
+
+<h2>Demo</h2>
+Run <tt>runAS -d</tt> and the correct values for the demo will be entered. It is only necessary
+to run <u>Build GO</u>, as the rest of the necessary files are in the TCW package, i.e. 
+under <tt>DBfasta/UniProt_demo</tt>.
+</html>

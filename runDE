@@ -1,0 +1,14 @@
+#!/bin/sh
+# setenv R_HOME to location of complete R install, e.g. /usr/lib64/R
+# which must have the /etc under it with Renviron
+
+# Linux: may be able to use external/jri unless its the wrong versions
+JPATH=external/jri
+echo Using Linux path
+
+# Mac-OSX: setenv R_HOME /Library/Frameworks/R.framework/Resources
+#JPATH=/Library/Frameworks/R.framework/Resources/library/rJava/jri 
+#echo Using MAC-OS path
+
+echo Set java.library.path=$JPATH
+java -Xmx4096m -Djava.library.path=$JPATH -classpath java/jars/stcw.jar sng.runDE.QRMain $@ 

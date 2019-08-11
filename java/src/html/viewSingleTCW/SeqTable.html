@@ -1,0 +1,81 @@
+<html>
+<body style="padding:20px;width:650px;font-family:Times">
+<title>Sequence Result Table</title>
+<h1>Sequence Result Table</h1>
+Shows search results from "Filters" or "Show All". 
+
+<h2>Columns</h2>
+<h3>Add/remove columns</h3>
+Change columns as follows: 
+<ul>
+<li>Select "Columns" link on the left panel. 
+<li>Return to the desired table (selecting its tab on the left).
+<li>Selecting "Refresh Columns" will redraw the table with the altered column selection.
+</ul>
+<h3>Sorting</h3>
+Columns may be sorted ascending or descending. Click on the header once for descending,
+then again for ascending; or, right-click for ascending. <b>Note</b>: The DE columns have 
+negative and positive values, where negative means the first condition has RPKM less
+than the second. The sort on the DE column ignores the sign so the right click sorts all
+DE to the top.
+<h3>Column re-order</h3>
+Columns may dragged to different positions, by clicking and dragging the headers.
+
+<hr>
+<h2>Table...</h2>
+<h3>Show Column Stats</h3>
+Shows statistics for all numeric columns in the table. 
+
+<h3>Copy</h3>
+Copies the table to the clipboard, which can then be pasted into a file.
+
+
+<h3>Export</h3>
+The table data can be exported to a file with 6 different options:
+<ul>
+<li><b>Table of columns:</b> tab-delimited copy of the table.
+<br>&nbsp;
+
+<li><b>Sequences from table:</b> fasta file of sequences for the seqIDs in the table. 
+<br>&nbsp;
+
+<li><b>Translated ORFs:</b> fasta file of translated ORFs for the seqIDs in the table, 
+where the translated ORFs correspond to the TCW selected frame and coordinates.
+<br>&nbsp;
+
+<li><b>Library replicates from table:</b> combined file of library replicates for the seqIDs in the table
+<br>&nbsp;
+
+<li><b>Hit Sequences from table:</b> creates a file of the combined best hit sequences that are either:
+<ol type='a'>
+<li>Best Eval: the best E-value per sequence.
+<li>Best Anno: the best annotation per sequence.
+<li>Both: all Best Eval and Best Anno hits.
+</ol>
+<br>&nbsp;
+
+<li><b>Sequences with Best GO:</b> creates a text file of all sequences that have a Best GO, i.e.
+hit with GOs. The hit is assigned GOs from the UniProt .dat file; the assigned GOs are listed for
+each sequence.
+<br>&nbsp;
+
+<li><b>GOs from table:</b> list GOs associated with the seqIDs in the table along with the count (#Seqs)
+of the number of sequences that have the GO (assigned or inherited). The output columns
+are: GO term, #Seqs, Level, Domain, Description and all p-values.
+<ol>
+<li>GO Level: 
+<ol type='a'>
+<li>Level 1 is the three domains. Level 2 are the GO terms directly beneath
+a domain, etc (see Basic GO Annotation 'GO Help' for more explanation). 
+<li>If you leave this blank, it will output all GOs. 
+<li>If you just want a couple of levels, e.g. 2 and 3, first export level 2, then export level 3
+to the same file and use the append option (there will be a pop-up asking whether you want to append).
+</ol>
+<li>Any domain: This toggles through the three main domains. If you select one, it will only 
+export the GOs in that domain.
+<li>E-value: If you leave this blank, it will ignore the E-value. Otherwise,
+this applies to each sequence-hit E-value where the hit has the GO. The #Seqs
+column is the number of sequences that have at least one hit with the GO and its E-value&lt; the value.
+</ol>
+See <b>GO Term</b> for more Export options.
+</ul>

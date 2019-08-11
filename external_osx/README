@@ -1,0 +1,37 @@
+external_osx/README
+
+All programs in this directory are downloaded from external sites that
+have open source licenses. 
+
+jri/
+The library libjri.so is supplied, which provides the interface to R for runDE. 
+This may be an older version than your R installation (it is v3.0), in which case 
+it will need to be replaced. 
+https://cran.r-project.org/bin/macosx/
+
+CAP3/
+VersionDate: 12/21/07  Size of long: 8
+http://seq.cs.iastate.edu/cap3.html
+
+diamond/
+diamond v0.9.22.123 (added Sept 2018)
+https://github.com/bbuchfink/diamond
+
+OrthoMCL/
+orthomclSoftware-v2.0.9
+mcl-14-137 
+https://orthomcl.org/common/downloads/
+http://www.micans.org/mcl/src/mcl-latest.tar.gz
+
+mafft/
+v7.407 (added Jul 2018)
+https://mafft.cbrc.jp/alignment/software/
+
+muscle:
+MUSCLE v3.8.31 (added Aug 2015)
+https://www.drive5.com/muscle/
+
+mstatX/
+Downloaded Nov 2018
+If the mstatx executable does not work on your Mac, see external/mstatX/Readme.TCW for further instructions.
+https://github.com/gcollet/MstatX

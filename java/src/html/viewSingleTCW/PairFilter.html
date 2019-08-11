@@ -1,0 +1,19 @@
+<html>
+<body style="padding:20px;width:750px;">
+<h1>Pairs Filters</h1>
+If the "Sequence Pairs" box is checked, all the filters are applied; otherwise, none of them
+are applied. The filters are based on the results of aligning the sequences
+using dynamic programming. The sequences are aligned based on nucleotide sequences, then
+amino acid sequences using their reading frame.
+<ul>
+<li><i>NT %Sim</i> - the number of match nucleotides divided by the alignment length.
+<li><i>NT Len</i> - the alignment length, which does not include overhangs at the beginning or end.
+<li><i>NT %Len</i> - the number of match nucleotides divided by the longest length.
+<li><i>AA %Sim</i> - the number of match amino acids divided by the alignment length; 
+both exact and amino acid substitutions (blosum scores > 0)  are considered a match; 
+two stop codons are not counted
+as a match.
+<li><i>AA Len</i> - the alignment length, which does not include overhangs at the beginning or end.
+<li><i>AA %Len</i> - the number of match amino acids divided by the longest length.
+</ul>
+</html>

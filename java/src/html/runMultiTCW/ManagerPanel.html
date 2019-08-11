@@ -1,0 +1,136 @@
+<html>
+<title>runMultiTCW</title>
+<body style="padding:20px;width:650px;font-family:Times">
+<h2>Build a multiTCW database (runMultiTCW)</h2>
+
+The multiTCW manager allows you to build a new multiTCW database (mTCWdb), modify an existing one,
+and perform clustering of transcripts and/or proteins. 
+Note that a multiTCW database is built by combining 
+one or more existing singleTCW databases (sTCWdb), which must already have been created and 
+(optionally) annotated. The sTCWdbs could have been built with 
+DNA or protein sequences.
+
+<h2>1. Project</h2>
+<b>Add Project:</b> This will request a project name. 
+As soon as you choose the name, the manager
+begins to store the project configuration information in the file <tt>mTCW.cfg</tt> under
+<tt>/projcmp/&lt;project name&gt;</tt>. If you exit the manager and return,
+the partially-completed project will now be available through "Select Project". 
+<p>
+<b>Project:</b> Browse for existing projects, which are listed under
+the <tt>/projcmp</tt> directory. You can either click on the "Select..." to view a drop-down
+of projects, or select the arrows to scroll through them. Note: using the arrows can have
+a bit of wait time because it loads and checks each project that appears in the Project
+select box.
+Select <b>Overview</b> to determine if the database
+has been built yet.
+<p>
+<b>mTCW database:</b> The name of the database to build. It must be prefixed with 'mTCW_'. 
+
+<p>
+<b>Remove:</b> See the last section. 
+
+
+<h2>2. Build Database</h2>
+
+Add one or more sTCWdbs, using the <b>Add</b> button, which brings up a
+new window, which has its own Help. 
+<p>
+When you are finished adding sTCWdbs, click <b>Build Database</b>. 
+This extracts all the individual
+singeTCW data and enters it into an mTCWdb. 
+Progress reports will print to the
+terminal window, and the loading usually takes 10-30 minutes. 
+
+<h3>Add GOs</h3>
+If the sTCWdbs have GOs, they will be added to the mTCWdb, which are useful
+in viewMultiTCW for downloading tables of GOs. This step takes a long
+time (a couple hours on a large database). 
+It can be done at any time after the "Build Database", i.e. GOs are not used
+for clustering or stats, so can be added after everything else is added.
+
+<h2>3. Compare Sequences</h2>
+To cluster the sequences,  a file of database sequences needs to be searched against itself
+to see what pairs are similar. 
+Use the <b>Settings</b> button to set the search program and parameters;
+this opens a new window which has further Help. 
+<p>
+Press <b>Run Search</b> to run the search. If this button is disabled, it means
+the file exists. 
+If you want to run the search again, you must removed or rename the file "hitsAA" or "hitsNT"
+under the directory "projcmp/&lt;project-name&gt;/hitResults".
+<p>
+After running the search, select <b>Add Pairs</b>, which adds all pairs from the
+hit file(s) to the database.
+
+<h2>4. Cluster</h2>
+
+To create clusters (e.g. putative ortholog sets), click <b>Add</b>, which brings
+up a new window with its own help. After adding one or more cluster methods, 
+click <b>Add New Clusters</b> to run the calculations for each
+new method and store the clusters to the database. 
+
+<p>Cluster sets that have been created and added to the database are listed in <i>italics</i>. 
+You can add new clusters or remove existing clusters.
+<p>
+If there are really big clusters, the parameters were probably not tight enough; remove
+the cluster method and add a new one with tighter parameters. 
+
+<h2> 5. Run Stats</h2>
+After you add Cluster, execute this function to do the following:
+
+<table border=1>
+<tr><td colspan=2><i>1. Compute for all pairs</i>
+<tr><td nowrap>PCC of RPKM
+<td>Computes the Pearson Correlation Coefficient on
+all conditions that are shared between the two sequences of a pair. 
+
+
+<tr><td colspan=2><i>2. Alignment of hit pairs in clusters</i><sup>+</sup>
+<tr><td nowrap>Alignment Statistics
+<td>Computes coding and nucleotide statistics for each pair.
+<br>Compute summary statistics.
+<tr><td nowrap>KaKs write
+<td>Write alignments to file for input to the <tt>KaKs_calculator</tt>.
+<br>Use the command 'sh runKaKs' in the project's KaKs directory to
+run the <tt>KaKs_calculator</tt>, which must be in the 'projcmp' directory.
+
+<tr><td colspan=2><i>3. After running <tt>KaKs_Calculator</tt></i>
+<tr><td nowrap>KaKs read
+<td>After running the <tt>KaKs_calculator</tt>, read the results into the database.
+
+<tr><td colspan=2><i>4. Multiple alignment of cluster</tt></i>
+<tr><td nowrap>Statistics
+<td>The <tt>MAFFT</tt> program is run on each cluster and the resulting alignment is score for
+sum-of-pairs and Trident, where Trident is computed by executing the
+<tt>MstatX</tt> program.
+
+</table>
+<sup>+</sup>It is important to read the "Settings Help".
+<br><br>
+<hr>
+<h2>Remove</h2>
+If you only want to remove one set of clusters from the database, select it from
+the 'Cluster Methods' table followed by 'Remove'. 
+The following explains options of the "Remove..." button.
+<table border=1>
+<tr><td nowrap>1. Pairs and methods from database<td>
+This removes all pairs and clusters from the database, which allows you to start
+over at the 'Add Pairs from Hits' step.
+You probably want to remove pairs and methods from disk also (#3).
+
+<tr><td nowrap>2. mTCW database<td>
+Removes the database. If you are done with the project, then select #5 also.
+If you are rebuilding, you may want to select #3 and/or #4 also.
+<tr><td nowrap>3. Pair and method from disk <br>(KaKs, Stats, Methods)<td>
+If you are starting over adding methods, it is best to clean up 
+the past work so mTCW does not inadvertently read a file from the previous
+methods.
+<tr><td nowrap>4. Hit files from disk<td>
+If you remove the database in order to recreate it with datasets that
+have any differences from the previous datasets, you must remove the hit files
+and redo the search.
+<tr><td nowrap>5. This mTCW project from disk<td>
+Remove the project directory found under <tt>/projcmp</tt>.
+</table>
+</html>

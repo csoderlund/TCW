@@ -1,0 +1,37 @@
+<html>
+<body style="padding:20px;width:650px;">
+<title>Basic Queries for Sequence</title>
+<h1>Basic Queries for Sequence</h1>
+
+This provides some basic sequence searches; for more involved searches, use
+the <b>Filter</b> bullet on the left panel.  This allows you to "build" a table
+of results from multiple queries, which can be Copied to Clipboard, 
+Exported, or view the individual sequences with "View Selected Sequence". 
+<ul>
+<p>
+Choose one of three search modes and enter a string to search on.  
+<ul>
+<li><b>Seq ID:</b> Sequence name 
+<li><b>TCW:</b> TCW Remarks are entered when the database is built; they provide information
+on the ORFs, and if the sequence has hits in multiple frames.
+<li><b>User:</b> TCW Remarks may be associated with each sequence (entered with <tt>runSingleTCW</tt>).
+</ul>
+<i>Search rules:</i> 
+<ul>
+<li>It first tries to find an exact match. If found, the results are listed.
+If not found, it then tries to match the substring anywhere in the hit ID or description.
+<li>To force it to match at the beginning of the string, enter a '%' at the end of the
+substring, e.g. 'mitochondrial%' to match everything that starts with 'mitochondrial'.
+NOTE: since '%' is a special character, it cannot be in a search string as a literal.
+</ul>
+
+<b>Load File</b>: The file should contain one Sequence ID per line (make sure <b>Seq IDs</b>
+is selected), or one Remark per line (make sure <b>Remark</b> is selected). This performs an exact search.
+
+
+<p>Click <b>BUILD TABLE</b> or <b>ADD to TABLE</b> to execute the search,
+which starts a new table or adds to an existing table, respectively. 
+<br>Columns can be added/removed (<b>Columns</b>), 
+rearranged by dragging and sorted. 
+
+

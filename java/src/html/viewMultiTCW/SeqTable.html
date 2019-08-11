@@ -1,0 +1,150 @@
+<html>
+<body style="padding:20px;width:650px;">
+<title>Sequence Table</title>
+<h2>Sequence Table</h2>
+
+This table can be viewed from Sample List "Sequences", Filter "Sequence", or selecting
+a row in the cluster or pairs table.
+
+<h2>First row of functions at the top</h2>
+The bottom panel can be switch between <b>Table</b> and any of the "Align:" buttons.
+Align button will be disabled or not appear if the option is not valid.
+
+<ul>
+<li><u>Pairwise...</u>
+
+<ul>
+<li><b>AA align</b>: Perform pairwise 
+alignment for all pairs of amino acid sequences from the selected sequences (20 seqs max). 
+<li><b>NT align</b> (NT-mTCW only) Perform pairwise 
+alignment for all pairs of nucleotide sequences from the selected sequences (20 seqs max). 
+<li><b>AA,NT,CDS</b>: (NT-MTCW only) 
+Align the selected pair using the amino acid sequence,
+CDS sequence, and nucleotide sequences. The resulting panel will have these 3 alignments.
+</ul>
+If 20 sequences are selected for the AA or NT option,
+this is 190 alignments so will take some time;  watch progress in lower left corner of viewMultiTCW.
+<br>&nbsp;
+
+<li><u>MSAdb</u> (Cluster set of sequences only) 
+The MAFFT-AA alignment has been stored in the database, so can be displayed
+without running the program. However, this option does not produce the alignment 
+or score files, where the MSA... option does.
+<br>&nbsp;
+
+<li><u>MSA...</u> (Not available from Applet).
+<ul>
+<li><b>MUSCLE-AA</b>: 
+Run MUSCLE to build a multiple alignment 
+for all amino acid sequences in the table or for the selected set. This can be very time consuming
+when run on many sequences. The command executed is:
+<pre>
+external/muscle/muscle -in ResultAlign/inSeq.fa -out ResultAlign/outAln.fa
+</pre>
+You can view the results along with the scores in the <tt>ResultAlign</tt> directory.
+The first score is the average of the column sums from the sum-of-pairs. The
+second is the trident method, run as follows (use -g to output global score only):
+<pre>
+external/mstatX/mstatx -s trident -i ResultAlign/outAln.fa -o ResultAlign/score2.txt
+</pre>
+<li><b>MAFFT-AA</b>: Same as above.
+The command executed is:
+<pre>
+external/mafft/mafft.bat --auto --reorder --thread N ResultAlign/inSeq.fa
+</pre>
+Where N is the number of available threads (processors/CPUs).
+<li><b>MAFFT-NT</b>: Same as above but with the NT sequences
+
+</ul>
+<p><i>On Mac, replace <tt>external</tt> with <tt>external_osx</tt></i>.
+</ul>
+
+<ul>
+<li><u>Table...</u>
+<ul>
+<li><b>Show Column Stats</b>: Popup a table of statistics for the numeric columns in the table. Note: if you Export the table and 
+compute the statistics, their results will not be as precise.
+<br>&nbsp;
+
+<li><b>Copy Table</b>: Copies the table to the clipboard either the entire table. 
+<br>&nbsp;
+
+<li><b>Export Table</b>: Exports the table to file in tab delimited file. 
+<br>&nbsp;
+
+<li><b>Export AA sequences</b>:Export the translated CDS sequences..
+<br>&nbsp;
+
+<li><b>Export CDS sequences</b>:Export the CDS sequences.
+<br>&nbsp;
+
+<li><b>Export NT sequences</b>:Export the full nucleotide sequences.
+<br>&nbsp;
+
+
+<li><b>Export all GOs:</b> output all assigned and inherited GOs for all seq-hit pairs 
+for all sequences in the table. 
+The first three are filters::
+<ol>
+<li><i>GO Level</i>: 
+<ol type='a'>
+<li>Level 1 is the three domains. Level 2 are the GO terms directly beneath
+a domain, etc (see GO annotations 'GO Help' for more explanation). 
+<li>If you leave this blank, it will output all GOs. 
+<li>If you just want a couple of levels, e.g. 2 and 3, first export level 2, then export level 3
+to the same file and use the append option (there will be a pop-up asking whether you want to append).
+</ol>
+
+<li><i>Any domain</i>: This toggles through the three main domains. If you select one, it will only 
+export the GOs in that domain.
+
+<li><i>E-value</i>: If you leave this blank, it will ignore the E-value. Otherwise,
+the sequence must have at least one seq-hit with E-value&le; this value.
+
+<li><i>File Columns</i>:
+<ol type='a'>
+<li>Verbose: outputs columns 
+<tt>
+GOterm	#Seqs	Level	Term_type	Description
+</tt>
+<li>Count only: only outputs the <tt>GOterm</tt> and <tt>#Seqs</tt>. 
+<br>This can be used as input to input to REVIGO (http://revigo.irb.hr)
+</ol>
+</ul>
+</ul>
+
+<h2>Second row of functions at the top</h2>
+<ul>
+<li><u>Details</u> For the selected sequence: show counts, RPKM values, 
+and annotations. 
+<br>&nbsp;
+<li><u>Clusters</u> For the selected sequence: 
+Show the table of clusters containing the sequence.
+<br>&nbsp;
+<li><u>Pairs</u> For the selected sequence(s): 
+Show the table of pairs containing at least one of the selected sequences.
+<br>&nbsp;
+<li><u>Blast...</u> For selected sequence: 
+Blast the sequence against the whole sequence set. This is currently not available from the web.
+<br>&nbsp;
+<li><u>Copy...</u> For the selected sequence: 
+Copies the seqID, hitID, description or AA (protein) sequence,  NT (nucleotide) sequence
+or CDS sequence.
+<br>&nbsp;
+<li><u>Clear</u> Clears the selected sequences.
+
+</ul>
+
+
+
+<h3>Columns</h3>
+<ul> 
+<li>Columns can be added/removed using the <b>Select Columns</b> button below the table. 
+<li>Columns can
+also be rearranged (by dragging the headers) and sorted (by clicking the headers). 
+<li>Put the mouse over a column heading in the <b>Select Columns</b> interface, and a full explanation of the column is shown
+in the lower left corner.
+</ul>
+
+</table>
+

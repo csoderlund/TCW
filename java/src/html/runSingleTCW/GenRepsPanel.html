@@ -1,0 +1,31 @@
+<html>
+<title>Define Replicates</title>
+<body style="padding:20px;width:650px;">
+<h2>Define replicates</h2>
+
+You may edit the third column to define the replicates. Just put your cursor in the cell you want to edit,
+hit the backspace keep and the cell will turn white indicating you can edit it.
+<p>
+The table is pre-filled out using the column names found in your
+count files. The three columns are as follows:
+<p>
+<b>SeqID:</b> The name of the sequence dataset that the count file
+is associated with. 
+<p>
+<b>Column name from file:</b> This column lists the replicate identifiers (column headers)
+ which were found in the Count File. Each replicate will
+ have a <i>unique</i> name, for example "MyLib1, MyLib2, MyLib3". 
+ <p> 
+ <b>Condition:</b> This is the column which you edit to define condition (e.g. tissue, treatment)
+ for each replicate set. If your "Conditions" are of the form name+number, as
+ in the MyLib1, MyLib2, MyLib3 example, then the root name (e.g. MyLib) will be automatically
+entered and you will not need to edit the name. Otherwise you will need to make
+ up suitable condition names and edit the corresponding rows. <i>Make sure that these
+ names don't match any others that were already used for a different Sequence Database.</i>
+
+<p>When the table is correct, press "Keep".
+<p>
+<i>Note:</i> If you are creating multiple singleTCW databases to compare with multiTCW, it
+is extremely important that you use the exact same condition names for equivalent conditions,
+e.g. if you have a maize and rice database where they both have 'leaf' and 'root', give them
+the same name so they will correspond in multiTCW.

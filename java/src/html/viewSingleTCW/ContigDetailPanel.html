@@ -1,0 +1,54 @@
+<html>
+<body style="padding:20px;width:650px;font-family:Times">
+<title>Sequence Details</title>
+<h1>Sequence Details</h1>
+<ol>
+<li><b>Best ORF</b>: shows the RF (reading frame) and coordinates. A '*' indicates a missing start or stop. 
+<li><b>DB hits table</b>: 
+<ul>
+<li>The columns E-value, %Sim, AlignLen, Start and End are from the first BLAST results for
+ the hit. 
+<li>The column Align is in the hit coordinates (e.g. amino acids if the hit is a protein), whereas the Start and End in the sequence coordinates.
+<li>The options GO..., Align... and Copy/Export... all have options that use
+the DB hits table contents or selection.
+</ul>
+</ol>
+
+<h2>Detail Options - second row of buttons</h2>
+<ol>
+<li><b>Counts</b> toggle: Toggles between counts, RPKM, Replicates (if there are replicates).
+
+<li><b>DB hits</b> toggle: Changes the set of hits listed in the DB hits table.
+<ul>
+<li><i>Best (EV, AN, GO)</i>.
+<ul>
+<li>EV is BestEval: The hit with the best e-value and bitscore.
+<li>AN is BestAnno: Either (1) SwissProt, or (2) does not have terms like "uncharacterize protein". If neither exists,
+it defaults to BestEval.
+<li>WG is Best with GO: If GO is available, this is the hit with the best e-value and has at least one 
+assigned GO term.
+<li>The Best EV, AN, and GO may all be the same, or any two of them the same. They may not be in the list of "best per annoDB".
+</ul>
+<li><i>Best per annoDB</i>: In preprocessing, the sequences in the database are generally searched against
+one or more annotation databases, which are referred to as an <i>annoDBs</i>. 
+For example, the sequences
+may have been searched against SwissProt Plants and TrEMBL Plants taxonomic databases. The best
+hit for each is listed.
+<li><i>Distinct regions</i>: A set of hits that represent the regions of the sequence for which
+hits align to based on hit coordinates. Note the Start and End coordinates in the table, they will
+not be the same, though may overlap some.
+<li><i>Unique annotation</i>: Determines the unique descriptions, after filtering on: 
+(1) ignore putative, hypothetical and predicted, (2) remove last character of description as often a number or letter.
+<li><i>Unique species</i>: Lists one of each species that was hit
+<li><i>Total</i>: All hits to the sequence. 
+</ul>
+<i>Note: sometimes its necessary to click in the window to get it to change the table, after changing the
+DB Hits option.</i>
+
+<li><b>Copy...</b>
+This is a menu of options to copy content to the clipboard (to "Paste" elsewhere). The first two require 
+a hit to be selected in the DB hits table. The last four copy the seqID or sequence.
+
+<li><b>Export...</b> Writes a file of the sequence or DB hits.
+</ol>
+</html>

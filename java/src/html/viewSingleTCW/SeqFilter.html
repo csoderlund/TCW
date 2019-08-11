@@ -1,0 +1,115 @@
+<html>
+<title>Filters</title>
+<body style="padding:20px;width:650px;font-family:Times">
+<h1>Filters</h1>
+Overall rules:
+<ol>
+<li>Set the desired filters, then select "View Filtered Sequences"; only the sequences
+that pass all filters will be shown in the resulting sequence table. 
+<li>Sections are collapsible; to expand a section to see its filters,
+click on the "+". 
+<li>
+All filters correspond to columns with the same name in the same sections of the "Columns" tab
+on the left.
+<li>
+TCW uses the terminology "every" and "any", but alternative terminology is:
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;every = all = and = & &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; any = at least one = or = |
+<li>A summary of the filters is shown at the top of the sequence table. 
+Example abbreviations used:
+"(U)" means Up, "(E)" is either, "&" is every, "|" is any.
+</ol>
+<h3>General</h3>
+Filter on sequence length, total read count, and whether the sequence has
+a user-added remark. Remarks can be added with the runSingleTCW interface.
+
+<h3>Counts and RPKM</h3>
+Filter based on counts or RPKM of one or more conditions, where RPKM is the default. 
+
+<ol>
+<li>Check either "At least N from every/any included condition" and/or "At most N from every/any excluded conditions".
+<li>Select "every" or "any", where "every" required all conditions to pass the filter, "any" requires at least one
+to pass the filter. 
+<li>Enter the number of RPKM requires as the lower limit for the included condition and
+upper limit for the excluded. 
+</ol>
+For example, say you choose Include=condA,condB and Exclude=condC,condD with the defaults.
+This filter would results in a list of sequence where both condA and condB are >= 1.0
+and both condC and condD are = 0.0.
+
+<h3>N-fold</h3>
+This applies to the RPKM columns. 
+<ol>
+<li>Check to turn filter on.
+<li>Select a RPKM condition from the "Select 1" list and another condition from the "Select 2" list.
+Then click "Add", which will add the pair separated by a "/" in the box on the right.
+<li>Select "Up", "Down" or "Either", where the last shows both up and down N-fold.
+<li>Set the number for N-fold, where the default is "2".
+<li>If there are more than one pair selected (i.e. shown in box on right),
+select "Every" if you want all pairs to pass the filter, 
+or "Any" if you at least one to pass the filter. 
+<li>To remove an N-fold pair from the box, select it followed by "Remove".
+<li>To change the Up/Down/Either selection for an entry in the table, select the entry followed by "Change".
+</ol>
+How this works:
+<ol>
+<li>In order to <b>view</b> the N-fold values of <i>cond1</i> with respect to <i>cond2</i>,
+use the "Columns" tab on the far left panel and set the N-fold columns to show 
+cond1/cond2. Then display a table to view the results.
+<ul>
+<li>Positive and negative results for cond1/cond2: 
+<pre>
+If cond1&lt;cond2, the result will be -cond2/cond1 
+If cond1&gt;cond2, the result will be  cond1/cond2
+</pre>
+<li>Since the divisor cannot be 0, a 0 is set to 0.1 before division.
+</ul>
+<li>To filter on <i>cond1</i> with respect to <i>cond2</i>,
+set "Select 1" to cond1 and "Select 2" to cond2. If N-fold is set to 2:
+<ul>
+<li>If you select "Either", this filters on the absolute value
+of the N-fold column so that both values &lt;= to -2 and &gt;= to 2 are shown.
+<li>If you select "Up", then all positive results &gt;=2 will be shown. 
+<li>If you select "Down",
+all negative results &lt;= -2 will be shown. 
+</ul>
+</ol>
+
+<h3>Differential Expression</h3>
+This filter will only be available if the person who built the database ran
+the function to add DE (Differential
+expression) p-values to your database.
+
+<ol>
+<li>You must check the box next to 'p-value' and enter a p-value.
+<li>You must select one or more DE values. Listed here will be the columns that were
+added with the runDE function.
+<li>Change 'Every' to 'Any' if you wish to see results where any of the selected DE values
+meets the threshold.
+</ol>
+The database stores up/down regulation as positive/negative DE p-values, in which
+case you will see options "Up/down/either" for each DE column. 
+For example, if you select "Up", then you will see only results for which that p-value
+has a <i>positive</i> value.
+
+<h3>Best Hit</h3>
+Every annotated sequence has both a "Best Eval" annotation and a "Best Anno" annotation.
+If the database has GO annotations, there will also be a "Best With GO".
+Selecting 'Annotated' shows a table of all annotated sequences. 
+<p>If 'Annotated' is selected, then you must select 'Best Eval', 'Best Anno' or 'Best With GO' to be filtered on.
+You may select additional filters, where the sequences in the resulting table must meet all of them for
+the respective 'Best' assignment.  See Help on Basic 'annoDB Hits' for the definition of 'Best Anno'.
+<p>All possible values of DBtype and Taxo are listed; if one of each is selected, the DBtype-taxo pair
+must correspond to one listed on the Overview under "Annotation Databases".
+<p>The "#annoDB" query is applied to the value in the column "#annoDBs" under "General" (see "Columns"). 
+<p><i>Note: there are additional annotation queries under 'annoDB Hits'.</i>
+
+<h3>GO</h3>
+
+Enter a GO term, e.g. 3674 or GO:0003674, and all sequences that have this GO as assigned or inherited
+will be displayed.  Additional
+GO queries are available from the 'Basic GO Annotation'. 
+
+<h3>SNPs and ORFs</h3>
+
+Note, SNPs are only computed for assembled contigs, so SNP queries are not available for
+imported transcript sequences. ORFs are computed in either case. 

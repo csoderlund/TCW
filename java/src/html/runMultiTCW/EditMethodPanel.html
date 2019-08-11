@@ -1,0 +1,77 @@
+<html>
+<body style="padding:20px;width:650px;font-family:Times;">
+
+<title>Cluster Methods</title>
+
+<h2>Clustering Methods</h2>
+
+This interface allows you to define one or more clustering method. If your mTCW 
+database is created from NT (nucleotide) sTCW databases,
+you should include a BBH cluster as the coding statistics
+are run on the BBH pairs (see 'Pair Statistics').
+
+<h3>Prefix (required)</h3>
+
+This is the prefix used for the clusters, e.g. if the 
+cluster method is prefixed with "T1" and has three clusters, they will be named T1_1, T1_2, T1_3.
+There can be multiple instances of the same "Method" in the databases, e.g. built with different
+parameters; the prefix allows them to be queries separately in <tt>viewMultiTCW</tt>.
+
+<h3>Method</h3>
+From the drop-down menu, choose the algorithm to use. 
+
+<h4>BBH (Bi-directional Best Hit)</h4>
+This methods creates the bi-directional best hit. 
+<table>
+<tr><td nowrap valign=top>Blast File Type<td>Either the amino acid blast results or the nucleotide blast results can be
+used, where the nucleotide is only valid if there are at least two nucleotide
+singleTCW in the multiTCW database.
+<tr><td valign=top>%Coverage<td>This is computed as the percentage of align/length.
+The %Coverage must be greater than this number for  'either' or 'both' sequences. 
+For example, if
+the align length is 100, sequence 1 has length 100, and sequence 2 has length 300, then the
+coverage will be 100% and 33%, respectively; if the cutoff is 90,
+the 'either' option will pass, the 'both' option will fail.
+<tr><td valign=top>%Similarity<td>This is the blast parameter "%Identity", where the %similarity must be 
+greater or equal this value.
+</table>
+
+<p><i>If your mTCWdb only has two sTCWdbs as input, then ignore the rest of this section.</i>
+<p>For an mTCWdb with &gt;2 sTCWdbs as input, this method works in the following ways 
+(examples will assume the input sTCWdbs are Foo, Bar and Fly):
+<ol>
+<li>Specify two sTCWdbs to create BBH clusters with only the associated sequences. It is recommended
+you make separate BBH clusters for Foo/Bar, Foo/Fly and Bar/Fly, where each set will have a different
+prefix and you can query them separately in the resulting mTCW database.
+<li>If you specify more then N (N&gt;2) sTCWdbs, it will create BBH clusters with N members. 
+For example, if you specify Foo, Bar and Fly, there clusters will be of
+size 3 where all pairs of members are BBH pairs.
+</ol>
+<h4>Closure</h4>
+
+The parameters are the same as described for BBH, except that there  is no option to select the
+sTCW databases as all sequences are considered regardless of origin. For a sequence to be added to a Closure cluster,
+it must have a hit and pass the <b>%Similarity</b> and <b>%Coverage</b>
+with every other sequence in the cluster.
+
+<h4>OrthoMCL</h4>
+
+OrthoMCL is an ortholog-detection package which has been included 
+with TCW. Its
+clustering is governed by the <b>Inflation</b> parameter; see www.orthomcl.org for more detail.
+Larger inflation values lead to smaller clusters.
+
+
+<h4>User Defined</h4>
+
+Here you load a file defining your own groups. The format is as follows:
+<pre>
+1 DE|OlR_041805 DE|OlR_072235
+2 ASM|demoASM_002 ASM|demoASM_003
+...
+</pre>
+Each line has a group number followed by a space-separated list of the sequences in the group. 
+Each group member starts with the project prefix followed by "|" (e.g. <tt>DE|</tt>), where
+the prefix for a sTCW database is defined when the database is added.  In the project
+directory, there is a 'methods' directory where you can see example of cluster files added by one
+of the above methods.

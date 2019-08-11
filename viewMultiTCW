@@ -1,0 +1,2 @@
+#!/bin/sh
+java -Xmx8196m -classpath java/jars/mtcw.jar cmp.viewer.MTCWMain $@ 

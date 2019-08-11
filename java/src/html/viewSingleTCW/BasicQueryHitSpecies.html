@@ -1,0 +1,38 @@
+<html>
+<body style="padding:20px;width:650px;">
+<title>Species selection</title>
+<h1>Species selection for DB Hits</h1>
+The left panel lists all the species in the database, the right panel
+shows the species to be included or excluded when 'BUILD TABLE' is executed.
+<ul>
+<li>Select one or more species in the left panel followed by "Add", and they will be added to the right panel.
+<li>Select a species in the right panel followed by 'Del', and it will be removed. 
+<li>Accept and BUILD TABLE: If 'Include' is selected, only the hits with the listed species will be displayed
+in the table. If 'Exclude' is selected, only the hits that are NOT to the listed
+species will be displayed. Note -- other filters will also be applied, e.g. from
+the Attributes.
+</ul>
+A groups of entries can be selected by selecting the first one, and the last
+one using Shift-Ctrl.
+<h3>Modifying the left panel</h3>
+<ol>
+<li>One word: the list will be changed to show only the first word of each species,
+followed by the number of species that have the first word, e.g. Drosophila (12).
+When a species is selected followed
+by 'Add', it is expanded in the right panel, e.g. Drosophila (12) will result
+in 12 entries in the right table.
+<li>Two words: same as 'One word', but the list is shown with the first two words.
+<li>All: the complete species names are shown.
+</ol>
+<b>Find:</b> This is case-sensitive and searches the beginning of the species description.
+For example, type 'Dros' followed by 'Find', and only the entries starting with 'Dros'
+will be shown. To return to the full list, clear the text entry box and select 'Find'.
+
+<h3>Accept/Discard</h3>
+Accept will preserve the contents of the right and left panel, even if 
+there are no species listed in the left panel. For example, if a 'Find' has been
+run so only a partial list shows on the left, it will be shown again when the Species
+panel is shown again.
+<p>Discard returns the content to the left and right panel to their previous 
+contents.
+</html>

@@ -1,0 +1,202 @@
+<html>
+<title>mTCW overview</title>
+<center>
+<table width=800 border=0>
+<tr><td>&nbsp;
+<tr><td>&nbsp;
+<tr><td>
+<h2>Description of mTCW overview</h2>
+If the mTCWdb was created with only AA sequences, the Pairs statistics will not be present.
+<br><br>
+Most of the statistics in this overview can be computed from the tables
+using the "Table..." <i>Column Stats</i> option, which provides the standard deviation,
+median, range and sum of the selected columns; there will be round-off error for many of the
+averages. The column name is in the <b>Column</b> column in the
+following table. 
+<table border=1 cellpadding=5>
+<tr><th>Label<th>Description<th>Column
+<tr><td nowrap valign="top"><b>DATASETS</b>
+<td colspan=2>
+This first section describes the data imported from the sTCWdbs. 
+
+<tr><td nowrap valign="top"><b>CLUSTER SETS</b>
+<td colspan=2>One or more sets of clusters will be present in the mTCW. The columns are in the Cluster table.
+
+<tr><td nowrap valign="top">Sizes
+<td>The range of cluster sizes per cluster set.
+<td>Count
+
+<tr><td>conLen<td>Average consensus length of the cluster<td>conLen
+<tr><td>sdLen<td>Average standard deviation of the lengths of 
+the amino acid sequences in the cluster.<td>sdLen
+<tr><td>Score<td>Average Sum-Of-Pairs score (see Cluster Help). 
+A large number indicates more similarity. <td>Score
+<tr><td>SD<td>Standard deviation of the Sum-of-pairs Score. 
+This can be viewed on the "Column Stats" from the cluster table.<td>-
+<tr><td>Trident<td>Average Trident score using the software package MstatX (see Cluster Help). 
+A small number indicates more conservation. <td>Trident
+<tr><td>SD<td>Standard deviation of the Trident score. This can be viewed on the "Column Stats" from the cluster table.<td>-
+
+<tr><td nowrap valign="top"><b>PAIRS</b>
+	<td colspan=2>Similar pairs were identified from the comparing the 
+	sequences using a search program (BLAST or DIAMOND), 
+	where AA is from the amino acid search and NT is from the nucleotide search (NT may not exist).
+	The columns are in the Pairs table.
+
+<tr><td nowrap valign="top"><b>Hits</b>
+    <td colspan=2>The following 4 are in regards to the pairs generated from the hit file(s).
+<tr><td nowrap valign="top">Diff
+	<td>The number of hits from different datasets.
+	<td>-	
+<tr><td nowrap valign="top">Same
+	<td>The number of hits from the same dataset.
+	<td>-
+<tr><td nowrap valign="top">Similarity	
+	<td>Average percent similarity (3rd column of hit file, often referred to as %Identity).
+	<td>%AAsim, %NTsim
+	
+<tr><td nowrap valign="top">Coverage	
+	<td>Average percent alignment (4th column of hit file) to the total length of the 
+	each sequence of the pairs.
+	
+	<td>%AAcov1, %AAcov2, %NTcov1, %NTcov2
+	
+<tr><td nowrap valign="top"><b>Aligned</b>
+    <td colspan=2>The coding regions of the pairs in clusters that have hits were aligned 
+    using dynamic programming, and the following statistics computed. 
+<tr><td nowrap valign="top">CDS, 5UTR, 3UTR
+    <td>The number of aligned bases including gaps but not overhangs.
+      <br>There is a column for the CDS aligned bases, but not the UTRs. 
+      However, these numbers can be viewed and verified in the Pairwise Align of the CDS and UTRs.
+	<td>Align
+
+<tr><td nowrap valign="top"><i>Codons</i>
+    <td>#Codons: Number of aligned codons excluding gaps. 
+	<td>Calign
+	
+<tr><td nowrap valign="top">Exact
+    <td>Percent of #codons that are exactly the same.
+	<td>%Cexact
+	
+<tr><td nowrap valign="top">Synonymous
+    <td>Percent of #codons that are synonymous (different codon, same amino acid).
+    <td>%Csyn
+    
+<tr><td nowrap valign="top">Fourfold
+    <td>Percent of #codons that are fourfold (4d), which are two synonymous codons 
+    where the ith position allows any of the 4 bases. 
+    <td>&nbsp;&nbsp;%C4d
+    
+<tr><td nowrap valign="top">Twofold
+    <td>Percent of #codons that are fourfold (2d), which are two synonymous codons 
+    where the ith position allows any of the 2 bases. 
+    <td>&nbsp;&nbsp;%C2d
+    
+<tr><td nowrap valign="top">Nonsynonymous
+    <td>Percent of #codons that are nonsynonynous (different amino acid).
+    <td>%CnonSyn    
+        
+<tr><td nowrap valign="top"><i>Amino Acids</i>
+    <td colspan=2>#AA will be the same as #codon.
+     
+<tr><td nowrap valign="top">Exact
+    <td>Percent of the #AA that are the same.
+    <td>Calign
+    
+<tr><td nowrap valign="top">Substitution&gt;0
+    <td>Percent of #AA that are substitutions with BLOSUM62&gt;0.
+    <td>%Apos
+    
+<tr><td nowrap valign="top">Substitution&lt;=0
+    <td>Percent of #AA that are substitution with BLOSUM62&lt;=0.
+	<td>%Aneg
+
+<tr><td nowrap valign="top"><i>Nucleotides</i>
+    <td colspan=2>#CDS, #5UTR, #3UTR: The number of aligned bases including gaps, excluding overhangs (numbers
+    by 'Aligned').
+       
+
+<tr><td nowrap valign="top">CDS Diff
+    <td>Percent of #CDS that are not the same base. 
+       <td>Cdiff
+  
+  <tr><td nowrap valign="top">Gaps
+    <td>Percent of #CDS that are gaps.
+    <td>Gaps
+    
+   <tr><td nowrap valign="top">SNPs
+    <td>Percent of #CDS that are SNPs.
+    <td>SNPs
+           
+<tr><td nowrap valign="top">5UTR diff
+    <td>Percent of #5UTR that are not the same base. 
+       <td>5diff
+         
+<tr><td nowrap valign="top">3UTR diff
+    <td>Percent of #3UTR that are not the same base, includes gaps. 
+        <td>3diff
+         
+<tr><td nowrap valign="top">Transition
+    <td>Percent of #SNPs that are transitions in each of the three codon positions.
+       <td>-
+<tr><td nowrap valign="top">Transversion
+    <td>Percent of #SNPs that are transversion in each of the three codon positions.
+       <td>-
+<tr><td nowrap valign="top">ts/tv
+    <td>The total number of transitions divided the total number of transversions.
+        <td>ts/tv
+    
+<tr><td nowrap valign="top">Both
+    <td>Percent of #CDS where both (union) sequences have a GC base. 
+    Same for the CpG sites, where CpG-Nt (nucleotide) and CpG-Cd (codon, CpG does not cross codon boundaries).
+    <td>-
+ <tr><td nowrap valign="top">Either
+    <td>Percent of #CDS where either or both (intersection) sequences have a GC base. 
+    Same for the CpG sites, where CpG-Nt (nucleotide) and CpG-Cd (codon, CpG does not cross codon boundaries).
+    <td>-
+     
+  <tr><td nowrap valign="top">Jaccard
+    <td>The total number of 'both' divided by the total number of 'either'.
+    There is a pair column for the GC and codon-based CpG-Cd, but not the nucleotide-base CpG-Nt.
+    <td>GC-JI, CpG-JI
+    
+<tr><td nowrap valign="top"><b>KaKs method</b>
+    <td colspan=2>The KaKs_calculator (Zhang et al. 2006) will typically be used to 
+    compute the KaKs values, where the method
+    used is shown on the "KaKs Method" line. 
+<tr><td>KaKs<td>Selective strength. A score &lt;1 is purifying, &gt;1 is positive, 
+and significantly &gt;1 implies that at least some of the mutations are probably advantageous. <td>KaKs
+<tr><td>Quartiles<td>Of the KaKs values. It uses the method of splitting the list in half; 
+Q1 is the median of the lower half and Q3 is the median of the upper
+half.<td>-
+<tr><td>P-value<td>The 'other' count includes pairs where the KaKs_calculator did not provide
+a p-value though did provide a KaKs value.<td>p-value.
+
+<tr><td nowrap valign="top"><b>SEQUENCES</b>
+<td colspan=2>
+The columns are in the Sequence table; use Sequence Filters to select a dataset
+to view its corresponding results.
+
+<tr><td>Average Lengths
+<td>The ORFs were computed for the sTCWdbs and imported along with their translated sequence.
+<td>5UTR Len, 3UTR Len, CDS Len
+
+<tr><td>%GC
+<td>The average percent of GC for 5'UTR, CDS and 3'UTR.
+The only %GC column is for the entire sequence.
+<td>-
+
+<tr><td>CpG O/E
+<td>The CpG observed/expected for the 5'UTR, CDS and 3'UTR [(#CpG/(#G*#C))*Len].
+The average of a CpG column will not be accurate due to round off error; the value
+in the Overview does not have round error, i.e. it is accurate.
+<td>5UTR CpG, CDS CpG, 3UTR CpG 
+
+<tr><td>Counts
+<td>The total raw counts from each dataset. The RPKM values are in the sequence table, but not the counts.
+<td>-
+
+</table>
+</table>
+</center>
+</html>

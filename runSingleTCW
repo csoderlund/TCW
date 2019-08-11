@@ -1,0 +1,2 @@
+#!/bin/sh
+java -Xmx8192m -classpath java/jars/stcw.jar sng.amanager.ManagerMain $@ 

@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<title>Add or Edit Sequence Datasets</title>
+	
+<body style="padding:20px;width:650px;font-family:Times">
+<h2>Add or Edit Sequence Datasets</h2>
+Only the SeqID and Sequence File are required, so enter these first. 
+<br>The default location for all files are under the /libraries/&lt;project&gt; directory,
+but they can be elsewhere. 
+<br><i>All SeqID and Condition names must be unique. Replicate names must be unique.</i>
+<p>
+	<table border=0 width=800>
+		<tr>
+			<td valign="top" width=150>SeqID</td>
+			<td>A short identifier for the dataset. Use letters, numbers, and underscores only. 
+			It must be unique. Also, the replicate names must be unique.</td>
+		</tr>
+		<tr>
+			<td valign="top">Sequence File</td>
+			<td>The fasta sequence file for this dataset, where each ">" must have a unique 
+			identifier for the sequence. If the file is not in the "/libraries" project directory, 
+			provide its full path.</td>
+		</tr>
+		<tr>
+			<td valign="top">Quality File</td>
+			<td>Optional fasta quality file for the sequence file.</td>
+		</tr>
+		<tr><td>&nbsp;</td></tr>
+		
+		<tr>
+			<td valign="top">Count File</td>
+			<td>A file that contains all the read or spectral counts, as follows:
+			The first row contains the column headings "Sequence" followed by the replicate names; the 
+			rest of the rows contain the sequence name followed by the counts (see the UserGuide 
+			for more detail).
+			<br>The file is read for the column names when "Keep" is selected, and the Count Table 
+			on the main window has a row added for each condition.
+		</td>
+		</tr>
+		<tr>
+			<td valign="top">Build Combined Count File</td>
+			<td>It is often the case that that replicate counts are in separate files, where each
+			file has two columns: sequence name and read count, where the sequence name is
+			the same as found in the sequence file. This function allows you to enter your
+			count files and build a single file of counts, which is read by the
+			Load Data function.
+		</tr>
+			<tr><td>&nbsp;</td></tr>
+		<tr>
+				<td colspan=2 align=left>
+					<b>Sanger ESTs</b>: mate-pairs should have the same name but with a 5' and 3' suffix.
+				</td>
+			</tr>
+		<tr>
+			<td valign="top">5' suffix</td>
+			<td>The 5' extensions used by the read sequences, e.g. "est1.f"</td>
+		</tr>
+		<tr>
+			<td valign="top">3' suffix</td>
+			<td>The 3' extensions used by the read sequences, e.g "est1.r"</td>
+		</tr>
+			<tr><td>&nbsp;</td></tr>
+		<tr>
+				<td colspan=2 align=left>
+					<b>ATTRIBUTES:</b> These values are listed on the viewSingleTCW 
+					overview page. Do not use single or double quotes. Attributes may be edited after the
+					database is created by using the "Edit" button on the main window.
+				</td>
+			</tr>	
+	</table>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<html>
+<body style="padding:20px;width:650px;font-family:Times">
+<title>Sequence Columns</title>
+
+<h1>Sequence Columns</h1>
+Use this interface to select columns for the results tables from Sequence queries. Note that
+sections are collapsible; to expand a section and see the filter options,
+click on the "+". There are descriptions of each beside the column name in each
+of these interfaces, so this Help provides any additional information.
+
+<p>The columns available depend on the attributes of the database, e.g. whether
+its TCW-assembled, differential expression was computed, annotation was performed.
+
+<p>Both "Show All" and "Filters" use these column setting for the
+ respective table. To change the columns in a given
+ table, display it and then use "Refresh Columns" to update the columns.
+ 
+<h3>General</h3>
+General sequence attributes: ID, length, total reads, etc. The columns available
+depend on the attributes of the database, e.g. if it is an assembled set, it
+will have the column'#buried'. 
+<br><br>In the "User Remark" column has user-supplied information added with
+runSingleTCW. The "TCW Remark" is information added by TCW during annotation.
+
+
+<h3>Counts and RPKM</h3>
+The raw count and normalized RPKM is available for each "Condition",
+i.e. the combined replicates of the experimental conditions (tissue, treatment, etc).
+
+
+<h3>N Fold and R Statistic</h3>
+N Fold - Select pairs of conditions to show their fold-change difference as a column. 
+The fold change is calculated using RPKM values as follows: 
+the larger value is divided by the smaller value, where zero in the denominator 
+is replaced by 0.1.
+If the condition selected for 'Select 1' is smaller than the condition selected for
+'Selected 2', the result is made negative. 
+<p>
+R Statistic<sup>1</sup> - is a quick way to look for differential expression 
+among all conditions at once.
+
+
+<h3>Differential Expression</h3>
+If your project has differential expression results added using 
+the <tt>runDE</tt> TCW program, then you can 
+select those columns here. In order to indicate up/down regulation,
+up-regulated p-values are positive, down-regulated are negative. 
+The DE column in the sequence table sorts without regard to the sign.
+<p><b>Note</b>: a 3 indicates the sequence was filtered out before DE analysis or that 
+the DE computation returned an NA.
+
+<h3>Best Hits</h3>
+<i>Best E-value</i>:
+The hit with the best e-value and bitscore.
+<p><i>Best Annotation</i>: See Help for the Basic annoDB hits.
+<p><i>Best with GO</i>: (if the database has GO annotation)
+The best e-value hit with an assigned GO term.
+
+<h3>SNPs and ORFs</h3>
+
+Note that SNPs are only available if the  assembly was performed within TCW. 
+
+<P>ORFs is the best Open Reading Frame. The best ORF is determined using 
+the best hit, longest open reading frame, and 5th-order Markov score. 
+For details, see www.agcol.arizona.edu/software/tcw/doc/stcw/ORF.html. 
+
+
+<p>
+<hr>
+<p>
+
+<sup>1</sup>Stekel, D.J., Git, Y. and Falciani, F. (2000) 
+<br>
+The comparison of gene expression from multiple cDNA conditions. Genome Res, 10, 2055-2061.
+<p>
+Note that the R-statistic is a Poisson-based test not accounting for over-dispersion, hence
+can produce false-positives on RNA-seq data, especially at low fold change. Results should 
+be verified by a more rigorous method (e.g., EdgeR, DESeq), but note that the latter methods
+work only on pairwise condition comparisons, and require replicates to work accurately.  
+

@@ -1,0 +1,191 @@
+<html>
+<title>sTCW overview</title>
+<center>
+<table width=800 border=0>
+<tr><td>&nbsp;
+<tr><td>&nbsp;
+<tr><td>
+<h2>Getting the table of associated values</h2>
+This describes how to obtain the table of results corresponding to statistics
+in the overview. The following short-hand is used:
+<ul>
+<li>The "Column:x" indicates that x should be selected for viewing in the table.
+<li>#Seqs is the number of sequences, which is listed at the top of the overview.
+<li>"Stats" is the "Show Column Stats" on the "Table..." drop-down.
+</ul>
+
+<h3>INPUT</h3>
+Most of the input section is data supplied by the user with runSingleTCW. The following
+two are computed:
+<table border=1>
+<tr><td>Counts: SIZE<td>Show all<td>Column:Counts for all conditions: Stats, column:Sum
+<tr><td>AVG-len<td>Show All<td>Column:Length; Stats, column:Average
+<tr><td>MED-len<td>Show All<td>Column:Length; Stats, column:Median
+<br>The median in the two cases will be slightly different 
+because they are computed differently.
+</table>
+ 
+<h3>Annotation Statistics:</h3>
+
+<table border=1>
+<tr><th>Column<th>Search<th>Obtain number
+<tr><td>Sequences with hits
+	<td>Filters: Annotated
+	<td>Number of rows
+<tr><td>Unique hits
+	<td>AnnoDB Hits: Seq:None(slow)<sup>*</sup>
+	<td>Hits number at top of table
+<tr><td>Total sequence hits
+	<td>AnnoDB Hits: Seq:None(slow)<sup>*</sup>
+	<td>Pairs number at top of table
+<tr><td>Bases covered by hit
+	<td>AnnoDB Hits: Seq:Best Eval
+	<td>Unselect Group by Hit ID; column:Align; 
+	<br>Stats, column:Sum; for NT, multiply by 3
+<tr><td>Total bases 
+	<br>(residues for AA seqs)
+	<td>Show All 
+	<td>Column:Length; Stats, column:Sum
+<tr><td>Sequences with GOs
+	<td>Filters: Best Hit: Annotated, Best with GO
+	<td>Number of rows
+<tr><td>Unique GOs
+	<td>GO Annotation: no filters<sup>*</sup>
+	<td>Results number
+<tr><td>Best hit with GOs
+	<td>AnnoDB Hits: Seq:Best Eval; GO,etc:Has GO
+	<td>Seqs number at top of table
+<tr><td>Unique hits with GOs
+	<td>AnnoDB Hits: Seqs:None; GO,etc:Has GO
+	<td>Hits number at top of table
+</table>
+<sup>*</sup> Use Clear All
+
+<h3>AnnoDBs:</h3>
+
+<table border=1>
+<tr><th>Column<th>Search<th>Obtain number
+<tr><td>ONLY
+	<td>Filters: Annotated, Best Eval, 
+	<br>Enter DBtype and Taxonomy 
+	<br>&nbsp;&nbsp;&nbsp; values for AnnoDB,
+	<br>General &lt;=1 annoDB
+ 	<td>Number of rows
+<tr><td colspan=3><i>The following all use AnnoDB Hits, 
+and select the correct ANNODB from the AnnoDBs panel.</i>	
+<tr><td>EVAL<td>Seq:Best Eval<td>Seqs number above the table
+<tr><td>ANNO<td>Seq:Best Anno<td>Seqs number above the table
+
+<tr><td>UNIQUE<td>Seq:None(slow)
+	<td>Hits number above the table
+<tr><td>TOTAL<td>Seq:None(slow)
+	<td>Pairs number above the table
+
+<tr><td>AVG-SIM<td>Seq:None(slow)
+	<td>Unselect Group by Hit ID; column:%Sim; Stats, column:Average
+
+<tr><td>HIT-SEQ<td>Seq:Rank=1
+	<td>Seqs number, the percentage is of the #Seqs
+
+<tr><td>AVG-SIM<td>Seq:Rank=1 
+    <td>Column:%Sim; Stats, column:Average
+
+<tr><td>Cover &gt;=N<td>Seq:Rank=1,%Sim&gt;=N,%Hcov&gt;=N
+	<td>Seqs number, the percentage is of the HIT-SEQ number
+</table>
+Halign is short for HitAlign, which is the difference between the hit stop and start coordinates
+divided by the length of the protein.
+
+<h3>Top 15 species from total: N</h3>
+The N is the number of unique species based on the first two words of the
+species name: 
+<ul>
+<li>AnnoDB Hits, select Species, select Two words 
+<li>The number listed beside "Species" is the same as N, and
+the species are listed in the table.
+</ul>
+
+<table border=1>
+<tr><th>Column<th>Search<th>Obtain number
+<tr><td colspan=3><i>For the following, use AnnoDB Hits and select the Species.</i>
+<tr><td>EVAL<td>Seq:Best Eval<td>Seqs number
+<tr><td>ANNO<td>Seq:Best Anno<td>Seqs number
+<tr><td>TOTAL<td>Seq:None(slow)<td>Pairs number
+</table>
+
+<h3>Total ORFs:</h3>
+<table border=1>
+<tr><th>Column<th>Search<th>Obtain number
+<tr><td colspan=3><i>The following use the Basic Sequence. Select "TCW" and enter
+the Substring indicated.</i>
+<tr><td>Is Longest ORF<td>!LG<td>#Seqs minus Result number
+<tr><td>Markov Best Score<td>mk!b<td>#Seqs minus Result number
+<tr><td>MultiFrame<td>Multi-frame<td>Result number
+<tr><td>&gt;=9 Ns in ORF<td>9N<td>Result number. View in Sequence Frame to see n's in ORF (CDS). 
+Others may have n's, but not in the CDS.
+<tr><td>Stops in Hit (Best Eval)<td>Stops<td>Result number
+
+<tr><td colspan=3><i>The following use the Filters, SNPs and ORFs.</i>
+<tr><td>Has Hit<td>Protein confirmation<td>Number of rows
+
+<tr><td>All of the above<td>Protein confirmation<td>
+Use the Basic Sequence (as above), search !LG, then add to that mk!b; 
+select all sequences and show in Sequence table with the 'Is PR Frame'
+column; take the number that have use the protein frame and subtract
+from the total number from 'Protein confirmation'.
+
+<tr><td>ORF>=300<td>Has ORF >= 300<td>Number of rows
+<tr><td>Has Start&Stop<td>Has Start and Stop<td>Number of rows
+<tr><td>Has Start|Stop<td>No filter<td> Columns:HasStart, HasStop;
+<br>Sort both columns so 'Yes' rise to the top,
+find where the rows start with 'No','No'.
+</table>
+<h3>GC Content:</h3>
+The only number reproducible is the GC Content, which is the %GC over the entire sequence..
+<table border=1>
+<tr><td>GC Content<td>Show All<td>Column:%GC; Stats, column:Average
+<br>Note, there will be some slight difference in the number due to round-off error.
+</table>
+<ul>
+<li>The "Pos i" column is the percent of G or C in the ith positon of the CDS codons.
+<li>The %GC is the percent of G's and C's over the sequence length.
+<li>The CpG-O/E is ratio observed/expected [(#CpG/(#G*#C))*length].
+<li>The UTRs can be viewed in the Sequence Detail alignments, but there is no column for it.
+</ul>
+
+<h2>Expression</h2>
+The following sections may not exist if the input had no count files or the DE methods
+were not executed.
+<table border=1>
+<tr><td>RPKM
+	<td>Filter: select Condition under Exclude; set "At Most" to 1.99. 
+	<td>This will continue using 4.99, 9.99, etc, where the previous results are
+subtracted from the current. The results are for intervals &gt;=N to &lt;M.
+<tr><td>Differential Expression
+	<td>Filter: select the condition pair, then enter the number, e.g. 1E-5.
+	<td>These counts are accumulative.
+<tr><td>Over-represented GOs:
+	<td>GO Annotation; select the condition pair using the DE panel; enter the threshold,
+	e.g. 0.05.
+	<td>These counts are accumulative.
+</table>
+
+<h2>SEQUENCES</h2>
+If the sequences (e.g. ESTs) have been assembled, there are statistics on buried,
+mate-pairs, etc. Most of them are columns, so select the column, then use the 
+"Show column stats" to view the sum. The following will only cover the three sections
+that are found in un-assembled sequences.
+<table border=1>
+<tr><td>Sequence lengths
+	<td>Filters: General: change &gt;= to &lt;=, 
+	  enter upper limit into Length
+	<td>The counts of the intervals to the left need to be subtracted from the number of rows.
+<tr><td>ORF lengths
+	<td>Filter: SNPs and ORFs; enter lower limit into ORF len
+	<td>Work from right to left, the counts of the intervals to the right need to be subtracted from the number of rows.
+<tr><td>Quality
+	<td>Filters: General: Has Ns: Yes; Column: Ns
+	<td>The resulting rows are the #n&gt;0; sort the rows in descending order and scroll down
+	to the row number that start having #n&gt;10.
+</table>
+</html>

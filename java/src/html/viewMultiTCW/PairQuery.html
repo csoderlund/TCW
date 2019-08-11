@@ -1,0 +1,73 @@
+<html>
+<body style="padding:20px;width:650px;">
+<title>Filter Pairs</title>
+<h2>Filter Pairs</h2>
+There is a pair for two sequences if they have a hit, where the hits are computed when
+the database is created by searching a file of all sequences
+in the database against itself using a heuristic search program
+such as <tt>Diamond</tt>, <tt>Blast</tt> or <tt>Usearch</tt>. 
+
+<p>
+A pair must pass ALL filters. The filters selected will be shown at the top
+of the resulting filtered Pairs table. Beware:
+<ul>
+<li>It is easy to forget to unset a filter, so execute "Clear"
+to clear all filters in order to start a brand new filter. 
+<li>If NO filters are set, all pairs will be displayed -- this can be a big
+set and may take awhile to display.
+</ul>
+
+<h3>+Basic</h3>
+Click the radio button and enter the search value.
+<table border=1>
+<tr><td>Pair #<td> Search for the number shown in the <tt>Pair #</tt> column. This results in only
+one pair being displayed.
+<tr><td>Seq ID (substring)<td>If the SeqID of either sequence in the pair contains the given substring, the
+resulting pair will be displayed. 
+<tr><td>PCC<td> This is only relevant if there are RPKM values in the database. The Pearson
+Correlation Coefficient (PCC) is computed for all pairs to determine the correlation of the
+RPKM values. 
+<tr><td>Description<td>Displays all pairs that have the substring in the  description column.
+</table>
+
+<h3>+Hit</h3>
+
+<table border=1>
+<tr><td>AA pairs<td> A 'yes' will display all pairs that have protein hit. A
+'no' will display all pairs without a hit score.
+<tr><td>E-value<td> Select the radio button and enter the hit e-value to search on.
+<tr><td>%Similarity<td> Select the radio button and enter the hit %Similarity to search on.
+</table>
+The same three filters are available for the nucleotide search.
+
+<h3>+Statistics - only available if all datasets have nucleotide sequences</h3>
+Selecting <tt>Has Stats</tt> or
+<tt>Has KaKs</tt> displays the pairs with the corresponding statistics. It depends on
+how the database was built as to whether a pair has Stats or has KaKs. 
+
+<br><br>For all queries that have a "&gt;=" and "&lt;", a blank entry will be ignored, but one 
+of the two entry boxes must have a number if the corresponding radio button
+is selected. 
+
+<br><br>Stats: All queries correspond to columns of the same name, e.g. "%Cexact" corresponds
+to the column "%Cexact", where putting the mouse over the column name (in the column panel)
+defines it in the lower left hand corner as "Percent of codons that have an exact match".
+
+<br><br>KaKs: This is the synonymous substitution rate (Ka) divided by the nonsynonymous
+substitution rate (Ks). KaKs&lt;1 is considered purifying selection and KaKs&gt;1
+is considered positive selection. The KaKs value is given a p-value, which can also
+be queried on. If Ka='-' then KaKs is ~0.0; if Ks='-', then KaKs is undefined; both of these
+are shown for the Zero query.
+
+<h3>+Datasets</h3>
+Select <tt>Different sets</tt> to only show pairs that are from different dataset,
+and <tt>Same sets</tt> to only show pairs from same sets.
+<p><tt>Pairs with</tt>: If the mTCW database contains more than two datasets, then the dataset names
+will be listed. If one or more datasets are selected, then it will only search for pairs
+that contain sequences from the selected dataset(s). 
+
+<h3>+Clusters</h3>
+One or more clusters sets will be in the database. They will all be listed here
+with an <tt>In</tt> to show pairs that are in the respective cluster, and <tt>Not in</tt>
+to only show pairs that are not in the respective cluster. 
+</html>

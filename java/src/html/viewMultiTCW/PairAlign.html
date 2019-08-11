@@ -1,0 +1,52 @@
+<html>
+<body style="padding:20px;width:650px;">
+<title>Pairwise</title>
+<h2>Pairwise</h2>
+The options displayed on the second row vary depending on whether
+"AA align", "NT align" or "AA,NT,CDS" were selected. 
+The "Align" buttons result in a pop-up showing the sequence alignment
+in a multi-row format. The pop-up has the following option:
+<table border=1>
+<tr><td><i>Remove hanging sequence from ends</i><td> If checked, overhangs are removed. If uncheck,
+the full alignment is shown, where is one extends further than the other, the gap character is
+used to show the extension.
+</table>
+<p>Only the "AA,NT,CDS" option has all of the following. The "AA align" and "NT align"
+only have an "Align" button with the respective align pop-up.
+<h3>AA (amino acid)</h3>
+<i>Display</i>:  60, 90 or 20 -- is the number of amino acids in a line.
+<br><br>The 20 is equivalent to 60 for CDS. If you compare the two, they do not always correspond
+because nucleotide gaps of 1 or 2 will cause a frameshift in the amino acid sequence, 
+causing the amino acid sequence to be incorrect after the gap. 
+A nucleotide gap of 3 is okay, as it will just cause a missing amino acid.
+
+<h3>CDS (coding sequence)</h3>
+
+<i>Display</i>:  60 or 90 -- is the number of bases in a line.
+             
+<br><br><i>Annotate</i>: With the following options:
+<table border=1>
+<tr><td>Match<td>Shows synonymous and non-synonmous mismatches.
+<tr><td>Amino Acid<td>Shows the corresponding AA characters. Note: generally,
+the AA characters will match with those shown on the "AA.." display. However, the CDS-NT
+alignment is separate from the AA alignment, so the are occasionally different if gaps
+have been inserted in the AA alignment.
+<tr><td>Degenerate<td>Shows fourfold (4d) and twofold (2d) degenerate codons. Degenerate
+codons code for the same amino acid, but 4d can have any of the 4 bases in the ith position
+and 2d can have 2 or 3 alternative bases in the same position.
+<tr><td>ts/tv<td>Shows ts (transitive) and tv (transversion) substitutions.
+<tr><td>CpG<td>Shows the location of CpG dinucleotides with codon (but not CpG dinucleotides
+that span codons).
+</table>		
+<h3>NT (nucleotide)</h3>
+
+<i>Display</i>:  60 or 90 -- is the number of bases in a line.           
+<br><br><i>Annotate</i>: Has the following options:
+<table border=1>
+<tr><td>Match<td>Shows a symbol for the mismatched nucleotides.
+<tr><td>ts/tv<td>Shows ts (transitive) and tv (transversion) substitutions.
+<tr><td>CpG<td>Shows all CpG dinucleotides.
+</table>
+		
+</html>
+

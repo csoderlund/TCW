@@ -1,0 +1,91 @@
+<html>
+<title>Stats Settings</title>
+<body style="padding:20px;width:650px;font-family:Times">
+<h2>Pair Stats Settings</h2>
+
+<p>Dependencies:
+<ul>
+<li><b>Add Pairs from Hit</b> must be executed before <b>PCC of RPKM</b>.
+<br>&nbsp;
+
+<li><b>Add New Clusters</b> must before the alignments.
+<br>&nbsp;
+
+<li><b>Run Stats</b> must with <b>Write</b> selected must be executed 
+before <b>Read</b> can be selected. See KaKs below.
+</ul>
+
+<h3>PCC (Pearson Correlation Coefficient) </h3>
+PCC is computed on the RPKM for shared conditions. This can be run at anytime after
+the pairs have been added. If there are many pairs and conditions, this can take awhile.
+
+<h3>Alignment of hit pairs in cluster</h3>
+If you execute <b>Run Stats</b> with <b>Compute statistics</b> and <b>KaKs files - Write</b> selected, 
+the following will occur:
+<ol>
+<li>Perform alignments on using dynamic programming on all pairs that (i) have a hit and (ii) are in
+ a cluster together.
+<li>Compute statistics for each pair and store the results in the database for query by <tt>viewMultiTCW</tt>.
+<li>Compute summary statistics for the <tt>viewMultiTCW</tt> overview page.
+<li>Write the alignments to file for input to <tt>KaKs_calculator</tt>
+</ol>
+Dynamic programming is a more precise alignment but takes longer than blast, moreover, it has
+not be parallelized. To align over 200k pairs took over 2 hours on a linux machine (if you have
+a big dataset, plan to leave it running over night).
+
+<h3>KaKs</h3>
+<ol>
+<li>The <b>write</b> will write alignment files into <tt>projcmp/&lt;project name&gt;/KaKs</tt> directory.
+A file called <tt>runKaKs</tt> will also be written into this file. If your computer has N CPUs,
+it will split the alignments into N files, which <tt>runKaKs</tt> will run concurrently. 
+<br>&nbsp;
+
+<li>Google <tt>KaKs_Calculator</tt> and download the executable. Put it into the <tt>projcmp</tt>
+directory. If desired, change the method used by editing <tt>runKaKs</tt>. Then:
+<pre>
+cd projcmp/&lt;project name&gt;/KaKs
+sh runKaKs
+</pre>
+<li>Select <b>Read</b> in <b>Setting</b> and run <b>Run Stats</b> again.
+</ol>
+See KaKs below for more information.
+
+<h3>Multiple Alignment of cluster</h3>
+This will execute the program <tt>MAFFT</tt> on each cluster, score the results, and enter the
+scores into the database. One of the two scores computed is from executing the program 
+<tt>MstatX</tt> and reading the results.
+
+<p>The <tt>MAFFT</tt> and <tt>MstatX</tt> executables are in the sub-directory <tt>external</tt>
+for Linux and <tt>external_osx</tt> for Mac.
+
+<h3>Add additional cluster sets</h3>
+If you add additional cluster sets after executing <b>Run Stats</b> on initial clusters,
+you can <b>Run Stats</b> again and it will only compute the pair and cluster statistics for the
+new data. 
+
+<p><b>KaKs</b>:
+If you have already written the KaKs files, run the <tt>KaKs_calculator</tt>, and read in the results;
+then, if you add more clusters and run this again, it will overwrite the original files. Since
+they take a while to create, you may want to save the completed files, e.g.
+<pre>
+cd projcmp/&lt;project-name&gt;/Kaks
+cat oTCW* >save_oTCW_files
+</pre>
+Do not prefix the saved file with 'oTCW' or 'iTCW' as TCW writes and reads files with those prefixes.
+
+<p>The KaKs files are written to use the 'YN' method, which executes very fast. 
+If you use a slower method, you may want to only  run the <tt>KaKs_calculator</tt> 
+on only the BBH clusters, in which case, add them first, run the statistics 
+with <b>KaKs Write</b> so only the BBH clusters are written
+to file, then add other cluster sets if desired.
+
+<h3>Change cluster sets</h3>
+<ul>
+<li>If you remove a cluster set using the <b>Remove</b> button on the main panel after adding statistics,
+the pair statistics will still exist.
+<li>You can remove all pairs and clusters to start over by using the <b>Remove...</b> option
+at the top and select "Pairs and clusters from database".
+</ul> 
+
+
+</html>
