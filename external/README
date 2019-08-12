@@ -1,39 +1,48 @@
-external/README
+External software 
 
-All programs in this directory are downloaded from external sites that
-have open source licenses. If any of them fail, first check to make
-sure the executables have +x permissions.
+Please give credit in publications to any of the TCW external programs 
+that you use for your results. The references are listed at: 
+http://www.agcol.arizona.edu/software/tcw/doc/External.html.
 
-jri/
-The library libjri.so is supplied, which provides the interface to R for runDE. 
-This may be an older version than your R installation (it is v3.0), in which case it will need to be replaced. 
-https://cran.r-project.org/bin/linux/
+The following programs are provided with the TCW package, but are not part of 
+the github source code. You may download the TCW package, extract the external
+directory and put it in this location, or you can download the programs (though
+there may be version incompatibility).
 
-CAP3/
-VersionDate: 12/21/07  Size of long: 8
-If this fail for you, try different ones from http://seq.cs.iastate.edu/cap3.html
-Also provided: cap3.linux.i686_exon64 "an old version (2009) of 64-bit Linux system with an Intel processor".
-http://seq.cs.iastate.edu/cap3.html
+## SingleTCW and MultiTCW
 
 diamond/ 
-diamond v0.9.22.123 (added Sept 2018)
+diamond v0.9.22.123 (TCW added Sept 2018)
 https://github.com/bbuchfink/diamond
 
+## SingleTCW (only if sequences are to be assembled): 
+
+CAP3/
+TCW added VersionDate: 12/21/07  
+http://seq.cs.iastate.edu/cap3.html
+
+## May be necessary for runDE
+
+jri/
+https://cran.r-project.org/bin/linux/
+
+## Used in MultiTCW
+
 OrthoMCL/
-orthomclSoftware-v2.0.9 (added Jan 2019)
+orthomclSoftware-v2.0.9 (TCW added Jan 2019)
 mcl-14-137 
-https://orthomcl.org/common/downloads/
+https://orthomcl.org/common/downloads/software/v2.0/
 http://www.micans.org/mcl/src/mcl-latest.tar.gz
 
 mafft/
-MAFFT v7.407 (added Jul 2018)
+MAFFT v7.407 (TCW added Jul 2018)
 https://mafft.cbrc.jp/alignment/software/
 
 muscle/
-MUSCLE v3.8.31 (added Aug 2015)
+MUSCLE v3.8.31 (TCW added Aug 2015)
 https://www.drive5.com/muscle/
 
 mstatX/
-Added Nov 2018
-If the mstatx executable does not work, see external/mstatX/Readme.TCW for further instructions.
+TCW added Nov 2018
 https://github.com/gcollet/MstatX
+
