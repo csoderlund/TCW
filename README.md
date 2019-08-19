@@ -1,4 +1,6 @@
-Download TCW package and documentation: www.agcol.arizona.edu/software/tcw
+**Download TCW package:**  www.agcol.arizona.edu/software/tcw or [from this site](https://github.com/csoderlund/TCW/releases)
+
+**Documentation:** www.agcol.arizona.edu/software/tcw
 
 **Reference:** C. Soderlund (2019) Transcriptome computational workbench (TCW): analysis of single and comparative transcriptomes. Published at [BioRxiv](https://www.biorxiv.org/content/10.1101/733311v1).
 
