@@ -1,3 +1,4 @@
+
 package sng.assem;
 
 import java.io.BufferedReader;
@@ -35,436 +36,61 @@ import util.methods.*;
 // The breakup between constructor, main() and run() is so
 // that it can be used either as a standalone Java application (which uses main() )
 // or be called from within a controller app, using run().
+// CASZ 1Sept19 got rid of a lot of dead code. Made private methods private (were all public)
+//      changed rs.getInt("name") to rs.getInt(num) in most places
+//      there is still lots of dead code and the DEBUG option crashes
 
 public class AssemMain
 {
-	TCWprops mProps;
+	private boolean debugTmp=false;
+	public ID2Obj<Integer> mMergesDone;
+	public TCWprops mProps;
+	public int mAID;
+	public String mIDStr;
+	public ID2Obj<Clone> mID2Clone;
+	public Str2Obj<Clone> mName2Clone;
+	public MatePair[] mPairs;
+	public ID2Obj<Contig> mID2Contig;
+	
+	private static boolean mNoPrompts = false;
+	private final String assmTmpDir = "assem";
 	private DBConn mDB;
 	private DBConn mDB2; // For nested queries which are used a couple places (better solution: no nesting)
-	Log mLog;
-	File mProjDir;
-	File mTopDir;
-	File mInitialBuryDir;
-	File mCliqueDir;
-	File mFilterDir;
-	File mLogDir;
-	File mSBFile = null;
-	String mIDStr;
-	Vector<Library> mLibs;
-	TreeMap<Integer,Integer> mLibMap;
-	File mLibsDir;
-	File mLibDir;
-	RStat mRstat;
 	
-	int mWhichDir = 0; // where launched from? 0=pave dir; 1=1 below; 2 = 2 below,etc
-	int mAID;
-	ID2Obj<Clone> mID2Clone;
-	ID2Obj<SubContig> mID2SubContig;
-	ID2Obj<Contig> mID2Contig;		
-	Str2Obj<Clone> mName2Clone;
-	Clone[] mClones;
-	MatePair[] mPairs;
-	SparseMatrix mPairOlaps;
-	Stack<TreeSet<Integer>> mPairCliques;
-	Stack<TreeSet<Integer>> mSingleCliques;
-	SparseMatrix mSingleOlaps;
-	HashSet<MatePair> mSelfOlaps;
-	String mDqStr = "";
-	int mDqLen = 0;
+	private File mProjDir,  mTopDir, mInitialBuryDir, mCliqueDir, mLogDir;
+	private File mSBFile = null;
 	
-	AutoArray<Cluster> mClusters;
-	HashMap<Contig,HashMap<Contig,Edge>> mEdgePairs;
-	int mThreadWorkItem;
-	int[] mThreadWorkList;
-	int mThreadsFinished;
+	private Vector<Library> mLibs;
+	private RStat mRstat;
 	
-	AutoArray<Edge> mEdges;
-	ID2Obj<Integer> mMergesDone;
+	private ID2Obj<SubContig> mID2SubContig;
+	private Clone[] mClones;
 	
-	BlastType mBlastType;
-	Stack<AceFile> mUploadQueue;
-	boolean mCliqueUploadThreadDie = false;
-	int mNChimeric = 0;
-	Contig[] mCtgsBySize ;
-	TreeMap<Integer,Integer> mLibCounts;
-	float mERate; 
-	float mExRate; 
-	static boolean mNoPrompts = false;
-	boolean bSkipAssembly=false;
+	private SparseMatrix mPairOlaps;
+	private Stack<TreeSet<Integer>> mPairCliques;
+	private Stack<TreeSet<Integer>> mSingleCliques;
+	private SparseMatrix mSingleOlaps;
+	private HashSet<MatePair> mSelfOlaps;
 	
-	public void run(boolean exitOnComplete) throws Exception
-	{
-		long startTime = Out.getTime();
-		ResultSet rs;
-		Schema schObj = new Schema(mDB);
-		String msg="Instantiate";
-		bSkipAssembly=true;
-		if (mProps.getProperty("SKIP_ASSEMBLY").equals("0"))
-		{
-			msg = "Assembly";
-			bSkipAssembly=false;
-			
-			rs = mDB.executeQuery("show columns from assem_msg like 'peptide'");
-			if (rs.first())
-			{
-				Utils.termOut("");
-				Utils.termOut("This is a protein project and cannot be assembled.");
-				Utils.termOut("Set 'Skip Assembly' to instantiate proteins.");
-				System.exit(0);
-			}
-		}
-		
-		rs = mDB.executeQuery("select AID from assembly where assemblyid != '" + mIDStr + "'");
-		if (rs.first())
-		{
-			Utils.termOut("\n\nA different assembly/instantiation already exists in this database. " +
-					"Multiple assemblies per database are no longer supported.");
-			System.exit(0);
-		}
-		rs= mDB.executeQuery("select AID,completed from assembly where assemblyid='"
-						+ mIDStr + "'");
-		boolean resume = false;
-		boolean deleteAssembly = false;
-		int maxTCnum = 0;
-		String dbmsg =  mProps.getProperty("STCW_db") + " on host "+ mProps.getProperty("DB_host");
-		if (rs.next())
-		{
-			boolean completed = rs.getBoolean("completed");
-			mAID = rs.getInt("AID");
-			if (completed || bSkipAssembly)
-			{
-				Utils.termOut("\nA completed instantiation for \"" + mIDStr
-								+ "\" already exists in the database " + dbmsg);
-				if (!mNoPrompts)
-				{
-					if (!Utils.yesNo("Delete this instantiation and re-start it"))
-					{
-						System.err.println("Exit instantiation");
-						return;
-					}
-				}
-				else
-				{
-					return;
-				}
-				deleteAssembly = true;			
-			} 
-			else
-			{
-				Log.msg("\nA partially-completed assembly with the same id \""+ mIDStr
-								+ "\" already exists in the database " + dbmsg, LogLevel.Basic);
-				if (!mNoPrompts && !Utils.yesNo("Resume this instantiation"))
-				{
-					if (!Utils.yesNo("Delete this assembly and re-start it"))
-					{
-						return;
-					}
-					deleteAssembly = true;
-				}
-				else
-				{
-					resume = true;
-					Log.msg("Previous assembly is being resumed",LogLevel.Basic);
-				}
-			}
-			if (!resume)
-			{
-				deleteSavedLogFiles();
-			}
-		}
-		mBlastType = BlastType.valueOf(mProps.getProperty("BLAST_TYPE"));
-
-		if (resume)
-		{
-			rs = mDB.executeQuery("select max(tcnum) as maxt from ASM_tc_iter where aid=" + mAID);
-			if (rs.first())
-			{
-				maxTCnum = rs.getInt("maxt");
-				if (maxTCnum > 0)
-				{
-					Log.msg("Resuming TC" + maxTCnum, LogLevel.Basic);
-				}
-			}
-		}
-		// to do: turn off
-		(new memCheckThread()).start();
-		
-		rs.close();
-		mLibs = new Vector<Library>();
-		int nLibClones = 0;
-		if (!mProps.getProperty("libraries").equals(""))
-		{
-			for (String libid : mProps.getProperty("libraries").split("\\s+"))
-			{
-				Library lib = new Library(mDB, libid);
-				if (!lib.loadFromDB())
-				{
-					Log.die("Can't find library " + libid + " in database");
-				}
-				mLibs.add(lib);
-			}
-		}
-		else
-		{
-			rs = mDB.executeQuery("select library.libid, count(*) as nclones from library join clone on " +
-					" clone.LID=library.LID group by library.LID");
-			while (rs.next())
-			{
-				String libid = rs.getString("libid");
-				int nclones = rs.getInt("nclones");
-				if (nclones > 0)
-				{
-					Library lib = new Library(mDB2, libid);
-					if (!lib.loadFromDB())
-					{
-						Log.die("Can't find dataset " + libid + " in database");
-					}
-					mLibs.add(lib);
-				}
-			}
-		}
-		Log.head("Dataset",LogLevel.Basic);
-		Log.columnsInd(25, LogLevel.Basic, "Dataset", "#Seqs", "Load Date", "Seq File");
-		for (Library lib : mLibs)
-		{
-			nLibClones += lib.mNumESTLoaded;
-			Log.columnsInd(25, LogLevel.Basic,lib.mIDStr, lib.mNumESTLoaded, lib.mLoadDate,
-					lib.mSeqFile.getName());
-		}
-		if (nLibClones > 100000)
-		{
-			mDB.checkInnodbBufPool();	
-		}
-			
-		int maxLen = Integer.parseInt(mProps.getProperty("MAX_MERGE_LEN"));
-		if (maxLen > 0)
-		{
-			Vector<String> longLibs = new Vector<String>();
-			int longClones = 0;
-			for (Library lib : mLibs)
-			{
-				rs = mDB.executeQuery("select count(*) as cnt from clone where length > " + maxLen);
-				rs.first();
-				int cnt = rs.getInt("cnt");
-				if (cnt > 0)
-				{
-					longLibs.add(lib.mIDStr);
-					longClones += cnt;
-				}
-			}
-			if (longLibs.size() > 0)
-			{
-				String clist = Utils.join(longLibs, ",");
-				Log.msg(longClones + " reads have length greater than " + maxLen,LogLevel.Basic);
-				Log.msg("These reads will not be assembled (to change, set property MAX_MERGE_LEN)",LogLevel.Basic);
-				Log.msg("Dataset containing long clones:" + clist,LogLevel.Basic);
-				
-			}
-		}
-		checkCommands(); 
-
-		// Find out if we need to ask them about using previous megablast files, before
-		// longer operations commence
-		boolean useOldBlastFiles = false;
-
-		clearFastaFiles();
-		
-		if (deleteAssembly) deleteAssembly(mAID);
-		renewConnections();
-		schObj.addASMTables(); // in case 
-		
-		if (!resume)
-		{
-			createAssemblyInDB();
-		}
+	private AutoArray<Cluster> mClusters;
+	private int mThreadWorkItem;
+	private int[] mThreadWorkList;
+	private int mThreadsFinished;
 	
-		if (!resume)
-		{
-			recordTime("Begin " + msg);	
-		}
-		else
-		{
-			recordTime("Resume " + msg);	
-		}	
-		
-		/***************************************************
-		 * XXX SKIP Assembly
-		 */
-		if (bSkipAssembly)
-		{
-			skipAssembly();	
-			schObj.dropInnoDBTables();
-			Log.msg("\n" + Out.getMsgTimeMem(">>>End Instantiate", startTime),LogLevel.Basic);
-			Log.finish();
-			System.exit(0);
-		}
-		/*********************************************
-		 * ASSEMBLE
-		 */
-		if (!mDB.hasInnodb())
-		{
-			Log.die("Unable to proceed because MySQL database does not support InnoDB tables.");
-			System.exit(-1);
-		}
-		int tc = 1;
-
-		File assemDir = new File(mProjDir,"assem");
-		Utils.checkCreateDir(assemDir);
-		mTopDir = new File(assemDir,mIDStr);
-		Utils.checkCreateDir(mTopDir);
-		if (!mTopDir.isDirectory())
-		{
-			Log.die("Could not create " + mIDStr + " directory");
-		}
-
-		mInitialBuryDir = new File(mTopDir, "initial_bury");
-		Utils.checkCreateDir(mInitialBuryDir);		
-
-		// Status dir holds the status tracking tags. this isn't very clean.		
-		File statdir = new File(mTopDir, "status");
-		Utils.checkCreateDir(statdir);
-		Utils.setStatusDir(statdir);
-		if (!resume)
-			Utils.clearDir(statdir);
-
-		mCliqueDir = new File(mTopDir, "cliques");
-		Utils.checkCreateDir(mCliqueDir);
-
-		if (!resume)
-		{
-			clearProjectDir();
-		}
-		
-		fix_assemlib();
-		Schema.addCtgLibFields(mDB); // do it now, while the table is empty
-		loadClones();	
-		if (!bSkipAssembly)
-		{
-					
-			if (mProps.getProperty("DO_INITIAL_BURY").equals("1"))
-			{
-				if (!Utils.checkUpToDate("FIRST_BURY","",""))
-				{
-					Log.head("Initial bury alignment",LogLevel.Basic);
-					doBuryBlast(useOldBlastFiles);
-					renewConnections();
-					processBuries();
-				}
-			}
-				
-			if (maxTCnum == 0 && doCliques())
-			{			
-				Log.head("Compute cliques", LogLevel.Basic);
-				if (!pairsOnly())
-				{
-					singleCliqueBlast();
-					renewConnections();
-					buildSingleCliques();
-					renewConnections();
-				}
-				if (!singlesOnly())
-				{
-					pairCliqueBlast();
-					renewConnections();
-					buildPairCliques();
-					renewConnections();
-				}
-				
-				int cliqueTCID = initCliques();
-				if (doCliques()) assembleCliques(cliqueTCID);
-				renewConnections();
-				
-				makeSingletons(cliqueTCID);
-				renewConnections();
-				
-				if (mProps.getProperty("DO_CAP_BURY").equals("1"))
-				{
-					loadContigs(true, false, false); 
-					capBuryCliques(cliqueTCID);
-					renewConnections();
-				}
-				if (!Utils.isDebug())
-				{
-					Utils.deleteDir(new File(mCliqueDir,"cap"));
-					Utils.deleteDir(new File(mCliqueDir,"burycap"));
-					Utils.deleteDir(mCliqueDir);	
-				}
-			}
-			
-			renewConnections();
-			checkContigIntegrity(true);
-			
-			renewConnections();
-			loadContigs(true, false, false); 
-				
-			// Figure out the maximum TC the user has specified to run.
-			// We need this partly b/c there is one heuristic that applies to all but the final TC.
-			int maxtc = 1;
-			while (true)
-			{
-				String tcstr = "TC" + (maxtc + 1);
-				if (!mProps.containsKey(tcstr) || mProps.getProperty(tcstr).trim().equals(""))
-				{
-					break;
-				}	
-				maxtc++;
-			}
-			
-			for (tc = 1; tc <= maxtc; tc++)
-			{
-				renewConnections();
-				String tcstr = "TC" + tc;
-				if (!mProps.containsKey(tcstr)) break;
-				String tcprop = mProps.getProperty(tcstr).trim();
-				if (tcprop.equals(""))	break;
-				doTCByCluster(tc,maxtc);			
-			}
-			renewConnections();
-		}
-		else
-		{
-			mDB.executeUpdate("delete from ASM_tc_iter where aid=" + mAID);
-			mDB.executeUpdate("delete from contig where aid=" + mAID);
-			mDB.executeUpdate("insert into ASM_tc_iter (AID,tcnum, tctype) values(" + mAID + ",0,'" + IterType.Clique.toString() + "')");
-			int tcid = mDB.lastID();
-			makeSingletons(tcid);
-			tc = 1;
-		}
-		finalizeContigs(tc);
-		renewConnections();
-		if (Utils.isDebug())
-		{
-			checkContigIntegrity(false);
-		}
-		else
-		{
-			cleanUpAssembly();
-			Utils.deleteDir(assemDir);
-		}
-		fixAssemLibCounts();
-		mDB.executeUpdate("update assembly set completed=1, assemblydate=NOW() where aid=" + mAID);
-		Utils.recordTime("AssemblyDone",mAID,mDB);
-		long maxMem = Utils.mMaxMemMB;
-		Log.indentMsg("\nMax memory usage:" + maxMem + "M", LogLevel.Basic);
-		Utils.timeSummary(LogLevel.Basic);
-		summarizeAssembly();
-		schObj.dropInnoDBTables();
-		
-		Log.msg("\n" + Out.getMsgTimeMem(">>>End Assembly", startTime),LogLevel.Basic);
-		Log.finish();
-		
-		if(exitOnComplete)
-			System.exit(0);
-	}	
-
+	private AutoArray<Edge> mEdges;
+	private BlastType mBlastType;
+	private Contig[] mCtgsBySize ;
+	private TreeMap<Integer,Integer> mLibCounts;
+	private float mERate, mExRate; 
+	
+	private boolean bSkipAssembly=false;
+	
 	public static void main(String[] args)
 	{
 		Version.printTCWversion();
 		
 		if (args.length == 0 || args[0].equals("-h"))
-		{
 			printUsage();
-		}
 
 		int argStart = 0;
 		if (args[0].equals("-q"))
@@ -491,7 +117,7 @@ public class AssemMain
 		System.exit(0);
 	}
 
-	public AssemMain(String dir, String cfg) throws Exception
+	private AssemMain(String dir, String cfg) throws Exception
 	{
 		mName2Clone = new Str2Obj<Clone>();
 		mID2Clone = new ID2Obj<Clone>();
@@ -500,7 +126,6 @@ public class AssemMain
 		mSelfOlaps = new HashSet<MatePair>();
 		mID2SubContig = new ID2Obj<SubContig>();
 		mID2Contig = new ID2Obj<Contig>();
-		mEdgePairs = new HashMap<Contig,HashMap<Contig,Edge>>();
 		mClusters = new AutoArray<Cluster>();
 		
 		mEdges = new AutoArray<Edge>();
@@ -510,11 +135,9 @@ public class AssemMain
 		Astats.init();
 		
 		// Try to find the projects directory. Hopefully we are not more than two levels from it.
-		String[] pdirs =
-		{ "./projects", "../projects", "../../projects" };
+		String[] pdirs = { "./projects", "../projects", "../../projects" };
 		boolean found = false;
 		File f = null;
-		mWhichDir = 0;
 		for (String d : pdirs)
 		{
 			f = new File(d);
@@ -523,7 +146,6 @@ public class AssemMain
 				found = true;
 				break;
 			}
-			mWhichDir++;
 		}
 		if (!found)
 		{
@@ -555,21 +177,9 @@ public class AssemMain
 		Utils.checkCreateDir(mLogDir);
 		
 		File logfile = new File(mLogDir, Globals.assmFile); 
-		File detailfile = new File(mLogDir, mIDStr + ".detail");
-
-		mLog = new Log(logfile);
+		new Log(logfile); // sets log file
 		Log.addLogAction(LogLevel.Basic, LogAction.Terminal);
 		Log.addLogAction(LogLevel.Basic, LogAction.Log);
-
-		if (Utils.isDebug())
-		{
-			detailfile = new File(mLogDir, mIDStr + ".detail"); 
-			detailfile.createNewFile();
-			Log.setDebugLog(detailfile);
-			Log.addLogAction(LogLevel.Basic, LogAction.DebugLog);
-			Log.addLogAction(LogLevel.Detail, LogAction.DebugLog);
-			Log.addLogAction(LogLevel.Dbg, LogAction.DebugLog);
-		}
 
 		Log.head("Begin instantiate " + dir,LogLevel.Basic);
 		
@@ -586,7 +196,7 @@ public class AssemMain
 			Log.indentMsg("No-prompt mode", LogLevel.Basic);	
 		}
 		
-		if (!mProps.getProperty("User_EST_selfblast").equals(""))
+		if (!mProps.getProperty("User_EST_selfblast").equals("")) // obsolete
 		{
 			mSBFile = new File(mProps.getProperty("User_EST_selfblast"));
 			if (!mSBFile.exists())
@@ -626,7 +236,6 @@ public class AssemMain
 			Log.indentMsg("Using CAP3 command:" + mProps.getProperty("CAP_CMD"),LogLevel.Basic);
 		
 		String db = mProps.getProperty("STCW_db");
-		if (db==null) db = mProps.getProperty("PAVE_db");
 		if (db==null || db.equals("")) {
 			System.err.println("Fatal error: STCW_db is not defined in sTCW.cfg");
 			return;
@@ -649,7 +258,375 @@ public class AssemMain
 		AceFile.mCapFailLog = null;
 		AceFile.mNumCapFails = 0;
 	}
-	public void clearFastaFiles()
+	private void run(boolean exitOnComplete) throws Exception
+	{
+		long startTime = Out.getTime();
+		ResultSet rs;
+		Schema schObj = new Schema(mDB);
+		
+	/** Determine state of database **/
+		
+		String msg="Instantiate";
+		bSkipAssembly=true;
+		if (mProps.getProperty("SKIP_ASSEMBLY").equals("0"))
+		{
+			msg = "Assembly";
+			bSkipAssembly=false;
+			
+			rs = mDB.executeQuery("show columns from assem_msg like 'peptide'");
+			if (rs.first())
+			{
+				Utils.termOut("");
+				Utils.termOut("This is a protein project and cannot be assembled.");
+				Utils.termOut("Set 'Skip Assembly' to instantiate proteins.");
+				System.exit(0);
+			}
+		}
+		
+		rs = mDB.executeQuery("select AID from assembly where assemblyid != '" + mIDStr + "'");
+		if (rs.first())
+		{
+			Utils.termOut("\n\nA different assembly/instantiation already exists in this database. " +
+					"Multiple assemblies per database are no longer supported.");
+			System.exit(0);
+		}
+		rs= mDB.executeQuery("select AID,completed from assembly where assemblyid='" + mIDStr + "'");
+		boolean resume = false;
+		boolean deleteAssembly = false;
+		int maxTCnum = 0;
+		String dbmsg =  mProps.getProperty("STCW_db") + " on host "+ mProps.getProperty("DB_host");
+		if (rs.next())
+		{
+			boolean completed = rs.getBoolean("completed");
+			mAID = rs.getInt("AID");
+			if (completed || bSkipAssembly)
+			{
+				Utils.termOut("\nA completed instantiation for \"" + mIDStr
+								+ "\" already exists in the database " + dbmsg);
+				if (!mNoPrompts)
+				{
+					if (!Utils.yesNo("Delete this instantiation and re-start it"))
+					{
+						System.err.println("Exit instantiation");
+						return;
+					}
+				}
+				else return;
+				
+				deleteAssembly = true;			
+			} 
+			else
+			{
+				Log.msg("\nA partially-completed assembly with the same id \""+ mIDStr
+								+ "\" already exists in the database " + dbmsg, LogLevel.Basic);
+				if (!mNoPrompts && !Utils.yesNo("Resume this instantiation"))
+				{
+					if (!Utils.yesNo("Delete this assembly and re-start it"))
+						return;
+					deleteAssembly = true;
+				}
+				else
+				{
+					resume = true;
+					Log.msg("Previous assembly is being resumed",LogLevel.Basic);
+				}
+			}
+			if (!resume)
+				deleteSavedLogFiles();
+		}
+		mBlastType = BlastType.valueOf(mProps.getProperty("BLAST_TYPE"));
+
+		if (resume)
+		{
+			rs = mDB.executeQuery("select max(tcnum) as maxt from ASM_tc_iter where aid=" + mAID);
+			if (rs.first())
+			{
+				maxTCnum = rs.getInt("maxt");
+				if (maxTCnum > 0)
+					Log.msg("Resuming TC" + maxTCnum, LogLevel.Basic);
+			}
+		}
+		// to do: turn off
+		(new memCheckThread()).start();
+		
+		rs.close();
+		mLibs = new Vector<Library>();
+		int nLibClones = 0;
+		if (!mProps.getProperty("libraries").equals(""))
+		{
+			for (String libid : mProps.getProperty("libraries").split("\\s+"))
+			{
+				Library lib = new Library(mDB, libid);
+				if (!lib.loadFromDB())
+					Log.die("Can't find library " + libid + " in database");
+				mLibs.add(lib);
+			}
+		}
+		else
+		{
+			rs = mDB.executeQuery("select library.libid, count(*) as nclones from library join clone on " +
+					" clone.LID=library.LID group by library.LID");
+			while (rs.next())
+			{
+				String libid = rs.getString("libid");
+				int nclones = rs.getInt("nclones");
+				if (nclones > 0)
+				{
+					Library lib = new Library(mDB2, libid);
+					if (!lib.loadFromDB())
+						Log.die("Can't find dataset " + libid + " in database");
+					mLibs.add(lib);
+				}
+			}
+		}
+		Log.head("Dataset",LogLevel.Basic);
+		Log.columnsInd(25, LogLevel.Basic, "Dataset", "#Seqs", "Load Date", "Seq File");
+		for (Library lib : mLibs)
+		{
+			nLibClones += lib.mNumESTLoaded;
+			Log.columnsInd(25, LogLevel.Basic,lib.mIDStr, lib.mNumESTLoaded, lib.mLoadDate,
+					lib.mSeqFile.getName());
+		}
+		if (nLibClones > 100000)
+		{
+			mDB.checkInnodbBufPool();	
+		}
+			
+		int maxLen = Integer.parseInt(mProps.getProperty("MAX_MERGE_LEN"));
+		if (maxLen > 0)
+		{
+			Vector<String> longLibs = new Vector<String>();
+			int longClones = 0;
+			for (Library lib : mLibs)
+			{
+				rs = mDB.executeQuery("select count(*) as cnt from clone where length > " + maxLen);
+				rs.first();
+				int cnt = rs.getInt("cnt");
+				if (cnt > 0)
+				{
+					longLibs.add(lib.mIDStr);
+					longClones += cnt;
+				}
+			}
+			if (longLibs.size() > 0)
+			{
+				String clist = Utils.join(longLibs, ",");
+				Log.msg(longClones + " reads have length greater than " + maxLen,LogLevel.Basic);
+				Log.msg("These reads will not be assembled (to change, set property MAX_MERGE_LEN)",LogLevel.Basic);
+				Log.msg("Dataset containing long clones:" + clist,LogLevel.Basic);
+			}
+		}
+		checkCommands(); 
+
+		// Find out if we need to ask them about using previous megablast files, before
+		// longer operations commence
+		boolean useOldBlastFiles = false;
+
+		clearFastaFiles();
+		
+		if (deleteAssembly) 
+			deleteAssembly(mAID);
+		renewConnections();
+		schObj.addASMTables(); // in case 
+		
+		if (!resume)
+		{
+			createAssemblyInDB();
+			recordTime("Begin " + msg);	
+		}
+		else recordTime("Resume " + msg);	
+		
+		/***************************************************
+		 * XXX SKIP Assembly
+		 */
+		if (bSkipAssembly)
+		{
+			skipAssembly();	
+			schObj.dropInnoDBTables();
+			Log.msg("\n" + Out.getMsgTimeMem(">>>End Instantiate", startTime),LogLevel.Basic);
+			Log.finish();
+			System.exit(0);
+		}
+		/*********************************************
+		 * XXX ASSEMBLE
+		 */
+		if (!mDB.hasInnodb())
+			Log.die("Unable to proceed because MySQL database does not support InnoDB tables.");
+		
+		int tc = 1;
+
+		/****** Open files and directories for work and logs ***/
+		//if (Utils.isDebug()) // CASZ 31aug19; moved from AssemMain
+		if (debugTmp)          // creates large output; the isDebug doesn't work anymore.
+		{
+			System.err.println("Debug is on - large output to log file");
+		    File detailfile = new File(mLogDir, mIDStr + ".detail");
+			detailfile = new File(mLogDir, mIDStr + ".detail"); 
+			detailfile.createNewFile();
+			Log.setDebugLog(detailfile);
+			Log.addLogAction(LogLevel.Basic, LogAction.DebugLog);
+			Log.addLogAction(LogLevel.Detail, LogAction.DebugLog);
+			Log.addLogAction(LogLevel.Dbg, LogAction.DebugLog);
+		}
+					
+		File assemDir = new File(mProjDir,assmTmpDir);
+		Utils.checkCreateDir(assemDir);
+		
+		mTopDir = new File(assemDir,mIDStr);
+		Utils.checkCreateDir(mTopDir);
+		if (!mTopDir.isDirectory())
+			Log.die("Could not create " + mIDStr + " directory");
+
+		mInitialBuryDir = new File(mTopDir, "initial_bury");
+		Utils.checkCreateDir(mInitialBuryDir);		
+
+		// Status dir holds the status tracking tags. this isn't very clean.		
+		File statdir = new File(mTopDir, "status");
+		Utils.checkCreateDir(statdir);
+		Utils.setStatusDir(statdir);
+		if (!resume)
+			Utils.clearDir(statdir);
+
+		mCliqueDir = new File(mTopDir, "cliques");
+		Utils.checkCreateDir(mCliqueDir);
+
+		if (!resume)
+			clearProjectDir();
+		
+		fix_assemlib();
+		Schema.addCtgLibFields(mDB); // do it now, while the table is empty
+		loadClones();	
+	
+	/*** Initial buries ***/
+		if (mProps.getProperty("DO_INITIAL_BURY").equals("1"))
+		{
+			if (!Utils.checkUpToDate("FIRST_BURY","",""))
+			{
+				Log.head("Initial bury alignment",LogLevel.Basic);
+				doBuryBlast(useOldBlastFiles);
+				renewConnections();
+				processBuries();
+			}
+		}
+			
+		if (maxTCnum == 0 && doCliques()) // maxTCnum>0 means its being resumed
+		{	
+	/** Cliques **/
+			Log.head("Compute cliques", LogLevel.Basic);
+			if (!pairsOnly()) // mClones.length != 2*mPairs.length
+			{
+				singleCliqueBlast();
+				renewConnections();
+				
+				buildSingleCliques();
+				renewConnections();
+			}
+			else Log.indentMsg("Pairs only",LogLevel.Basic);
+			
+			if (!singlesOnly())  // (mPairs.length > 0)
+			{
+				pairCliqueBlast();
+				renewConnections();
+				
+				buildPairCliques();
+				renewConnections();
+			}
+			else Log.indentMsg("Singles only",LogLevel.Basic);
+			
+			int cliqueTCID = initCliques();
+			if (doCliques()) 
+			{
+				assembleCliques(cliqueTCID);
+			}
+			renewConnections();
+			
+			makeSingletons(cliqueTCID);
+			renewConnections();
+			
+			if (mProps.getProperty("DO_CAP_BURY").equals("1")) // on by default
+			{
+				loadContigs(true, false, false); 
+				capBuryCliques(cliqueTCID);
+				renewConnections();
+			}
+			else Log.msg("CAP Bury turned off", LogLevel.Basic);
+			
+			if (!Utils.isDebug())
+			{
+				Utils.deleteDir(new File(mCliqueDir,"cap"));
+				Utils.deleteDir(new File(mCliqueDir,"burycap"));
+				Utils.deleteDir(mCliqueDir);	
+			}
+			
+			renewConnections();
+			checkContigIntegrity(true);
+			
+	/******** TC contig merge *************/
+			renewConnections();
+			loadContigs(true, false, false); 
+				
+			// Figure out the maximum TC the user has specified to run.
+			// We need this partly b/c there is one heuristic that applies to all but the final TC.
+			int maxtc = 1;
+			while (true)
+			{
+				String tcstr = "TC" + (maxtc + 1);
+				if (!mProps.containsKey(tcstr) || mProps.getProperty(tcstr).trim().equals(""))
+					break;
+				maxtc++;
+			}
+			
+			for (tc = 1; tc <= maxtc; tc++)
+			{
+				renewConnections();
+				String tcstr = "TC" + tc;
+				if (!mProps.containsKey(tcstr)) break;
+				String tcprop = mProps.getProperty(tcstr).trim();
+				if (tcprop.equals(""))	break;
+				doTCByCluster(tc,maxtc);			
+			}
+			renewConnections();
+		} // end maxTCnum == 0 && doCliques())
+		else
+		{
+			mDB.executeUpdate("delete from ASM_tc_iter where aid=" + mAID);
+			mDB.executeUpdate("delete from contig where aid=" + mAID);
+			mDB.executeUpdate("insert into ASM_tc_iter (AID,tcnum, tctype) values(" + mAID + ",0,'" + IterType.Clique.toString() + "')");
+			int tcid = mDB.lastID();
+			makeSingletons(tcid);
+			tc = 1;
+		}
+		
+		finalizeContigs(tc);
+		renewConnections();
+		if (Utils.isDebug())
+		{
+			Log.msg("Debug is on", LogLevel.Basic);
+			checkContigIntegrity(false);
+		}
+		else
+		{
+			cleanUpAssembly();
+			Utils.deleteDir(assemDir);
+		}
+		fixAssemLibCounts();
+		mDB.executeUpdate("update assembly set completed=1, assemblydate=NOW() where aid=" + mAID);
+		Utils.recordTime("AssemblyDone",mAID,mDB);
+		long maxMem = Utils.mMaxMemMB;
+		Log.indentMsg("\nMax memory usage:" + maxMem + "M", LogLevel.Basic);
+		Utils.timeSummary(LogLevel.Basic);
+		summarizeAssembly();
+		if (!Utils.isDebug()) 
+			schObj.dropInnoDBTables();
+		
+		Log.msg("\n" + Out.getMsgTimeMem(">>>End Assembly", startTime),LogLevel.Basic);
+		Log.finish();
+		
+		if(exitOnComplete)
+			System.exit(0);
+	}	
+
+	private void clearFastaFiles()
 	{
 		// delete the fasta files on disk in case the new assembly results in different ones,
 		// e.g. if user changed their "use trans names" selection
@@ -665,7 +642,7 @@ public class AssemMain
 			}
 		}
 	}
-	public void deleteAssembly(int aid) throws Exception
+	private void deleteAssembly(int aid) throws Exception
 	{
 		Log.head("Delete previous instantiation", LogLevel.Basic);
 		ResultSet rs = null;
@@ -701,9 +678,9 @@ public class AssemMain
 		}
 		Utils.termOut("Finish delete");	
 	}
-	public void cleanUpAssembly() throws Exception
+	private void cleanUpAssembly() throws Exception
 	{
-		Utils.singleLineMsg("Cleaning up database tables...");
+		Utils.singleLineMsg("Cleaning up database tables");
 		mDB.executeUpdate("delete from ASM_cliques where aid=" + mAID);
 		mDB.executeUpdate("delete from ASM_scontig where aid=" + mAID);
 		mDB.executeUpdate("delete ASM_tc_edge.* from ASM_tc_edge join ASM_tc_iter on ASM_tc_edge.tcid=ASM_tc_iter.tcid where ASM_tc_iter.aid=" + mAID);
@@ -716,7 +693,7 @@ public class AssemMain
 	// As clones are buried, they are dropped from further consideration. 
 	// At the end, their correct contigs have to be identified, which means
 	// we have to find the top parent in their bury chain, which may be multiple levels deep. 
-	public void setTopParents() throws Exception
+	private void setTopParents() throws Exception
 	{
 		String thisTag = "SET_TOP_PARENTS";	
 
@@ -761,7 +738,7 @@ public class AssemMain
 	// B. Make the new log file XX.log
 	// C. If it is a fresh build (NOT a restart), remove all of the XX.log.N files
 	// 
-	public void deleteSavedLogFiles() throws Exception
+	private void deleteSavedLogFiles() throws Exception
 	{
 		for (File f : mLogDir.listFiles())
 		{
@@ -781,13 +758,11 @@ public class AssemMain
 	}
 	// Every thread should call this to get its own DB connection. 
 	// Otherwise, there will be conflicts in getting the last autoincrement id's from inserts. 
-	public DBConn getDBConnection() throws Exception
+	private DBConn getDBConnection() throws Exception
 	{
-		String db = mProps.getProperty("PAVE_db");
-		if (db==null) mProps.getProperty("STCW_db");
 		return new HostsCfg().getDBConn(mProps.getProperty("STCW_db"));
 	}
-	public void renewConnections() throws Exception
+	private void renewConnections() throws Exception
 	{
 		mDB.renew();
 		mDB2.renew();
@@ -795,7 +770,7 @@ public class AssemMain
 	
 	private void clearProjectDir()
 	{
-		Utils.singleLineMsg("Clearing project directory...");
+		Utils.singleLineMsg("Clearing project directory");
 		for (File file : mTopDir.listFiles())
 		{
 			if (file.isDirectory() )
@@ -812,9 +787,9 @@ public class AssemMain
 				file.delete();
 			}
 		}
-		System.err.println(""); 
+		System.err.println("                                            "); 
 	}
-	public void createAssemblyInDB() throws Exception
+	private void createAssemblyInDB() throws Exception
 	{
 		String user = System.getProperty("user.name"); 
 		mDB.executeUpdate("insert into assembly (AID, assemblyid,assemblydate,projectpath,completed,annotationdate,username,descr) "
@@ -842,7 +817,7 @@ public class AssemMain
 		ps.close();
 	}
 
-	public void doBuryBlast(boolean useOldFiles) throws Exception
+	private void doBuryBlast(boolean useOldFiles) throws Exception
 	{
 		String thisTag = "FIRST_BURY_BLAST";
 
@@ -978,7 +953,7 @@ public class AssemMain
 	}
 	// megablast -a option is not trustworthy; hence, we multithread it by hand, just
 	// by splitting the query into pieces.
-	public void threadedBlast(String cmd, String queryFile, String outFile, File dir) throws Exception
+	private void threadedBlast(String cmd, String queryFile, String outFile, File dir) throws Exception
 	{		
 			boolean nativeThreading = mProps.getProperty("BLAST_NATIVE_THREADING").equals("1");
 			int nThreads = (nativeThreading ? 1 : Integer.parseInt(mProps.getProperty("CPUs"))); // threads we will start
@@ -1032,7 +1007,7 @@ public class AssemMain
 			renewConnections();
 	}
 	// Split the query fasta file into parts so we can do the blast in multiple threads.
-	public int splitFastaFile(File dir, String name, int nParts) throws Exception
+	private int splitFastaFile(File dir, String name, int nParts) throws Exception
 	{
 		// first count the fasta entries
 		File qFile = new File(dir,name);
@@ -1104,7 +1079,7 @@ public class AssemMain
 	}
 
 	// The blast of paired sequences for creating the paired cliques.
-	public void pairCliqueBlast() throws Exception
+	private void pairCliqueBlast() throws Exception
 	{
 		if (singlesOnly()) return;
 		String thisTag = "CLIQUE_ALIGN_PAIR";	
@@ -1155,17 +1130,14 @@ public class AssemMain
 	}
 
 	// the blast for the unpaired clone cliques
-	public void singleCliqueBlast() throws Exception
+	private void singleCliqueBlast() throws Exception
 	{
 		if (pairsOnly()) return;
 		String thisTag = "CLIQUE_ALIGN_SINGLE";	
+		if (Utils.checkUpToDate(thisTag, null,null)) return;
 		
 		long tstart = TimeHelpers.getTime();
 		
-		if (Utils.checkUpToDate(thisTag, null,null))
-		{
-			return;
-		}
 		writeUnburiedSingle();
 		File outFile1 = new File(mCliqueDir, "unburied_single.out");
 
@@ -1207,7 +1179,7 @@ public class AssemMain
 	// at least 2x so cap3 will not drop the segment from the consensus. 
 	// 
 	// For mated, we just save the possible buries, and then buildMatedBuryGraph finishes the job. 
-	public void readBlastBuryData() throws Exception
+	private void readBlastBuryData() throws Exception
 	{
 		int min2keep = Integer.parseInt(mProps.getProperty("MIN_UNBURIED"));
 		int max2bury = Math.max(0,mClones.length - min2keep);
@@ -1459,7 +1431,7 @@ public class AssemMain
 		}
 	}
 
-	public void readPairCliqueBlast() throws Exception
+	private void readPairCliqueBlast() throws Exception
 	{
 		File[] blastFiles = new File[1000]; 
 		for (int i = 0; i < blastFiles.length; i++)
@@ -1673,7 +1645,7 @@ public class AssemMain
 			Log.indentMsg("Example: " + unkClone.first(), LogLevel.Basic);
 		}
 	}
-	public void readSingleCliqueBlast() throws Exception
+	private void readSingleCliqueBlast() throws Exception
 	{	
 		File[] blastFiles = new File[1000]; 
 		for (int i = 0; i < blastFiles.length; i++)
@@ -1704,7 +1676,7 @@ public class AssemMain
 
 		TreeSet<String> unkClone = new TreeSet<String>();
 		
-		Utils.singleLineMsg("Reading alignment results...");
+		Utils.singleLineMsg("Reading alignment results");
 		Log.msg("read alignments results from " + mCliqueDir.getAbsolutePath(),LogLevel.Detail);
 
 		int linenum = 0;
@@ -1835,7 +1807,7 @@ public class AssemMain
 	}
 	// Look through the previously-saved possible parents for mated ESTs, and
 	// find those that have an acceptable mated bury (i.e., into another mate pair).
-	public void buildMatedBuryGraph() throws Exception
+	private void buildMatedBuryGraph() throws Exception
 	{
 		if (singlesOnly())
 		{
@@ -1894,7 +1866,7 @@ public class AssemMain
 		}
 	}
 	// If pairs are contained backwards (.r in .f and vice versa) alert the user.
-	public boolean checkPairBury(MatePair c, MatePair p)
+	private boolean checkPairBury(MatePair c, MatePair p)
 	{
 		if (c.m3Prime.mParents.contains(p.m3Prime.mID)
 				&& c.m5Prime.mParents.contains(p.m5Prime.mID))
@@ -1913,7 +1885,7 @@ public class AssemMain
 		return false;
 	}
 
-	public void buryDataToDB() throws Exception
+	private void buryDataToDB() throws Exception
 	{
 		Log.msg("load bury data to database",LogLevel.Detail);
 		renewConnections();
@@ -2005,18 +1977,10 @@ public class AssemMain
 		Log.msg("Loaded " + i + " buries to database",LogLevel.Detail);
 	}
 
-	//this part of the state persistence could be made alot cleaner
-	public boolean unburiedHaveBeenWritten() throws Exception
-	{
-		String thisTag = "WRITE_UNBURIED";		
-		return Utils.checkUpToDate(thisTag,"","");
-	}
-	
-	
 	// These two routines read the bury blast data, load the buries to
 	// the database, and write the unburied ESTs for clique calculation.
 	// these steps could be better organized.
-	public void processBuries() throws Exception
+	private void processBuries() throws Exception
 	{
 		String thisTag = "FIRST_BURY";
 		if (Utils.checkUpToDate(thisTag, null,null))
@@ -2032,7 +1996,7 @@ public class AssemMain
 		Utils.writeStatusFile(thisTag);
 	}
 		
-	public void writeUnburiedSingle() throws Exception
+	private void writeUnburiedSingle() throws Exception
 	{
 		Utils.termOut("Write non-buried to file for clique alignment");
 		File fSing = new File(mCliqueDir, "unburied_single.fasta");
@@ -2066,7 +2030,7 @@ public class AssemMain
 
 
 	}
-	public void writeUnburiedPair() throws Exception
+	private void writeUnburiedPair() throws Exception
 	{	
 		Utils.termOut("Write non-buried paired reads to file for clique alignment");
 
@@ -2105,7 +2069,7 @@ public class AssemMain
 		bwMate.flush();
 		bwMate.close();
 	}
-	public void loadCloneParents() throws Exception
+	private void loadCloneParents() throws Exception
 	{
 		for (Clone c : mClones)
 		{
@@ -2124,7 +2088,7 @@ public class AssemMain
 
 	}
 	// Does not load the sequence or quality, to save memory
-	public void loadClones() throws Exception
+	private void loadClones() throws Exception
 	{
 		Log.head("Load reads from database",LogLevel.Basic);
 		ResultSet rs = null;
@@ -2302,26 +2266,16 @@ public class AssemMain
 		buries.clear();buries=null;
 		id2pair.clear(); id2pair = null;
 	}
-	public boolean pairsOnly()
+	private boolean pairsOnly()
 	{
-		boolean retVal = (mClones.length == 2*mPairs.length);
-		if (retVal)
-		{
-			Log.msg("The assembly contains only pairs ", LogLevel.Detail);
-		}
-		return retVal;
+		return (mClones.length == 2*mPairs.length);
 	}
-	public boolean singlesOnly()
+	private boolean singlesOnly()
 	{
-		boolean retVal = (mPairs.length == 0);
-		if (retVal)
-		{
-			Log.msg("The assembly contains only singles ", LogLevel.Detail);
-		}		
-		return retVal;
+		return (mPairs.length == 0);
 	}
 	
-	public static void printUsage()
+	private static void printUsage()
 	{
 		System.err.println("Usage:  AssemMain <directory>");
 		System.err.println("    <directory> must be under the 'projects' directory");
@@ -2330,13 +2284,13 @@ public class AssemMain
 	}
 
 	// Make sure we can find the programs we're going to need
-	public void checkCommands() throws Exception
+	private void checkCommands() throws Exception
 	{
 		checkCommand(BlastArgs.getFormatCmd());
 		checkCommand(BlastArgs.getBlastnExec());
 	}
 
-	public static void checkCommand(String cmd)
+	private static void checkCommand(String cmd)
 	{
 		if (cmd.contains(" "))
 		{
@@ -2353,7 +2307,7 @@ public class AssemMain
 		}
 	}
 
-	public void buildSingleCliques() throws Exception
+	private void buildSingleCliques() throws Exception
 	{
 		String thisTag = "CLIQUE_BUILD_SINGLE";
 		if (Utils.checkUpToDate(thisTag, "", ""))
@@ -2390,7 +2344,7 @@ public class AssemMain
 		recordTime(thisTag + " end");
 	}
 
-	public void buildPairCliques() throws Exception
+	private void buildPairCliques() throws Exception
 	{
 		String thisTag = "CLIQUE_BUILD_PAIR";
 		if (Utils.checkUpToDate(thisTag, "", ""))
@@ -2466,7 +2420,7 @@ public class AssemMain
 		Utils.writeStatusFile(thisTag);
 		recordTime(thisTag + " end");
 	}
-	public int initCliques() throws Exception
+	private int initCliques() throws Exception
 	{
 		ResultSet rs = null;
 		int TCID = 0;
@@ -2482,7 +2436,8 @@ public class AssemMain
 		else
 		{
 			// This stage will be called "TC0"
-			mDB.executeUpdate("insert into ASM_tc_iter (AID,tcnum, tctype) values(" + mAID + ",0,'" + IterType.Clique.toString() + "')");
+			mDB.executeUpdate("insert into ASM_tc_iter (AID, tcnum, tctype) " +
+					" values(" + mAID + ",0,'" + IterType.Clique.toString() + "')");
 			TCID = mDB.lastID();
 
 			Utils.clearDir(capTopDir);			
@@ -2491,7 +2446,7 @@ public class AssemMain
 		
 		return TCID;
 	}
-	public void assembleCliques(int TCID) throws Exception
+	private void assembleCliques(int TCID) throws Exception
 	{
 		String thisTag = "CLIQUE_ASSEMBLE";
 		if (Utils.checkUpToDate(thisTag, "", ""))
@@ -2500,17 +2455,13 @@ public class AssemMain
 		}
 		Log.head("Clique assembly",LogLevel.Basic);
 		Utils.deleteStatusFile(thisTag);
-		ResultSet rs = null;
 		File capTopDir = new File(mCliqueDir,"cap");
-
 		recordTime(thisTag + " start");
 		
 		// Get the unassembled cliques 
-		rs = mDB.executeQuery("select count(*) from ASM_cliques " +
+		
+		int numLeft = mDB.executeCount("select count(*) from ASM_cliques " +
 				"where AID=" + mAID + " and assembled=0 order by nclone desc");
-		rs.first();
-		int numLeft = rs.getInt(1);
-		rs.close();
 		
 		Log.indentMsg(numLeft + " cliques to assemble",LogLevel.Basic);
 		if (numLeft > 0)
@@ -2524,7 +2475,7 @@ public class AssemMain
 			mThreadWorkList = new int[numLeft];
 			int i = 0;
 			
-			rs = mDB.executeQuery("select CQID from ASM_cliques where AID=" + mAID + " and assembled=0 order by nclone desc");
+			ResultSet rs = mDB.executeQuery("select CQID from ASM_cliques where AID=" + mAID + " and assembled=0 order by nclone desc");
 			i = 0;
 			while (rs.next())
 			{
@@ -2532,6 +2483,7 @@ public class AssemMain
 				mThreadWorkList[i] = CQID;
 				i++;
 			}
+			rs.close();
 			
 			mThreadWorkItem = 0;
 			mThreadsFinished = 0;
@@ -2562,20 +2514,19 @@ public class AssemMain
 			mThreadWorkList = null;
 		}
 		renewConnections();
-		rs = mDB.executeQuery("select count(*) as count from contig where aid=" + mAID);
-		rs.first();
-		int count = rs.getInt("count");
+		int count = mDB.executeCount("select count(*) as count from contig where aid=" + mAID);
+		
 		Log.indentMsg(count + " contigs created", LogLevel.Basic);
 		mDB.executeUpdate("update ASM_tc_iter set finished=1,ctgs_end=" + count + " where TCID=" + TCID);
 
 		Utils.writeStatusFile(thisTag);	
 		recordTime(thisTag + " end");
 	}
-	public void doUnpairedCliqueUpload(AceFile af, int TCID, DBConn db,CliqueType ct) throws Exception
+	private void doUnpairedCliqueUpload(AceFile af, int TCID, DBConn db,CliqueType ct) throws Exception
 	{
 		// Use a transaction to guarantee the contig, ASM_scontig, contclone tables are updated consistently
-		db.openTransaction();
-		db.executeQuery("lock tables contig write,ASM_scontig write,ASM_cliques write,contclone write");
+		//db.openTransaction();
+		//db.executeQuery("lock tables contig write,ASM_scontig write,ASM_cliques write,contclone write");
 		try
 		{				
 			for (SubContig sctg : af.mContigs)
@@ -2592,8 +2543,8 @@ public class AssemMain
 			}
 			db.executeUpdate("update ASM_cliques set assembled=1,cap_success=1 where CQID=" + af.mThisID);
 			
-			db.closeTransaction();
-			db.executeQuery("unlock tables");
+			//db.closeTransaction();
+			//db.executeQuery("unlock tables");
 		}
 		catch (Exception e)
 		{
@@ -2602,15 +2553,14 @@ public class AssemMain
 			throw(e);
 		}
 	}	
-	public void doPairedCliqueUpload(int CQID, SubContig[] ctgs, int TCID, DBConn db,CliqueType ct) throws Exception
+	private void doPairedCliqueUpload(int CQID, SubContig[] ctgs, int TCID, DBConn db,CliqueType ct) throws Exception
 	{
 		TreeSet<Integer> uploaded = new TreeSet<Integer>();
 
 		try
 		{
 			// Use a transaction to guarantee the contig, ASM_scontig, contclone tables are updated consistently
-			db.openTransaction();
-			
+			// db.openTransaction
 			for (int i = 0; i < ctgs.length; i++)
 			{
 				if (uploaded.contains(i)) continue;
@@ -2645,8 +2595,8 @@ public class AssemMain
 					ctg.upload(db,TCID);
 				}			
 			}
+			// db.closeTransaction
 			db.executeUpdate("update ASM_cliques set assembled=1,cap_success=1 where CQID=" + CQID);
-			db.closeTransaction();
 		}
 		catch (Exception e)
 		{
@@ -2654,7 +2604,7 @@ public class AssemMain
 			throw(e);
 		}
 	}
-	public void doSelfPairedCliqueUpload(AceFile af, int TCID, DBConn db,CliqueType ct) throws Exception
+	private void doSelfPairedCliqueUpload(AceFile af, int TCID, DBConn db,CliqueType ct) throws Exception
 	{
 		SubContig sctg1 = af.mContigs.get(0);
 		if (af.mContigs.size() > 1)
@@ -2666,7 +2616,7 @@ public class AssemMain
 		sctg1.mTCID = TCID;
 		
 		// Use a transaction to guarantee the contig, ASM_scontig, contclone tables are updated consistently
-		db.openTransaction();
+		// db.openTransaction
 		try
 		{				
 			sctg1.doUpload(db,"",false);
@@ -2678,7 +2628,6 @@ public class AssemMain
 			ctg.upload(db,TCID);
 				
 			db.executeUpdate("update ASM_cliques set assembled=1,cap_success=1 where CQID=" + af.mThisID);
-			db.closeTransaction();
 		}
 		catch (Exception e)
 		{
@@ -2689,12 +2638,12 @@ public class AssemMain
 
 	// Helper functions used by a few of the threaded operations
 	
-	public synchronized void threadDone(int num)
+	private synchronized void threadDone(int num)
 	{
 		Log.msg("Thread " + num + " finished!",LogLevel.Detail);
 		mThreadsFinished++;
 	}
-	public synchronized int getNextThreadWorkItem()
+	private synchronized int getNextThreadWorkItem()
 	{
 		int ret = 0;
 		if (mThreadWorkItem < mThreadWorkList.length)
@@ -2704,27 +2653,23 @@ public class AssemMain
 		}
 		return ret;
 	}
-	public int threadItemsLeft()
+	private int threadItemsLeft()
 	{
 		return mThreadWorkList.length - mThreadWorkItem;
 	}
 
 	// Make initial "contigs" of the (unburied) single pairs and loners which didn't go
 	// into contigs during clique assembly
-	public void makeSingletons(int TCID) throws Exception
+	private void makeSingletons(int TCID) throws Exception
 	{
 		String thisTag = "SINGLES2CTGS";
-		if (Utils.checkUpToDate(thisTag, "", ""))
-		{
-			//Log.msg("already done",LogLevel.Basic);
-			return;
-		}
+		if (Utils.checkUpToDate(thisTag, "", "")) return;
 		Utils.deleteStatusFile(thisTag);
 		
 		// First thing to do is get the error rate estimates using the cliques
 		estimateErrorRates();
 		
-		Utils.singleLineMsg("Find remaining singletons...");
+		Utils.singleLineMsg("Find remaining singletons");
 		
 		TreeSet<Integer> cliqueClones = new TreeSet<Integer>();
 		ResultSet rs = mDB.executeQuery("select CID from contclone join contig on contig.CTGID=contclone.CTGID where contig.AID= " + mAID);
@@ -2739,12 +2684,12 @@ public class AssemMain
 		rs = mDB.executeQuery("select CID_child from buryclone where AID=" + mAID );
 		while (rs.next())
 		{
-			int cid = rs.getInt("CID_child");
+			int cid = rs.getInt(1);
 			Clone c = mID2Clone.get(cid);
 			c.mBuried = true;
 		}
 		rs.close();
-		int newCtgs = 0;
+		int cntNewCtgs = 0, cntPrt=0;
 		for (MatePair p : mPairs)
 		{
 			if (cliqueClones.contains(p.m3Prime.mID)) continue;
@@ -2758,10 +2703,10 @@ public class AssemMain
 			c.mSC1.doUpload(mDB,"",false);
 			c.mSC2.doUpload(mDB,"",false);
 			c.upload(mDB,TCID);
-			newCtgs += 2;
-			if (newCtgs % 50000 == 0)
-			{
-				Log.msg(newCtgs + " contigs",LogLevel.Detail);
+			cntNewCtgs += 2; cntPrt++;
+			if (cntPrt==1000) {
+				Utils.singleLineMsg(cntNewCtgs + " contigs with mate");
+				cntPrt=0;
 			}
 			c.clearSeqs();
 			c.mSC1 = null;
@@ -2770,6 +2715,8 @@ public class AssemMain
 		}
 		SubContig sc = null;
 		Contig ctg = null;
+		
+		cntPrt=0;
 		for (Clone c : mClones)
 		{
 			if (c.mMate != null) continue;
@@ -2786,20 +2733,20 @@ public class AssemMain
 			ctg.clearSeqs();
 			sc = null;
 			ctg = null;
-			newCtgs++;
-			if (newCtgs % 50000 == 0)
-			{
-				Log.msg(newCtgs + " contigs",LogLevel.Detail);
-			}			
+			cntNewCtgs++; cntPrt++;
+			if (cntPrt==1000) {
+				Utils.singleLineMsg(cntNewCtgs + " contigs without mate");
+				cntPrt=0;
+			}
 		}
-		Log.indentMsg(newCtgs + " singleton contigs created",LogLevel.Basic); 
+		Log.indentMsg(cntNewCtgs + " singleton contigs created",LogLevel.Basic); 
 		mDB.executeUpdate("update ASM_tc_iter set ctgs_end = (select count(*) from ASM_scontig where aid=" + mAID + ") where tcid=" + TCID);
 		Utils.writeStatusFile(thisTag);
 	}
 
-	public void estimateErrorRates() throws Exception
+	private void estimateErrorRates() throws Exception
 	{
-		Utils.singleLineMsg("estimating sequencing error rates...");
+		Utils.singleLineMsg("estimating sequencing error rates");
 		ResultSet rs = mDB.executeQuery("select sum(mismatch) as mis, sum(numex) as ex from contclone " + 
 				" join contig on contig.ctgid=contclone.ctgid where contig.aid=" + mAID);
 		ResultSet rs2 = mDB2.executeQuery("select sum(length) as nbases from clone join contclone on contclone.cid=clone.cid " + 
@@ -2828,7 +2775,7 @@ public class AssemMain
 			Log.msg("Unable to estimate error rates since no contigs!", LogLevel.Basic);	
 		}
 	}
-	public Contig contigFromPair(MatePair p) throws Exception
+	private Contig contigFromPair(MatePair p) throws Exception
 	{
 		SubContig sc1 = new SubContig(mID2Clone,mAID,mIDStr,p.m3Prime);
 		SubContig sc2 = new SubContig(mID2Clone,mAID,mIDStr,p.m5Prime);
@@ -2839,7 +2786,7 @@ public class AssemMain
 	}
 
 	// Assemble a collection of Reads. Used by all the operations that use cap. 
-	public void assembleClones(File capDir, Integer[] cids, String capArgParam, int threadNum, DBConn db) throws Exception
+	private void assembleClones(File capDir, Integer[] cids, String capArgParam, int threadNum, DBConn db) throws Exception
 	{
 		int maxSize = Integer.parseInt(mProps.getProperty("MAX_CAP_SIZE"));
 		if (cids.length > maxSize) 
@@ -2891,9 +2838,9 @@ public class AssemMain
 		qualFile.close();		
 	}
 
-	public void buildCliques(SparseMatrix links, Stack<TreeSet<Integer>> cliques, int minSize, int maxSize) throws Exception
+	private void buildCliques(SparseMatrix links, Stack<TreeSet<Integer>> cliques, int minSize, int maxSize) throws Exception
 	{
-		Utils.singleLineMsg("Building cliques...");
+		Utils.singleLineMsg("Building cliques");
 		links.sortRows();
 		
 		Vector<Integer> sizes = new Vector<Integer>();
@@ -2994,7 +2941,7 @@ public class AssemMain
 	// Steps are taken to prevent any one cluster from being too big, which would negate the 
 	// effects of threading.
 	
-	public void doTCByCluster(int tc, int maxtc) throws Exception
+	private void doTCByCluster(int tc, int maxtc) throws Exception
 	{
 		loadContigs(true,false, false); 
 
@@ -3109,7 +3056,7 @@ public class AssemMain
 			iteration++;
 			Log.msg("TC" + tc + " iteration " + iteration + " : " + mClusters.size() + " clusters", LogLevel.Detail);
 
-			Utils.singleLineMsg("assembling " + mClusters.size() + " clusters...");
+			Utils.singleLineMsg("assembling " + mClusters.size() + " clusters");
 			assembleClusters(capTopDir, TCID, tc, tcstr, maxtc);
 			mDB.executeUpdate("update ASM_tc_iter set clustiter_done=" + iteration + " where tcid=" + TCID);
 		}
@@ -3144,7 +3091,6 @@ public class AssemMain
 				int scid = rs.getInt("ASM_scontig.scid");
 				ps2.setInt(1,scid);
 				ps2.addBatch();
-	
 			}
 			rs.close();
 			ps2.executeBatch(); ps2.close();
@@ -3192,12 +3138,13 @@ public class AssemMain
 			mergesDone.put(rs.getInt("SCID"),rs.getInt("merged_to"));
 		}
 		rs.close();
-		if (mergesDone.numKeys() > 0) Log.msg( mergesDone.numKeys() + " previous contig merges loaded",LogLevel.Detail);
+		if (mergesDone.numKeys() > 0) 
+			Log.msg( mergesDone.numKeys() + " previous contig merges loaded",LogLevel.Detail);
 	}	
 
 	// Get the next block of up to maxEdges untried edges from the database (limited, to cap memory use)
 	// Update them for previous contig merges and see if they are still valid edges. 	
-	public boolean getTCEdgesFromDB(int TCID, SparseMatrix triedEdges, int iteration, boolean lastTC ) throws Exception
+	private boolean getTCEdgesFromDB(int TCID, SparseMatrix triedEdges, int iteration, boolean lastTC ) throws Exception
 	{
 		boolean started = false;
 		int maxEdges = 100000;
@@ -3332,7 +3279,7 @@ public class AssemMain
 	}
 
 	// Get the threads going to assemble the current batch of clusters
-	void assembleClusters(File capTopDir, int TCID, int tcnum, String tcstr, int maxtc) throws Exception
+	private void assembleClusters(File capTopDir, int TCID, int tcnum, String tcstr, int maxtc) throws Exception
 	{
 		int nThreads = Integer.parseInt(mProps.getProperty("CPUs"));
 
@@ -3385,7 +3332,9 @@ public class AssemMain
 					}
 				}
 				Log.msg(left + " clusters still on queue",LogLevel.Detail);
-				printEdgesRemaining(TCID);
+				
+				int count = mDB.executeCount("select count(*) as count from ASM_tc_edge where attempted=0 and tcid=" + TCID);
+				Utils.singleLineMsg("trying merges: " + count + " remaining");
 			}
 			Thread.sleep(10000);			
 		}
@@ -3396,14 +3345,6 @@ public class AssemMain
 			threadList[i] = null;
 		}
 		threadList = null;
-	}
-	
-	void printEdgesRemaining(int tcid) throws Exception
-	{
-		ResultSet rs = mDB.executeQuery("select count(*) as count from ASM_tc_edge where attempted=0 and tcid=" + tcid);
-		rs.first();
-		int count = rs.getInt("count");
-		Utils.singleLineMsg("trying merges:" + count + " remaining");
 	}
 
 	// A thread for cluster assembly.
@@ -3419,7 +3360,7 @@ public class AssemMain
 		int mCLUSTID;
 		Cluster mClust = null;
 		DBConn mLocalDB = null;
-		public ClusterThread(AssemMain assem, File capTopDir, int TCID, int tcnum, int num, String tcstr, int maxtc) throws Exception
+		private ClusterThread(AssemMain assem, File capTopDir, int TCID, int tcnum, int num, String tcstr, int maxtc) throws Exception
 		{
 			mAssem = assem;
 			mCapTopDir = capTopDir;
@@ -3476,7 +3417,7 @@ public class AssemMain
 		int mNum;
 		int mTCID;
 		DBConn mLocalDB;
-		public CliqueThread(AssemMain assem, File capTopDir, int TCID, int num) throws Exception
+		private CliqueThread(AssemMain assem, File capTopDir, int TCID, int num) throws Exception
 		{
 			mAssem = assem;
 			mCapTopDir = capTopDir;
@@ -3762,7 +3703,7 @@ public class AssemMain
 				System.exit(0);
 			}
 		}
-		public void ReassembleContigs(File capDir,SubContig... ctgs) throws Exception
+		private void ReassembleContigs(File capDir,SubContig... ctgs) throws Exception
 		{
 			TreeSet<Integer> IDs = new TreeSet<Integer>();
 			for (SubContig ctg : ctgs)
@@ -3776,7 +3717,7 @@ public class AssemMain
 	// Thread to periodically print memory use to log.
 	class memCheckThread extends Thread
 	{
-		public memCheckThread()
+		private memCheckThread()
 		{
 			
 		}
@@ -3805,7 +3746,7 @@ public class AssemMain
 		int mNum;
 		int mTCID;
 		DBConn mLocalDB;
-		public CapBuryThread(AssemMain assem, File capTopDir, int num,int TCID) throws Exception
+		private CapBuryThread(AssemMain assem, File capTopDir, int num,int TCID) throws Exception
 		{
 			mAssem = assem;
 			mCapTopDir = capTopDir;
@@ -3862,7 +3803,7 @@ public class AssemMain
 		String mCmd;
 		String mQueryFileName;
 		String mOutFileName;
-		public BlastThread(AssemMain assem, File blastDir, String cmdLine, String queryFileName, String outFileName, int num) throws Exception
+		private BlastThread(AssemMain assem, File blastDir, String cmdLine, String queryFileName, String outFileName, int num) throws Exception
 		{
 			mAssem = assem;
 			mBlastDir = blastDir;
@@ -3905,7 +3846,7 @@ public class AssemMain
 		int mTCID;
 		int mStart;
 		DBConn mLocalDB;
-		public FinalizeThread(AssemMain assem, int num, int TCID, int start) throws Exception
+		private FinalizeThread(AssemMain assem, int num, int TCID, int start) throws Exception
 		{
 			mAssem = assem;
 			mNum = num;
@@ -3946,16 +3887,18 @@ public class AssemMain
 		}
 	}		
 
-
 	// Clear out and re-download the current contigs and subcontigs (i.e., those which have not been merged to others).
 	// Also get all the clone positions.
-	// This is called alot to initialize various stages, and protect against a restart.
+	// This is called a lot to initialize various stages, and protect against a restart.
 	// It is getting and setting more fields than necessary.
 	// WMN: added the noFinal at the last minute to keep it from re-doing finalized contigs
 	// 		on a restart. The code it controls could really be executed every time but I
 	//		put it within if blocks to make sure it can only affect the finalizeContigs function.
 	void loadContigs(boolean unmergedOnly, boolean loadSeqQual, boolean noFinal) throws Exception
 	{
+		Log.msg("Load Contigs:  unmergedOnly " + unmergedOnly + "  loadSeqQual " + loadSeqQual +
+				"  noFinal " + noFinal, LogLevel.Detail);
+		
 		// clear out all the old refs that hold contig pointers
 		mID2SubContig.clear();
 		mID2Contig.clear();
@@ -3976,40 +3919,44 @@ public class AssemMain
 				
 		ResultSet rs = null;
 		String query = "select min(CTGID) as minid, max(CTGID) as maxid from contig " +
-				" join ASM_scontig on ASM_scontig.scid=contig.sctgid where contig.AID=" + mAID + " ";
+				" join ASM_scontig on ASM_scontig.scid=contig.sctgid " +
+				" where contig.AID=" + mAID + " ";
 		if (unmergedOnly) query += 	" and ASM_scontig.merged_to = ASM_scontig.scid ";
 		rs = mDB.executeQuery(query);
 		rs.first();
+
 		mID2SubContig.setMinMax(rs.getInt("minid"),rs.getInt("maxid"));
 		rs.close();
 		
-		int total_ctg = 0;
-		int total_subctg = 0;
-		 query = "select CTGID,contigid,mate_CTGID,numclones, rftype,SCTGID, consensus_bases  ";
+		int total_ctg = 0, total_subctg = 0;
+		
+		query = "select CTGID, contigid, mate_CTGID, numclones, rftype, SCTGID, consensus_bases  ";
 		if (loadSeqQual) query += ",consensus,quality ";
 		query +=		" from contig join ASM_scontig on ASM_scontig.scid=contig.sctgid where contig.AID=" + mAID + " " ;
 		if (unmergedOnly) query += " and ASM_scontig.merged_to = ASM_scontig.scid ";
 		if (noFinal) query += " and contig.finalized = 0 "; // WMN last-minute fix; it was re-doing already finalized contigs on restart
 		query +=  " order by CTGID asc";
+		
 		rs = mDB.executeQuery(query);
 		while (rs.next())
 		{
 			SubContig ctg = new SubContig(mID2Clone,mAID, mIDStr);
-			int CTGID = rs.getInt("CTGID");
-			int SCTGID = rs.getInt("SCTGID");
+			int CTGID = rs.getInt(1);
+			int SCTGID = rs.getInt(6);
 			mID2SubContig.put(CTGID, ctg);
 			ctg.mID = CTGID;
 			ctg.mCTGID = SCTGID;
-			ctg.mCCSLen = rs.getInt("consensus_bases");
-			if (SCTGID == 0) throw(new Exception("subcontig " + CTGID + " has no containing contig"));				
-			ctg.mMateID = rs.getInt("mate_CTGID");
+			ctg.mCCSLen = rs.getInt(7);
+			if (SCTGID == 0) 
+				throw(new Exception("subcontig " + CTGID + " has no containing contig"));				
+			ctg.mMateID = rs.getInt(3);
 			if (loadSeqQual)
 			{
 				ctg.mCCS = rs.getString("consensus");
 				ctg.mQual = rs.getString("quality");
 			}
-			ctg.mRF = RF.valueOf(rs.getString("rftype"));
-			ctg.mIDStr = rs.getString("contigid");
+			ctg.mRF = RF.valueOf(rs.getString(5));
+			ctg.mIDStr = rs.getString(2);
 			total_subctg++;
 		}
 		rs.close();
@@ -4027,23 +3974,25 @@ public class AssemMain
 			Log.msg("There are no contigs yet");
 			return;
 		}
-		rs = mDB.executeQuery("select min(SCID) as mins, max(SCID) as maxs from ASM_scontig  where ASM_scontig.AID=" + mAID );
+		rs = mDB.executeQuery("select min(SCID) as mins, max(SCID) as maxs " +
+				" from ASM_scontig  where ASM_scontig.AID=" + mAID );
 		if (unmergedOnly) query +=  " and merged_to = SCID " ;
 		rs.first();
 		mID2Contig.setMinMax(rs.getInt("mins"), rs.getInt("maxs"));
 		rs.close();
 		
-		query = "select SCID,CTID1,CTID2,merged_to,capbury_done,TCID from ASM_scontig  where ASM_scontig.AID=" + mAID ;
+		query = "select SCID,CTID1,CTID2,merged_to,capbury_done,TCID from ASM_scontig  " +
+				"where ASM_scontig.AID=" + mAID ;
 		if (unmergedOnly) query +=  " and merged_to = SCID ";
 		query += " order by SCID asc" ;
 		rs = mDB.executeQuery(query);
 		while (rs.next())
 		{
-			int id = rs.getInt("SCID");
-			int cid1 = rs.getInt("CTID1");
-			int cid2 = rs.getInt("CTID2");
-			int tcid = rs.getInt("TCID");
-			int merged_to = rs.getInt("merged_to");
+			int id = rs.getInt(1);
+			int cid1 = rs.getInt(2);
+			int cid2 = rs.getInt(3);
+			int tcid = rs.getInt(6);
+			int merged_to = rs.getInt(4);
 			if (noFinal) // WMN last-minute fix; minimize impact
 			{
 				if (!mID2SubContig.containsKey(cid1) || (cid2 > 0 && !mID2SubContig.containsKey(cid2)))
@@ -4051,7 +4000,7 @@ public class AssemMain
 					continue;	
 				}
 			}
-			if (!mID2SubContig.containsKey(cid1)) {
+			if (!mID2SubContig.containsKey(cid1)) { // FIXME: with debug on, crashes here
 				System.err.println("Internal error1 in Assembly: you need to delete database and restart.");
 				System.exit(-1);
 			}
@@ -4070,13 +4019,15 @@ public class AssemMain
 		}
 		rs.close();
 
-		rs = mDB.executeQuery("select CID,contclone.CTGID,leftpos,ngaps,contclone.orient from contclone join contig on contclone.CTGID=contig.CTGID " +
-				" join ASM_scontig on ASM_scontig.SCID=contig.SCTGID where contig.AID=" + mAID + " and buried=0 and ASM_scontig.merged_to=ASM_scontig.SCID");
+		rs = mDB.executeQuery("select CID, contclone.CTGID, leftpos, ngaps, contclone.orient from contclone " +
+				" join contig on contclone.CTGID=contig.CTGID " +
+				" join ASM_scontig on ASM_scontig.SCID=contig.SCTGID " +
+				" where contig.AID=" + mAID + " and buried=0 and ASM_scontig.merged_to=ASM_scontig.SCID");
 		while (rs.next())
 		{
-			int cid = rs.getInt("CID");			
-			int ngaps = rs.getInt("ngaps");
-			int ctgid = rs.getInt("contclone.CTGID");
+			int cid = rs.getInt(1);			
+			int ngaps = rs.getInt(4);
+			int ctgid = rs.getInt(2);
 			if (noFinal) // WMN last-minute fix; minimize impact
 			{
 				if (!mID2SubContig.containsKey(ctgid) )
@@ -4086,12 +4037,12 @@ public class AssemMain
 			}
 			
 			Clone c = mID2Clone.get(cid);
-			c.mStart = rs.getInt("leftpos");
-			c.mEnd = rs.getInt("leftpos") + c.mSeqLen + ngaps;
+			c.mStart = rs.getInt(3);
+			c.mEnd = c.mStart + c.mSeqLen + ngaps;
 			c.mNGaps = ngaps;
 			c.mSCID = ctgid;
 			c.mSC = mID2SubContig.get(ctgid);
-			c.mUC = UC.valueOf(rs.getString("orient"));
+			c.mUC = UC.valueOf(rs.getString(5));
 			mID2SubContig.get(ctgid).mAllClonesID.add(c.mID);
 		}
 		rs.close();
@@ -4111,68 +4062,9 @@ public class AssemMain
 		Log.msg("Loaded " + total_subctg + " contigs, " + npaired + " paired",LogLevel.Detail);
 	}
 	
-	// On a restart, we may load edges for ASM_scontigs which have been merged. Since
-	// loadContigs only loads unmerged contigs, we need this to load the contigs for the edge,
-	// so we can get the edge loaded.
-	// make ClusterLink store only ctg id's, not contig reference?
-	void loadSingleContig(int scid) throws Exception
-	{		
-		String query = "select CTGID,contigid,mate_CTGID,numclones, consensus,quality, rftype,SCTGID from contig where sctgid=" + scid;  
-		ResultSet rs = mDB.executeQuery(query);
-		while (rs.next())
-		{
-			SubContig ctg = new SubContig(mID2Clone,mAID, mIDStr);
-			int CTGID = rs.getInt("CTGID");
-			int SCTGID = rs.getInt("SCTGID");
-			mID2SubContig.put(CTGID, ctg);
-			ctg.mID = CTGID;
-			ctg.mCTGID = SCTGID;
-			if (SCTGID == 0) throw(new Exception("subcontig " + CTGID + " has no containing contig"));				
-			ctg.mMateID = rs.getInt("mate_CTGID");
-			ctg.mCCS = rs.getString("consensus");
-			ctg.mQual = rs.getString("quality");
-			ctg.mRF = RF.valueOf(rs.getString("rftype"));
-			ctg.mIDStr = rs.getString("contigid");
-		}
-		rs.close();
-
-		query = "select SCID,CTID1,CTID2,merged_to,capbury_done from ASM_scontig  where ASM_scontig.scid=" + scid;
-		rs = mDB.executeQuery(query);
-		while (rs.next())
-		{
-			int id = rs.getInt("SCID");
-			int cid1 = rs.getInt("CTID1");
-			int cid2 = rs.getInt("CTID2");
-			int merged_to = rs.getInt("merged_to");
-			Contig ctg = new Contig(mAID,mID2SubContig.get(cid1),(cid2 > 0 ? mID2SubContig.get(cid2) : null));
-			ctg.mID = id;
-			ctg.mMergedTo = merged_to;
-			ctg.mCapBuryDone = rs.getBoolean("capbury_done");
-			mID2Contig.put(id,ctg);
-		}
-		rs.close();
-		rs = mDB.executeQuery("select CID,contclone.CTGID,leftpos,ngaps from contclone join contig on contclone.CTGID=contig.CTGID  where contig.sctgid=" + scid);
-		while (rs.next())
-		{
-			int cid = rs.getInt("CID");			
-			int ngaps = rs.getInt("ngaps");
-			Clone c = mID2Clone.get(cid);
-			c.mStart = rs.getInt("leftpos");
-			c.mEnd = rs.getInt("leftpos") + c.mSeqLen + ngaps;
-			c.mSCID = rs.getInt("CTGID");
-			mID2SubContig.get(c.mSCID).mAllClonesID.add(c.mID);
-		}
-		rs.close();
-
-		SubContig ctg1 = mID2Contig.get(scid).mSC1;
-		if (ctg1.mMateID > 0)
-		{
-			ctg1.mMate = mID2SubContig.get(ctg1.mMateID);
-			ctg1.mMate.mMate = ctg1;
-		}
-	}	
+	
 	// Given a set of edges, build the transitive closure contig sets. 
-	void transitiveClose(int TCID, AutoArray<Edge> edges, Contig[] ctg2use) throws Exception
+	private void transitiveClose(int TCID, AutoArray<Edge> edges, Contig[] ctg2use) throws Exception
 	{
 		// we first have to map the contig ids to start from 0
 		TreeMap<Integer,Integer> id2idx = new TreeMap<Integer,Integer>();
@@ -4263,7 +4155,7 @@ public class AssemMain
 	// intersect a previous chunk. If it does, it is skipped for now.
 	// This way we can keep clusters from getting too big, while still
 	// mostly doing the strongest edges first. 
-	void buildClusters(int TCID, AutoArray<Edge> edges, Set<Integer> ctg2use) throws Exception
+	private void buildClusters(int TCID, AutoArray<Edge> edges, Set<Integer> ctg2use) throws Exception
 	{
 		int ctgsPerCluster = 1000;
 		
@@ -4333,7 +4225,7 @@ public class AssemMain
 	}	
 
 	// Set up the blast or vmatch for the TC
-	File doTCSelfAlign(File tcdir, int tc) throws Exception
+	private File doTCSelfAlign(File tcdir, int tc) throws Exception
 	{
 		String tcstr = "TC" + tc;
 		String thisTag = tcstr + "_SELF";
@@ -4370,7 +4262,7 @@ public class AssemMain
 	}
 	
 	// Write all current (unmerged) contig consensus to file for blast
-	void writeCurrentContigs(File ctgFile) throws Exception
+	private void writeCurrentContigs(File ctgFile) throws Exception
 	{
 		BufferedWriter ctgFileW = new BufferedWriter(new FileWriter(ctgFile));
 		int maxID = 0;
@@ -4404,7 +4296,7 @@ public class AssemMain
 	}
 	
 	// Load the TC overlaps from the blast or vmatch output file, and into the DB
-	void LoadTCEdges(int TCID, int tc, String tcstr, File outFile,  File tcdir, SparseMatrix triedEdges ) throws Exception
+	private void LoadTCEdges(int TCID, int tc, String tcstr, File outFile,  File tcdir, SparseMatrix triedEdges ) throws Exception
 	{
 		String thisTag = tcstr + "_EDGES";
 		if (Utils.checkUpToDate(thisTag, "", ""))
@@ -4421,7 +4313,7 @@ public class AssemMain
 	}
 
 	// read the contig overlap edges from the blast output file
-	public void readTCBlastEdges(int tc, AutoArray<Edge> edges, int TCID, File tcdir,SparseMatrix triedEdges) throws Exception
+	private void readTCBlastEdges(int tc, AutoArray<Edge> edges, int TCID, File tcdir,SparseMatrix triedEdges) throws Exception
 	{		
 		File[] blastFiles = new File[1000]; 
 		for (int i = 0; i < blastFiles.length; i++)
@@ -4647,35 +4539,8 @@ public class AssemMain
 			Log.msg("TC Overlap Rejected:" + reason + ":" + count,LogLevel.Detail);
 		}
 	}	
-	
-	// Add a new edge to our set
-	public void addEdge(Contig c1, Contig c2, int score, AutoArray<Edge> edges, int TCID, int olap, float pctid, int hang) throws Exception
-	{
-		if (c1.mID > c2.mID)
-		{
-			Contig foo = c1;
-			c1 = c2;
-			c2 = foo;
-		}			
-		Edge edge = null;
-		
-		if (c1.mLinks.containsKey(c2))
-		{
-			c1.mLinks.get(c2).mScore += score;
-		}
-		else
-		{
-			edge = new Edge(c1,c2,score,this, TCID);
-			edge.mOlap = olap;
-			edge.mIdentity = (int)Math.floor(10*pctid);
-			edge.mHang = hang;
-			c1.mLinks.put(c2,edge);
-			c2.mLinks.put(c1,edge);
-			edges.add(edge);
-		}
-	}
 
-	public void doTCBlast(File tcdir, File ctgFile, File outFile, int tc) 	throws Exception
+	private void doTCBlast(File tcdir, File ctgFile, File outFile, int tc) 	throws Exception
 	{
 		String tcstr = "TC" + tc;
 		String tcprop = mProps.getProperty(tcstr).trim();
@@ -4709,12 +4574,12 @@ public class AssemMain
 		
 		threadedBlast(cmd,"contigs.fasta","tc_blast_result",tcdir);
 	}
-	int calcBlastScore(int in)
+	private int calcBlastScore(int in)
 	{
 		return (9*in)/10;	
 	}
 	// make the final, N-joined contigs, and do the clone alignments, calculate rstats
-	public void finalizeContigs(int finalTC) throws Exception
+	private void finalizeContigs(int finalTC) throws Exception
 	{
 		int tcid = 0;
 		ResultSet rs = mDB.executeQuery("select TCID, finished from ASM_tc_iter where AID='"
@@ -4821,7 +4686,7 @@ public class AssemMain
 			d++;
 			if (d % 600 == 0)
 			{
-				Utils.singleLineMsg("finalize:" + nRemaining + " contigs remaining ");
+				Utils.singleLineMsg("finalize: " + nRemaining + " contigs remaining");
 			}
 			
 			Thread.sleep(100);
@@ -4840,7 +4705,8 @@ public class AssemMain
 			ids.add(rs.getInt(1));
 		}
 		rs.close();
-		mDB.executeUpdate("delete from contclone where ctgid in (" + Utils.strIntVectorJoin(ids, ",") + ")");
+		if (ids.size()>0) // CASZ 8/22/19
+			mDB.executeUpdate("delete from contclone where ctgid in (" + Utils.strIntVectorJoin(ids, ",") + ")");
 		
 		Log.indentMsg("Complete finalizing ", LogLevel.Basic); 
 		
@@ -4850,7 +4716,7 @@ public class AssemMain
 		Log.indentMsg("Write final contigs ", LogLevel.Basic);
 		Utils.recordTime("FinalizeEnd",mAID,mDB);
 	}
-	public void fix_assemlib() throws Exception
+	private void fix_assemlib() throws Exception
 	{
 		TreeSet<String> curLibs = new TreeSet<String>();
 		for (Library lib : mLibs)
@@ -4881,7 +4747,7 @@ public class AssemMain
 		}
 		
 	}
-	public void init_rstat() throws Exception
+	private void init_rstat() throws Exception
 	{
 		// Build the library counts needed for the rstat computation
 
@@ -4898,7 +4764,7 @@ public class AssemMain
 		mRstat = new RStat(mLibCounts);	
 	}
 	
-	public void finalizeContig(Contig c, int ctgNum, int tcid, int nThread, DBConn db) throws Exception
+	private void finalizeContig(Contig c, int ctgNum, int tcid, int nThread, DBConn db) throws Exception
 	{		
 		SubContig newSC = null;
 		if (c.mTCID != tcid)
@@ -4995,8 +4861,6 @@ public class AssemMain
 				db.executeUpdate("update contig set longest_clone='" + longestClone.mFullName + "'where ctgid=" + newSC.mID);
 			}
 			
-			if (newSC.chimeric(db)) mNChimeric++;
-			
 			newSC.libCounts(db);
 			newSC.doRstat(mRstat, db);
 			newSC.snpCounts(db);
@@ -5004,8 +4868,8 @@ public class AssemMain
 			newSC.clear();
 		}
 	}
-
-	public void validateBuried() throws Exception
+	// Only called for debug
+	private void validateBuried() throws Exception
 	{		
 		Log.msg("Check buried reads for consistency",LogLevel.Detail);
 		// Check that every topparent is in a current contig, and is not buried itself
@@ -5066,12 +4930,15 @@ public class AssemMain
 			Clone c = mID2Clone.get(cid);
 
 			if (c.mBuried) continue;
-			rs = mDB.executeQuery("select count(*) as count from contclone join contig on contig.ctgid=contclone.ctgid join ASM_scontig on ASM_scontig.scid=contig.sctgid " +
-					" where contclone.cid=" + cid + " and ASM_scontig.merged_to=ASM_scontig.scid and contig.aid=" + mAID);
+			rs = mDB.executeQuery("select count(*) as count from contclone " +
+					" join contig on contig.ctgid=contclone.ctgid " +
+					" join ASM_scontig on ASM_scontig.scid=contig.sctgid " +
+					" where contclone.cid=" + cid + 
+					" and ASM_scontig.merged_to=ASM_scontig.scid and contig.aid=" + mAID);
 			rs.first();
 			int count = rs.getInt("count");
 			rs.close();
-			if (count == 0)
+			if (count == 0) 
 			{
 				throw(new Exception("non-buried clone " + cid + " is not in a current contig"));				
 			}
@@ -5086,13 +4953,16 @@ public class AssemMain
 			}
 		}
 	}
-	public void checkContigIntegrity(boolean force) throws Exception
+	
+	private void checkContigIntegrity(boolean force) throws Exception
 	{
 		Log.msg("Check contig integrity",LogLevel.Detail);
 		Utils.termOut("Checking contig integrity");
 		synchronized(this)
 		{
 			ResultSet rs = null;
+			
+			// force is true after Cliques are created
 			if (!force && !mProps.getProperty("DEBUG").equals("1")) return;
 			
 			rs = mDB.executeQuery("select count(*) as count from contig where AID=" + mAID);
@@ -5111,42 +4981,51 @@ public class AssemMain
 			clone2sctg.setMinMax(mID2Clone.minKey(), mID2Clone.maxKey());
 			clone2ctg.setMinMax(mID2Clone.minKey(), mID2Clone.maxKey());
 			
-			rs = mDB.executeQuery("select cid_child,cid_parent,cid_topparent from buryclone where aid=" + mAID); 
+			rs = mDB.executeQuery("select cid_child, cid_parent, cid_topparent " +
+					" from buryclone where aid=" + mAID); 
 			while (rs.next()) 
 			{
-				child2parent.put(rs.getInt("cid_child"),rs.getInt("cid_parent"));
-				if (rs.getInt("cid_parent") == 0) throw(new Exception(""));
-				clone2topparent.put(rs.getInt("cid_child"),rs.getInt("cid_topparent"));
-				top.add(rs.getInt("cid_topparent"));
+				int child = rs.getInt(1);
+				int parent = rs.getInt(2);
+				int topParent = rs.getInt(3);
+				
+				if (parent == 0) 
+					throw(new Exception("No parent"));
+				
+				child2parent.put(child, parent);
+				clone2topparent.put(child, topParent);
+				top.add(topParent);
 			}
 			rs.close();
 					
 			// 3. every non-buried clone is in exactly one current, un-merged contig
-			rs = mDB.executeQuery("select cid,ASM_scontig.scid,contig.ctgid from contclone join contig on contclone.ctgid=contig.ctgid " +
-					" join ASM_scontig on ASM_scontig.scid=contig.sctgid where ASM_scontig.merged_to=ASM_scontig.scid and contig.aid=" + mAID);
+			rs = mDB.executeQuery("select cid, ASM_scontig.scid, contig.ctgid " +
+					" from contclone " +
+					" join contig on contclone.ctgid=contig.ctgid " +
+					" join ASM_scontig on ASM_scontig.scid=contig.sctgid " +
+					" where ASM_scontig.merged_to=ASM_scontig.scid and contig.aid=" + mAID);
 			while (rs.next())
 			{
-				int cid = rs.getInt("cid");
+				int cid = rs.getInt(1);
+				int ctgid = rs.getInt(3);
+				int scid = rs.getInt(2);
 				
-				if (clone2ctg.containsKey(cid))
-				{
+				if (clone2ctg.containsKey(cid)) 
 					throw(new Exception("Clone " + cid + " is in more than one current contig"));
-				}
-				clone2ctg.put(cid,rs.getInt("ctgid"));	
-				
-				if (clone2sctg.containsKey(cid))
-				{
+				if (clone2sctg.containsKey(cid)) 
 					throw(new Exception("Clone " + cid + " is in more than one current supercontig"));
-				}
-				clone2sctg.put(cid,rs.getInt("scid"));
+				
+				clone2ctg.put(cid,ctgid);	
+				clone2sctg.put(cid,scid);
 			}
 			rs.close();
 			
 			for (int cid = mID2Clone.minKey(); cid <= mID2Clone.maxKey(); cid++)
 			{
 				if (!mID2Clone.containsKey(cid)) continue;
+				
 				if (!child2parent.containsKey(cid) && !clone2sctg.containsKey(cid))
-				{
+				{// FIXME crash on Mariadb 10.4
 					throw(new Exception("Non-buried clone " + cid + " is not in a current contig"));
 				}
 			}
@@ -5246,13 +5125,13 @@ public class AssemMain
 		System.gc();
 	}
 	// save a time milepost to the DB
-	public void recordTime(String stage) throws Exception
+	private void recordTime(String stage) throws Exception
 	{
 		Utils.recordTime(stage,mAID,mDB);
 	}
 
 	// Put to parts of a L/R contig pair into one, joined by N's
-	public SubContig combineSubContigs(SubContig sc1, SubContig sc2,DBConn db) throws Exception
+	private SubContig combineSubContigs(SubContig sc1, SubContig sc2,DBConn db) throws Exception
 	{
 		sc1.loadClones(db);
 		sc1.setRF();
@@ -5357,40 +5236,29 @@ public class AssemMain
 		}
 		return newSC;
 	}
-	public String qualReverse(String q1)
-	{
-		String[] vals = q1.split("\\s+");
-		String out = "";
-		for (int i = vals.length - 1; i >= 0; i--)
-		{
-			out += vals[i] + " ";
-		}
-		return out;
-	}
-
 
 	// fire off the cap bury threads for cliques
-	public void capBuryCliques(int TCID) throws Exception
+	private void capBuryCliques(int TCID) throws Exception
 	{
 		String thisTag = "CLIQUE_BURY";
-		if (Utils.checkUpToDate(thisTag, "", ""))
-		{
-			return;
-		}
+		if (Utils.checkUpToDate(thisTag, "", "")) return;
+		
+		Log.head("Clique cap buries",LogLevel.Basic);
 		
 		recordTime(thisTag + " start");
 		int nToDo = 0;
 		for (int id = mID2Contig.minKey(); id <= mID2Contig.maxKey(); id++)
-		{
+		{	
 			if (!mID2Contig.containsKey(id)) continue;
 			Contig ctg = mID2Contig.get(id);
 			if (ctg.mCapBuryDone) continue;
 			if (ctg.totalSize() < 10) continue;
 			nToDo++;
 		}
+		Log.indentMsg(nToDo + " cliques check for bury", LogLevel.Basic);
+		
 		if (nToDo > 0)
 		{
-			Log.head("Clique cap buries",LogLevel.Basic);
 			File capdir = new File(mCliqueDir,"burycap");
 			Utils.checkCreateDir(capdir);
 
@@ -5676,7 +5544,7 @@ public class AssemMain
 	}
 
 	// Make sure the contig still hangs together after the burying. 
-	public boolean buryRecapOK(Contig ctg, File capdir, String capArgParam, Integer[] cids, int threadNum, DBConn db) throws Exception
+	private boolean buryRecapOK(Contig ctg, File capdir, String capArgParam, Integer[] cids, int threadNum, DBConn db) throws Exception
 	{
 		if (mProps.getProperty("DO_RECAP").equals("0")) return true;
 		
@@ -5760,7 +5628,7 @@ public class AssemMain
 
 		mDB.executeUpdate("replace into assem_msg (aid,msg) values(" + mAID + ",'" + statsMsg.toString() + "')");
 	}
-	public void summarizeAssembly() throws Exception
+	private void summarizeAssembly() throws Exception
 	{
 		ResultSet rs = null;
 		StringBuilder statsMsg = new StringBuilder();
@@ -5906,7 +5774,7 @@ public class AssemMain
 	{
 		Vector<Integer> mSizes;
 
-		public NbhdCmp(Vector<Integer> sizes)
+		private NbhdCmp(Vector<Integer> sizes)
 		{
 			mSizes = sizes;
 		}
@@ -5924,51 +5792,9 @@ public class AssemMain
 	}
 	
 
-	public void singleCliqueVmatch() throws Exception
-	{
-		if (pairsOnly()) return;
-		
-		String thisTag = "CLIQUE_ALIGN_SINGLE";
+	
 
-		File filterFile1 = new File(mFilterDir, "pave_clique_single.so");
-		File outFile1 = new File(mCliqueDir, "unburied_single.out");
-
-		Log.head("single clique alignment",LogLevel.Basic);
-
-		if (Utils.checkUpToDate(thisTag,"",""))
-		{
-			Log.msg("single clique alignment up to date",LogLevel.Basic);
-			return;
-		}
-		Utils.deleteStatusFile(thisTag);
-		recordTime(thisTag + " start");
-
-		if (!filterFile1.isFile())
-		{
-			Log.die("Can't find vmatch filter file "
-					+ filterFile1.getAbsolutePath());
-		}
-
-		if (outFile1.exists())
-			outFile1.delete();		
-
-		String args1[] =
-		{ mProps.getProperty("VMATCH_CMD"), "-q", "index_unburied_single",
-				"-selfun", filterFile1.getAbsolutePath(), "-exdrop", "2",
-				"-identity", mProps.getProperty("MIN_ID_CLIQUE"), 
-				"-noevalue", "-noidentity", "-noscore",
-				"-nodist", "-d", "-p",
-				// "-showdesc","32",
-				"index_unburied_single" };
-
-		Log.msg(Utils.join(args1, " "),LogLevel.Detail);
-		Utils.recordCmd(mAID,"SingleCliqueVmatch",Utils.join(args1, " "),mDB);
-		Utils.runCommand(args1, mCliqueDir, false, true, outFile1,0);
-		Utils.writeStatusFile(thisTag);
-		recordTime(thisTag + " end");
-	}
-
-	public boolean doCliques() throws Exception
+	private boolean doCliques() throws Exception
 	{
 		return mProps.getProperty("DO_CLIQUES").equals("1");
 	}
@@ -5993,7 +5819,7 @@ public class AssemMain
               	 " where library.libid=assemlib.libid and assemlib.aid=" + mAID + "");
 	}	
 	/***************************************************************
-	 * XXX SKIP ASSEMBLY
+	 * SKIP ASSEMBLY
 	 * Much of this code is copied in loadLibMain
 	 */
 	private void skipAssembly() throws Exception
@@ -6051,7 +5877,7 @@ public class AssemMain
 		Log.indentMsg("Setting coordiantes", LogLevel.Basic);
 	
 		// Pattern is something like: LG_1:1-50(+)_1 where last _n is for duplicates
-		Pattern mBEDPat = Pattern.compile("(\\S+):(\\d+)-(\\d+)"); // XXX
+		Pattern mBEDPat = Pattern.compile("(\\S+):(\\d+)-(\\d+)"); 
 		HashMap <String, String> origMap = new HashMap <String, String> ();
 		rs = mDB.executeQuery("select cloneid, origid from clone");
 		while (rs.next()) origMap.put(rs.getString(1), rs.getString(2));
@@ -6083,11 +5909,11 @@ public class AssemMain
 		summarizeSkipAssembly(); 
 	}
 	// Some of this code is replicated in several places; search LN__ to find them. 
-	public void allLibCounts(DBConn db) throws Exception
+	private void allLibCounts(DBConn db) throws Exception
 	{
 		// Step 1: fill the contig_counts table, and the contig.L__ and contig.LN__ fields
 		// First initialize counts to zero for all libs, including the ones from expression files
-		Utils.singleLineMsg("Update counts...");
+		Utils.singleLineMsg("Update counts");
 		db.executeUpdate("delete contig_counts.* from contig_counts, contig " +
 				"where contig_counts.contigid=contig.contigid and contig.AID=" + mAID);
 		db.executeUpdate("insert into contig_counts (select contigid, libid, 0 from contig,assemlib  where contig.aid=" + mAID + 
@@ -6115,7 +5941,7 @@ public class AssemMain
 		{
 			libs.add(rs.getString("libid"));
 		}
-		// XXX 
+		
 		for (String libid : libs)
 		{
 			String col = "L__" + libid;

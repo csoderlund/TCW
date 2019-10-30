@@ -44,15 +44,16 @@ public class FieldData {
 	public static final String NTSEQ_SQL = "ntSeq"; // not used in this file, but since all MySQL is here...
 	
 	private static DBinfo theInfo;
-	public static boolean hasNTdb=false, hasGO=false, hasPCC=false, hasStats=false, hasNTblast=false, hasMultiScore=false;
+	public static boolean hasNTdb=false, hasGO=false, hasPCC=false, hasKaKs=false, hasStats=false, hasNTblast=false, hasMultiScore=false;
 	public static void setState(DBinfo info) {
 		theInfo = info;
 		hasNTdb=theInfo.nNTdb()>1;
-		hasGO=theInfo.getCntGO()>0; // this will be zero if 'Add GOs' has not been run from runMulti
+		hasGO=theInfo.hasGOs(); // this will be zero if 'Add GOs' has not been run from runMulti
 		hasPCC=theInfo.getCntPCC()>0;
-		hasStats = theInfo.getCntStats()>0;
+		hasStats = theInfo.hasStats();
 		hasNTblast = theInfo.hasNTblast();
 		hasMultiScore = theInfo.hasMultiScore();
+		hasKaKs = theInfo.hasKaKs();
 		
 		if (theInfo.nNTdb()==0) System.out.println("   This is an AA-mTCW.");
 	}
@@ -225,7 +226,7 @@ public class FieldData {
 	private static int [] PAIR_SECTION_IDX, PAIR_SECTION_BREAK;
 	
 	public static void buildPairs() {
-		int nCol=18, nStat=25, nNT=7; 
+		int nCol=18, nNT=7, nStat=21, nKa=4; 
 		if (hasPCC) nCol++;
 		if (hasGO)  nCol++;
 		if (hasNTblast) nCol += nNT;
@@ -238,12 +239,17 @@ public class FieldData {
 		}
 		else {
 			nCol += nStat;
+			if (hasKaKs) nCol += nKa;
+			
 			PAIR_SECTIONS =	new String [5];	
 			PAIR_SECTIONS[0] = "General";
 			PAIR_SECTIONS[1] = "Hit";
 			PAIR_SECTIONS[2] = "Coding sequence";
-			PAIR_SECTIONS[3] = "KaKs";
-			PAIR_SECTIONS[4] = "Cluster Sets";
+			if (hasKaKs) {
+				PAIR_SECTIONS[3] = "KaKs";
+				PAIR_SECTIONS[4] = "Cluster Sets";
+			}
+			else PAIR_SECTIONS[3] = "Cluster Sets";
 		}
 		
 		Vector <Integer> mkBreak = new Vector <Integer> ();
@@ -328,11 +334,13 @@ public class FieldData {
 			addPair(c++, "%3diff", Float.class, PAIR_TABLE,  "pDiffUTR3", "3'UTR %Difference (#bases different including gaps/Align); a '-' indicates one or both do not have UTR; overhangs excluded",  false);
 			addPair(c++, "ts/tv",Float.class, PAIR_TABLE,  "tstv",        "ts/tv of CDS, where ts=Transistion, tv=Transversion",	  false);
 			
-			mkSection.add(c);
-			addPair(c++, "Ka",Float.class, PAIR_TABLE, "ka","Nonsynonymous substitution rate",	   false);
-			addPair(c++, "Ks", Float.class, PAIR_TABLE, "ks","Synonymous substitution rate", 	   false);
-			addPair(c++, KaKs, Float.class, PAIR_TABLE, "kaks","Selective strength",	   false);
-			addPair(c++, "p-value",	Double.class, PAIR_TABLE, "pVal", "Fisher exact test of KaKs value",   false);
+			if (hasKaKs) {
+				mkSection.add(c);
+				addPair(c++, "Ka",Float.class, PAIR_TABLE, "ka","Nonsynonymous substitution rate",	   false);
+				addPair(c++, "Ks", Float.class, PAIR_TABLE, "ks","Synonymous substitution rate", 	   false);
+				addPair(c++, KaKs, Float.class, PAIR_TABLE, "kaks","Selective strength",	   false);
+				addPair(c++, "p-value",	Double.class, PAIR_TABLE, "pVal", "Fisher exact test of KaKs value",   false);
+			}
 			mkSection.add(c);
 		}
 		if (c!=nCol) // only happens when change columns

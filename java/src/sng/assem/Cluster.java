@@ -1,21 +1,15 @@
 package sng.assem;
 
 import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.TreeMap;
-import java.util.Arrays;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.sql.ResultSet;
-import java.sql.PreparedStatement;
 
 import sng.assem.enums.*;
 import sng.assem.helpers.*;
 import util.database.DBConn;
-
-
 
 // A cluster of contigs (or paired contigs; the Contig class) during TC iteration.
 // 
@@ -46,8 +40,6 @@ public class Cluster
 		mLocalDB = db;
 	}
 
-
-
 	public void clear()
 	{
 		mEdges.clear();
@@ -57,15 +49,7 @@ public class Cluster
 	}
 
 	private Edge getNextEdge() throws Exception
-	{
-//		for (int i = mAssem.mID2Contig.minKey(); i <= mAssem.mID2Contig.maxKey(); i++)
-//		{
-//			if (mAssem.mID2Contig.containsKey(i))
-//			{
-//				mAssem.mID2Contig.get(i).totalSize();
-//			}
-//		}
-//				
+	{		
 		Edge ret = null;
 		for (; mCurEdgeIdx < mEdges.size(); mCurEdgeIdx++)
 		{
@@ -80,41 +64,30 @@ public class Cluster
 			}
 		}
 		return ret;
-
 	}
 
 	public void doAssembly(int TCID, File capTopDir, String tcstr, int tcnum, boolean strict) throws Exception
-	{
-		
+	{	
 		int[] ws = {7,12,50,30,20,10,10,10};
-		int redund = 0;
-		int i = 0;
 		mEdgesDone = 0;
 		Edge e = null;
 		mEdges.sort(new Edge.ScoreCmp());
-		int nLeft = mEdges.size();
 		
 		boolean bHeuristics = !mAssem.mProps.getProperty("HEURISTICS").equals("0");
 		boolean bTwoBridge = mAssem.mProps.getProperty("REQUIRE_TWO_BRIDGE").equals("1");
 		boolean bNoTest4 = mAssem.mProps.getProperty("NO_TEST4").equals("1");
 
-
 		while ( (e = getNextEdge()) != null) 
 		{			
-			i++;
-
 			String notes = tcstr + ":" + e.idStr();
 	
-			nLeft--;
-
 			int capDirPrefix = e.mID/1000;
 			File capDirTop = new File(capTopDir,"E" + capDirPrefix);
 			Utils.checkCreateDir(capDirTop);
 			File capdir = new File(capDirTop,"" + e.mID);
 			Utils.checkCreateDir(capdir);
 			Utils.clearDir(capdir);
-
-			
+		
 			String caproot = "Edge" + e.mID + ".fasta";
 			mLocalDB.executeUpdate("update ASM_tc_iter set merges_tried=merges_tried+1 where tcid=" + TCID);
 			Utils.intTimerStart(mThreadNum);
@@ -136,7 +109,7 @@ public class Cluster
 					Utils.intTimerEnd(mThreadNum,"mergeBlock");
 					
 					// Use a transaction to guarantee the contig, ASM_scontig, contclone tables are updated consistently
-					mLocalDB.openTransaction();
+					//mLocalDB.openTransaction(); CASZ 1Sept19
 					try
 					{
 						Utils.intTimerStart(mThreadNum);
@@ -159,11 +132,10 @@ public class Cluster
 						ctg.upload(mLocalDB,TCID);
 						mAssem.mID2Contig.put(ctg.mID,ctg);
 						doMerge(e,ctg,mAssem.mMergesDone, mTCID);
-						mLocalDB.closeTransaction();
+						//mLocalDB.closeTransaction();
 						mLocalDB.executeUpdate("update ASM_tc_iter set merges_ok=merges_ok+1 where tcid=" + TCID);
 
 						Utils.intTimerEnd(mThreadNum,"doMerge");
-
 					}
 					catch(Exception e1)
 					{
@@ -182,7 +154,6 @@ public class Cluster
 					Utils.intTimerEnd(mThreadNum, "capBury");
 				}
 				Log.columns(ws, LogLevel.Dbg,mThreadNum,mID,e.idStr(), aceFile.mOK.toString(),ctg.idStr(),nbury,e.mID,aceFile.mOKInfo);
-
 			}
 			else
 			{
@@ -197,8 +168,6 @@ public class Cluster
 			}
 			mEdgesDone++;
 		}
-		//Log.msg("Thread " + mThreadNum + " finshed cluster " + mID + " : " + redund + " redundant edges",LogLevel.Detail);
-		
 	}	
 	void doMerge(Edge edge, Contig newctg,ID2Obj<Integer> mergesDone,int TCID) throws Exception
 	{
@@ -210,8 +179,6 @@ public class Cluster
 		mLocalDB.executeUpdate("update ASM_scontig set merged_to=" + newctg.mID + " where scid=" + edge.mC2.mID);
 	
 		mLocalDB.executeUpdate("update ASM_tc_edge set SCID_result=" + newctg.mID + " where EID=" + edge.mID);
-		
-
 	}			
 	int assemblyProgress() throws Exception
 	{
@@ -240,16 +207,14 @@ public class Cluster
 		File qualFile = new File(capdir,ctgFile.getName() + ".qual");
 		BufferedWriter ctgFileW = new BufferedWriter(new FileWriter(ctgFile));
 		BufferedWriter qualFileW = new BufferedWriter(new FileWriter(qualFile));
-		//Utils.intTimerStart(mThreadNum);
+		
 		int nClones = e.writeClones(ctgFileW, qualFileW, mLocalDB);
-		//Utils.intTimerEnd(mThreadNum, "Twrite");
 		int maxSize = Integer.parseInt(mAssem.mProps.getProperty("MAX_CAP_SIZE"));
 		if (nClones > maxSize)
 		{
 			Log.msg("Edge " + e.mID + ":skipping large assembly of " + nClones,LogLevel.Detail);
 			return;
 		}
-
 
 		ctgFileW.flush();
 		qualFileW.flush();
@@ -258,9 +223,7 @@ public class Cluster
 		Utils.appendToFile(cmd,capdir,"cmd.list");
 		Utils.recordCmd(mAssem.mAID,tcstr.toUpperCase() + "CAP",cmd,mLocalDB);
 
-		//Utils.intTimerStart(mThreadNum);
 		int exitValue = Utils.runCommand(cmd.split("\\s+"), capdir, false, false, null,mThreadNum);
-		//Utils.intTimerEnd(mThreadNum,"Tcap");
 		Utils.checkExitValue(exitValue,cmd);	
 		ctgFileW.close();
 		qualFileW.close();

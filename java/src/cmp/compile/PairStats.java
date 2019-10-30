@@ -192,8 +192,8 @@ public class PairStats {
 		}
 		rs.close();
 		
-		Out.PrtSpCntMsg(1, pairSet.size(), "Pairs to align");
-		Out.PrtSpCntMsgNz(1, cntAlreadyAligned, "Previously aligned");
+		Out.PrtSpCntMsg(2, pairSet.size(), "Pairs to align");
+		Out.PrtSpCntMsgNz(2, cntAlreadyAligned, "Previously aligned");
 	}
 	catch(Exception e) {ErrorReport.reportError(e, "Error loadBBHpairs"); }
 	}
@@ -211,7 +211,7 @@ public class PairStats {
 				}
 				int nCPU = theCompilePanel.getBlastPanel().getCPUs();
 				NRECORDs = (int) (((float)cntDoAlg/(float)nCPU)+5.0);
-				Out.PrtSpCntMsg(1, NRECORDs, " aligned pairs will be written per KaKs file " +
+				Out.PrtSpCntMsg(2, NRECORDs, "Aligned pairs will be written per KaKs file " +
 						"(" + Globals.KaKsOutPrefix + "n" + Globals.KaKsOutSuffix + ")");
 				outKsKsCmd = new BufferedWriter(new FileWriter(dirKaKs + "/" + Globals.KaKsCmd)) ;
 			}

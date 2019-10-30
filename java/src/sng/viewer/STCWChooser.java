@@ -37,9 +37,7 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-
 import sng.database.DBInfo;
-import sng.database.Globals;
 import sng.database.Overview;
 import sng.util.HiddenTabbedPane;
 import sng.util.MenuTree;
@@ -48,6 +46,7 @@ import util.database.DBConn;
 import util.methods.ErrorReport;
 import util.methods.Static;
 import util.ui.UserPrompt;
+import util.database.Globalx;
 
 public class STCWChooser extends JFrame {
 	private static final long serialVersionUID = 6434887265792656100L;
@@ -100,7 +99,8 @@ public class STCWChooser extends JFrame {
 	           DefaultMutableTreeNode hostNode = (DefaultMutableTreeNode) hostTree.getChildAt(i);
 	           
                for (DBInfo dbObj : dbList) {
-                  hostNode.add(new DefaultMutableTreeNode(dbObj));
+            	   	  if (!dbObj.getID().equals(Globalx.error))
+            	   		  hostNode.add(new DefaultMutableTreeNode(dbObj));
                } 
 	       }
 
@@ -142,7 +142,7 @@ public class STCWChooser extends JFrame {
 
 	       final JButton btnViewdb = new JButton("Launch");
 	       btnViewdb.setAlignmentX(Component.CENTER_ALIGNMENT);
-	       btnViewdb.setBackground(Globals.LAUNCHCOLOR);
+	       btnViewdb.setBackground(Globalx.LAUNCHCOLOR);
 	       btnViewdb.setEnabled(false);
 
 	       btnViewdb.addActionListener(new ActionListener() {
@@ -158,7 +158,7 @@ public class STCWChooser extends JFrame {
 	       });
 	       
 			final JButton btnGetState = new JButton("Overview");
-			btnGetState.setBackground(Globals.LAUNCHCOLOR);
+			btnGetState.setBackground(Globalx.LAUNCHCOLOR);
 			btnGetState.setAlignmentX(Component.LEFT_ALIGNMENT);
 			btnGetState.setEnabled(false);
 			btnGetState.addActionListener(new ActionListener() {
@@ -265,10 +265,10 @@ public class STCWChooser extends JFrame {
 	/*************************************************************
 	 * XXX set UI Defaults 
 	 */
-	static private final Font boldUIFont = Globals.boldUIFont;
-	static private final Font textFont = Globals.textFont;
-	static private final Color componentBGColor = Globals.componentBGColor;
-	static private final Color selectColor = Globals.selectColor;
+	static private final Font boldUIFont = Globalx.boldUIFont;
+	static private final Font textFont = Globalx.textFont;
+	static private final Color componentBGColor = Globalx.componentBGColor;
+	static private final Color selectColor = Globalx.selectColor;
 	
 	static public void setupUIDefaults() {
 		UIManager.put("CheckBox.font", boldUIFont);

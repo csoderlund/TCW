@@ -915,7 +915,7 @@ public class Library
 	public void doLoadGene()
 	{
 		if (mSeqFile == null) return;
-		Utils.singleLineMsg("loading " + mSeqFile.getName() + "...");
+		Utils.singleLineMsg("loading " + mSeqFile.getName());
 		try {
 			mDB.tableCheckAddColumn("assem_msg", "hasLoc", "tinyint", "");
 			PreparedStatement ps = mDB.prepareStatement("insert into clone "
@@ -1035,7 +1035,7 @@ public class Library
 		mID = mDB.lastID();
 		
 		if (mSeqFile == null) return;
-		Utils.singleLineMsg("loading " + mSeqFile.getName() + "...");
+		Utils.singleLineMsg("loading " + mSeqFile.getName());
 
 		PreparedStatement ps = mDB.prepareStatement("insert into clone (cloneid, origid, libid, LID,"
 						+ "sequence,quality,sense,length,mate_CID,source)"
@@ -1272,7 +1272,7 @@ public class Library
 	public void matePairs() throws Exception
 	{
 		if (paired() == 0) return;
-		Utils.singleLineMsg(mIDStr + ":assigning mate pairs....");		
+		Utils.singleLineMsg(mIDStr + ": assigning mate pairs");		
 		PreparedStatement ps = mDB.prepareStatement("update clone set mate_CID=? where CID=? ");
 
 		for (String cname : mClones.keySet())
@@ -1642,7 +1642,7 @@ public class Library
 					nAdd++;
 					if (nAdd%10000==0) 
 					{
-						Utils.singleLineMsg(nAdd + " loaded          ");
+						Utils.singleLineMsg(nAdd + " loaded");
 						ps.executeBatch();		
 					}
 				}

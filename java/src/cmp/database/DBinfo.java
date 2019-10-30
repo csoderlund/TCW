@@ -14,97 +14,15 @@ import util.methods.Static;
  * Load basic information so the queries do not have to be repeated.
  */
 public class DBinfo {
-	/****************************************************************
-	 * viewMulti on startup
-	 */
+	
+	// this gets called after every major step in runMulti. on startup of viewMulti and on compute summary
 	public DBinfo(DBConn dbc) {
 		mDB = dbc;
-		loadFromInfoTable();
-		loadFromCompute();
+		
+		setASM();    // need to read assembly table for species and which are protein
+		setMethod(); // need to read method table for Name and Prefix
 	}
 	
-	public void loadFromInfoTable() {
-		try {
-			ResultSet rs = mDB.executeQuery(
-				"select allTaxa, allSeqLib, allSeqDE, pairInfo from info");
-			if (!rs.next()) ErrorReport.die("Unexplained error when reading columns");
-			
-			String sTaxa = rs.getString(1);
-			String ssLib = rs.getString(2);
-			String ssDE = rs.getString(3);
-			String sumStats = rs.getString(4);
-			rs.close();
-			
-			hasSumStats = (sumStats==null || sumStats.equals("")) ? false : true;
-			
-			if (sTaxa == null || sTaxa.equals("")) setTaxa();
-			else allTaxa = sTaxa.trim().split(" ");
-			
-			if (ssLib == null || ssLib.equals("") || ssDE == null || ssDE.equals("")) 
-				setSeqLibDE();
-			else {
-				allSeqLib = ssLib.trim().split(" ");
-				allSeqDE  = ssDE.trim().split(" ");
-			}
-		}
-		catch(Exception e) {ErrorReport.die(e, "Error loading columns");}
-	}
-	private void loadFromCompute() {
-		try {
-			setASM();    // need to read assembly table for species and which are protein
-			setMethod(); // need to read method table for Name and Prefix
-			
-			cntSeq = mDB.executeCount("select count(*) from unitrans");
-			cntPair = mDB.executeCount("select count(*) from pairwise");
-			cntGrp = mDB.executeCount("select count(*) from pog_groups");
-			
-			if (cntPair>0) {
-				int cnt = mDB.executeCount("select count(*) from pairwise " +
-						" where ntSim>0 limit 1");
-				if (cnt>0) hasNTblast=true;
-				
-				cntStats = mDB.executeCount("select count(*) from pairwise where nAlign>0");
-				if (cntStats>0) hasStats=true;
-				
-				cntKaKs = mDB.executeCount("select count(*) from pairwise where kaks>=" + Globalx.dNullVal); 
-				if (cntKaKs>0) hasKaKs=true;
-				
-				// PCC is between -1 and 1, was checking for >0
-				cntPCC = mDB.executeCount("select count(*) from pairwise where PCC!=" + Globalx.dNoVal); 
-				if (cntPCC>0) hasPCC=true;
-				
-				cntPairGrp = mDB.executeCount("select count(*) from pairwise where hasGrp>0");
-				
-				cntGrpPCC = mDB.executeCount("select count(*) from pog_groups where perPCC > -1");
-				
-				cntMultiScore = mDB.executeCount("select count(*) from pog_groups where conLen>0");
-				if (cntMultiScore>0) hasMultiScore=true;
-				int cntDBalign = mDB.executeCount("select count(*) from pog_groups where conSeq is not null limit 1");
-				if (cntDBalign>0) hasDBalign=true;
-			}
-			int cnt = mDB.executeCount("select count(*) from go_info limit 1");
-			hasGOs = (cnt>0);
-		}
-		catch (Exception e) {ErrorReport.prtReport(e, "loading counts");}
-	}
-	/*******************************************************
-	 * Called from CompilePanel after 'Build Database'
-	 */
-	public void updateSTCW() { // recompute all values. This automatically loads for 'gets'
-		try {
-			setASM();
-			setSeqLibDE();
-			
-			mDB.executeUpdate("update info set " +
-					" allASM = " + join(allsTCW) + "," + 
-					" allSeqLib=" + join(allSeqLib) + "," + 
-					" allSeqDE=" + join(allSeqDE) + "," +
-					" hasDE=" + allSeqDE.length + "," +
-					" hasLib=" + allSeqLib.length 
-					);
-		}
-		catch(Exception e) {ErrorReport.die(e, "Error updating info species");}
-	}
 	private void setASM() {
 		try {
 			ResultSet rs = mDB.executeQuery("select ASMstr, isPep, ASMid from assembly");
@@ -121,9 +39,7 @@ public class DBinfo {
 			}
 			rs.close();
 			
-			if      (cntAAdb>0 && cntNTdb==0) isAAonly=true;
-			else if (cntNTdb>0 && cntAAdb==0) isNTonly=true;
-			else isMixed=true;
+			if (cntNTdb>0 && cntAAdb==0) isNTonly=true;
 			
 			allsTCW = new String [col.size()];
 			for(int x=0; x<allsTCW.length; x++) {
@@ -133,47 +49,7 @@ public class DBinfo {
 		}
 		catch (Exception e){ErrorReport.prtReport(e, "Error getting datasets");}	
 	}
-	private void setSeqLibDE() {
-		try {		
-			Vector <String> colR = new Vector <String> ();
-			Vector <String> colD = new Vector <String> ();
-			int l1 = Globals.PRE_LIB.length(); 
-			int l2 = Globals.PRE_DE.length();
-			
-			ResultSet rs = mDB.executeQuery("Show columns from unitrans");
-			while (rs.next()) {
-				String colName = rs.getString(1);
-				if(colName.startsWith(Globals.PRE_LIB)) colR.add(colName.substring(l1));
-				else if(colName.startsWith(Globals.PRE_DE)) colD.add(colName.substring(l2));
-			}	
-			allSeqLib = new String[colR.size()];
-			for(int x=0; x<allSeqLib.length; x++) allSeqLib[x] = colR.get(x);
-			
-			allSeqDE = new String[colD.size()];
-			for(int x=0; x<allSeqDE.length; x++) allSeqDE[x] = colD.get(x);
-
-			colR.clear(); colD.clear();
-			rs.close();			
-		}
-		catch(Exception e) {ErrorReport.prtReport(e, "Error loading dataset names");}
-	}
-
-	/*********************************************
-	 * Called from CompilePanel after 'Add Methods' 
-	 */
-	public void updateMethod() {
-		try {
-			setMethod();
-			setTaxa();
-			
-			mDB.executeUpdate("update info set " + 
-					" allTaxa= " + join(allTaxa) + "," + 
-					" allMethods=" + join(methodName) 
-					);
-		}
-		catch(Exception e) {ErrorReport.die(e, "Error updating info method");}
-		
-	}
+	
 	private void setMethod() { // called on update and read
 		try {
 			nMethods = mDB.executeCount("select count(*) from pog_method");
@@ -199,6 +75,64 @@ public class DBinfo {
 		}
 		catch (Exception e){ErrorReport.prtReport(e, "Error getting methods");}
 	}
+	
+	/***  set on demand ***/
+	private void setCounts() {
+		try {
+			cntSeq = mDB.executeCount("select count(*) from unitrans");
+			cntPair = mDB.executeCount("select count(*) from pairwise");
+			cntGrp = mDB.executeCount("select count(*) from pog_groups");
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "loading counts");}
+	}
+	
+	private void setFromInfoTable() {
+		try {
+			ResultSet rs = mDB.executeQuery(
+				"select allTaxa, allSeqLib, allSeqDE, pairInfo from info");
+			if (!rs.next()) ErrorReport.die("Unexplained error when reading columns");
+			
+			String sTaxa = rs.getString(1);
+			String ssLib = rs.getString(2);
+			String ssDE = rs.getString(3);
+			rs.close();
+			
+			if (sTaxa == null || sTaxa.equals("")) setTaxa();
+			else allTaxa = sTaxa.trim().split(" ");
+			
+			if (ssLib == null || ssLib.equals("") || ssDE == null || ssDE.equals("")) 
+				setSeqLibDE();
+			else {
+				allSeqLib = ssLib.trim().split(" ");
+				allSeqDE  = ssDE.trim().split(" ");
+			}
+		}
+		catch(Exception e) {ErrorReport.die(e, "Error loading columns");}
+	}
+	private void setSeqLibDE() {
+		try {		
+			Vector <String> colR = new Vector <String> ();
+			Vector <String> colD = new Vector <String> ();
+			int l1 = Globals.PRE_LIB.length(); 
+			int l2 = Globals.PRE_DE.length();
+			
+			ResultSet rs = mDB.executeQuery("Show columns from unitrans");
+			while (rs.next()) {
+				String colName = rs.getString(1);
+				if(colName.startsWith(Globals.PRE_LIB)) colR.add(colName.substring(l1));
+				else if(colName.startsWith(Globals.PRE_DE)) colD.add(colName.substring(l2));
+			}	
+			allSeqLib = new String[colR.size()];
+			for(int x=0; x<allSeqLib.length; x++) allSeqLib[x] = colR.get(x);
+			
+			allSeqDE = new String[colD.size()];
+			for(int x=0; x<allSeqDE.length; x++) allSeqDE[x] = colD.get(x);
+
+			colR.clear(); colD.clear();
+			rs.close();			
+		}
+		catch(Exception e) {ErrorReport.prtReport(e, "Error loading dataset names");}
+	}
 	private void setTaxa() {
 		try {
 			ResultSet rs = mDB.executeQuery("SELECT taxa FROM pog_groups GROUP BY taxa ORDER BY taxa ASC");
@@ -219,6 +153,64 @@ public class DBinfo {
 		catch(Exception e) {ErrorReport.prtReport(e, "Error loading taxa");}
 	}
 	
+	
+	private void setIfPairs() {
+		try {
+			if (cntPair==-1) setCounts();
+			if (cntPair>0) {
+				cntStats =      mDB.executeCount("select count(*) from pairwise where nAlign>0");
+				cntKaKs =       mDB.executeCount("select count(*) from pairwise where kaks>=" + Globalx.dNullVal); 
+				cntPCC =        mDB.executeCount("select count(*) from pairwise where PCC!=" + Globalx.dNoVal); 
+				cntPairGrp =    mDB.executeCount("select count(*) from pairwise where hasGrp>0");
+				cntMultiScore = mDB.executeCount("select count(*) from pog_groups where conLen>0");
+				
+				int cnt = mDB.executeCount("select count(*) from pairwise " +
+						" where ntSim>0 limit 1");
+				if (cnt>0) hasNTblast=true;
+				int cntDBalign = mDB.executeCount("select count(*) from pog_groups " +
+						" where conSeq is not null limit 1");
+				if (cntDBalign>0) hasDBalign=true;
+			}
+			else {
+				cntStats=cntPCC=cntKaKs=cntPairGrp=cntMultiScore=0;
+			}
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "loading counts");}
+	}
+		
+	/*******************************************************
+	 * XXX Updates from runMultiTCW
+	 */
+	// Called from CompilePanel after 'Build Database'
+	public void updateSTCW() { // recompute all values. This automatically loads for 'gets'
+		try {
+			setASM();
+			setSeqLibDE();
+			
+			mDB.executeUpdate("update info set " +
+					" allASM = " + join(allsTCW) + "," + 
+					" allSeqLib=" + join(allSeqLib) + "," + 
+					" allSeqDE=" + join(allSeqDE) + "," +
+					" hasDE=" + allSeqDE.length + "," +
+					" hasLib=" + allSeqLib.length 
+					);
+		}
+		catch(Exception e) {ErrorReport.die(e, "Error updating info species");}
+	}
+	//Called from CompilePanel after 'Add Methods' 
+	public void updateMethod() {
+		try {
+			setMethod();
+			setTaxa();
+			
+			mDB.executeUpdate("update info set " + 
+					" allTaxa= " + join(allTaxa) + "," + 
+					" allMethods=" + join(methodName) 
+					);
+		}
+		catch(Exception e) {ErrorReport.die(e, "Error updating info method");}
+		
+	}
 	private String join(String [] s) {
 		if (s==null) return "'" + "" + "'";
 		StringBuffer buffer = new StringBuffer();
@@ -227,64 +219,8 @@ public class DBinfo {
 		
 		return "'" + buffer.toString() + "'";
 	}
-	/*******************************************************
-	 * Gets
-	 */
-	public String [] getTaxa() { return allTaxa; }
-	public String [] getSeqDE() { return allSeqDE; }
-	public String [] getSeqLib() { return allSeqLib; }
-	
-	public int [] getMethodIDs() { return methodID;}
-	public int getMethodID(String name) { 
-		for (int i=0; i<nMethods; i++) {
-			if (methodPrefix[i].equals(name)) return methodID[i];
-		}
-		Out.debug("No method with name " + name);
-		return 0;
-	}
-	public String [] getMethods() { return methodName;}
-	public String [] getMethodPrefix() { return methodPrefix;}
-	public String getStrMethodPrefix() { return allPrefix;}
-	
-	public int nAAdb() { return cntAAdb;}
-	public int nNTdb() { return cntNTdb;}
-	
-	public String [] getASM() { return allsTCW;}
-	public int getASMnum() { return allsTCW.length;}
-	public HashMap <String, Boolean>getAsmPrMap() {return asmIsPrMap;}
-	public HashMap <String, Integer>getAsmIdxMap() {return asmIdxMap;}
-	public int getAsmIdx(String asmName) {
-		if (asmIdxMap.containsKey(asmName)) return asmIdxMap.get(asmName);
-		Out.PrtError("NO dataset name " + asmName);
-		return 0;
-	}
-	
-	public String getSeqDESQL() { 
-		if (allSeqDE==null || allSeqDE.length==0) return "";
-		String sql = Globals.PRE_DE + allSeqDE[0];
-		for (int i=1; i<allSeqDE.length; i++) sql += "," + Globals.PRE_DE + allSeqDE[i];
-		return sql;
-	}
-	public String getSeqLibSQL() { 
-		if (allSeqLib==null || allSeqLib.length==0) return "";
-		String sql = Globals.PRE_LIB + allSeqLib[0];
-		for (int i=1; i<allSeqLib.length; i++) sql += "," + Globals.PRE_LIB + allSeqLib[i];
-		return sql;
-	}
-	
-	public boolean isReservedWords(String w) {
-		try {
-			String ww = w.toLowerCase();
-			HashSet <String> words = new HashSet <String> ();
-			ResultSet rs = mDB.executeQuery("SELECT name FROM mysql.help_keyword");
-			while (rs.next()) words.add(rs.getString(1).toLowerCase());
-			return words.contains(ww);
-		}
-		catch (Exception e) {ErrorReport.prtReport(e, "Getting reserved words");}
-		return false;
-	}
 	/*********************************************************
-	 * Want to show between 20 and 1000 of each
+	 * XXX SAMPLEs: Want to show between 20 and 1000 of each
 	 */
 	private final int minList=20, maxList=1000;
 	/*********************************************************
@@ -295,6 +231,8 @@ public class DBinfo {
 	 */
 	public String getSampleGrp() {
 		try {
+			if (cntGrp==-1) setCounts();
+			
 			String x = mDB.executeString("select grpSQL from info");
 			if (x!=null && x!="" && x.contains(":")) return x;
 			if (cntGrp==0) return "Show all : 1"; 
@@ -355,7 +293,9 @@ public class DBinfo {
 	 * 3. All or limit
 	 */
 	public String getSamplePair() {
-		try { // added for v2.6
+		try { 
+			if (cntPair==-1) setCounts();
+			
 			String x = mDB.executeString("select pairSQL from info");
 			if (x!=null && x.contains(":")) return x;
 			if (cntPair==0) return "Show all : 1";
@@ -408,6 +348,7 @@ public class DBinfo {
 	 */
 	public String getSampleSeq() {
 		try {
+			if (cntSeq==-1) setCounts();
 			String x = mDB.executeString("select seqSQL from info");
 			if (x!=null && x.contains(":")) return x;
 			
@@ -476,48 +417,136 @@ public class DBinfo {
 		catch (Exception e){ErrorReport.prtReport(e, "Creating seq query");}
 		return "Show all: 1";
 	}
-	public boolean hasNegDE() {
-		if (cntNegDE!=1) return (cntNegDE>0);
-		
-		try {
-			ResultSet rs=null;
-			for (int i=0; i< allSeqDE.length && cntNegDE==-1; i++) {
-				String col = Globals.PRE_DE + allSeqDE[i];
-				rs = mDB.executeQuery("select UTstr from unitrans where " + 
-						 col + " < 0  limit 1"); 
-				if (rs.first()) cntNegDE=1;
-			}
-			if (cntNegDE==-1) cntNegDE=0;
-			return (cntNegDE>0);
-		}
-		catch (Exception e) {ErrorReport.prtReport(e, "Could not get GO cnt"); return false;}
+	/*******************************************************
+	 * XXX Gets
+	 */
+	/** Called at startup **/
+	// setCounts
+	public int getCntSeq()  {
+		if (cntSeq==-1) setCounts();
+		return cntSeq;
 	}
-	public boolean hasNTblast() { return hasNTblast;}
-	public boolean hasSumStats() {return hasSumStats;}
-	public boolean hasStats() {return hasStats;}
-	public boolean hasKaKs() {return hasKaKs;}
-	public boolean hasPCC() {return hasPCC;}
-	public boolean isAAonly() {return isAAonly;}
+	public int getCntGrp()  {
+		if (cntGrp==-1) setCounts();
+		return cntGrp;
+	} 
+	public int getCntPair() {
+		if (cntPair==-1) setCounts();
+		return cntPair;
+	} 
+	// setASM
+	public int nAAdb() {return cntAAdb;}
+	public int nNTdb() {return cntNTdb;}
+	public String [] getASM() { return allsTCW;}
+	public int getAsmIdx(String asmName) { 
+		if (asmIdxMap.containsKey(asmName)) return asmIdxMap.get(asmName);
+		Out.PrtError("NO dataset name " + asmName);
+		return 0;
+	}
 	public boolean isNTonly() {return isNTonly;}
-	public boolean isMixed() {return isMixed;}
-	public boolean hasAA() {return (isAAonly || isMixed);}
-	public boolean hasGOs() {return hasGOs;}
-	public boolean hasMultiScore() {return hasMultiScore;}
-	public boolean hasDBalign() {return hasDBalign;}
-	public boolean hasRPKM() {return (allSeqLib!=null && allSeqLib.length>0);}
 	
-	public int getCntSeq() {return cntSeq;}
-	public int getCntGrp() {return cntGrp;} 
-	public int getCntPair() {return cntPair;} // pairs in table
-	public int getCntPCC() {return cntPCC;}  // pairs with PCC = should equal cntPair
-	public int getCntGrpPCC() {return cntGrpPCC;}  // pairs with PCC = should equal cntPair
-	public int getCntMultiScore() {return cntMultiScore;}
+	// setMethod
+	public int getMethodID(String name) { // 2
+		for (int i=0; i<nMethods; i++) {
+			if (methodPrefix[i].equals(name)) return methodID[i];
+		}
+		Out.debug("No method with name " + name);
+		return 0;
+	}
+	public String [] getMethodPrefix() { return methodPrefix;}
+	public String getStrMethodPrefix() { return allPrefix;}
 	
-	public void resetGO() { // executed after LoadSingleGO
+	/*** Set on demand ***/
+	// Info table
+	public String [] getTaxa() { 
+		if (allTaxa==null) setFromInfoTable();
+		return allTaxa; 
+	}
+	public String [] getSeqDE() { 
+		if (allSeqLib==null) setFromInfoTable();
+		return allSeqDE; 
+	}
+	public String [] getSeqLib() { 
+		if (allSeqLib==null) setFromInfoTable();
+		return allSeqLib; 
+	}
+	public String getSeqDESQL() { 
+		if (allSeqDE==null) setFromInfoTable();
+		if (allSeqDE.length==0) return "";
+		
+		String sql = Globals.PRE_DE + allSeqDE[0];
+		for (int i=1; i<allSeqDE.length; i++) sql += "," + Globals.PRE_DE + allSeqDE[i];
+		return sql;
+	}
+	public String getSeqLibSQL() { 
+		if (allSeqLib==null) setFromInfoTable();
+		if (allSeqLib.length==0) return "";
+		
+		String sql = Globals.PRE_LIB + allSeqLib[0];
+		for (int i=1; i<allSeqLib.length; i++) sql += "," + Globals.PRE_LIB + allSeqLib[i];
+		return sql;
+	}
+	public boolean hasRPKM() { 
+		if (allSeqLib==null) setFromInfoTable();
+		return (allSeqLib.length>0);
+	}
+	
+	// setIfPairs (all cnts set to zero on setIfPairs if no Pairs)
+	public int getCntPCC() {
+		if (cntPCC==-1) setIfPairs();
+		return cntPCC;
+	}  
+	public int getCntKaKs() {  
+		if (cntKaKs==-1) setIfPairs();
+		return cntKaKs;
+	}
+	public int getCntMultiScore() {
+		if (cntMultiScore==-1) setIfPairs();
+		return cntMultiScore;
+	}
+	public int getCntStats() {
+		if (cntStats==-1) setIfPairs();
+		return cntStats;
+	} 
+	public int getCntPairGrp() { 
+		if (cntPairGrp==-1) setIfPairs();
+		return cntPairGrp;
+	} 
+	public boolean hasPCC() { 
+		if (cntPCC==-1) setIfPairs();
+		return (cntPCC>0);
+	}
+	public boolean hasStats() {
+		if (cntStats==-1) setIfPairs();
+		return (cntStats>0);
+	}
+	public boolean hasMultiScore() { 
+		if (cntMultiScore==-1) setIfPairs();
+		return (cntMultiScore>0);
+	}
+	public boolean hasKaKs() { 
+		if (cntKaKs==-1) setIfPairs();
+		return (cntKaKs>0);
+	}
+	public boolean hasNTblast() { 
+		if (cntStats==-1) setIfPairs();
+		return hasNTblast;
+	}
+	public boolean hasDBalign() { 
+		if (cntStats==-1) setIfPairs();
+		return hasDBalign;
+	}
+	
+	// set in getCntGO
+	public boolean hasGOs() { 
+		if (cntGO == -1) getCntGO();
+		return (cntGO>0);
+	}
+	public void resetGO() { //executed after LoadSingleGO
 		cntGO=-1;
 		getCntGO();
 	}
-	public int getCntGO() { 
+	public int getCntGO() {  
 		if (cntGO ==-1) {
 			try {
 				cntGO = mDB.executeCount("select count(*) from go_info");
@@ -527,11 +556,7 @@ public class DBinfo {
 		return cntGO;
 	};
 
-	public int getCntStats() {return cntStats;} // pairs with stats = should equal cntPairGrp
-	
-	public int getCntPairGrp() { return cntPairGrp;} // pairs with pairwise.hasGrp
-	public int getCntKaKs() { return cntKaKs;}
-	public String [] getTermTypes() {
+	public String [] getTermTypes() { // not called
 		if (termTypes!=null) return termTypes;
 		try {
 			ResultSet rs = mDB.executeQuery("SHOW COLUMNS FROM go_info LIKE 'term_type'");
@@ -550,6 +575,33 @@ public class DBinfo {
 		return termTypes;
 	}
 	
+	public boolean hasNegDE() { // not called
+		if (cntNegDE!=1) return (cntNegDE>0);
+		
+		try {
+			ResultSet rs=null;
+			for (int i=0; i< allSeqDE.length && cntNegDE==-1; i++) {
+				String col = Globals.PRE_DE + allSeqDE[i];
+				rs = mDB.executeQuery("select UTstr from unitrans where " + 
+						 col + " < 0  limit 1"); 
+				if (rs.first()) cntNegDE=1;
+			}
+			if (cntNegDE==-1) cntNegDE=0;
+			return (cntNegDE>0);
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "Could not get GO cnt"); return false;}
+	}
+	public boolean isReservedWords(String w) { 
+		try {
+			String ww = w.toLowerCase();
+			HashSet <String> words = new HashSet <String> ();
+			ResultSet rs = mDB.executeQuery("SELECT name FROM mysql.help_keyword");
+			while (rs.next()) words.add(rs.getString(1).toLowerCase());
+			return words.contains(ww);
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "Getting reserved words");}
+		return false;
+	}
 	/**********************************************************/
 	private String [] allsTCW=null;
 	private HashMap <String, Integer> asmIdxMap = new HashMap <String, Integer> ();
@@ -557,20 +609,19 @@ public class DBinfo {
 	
 	private String [] allSeqDE=null, allSeqLib=null;
 	
-	private boolean isAAonly=false, isNTonly=false, isMixed=false;
 	private String [] termTypes = null;
 	
-	private int nMethods=0;
+	private int nMethods=-1;
 	private String allPrefix="";
 	private int [] methodID=null;
 	private String [] methodName=null, methodPrefix=null;
 	private String [] allTaxa=null;
 	
-	private boolean hasStats=false, hasKaKs=false, hasPCC=false, hasMultiScore=false, hasDBalign=false;
-	private boolean hasSumStats=false, hasGOs=false, hasNTblast=false;
-	private int cntAAdb=0, cntNTdb=0, cntSeq=0, cntGrp=0, cntPair=0, cntGO=-1;
-	private int cntStats=0, cntKaKs=0, cntPairGrp=0, cntPCC=0, cntMultiScore=0;
-	private int cntGrpPCC=0;
+	private boolean hasDBalign=false, hasNTblast=false, isNTonly=false;
+	
+	private int cntAAdb=0, cntNTdb=0;
+	private int cntSeq=-1, cntGrp=-1, cntPair=-1, cntGO=-1;
+	private int cntStats=-1, cntKaKs=-1, cntPairGrp=-1, cntPCC=-1, cntMultiScore=-1;
 	private int cntNegDE=-1; // not used right now
 	
 	private DBConn mDB=null;

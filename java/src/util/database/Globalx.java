@@ -7,10 +7,11 @@ import java.text.DecimalFormat;
 // shared by sTCW and mTCW
 // They both have their own database/Globals.java
 public class Globalx {
-	public static final String strRelDate = "(10-Aug-19)"; 
-	public static final String strTCWver = "3.0";
+	public static final String strRelDate = "(30-Oct-19)"; 
+	public static final String strTCWver = "3.0.1";
 	public static final String URL = "http://www.agcol.arizona.edu ";
 	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate;
+	public static final String error="***";
 	
 	public final static String diamondSuffix = ".dmnd";
 	public final static String usearchSuffix = ".usch"; // not tested for awhile

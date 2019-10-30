@@ -4,8 +4,8 @@ import java.io.BufferedWriter;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Vector;
 
+import sng.assem.enums.LogLevel;
 import util.database.DBConn;
 
 
@@ -50,7 +50,6 @@ public class Contig
 				}				
 			}
 		}
-
 	}
 
 	public String idStr()
@@ -70,17 +69,24 @@ public class Contig
 		if (mSC1 != null) numWritten += mSC1.writeClones(w, qw, db, ctgWritten);
 		if (mSC2 != null) numWritten += mSC2.writeClones(w, qw, db, ctgWritten);
 		return numWritten;
-	}	
+	}
+	// CASZ 1Sept19 MariaDB 10.4.7 fails to insert if an openTransaction is performed before this is called
+	// some of the calls to upload had open/close and some did not; they have all been removed.
+	// CASZ 24Sept19 - the doUnpairedCliqueUpload lock/unlock also screwed it up (or maybe it was only this?)
 	public void upload(DBConn db, int tcid) throws Exception
 	{
 			int id1 = mSC1.mID;
-			int id2 = (mSC2 != null ? mSC2.mID : 0);
-			db.executeUpdate("insert into ASM_scontig (AID,CTID1,CTID2,TCID) VALUES(" + mAID + "," +
-				id1 + "," + id2 + "," + tcid + ")");
+			int id2 = (mSC2 != null) ? mSC2.mID : 0;
+			
+			db.executeUpdate("insert into ASM_scontig (AID,CTID1,CTID2,TCID) " +
+						"VALUES(" + mAID + "," + id1 + "," + id2 + "," + tcid + ")");
+			
 			mID = db.lastID();
+			
 			db.executeUpdate("update ASM_scontig set merged_to=" + mID + " where SCID=" + mID );
 			db.executeUpdate("update contig set SCTGID=" + mID + " where CTGID=" + id1);
-			if (id2 > 0) db.executeUpdate("update contig set SCTGID=" + mID + " where CTGID=" + id2);
+			if (id2 > 0) 
+				db.executeUpdate("update contig set SCTGID=" + mID + " where CTGID=" + id2);
 	}
 	public void setCapBuryDone(boolean done, DBConn db) throws Exception
 	{

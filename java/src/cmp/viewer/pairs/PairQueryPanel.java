@@ -293,9 +293,7 @@ public class PairQueryPanel extends JPanel {
 		page.add(Box.createVerticalStrut(rsep));	
 		
 		// Has KaKs Yes No Either
-		row = Static.createRowPanel();
-		page.add(new JLabel("  KaKs"));
-		page.add(Box.createVerticalStrut(rsep));
+		
 		
 		row = Static.createRowPanel();
 		row.add(Box.createHorizontalStrut(15));
@@ -319,18 +317,23 @@ public class PairQueryPanel extends JPanel {
 		
 		group = new ButtonGroup();
 		group.add(kaZeroButton); group.add(kaEQksButton); group.add(kaLTksButton);
-		group.add(kaGTksButton);  group.add(hasKaKsButton);  group.add(ignKaKsButton);
-			
-		page.add(row);
-		page.add(Box.createVerticalStrut(5));
+		group.add(kaGTksButton);  group.add(hasKaKsButton);  group.add(ignKaKsButton);	
 		
 		row = Static.createRowPanel();
 		rgKaKs = new Range("KaKs", "0.0", "", "kaks", "Selective strength");
 		row.add(rgKaKs);row.add(Box.createHorizontalStrut(5));
 		rgPval = new Range("p-value", "0.0", "0.05",  "pVal", "Fisher exact test of KaKs value");
-		row.add(rgPval);
-		page.add(row);
 		
+		if ((theViewerFrame.getInfo().hasKaKs())) {
+			page.add(new JLabel("  KaKs"));
+			page.add(Box.createVerticalStrut(rsep));
+			
+			page.add(row);
+			page.add(Box.createVerticalStrut(5));
+		
+			row.add(rgPval);
+			page.add(row);
+		}
 		return page;
 	}
 	private JPanel createDatasetPanel() {

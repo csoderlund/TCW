@@ -8,6 +8,7 @@ import java.util.Vector;
 
 import util.database.DBConn;
 import util.database.HostsCfg;
+import util.database.Globalx;
 import util.methods.ErrorReport;
 import util.ui.UIHelpers;
 
@@ -20,10 +21,9 @@ public class DBInfo {
 			DBConn dbc = hostsObj.getDBConn("mysql");
 			
 			ResultSet rs = dbc.executeQuery("show databases");
-			String dbName;
 			while (rs.next()) 
 			{
-				dbName = rs.getString(1);
+				String dbName = rs.getString(1);
 				if ((dbName.startsWith(Globals.STCW))) list.add(dbName);
 			}
 			rs.close();
@@ -36,9 +36,9 @@ public class DBInfo {
 				System.exit(0);
 			}
 			Vector <DBInfo> dbList = new Vector <DBInfo> ();
-			for (String n : list) {
-				DBConn mdb = hostsObj.getDBConn(n);
-				DBInfo db = setDBParams(mdb, n, dbstr);
+			for (String dbName : list) {
+				DBConn mdb = hostsObj.getDBConn(dbName);
+				DBInfo db = setDBParams(mdb, dbName, dbstr);
 				if (db!=null) dbList.add(db);
 				mdb.close();
 			}
@@ -54,8 +54,12 @@ public class DBInfo {
 	{
         ResultSet rs = null;
         try {
+        		DBInfo db = new DBInfo();
+	        db.dbName = dbName;
+	        db.id = Globalx.error;
+	        
         		if (!mdb.tableExists("assembly")) {
-        			prtErr(dbName, dbstr);
+        			System.err.println("Error: corrupt database  '" + dbName);
         			return null;
         		}
             String strQ = "SELECT username, projectpath, assemblydate, annotationdate, assemblyid " +
@@ -63,12 +67,10 @@ public class DBInfo {
  
             rs = mdb.executeQuery ( strQ );
             if ( !rs.next() ) {
-            		prtErr(dbName, dbstr);
+            		System.err.println(Globalx.error + "Database not instantiated  '" + dbName + "' -- ignoring");
             		rs.close();
-	            	return null;
+        			return db;
             }
-            DBInfo db = new DBInfo();
-            db.dbName = dbName;
             
             db.id = rs.getString("assemblyid");
             db.username = rs.getString("username");
@@ -89,12 +91,7 @@ public class DBInfo {
         }
         return null;
 	}
-	static private void prtErr(String dbName, String dbstr) {
-		if (dbstr!="" && dbName.equals(dbstr))
-			System.err.println("Error: incomplete database '" + dbName + "'");
-		else if (dbstr=="")
-			System.err.println("Error: incomplete database  '" + dbName + "' -- ignoring");
-	}
+	
 	/***** DBInfo method *********************************/
 	public boolean checkDBver(HostsCfg hostsObj) {
 		if (dbVerStr.equals(Version.strDBver)) return true;
@@ -127,11 +124,7 @@ public class DBInfo {
 	}
 	public String getID() {return id;}
 	public String getdbName() {return dbName;}
-	String id;
-	String dbName;
-	String username;
-	String projectpath;
-	String assemblydate;
-	String annotationdate;
-	String dbVerStr;
+	
+	private String id="", username="", projectpath="", assemblydate="", annotationdate="", dbVerStr="";
+	private String dbName;
 }

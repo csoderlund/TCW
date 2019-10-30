@@ -35,7 +35,7 @@ public class Overview {
 		Out.Print("Using Cover values " + c1 + " " + c2);
 	}
 	/*****************************************************
-	 * called from CoreMain, ManagerFrame (Get Start if pja_msg==null), QRFrame, Schema (updateTo41)
+	 * called from runSTCMain, ManagerFrame (Get Start if pja_msg==null), QRFrame, Schema (updateTo41)
 	 */
 	public String createOverview(Vector<String> lines) throws Exception
 	{
@@ -79,9 +79,14 @@ public class Overview {
                 	lines.add(meta_msg);
             }
             else { // Update overview from viewSingleTCW
-            		if (STCWMain.COVER1!=0) COVER1 = STCWMain.COVER1;
-            		if (STCWMain.COVER2!=0) COVER2 = STCWMain.COVER2;
-            		Out.PrtSpMsg(1, "Using Cover values " + COVER1 + " " + COVER2);
+            		if (STCWMain.COVER1!=0) {
+            			COVER1 = STCWMain.COVER1;
+            			Out.PrtSpMsg(1, "Using Cover1 values " + COVER1);
+            		}
+            		if (STCWMain.COVER2!=0) {
+            			COVER2 = STCWMain.COVER2;
+            			Out.PrtSpMsg(1, "Using Cover2 values " + COVER2);
+            		}
                 	computeOverview(lines);
             }     
             return;
@@ -100,7 +105,8 @@ public class Overview {
         	try {   
         		long stime = Out.getTime();
             setFlags();
-    		    if (!computeSections(lines, true)) 	 
+    		    computeSections(lines, true); 
+    		    if (lines.size()<3)
     		        lines.add("Error creating overview");
         	    
         		String text = "";
@@ -120,16 +126,20 @@ public class Overview {
             }
             rset.close();
             
-            // second part is separate so the message is not so long
-            Vector <String> mlines = new Vector <String> ();
-            finalAnnoDBs(mlines);
-            finalLegend(mlines);
             
             String mtext = "";
-    			for (int i=0; i< mlines.size(); i++) {
-    				mtext = mtext + mlines.get(i) + "\n";
-    				lines.add(mlines.get(i));
-    			}
+            if (hasDBhitData) {
+            		// second part is separate so the message is not so long
+                Vector <String> mlines = new Vector <String> ();
+               
+            	 	finalAnnoDBs(mlines);
+                finalLegend(mlines);
+                 
+	    			for (int i=0; i< mlines.size(); i++) {
+	    				mtext = mtext + mlines.get(i) + "\n";
+	    				lines.add(mlines.get(i));
+	    			}
+            }
     			String fullText = text + "\n" + mtext;
     			if (mDB.tableColumnExists("assem_msg", "meta_msg"))
     				mDB.executeUpdate("update assem_msg set meta_msg = \"" + mtext + "\" where AID=1"); 
@@ -193,7 +203,6 @@ public class Overview {
 	        if (strAssmID==null || strAssmID=="" || strAssmID.contains("Not assembled")) {
 	        		hasTranscripts=false;
 	        		lines.add( "Project: Not instantiated yet");
-	        		return false;
 	        }
 	        else {
 	        		lines.add( "Project: " + strAssmID  + "   #Seqs: " + dff.format(numSeqs)); 
@@ -203,6 +212,8 @@ public class Overview {
 	        
 	        	if (!inputExp(lines)) return false;
 	        	if (!inputSeq(lines)) return false;
+	        	
+	        	if (hasTranscripts==false) return false;
 	        return true;
 	    }
         	catch ( Exception err ) {
@@ -1321,6 +1332,7 @@ public class Overview {
     }
     private void writeHTML(String text) {
     		try {
+    			if (strAssmID==null) return; // CASz 10oct19
     			String file=strAssmID + ".html";
     			if (new File("./projects").exists()) {
     				File h = new File("./projects/" + Globalx.HTMLDIR);

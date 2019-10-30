@@ -310,6 +310,7 @@ public class AnnoOptionsPanel extends JPanel {
 	}
 	
 	private void createAnnoDBOptionPanel() {
+		try {
 		pnlAnnoDBOptions = new JPanel();
 		pnlAnnoDBOptions.setLayout(new BoxLayout(pnlAnnoDBOptions, BoxLayout.PAGE_AXIS));
 		pnlAnnoDBOptions.setBackground(Globals.BGCOLOR);
@@ -403,6 +404,8 @@ public class AnnoOptionsPanel extends JPanel {
 		setBackground(Globals.BGCOLOR);
 		add(pnlAnnoDBOptions);
 		setVisible(false);
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "Retry - this happens occasionally on updates");}
 	}
 	// ORF
 	private void createOrfPanel(JPanel innerPanel) {

@@ -288,7 +288,7 @@ public class LoadLibMain
 		Log.indentMsg(n2Load + " datasets to load, " + n2Update + " datasets to update",LogLevel.Basic);
 		if (!mNoPrompts && !DBNewlyCreated && !Utils.yesNo("\n\tContinue"))
 		{
-			Utils.singleLineMsg("execLoadLib aborted by user\n");
+			System.err.println("execLoadLib aborted by user");
 			return;
 		}		
 		

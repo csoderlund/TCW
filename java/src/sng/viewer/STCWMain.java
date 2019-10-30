@@ -2,13 +2,12 @@ package sng.viewer;
 
 import java.util.Vector;
 
-
 import sng.database.DBInfo;
-import sng.database.Globals;
 import sng.database.Overview;
 import sng.database.Version;
 import util.database.HostsCfg;
 import util.database.DBConn;
+import util.database.Globalx;
 import util.methods.Out;
 /* 
  *  Main class for the viewSingleTCW 
@@ -79,7 +78,7 @@ public class STCWMain
 			
 			for (DBInfo db : dbList) {
 				if (db.getID().equals(dbx) || db.getdbName().equals(dbx) 
-						|| db.getdbName().equals(Globals.STCW + dbx)) {
+						|| db.getdbName().equals(Globalx.STCW + dbx)) {
 					dbObj = db; 
 					break;
 				}
@@ -90,6 +89,9 @@ public class STCWMain
 				for (DBInfo db : dbList) {
 					System.err.format("   %-10s %s\n", db.getID(), db.getdbName());
 				}
+				System.exit(-1);
+			}
+			if (dbObj.getID().equals(Globalx.error) && !hasOption(args, "-w")) {
 				System.exit(-1);
 			}
 		}

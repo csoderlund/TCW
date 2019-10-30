@@ -621,7 +621,7 @@ public class Utils
 	}
 	static void singleLineMsg(String msg)
 	{
-		System.err.print("\t" + msg + "                                  \r");	
+		System.err.print("\t   " + msg + "...                                  \r");	
 	}
 	static void termOut(String msg)
 	{
@@ -641,68 +641,7 @@ public class Utils
 		rs.close();
 		return ret;
 	}
-	static void checkUpdateErrorRates(int AID, DBConn db, DBConn db2) throws Exception
-	{
-		ResultSet rs = db.executeQuery("select erate,exrate from assembly where aid=" + AID);
-		rs.first();
-		float erate = rs.getFloat("erate");
-		float exrate = rs.getFloat("exrate");
-		if (erate == 0.0 && exrate == 0.0)
-		{
-			float[] rates = getErrorRate(AID,db,db2);
-			erate = rates[0];
-			exrate = rates[1];
-			db.executeUpdate("update assembly set erate='" + erate + "',exrate='" + exrate + "' where aid=" + AID);
-		}
-	}
-	// Try to figure out the error rates for a project for which it wasn't done after cliques
-	static float[] getErrorRate(int AID, DBConn db, DBConn db2) throws Exception
-	{
-		singleLineMsg("estimating sequencing error rate...");
-		float[] rates = new float[2];
-		rates[0] = 0; rates[1] = 0;
-		int TCID = finalTC(db,AID);
-		ResultSet rs = db.executeQuery("select consensus,ctgid from contig join ASM_scontig on ASM_scontig.scid=contig.sctgid " + 
-				" where ASM_scontig.merged_to=ASM_scontig.scid and contig.numclones >= 5");
-		long nMismatch = 0;
-		long nBases = 0;
-		int nAlign = 0;
-		int nExtras = 0; // we'll count these both using the contclone.extras and the pad chars in the consensus
-		while (rs.next())
-		{
-			String cons = rs.getString("consensus").toUpperCase();
-			
-			String foo[] = cons.split("\\*");
-			nExtras += 2*(foo.length - 1); // we'll assume each pad corresponded to 2 extras on average; probably low
-			foo = null;
-			
-			int ctgid = rs.getInt("ctgid");
-			ResultSet rs2 = db2.executeQuery("select char_length(clone.sequence) as slen,contclone.mismatch,contclone.gaps,contclone.extras " +
-											" from contclone join clone on clone.cid=contclone.cid where contclone.ctgid="+ctgid + 
-											" and contclone.buried=0");
-			while (rs2.next())
-			{
-				nAlign++;
-				nBases += rs2.getInt("slen");
-				nMismatch += rs2.getInt("contclone.mismatch");
-				nExtras += rs2.getString("contclone.extras").split(" ").length - 1;
-				if (nExtras < 0) throw(new Exception("neg extras " + rs2.getString("contclone.extras")));
-			}
-			rs2.close();
-		}
-		rs.close();
-		float eRate = 0;
-		float exRate = 0;
-		if (nBases > 0)
-		{
-			rates[0] = (float)(((double)nMismatch)/((double)nBases));	
-			rates[1] = (float)(((double)nExtras)/((double)nBases));	
-			eRate = rates[0];
-			exRate = rates[1]; 
-		}
-		Log.indentMsg("Estimated sequencing error from " + nAlign + " alignments:" + eRate + ", extra rate:" + exRate, LogLevel.Detail);
-		return rates;
-	}
+	
 	public static void snpThresholds(double erate,double minScore, String label) throws Exception
 	{
 		Log.columns(10,LogLevel.Detail,"depth",label);

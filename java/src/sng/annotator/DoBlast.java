@@ -127,7 +127,7 @@ public class DoBlast {
 		}
 				
 		if (!(doSelfBlast || doTSelfBlast|| doDBblast)) {
-			Out.PrtSpMsg(0,"No blasts to be executed - complete check files\n");
+			Out.PrtSpMsg(0,"No searches to be executed - complete check files\n");
 			return true;
 		}
 		

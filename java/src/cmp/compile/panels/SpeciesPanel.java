@@ -266,6 +266,7 @@ public class SpeciesPanel extends JPanel {
 						Out.PrtError(msg);
 						continue;
 					}
+					rs.close();
 				}
 				else {
 					String dbName = theTable.getDBNameAt(i);
