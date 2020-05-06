@@ -1,0 +1,189 @@
+<html>
+<!--#set var=TITLE value="Tour: runMultiTCW" -->
+<!--#include virtual="../../ssi/head.html" -->
+<body bgcolor="#FFFFFF" text="#000000" onLoad="init('runM')">
+<!--#include virtual="../ssi/start2t.html" -->
+
+<a name=top>
+<center><code>runMultiTCW</code>
+<table  border="0" cellspacing="0" cellpadding="2" height="18">
+<tr><td align="left" bgcolor="#666666" class="white" style="padding-bottom:4px;">
+<a href="#main" class="white">Main Panel</a> |
+<a href="#add" class="white">Additional Panel</a> |
+<a href="#stat" class="white">Example summary statistics |
+<a href="#refs"  class="white" >References</a>
+</td></tr>
+</table>
+
+</center>	
+<p><code>runMultiTCW</code> takes as input two or more singleTCW (sTCW) databases 
+and builds a multiTCW (mTCW) database of clustered sequences. 
+See <a href="../../mtcw/UserGuide.html" class="ext" target="_blank">mTCW UserGuide</a> for details. 
+
+<a name=main>
+<h3>Main panel</h3>	
+
+<table cellpadding=5>
+<tr><td valign=top>	
+	
+<tt><b>1. Build database</tt></b>. Define the input sTCW databases
+(see <a href=#add>panel #1</a>), which can created from
+nucleotide sequences (NT-sTCW) and/or protein sequences (AA-sTCW). 
+For NT-sTCW, translated ORFs must be provided; the translated ORFs from <code>runSingleTCW</code>
+may be used.
+Then press <tt>Build database</tt>, which builds a database of all sequences, RPKM, DE, annotations and GOs.
+
+
+<p>
+<tt><b>2. Compare sequences</tt></b>. This creates a file of all sequences and performs a heuristic search <sup>1</sup> against itself
+to determine similar sequences. The search program and parameters can be changed (see <a href=#add>panel #2</a>).
+<p>
+<tt>Add Pair from Hits</tt>. All pairs from the Hit file are entered into the database.
+
+
+<p>
+<tt><b>3. Add new clusters</tt></b>. Add clusters (see <a href=#add>panel #3</a>), where the methods are:
+<ol>
+<li>BBH - Bi-directional Best Hit TCW algorithm between N sTCWdbs, where each resulting cluster has N sequences and all pairs are BBH.
+<li>Closure - TCW algorithm for determining clusters, where each sequence in a cluster has
+a hit, good similarity and good overlap with all other sequences in the cluster.
+<li>OrthoMCL<sup>3</sup> - <code>runMultiTCW</code> executes the 
+<code>orthoMCL</code> scripts and then loads the results into the mTCW database.
+<li>User Defined - load a file of clusters where the file format is the orthoMCL format.
+</ol>
+One or more clusters can be added with each execution of <tt>Add New Cluster</tt>, and any cluster 
+can be removed with <tt>Remove</tt>.  			
+</td>
+
+<td>
+<a  href="img/runMultiTCW.png">
+<img width=450 src="img/runMultiTCW.png" border=1></a>
+</td> </tr>
+</table>
+
+<p>
+<tt><b>4. Add Stats</tt></b>. 	Add statistics (see <a href=#add>panel #4</a>), as follows.
+<ol>
+<li>PCC (Pearson Correlation Coefficient): This is only relevant if there are shared conditions, 
+as it is used to determine how similar the RPKM values of the conditions are. 
+It is run on all pairs in the database.
+<li>The following two are only relevant for mTCW databases that are built with
+only NT-sTCW databases, as they use the nucleotide coding regions.
+<ol>
+<li>Summary statistics and KaKs files: This uses all pairs from BBH clusters for pair-wise alignments. The KaKs files are written for input to
+the <code>KaKs_calculator</code><sup>4</sup> along with a script to run from the terminal.
+<li>Coding region statistics: Run on all pairs that exist in any cluster. The statistics 
+are those that are shown in the summary statistics  (see <a href=#stat>e.g. summary</a>).
+</ol>
+<li>Read KaKs files: This is only relevant if the <code>KaKs_calculator</code> has been
+executed on the KaKs files.  It reads the results into the database.
+</ol>
+		
+<a name=add>
+<table width='100%'><tr><td align='left' >
+<h3>Additional panels</h3>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+<table cellpadding=5>
+<tr><td valign=top>		
+1. Add single TCW database
+<br><a  href="img/addSingle.png">
+<img width=400 src="img/addSingle.png" border=1></a>
+</td>
+
+<td valign=top>
+3. Add a cluster method
+<br><a  href="img/method.png">
+<img width=400 src="img/method.png" border=1></a>
+</td>
+
+<tr>
+<td valign=top>
+2. Run Search
+<a  href="img/hitSettings.png">
+<br><img width=400 src="img/hitSettings.png" border=1></a>
+</td>
+
+<td valign=top>
+4. Add statistics (before adding statistics)
+<a  href="img/stats.png">
+<br><img width=300 src="img/stats.png" border=1></a>
+</td>
+</table>
+
+<a name=stat>
+<table width='100%'><tr><td align='left' >
+<h3>Example summary statistics</h3>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+<pre>
+CLUSTER SETS: 3
+      Prefix  Method    Remark                            
+      BB      BBH       Sim 40; Olap 80(Eit); All pairs of sTCWs  
+      CL      Closure   Sim 40; Olap 80(Eit)                      
+      OM      OrthoMCL  Inflation 1.5                             
+
+   Sizes:
+      Prefix   =2   =3  4-5  6-10  11-15  16-20  21-25  >25  Total  #Seqs  
+      BB      606    0    0     0      0      0      0    0    606  1,212  
+      CL       70  166    2     3      0      0      0    0    241    665  
+      OM       40  179    4     9      0      0      0    0    232    696  
+
+   Average and Stddev:
+      Prefix  conLen          sdLen          SofP        Trident         
+      BB      575.51  342.60  79.49  134.28  3.41  1.68    0.736  0.215  
+      CL      599.27  365.42  87.16  130.15  8.54  6.04    0.700  0.209  
+      OM      609.76  377.05  96.95  128.15  8.66  7.26    0.657  0.227  
+ 
+PAIRS: 869
+   Hits
+      AA   Dataset: Diff 789     Same 69       Similarity 76.0%   Overlap 83.4%
+      NT   Dataset: Diff 661     Same 2        Similarity 86.9%   Overlap 63.9%
+
+   Aligned CDS: 784 (1.1Mb)   5-UTR: 510 (169.9kb)   3-UTR: 527 (310.3kb)
+      Codons                   Amino Acids                 Nucleotides         
+      Exact          56.2%     Exact             84.0%     CDS  gap     13.6%  
+      Synonymous     27.8%     Substitution  >0  10.6%     CDS  diff    27.0%  
+        Fourfold     14.3%     Substitution <=0   5.4%     5UTR diff    63.1%  
+        Twofold      10.8%                                 3UTR diff    71.6%  
+      Nonsynonymous  16.0%                                                     
+
+      CDS base substitutions: 208.1kb              Content: By Nucleotide  By Codon
+                    Pos1  Pos2  Pos3  Total                    GC    CpG    CpG  
+      Transition     9.4   4.9  36.4   50.7         Both    40.4%   2.0%   1.1%  
+      Transversion  11.3   7.7  28.6   47.6         Either  55.1%   5.6%   2.9%  
+      ts/tv         0.73  0.61  1.11   1.07         B/E     0.746  0.407  0.444  
+
+   KaKs method: YN    Pairs: 765
+
+      Ka/Ks          Quartiles             P-value       
+      0-0.5  743     Q1(Lower)   0.019     <1e-100  452  
+      0.5-1   17     Q2(Median)  0.044     <1e-10   140  
+      1-1.5    3     Q3(Upper)   0.117     <0.001    55  
+      >=1.5    2                           Other    118  
+
+</pre>
+<a name=refs>
+<table width='100%'><tr><td align='left' >
+<h3>References</h3>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+<ol>
+<li>Supported search programs: any of the following programs can be used for the AA search, and blastn is used for the NT search.
+
+<ul>
+<li><b>BLAST</b>: 
+Altschul SF, Madden TL, Schaffer AA, Zhang J, Zhang Z, et al. (1997) Gapped BLAST and PSI-BLAST: a new generation of protein database search programs. Nucleic Acids Res 25: 3389-3402.
+<li><b>Diamond</b>: 
+Buchfink B, Xie C, Huson D (2015) Fast and Sensitive Protein Alignment 
+using DIAMOND, Nature Methods, 12, 59-60 doi:10.1038/nmeth.3176.
+<li><b>Usearch</b>: 
+Edgar,RC (2010) Search and clustering orders of magnitude faster than BLAST, Bioinformatics 26(19), 2460-2461.
+</ul>
+
+<li>Li L, Stoeckert CJ, Jr., Roos DS (2003) OrthoMCL: identification of ortholog groups for eukaryotic genomes. Genome Res 13: 2178-2189.
+
+<li>Zhang Z, Li J, Xiao-Qian Z, Wang J, Wong, G, Yu J (2006) KaKs_Calculator: Calculating Ka and Ks through model selection and model averaging. Geno. Prot. Bioinfo. Vol 4 No 4. 259-263.
+</ol>
+
+<!--#include virtual="../../ssi/end.html" -->
+

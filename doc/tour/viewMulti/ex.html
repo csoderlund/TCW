@@ -1,0 +1,74 @@
+<html><pre>
+Project: ex  multiTCW 2.7  Cluster: 630  Pairs: 920  Sequences: 707  GOs: 10,988
+
+DATASETS: 3  Created 08-Aug-18
+           Type  #Seq  #annotated  #annoDB  Created    Remark  
+      Bar  NT     250         229        2  20-Feb-18  exBar   
+      Foo  NT     250         230        2  20-Feb-18  exFoo   
+      Fly  NT     207         189        2  08-Aug-18  exFly   
+                           
+
+           Average  Lengths                   %GC          %CpG         
+              5UTR      CDS     3UTR          Avg     SE    Avg     SE  
+      Bar    254.9   1516.9    240.9        47.82   7.64   3.99   2.08  
+      Foo    249.4   1478.2    342.1        44.55   5.68   3.54   1.85  
+      Fly    297.6   1358.6    313.5        44.06   5.38   3.31   1.66  
+
+   Counts  
+                  Ww       Xx       Yy         Zz  
+      Bar    812,745  665,939  853,758    963,211  
+      Foo  1,009,851  706,578  537,403  1,014,952  
+      Fly    736,627  605,318  772,927    877,650  
+
+   Differential Expression (p-value < 0.05): 
+           WwXx  WwYy  WwZz  XxYy  XxZz  YyZz  
+      Bar     1    21    24    31    23     4  
+      Foo    16    23    33    38    41     7  
+      Fly     0    19    20    26    20     1  
+
+CLUSTER SETS: 3
+      Prefix  Method    Remark                             
+      BB      BBH       Sim 40; Olap 80(Eit); Bar,Fly,Foo  
+      CL      Closure   Sim 40; Olap 80(Eit)               
+      OM      OrthoMCL  Inflation 4                        
+
+   Sizes:
+      Prefix  =2   =3  4-5  6-10  11-15  16-20  21-25  >25  Total  #Seqs  
+      BB       0  161    0     0      0      0      0    0    161    483  
+      CL      71  156    2     3      0      0      0    0    232    637  
+      OM      44  187    3     3      0      0      0    0    237    685  
+
+   Taxa categories: 
+      Prefix  2x1  3x1  1xN  2xN  3xN  
+      BB        0  161    0    0    0  
+      CL       71  156    0    1    4  
+      OM       44  187    0    0    6  
+ 
+PAIRS: 920
+     AA   Dataset: Diff    820, Same     85   Similarity 74.3%   Overlap 79.7%   diamond
+     NT   Dataset: Diff    663, Same      3   Similarity 87.0%   Overlap 63.6%   blastn
+
+    Aligned pairs   CDS: 701 (941k)   5-UTR: 502 (228k)   3-UTR: 458 (263k)
+                                                                               
+      Codons                   Amino Acids                 Nucleotides         
+      Exact          60.2%     Exact             88.2%     CDS  gap      9.4%  
+      Synonymous     28.0%     Substitution  >0   5.6%     CDS  diff    22.7%  
+        Fourfold     14.4%     Substitution <=0   6.2%     5UTR diff    62.5%  
+        Twofold      11.0%                                 3UTR diff    70.0%  
+      Nonsynonymous  11.8%                                                     
+
+      CDS base substitutions: 154.8k               Content: By Nucleotide  By Codon
+                    Pos1  Pos2  Pos3  Total                    GC    CpG    CpG  
+      Transition     9.0   4.4  38.5   52.0         Both    41.3%   2.2%   1.2%  
+      Transversion  10.3   6.8  28.6   45.8         Either  54.1%   5.5%   2.9%  
+      ts/tv         0.80  0.63  1.20   1.13         B/E     0.774  0.442  0.478  
+
+   KaKs method: YN    Pairs: 679
+
+      Ka/Ks          Quartiles             P-value       
+      0-0.5  660     Q1(Lower)   0.016     <1e-100  415  
+      0.5-1   13     Q2(Median)  0.036     <1e-10    95  
+      1-1.5    3     Q3(Upper)   0.089     <0.001    51  
+      >=1.5    3                           Other    118  
+
+</pre></html>

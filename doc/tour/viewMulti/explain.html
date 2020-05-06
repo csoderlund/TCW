@@ -1,0 +1,176 @@
+<html>
+<title>mTCW overview</title>
+<center>
+<table width=800 border=0>
+<tr><td>&nbsp;
+<tr><td>&nbsp;
+<tr><td>
+<h2>Description of mTCW overview</h2>
+The mTCW database is created from two or more single TCW (sTCW) databases, where a sTCWdb may be
+composed on nucleotide (NT) or protein (AA) sequences. If this mTCW contains data from
+one or more AA-sTCWdbs, then many of the following statistics will not be present. 
+<p>
+Most of the statistics in this overview can be computed from the clusters and sequence tables
+using the "Table..." <i>Column Stats</i> option, and from the pairs table using the "Show..."
+<i>Column Stats</i> option; the <i>Column Stats</i> also give the standard deviation,
+median and range. The column name is in the <b>Column</b> column. 
+<table border=1 cellpadding=5>
+<tr><th>Label<th>Description<th>Column
+<tr><td nowrap valign="top"><b>DATASETS</b>
+<td colspan=2>
+This first section describes the data imported from the
+sTCWdbs. The data is shown in the <i>Sequences</i> table.
+
+<tr><td>Average Lengths
+<td>The ORFs were computed for the sTCWdbs and imported along with their translated sequence.
+<td>5UTR Len, 3UTR Len, CDS Len
+
+<tr><td>%GC
+<td>The average percent of GC content per sequence.
+<td>%GC
+
+<tr><td>%CpG
+<td>The average percent of CpG content per sequence.
+<td>%CpG
+
+<tr><td>Counts
+<td>The total raw counts from each dataset. The RPKM values are in the sequence table, but not the counts.
+<td>-
+
+<tr><td nowrap valign="top"><b>CLUSTER SETS</b>
+<td colspan=2>One or more sets of clusters will be present in the mTCW. A given sequence can be in multiple 
+cluster sets, but in a given cluster set only once. The data is shown in the <i>Cluster</i> table.
+
+<tr><td nowrap valign="top"><i>Sizes</i>
+<td>The number of sequences that are in clusters per cluster set.
+<td>Count
+
+<tr><td nowrap valign="top"><i>Taxa categories</i>
+<td>An indicator of the composition of the cluster, where Mx1 means it contains M different datasets with exactly one member from each, while MxN means there are M different datasets, and one or more datasets has more than one sequence.
+<td>Taxa
+
+<tr><td nowrap valign="top"><b>PAIRS</b>
+	<td colspan=2>Similar pairs are identified from the self-blast, where AA is from the amino acid search,
+	and if NT exists, it is from the nucleotide search. The data is shown in the <i>Pairs</i> table.
+	
+<tr><td nowrap valign="top">Dataset
+	<td>Based on the blast output, count of pairs from two different datasets and the count of pairs from the same dataset.
+	<br>The Pair Filter under "Dataset" lets you perform this query.
+	<td>-
+	
+<tr><td nowrap valign="top">Similarity	
+	<td>Average percent similarity (3rd column of blast file, often referred to as %Identity).
+	<td>%AAsim, %NTsim
+	
+<tr><td nowrap valign="top">Overlap	
+	<td>Average percent overlap of the alignment (4th column of blast file) to the total length of the sequence.
+	There are two percent overlap values for each pair.
+	<td>%AAolap1/2, %NTolap1/2
+	
+<tr><td nowrap valign="top">Program
+	<td>Search program used, e.g. Blast, Diamond, Usearch. This is relevant as they give slightly different
+	results.
+	<td>-
+	
+<tr><td nowrap valign="top"><b>Aligned Pairs</b>
+    <td colspan=2>The pairs in clusters are aligned using dynamic programming and statistics computed.
+
+<tr><td nowrap valign="top" colspan=3><i>Codons</i>
+
+<tr><td nowrap valign="top">Exact
+    <td>Average percent of #codons that are exactly the same.
+	<td>%Cexact
+	
+<tr><td nowrap valign="top">Synonymous
+    <td>Average percent of #codons that are synonymous (different codon, same amino acid).
+    <td>%Csyn
+    
+<tr><td nowrap valign="top">Fourfold
+    <td>Average percent of codons that are fourfold (4d), which is a synonymous codon 
+    where the ith position allows any of the 4 bases. 
+    <td>%C4d
+    
+<tr><td nowrap valign="top">Twofold
+    <td>Average percent of codons that are fourfold (2d), which is a synonymous codon 
+    where the ith position allows any of the 2 bases. 
+    <td>%C2d
+    
+<tr><td nowrap valign="top">Nonsynonymous
+    <td>Average percent of #codons that are nonsynonynous (different amino acid).
+    <td>%CnonSyn    
+        
+<tr><td nowrap valign="top" colspan=2><i>Amino Acids</i>
+        
+<tr><td nowrap valign="top">Exact
+    <td>Average percent of the #AA that are the same.
+    <td>%Aexact
+    
+<tr><td nowrap valign="top">Substitution&gt;0
+    <td>Average percent of #AA substitutions with BLOSUM62 score &gt;0.
+    <td>%Apos
+    
+<tr><td nowrap valign="top">Substitution&lt;=0
+    <td>Average percent of #AA substitutions with BLOSUM62 score &lt;=0.
+	<td>%Aneg
+
+<tr><td nowrap valign="top" colspan=3><i>Nucleotides</i>
+        
+<tr><td nowrap valign="top">CDS gap
+    <td>Average percent gaps of total aligned bases including gaps. The #Gaps is a column, but
+    not the %Gap.
+    <td>-
+    
+<tr><td nowrap valign="top">CDS diff
+    <td>For the CDS alignments, average percent differences of total aligned bases including gaps.
+       <td>Cdiff
+         
+<tr><td nowrap valign="top">5UTR diff
+    <td>For the 5'UTR alignments, average percent differences of total aligned bases including gaps.
+       <td>5diff
+         
+<tr><td nowrap valign="top">3UTR diff
+    <td>For the 3'UTR alignments, average percent differences of total aligned bases including gaps.
+        <td>3diff
+         
+<tr><td nowrap valign="top"><i>CDS base substitution</i>
+    <td colspan=2>Total number of SNPs for the whole dataset.
+       
+<tr><td nowrap valign="top">Transition
+    <td>Average percent of SNPs that are transitions in each of the three codon positions.
+       <td>-
+<tr><td nowrap valign="top">Transversion
+    <td>Average percent of SNPs that are transversion in each of the three codon positions.
+       <td>-
+<tr><td nowrap valign="top">ts/tv
+    <td>Average count of transitions divided by count of transversions.
+        <td>ts/tv
+        
+<tr><td nowrap valign="top"><i>Content</i>
+    <td colspan=2>For the <i>By Nucleotide</i>, all CpGs occurrences were counted, even if they crossed codon boundaries.
+    <br>For the <i>By Codon</i>, CpG occurrences were not counted if they crossed a codon boundary. 
+<tr><td nowrap valign="top">Both
+    <td>Average of the count of base alignments where both sequences have a G or C or CpG.
+    <td>-
+ <tr><td nowrap valign="top">Either
+    <td>Average of the count of base alignments where either (or both) sequences have a G or C or CpG. 
+    <td>-
+     
+  <tr><td nowrap valign="top">B/E
+    <td>Average value of 'Both' count divided by the 'Either' count (i.e. the Jaccard Index).
+    There is a pair column for the GC and codon-based CpG, but not the nucleotide-base CpG.
+    <td>GC, CpG
+    
+<tr><td nowrap valign="top"><b>KaKs method</b>
+    <td colspan=2>The KaKs_calculator (Zhang et al. 2006) is used to compute the KaKs values, where the method
+    used is shown on the "KaKs Method" line. 
+<tr><td>KaKs<td>Selective strength (&lt;1 is purifying, &gt;1 is positive, 
+significantly &gt;1 implies that at least some of the mutations are probably advantageous). <td>KaKs
+<tr><td>Quartiles<td>Of the KaKs values using the method of splitting the list in half (exclude
+median for odd number); Q1 is the median of the lower half and Q3 is the median of the upper
+half.<td>-
+<tr><td>P-value<td>The 'other' count includes pairs where the KaKs_calculator did not provide
+a p-value though did provide a KaKs value.<td>p-value.
+</table>
+</table>
+</center>
+</html>

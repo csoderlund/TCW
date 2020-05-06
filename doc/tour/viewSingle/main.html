@@ -1,0 +1,143 @@
+<html>
+<!--#set var=TITLE value="Tour: Main Table" -->
+<!--#include virtual="../../ssi/head.html" -->
+<body bgcolor="#FFFFFF" text="#000000" onLoad="init('main')">
+<!--#include virtual="../ssi/start2t.html" -->
+
+<a name=start>
+<!--#include virtual="./ssi/view_stcw.html" -->
+
+<center><code>Main Table</code>
+<table  border="0" cellspacing="0" cellpadding="2" height="18">
+<tr><td align="left" bgcolor="#666666" class="white" style="padding-bottom:4px;">
+<a href="#tab" class="white">Table</a> |
+<a href="#col" class="white">Columns</a> |
+<a href="#filter" class="white">Filters</a> 
+</td></tr>
+</table>
+</center>	
+<p>
+The &#10148; items under <tt>Sequence</tt> produce the main table of sequences.
+Selecting <tt>Show All</tt> shows all sequences with whatever columns are set in
+<tt>Columns</tt>.
+<p>The table below was produced by filtering for all sequences that (1) have annotation and
+(2) are up-regulated for rhizome (RhiTiZo) compared to root.
+
+<br><a  href="img/mainTable.png">
+<img width=850 src="img/mainTable.png" border=1></a>
+
+<p>The columns can be sorted and moved around. A row can be selected to view
+the sequence. 
+<table>
+<tr><td>The <tt>Table...</tt> allows the options on the right.
+<tt>Export</tt> is a popup window that allows various formats to be written, e.g.
+a tabular format of the columns, FASTA format of the sequences, etc. 
+
+<td><a href="img/viewTable.png"><img src="img/viewTable.png" border=1></a>
+
+<tr><td>The <tt>Show Column Stats</tt> results in a pop-up window of statistics for all numeric columns,
+as shown on the right. 
+<td><a href="img/stats.png"><img width="90%" src="img/stats.png" border=1></a>
+
+</table>
+
+
+
+<p>
+<a name=col>
+<table width='100%'><tr><td align='left' >
+<h3>Set Columns</h3>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+<table>
+<tr><td valign="top">
+Click <a class=code href=img/collapseColumns.png>here</a> to see all column sections, which
+change the columns shown in the table shown above. 
+A few major groups of columns are shown on the left and below.
+
+<p>The <tt>Counts and RPKM</tt> columns displays the input expression levels as either their raw
+counts or normalized RPKM.
+<p>The <tt>Differential Expression</tt> columns displays the DE for two or more conditions.
+<td>
+<a  href="img/countColumns.png">
+<img width=500 src="img/countColumns.png" border=1></a>
+</td></tr>
+</table>
+
+<table width='100%'><tr><td align='left' >
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+</table>
+<table>
+<tr><td valign="top">
+There are "three" best hits for each sequence that has annotation:
+<ol>
+<li>Best e-value: the one with the best e-value.
+<p>
+<li>Best anno: the best e-value hit may have a descriptions that is not informative. TCW tries to find a hit with almost as good of e-value
+but a more informative description. It does this be ignoring hits with descriptions containing
+phrases like "uncharacterized protein", "putative uncharacterized", "hypothetical protein", etc.
+<p>
+<li>Best with GO: Hit IDs from UniProt are often assigned GO terms, but not all Hit IDs have GO terms.
+This is the best e-value that has at least one assigned GO term.
+</ol>
+All three groups of "Best Hits" have the same set of columns available for display.
+	    	
+<td>
+<a  href="img/annoColumns.png">
+<img width=500 src="img/annoColumns.png" border=1></a>
+</td></tr>
+</table>
+
+<!----------------------------------------------------------------!>
+<a name=filter>
+<table width='100%'><tr><td align='left' >
+<h3>Set Filters</h3>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+<table>
+<tr>
+<td valign="top" >
+Click <a class=code href=img/collapseFilter.png>here</a> to see all filter sections, which
+applies one or more filters to the sequences shown in the <tt>Main Table</tt>.
+ 
+A few major groups of filter are shown on the left and below.
+
+<p>The <tt>Counts and RPKM</tt> filters allow finding sequences that have differences in Counts
+or RPKM based on user supplied numbers. The example on the right would filter result in all
+sequences that have RPKM&gt;=10.0 for condtion RhiTiZo and RPKM&lt;=1.0 for condition Root.
+</td>
+
+<td valign="top">
+<a  href="img/countFilter.png">
+<img width=400 src="img/countFilter.png" border=1></a>
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top">
+The <tt>Expression Level</tt> filters allow finding sequences that are up or down regulated
+in respect to the selected conditions.
+</td>
+<td valign="top" >
+<a  href="img/deFilter.png">
+<img width=400 src="img/deFilter.png" border=1></a>
+</tr>
+</table>
+
+<table>
+<tr><td valign="top">
+The <tt>Best Hit</tt> filters allows querying on the three types of best hits described
+in <a class=tt href-#col>Columns</a> above. More extensive queries are provided in <tt>Basic Query annoDB Hits</tt>,
+but this set of filters can be used with other filters such as <tt>Differential Expression</tt>
+<td>
+<a  href="img/hitFilter.png">
+<img width=400 src="img/hitFilter.png" border=1></a>
+</td></tr>
+</table>
+
+<table width='100%'><tr><td align='left' >
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+<!--#include virtual="../../ssi/end.html" -->

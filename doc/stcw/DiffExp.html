@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<HTML>
+<!--#set var=TITLE value="sTCW Differential Expression Guide" -->
+<!--#include virtual="../ssi/head.html" -->
+<body bgcolor="#FFFFFF" text="#000000" onLoad="init('de')">
+<a name=top>
+<!--#include virtual="../ssi/start2.html" -->
+
+<code>RunDE</code> computes differential expression (DE) between conditions for an existing singleTCW database,
+as follows:
+<ol>
+<li>DE per sequence: R scripts for <code>EdgeR</code>, <code>DESeq2</code>. 
+<ul>
+<li>It is <i>important</i> that you study the documentation for the respective DE method to determine the
+best approach for your data, then customize one of the existing R-scripts or create a new one. 
+<li>The <a href=#scripts>R-scripts</a> explains how <code>runDE</code> writes the data to R variables, executes the R-script, then reads the results into sTCWdb.
+</ul>
+
+<li>Over-represented GO categories: <code>GOseq</code>. 
+</ol>
+This document uses the "<tt>demoTra</tt>" project as an example, see
+<a href="UserGuide.html" class="ext" target="_blank">User Guide</a>. 
+
+<h3>Contents</h3>
+<table width=50%>
+<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<td>
+<ol type="1">
+    <li><a href="#install">Installing R and packages</a>
+    <li><a href="#demo">Example: demoTra</a>
+    <li><a href="#libDE">DE between conditions</a>
+	<ol type="A">
+	<li><a href="#methods">Methods</a>
+		<ul>
+		<li><a href="#reps">Use of replicates</a>
+		<li><a href="#scripts">R-scripts</a>
+		</ul>
+	<li><a href="#options">Options</a>
+		<ul>
+		<li><a href="#filter">Pre-filtering</a>
+		<li><a href="#disp">Fixed dispersion</a>
+		</ul>
+	<li><a href="#exec">Execute</a>
+		<ul>
+		<li><a href="#groups">Group 1 - Group 2</a>
+		<li><a href="#all">All Pairs for Group 1</a>
+		<li><a href="#file">All Pairs from File</a>
+		<li><a href="#pfile">P-values from File</a>
+		</ul>
+	</ol>
+    <li><a href="#go">Over-represented GO categories</a>
+    <li><a href="#Rperms">R directory permissions</a>
+</ol>
+</table>
+
+<a name="install">
+<h2>1. Installing R and packages</h2>
+
+Before running DE computations the relevant R packages must be installed. Note, you only need
+to install those packages which you intend to use. 
+
+<h4>Installing R</h4>
+
+The following instructions are for Linux systems. See <a href="../Mac-OSX.html" class="ext" target="_blank">Mac-OSX</a> for Mac instructions.
+On Redhat or CentOS Linux, R can be installed simply by 
+<pre class=tt>
+sudo yum install R-devel
+</pre>
+If you do not have <b>sudo</b> privileges (sudo allows a general user to run some commands as 
+the root user), you will need an administrator to do the install. 
+Note, even if R is already installed, you probably still need to run this command to install the
+"devel" libraries, which are needed for the rJava package used by <code>runDE</code> to interface with R. 
+<p>
+This is all that you strictly need to do; however, unless you plan to run as root (not recommended), 
+or will be the only one running <code>runDE</code>, you will also want to set up R so that one user
+can install packages to be used by all users (see <a href="#Rperms">R directory permissions</a>). Note: you
+do you need R to view the DE results with <code>viewSingleTCW</code>.
+
+<h4>Installing rJava</h4>
+TCW uses the <a href="http://www.rforge.net/rJava/" class="ext" target="_blank">rJava</a> package to 
+interface directly to R. 
+<i>However, you should not need to do anything for rJava on Linux or Mac since
+the necessary library is included in the package.</i>
+If, however, you see an error involving <tt>libjri.so</tt> when trying DE functions, you may try the following:
+copy the library to a system directory, e.g. on Linux:
+<pre>sudo cp external/libjri.so  /usr/lib64</pre>
+Also use the <tt>file</tt> function to verify that the library is actually usable on your system. A 64-bit
+library is supplied, which will not work on 32-bit systems, or with 32-bit Java installed on 64-bit systems.  
+<p>6/29/18: I updated my R biocLite on Linux, and the rJava quite working. In R, I ran <tt>install.packages("rJava")</tt>, then
+modified <code>runDE</code> to set <tt>JPATH=/usr/lib64/R/library/rJava/jri</tt>, and it works now.
+
+
+<h4>Installing packages</h4>
+If you are going to supply your own R-scripts, skip this section; interfacing your R-scripts with <code>runDE</code>
+is covered in the <a href=#scripts>R-scripts</a> section.
+<p>The packages used by TCW can all be installed through the "biocLite" system of Bioconductor as follows:
+<ol>
+	<li> Run R (type "R" at the command line)
+	<li> At the R prompt, type: <tt>source("http://bioconductor.org/biocLite.R")</tt>
+	<li> At the R prompt, install the packages you need:
+	<table border=1 cellpadding=3>
+<tr><td><i>Package</i><td><i>Install</i><td><i>Version as of 13-Dec-15<sup>1</sup></i><td><i>Note</i><td><i>Dependencies, e.g.</i><sup>2</sup>
+<tr><td><code>edgeR</code><td><tt>biocLite("edgeR")</tt><td>3.12.0<td>Used for demo<td><tt>biocLite("locfit")</tt>
+<tr><td><code>DESeq2</code><td><tt>biocLite("DESeq2")<td>1.10.0<td>&nbsp;<td> <tt>sudo yum install libxml2-devel</tt> 
+<tr><td><code>GOSeq</code><td><tt>biocLite("goseq")<td>1.22.0<td>&nbsp;<td><tt>sudo yum install curl-devel</tt>
+</table>
+<sup>1</sup></i>These packages have been tested on Linux  3.6.0 (2019-04-26), older versions of R on Linux, and Mac 3.2.3 (2015-12-10).
+<br><sup>2</sup>There are many dependencies, most are automatically resolved with the <tt>biocLite</tt> command, but some you may need to track down as they are dependent on your system. You will probably need the ones listed in the last column. Note, if you do not have sudo permissions, your system administrator will need to perform the 'yum install' commands.
+		
+	</li>
+</ol>
+
+<p>
+<a name="demo">
+<table width='100%'><tr><td align='left' >
+<h2>2. Example: demoTra</h2>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+<table cellspacing=0 cellpadding=0>
+	<tr>
+	<td width="65%" valign="top">
+	From the command line, type:
+<pre  class=tt>
+    >runDE tra
+</pre>
+Or, if you type  <tt>runDE</tt> with no arguments, the sTCW graphical chooser will appear
+with all sTCW databases listed; select the <tt class=s>demoTra</tt> database. 
+Either way, this brings up the <code>runDE</code> interface shown at right.
+<p>
+Define a pairwise comparison by selecting "Stem" for <tt>Group 1</tt> and "Root" for <tt>Group 2</tt>, as shown. 
+<p>
+Check the box <b>Save results in p-value column</b>, the text box will display the column name "StRo", which can be changed.
+<p>
+Assuming you have installed <code>edgeR</code>, leave the method as is. 
+<p>
+Execute <b>Group 1 - Group 2</b>. The default is to run the edgeRglm.R script. The output will be as follows:
+
+<pre class=tt>
+   5 Stem replicates
+   5 Root replicates
+Collecting count data (may take several minutes)
+Using CPM filter > 1 for >= 2
+   1 filtered sequences
+Assigning R variables
+   gc: GC values of sequences
+   rowNames: sequences (row) names
+   grpNames: group (column) names
+   repNames: replicate names
+   counts: counts of sequences
+   countData <- array(counts,dim=c(210,10))
+   rm(counts)
+   rownames(countData) <- rowNames
+   nGroup1 <- 5
+   nGroup2 <- 5
+
+Start R-script
+   source('R-scripts/edgeRglm.R')
+Loading required package: limma
+Using traditional glm (quasi-likelihood F-tests)
+   results
+   rowNames
+R-script done
+
+Number of DE results:
+   <1e-5 <1e-4 <0.001 <0.01 <0.05
+       6    14    21    40    66
+      
+Saving 210 scores for StRo      
+</pre>
+</td>
+		<td width="35%" valign="top" style="padding-left:10px;">
+			<a href="img/DErun.png"><img src="img/DErun.png" width="450" border=1></a>
+		</td>
+	</tr>
+</table>
+
+The R console remains open and you can now manually explore the data using R, if desired. However, it easiest to explore it be
+selecting "Close" on <code>runDE</code>, which closed the java program but not R. Then do the following:
+<pre>
+>q()
+Save workspace image? [y/n/c]: y
+R
+</pre>
+This saves all variables written by <code>runDE</code> and the scripts (in this case <code>edgeRglm.R</code>. By restarting R, you can now
+explore the data, e.g.
+<pre>
+> library(edgeR)
+> plotBCV(y)
+> plotMDS(y, labels=grpNames)
+</pre>
+
+<p>
+<table>
+<tr><td>
+<i>View Results: </i>To view the resulting p-values, run '<tt>viewSingleTCW tra</tt>' from the command line,  
+and click <b>Columns</b>. The column options has a section 
+<tt>Differential Expression</tt> with the DE columns listed, e.g. the DE columns for <tt>demoTra</tt> are shown on the right. There is also
+a section for <tt>Conditions</tt>, which has the "Stem", "Root, and "Oleaf" column options. Select the desired columns (
+e.g. "Stem", "Root", "StRo"); you may then select a filter (e.g. all sequences that have an absolute p-value &lt; 0.05).
+
+Note in the below figure that if Stem &lt; Root, the p-values StRo is negative, else it is positive. 
+<td>
+<code>viewSingleTCW</code> DE section with all pairs computed.
+<a href="img/DEcolumn.png"><img src="img/DEcolumn.png" width="350" border=1></a>
+</table>
+
+<br><a href="img/DEtable.png"><img src="img/DEtable.png" width="800" border=1></a>
+
+<p>&nbsp;
+<a name="libDE">
+<h2>3. DE between conditions</h2>
+
+<a name="methods">
+<table width='100%'><tr><td align='left' >
+<h3>3.A Methods</h3>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+<a name="reps">
+<h4>Use of replicates</h4>
+
+Biological replicates are valuable for RNA-seq to provide the baseline estimate of variability.
+This is incorporated into the models (typically as dispersion of the negative-binomial distribution)
+and makes a big difference in the result DE scores. 
+<p>
+If replicates are provided for a condition, they will automatically be used for the applicable
+R packages (e.g., <code>edgeR</code>). All of the methods also work without replicates, but are likely to
+overestimate DE. 
+<p>
+Replicates should be biological replicates, i.e. sequencing from distinct individuals having the
+same treatments, rather than technical replicates, i.e. re-sequencing of the same individuals. 
+Technical replicates can be input to TCW and will be used in the same way, but do not provide
+a useful estimate of variability. 
+
+
+
+<a name="scripts">
+<table width='100%'><tr><td align='left' >
+<h4>R-scripts</h4>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+When the <b>R-script</b> option is selected, TCW performs the following:
+<ol>
+<li>Writes the necessary information to the R environment based on the options selected.
+<li>Runs the R script using the <tt>source</tt> command.
+<li>Reads the <tt>results</tt> variable from the R environment, which should contain the p-values.
+</ol>
+TCW writes the following variables to the R environment (the following assignments are from the above demo example):
+<pre class=tt>
+gc: GC values of sequences
+    rowNames: sequences (row) names
+    grpNames: group (column) names
+    repNames: replicate names
+    counts: counts of sequences
+    countData <- array(counts,dim=c(210,10))
+    rm(counts)
+    rownames(countData) <- rowNames
+    nGroup1 <- 5
+    nGroup2 <- 5
+   
+	
+</pre>
+The variables displayed with a ":" after them are assigned with the <tt>assign</tt> function, whereas the others are the exact assignment.
+<br>The most important variables are <tt>countData</tt> and <tt>grpNames</tt>, e.g.
+<pre class=tt>
+> head(countData)
+        [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
+tra_001 1017  594 1222 1209 1315  378 1002 1649  826  1195
+tra_002  272  239  431  400  368  101  206  151  109   185
+tra_003 3830 5185 4847 4857 5451 1859 2506 1334 1541  2307
+tra_004 1707 1088 2429 2210 2334  529  919 1103  810  1427
+tra_005  479  369  439  444  565  114  192  151  232   351
+tra_006 1122  923 1381 1320 1482  632  839  905  670   823
+> grpNames
+ [1] "Stem" "Stem" "Stem" "Stem" "Stem" "Root" "Root" "Root" "Root" "Root"
+</pre>
+The R script should put the p-values in the <tt>results</tt> variables, e.g. 
+<pre class=tt>
+> head(results)
+[1] 1.537634e-07 1.695981e-07 2.478791e-07 2.478791e-07 4.026519e-06
+[6] 4.600047e-06
+</pre>
+The order should correspond to the input order; if changed, then change the order in <tt>rowNames</tt> to correspond.
+<p>An example script is:
+<pre class=tt>
+# edgeR gln method unless no replicates
+library(edgeR)
+y <- DGEList(counts=countData,group=grpNames)
+y <- calcNormFactors(y)
+if (nGroup1==1 && nGroup2==1) {
+    writeLines("Using classic with fixed dispersion")
+    et <- exactTest(y, dispersion=disp)
+    res <- topTags(et, n=nrow(et), adjust.method="BH")
+} else {
+ 	writeLines("Using tradional glm")
+    design <- model.matrix(~grpNames)
+    y <- estimateDisp(y, design)
+    fit <- glmQLFit(y,design)
+    qlf <- glmQLFTest(fit,coef=2)
+    res <- topTags(qlf, n=nrow(qlf), adjust.method="BH")
+} 
+# Columns are:  logFC    logCPM        F       PValue          FDR
+results <- res$table$FDR
+rowNames <- rownames(res)
+</pre>
+
+
+
+
+<a name="options">
+<table width='100%'><tr><td align='left' >
+<h3>3.B Options</h3>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+<a name="filter">
+<h4>Pre-filter</h4>
+This example uses a database with 26k sequences and 5 replicates for root and stem.
+The three filtering options  where run with defaults(table on lower left)
+before input to <code>edgeR</code> (results in figure on lower right). 
+The first option filtered 1713 sequences and the second option filtered 7518; 
+with <code>edgeR</code>, the number of analyzed sequences effects the resulting DE value.
+
+<table>
+<tr>
+
+<td valign="top">
+<table cellspacing=3 border=1>
+<tr><td><i>Filter</i><td><i>Description</i><td><i>Column</i><sup>1</sup>
+<tr><td>Count >[n]
+    <td>Filter all sequences that do not have any replicates with a count &gt; n (default 1) 
+    <td>RoSt1
+<tr><td nowrap valign="top">CPM<sup>2</sup> >=[n] for >[m]
+    <td>Filter all sequences that do not have more than m replicates with CPM >= n (default 2 and 1)
+    <td>RoSt2
+<tr><td>None<td> No filtering <td>RoSt3
+</table>
+<font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<sup>1</sup> Column in table on right.
+<br><sup>2</sup> CPM (Counts per million) is defined below.
+</font>
+
+
+<td width="40%" valign="top" style="padding-left:10px;">
+			<a href="img/DEfilter.png"><img src="img/DEfilter.png" border=1></a>	
+<font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+The DE value (RoSt) is set to negative if Root&lt;Stem.
+<br>The columns prefixed with '#' are the counts, which are used by the filters.
+<br>The two columns at the end (Root and Stem) are the RPKM values. 
+</font>
+</table>
+
+In the figure on the right:
+<ol>
+<li>DE value 3.00: the filtered sequences (i.e. not input to the DE computation) have a value of 3.
+<li>DE value 2.00: the sequences that received an NA (i.e. no result) from the DE computation have a value of 2.
+</ol>
+
+<p>CPM (Counts per million) takes into account replicate size. 
+There will be N replicates/samples to be analyzed, e.g. there are 10 replicates for the above dataset.
+The CPM value for a sequence j replicate i is computed (count<sub>j</sub>/S<sub>i</sub>)*1E6, 
+where S<sub>i</sub> is sum of the counts for each replicate i.
+
+  
+<p>
+To view the first 50 filtered sequences that do not have 'all' zero count values, 
+execute <tt>runDE</tt> with the ID or database name and a -v, 
+<br>e.g. <tt class=s>runDE NnR -v</tt>.
+<p>
+Using Count > 1, the following are the Counts of the filtered sequences.
+<pre class=tt>
+  NnR_00003    0    0    0    1    0    0    0    0    0    0
+  NnR_00016    0    0    0    0    0    0    1    0    0    0
+  NnR_00032    0    0    0    0    0    1    0    0    0    0
+  NnR_00090    1    0    0    1    0    1    0    0    0    0
+  NnR_00095    1    1    1    1    0    1    0    0    0    0
+  NnR_00112    0    0    0    1    0    0    0    0    0    0
+  ...
+  1713 filtered sequences
+</pre>
+Using CPM >=2 for >1 replicates, the following are the Counts:CPM values of the filtered sequences.
+<pre class=tt>
+ NnR_00002   6   10   13    8   21   20   16    9   13    3  :  0.2  0.4  0.4  0.3  0.6  0.8  0.5  0.3  0.4  0.1
+ NnR_00003   0    0    0    1    0    0    0    0    0    0  :  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ NnR_00004  19   27   18   15   17   16   17    4   22   10  :  0.8  1.0  0.6  0.5  0.5  0.6  0.5  0.1  0.7  0.3
+ NnR_00007  34   23   29   29   31   12    6    1    7    2  :  1.4  0.9  0.9  1.0  0.9  0.5  0.2  0.0  0.2  0.1
+ NnR_00009  45   23   33   22   46   17   26    7   22    3  :  1.8  0.9  1.1  0.8  1.3  0.6  0.8  0.3  0.7  0.1
+ NnR_00010  19   16   29   23   26    5    4    3    4    1  :  0.8  0.6  0.9  0.8  0.7  0.2  0.1  0.1  0.1  0.0
+ NnR_00014  28   21   38   26   31   13   13   15   14   11  :  1.1  0.8  1.2  0.9  0.9  0.5  0.4  0.5  0.5  0.4
+ NnR_00016   0    0    0    0    0    0    1    0    0    0  :  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ NnR_00017   5    4    4   10   11    0    0    2    1    0  :  0.2  0.2  0.1  0.4  0.3  0.0  0.0  0.1  0.0  0.0
+ ...
+ 7518 filtered sequences
+</pre>
+
+<a name="disp">
+<h4>Fixed dispersion</h4>
+If there are not biological replicates, then it is necessary to set the dispersion. If it is not set, TCW will use 0.1 by default.
+
+
+<a name="exec">
+<table width='100%'><tr><td align='left' >
+<h3>3.C Execute</h3>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+The most meaningful DE comparison is between exactly two conditions, as illustrated in the example above. 
+Groups of more than one condition may also be selected, however 
+the conditions in each group will be treated as replicates, leading (probably) to an overestimation
+of biological variability and underestimation of DE. 
+<p>
+If multi-condition testing is desired, e.g. to find transcripts reduced in condition A compared to
+any or all of conditions B,C,D, then the recommended process is to compute the individual
+pair DEs A-B, A-C, A-D, and then use filter options in <code>viewSingleTCW</code>
+to perform the screen. 
+
+<p>There are four options to add DE values to the sTCW database, as explained in the following four sections.
+<a name="groups">
+<h4>Group 1 - Group 2</h4> 
+<ul>
+<li>Select at least one condition from each group.
+<li>If you want to store the results in the database, check "Save results in P-value column".
+If the groups have been selected, a column name will be auto-generated which you can change.
+When you change the groups for a subsequent execution, uncheck-then-check the column box
+to auto-generated a name for the new groups.
+<li>Execute: The condition(s) in Group 1 will be compared with the condition(s) in group 2.
+</ul>
+
+<a name="all">
+<h4>All Pairs for Group 1</h4>
+<ul>
+<li>Only check conditions in Group 1.
+<li>Results will be saved in the database with auto-generated column names.
+<li>Execute: Each condition selected in group 1 will be pairwise compared; any selections
+in Group 2 are ignored.
+</ul>
+For example, if all three conditions (Stem, Root, Oleaf) were selected, then it would 
+compute:
+<pre class=tt>
+Stem  Root   StRo
+Stem  Oleaf  StOl
+Root  Oleaf  RoOl
+</pre>
+where the last column is the generated column name.
+
+<a name="file">
+<h4>All Pairs from File</h4>
+<ul>
+<li>Any checked conditions in <tt>Group 1</tt> and <tt>Group 2</tt> are ignored; the conditions to
+compare are specified in the file.
+<li>Results will be saved in the database with the provided column names.
+<li>Execute: All pairs from the file will be compared with the selected method
+and options.
+</ul>
+
+<i>File format:</i> Each line has 3 columns which represent Group 1, Group 2 and the column name to use, respectively. 
+For example:
+<pre class=tt>
+Root     Stem  RoSt
+Root     Oleaf RoOl
+Stem     Oleaf StmLea
+Root:Stem Oleaf RoSt_Ol
+</pre>
+The last row shows how to select two or more from Group 1; no spaces are allowed between the ":".
+Group 2 can only have one condition.
+<p>
+Keep the column names short but meaningful. A file similar to the above is in the <tt>projects/demoTra</tt> directory,
+filename <tt>traDE</tt> to allow user to try this option.
+<p>
+
+<a name="pfile">
+<h4>P-values from File</h4>
+The first line defines the two groups and the p-value column name, using the same format as the "Get Pairs from File". All remaining lines have a seqID followed by the p-value. For example,
+<pre>
+#Example p-value file 
+root stem RoSt
+tra_001	0.14
+tra_002	0.14
+tra_003	0.65
+</pre>
+The p-values are read as absolute values since runDE makes values negative if Cond1&lt;Cont2.
+
+<p>
+<a name="go">
+<table width='100%'><tr><td align='left' >
+<h2>4. Over-represented GO categories</h2>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+If GO annotations are loaded (see <a href="UserGuide.html#anno" class="ext" target="_blank">User Guide</a>), you can
+compute p-values for enrichment of DE in GO categories using the <b>Execute GOseq</b> button. 
+For this, you first choose one of the DE comparison pairs (or all of them), and a p-value threshold
+to define DE of individual transcripts (or a percentage ranking). 
+<p>
+The result is p-value columns for the GO, having
+the same names as the corresponding transcript DE columns, accessible through the "Basic GO Query" function of 
+<code>viewSingleTCW</code>.
+<p>
+The meaning of a low p-value for a given GO is that the transcripts labeled by that
+GO have a higher percentage of DE than the transcripts as a whole. For example, if GO:000123 has
+1000 labeled transcripts, of which 500 are DE (50%), while only 25% of transcripts as a whole are
+DE, then GO:000123 will receive a very low p-value. Note that the direction of the DE for
+each transcript (elevated or suppressed) is not relevant. 
+<p>
+To use <code>GOseq</code> therefore requires a threshold for defining DE of transcripts. The default is a 
+typical <tt>.05</tt> value (which assumes FDR correction was applied). 
+Since the DE p-values still contain considerable
+uncertainty as absolute measures of probability, we have also included an option to defined DE
+in terms of ranking, i.e., top 10% (the ranking is ordered by the p-values).
+
+<p>
+<a name="Rperms">
+<table width='100%'><tr><td align='left' >
+<h2>5. R Directory Permissions</h2>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+When you install an R package, it can go either to a shared location or to a user-specific location.
+Installing to the shared location is better, as others can then use the package, however in the default
+installation of R the shared directories are owned by the root user and their permissions must be
+changed to allow ordinary users to install shared packages. This is done as follows (unless you have 
+<tt>sudo</tt> access, you will need an administrator to do this):
+<ol>
+<li> Run R (by typing "R")
+<li> In R, use <tt>Sys.getenv("R_HOME")</tt> to find the R installation directory (usually /usr/lib64/R)
+<li> Exit from R with command "q()"
+<li> <tt>ls /usr/lib64/R</tt> (or wherever the R_HOME was)
+<li> The directory listing should have a <tt>library</tt> subdirectory; if not, R is not installed right
+<li> Change permissions on the <tt>library</tt> directory
+		(and everything under it) such that ordinary users can write to it. 
+		Ideally there is an appropriate user group and you can use <tt>chgrp -R &lt;group&gt; library</tt>
+		and <tt>chmod -R g+w library</tt> to give this group write permissions. Otherwise, 
+		<tt>chmod -R 777 library</tt> will be necessary. 
+</ol>
+
+Also, you can check the <tt>R-devel</tt> installation using <tt>ls &ltR_HOME&gt;/etc</tt>. There
+should be a file <tt>Renviron</tt> in this <tt>etc</tt> directory; if not, or if <tt>etc</tt> is
+not there, then <tt>R-devel</tt> was not installed. 
+</table>
+
+<!--#include virtual="../ssi/end.html" -->
+</BODY>
+</HTML>

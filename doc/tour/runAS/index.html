@@ -1,0 +1,46 @@
+<html>
+<!--#set var=TITLE value="Tour: runAS" -->
+<!--#include virtual="../../ssi/head.html" -->
+<body bgcolor="#FFFFFF" text="#000000" onLoad="init('runAS')">
+<!--#include virtual="../ssi/start2t.html" -->
+
+<a name=start>
+<center><code>runAS - Annotation Setup</code>	</center>
+
+<p><code>runAS</code> downloads UniProt files and formats them for input to sTCW, and download the
+GO database
+to build a local GO database for input into sTCW. 
+See <a href="../../stcw/AnnoDBs.html" class="ext" target="_blank">Annotation Setup</a> for details. 
+
+<table>
+<tr><td valign="top">
+<br>&nbsp;
+<br>&nbsp;
+<br>
+<code>runAS</code> performs the following:
+<ol>
+<li>Downloads one or more UniProt Taxonomic .dat files and creates FASTA files from them.
+<li>Downloads the full SwissProt or TrEMBL, creates subset files by removing entries from the taxonomic
+downloads, and creates a FASTA file of the remaining entries.
+<li>Download the GO schema and data, and creates a GO mySQL database
+with the mapping of UniProt IDs to the GO, KEGG, EC, Pfam and InterPro. 
+</ol>These are used for annotating a TCW database with 
+<a href=../runSingle/ class="ext" target="_blank"><code>runSingleTCW</code></a>. 
+
+<p>The highlighted entries in the figure indicate what has been created, i.e. the invertebrate SwissProt
+and SwissProt subset.
+
+<p>Other databases, such as Genbank nr, can also be used in <code>runSingleTCW</code> for annotation, 
+but the user must download and format them as FASTA files.
+
+
+<td>
+<center><font size=2><code>runAS</code> graphical interface</font></center>
+<a name="Fig1">
+<a  href="img/runAS.png">
+<img src="img/runAS.png" width=400 border=1></a>
+</table>
+
+<!--#include virtual="../../ssi/end.html" -->
+</html>
+

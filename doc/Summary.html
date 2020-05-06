@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<HTML>
+<!--#set var=TITLE value="TCW Summary" -->
+<!--#include virtual="./ssi/head.html" -->
+<!--#include virtual="./ssi/start1.html" -->
+<a name=top>
+
+Select a program name to view the graphical interface of the Demo Project.
+<p>
+	<i>singleTCW contains four major programs:</i>
+	<ol>
+	<li><a href=img/runAS.png><code>runAS</code><a> -- annotation setup for input to <code>runSingleTCW</code>
+	<ul>
+	<li>Downloads the UniProt taxonomic and/or full SwissProt and TrEMBL .dat files
+	<li>Create fasta files from .dat files for searching against TCW sequences
+	<li>Download GO mysql database and augment it with UniProt information about GO, KEGG, Pfam, and InterPro
+	</ul>
+	Note: <code>runSingleTCW</code> can take as input other databases such as Genbank nr, 
+	but these results will not have associated GO annotations.
+	<p>
+	<li><a href=img/runSingleTCW.png><code>runSingleTCW</code></a> -- create single TCW database
+	   <ul>
+	   <li> Input: sequences and optional counts, where <i><b>any</b></i> of the following are valid:
+		<ol>
+		<li>Load RNA-seq transcripts and count data with optional replicates.
+		<li>Load protein sequences and spectra (count) data with optional replicates.
+		<li>Load sequences with location information (e.g. predicted genes).
+		<li>Assemble up to ~1M sequences, such as: transcript sets, 
+		paired-end Sanger ESTs, or a mix of transcripts and ESTs. 
+		</ol>
+	
+	   <li> Annotation:
+		<ol>
+		<li>Annotate sequences with one or more nucleotide or protein databases (called annoDBs). 
+		UniProt should be downloaded with the <code>runAS</code> program. The searching may be done with 
+		the super-fast
+		<code>DIAMOND</code> or the standard <code>BLAST</code>.
+		<li>If UniProt is used, GO annotations along with EC, KEGG and Pfam identifiers are extracted 
+		from the GO database and entered into the sTCW database. The GO database is set up with the <code>runAS</code> program.
+		<li>Compute ORFS and GC content.
+		</ol>
+	   <li> All data and results are stored in a MySQL database. 
+	   </ul>
+	<br>		
+	<li><a href=img/runDE.png><code>runDE</code></a> -- run Differential Expression analysis
+	   <ul><li>An interface to several R packages (<code>EdgeR, DESeq</code>) for calculating differential
+			of sequences. Additionally, it can execute a user-provided R script for DE calculation.
+		<li>If UniProt is used and GO entered, the <code>GOseq</code> R program can be used to compute differential GO terms.
+	   </ul>
+	<br>
+	<li><a href=img/viewSingleTCW.png><code>viewSingleTCW</code></a> -- view single TCW database
+	   <ul><li>Query and view the results. There are various filters, for example,
+	   filters are provided specific to taxonomic databases, trimmed GOs, filter by annotation, etc.
+	   The initial view is the <a href=overview.html>Overview</a>, which summarizes the results.
+	   </ul>
+	</ol>
+	
+	<i>multiTCW contains two major programs</i>:
+	<ol>
+	<li><a href=img/runMultiTCW.png><code>runMultiTCW</code></a> -- build species comparison TCW database
+		<ul><li>Builds a database of singleTCW projects.
+		<li>Runs <code>DIAMOND</code> or <code>BLAST</code> to compare the sequences from the input TCWs. Add the resulting pairs to the database.
+	 	<li>Clusters the pairs into ortholog groups. They can be clustered with <code>OrthoMCL</code>,
+	 	TCW Closure, TCW BBH (best bi-directional) and/or user-supplied clusters can be uploaded. 
+		Multiple ortholog clustering can be in the database for query.
+		<li>If the input is from DNA singleTCW projects, coding statistics are calculated. Additionally,
+		alignment files are output for input to <code>KaKs_calculator</code>, and the results of running
+		the KaKs_calculator are input to <code>runMultiTCW</code>.
+		<li>The clusters MSA are scored with Trident.
+	 	</ul>
+	 <br>
+	 <li><a href=img/viewMultiTCW.png><code>viewMultiTCW</code></a> -- view multi TCW database
+	 	<ul><li>Query and view the results. The results can be filtered on various attributes. A cluster
+	 	can be viewed graphically with the results of <code>MAFFT</code> or <code>MUSCLE</code> 
+	 	multiple sequence alignment (MSA) or pairwise alignment
+	 	(e.g. <a href=img/viewMultiMSA.png>MSA</a> 
+	 	and <a href=img/viewMultiPair.png>Pair</a>).
+	 	</ul>
+	</ol>
+	<p>
+   	<table style="font-family:verdana,arial;font-size:13px;">
+   		
+    	<tr>
+    		<td><i>Email: </i></td>
+      		<td> tcw@agcol.arizona.edu</i></td>
+		</tr>
+    	<tr>
+    		<td valign="top"><i>References: </i></td>
+    	<td>
+    	<br>C. Soderlund (2019) Transcriptome computational workbench (TCW): 
+    	analysis of single and comparative transcriptomes. Submitted.
+    	<br><i>Describes the TCW v3 package.</i>
+<br>&nbsp;
+		<br>C. Soderlund, W. Nelson and S. Goff (2014)
+		Allele Workbench: transcriptome pipeline and interactive graphics for allele-specific expression.
+		PLOS ONE.
+		<a href=http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0115740>Link</a> 
+		
+		<br><i>Describes a pipeline that can be used with TCW, plus a new GO trim algorithm.</i>
+		<br>&nbsp;
+    	<br>C. Soderlund, W. Nelson, M. Willer and D. Gang (2013) TCW: Transcriptome Computational Workbench. PLOS ONE.
+				<a href="http://dx.plos.org/10.1371/journal.pone.0069401">Link</a>	
+		<br><i>Describes the TCW v1 package.</i>
+		<br>&nbsp;
+    		<br>C. Soderlund, E. Johnson, M. Bomhoff, and A. Descour (2009) 
+       		PAVE: Program for Assembling and Viewing ESTs. BMC Genomics.
+<a href="http://www.biomedcentral.com/1471-2164/10/400">Link </a>.
+		<br><i>Describes the assembly algorithm.</i>
+			</td>
+		</tr>
+	</table>
+<br>
+<p>
+<!--#include virtual="./ssi/end.html" -->
+</HTML>
+

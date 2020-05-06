@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<HTML>
+<!--#set var=TITLE value="sTCW Update Annotation" -->
+<!--#include virtual="../ssi/head.html" -->
+<!--#include virtual="../ssi/start2.html" -->
+<a name=top>
+
+Though the options for the annotation should be set in the runSingleTCW interface,
+they can be <b>Save</b> and then the annotation run from the command line with:
+<pre>
+./execAnno &lt;project&gt;
+</pre>
+
+
+<!--------------------------------------------->
+
+<a name=update>
+<table width='100%'><tr><td align='left' >
+<h3>Updating or redoing annotation</h3>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+You may wish to re-run annotation steps for two reasons:
+<ol>
+<li>Update to a newer AnnoDB (e.g. more recent UniProt release): In this case,
+you would delete existing annotation.
+<li>Add a new AnnoDB: In this case, make sure to uncheck all annoDBs in the 
+runSingleTCW interface that are already in the database.
+<li>Remove an annoDB: In this case, you will need to delete the existing annotation
+and reload all annoDBs that you want to keep. The original blast files can be reused.
+</ol>
+Both of these can be accomplished by editing the AnnoDB list in runSingleTCW, then
+re-running "Annotate Sequences", and responding to the yes/no prompts
+which will appear on the console, as follows (note, at any point during these
+question, you can Ctrl-C to stop the process):
+<p>
+<div class="codesec"><pre>
+?--Annotation exists in database. Enter [a/d/e]
+Add to existing annotation [a], Delete annotation [d], Exit [e]:
+</div></pre>
+Answer 'a' to add to the existing annotation.
+<br>Answer 'd' to replace all annotation. Note that this
+does NOT delete blast result files from disk, and they may be loaded again if desired. 
+<br>Answer 'e' to exit.
+
+<p>
+If you get the prompt:
+<div class="codesec"><pre>
+?--DB#1 The annoDB /projects/DBfasta/demo4/plants/demo_sprot_plants.fasta
+      has been processed previously. Continue? (y/n)? 
+</div></pre>
+This means you have already added an annoDB with the exact same path name. If it is a new
+version of UniProt, you probably want to have it delete all previous annotation 
+(i.e. answer 'n', which will let you restart and answer 'y' to deleting annotation). 
+If you answer
+'y' to this prompt, it will add what is new from the annoDB 
+(we do not recommend this -- its better to start fresh).
+<p>If you get the prompt:
+<div class="codesec"><pre>
+DB#1 blast
+   DBfasta file:  demo_sprot_plants.fasta
+   Output file :  /projects/demo_exp/uniblasts/demo_exp_SPpla.tab
+   Output File exists, dated: Wed Apr 20 15:03:14 MST 2011
+?--Yes = use this existing file; No = perform new blast;  (y/n)? 
+</div></pre>
+A 'y' will use the existing file and not redo the blast. 
+<p><font color=green>Note:</font> the file
+name of the blast output uses the database type (SP, TR, GI) and the first three letters of the 
+DBtaxo (e.g. SPpla is the SwissProt plant taxonomy database); if you have multiple databases
+with the same output name, it will append numbered suffixes.  
+<p>
+We have annotated many databases with no problems, however, if you are updating an 
+annotated database, it is worth making a dump of the database
+before beginning just to be on the safe side. This can be done with
+<pre>
+mysqldump -u &lt;user&gt; -p &lt;database_name&gt; &gt;! &lt;dump_file_name&gt;
+</pre>
+
+
+<p>
+<!--#include virtual="../ssi/end.html" -->
+
+</HTML>

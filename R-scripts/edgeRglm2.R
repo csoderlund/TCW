@@ -15,8 +15,6 @@ if (nGroup1==1 && nGroup2==1) {
     qlf <- glmQLFTest(fit,contrast=c(-1,1))
     res <- topTags(qlf, n=nrow(qlf), adjust.method="BH")
 } 
-# Use the following for non-adjusted: results <- et$table$PValue
-# 4th column is FDR
-
-results <- res$table[,4]
+# Columns are:  logFC    logCPM        F       PValue          FDR
+results <- res$table$FDR
 rowNames <- rownames(res)

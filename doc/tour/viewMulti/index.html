@@ -1,0 +1,211 @@
+<html>
+<!--#set var=TITLE value="Tour: viewMultiTCW" -->
+<!--#include virtual="../../ssi/head.html" -->
+<body bgcolor="#FFFFFF" text="#000000" onLoad="init('viewM')">
+<!--#include virtual="../ssi/start2t.html" -->
+
+<a name=start>
+<center><code>viewMultiTCW</code>
+<table  align='center' border="0" cellspacing="0" cellpadding="2" height="18">
+<tr><td align="left" bgcolor="#666666" class="white" style="padding-bottom:4px;">
+<a href="#overview" class="white">Overview</a> |
+<a href="#clusterTable" class="white">Cluster Table</a> |
+<a href="#pairTable" class="white">Pairs Table</a> |
+<a href="#seqTable" class="white">Sequence Table</a> |
+<a href="#align" class="white">Alignment</a> |
+<a href="#filter" class="white">Filters</a> 
+</td></tr>
+</table>
+</center>	
+
+<p><code>viewMultiTCW</code> displays information from a multiTCW (mTCW) database, which was created
+by one or more singleTCW (sTCW) databases. A sTCW database can be created from nucleotide (NT-sTCW) 
+or protein (AA-sTCW) sequences. A mTCW database created only from NT-sTCW databases contains both
+nucleotide sequences and the corresponding translated ORFs, and special statistics on the coding
+regions, e.g. Ka/Ks from the KaKs_calculator<sup>1</sup>.
+
+<!---------------------------- Overview ----------------------------->
+
+<a name=overview>
+<h3>1. Overview</h3> 
+<table border=0>
+<tr><td>
+Scrolling down in the overview shows the <a href=ex.html>statistics summary</a>, and the <a href=explain.html>Explain</a>
+button explains how each value was computed.
+<p>There are three types of tables: clusters, pairs, and sequences.
+The tables can be very big, so the top three tabs on the left provide <b>Sample</b> tables
+of just a few 1000's. All three table types have <b>Filters</b>, which limits the number of rows that
+are displayed. 
+<p>The types of clusters in a table depends on how the database was built 
+(see <a href=../runMulti>runMulti</a>) for detail. This mTCW database has 6 different types of clusters,
+as described in the Overview on the right.
+
+
+<td><a  href="img/viewMulti.png">
+<img width=650 src="img/viewMulti.png" border=1></a>
+</table>
+
+<!----------------------------- cluster ---------------------------->
+<a name=clusterTable>
+<table width='100%'><tr><td align='left' >
+<h3>2. Cluster Table</h3> 
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+<table border=0>
+<tr><td>
+The table on the right was created with the filter to show the clusters of method 'CL-Closure' with at least one
+sequence for each dataset.
+
+<p>Select a row followed by:
+<ol>
+<li><b>Sequences</b>: the table of sequences for the cluster will
+be shown (see lower left image). The columns Ww, Xx, Yy, Zz are the RPKM values.
+<li><b>Pairs</b>: the table of pairs for the cluster will
+be shown (see lower right image). Only pairs that share a blast hit will be in the database. 
+Only two of these pairs has a PCC>0.8, which is the correlation between the RPKM values in the sequence table.
+</ol>
+<td>
+<a  href="img/clusterTable.png">
+<img width=650 src="img/clusterTable.png" border=1></a>
+</table>
+
+<table border=0>
+<tr><td>
+<b>Sequences</b>: Sequences in selected cluster
+<a  href="img/clusterSeqs.png">
+<img width=450 src="img/clusterSeqs.png" border=1></a>
+<td>
+
+<b>Pairs</b>: Pairs in selected cluster
+<br><a  href="img/clusterPairs.png">
+<img  width=450 src="img/clusterPairs.png" border=1></a>
+</table>
+
+
+<!----------------------------- pairs ---------------------------->
+<a name=pairTable>
+<table width='100%'><tr><td align='left' >
+<h3>3. Pairs Table</h3> 
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+<table border=0>
+<tr><td>
+Selecting a row followed by <b>Sequences</b> creates a table of two sequences; from the sequence
+table, you can see how they align.
+
+<td>
+<a  href="img/pairTable.png">
+<img width=700 src="img/pairTable.png" border=1></a>
+
+<tr><td>
+<p>The figure on the right shows the columns for pairs. All 3 types of table work as follows:
+<ol>
+<li>The <b>Select Column</b> panel displays all possible columns. 
+<li>Mousing over a column describes it in the lower left.
+<li>Selecting or deselecting a column name immediately shows or removes the column from the table.
+<li>The  columns can be sorted and moved around.
+</ol>
+<td>
+<a  href="img/pairColumn.png">
+<img width=500 src="img/pairColumn.png" border=1></a>
+
+<tr><td>All three tables also has a "Show Column Stats" option to display summary
+statistics for the rows and numeric columns of the displayed table, as illustrated on the right (results from
+the Pair Table displayed above).
+<td >
+<a  href="img/showColumns.png">
+<img width=400 src="img/showColumns.png" border=1></a>
+
+</table>
+
+<a name=seqTable>
+<table width='100%'><tr><td align='left' >
+<h3>4. Sequence Table</h3> 
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+<table border=0>
+<tr><td>
+Align:  
+<ol>
+<li><b>Pairwise...</b>: The first two options perform AA or NT alignment for all selected sequences will
+using dynamic programming. The third option aligns a pair of sequences on their AA, CDS and NT sequences using
+dynamic programming.
+<li><b>multiDB</b>: displays the multi-alignment for a cluster stored in the database.
+<li><b>Multi...</b>: (not available with Applet) either the cluster or selected sequences will be aligned
+using MUSCLE<sup>3</sup> or MAFFT<sup>4</sup>. Their alignments and scores are written to file.
+</ol>
+<td>
+<a  href="img/seqTable.png">
+<img width=700 src="img/seqTable.png" border=1></a>
+</table>
+
+
+<a name=align>
+<table width='100%'><tr><td align='left' >
+<h3>5. Alignments</h3> 
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+Multi-alignment of a cluster.
+<br>
+<a  href="img/muscle.png">
+<img width=700 src="img/muscle.png" border=1></a>
+
+<br><br>AA, CDS and NT alignments of a pair. The text alignment can be viewed by clicking the AA, CDS or NT buttons.
+<br><a  href="img/pairAlign.png">
+<img width=700 src="img/pairAlign.png" border=1></a>
+<br><br>
+
+<table border=0>
+<tr><td>
+Menu for the CDS text alignment: 
+<a  href="img/alignMenu.png">
+<img width=300 src="img/alignMenu.png" border=1></a>
+<td>
+
+Text alignment of the CDS showing matches. The '|' are mutations in synonymous codons, the '*' in nonsynonymous codons.
+<a  href="img/alignText.png">
+<img width=600 src="img/alignText.png" border=1></a>
+</table>
+
+<a name=filter>
+<table width='100%'><tr><td align='left' >
+<h3>6. Filters</h3> 
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+<table border=0>
+<tr>
+<td width=40%>
+Cluster Filter
+<br><a  href="img/clusterFilter.png">
+<img width=450 src="img/clusterFilter.png" border=1></a>
+<td width=40%>
+Pair Filter
+<br><a  href="img/pairFilter1.png">
+<img width=450 src="img/pairFilter1.png" border=1></a>
+
+<tr>
+<td width=40%>
+Sequence Filter
+<br><a  href="img/seqFilter.png">
+<img width=350 src="img/seqFilter.png" border=1></a>
+<td width=40%>
+Pair Filter (continue)
+<br><a  href="img/pairFilter2.png">
+<img width=450 src="img/pairFilter2.png" border=1></a>
+</table>
+
+<a name=refs>
+<table width='100%'><tr><td align='left' >
+<h3>References</h3> 
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+<ol>
+
+<li>Zhang Z, Li J, Xiao-Qian Z, Wang J, Wong, G, Yu J (2006) KaKs_Calculator: Calculating Ka and Ks through model selection and model averaging. Geno. Prot. Bioinfo. Vol 4 No 4. 259-263.
+<li>Li L, Stoeckert CJ, Jr., Roos DS (2003) OrthoMCL: identification of ortholog groups for eukaryotic genomes. Genome Res 13: 2178-2189.
+<li>Edgar RC (2004) MUSCLE: multiple sequence alignment with high accuracy and high throughput. Nucleic Acids Res 32: 1792-1797.
+<li>Katoh K, Standley DM (2013) MAFFT Multiple Sequence Alignment Software Version 7: Improvements in Performance and Usability. Molecular Biology and Evolution Vol 30, Issue 4  772:780
+</ol>
+</table>
+</table>
+<!--#include virtual="../../ssi/end.html" -->
+

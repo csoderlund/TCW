@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<!--#set var=TITLE value="sTCW Troubleshooting" -->
+<!--#include virtual="../ssi/head.html" -->
+<a name=top>
+<!--#include virtual="../ssi/start2.html" -->
+
+		
+<!------------- Trouble -------------------->
+<a name=trouble></a>
+<h2>Troubleshooting</h2>
+Content:
+<ul>
+<li><a href=#max>MySQL slow build</a>
+<li><a href=#db>MySQL connection errors</a>
+<li><a href=#ports>MySQL port access</a>
+<li><a href=#mem>Out of memory</a>
+<li><a href=#run>singleTCW errors</a>
+<li><a href=#asm>Assembly errors</a>
+</ul>
+
+<a name="max">
+<h3>MySQL slow build</h3>
+<i>Check max_allowed_packet</i>
+<br>Startup mysql and enter the command: <tt>show variables like "max_allowed_packet";</tt>
+<br>If it is small (e.g. 1048576), it will be very slow to build big databases. 
+<br>Increase it by entering the command: <tt>set global max_allowed_packet=1073741824;</tt>
+
+<a name="db">
+<h3>MySQL connection errors</h3>
+
+If TCW cannot connect to the database, generally the problem is the access privileges of the DB_user
+ in the HOSTS.cfg (firewalls are another common problem, as discussed in the next section). 
+MySQL privileges are very specific and must exactly match the hostname in HOSTS.cfg. 
+<br> For example, if DB_host = localhost, DB_user=user, then privileges must be granted to 'user@localhost'.
+Sometimes you may need equivalent variants, e.g. if localhost has IP 74.125.239.17 
+and domain my.domain.org, you may also need 'user@74.125.239.17' and 'user@my.domain.org'. 
+<p>
+Privilege problems are easiest to debug by running the 'mysql' command line client.<br>
+Run
+<div class="codesec"><pre>
+mysql -u &lt;DB_user&gt; -p -h &lt;DB_host&gt;
+</div></pre> 
+and enter the DB_password when prompted. If this fails, then the user/password privileges have
+to be corrected. If it succeeds, then try to add and drop a test database:
+<div class="codesec"><pre>
+>create database TCW_PRIVTEST;
+>drop database TCW_PRIVTEST;
+</pre></div>
+If this fails you can still run TCW, but you will need an administrator to create
+the TCW database since <tt>runSingleTCW</tt> cannot do it. 
+
+<p>
+
+<a name="ports">
+<h3>MySQL port access</h3>
+Users running the TCW web applet need to able to connect from their computer, wherever it happens to be located,
+to the MySQL server on which the data is hosted. This connection is often blocked by firewalls,
+which can be either on the server's network, blocking incoming connections, or on the user's network, blocking outgoing
+connections. 
+<p>
+If the MySQL connection is blocked by a firewall, there are two options which we have had success with:
+<ol>
+<li> Request network adminstrators to open a hole for the MySQL connection (which will usually be on port 3306)
+<li> Use port forwarding on the MySQL server to forward an un-blocked port such as 80 or 443 to 3306. This works only if the un-blocked port
+is not being used on the same server (note that 80 and 443 correspond to standard and secure HTTP, respectively, so at least one will
+be in use if a webserver is running). 
+</ol>
+
+The second solution is the most robust since it works for all clients, even if their own networks are blocking outgoing MySQL connections. This is
+important if you have a public site receiving random visitors and need to guarantee a good experience.  
+<p>
+Another option is to run the MySQL server on a non-standard port (not 3306). This is easy to do, however most other ports will
+also be blocked, and most systems won't let you start MySQL on a non-blocked port such as 80 or 443. Hence, forwarding is simpler. 
+<p>
+Once you have a working port set up, modify the java applet <tt>DB_URL</tt>tag by appending the port, e.g.:
+<br><br><tt>
+&lt;param name="DB_URL" value="www.your.hostname:80"&gt;
+</tt>
+
+<a name=memset></a>
+<h3>Out of memory</h3>
+<p>Java applications must specify their memory usage in advance, so it is very 
+important to set it high enough. The setting is adjusted by editing the appropriate launch script,
+by increasing the "-Xmx" parameter value on the java command line.   
+<p>
+If you run out of memory while annotating, edit the <tt>execAnno</tt> script, and load
+your annotation using <tt>./execAnno &lt;project&gt;</tt>.
+<p>
+If you run out during assembly, edit the <tt>execAssm.pl</tt> script, and run the
+assembly using <tt>perl execAssm &lt;project&gt;</tt>.     
+<p>
+If you run out during initial project loading, edit the <tt>execLoadLib.pl</tt> script, and load
+ using <tt>perl execLoadLib.pl &lt;project&gt;</tt>.     
+<p>
+Other phases such as viewing or DE computation are unlikely to run out of memory, but their memory 
+can also be increased through the appropriate launch scripts <tt>runDE</tt> and <tt>viewSingleTCW</tt>.
+<p>
+If a user of the web applet runs out of memory, they will need to close their browser and increase
+applet memory through the Java Preferences manager. On Macs this is found under
+<tt>Applications/Utilities/Java Preferences</tt>
+<br>
+and on Windows it is on the Control Panel. On Linux, find the executable called "ControlPanel" 
+by following links from the browser plugin directory (typically <tt>~/.mozilla/firefox/plugins</tt>
+to find the java installation directory, and look in its <tt>bin</tt> directory. 
+<p>
+Once you have the Control Panel open, look for a panel where you can enter the runtime parameters
+for java applets, and add "-Xmx1024m", for 1Gb (which should be plenty). 
+
+<a name=run></a>
+<h3>SingleTCW errors</h3>
+<code>runSingleTCW</code> and <code>viewSingleTCW</code>:
+If errors occur in either of these two programs, a message is written to the terminal
+and the Java stack-trace is written to the file <tt>sTCW.error.log</tt>. This can 
+be sent to us so we can help you trouble shoot the problem, that is, if the 
+message to the terminal is not sufficient to indicate how to fix the problem. NOTE:
+errors are appended to this file, so if an error keeps re-occurring without getting
+fixed, the file can get quite large.
+
+<p><code>runSingleTCW</code>:
+If the information on this window does not look right, remove
+<tt>/libraries/&lt;project&gt;/LIB.cfg</tt> to start over. You can try fixing the problem
+by editing this file, but its necessary to format it correctly.
+<p>If you have many sequences (e.g. transcripts) in the database and/or many annoDBs (databases to blast against),
+this can take a lot of memory. Running <tt>Exec Annotate Sequences</tt> from <tt>runSingleTCW</tt>
+sets the memory to 4096, which may not be 
+enough; in this case, once <tt>runSingleTCW</tt> is ready to annotate your database, exit and run from the command line:
+<pre>
+	./execAnno &lt;project&gt;
+</pre>
+You can increase the memory size in the <tt>execAnno</tt> script.
+
+<a name=asm></a>
+<h3>Assembly errors</h3>
+See <a href=AssemGuide.html#trouble>Assembly trouble shooting</a>.
+<p>
+<!--#include virtual="../ssi/end.html" -->
+
+
+</html> 

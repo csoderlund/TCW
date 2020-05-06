@@ -1,0 +1,82 @@
+<html>
+<!--#set var=TITLE value="Tour: runDE" -->
+<!--#include virtual="../../ssi/head.html" -->
+<body bgcolor="#FFFFFF" text="#000000" onLoad="init('runDE')">
+<!--#include virtual="../ssi/start2t.html" -->
+
+<a name=start>
+<center><code>runDE</code>
+<table  border="0" cellspacing="0" cellpadding="2" height="18">
+<tr><td align="left" bgcolor="#666666" class="white" style="padding-bottom:4px;">
+<a href="#main" class="white">runDE</a> |
+<a href="#batch" class="white">Batch</a> |
+<a href="#R" class="white">R-scripts</a> |
+<a href="#refs"  class="white" >References</a>
+</td></tr>
+</table>
+</center>	
+
+<a name=main>
+<p><code>runDE</code> adds differential expression (DE) to a singleTCW database.
+It uses JRI (Java-R interface) to R methods. TCW supplies <tt>edgeR<sup>1</sup></tt>, <tt>EDSeq2<sup>2</sup></tt> and <tt>GOseq<sup>3</sup></tt>,
+or the user can supply an R-script to a method. 
+See <a href="../../stcw/DiffExp.html" class="ext" target="_blank">Compute Differential Expression</a> for details. 
+<table width=100% cellpadding=5>
+			<tr>
+				<td>		
+
+				<p>1. Select one condition from group 1 and one condition from group 2.
+				<p>2. Select a method.
+				<p>3. Only select <tt>Fixed Dispersion</tt> if no replicates. 
+				Only select <tt>Apply FDR</tt> if using an R-script that does not provide FDR adjusted p-values. 
+				<p>4. Click <tt>Save results in p-value column</tt> to save the results in the database. If the two conditions
+				have been selected, it will provide a default name (that can be over-written).
+				<p>5. <tt>Group 1 - Group 2</tt> will run the DE method and (if Save selected) add the results to the database.
+				<p>6. When all columns have been added, click on the <tt>Select p-value column</tt> until
+				it says <tt>All p-value columns</tt>, then select <tt>Execute GOseq</tt>. 
+				<p><p>On the terminal window, it will be left in R so that you can execute
+				R commands. The output to terminal suggests some commands to view graphs of the 
+				results.			
+				
+				</td>
+				<td>
+					<center><font size=2>(Click to see larger)</font></center>
+					<a name="Fig1">
+					<a  href="img/runDE.png">
+					<img width=500 src="img/runDE.png" border=1></a>
+				</td>
+			</tr>
+			</table>
+<p>		
+<a name=batch>
+<table width='100%'><tr><td align='left' >
+<h4>Batch mode</h4>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+<tt>All Pairs for Group 1</tt>: All conditions in Group 1 will be paired for DE analysis. For example, if Rhiz, Root, and Stem are selected, then DE columns RhRo, RhSt and RoSt will be computed.
+<p><tt>All Pairs from File</tt>: A file will be read where the first column is Group 1, the second is Group 2 and the third is the column name. All entries will be computed and added to the database.
+<p>
+<a name=R>
+<table width='100%'><tr><td align='left' >
+<h4>R-scripts</h4>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+A script of R commands can be provided, which uses the variables created by 
+<code>runDE</code> to compute DE. <code>RunDE</code> 
+writes the data into the R environment (e.g. the count data is written to a matrix called 
+<tt>countData</tt>), executes the R script using the <tt>source</tt> command, and 
+reads the results from the variable called <tt>results</tt>.  Two scripts are supplied as example.
+<p>
+
+<table width='100%'><tr><td align='left' >
+<a name=refs>
+<h3>References</h3>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+<ol>
+<li><b>edgeR</b> - Robinson MD, McCarthy DJ, Smyth GK (2010) edgeR: a Bioconductor package for differential expression analysis of digital gene expression data. Bioinformatics 26: 139-140.
+<li><b>DESeq2</b> - Love MI, Huber W and Anders S (2014) Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2. Genome Biology 15:550.
+<li><b>GOSeq</b> - Young MD, Wakefield MJ, Smyth GK, Oshlack A (2010) Gene ontology analysis for RNA-seq: accounting for selection bias. Genome Biology 11: R14.
+</ol>
+<!--#include virtual="../../ssi/end.html" -->
+</html>
+

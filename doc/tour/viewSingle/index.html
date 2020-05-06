@@ -1,0 +1,49 @@
+<html>
+<!--#set var=TITLE value="Tour: viewSingleTCW" -->
+<!--#include virtual="../../ssi/head.html" -->
+<body bgcolor="#FFFFFF" text="#000000" onLoad="init('viewS')">
+<!--#include virtual="../ssi/start2t.html" -->
+
+<a name=start>
+<!--#include virtual="./ssi/view_stcw.html" -->
+
+
+<code>viewSingleTCW</code> provides query and display of the sTCW database built with
+runSingleTCW. It allows the user to explore 
+all aspects of their data and annotation.
+
+<p>
+<table>
+<tr><td>
+<p><a class=tt href=overview.html>Overview</a>: Displays a complete overview of the 
+input, results and process.
+
+<p><a class=tt href=main.html>Sequence</a>: The items under this label (on left of image) produces
+the "Main Table" of sequences.
+<p><a class=tt href=seqDetails.html>Sequence Details</a>: From all views, 
+it is possible to drill down to the sequence view.
+
+<p><b><tt>Basic Queries</tt></b>: 
+<br>&#10148;<a class=tt href=seqSearch.html>Sequences</a>: Search by seqID or remark.
+<br>&#10148;<a class=tt href=hitSearch.html>AnnoDB Hits</a>: Search by hitID, taxonomy, e-value, etc.
+<br>&#10148;<a class=tt href=goSearch.html>GO Annotation</a>: Search by GO term, term_type, etc.
+<br><a class=tt  href=search.html>&#10148;Search</a>: Search an user supplied sequence against the sequences in the database or an external database..
+
+<p><a class=tt href=pairs.html>Similar Sequence Pairs</a>: The items under this label produces a table of 
+similar pairs of sequences.
+
+<p>
+</td>
+
+<td><center>The initial <code>viewSingleTCW</code> display.</center>
+<a  href="img/initialView.png">
+<img width=700 src="img/initialView.png" border=1></a>
+</td></tr>
+</table>
+
+<table width='100%'><tr><td align='left' >
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+</table>
+
+<!--#include virtual="../../ssi/end.html" -->
+

@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<HTML>
+<!--#set var=TITLE value="TCW Release Notes" -->
+<!--#include virtual="./ssi/head.html" -->
+<!--#include virtual="./ssi/start1.html" -->
+<a name=top>
+
+<p>
+<font color="#000000" face="Verdana, Arial, Helvetica, sans-serif" size="2"> 
+<p><b><big><u>TCW Version 3.0</u></b></big>
+
+<p>Release v3.0.2 5-May-20
+
+<p>runDE: The R-script/edgeRglm.R has been changed from importing the p-values to importing the FDR values.
+<br>Github: The /doc directory of html instructions has been added to Github.
+
+<p>Release v3.0.1 30-Oct-19
+<ul>
+<li>SingleTCW:
+<ol>
+<li>MariaDB 10.4.7 broke the assembler, which has been fixed. Note, it runs slower with MariaDB compared to MySQL.
+<li>The overview is available after 'Build Database' in order to show the libraries loaded.
+</ol>
+<li>MultiTCW:
+<ol>
+<li>For runMultiTCW, selecting a different database from the dropdown is a little faster.
+<li>In viewMultiTCW, the KaKs columns and queries are only available if the data has been loaded.
+</ol>
+</ul>
+
+<p>Release v3.0 10Aug19
+<ol>
+<li>With this release, the code is on github.com/csoderlund/tcw.
+<li>There was a major internal code cleanup.
+</ol>
+
+<p><b><big><u>Lost release notes after 1Apr19</u></b></big>
+<p>The release notes got lost in a corrupted backup. From 1Apr19 to 10Aug19 are lost.
+
+<!------------------ Version 2.13 ----------------------->
+<p><b><big><u>TCW Version 2.13</u></b></big>
+<p>Release 1Apr19
+<ol>
+<li>If you are not using TCW v2.12, <font color=green>see the green highlighted points for the v2.12 release</font>.
+<li>The multiTCW algorithm has been improvement for assigning shared descriptions and distinguishing between KaKs 'not run' versus 'null value'; <font color=green>to get new assignments, remove Pairs and Clusters and re-add</font>. (However, viewMulti works fine without the update). 
+</ol>
+
+General:
+<ol>
+<li>Added the search program <code>Diamond</code> to the /external and /external_osx directories.
+<li>The Show Stat function bug: If values were missing, the Median was wrong. 
+</ol>
+
+<p><code>runSingleTCW</code>
+<ol>
+<li>Assigning bestAnno: If the bestAnno is not the same as the bestEval, and the bestEval is not a good description 
+but has a much better E-value (exponent is 80% higher),
+then the bestAnno is set to the bestEval. This increases the number of "uncharacterized" hits, but if the bestEval has an E-value of 0.0 and the bestAnno has
+an E-value of >1E-30, it makes more sense to have the bestAnno be "uncharacterized".
+<li>Minor bug: If an annoDB had a type other than 'sp', 'tr', 'pr', 'nt', e.g. PlantTFDB uses
+the format of <tt>>tf|B3_1 B3 family protein {KFK32619.1} OS=Arabis alpina</tt> where 'tf' is the type, then the viewSingleTCW General columns of #Protein or #Nucleotide would be incorrect.
+
+</ol>
+
+<p><code>viewSingleTCW</code>
+<ol>
+<li>Find hit: when using Diamond for searching, it reformatted the database everytime; this has been corrected.
+</ol>
+
+<p><code>runMultiTCW</code>
+<ol>
+<li>Assigning a representative hit:
+<ul>
+<li>The algorithm for assigning a representative hit to a cluster or hit pair has been re-written to give more weight to the hits with GOs.
+<li>Hit pairs are assigned a representative hit if a shared hit can be found, else, "NoShare" is assigned. 
+<li>For clusters, if any sequence has a hit, the cluster will have a hit even if only one sequence has the hit.
+</ul>
+<li>If pairs have been aligned and KaKs values added, then new clusters added, all pairs were realigned in order to write to file.
+Now only the pairs that have not been aligned will be re-aligned and written to file.
+<li>Improved error handling for when the permissions are wrong in the /external or /external_osx directories.
+<li>Bug: the Multi align function could result in too many open files.
+<li>Bug: The CDS/5'UTR/3'UTR lengths and CpG were not getting written to the database (recent bug).
+</ol>
+
+<p><code>viewMultiTCW</code>
+<ol>
+<li>The Cluster and Pairs filters have a Yes/No toggle to find clusters with or without a description substring.
+<li>The Export GOs has a count cutoff, and an option for outputing the description and count.
+<li>The Pairs table will have a hitName of "NoShare" if there is no shared description.
+<li>Sequence details has new 'best' column on hit table.
+</ol>
+<!------------------ Version 2.12 ----------------------->
+<p><b><big><u>TCW Version 2.12</u></b></big>
+
+<p>Release 25Feb19: This has improvements to multiTCW for GO support along with making the sTCW and mTCW GO support consistent (though sTCW still has more
+support than mTCW).
+<ol>
+<li>If you are not using TCW v2.11, <font color=green>see the green highlighted points for the v2.11 release</font>.
+<li>There is a small database change for multiTCW, which will be applied the first time your view a mTCWdb. If the GOs were previously added,
+they will be removed and will need to be re-added, which will use the new algorithm.
+</ol>
+
+<p><code>runMultiTCW</code>
+<ol>
+<li>The "Add GOs" option was rewritten so that only GOs associated with the hits in the database were added. 
+That is, only the top 5 hits for each sequence are in the mTCWdb, so only the associated GOs are added.
+<li>Clusters have a minPCC and %PCC column, which were being computed for clusters that were added before computing pairwise PCC, this has been fixed.
+</ol>
+
+<p><code>viewMultiTCW</code>
+<ol>
+<li>Sequence Detail: add options to view the GOs for all or selected hits.
+<li>Cluster table: the GO Export is more user-friendly.
+<li>The pairwise AA and NT alignments were cropping the overhangs before display; now the entire alignments are shown.
+</ol>
+
+<p><code>viewSingleTCW</code>
+<ol>
+<li>Sequence Detail: Add option to view "All GOs for selected hit".
+<li>The Export functions work in a more systematic way across tables.
+<li>Bug fix on Basic GO annotation: if the p-values had not added using <code>runDE</code>, the "#Seq" option did not work.
+</ol>
+
+<!------------------ Version 2.10 ----------------------->
+<p><b><big><u>TCW Version 2.11</u></b></big>
+
+<p>Release 9Feb19: This includes some speedups and a new option in <code>viewSingleTCW</code> for GOs.
+<ol>
+<li>If you are not using TCW v2.10, <font color=green>see the green highlighted points for the v2.10 release</font>.
+<li>The new GO feature allows you to view the number of DE sequences associated with a GO DE value.
+<br><font color=green>To use this feature, you need to rerun GOseq in <code>runDE</code></font>.
+</ol>
+<p><code>runDE</code>
+<ol>
+<li>Speedup to adding the results to the database, which makes a difference when using MariaDB.
+<li>The cutoff used for GOseq is saved in the database and displayed on Overview. The variables names written to R have been changed to reflect their meaning.
+<li>The built-in edgeR and DEseq2 have been removed as they are redundant with the r-scripts.
+<li>The "Top N" only worked correctly for the first set of conditions (this option is seldom used since the p-value cutoff is better except for experimentation).
+</ol>
+
+<p><code>runMultiTCW</code>
+<ol>
+<li>The algorithm for assigning shared annotation to a cluster had changed, where it is not the best annotation hit.
+<li>Speedup on "Build Database" and "Add GOs", which makes a "huge" difference when using MariaDB.
+<li>The Closure algorithm now guarantees that best hit pairs are in a cluster together.
+<li>Whether the NT blastn is checked in the 'Compare sequence' Settings is saved in mTCW.cfg.
+</ol>
+
+<p><code>viewSingleTCW</code>: changes for Basic GO panel.
+<ol>
+<li>A new option for the DE set of filters, which allows the #Seqs column to reflect the number of DE sequences for the GO term,
+or the number of up-regulated or the number of down-regulated. The "View Sequences" only shows the sequences associated with the #Seqs number.
+The TCW Basic GO Help provides much more information about this new feature.
+<li>The "Table..."  menu has a new option called "Export/merge #Seqs for table GOs", which allows subsequent columns of #Seq to be added to 
+a .xls file, e.g. the number of sequences that are DE for one comparison compared to another. Excel can then be used to view the associated
+graph.
+</ol>
+
+<p><code>viewMultiTCW</code>
+<ol>
+<li>Cluster table, the Export all cluster GO option, the Per Sequence vs Overall option had been removed. The output can the viewed
+columns or just the cluster names and counts (useful for input to REVIGO).
+<li>Sort is changed to be case-insensitive.
+<li>In the sequence table, multiple sequences can be selected in order to view all their clusters.
+<li>Fixed a couple of obscure bugs in "Show Column Stats".
+</ol>
+
+<p>General changes to views:
+<ol>
+<li>The drop-down menus have been changed to use a type that includes arrows at the end to scroll.
+<li>The terminology of "Substitution" for Blosum scores has been standardized.
+<li>The term "Overlap" has been changed to "Coverage", which indicates how much an aligment covers a sequence.
+<li>The mTCW.cfg now uses the terminology MTCW, STCW, CLST to replace the old terminology of CPAVE, PAVE, POG.
+<li>The precision on the "Column Stats" has increased.
+<li>Other little terminology clean-ups.
+</ol>
+<!------------------ Version 2.10 ----------------------->
+<p><b><big><u>TCW Version 2.10</u></b></big>
+<p>Release 21Dec18: The biggest addition is the scoring of multiple alignments in <code>runMultiTCW</code>, and many small upgrades and two bug fixes.
+<ol>
+<li>The "/libraries" project directories have been merged with the "/projects" project directories.
+<br><font color=green>The first time you run <code>runSingleTCW</code>, it will ask you if you want it to merge the directories.</font> No files
+or directories will be deleted, only moved. Anything that can't be move will remain and "libraries" will be renamed "libariesOld". 
+
+<li>When parsing the UniProt .dat file, TCW treated OS lines that had no additional information as a species name with a '.' at the end, and if it did have additional information, there was no '.'; hence, there could be species such as 'Asperguillus niger' and "Asperguillus niger.'. The '.' is now removed
+from the end so its just one species.
+<br><font color=green>To apply this change in an existing sTCW, remove the annotation and reload it.</font>
+
+<li>The five 'high throughput' GO evidence codes have been added.
+<br><font color=green>If you have an existing sTCWdb, the schema is updated on the first view (update to sTCW db5.3)
+<br>To get the HT GO evidence codes, you need execute runAS and select "Build GO" to rebuild the TCW-GOdb; 
+then to update a sTCW database select "GO only" from runSingleTCW (or ./execAnno &lt;project&gt; -g).</font>
+
+<li>The sTCW overview has many changes along with a "Reproduce" popup that explains how to reproduce the numbers in the overview. The overview should
+be updated to correspond with the "Reproduce".
+<br><font color=green>viewSingleTCW &lt;project-name&gt; -o</font>
+
+<li>The biggest addition is the scoring of multiple alignments for multiTCW. 
+<br><font color=green>If you view an existing mTCWdb, the schema is updated on the first view (update to mTCW db5.9).</font>Run the "Run Stats" command
+with "Compute cluster scores" selected in Settings.
+</ol>
+
+<p><code>runAS</code>
+<ol>
+<li>The five high throughput GO evidence codes have been added.
+</ol>
+
+<p><code>runSingleTCW</code>
+<ol>
+<li>The log files are all written to the sub-directory "logs", where subsequent runs concatentate to files. Load Data writes to "load.log", Instantiate writes to "inst.log", annotate writes to "anno.log". 
+<li>The html directory has been renamed to OverviewHTML (all overviews are written to this directory). The project ORF directory has been renamed
+to "orfFiles".
+<li>All functions write elapse time and memory (memory is very approximate). For time, the nanoTime function is used.
+<li>An option has been added to the allow the user to decide whether the SwissProt hit should take precedence for Best Anno.
+<li>The Best-Anno hit is calculated as follows: (1) It is the first hit in the sorted list that has a good description. (2) If the above SwissProt option
+is selected, then if there is a SwissProt hit with a good annotation that has an exponent within 20% of the best anno hit, it is used.
+<li>The "un-annotated only" option has been removed from the panel that added an annoDB (the speed of <code>Diamond</code> makes this unnecessary).
+<li>The ORF finder has multiple small changes. The hit cutoff defaults have been changed to better apply to Diamond hit results. The codon frequencies are no longer written to BestORFScores.txt. The algorithm has been slightly changed.
+<li>The overview has quite a few changes.
+<li>The "Edit" for the AnnoDBs did not work. Now it is possible to edit the "taxonomy" only.
+</ol>
+
+<p><code>viewSingleTCW</code>
+<ol>
+<li>BUG FIX: Basic Hit - the GO, Interpro, etc columns were off by one.
+<li>Show stats - bug fix, same as in <code>viewMultiTCW</code>.
+<li>The string sort was changed to case-insensitive.
+<li>The Sequence Detail Frame panel had the Markov and Codon scores swapped, this has been fixed.
+<li>Basic GO - the five high throughput GO evidence codes have been added. 
+<li><tt>./viewSingleTCW project-name -w</tt> writes to the terminal the overview up to the "Processing Information", then exits. 
+</ol>
+
+<p><code>runMultiTCW</code>
+
+<ol>
+<li>The Stats options panel has an option to score the multi-alignments of all clusters in the database. It runs the MAFFTA on
+each cluster and computes the Sum-of-pairs score and the Trident score, where the Trident score is computed by the MstatX program
+(see github.com/gcollet/MstatX). The two scores are added to the database. <i>The MAFFTA and MstatX programs are contained within the TCW distributable.</i>
+<li>The conLen (consensus length) and sdLen (stddev of the sequence lengths in the cluster) are computed and added to the database. The multiple
+alignment is also saved.
+<li>The overview has replaced the 'Taxa' section with 'Average and Stddev', which is the average and standard deviation of the four
+new columns.
+<li>The search program parameters are saved, and they are listed at the end of the Overview.
+<li>Bug fix: The Cluster PCC and minPCC columns were not getting populated.
+
+</ol>
+
+<p><code>viewMultiTCW</code>
+<ol>
+<li>Clusters Table has four new columns: conLen (consensus length), sdLen (StdDev of the AA sequences for the cluster), Score1 (Sum-of-pairs),
+Score2 (Trident). The Help explains more about these.
+<li>When MUSCLE or MAFFT are run on a set of sequences, the input file, output file, and score files are written to the ResultAlign sub-directory; these only
+are saved for the last alignment.
+File score1.txt has the column sums for Sum-of-pairs and score2.txt has the column sums for Trident.
+<li>MAFFT can now be run on the NT sequence or the AA sequence. Occassionally MAFFT will fail; TCW now catches its failure.
+<li>A "multiDB" option displays the alignment saved in the database.
+<li>Show Stats - the following two problems have been fixed: It did not work for floating point numbers, and it did not work if there was less than 6 rows in the table. A "sum" column has been added.
+</ol>
+
+<p><code>viewSingleTCW</code> and <code>viewMultiTCW</code>
+<ol>
+<li>TCW creates three subdirectories: ResultHit, ResultExport, ResultAlign. All searches occur in the subdirectory ResultHit. 
+The default export directory is ResultExport. ResultAlign is used by <code>viewMultiTCW</code> as described above in item 2.
+</ol>
+
+<!------------------ Version 2.9 ----------------------->
+<p><b><big><u>TCW Version 2.9</u></b></big>
+
+<p>Release 21Oct18: Requires Java 1.7 (instead of 1.6). Added User Remark to sTCW and MAFFTA alignments to mTCW.
+<br><font color=green>The first time you view an existing sTCW database, the database will be updated from schema db5.1 to db5.2.</font>
+<br>The MAFFT code is in the jar file in the directories /external for linux and /external_osx for mac.
+
+<p>Release 14Oct18: Change to the <code>viewSingleTCW</code> overview of the annoDBs, slight change to the <code>Diamond</code> TCW defaults, and added filters.
+<br><font color=green>The first time you view an existing sTCW database, the database will be updated from schema db5.0 to db5.1.</font>
+<br>To update the overview, execute "viewSingleTCW &lt;id&gt; -o"
+
+<p>Release 4Oct18: Speedups for <code>runAS</code> and <code>runSingleTCW</code> building databases, especially if using MariaDB 5.5 for MySQL.
+
+<p>Release 28Sept18: This version is mainly about using <code>Diamond</code> and <code>Blast</code> within singleTCW. 
+<br><font color=green>If you have existing sTCW and mTCW databases, see <i>hitResults</i> below.</font>
+
+
+
+<p><code>runSingleTCW</code>
+<ol>
+
+<li>Search annoDBs:
+<ul>
+<li>Parameters were established that result in <code>Diamond</code> getting close to the same hits as <code>Blast</code>. 
+<br>It uses "--top 20" instead of "-k 25", hence, there can be many hits when using TrEMBL. Therefore, there is now an internal cutoff of 25 hits per annoDB per sequence. (14Oct18)
+<br>The "--masking 0" option has been added to the Diamond TCW default parameters, as tests show that good hits were not being reported (this reduction
+of false-negatives does increas the false-positives a little).
+<li>When adding annoDBs, the search program option of "TCW Select" is no longer available. If <code>Diamond</code> path in in the HOSTS.cfg file, it is the
+default. Diamond 0.9.22 was tested.
+<li>The ability to use Legacy blast has been removed. 
+<li><i>hitResults</i>: The results are now written to the project directory called "hitResults". Previously, they were written to the directory called "uniblasts"; if you 
+have an existing directory of this name, you need to rename it "hitResults" or remove it.
+<li>The overview has multiple changes in presenting statistics on the results. (14Oct18)
+</ul>
+
+
+<li>ORF Finder: Add the ability to use the %Similarity or E-value for determining what hits can be used to determine the ORF frame. Also, it was ignoring the hit frame
+if there were multiple hit frames for the sequence; it no longer does that.
+<li>Bug fix: When adding remarks, if there was a tab in the remark, it would not display right; hence, tabs are changed to spaces.
+<li>User Remark: The TCW remark and User Remark are now separate, so when you "Add Remarks", it goes into User Remark. (21Oct18)
+</ol>
+
+<p><code>viewSingleTCW</code>
+<ol>
+<li>The "Blast" option is changed to "Find Hit", and:
+<ul>
+<li>The ability to use <code>Diamond</code> has been added. 
+<li>Sequences can now be searched as follows: 
+<ul>
+<li>For NT-sTCW: (1) the nucleotide sequences in the database, (2) the translated ORFs from all sequences, or (3) a user selected protein database.
+<li>For AA-sTCW: (1) the proteins sequences in the database, (2) or a user selected protein database. 
+</ul>
+<li>The user can input any set of parameters.
+<li>A paste from clipboard button has been added. The search commands will only be written to the terminal if the "Trace" label is checked.
+</ul>
+<li>Sequence table: Add "Export hit sequences for table", which will write a file of all Best Eval and/or Best Anno hits from the table.
+<li>Sequence columns: Changed #Taxonomy to #AnnoDB. (14Oct18)
+<li>Sequence Frame: If the Best Eval and Best Anno frames are different, the hit information for both of them is shown. 
+<li>Filters have been added on (1)  the number of taxonomies that has a sequence has hits for, (2) The taxonomy and/or DBtype of the best eval or best anno per sequence.
+<li>Basic Hit: 
+<ul>
+<li>The number of unique sequences is shown along with the number of unique hits. 
+<li>There is a new filter on Rank=1 and a column for Rank. There is also a new filter on "Hit-align". (14Oct18)
+</ul>
+<li>Basic Sequence: Added "User" remark search. (21Oct18)
+<li>Overview: (14Oct18)
+<ul>
+<li>The AnnoDB table has multiple changes to the statistics.
+<li>For "Cover&gt;=50" and "Cover&gt;=99", the N can be changed with "viewSingleTCW &lt;project-name&gt; -o -o1 N -o2 M", which recompute the overview.
+</ul>
+<li>Sequence Columns: the #SwissProt, etc now uses integer sorting instead of string sorting. (14Oct18)
+<li>Bug fix: The #Seq column did not sort in the Sequence table, and the #Pair column did not sort in the Pairs table. 
+</ol>
+
+
+<p><code>runMultiTCW</code>
+<ul>
+<li>It was the case that NT blast and statistics were disabled if there was even one AA-sTCWdb as input. Now, if there are at least
+two NT-sTCWdb as input, then functions are allowed.
+<li><i>hitResults</i>: The results are now written to the project directory called "hitResults". Previously, they were written to the directory called "blastResults"; if you 
+have an existing directory of this name, you need to rename it "hitResults" or remove it.
+</ul>
+
+<p><code>viewMultiTCW</code>
+<ul>
+<li>The NT blast and statistics are available if there is more than one NT-sTCWdb, regardless if there is an AA-sTCWdb.
+<li>From the sequence table, MAFFT has been added for multiple alignments. (21Oct18)
+</ul>
+
+<p><code>runAS</code>
+<ol>
+<li>Fixed a recently added bug in the "TCW.anno" function.
+<li>The "TCW.anno" writes the date for each saved annoDB.
+</ol>
+
+
+<p><b><big><u>TCW Version 2.8</u></b></big>
+<p>Release 21Aug2018, Update 5Sept2018 (this includes a fix to a very stupid recent bug to runAS)
+<p>Improvements to MulitTCW: For existing mTCWdbs, update the statistics as follows: Select your project with <code>runMultiTCW</code>. Use the "Remove..." option to remove the Pairs and Clusters. Add the Pairs and Clusters and "Run Stats". 
+
+<p><code>runMultiTCW</code>
+<ol>
+<li>The AA-BBH pairs are computed when the blast file is loaded, and used by the BBH clustering routine. A new column was added to the MySQL schema for this, and is displayed in <code>viewMultiTCW</code>. Note: there is no corresponding columnt for NT-BBH as it is rarely used, hence, computed on the fly.
+<li>Build Database: speedup for loading uniprots.
+</ol>
+
+<p><code>viewMultiTCW</code>
+<ol>
+<li>Sequence table: add Pairs option to show all pairs for selected sequences in the Pairs table. 4Sept2018 - fixed a bug.
+<li>Sequence filter: add a filter on datasets, i.e. show all sequences from a given dataset.
+<li>Pairs table: Add a new column to indicate the BBH pairs (though they may not be in BBh clusters if they do not pass other parameters).
+Also, run the "Table Stats" in the background.
+</ol>
+
+<p><code>runAS</code>
+<ol>
+<li>It is no longer possible to get passed GO tables from the GO website. Hence, that option has been removed.
+<li>Speedup for building the GO database.
+<li>5Sept2018 - replaced the 'Download' labels with 'Build' since the function performs more than a download.
+<li>5Sept2018 - BUG fix - incorrectly made the directory name for the full download of SwissProt or TrEMBL
+</ol>
+
+<p><code>runSingleTCW</code>
+<ol>
+<li>Some buttons have been moved to more logical places and 'Run DE" was removed (should always be run from command line).
+<li>Speedup on adding the GO information.
+</ol>
+
+
+
+<p><b><big><u>TCW Version 2.8 (mTCW database 5.8) 21Aug2018</u></b></big>
+<p>Release 21Aug2018, Update 5Sept2018 (this includes a fix to a very stupid recent bug to runAS)
+<p>Improvements to MulitTCW: For existing mTCWdbs, update the statistics as follows: Select your project with <code>runMultiTCW</code>. Use the "Remove..." option to remove the Pairs and Clusters. Add the Pairs and Clusters and "Run Stats". 
+
+<p><code>runMultiTCW</code>
+<ol>
+<li>The AA-BBH pairs are computed when the blast file is loaded, and used by the BBH clustering routine. A new column was added to the MySQL schema for this, and is displayed in <code>viewMultiTCW</code>. Note: there is no corresponding columnt for NT-BBH as it is rarely used, hence, computed on the fly.
+<li>Build Database: speedup for loading uniprots.
+</ol>
+
+<p><code>viewMultiTCW</code>
+<ol>
+<li>Sequence table: add Pairs option to show all pairs for selected sequences in the Pairs table. 4Sept2018 - fixed a bug.
+<li>Sequence filter: add a filter on datasets, i.e. show all sequences from a given dataset.
+<li>Pairs table: Add a new column to indicate the BBH pairs (though they may not be in BBh clusters if they do not pass other parameters).
+Also, run the "Table Stats" in the background.
+</ol>
+
+<p><code>runAS</code>
+<ol>
+<li>It is no longer possible to get passed GO tables from the GO website. Hence, that option has been removed.
+<li>Speedup for building the GO database.
+<li>5Sept2018 - replaced the 'Download' labels with 'Build' since the function performs more than a download.
+<li>5Sept2018 - BUG fix - incorrectly made the directory name for the full download of SwissProt or TrEMBL
+</ol>
+
+<p><code>runSingleTCW</code>
+<ol>
+<li>Some buttons have been moved to more logical places and 'Run DE" was removed (should always be run from command line).
+<li>Speedup on adding the GO information.
+</ol>
+
+<p><code>runDE</code>
+<ol>
+<li>EdgeR.R is replaced with edgeRclassic.R and edgeRglm.R. 
+<li>5Sept18 - Made CPM (count-per-million) the default filter and made the parameters behave like <code>edgeR</code>. This will give the same result as 
+<code>edgeR cpm</code>, e.g. <tt>keep &lt;- rowSums(cpm, y, normalized.lib.sizes=FALSE) > N) >= M</tt> where N and M are <code>runDE</code> parameters.
+</ol>
+<p><tt>Demos</tt> - the count files have been changed; they are not compatible with existing demo sTCWdbs. 
+The Demo annoDBs have been updated, and now work for both the demo and ex (example) projects. The demo GO tables are part of the 
+packages so they do not have to be downloaded.
+
+<p><code>MySQL</code> connection - a change was made to the way TCW connects with the database, that speeds up the building of TCW database (GO, sTCW, mTCW)
+on some machines, depending on configuration.
+
+<!------------------ Version 2.7 ----------------------->
+<p><b><big><u>TCW Version 2.7 (mTCW database 5.7) 8Aug2018</u></b></big>
+<p>Improvements to MulitTCW.
+
+<p><code>runMultiTCW</code>
+<ol>
+<li>The mysql database schema has been altered so that all percentages are stored with more precision. Your database will be updated the first time you access
+it with <code>runMultiTCW</code> or <code>viewMultiTCW</code>. However, you need to re-run the statistics (as explained above) to get the new precision.
+<li>Overview: 
+<ul>
+<li>The percentages were for the whole dataset, e.g. the percent of exact codons from all codons. This
+has been changed to be the average of the individual precentages, e.g. the average percent codon from all pairs. This makes the numbers consistent with
+the new 'Columns Stats" in <code>viewMultiTCW</code>, which also provide standard deviation, median and ranges.
+<li>The KaKs quartiles were incorrect in some cases, plus changed the p-value table for the overview. The standard deviation method was changed from population to sample calculation.
+</ul>
+</ol>
+
+
+<p><code>viewMultiTCW</code>
+<ol>
+<li>Column Stats: A new option has been added to all three tables to show the averages, etc of all numeric columns shown. For the Pair Table, the option is on
+the 'Show' pull-down. For the Cluster and Sequence tables, the options  is on the "Tables" pull-down.
+<li>A new 'Explain' button is on the overview page to explain how the different values were computed.
+</ol>
+
+<p><code>runSingleTCW</code>
+<ol>
+<li>The input count file (i.e. expression counts) can have decimal numbers for the counts.
+</ol>
+
+<p><b><big><u>TCW Version 2.7 (mTCW database 5.6) 28July2018</u></b></big>
+<p>Improvements to MulitTCW.
+
+<p><code>runMultiTCW</code>
+<ol>
+<li>The proteins sequences for an NT-sTCW are now created when the sTCWdbs are loaded; this makes the requirement of having an input protein file obsolete.
+<li>Save pairwise alignments in database so can recreate the statistics from the alignments.
+<li>The last release had some loss of accuracy in the statistics in order to fix a problem; the accuracy has been restored with the stored alignments.
+<li>Improve summary and document how the statistics are computed in doc/mtcw/summary.html.
+<li>The GC and CpG statistics have been changed to use the Jaccard Index (intersection/union).
+</ol>
+
+<p><code>viewMultiTCW</code>
+<ol>
+<li>If an AA-mTCW( i.e. at least one AA-sTCW was input), no NT filters, columns or options will be shown.
+<li>If there are no GOs in the mTCWdb, GO columns and options will not show on the interface.
+<li>Bug fix: the 'Copy Cluster ID' on the Cluster table did not work. 
+</ol>
+
+<p><code>runSingleTCW</code>: conditions names are shown in <code>viewSingleTCW</code> in the same order as from the input file *they use to be sorted).
+
+<!------------------ V2.6 ------------------------->
+<p><b><big><u>TCW Version 2.6</u></b></big>
+<p>Improvements to MultiTCW. Most improvements are in the 6/22/18 release, the rest are dated. The latest releast is 7/16/18.
+
+
+<p><code>runMultiTCW</code>	
+<ol>
+<li><font color=blue>Major change: </font>The coding statistics were based on the CDS nucleotide alignments; this has been changed to use the AA alignment and
+retro-fit the codons to the alignment; this produces better coding statistics when there are gaps in the alignment. 
+This AA-NT alignment works with the TCW AA files, but not with ESTscan.
+<li><font color=blue>Major change: </font> The BBH method has been extended to work in the following two modes when there are more than two input sTCWdbs:
+<ol type='a'>
+<li> Select the sTCWdbs to be used as input to the BBH clustering routine. If there are more than two selected,
+it will create mutual BBH clusters, e.g. if three sTCWdbs are selected, it will create clusters of size 3 where they
+are all best hit with each other.
+<li> If no sTCWdbs are selected, then it will run the BBH for all pairs of sTCWdbs in the database.
+</ol>
+<li> mTCW was not outputing pairs for KaKs analysis if their alignment
+had more than 10 gaps. There is no longer this restriction since the user can filter
+via the viewMultiTCW interface. 
+<li> Added the column "minPCC" for the minimal PCC value of a group, where the PCC is computed
+on the RPKM. 
+<li>A check has been added to make sure that names in the AA file match the database seqIDs 
+<li>The maximum allowed size of the method prefixes has been changed from 3 to 5. 
+<li>The search program for the self-blast can be set to diamond or ublast (if they exists); the code has been altered to save this setting in mTCW.cfg.
+<li>Bug fix: If the mTCW database has datasets that have a mix of upper and lower case start characters for the sequence names, there was multiple
+problems due to the default sort in Java and MySQL being different. 
+<li> BugFix: Some of the %PCC values for groups were wrong.
+<li> The Summary for Pairs has more information, which is computed when the pairs are added. (7/1/18)
+<li> Improvements for self-blast "Settings": (7/1/18)
+<ol type='a'>
+<li>The filter option has been removed because it was not useful.
+<li>A "Cancel" has been added.
+<li>The parameters are saved to the mTCW.cfg file.
+<li>Made it more user-friendly.
+</ol>
+<li>Database optimization: (1) Added index to the pair table. (2) Remove extras from the Unique Hits tables. Both
+of these changes will be made on existing databases the first time they are viewed. (7/5/18)
+<li>A "Add GOs" button has been added so this step is separate from building the database; this is done because it takes a long time (e.g. a couple hours
+on a large database), hence,
+the user has the choice of if and when to add them. (7/5/18)
+<li>On the Overview, the Cluster Set table of counts has been slightly changed to be more meaningful. (7/5/18).
+<li><font color=blue>Major change (7/16/18):</font> The overall statistics have been changed:
+<ol>
+<li>They were only correct if only BBH clusters were in the database. This has been fixed. 
+<li>The user has the choose of what cluster set pairs are used for coding sequence statistics and KaKs. 
+<li>The CpG and GC statistics have been removed from the overview and the computed statistics have more round-off error then before (both these
+issues will be fixed in a later release).
+<li>Changed the Statistics "Settings" to give more control over when the KaKs files were written.
+</ol>
+</ol>
+
+<p><code>viewMultiTCW</code>
+<ol>
+<li>In the CDS alignment view, the AA-NT alignment is used as described in (1) above.
+<li> Added "and" and "or" options on Cluster Set filter for Pairs and Seqs
+<li> Added Prev/Next on Pairs table when selected from the Cluster table
+  so one can step through the pairs of a cluster table.
+<li> Improvements to column names and organization, and clarified jargon of the interface. 
+<li>For when there are more than two datasets in a mTCW database, a new Pairs filter allows the datasets to be selected.
+<li>The sequence detail panel has multiple little improvements.
+<li>The sequence table showed DE values &lt;1 or &gt;1 in a weird way; now they are all shown 'as is' except 3/-3 are shown as "-".
+<li>Bug fix: Some of the Pair queries did not work.
+<li>For the Pairs, it no longer shows statistics queries and column if there are one or more
+protein sTCWs as input (statistics are not computed in this case). (7/1/18)
+<li>Tool tips that show in the lower left hand corner as attached to all queries. (7/1/18)
+<li>The "Pairs with:" pairs filter has been changed to list the sTCWdb pairs. This was done to speed up the query, but it can still be slow on
+large databases. (7/1/18)
+<li>The SQL query for the sample tables are only computed on the first viewing of a database, and retrived from the database there after. (7/1/18)
+<li>The PairID is shown on the Sequence Detail panel, which can be search on in the Pair Filter. (7/5/18)
+<li>The Results List has a "Remove Selected" added and the panel has a more informative layout. (7/5/18)
+<li>The number of filtered row that will be downloaded are shown before the download from mySQL begins. (7/5/18)
+<li>The Pairs table has a new option to "Show Stats" which will show the summary statistics for the pairs in the table that have coding statistics and KaKs (7/16/18).
+<li>The Pairs table allows the selection of multiple lines followed by "Sequences"; this allows the alignment of user selected pairs. (7/16/18).
+</ol>
+
+<p><code>runDE</code>
+<br>If a DE value was &gt;1 or &lt;1, is was being put into the database as 2 or -2. It now keeps its original value. 
+
+<p><code>runAS</code>
+<br>The <tt>TCW.anno</tt> option, which writes the information to file for <code>runSingleTCW</code> now includes writing the GO database name. (7/1/18)
+
+<p><code>runSingleTCW</code>
+<ol>
+<li>Bug fix: if an sTCW database was only annotated with nucleotide annoDBs, the ORF finder failed. 
+<li>The <tt>Import Annodbs</tt> will load the GO database name along with the annoDBs. (7/1/18)
+</ol>
+
+<p><b><big><u>TCW Version 2.5</u></b></big>
+<p>Release dates 5/3/18 through 5/31/18: 
+The May 3rd release had major changes
+to the ORF finder, including replacing the Hexamer score with the 5th-order Markov model score. The subsequent releases involved incremental
+changes to the ORF finder, which are described in <a href=stcw/ORF.html>TCW ORF finder</a>. 
+<p>If you have existing sTCW databases, you can simply download the jar files from <a href="http://www.agcol.arizona.edu/software/tcw/download/jars.html">here</a> and
+follow the instructions to put them in your <tt>TCW_2/java/jars</tt> directory. Then for each sTCW database that needs updating, execute:
+<pre>
+   ./execAnno project_name -r -n
+</pre>
+
+<p><b>Major changes for v2.5:</b>
+
+<p><code>runSingleTCW ORF finder</code>
+<ul>
+<li>The hexamer score has been replaced with a 5th-order Markov model (see Hass 2013, <i>Nature Protocals</i> 8:1494).
+<li>The sequences with multiple hit frames are evaluated to determine whether to use the best hit for the frame selection.
+<li>The rules for selecting the best ORF have changed a little (see <a href=stcw/ORF.html>ORF finder</a>). 
+<li>Various changes to output file names and their content. 
+<li>Changes to the remark assigned to the sequence by the ORF finder and the summary information (additional changes on 8/21/18).
+</ul>
+
+<code>viewSingleTCW</code>
+<ul>
+<li>The Sequence Detail hit table has two new columns to show the percent overlap of the sequence and the hit.
+<li>The Sequence Detail Frame display has been changed. It no longer highlights codon or hexamer usage. 
+Changing the "ORF/Nt" pull-down to "Scores/AA" shows the 6-frame scores for the current displayed ORF. The CDS region can be highlighted,
+and the hit region can be highlighted using italics or blue font.
+<li>The Sequence Alignment panels provide options for the UTRs and Blast Hit region to be highlighted (added 5/21/18).
+</ul>
+<i>Bug fixes</i>: 
+<ul>
+<li>runSingleTCW: Fixed a bug in Remove Remarks, where the option to remove only TCW-added remarks did not work (5/12/18). 
+<br>Fixed a bug where  the "Exec GO only" was running the entire annotation (5/21/18).
+<li>runMultiTCW: Fixed a bug where it sometimes was not possible to select the "NT" blast (5/12/18).
+<li>viewSingleTCW: Fixed a few problems that caused errors, but nothing serious.
+<br>Fixed a bug in the Sequence Frame panel where on a rare occassion the wrong hit coordinates were used (5/21/18).
+<br>Fixed a bug in the Sequence GO panel where the assigned GOs for the selected hit were not shown if there was &lt;4 (5/31/18).
+</ul>
+
+<p><b><big><u>TCW Version 2.4</u></b></big>
+<p>2/20/18 - upgrades to the annotations
+<p><code>RunSingleTCW:</code>
+<ul>
+<li>The annotation assigns a 'BestEval' and a 'BestAnno', which now work as follows:
+<ol>
+<li>BestEval - the hit with the best E-value and best bitscore.
+<br>Previously, it just used the E-value, where the E-values may be the same between two hits but large differences in the bitscore.
+<li>BestAnno - a hit is marked as having 'good annotation' if it is (1) SwissProt or (2) does not have phrases in its annotation such as
+'uncharacterized protein'. The hits marked as 'good annotation' are sorted by E-value and bitscore and the best one assigned as BestAnno.
+<br>Previously, there was a restriction that the BestAnno had to have an E-value close to the 'BestEval', that restriction has been removed.
+</ol>
+You can view all hits per sequences in ViewSingleTCW along with their description, E-value, and bitscore.
+<li>The ORF finder has a few improvements:
+<ol>
+<li>ORFs now computes for sequences less than 30bp in length (it previously did not).
+<li>ORFs with Start/Stop codons are given more preferences over longer ORFs without Start/Stop.
+</ol>
+</ul>
+
+<code>ViewSingleTCW:</code>
+<ul>
+<li>For the Sequence Detail view, the bitscore is shown instead of the rank for hits.
+<li>The Export command for the main sequence table did not work if there was no GOs, that has been fixed. 
+</ul>
+</ol>
+
+
+<p><b><big><u>TCW Version 2.3</u></b></big>
+<p>2/6/18 - this release is mainly on upgrading the search functions.
+
+<p><code>RunSingleTCW</code>:
+<ul>
+<li>The diamond tabular file has a ".dmnd.tab" suffix, usearch has a ".usch.tab" suffix, and blast has a ".tab" suffix.
+<li>The log file is appended too instead of keeping the last 10 old copies.
+<li>The mysql command for creating the species table would hang when there were too many hits - its been broken down into
+smaller queries.
+<li>Bug fix: The ORF finder was using NT hits, which caused bad ORFs; it now only uses AA hits.
+</ul>
+
+<code>RunMultiTCW:</code>
+<ul>
+<li>Diamond and userach can now be used for amino acid self-blast.
+<li>The logs directory has a file fo reach action, which is appended to each time the action is executed.
+<li>Small bug fixes with mixed (NT and AA) databases: (1) The NT blast would be executed, even if the interface
+indicated it would not be. (2) The "Add" was disabled if the database was removed.
+</ul>
+
+<i>Searching for both sTCW and mTCW:</i>
+<ul>
+<li>Usearch was tested on Mac and Linux 10.0.240 32-bit (1/31/18). The blast-style tabular output of this version had some
+differences from blast and diamond, so TCW was modified for it.
+<li>Diamond was tested on Mac and Linux v0.9.17.118 (2/2/18). The "-sensitive" option was used in the defaults, but
+this can cause it to take a long time so has been removed as a default; however, the user can add it back on the 
+parameters window.
+<li>Blast was tested on Mac and Linux NCBI 2.7.1 (where the last release is 10/3/17). The "-task megablast" has been
+added for the blastn command, which is desirable for closely related sequences; the user can remove this on the
+parameter window.
+<li>Improvements for catching and reporting errors from the search programs.
+</ul>
+
+<code>viewSingleTCW</code>: The "DB type" on the sequence detail window was always zero, which has been fixed
+
+
+
+<p><b><big><u>TCW Version 2.2</u></b></big>
+<p class=hang>Update: 1/22/18 - A recent download of UniProt had a few unknown evidence codes that caused runSingleTCW to fail on adding GOs - this has been fixed.
+<p>Update: 12/20/17 - made it more user-friendly if the search failed.
+<p>First Release: 12/12/17
+<p><code>runSingletTCW</code>
+<ol>
+<li>Upgraded to work with the most recent Diamond release (0.9.13.114, downloaded 12/10/17)
+<li>Add "Copy" project.
+<li>Add "Remove blast files from disk" to the "Remove..." menu.
+<li>Small interface cleanup and more checking for input error
+</ol>
+<p><code>viewSingletTCW</code>
+<ol>
+<li>Basic GO: add 'domain' to the columns for the table
+<li>Save column selection for all Basic Searches, i.e. if the user changes the column, the change will be reflected on the next time <code>viewSingleTCW</code> is run to view the project.
+</ol>
+<p><code>runMultiTCW</code>
+<ol>
+<li>The <tt>Run Stats</tt> "Settings" options were confusing -- made them more obvious.
+</ol>
+<p><code>viewMultiTCW</code>
+<ol>
+<li>A button has been added on each table to "Clear" the current column selection.
+</ol>
+
+
+<p><b><big><u>TCW Version 2.1</u></b></big>
+<br>Second release 6 Nov 17: fixed problem where is was not working with JDK v9.
+<br>First release 25 Oct 17
+
+<br><br><code>viewSingleTCW</code>:
+<ol>
+<li><b>N-fold:</b> The N-fold filter has been re-written to have the same look as the N-fold column, and be easier to use.
+Also, a bug was fixed where if the divisor was zero, the N-fold pair was not shown in the table.
+The N-fold column now sorts like the DE columns by absolute value.
+<li><b>Decimal numbers:</b>The ability to change how decimal numbers were displayed has been moved from the Sequence Table Column panel to its own panel,
+which is shown in the upper left. This change was made because the formating is used for all tables. Additionally, the formating
+options have changed to give more flexibity and be simipler to use.
+<li>The percentage of sequences in table is now displayed at the top of the table.
+</ol>
+
+<p><b><big><u>TCW Version 2.0</u></b></big>
+<br>Date 23 July 17
+<p>This is a major release for the multiTCW, though there are also a few significant changes for singleTCW.
+
+<p><code>runMultiTCW</code>
+<ol>
+<li>The interface is much cleaner -- too many changes to list.
+<li>Add Pairs is a separate step, which adds all pairs that have a blast hit, which can be queried in viewMultiTCW
+<li>Add statistics to pairs is a separate step. This is relevant when the singleTCWs were created from transcripts (i.e. DNA).
+The statistics include:
+<ul>
+<li>Synonymous, nonsynonymous, and degenerate codons.
+<li>Transitions and tranversions.
+<li>CpG sites and GC content.
+<li>Ka/Ks values, where are obtained from KaKs_calculator (Zhang et al. 2006). The pairs file is written to disk, the user
+runs KaKs_calculator on the file, then had runMultiTCW read in the results.
+</ul>
+<li>The GO (gene ontology) are imported into the database on creation.
+<li>The Transitive clustering routine has been replaced with Closure clustering, which guarentees that all sequences in a cluster
+have a blast hit with all other sequences in the cluster, and that each sequence has a user supplied overlap and similarity score
+with at least one sequence in the cluster.
+<li>Some improvements to the BBH clustering routine.
+<li>Two new example projects are included that have good homology. They are referred to in the <a href="mtcw/UserGuide.html">mTCW UserGuide</a>.
+</ol>
+
+	
+<code>viewMultiTCW</code>
+<ol>
+<li>Pairs:
+<ul>
+<li>Add new Pairs Table.
+<li>Add filters on blast scores, and all statistics stated above.. 
+<li>Provides alignment of both AA, NT, CDS for pairs.
+<li>Improved the codon alignment algorithm and alignment display in viewMultiTCW.
+
+</ul>
+
+<li>Cluster:
+<ul>
+<li>Add link to pairs and sequences tables, i.e. all pairs in the 
+cluster are shown in the pairs table, and all sequences
+in the cluster are shown in the sequence table.
+<li>The RPKM and DE filters have been removed, as they were pretty meaningless. The new links to the sequences
+allow easy viewing of these details.
+</ul>
+
+<li>Sequences - added filters:
+<ul>
+<li>Cluster methods
+<li>RPKM values
+<li>Sequences with Blast hits to different set (i.e. not from same singleTCW)
+<li>Has Annotation or has GO.
+</ul>
+<li>Export on all three tables now includes exporting GOs and sequences.
+<li>All three tables have 'Copy' button to copy various information to clipboard.
+</ol>
+
+<code>runSingleTCW:</code>
+<br>The ORF finder has been updated. To use it on an existing sTCW database, just run <tt>./execAnno &lt;project_name&gt; -r</tt>.
+<ul>
+<li>The ORF finder use to use the longest ORF that agrees with the hit frame, where the ORFs were basically the same 
+as found with the NCBI ORF_finder. When working with the BBH in multiTCW, it became clear that for de novo transcripts,
+when there is a hit to the sequence, it is better to use the hit ends -- which is what it does not.
+<li>ORFs no longer will contain strings of n's.
+<li>The names of the ORF files have been changed in the ORF directory,
+and it writes the file of proteins (translated best hit) to th projcmp/AAfiles directory for easy use in runMultiTCW.
+<li>More elaborate GC statistics are computed to be shown in the overview.
+</ul>
+
+<code>viewSingleTCW:</code>
+<ul>
+<li>Overview: Change annoDB <40% to Eval>=50 and Total>=50
+Includes the average length of UTRs and CDS, and  GC and CpG for UTRs and CDS
+<li>Basic GO query: Added Show 'Sequence - best hit with GO'. This helps to understand how the best-evalue was assigned
+<li>Basic Hit query: Added column of all GOs and column of #GOs for hit. Added 'Show all assigned and inherited GOs for hit'
+<li>Export on Main Sequence table: 
+<ol>
+<li>Allow appending to existing file.
+<li>GO: add term_type filter. Add option for 'per sequence' and 'overall', 
+where the first applies the evalue to each GO-seq bestEval
+and the second applies the evalue to the overall GO bestEval
+<li>Remove writing PCC files.
+<li>Check for write access (may not have it from Applet).
+</ol>
+</ul>
+
+<b>Bug fixes in singleTCW:</b>
+<ul>
+<li>Even when downloading the GO mysql on the same day as UniProt, I have had them be out of sync, which caused an error in runSingleTCW;
+this has been fixed.
+<li>Overview of viewSingleTCW: the coverage was wrong.	
+<li>Basic GO Query: if #Seqs selected, E-value filter was ignored.
+<li>Pair alignment: gaps were not shown in graphic view (bug just in last release)
+</ul>
+
+
+<p><b><big><u>TCW Version 1.6.8 (03 Jan 17)</u></b></big>
+<ol>
+<li>runMultiTCW
+<ol>
+<li>The user interface is much easier to use, and better error messages.
+<li>The user can now have mTCW run a self-blast on the protein or DNA sequences to be used for clustering.
+<li>The BBH (Bi-directional best hit) has now been added as a clustering method. It only works well if there are only
+two datasets being compared since it only allows clusters of size two, i.e. they are the reciprocal best hit over all hits.
+<li>BBH and Transitive can use the protein or DNA blast files for clustering.
+</ol>
+<li>viewMultiTCW
+<ol>
+<li>The user can view the protein or DNA alignment. They can also click on an alignment to see the text form in the canonical 
+multi-row format.
+</ol>
+<li>viewSingleTCW 
+<ol>
+<li>Basic Hits: (1) Added a 'Show' button so show all columns for the selected row. (2) Added seqStart, hitStart, seqLen, and hitLen columns. (3) Add a copy to clopboard for the descripton or sequence of the selected hit. (4) Fixed a bug where the nucleotide alignment did not
+work if one sequence was upper case and the other lower case.
+<li>Export: The tables now have column headings writen as first row, and the output from the different interfaces is more systematic.
+</ol>
+</ol>
+
+<p><b><big><u>TCW Version 1.6.7 (29 Nov 16)</u></b></big>
+<ol>
+<li>Sequence Pairs:
+<ol>
+<li>TCW has an option to compare sequences in the database; this has been improved.
+<li>The interface has more options for viewing Pairs.
+</ol>
+
+<li>Basic GO:
+<ol>
+<li>The DEtrim features has been added back.
+<li>An 'Add to table' has been added.
+<li>The ability to delete rows has been added.
+<li>Basic GO has new options that act on the entries in the GO table:
+<ol>
+<li>Show All ancestors - shows the ancestors for the the entries in the GO table.
+<li>Show Longest Paths - determines all paths for all the entries in the GO table, then removes ones that are contained in a longer one.
+<li>Export All Ancestors, Export Longest Paths, Export All Paths - writes the respective information to file.
+</ol>
+</ol>
+<li>An 'Add to table' has been added to the Basic Seq and Basic Hit panels.
+<li>An 'Align' option has been added to the Basic Hit panel; this can show the alignment of multiple sequences to a hit.
+<li>Overview: Fixed a little bug on the percentages of GO DE terms.
+</ol>
+
+<p><b><big><u>TCW Version 1.6.6 (28 Oct 16)</u></b></big>
+<ol>
+<li>runSingleTCW: some additional changes were necessary to accommodate the changes to nr.gz, as a few things in
+viewSingleTCW did not work. To get the fixes, reload the annotations; i.e. ./execAnno &lt;project&gt; -q (this deletes the
+existing annotations, and reloads from the existing blast .tab files).
+Also, some slight changes were made to the rules for selecting the best annotation hit.
+<li>viewSingleTCW:
+<ul>
+<li> Basic Hit Query: a filter on percent similarity was added, along with the column for it and aligment length.
+<li>For both Basic Hit and Basic GO, the query form was made more intuitive.
+<li>Sequence Details: a column was added to the Hit table to indicate the TCW selected Best E-val, Best Anno, and Best GO.
+</ul>
+</ol>
+
+<p><b><big><u>TCW Version 1.6.5 (10 Oct 16)</u></b></big>
+<br>This release adds evidence codes (EC) to the single TCW database; it is necessary to run "Exec GO Only" from runSingleTCW to get the codes;
+no error occur in viewSingleTCW if the EC have not been added.
+<ol>
+<li>runDE: 
+<ul>
+<li>The p-values can be read from a file versus being computed. 
+<li>The overview can be updated from the runDE interface. 
+<li>An 'Exit' button has been added which will also exit R. 
+<li>A tiny bug has been fixed for the "GOseq" execution -- except for an unusal situation, it will only have minor effect on the p-values.
+</ul>
+<li>runSingleTCW: 
+<ul>
+<li>The evidence codes (EC) have been added.
+<li>The format for NCBI nr database changes; TCW has been updated so that it will read the new or old format. 
+</ul>
+<li>viewSingleTCW - Basic GO Query: 
+<ul>
+<li>The evidence codes can be queried from the "Basic GO" interface. 
+<li>An additional filter has been added on the number of Sequences (gene products) associated with each GO.
+<li>The maximum number of GO levels was 16; its now dynamic and may go above or below this number.
+<li>Multiple GOs can be selected in order to view the sequences associated with all selected GOs.
+<li>The DE trimmed feature is currently disabled, as recent changes have broken the algorithm.
+</ul>
+</ol>
+
+<p><b><big><u>TCW Version 1.6.4 (21Sept16)</u></b></big>
+<ol>
+<li>viewSingleTCW:
+<ul>
+<li>Status output has been added to the Blast page.
+<li>Basic Hit Query, the annoDB option: it was the case that only one or all annoDBs could be selected; now, any subset can be selected.
+<li>Basic GO Query: query on GO Slims has been added. 
+<li>Sequence Details: an option has been added to view all assigned and inherited GOs.
+</ul>
+<li>runSingleTCW:
+<ul>
+<li>GO slims can be added from the GO database or from a user supplied OBO file.
+<li>When building the database, indicies have been added for the Hits so that queries for the Basic Hit tend to run faster.
+<li>For annotation: If the tabular search file is supplied, the corresponding FASTA file may be zipped
+(as before, it can also be zipped for <tt>diamond</tt>, but not for <tt>blast</tt>).
+</ul>
+</ol>
+
+<p><b><big><u>TCW Version 1.6.3</u></b></big>
+<br>The release is on changes to viewSingleTCW.
+
+<p>
+(4Sept16)
+<ol>
+<li>Fixed two bugs: (1) viewSingleTCW would not startup right if there was only one library. (2) Could not view a RPKM or DE
+column in Basic Hits if there was no GO annotation.
+<li>GO Annotation: (1) Basic GO Annotation: There are more ways to look at ancestor and descendants.
+(2) Sequence Detail: The hits with inherited GOs can now be viewed. (3) Rearrangment of the GO query panel to make it more logical.
+</ol>
+
+<br>(16Aug16) 
+<ol>
+<li>Basic Hit Query: filters have been added for RPKM and DE p-values, i.e. the hits that pass the filters must have
+at least one sequence that passes the RPKM and/or p-value filter.
+<li>All queries result in a description of the filter used, which is placed over the table.
+<li>Basic Sequence: this has been simplified.
+</ol>
+
+<p><b><big><u>TCW Version 1.6.2 (8Aug16)</u></b></big>
+<br>The release is on changes to viewSingleTCW.
+<ol>
+<li>The tabs for Sequence Panels are positioned under their respective list instead of all under "Show All".
+<li>Basic Hit Queries: The Limit entry box is removed, and the 'Best Eval' and 'Best Anno' checkboxes are moved from Attributes
+to the front panel. A new columns is added called '#Best' to indicate whether the hit is a assigned the best hit for any sequence
+that aligned to the hit; this will always be >0 if 'Best Eval' or 'Best Anno' is selected.
+<li>All searches are queued so that TCW is not frozen during database retrieval.
+</ol>
+
+<p><b><big><u>TCW Version 1.6.1 (16July16)</u></b></big>
+<br>The release is on changes to viewSingleTCW.
+<ol>
+<li>All writing to disks has been removed except for writing to Java Preferences, where TCW will not fail if the user does not have write permission.
+<li>The columns panel for Sequences has been condensed.
+<li>Some features were removed that were mainly useless.
+</ol>
+
+<!------------------ Version 1.5 ----------------------->
+<p><b><big><u>TCW Version 1.5</u></b></big>
+<br>Release dates from 24 March 2016 to 7 June 2016
+<br>The major changes are: (1) <b><tt><big>runAS</big></tt></b> provides a graphical interface for the annotation setup.
+(2) New demo files. (3) More options for querying GO in viewSingleTCW.
+
+<p>viewSingleTCW
+<ol>
+<li>The Sequence Results table provides a description of the filters applied for the corresponding table.
+<li>The Export on the Main Sequence Table did not always work on some machines, that has been fixed.
+<li>Basic Sequence and Basic Hit Query have been greatly modified for clarity. The Species selection for the Basic Hit Query
+has been improved.
+<li>An option to view the GO paths for a selected GO has been added.
+<li>The GO List and GO Tree outputs are clearer, and the GO Help has been added to.
+<li>Added an option to export the replicates for all seqIDs in the sequence table.
+</ol>
+
+<p>runAS
+<ol>
+<li>A Java interface has been created for the "Annotation Setup". It guides the user in downloading the UniProt taxonomic database
+and building the GO database. It replaces the original Perl scripts, and is faster and uses less memory.
+See <a href=stcw/AnnoDBs.html class=ext target="_blank">Annotation Setup</a> (12 April 2016).
+<li>runAS (Annotation SetUp) has been updated to provide better messages and use less memory (29 April 2016).
+</ol>
+
+<p>runSingleTCW has been updated to provide much better error messages and some small bugs were fixed.
+
+<p>New demo files with recent annotations. The old ones work fine, but the annotations are 4 years out of date and the sequence quality is not as good.
+Plus, the new demos include (1) a protein sequence demo, and (2) quality values for the mixed Illumina transcripts and Sanger assembly.
+
+
+<p>Release  14 March 2016 -- New GO Features in viewSingleTCW
+<br><i>To use the new features on pre-March 14th built TCW databases, it is necessary to 
+<br>(1) update the TCW GO tables (./execAnno &lt;database name &gt; -G)
+and then (2) rerun the <tt>runDE</tt> GOseq option.</i>
+<ol>
+<li>Basic GO annotations display: has multiple new options to show information about a selected GO, i.e. showing
+the ancestors as a list, ancestors as a tree, and descendants. It also has a few more count columns in the table
+to distinquish hits that have been directly assigned to a GO in the UniProt files versus hits that are descendants
+of a GO, hence, are inherited.
+<li>Basic AnnoDBs display: has an option to show the GOs assigned to a selected hit.
+<li>View Sequence: has options to show hits, ancestors or tree associated with a selected GO.
+<li>A new best hits column: the Best Eval and Best Anno do not always have GO annotations. The new "Best Hit With GO"
+is the best e-value with GO annotations.
+<ul>
+<li>Select on "Columns".
+<li>Filter under "Best Hit".
+<li>Displayed in Sequence details.
+</ul>
+<li>Sequence details shows differential expressions values.
+</ol>
+Additionally, the GO tables in the TCW are significantly smaller (30%). 
+
+<!------------------ Version 1.4 ----------------------->
+<p><big><b><u>TCW Version 1.4</u></b></big>
+<p>Release (1 Mar 2016)
+<br>This release has changes for exploring the details of a selected sequence from the sequence table.
+<ol>
+<li>The options for the sequence detail page are restructured for clarity (Detail, Frame, Go, Hit Alignment).
+<li>For hit alignment, a new display is available to show the alignment in a format like UniProt uses, i.e.
+multi-line where a "+" is used for synonymous match, the amino acid is shown for exact match....
+</ol>
+The version works on previously built v1.4 TCW databases.
+
+<p>Release (8 Feb 2016)
+<br><i>To use the new features on previously built TCW databases, it is necessary to 
+<br>(1) reinstall the GO database (i.e. newGOver.pl), (2) update the TCW GO tables (./execAnno &lt;database name &gt; -G)
+and then (3) rerun the <tt>runDE</tt> GOseq option.</i>
+<ol>
+<li>Add GO and Interpro:
+<ol type='a'>
+<li>Basic Query Sequence - add best GO and Interpro as columns
+<li>Basic Query annoDB	- add GO and Interpro as columns and filters fot these to the Attributes
+<li>Main Table Column - add as columns for Best Eval and Best Annotation
+</ol>
+
+<li>Basic Query GO 
+<ol type='a'>
+<li>A filter has been added for e-value, where the e-value assigned is the best of all UniProt-Sequence hits that contain this GO.
+<li>For a selected GO, the following options are available:
+<ul>
+
+<li>Show.... 
+<pre>
+	all hits mapped to the GO (assigned only)
+	all hits mapped to the GO (assigned or child)
+</pre>
+This display shows the evidence code for assigned hits.
+<li>Copy GO Term to clipboard
+</ul>
+These options are explained in detail on the Basic Query GO Help page.
+</ol>
+
+<li>Sequence Details -- View GOs (optional selected):
+<ol type='a'>
+<li>If no selected hit, show union of assigned hits with evidence codes
+<br>A "Hits for selected" button allows the user to see all the  {HitID, e-value, EC, %sim) for the GO.
+<li>If selected hit, show assigned and ancestor GOs, and all assigned Interpro, enzyme EC, KEGG, and Pfam identifiers.
+</ol>
+	
+<li>Overview contains GO version and a table of GO p-values.
+
+<li> Changed Basic annoDB Hit:
+<ol type='a'>
+<li>Add 'Load File' so a list of hit identifiers or descriptions can be loaded together (the Load File is also on the Basic Query Sequence page).
+<li>When a search string is entered, check "Use Filters" if the filters should be used in addition to the search string.
+<li>Default in Attributes changed from Best Eval to Best Anno
+</ol>
+<li>Bug fix:
+<ol type='a'>
+<li>Blast feature: if there were n's in a nucleotide sequence, and was assumed to be protein.
+<li>Columns KEGG, EC and PFam: if one of these was selected for both Best Eval and Best Anno the same identifier was shown in both columns.
+</ol>
+</ol>
+Changes to UniProt/GO installation scripts:
+<ol>
+	<li>newGOver.pl - add GO version to the local go database and add GO and InterPro to TCW UniProt table to the local go database used
+to build TCW GO tables.This script needs to be rerun, and the TCW go tables updated (./execAnno <db> -G)
+
+<li>newUPfull.pl - The full .dat is not downloaded with the newUPver.pl since it is so big and only a subset of it is typically used. However, that means there will be no GOs for the subset; this script downloaded the .dat files. It should be run after newUPver.pl and before the newGOver.pl is run.
+</ol>
+
+Next release: there will be another release with more GO improvements within a month.
+Three improvements will be:
+<ol>
+<li>the MySQl hit-GO tables can be very big as it contains both assigned and ancestor relations;
+this will be reduced to just assigned.
+<li>an improved view for the GO tree
+<li>a filter will be included for the evidence code.	
+</ol>
+<!------------------ Version 1.3 ----------------------->
+<p><big><b><u>TCW Version 1.3 </u></b></big>
+<p>Version 1.3.9 (10 Dec 2015)
+<ol>
+<li><tt>runDE</tt>:
+<ul>
+<li>Upgraded DESeq to DESeq2. EdgeR works with their latest release (Oct 2015).
+<li>For the built-in EdgeR and DESeq2, their p-value adjusted values are used, so the checking TCW FDR is not necessary.
+<li>EDASeq has been removed as it can be executed with an R-script if desired.
+</ul>
+<li>Terminology has been updated to reflect current practices.
+</ol>
+<!------------------ Version 1.3.8 ----------------------->
+<p>Version 1.3.8 (30 Nov 2015 - 5 Dec 2015)
+<ul>
+<li>This release had a major feature added to the <big><tt>runDE</tt></big> program, which computes differential expression using 
+published DE methods that execute in the R environment. The changes are as follows:
+<ol>
+<li>It was the case that there were three methods available, however,
+they can get out-of-date and new methods published, and there was no way for the user to change them without changing
+the TCW code. In this release, there is a new option to supply an R-script. The needed values (e.g. matrix of counts) are
+written to the R environment, the R-script is run using the supplied variables, and the results are read and entered
+into the TCW database.
+<tt>runDE</tt> has an option to filter sequences that have low read counts before computing DE.
+<li>The interface has been restructured for clarity.
+<li>Can now run "runDE &lt;database&gt;", which by-passes the sTCW database chooser.
+
+</ol>
+<li>This version works with Diamond release 4/2015.
+<li>Some oddities in the runSingleTCW were cleaned up.
+</ul>
+
+<p>Releases 2 Oct 2015 - 8 Nov 2015)
+<br>This release contains further enhancements to the ORF finding algorithm. It computes codon and hexamer usage from the regions of sequence that
+have good annotation hits, and uses their log-likelihood ratio to select between two similar length candidate ORFs (when there is no annotation hit). 
+It has a new display in <tt>viewSingleTCW</tt> to show the codons of a sequence in any of the 6 frames. More information
+can be found in <a href=stcw/ORF.html class="ext" target="_blank">TCW ORF finder</a>.
+<p>
+<ol>
+<li>viewSingleTCW: 
+<ol>
+<li>For location, the group could be 'scaffold', 'chr', etc; these are generally followed by a number. A column was added that contains the number only,
+which allows numeric sorting.
+<li>Added a Filter for sequences that have a location. 
+<li>Speeded up some operations in the Basic searches.
+<li>A column has been added to viewSingleTCW that is the count of the n's within a sequences.
+<li>The n's can be viewed with the "Show Sequence by Frame" (upper left pull-down from the sequence detail page.
+</ol>
+
+<li>runSingleTCW:
+<ol>
+<li>For 'Add Remark', where remarks can also be removed, added the ability to remove all remarks except
+TCW added remarks.
+<li>The options for the ORF finder are incorporated into runSingleTCW.  The ORF finder options are shown on the viewSingleTCW 'Overview' at the bottom.
+<li>Slight redesign to the runSingleTCW interface and the annoDB Options menu for clarity.
+<li>Input fasta files may now have comment lines starting with '#'.
+</ol>
+</ol>
+
+
+
+<p>Version 1.3.5 (5 Sept 2015)
+<p>This release has improvements for determining the best reading frame, where the frame with a protein hit is given precedence. 
+
+<p>Version 1.3.4 (7 Aug 2015)
+<ol>
+<li>The code has been restructured to be clearer. The only impact this may have on users it that the applets should now reference:
+<ol>
+<li> stcw.jar: CODE="jpave.query_interface.JPaveApplet" =>  CODE="jpave.viewer.STCWApplet"
+<li> mtcw.jar: CODE="cmp.main.CPaveApplet" => CODE="cmp.viewer.MTCWApplet"
+</ol>
+And there are three jars instead of two: stcw.jar (viewSingleTCW), runstcw.jar (runSingleTCW) and mstcw.jar (viewMultiTCW and runMultiTCW). 
+<li>The computation of the Best Eval is now strictly the best e-value (it did have some logic to get best annotation with slightly less-good e-value). The term 'unk' has been added to the terms ignored for 'Best Annotation', as its the default description when none is provided.
+<li>viewMultiTCW counted the percentage of RPKM >=1000, but was not including those with no RPKM in the total count.
+<li>viewSingleTCW: the rarely used "Filter Pairs" had quit working. 
+</ol>
+<p>Version 1.3.3 (7 July 2015)
+<ol>
+
+<li><i>Locations</i>: From runSingleTCW, locations can be entered using the "Add Remarks and Locations" button. 
+The input file contains rows of (seqid, location) pairs, where the location information in the format 
+"&gt;scaffold:start-end(strand)", e.g. "&gt;LG_1:100-500(-)". Note, the last version allowed the location to be the
+seqid from the sequence file; this allows the locations to be added after the database has been created.
+<li>Minor bug fixes and changes:
+<ol type='a'>
+<li>The viewSingleTCW overview now additionally reports RPKM ranges.
+<li>The viewSingleTCW Blast option did not work for protein databases. Also, the display of the 'long' form of output
+had a messed-up indentation. Both have been fixed.
+<li>In the calculation of the 'Best Annotation': any hit with description "unknown" is now
+omitted (this is used by Genbank nr). Some other minor changed were added to adapt to changes in UniProt.
+<li>The annoDB hits are ranked according to their e-value -- which had been broken and is now fixed. Also,
+the "View Sequence" options of seeing "Best annoDB, eval & anno" was split into "Best eval & anno" and "Best annodB".
+<li>In the Basic searches, using "_" in a substring was ignored by MySQL because it is a special character in MySQL (ignores
+any single character). This has been fixed.
+<li>runMultiTCW has more checks on the input.
+</ol>
+</ol>
+<p>Release (16 Jun 2015)
+<p><i>Location information</i>. This release add the ability to load location information, which is useful when the input is predicted genes (with introns removed).
+<ol>
+<li>The input sequence fasta files can have location information in the format 
+<br>"&gt;scaffold:start-end(strand)", e.g. "&gt;LG_1:100-500(-)".
+<li>The location information will be enter into four new columns that will be displayed in the sequence table.
+</ol>
+<p>Version v1.3.2 (24 May 2015)
+<ol>
+<li>Usearch/ublast can be used for searches; it works best for protein to protein. 
+<li>The search program can be selected on the runSingleTCW interface; e.g. to run blast on SwissProt where we want hits in the 
+gray zone, but run diamond on Trembl for speed but do not get the hits in the gray zone.
+<li>Existing annotation can be removed from the runSingleTCW window.
+<li>TCW works for transcripts or protein sequences, but the terminology was basically for transcripts; rewording now uses the
+terminology "sequences" as much as possible. 
+<li>viewSingleTCW has some small interface changes for clarity.
+</ol>
+<p>Release (3 May 2015)
+<ol>
+<li>TCW can extract annotation from a gzipped fasta file. Note: Diamond can search against a gzipped file but Blast cannot. 
+<li>newUPver.pl: added option to download the full SwissProt but not the full Trembl.
+<li>newGOver.pl: added error messages and detection if the GO URL no longer exists.
+<li>runSingleTCW: 
+<ul>
+<li>added column for fasta file (there was only a column for the annoDB), 
+<li>fixed a problem on MACs where it did not always detect when an annoDB had already been loaded,
+<li>fixed a bug where the "Used Protein" query did not work right; the annotation needs to be redone for this to work
+on existing TCW databases (you can just reload all blast files if they still exist).
+</ul>
+<li>viewSingleTCW: The header information on showing sequence to protein alignments is more informative.
+</ol>
+
+<p>Version 1.3.1 (27 Feb 2015)
+<ol>
+<li>TCW provides the option to use <a href=http://ab.inf.uni-tuebingen.de/software/diamond class="ext" target="_blank">Diamond</a> for searching protein databases. 
+Diamond executes blastp and blastx-like searchers, producing the same output with very similar e-values. It is awesomely fast!! Though note, it misses some 
+low similarity hits that Blast gets. See <a href=stcw/Search.html class="ext" target="_blank">using diamond</a> for details on using this program in TCW and performance.
+<li>TCW use to read an old NCBI refseq format, but it is not compatiable with NCBI nr format, so TCW has been upgraded to read NCBI nr format.
+NOTE: GO annotation is only provided for UniProt hits as it reads the necessary information from the UniProt .dat files. 
+<li>A few small schema (i.e. database) additions for the following:
+<ol>
+<li>A new column to provide the number of NCBI hits for a sequence/contig (it already has #Swiss, #Trembl, #NT in viewSingleTCW, Select Columns). 
+<li>The viewSingleTCW Overview is updated to show better statistics for the annoDB hits.
+</ol>
+If you have an existing TCW databases, view it with viewSingleTCW and it will be automatically updated.
+<li>./execAnno &lt;project name&gt; -a removes the current annotation only. This is useful if you want to try different parameters. That is, if the database contains the hits for an annoDB,  runSingleTCW will not let you edit parameters to re-run diamond or blast; this will remove the annotation so you try different parameters easily.
+<li>The execAnno/runSingleTCW provides clearer trace output, and multiple other little changes for clarity. A few tiny bug fixes.
+</ol>
+<br>Release (28 Dec 2014)
+<p>On viewSingleTCW, in the "Select Columns and "Filter Query" panels,  it now shows the library Title next to the column name and the library names that were used in a DE calculation. For the Library Title, if it does not have one, you can add it with the runSingleTCW. For the library names to show for the DE column, you
+need to rerun the DE calculations using runDE.
+
+<p>Release (27 Nov 2014)
+<ol>
+<li>The signed applet displayed SyMAP instead of TCW
+<li>All the exec scripts (e.g. execAnno) had the wrong path to the jar file
+</ol>
+
+<br>Release (28 Aug 2014)
+<p>
+There are no major changes of functionality for this release, however there are
+some substantial alterations.
+
+<ol>
+<li> The applets have been signed with a proper certificate to minimize security popups and blocks. 
+<li> Multi-host browsing capability has been removed as being too prone to problems. 
+Now, HOSTS.cfg can only contain one host/username/password set, and this will be used
+for all operations. 
+<li> Mac OSX binaries have been supplied for all auxiliary programs, so all functions
+should now work on (64-bit) OSX without additional install. 
+<li> Jar files have been renamed stcw.jar and mtcw.jar
+<li> For the DE feature, the path to library libjri.so has been properly included to
+remove the need to copy this library to a system location
+<li> For connecting to the database, TCW will try several variations of 'localhost', including
+IP address and domain name, to reduce the need to add additional MySQL user entries 
+</ol>
+Known bugs:
+<ol>
+<li>If you pairs computed, sometimes the pairs table shows when you select "Show all sequences"; just 
+go to the "Filter Query" and select search and you will get the all sequence table.
+<li>Occasionally when I add an annoDB to an existing project, it does not show up in the interface but it does
+exist internally, i.e. if you "Annotate", it is included in the annotation.
+</ol>
+<!------------------ Version 1.2 ----------------------->
+
+<p>
+<font color="#000000" face="Verdana, Arial, Helvetica, sans-serif" size="2"> 
+<big><b><u>TCW Version 1.2</u></b></big><br>
+<font color="#000000" face="Verdana, Arial, Helvetica, sans-serif" size="2"> 
+<br>Release: 18 December 2013
+<p><b>Major changes</b>
+<ol>
+
+<li>DE values
+<ol>
+<li>The DE values only provided signficance but not direction, e.g. if Lib1 compared to Lib2 have a
+low p-value, is Lib1&gt;Lib2 or is Lib1&lt;Lib2. Hence, if Lib1 is less than Lib2, the p-value will
+now be negative.
+<li>You can just rerun runDE on your project(s) to update the p-values; you must also rerun GOseq.
+The Overview will be regenerated once you view the project again.
+<li>The sort on the DE column ignores the sign so that the most signficant values will sort to
+the top or the bottom.
+<li>viewSingleTCW: the DE Pvalues query allows you to select for each individual library pair up, down
+or either.
+<li>viewMultiTCW: has a new query that allows you to view clusters that have similar DE values; 
+i.e. view the clusters that have
+{at least one, all} members from N species that have a significant 
+{up, down} DE values for one or more selected pairs. 
+</ol>
+<li>runSingleTCW:
+<ol>
+<li>The Add Remarks is more robust and now allows appending remarks.
+</ol>
+
+<li>viewSingleTCW: 
+<ol>
+<li>A Blast option allows the user to blast a sequence against those in the database; for applets, the user must have blast on their machine.
+<li>An Export type has been added to include  the level N GOs on output for the displayed sequences, where N (or a range) will be a parameter on the Export menu.
+</ol>
+
+</ol>
+
+<p><b>Smaller changes and bug fixes</b>
+<ol>
+<li>viewSingleTCW: If a single sequence or DB hit is selected in the Basic search, 
+the "View Selected Sequence"
+will display it in the table instead of going directly to the Sequence Detail page,
+as the DE values are only available from the table.
+<li>Fix bug which caused occasional truncation of annotation loading
+</ol>
+<!------------------ Version 1.1 ----------------------->
+
+<p>
+<font color="#000000" face="Verdana, Arial, Helvetica, sans-serif" size="2"> 
+<big><b><u>TCW Version 1.1</u></b></big><br>
+<font color="#000000" face="Verdana, Arial, Helvetica, sans-serif" size="2"> 
+<br>Release: 16 July 2013
+<p><b>Major changes</b>
+<ol>
+<li>runSingleTCW: 
+<ol>
+<li>When defining the count files for "Generate File", a directory
+can be specified and all valid files automatically entered.
+<li>Selecting the 'Best Anno' has been further improved when using UniProt, as whether it is
+a SwissProt (versus TrEMBL) is taken into account.
+</ol>
+<li>runDE:
+<ol>
+<li>Two ways have been added to add multiple DE columns: (1) All Pairs for Group 1, where
+every library selected in group 1 will be compared with all others. (2) Get Pairs from File,
+where the rows in the file list Group 1, Group 2 and the column name.
+</ol>
+<li>viewSingleTCW: 
+<ol>
+<li>A trimmed set of "most interesting" GOs is computed based on GOseq p-values, if GOseq was run.
+<li>The BasicGO search output has a tree view mode to see the GO hierarchy.
+<li>Contig overview: the lowest level GOs are shown on the main overview page. Using a pull-down, the tree of GOs for the contig can be displayed, or a hit can be selected and only the GOs for that hit are displayed. 
+</ol>
+<li>runMultiTCW:
+<ol>
+<li>The Pearson Correlation Coeffient may be run on all pairs of a cluster.
+<li>Improved algorithm for assigning the best description to each cluster.
+</ol>
+<li>viewMultiTCW:
+<ol>
+<li>The percentage of PCC>=0.8 is shown for each cluster.
+<li>The percentage of RPKM>1000 is shown for each cluster.
+</ol>
+</ol>
+
+<p><b>Smaller changes</b>
+<ol>
+<li>runSingleTCW: 
+<ol>
+<li>Bug fix: DE values could not be added with runDE to assembled contigs, which has been
+fixed in the assembler.
+<li>Though incremental annotation was/is supported, it was cleaned up to ensure that no extract
+steps were performed.
+</ol>
+<li>viewSingleTCW:
+<ol>
+<li>Replicas can be viewed from the Sequence detail page. 
+<li>The display for floating points can be changed on "Select Columns", which applies to all tables that contain any floating point.
+<li>On Basic DB hit page, for read libraries, the count was being shown; this has been changed
+to RPKM.
+<li>Multiple projects can be viewed from the same viewSingleTCW startup window
+without problems.
+<li>The  #5' and #3' were wrong in contig overview. Removed columns #loners (for assembled contigs) and #Shared hits (for pairs), as these columns no longer have values.
+<li>Bug fix: GO query produced an error if GO ID was selected but the go id string did not have numbers.
+<li>Bug fix: error viewing sequences for GO
+<li>Bug fix: proteins could not be aligned if the project was created with peptides sequences.
+</ol>
+<li>viewMultiTCW applet: 
+<ol>
+<li>The MUSCLE button does not show on the applet, as it will not run from the applet.
+<li>The Filter query view looked odd due to missing +/- icons, which has been fixed.
+</ol>
+</ol>
+
+<p>
+<font color="#000000" face="Verdana, Arial, Helvetica, sans-serif" size="2"> 
+<big><b><u>TCW Version 1.0</u></b></big><br>
+<font color="#000000" face="Verdana, Arial, Helvetica, sans-serif" size="2"> 
+<br>Release: 15 April 2013
+<p>There are major changes from PAVE to TCW, where the biggest are:
+<ol>
+<li>New <b><tt><big>runDE</b></big></tt>: computes differential expression using published methods for R.
+<li>New <b><tt><big>runMultiTCW</big></b></tt>: builds a comparison database from multipe single TCW databases.
+<li>New <b><tt><big>viewMultiTCW</big></b></tt>: view the comparison database.
+<li>The manager and viewer for a single species database (as processed by PAVE), are now called
+<b><tt><big>runSingleTCW</big></b></tt> and <b><tt><big>viewSingleTCW</big></b></tt> and the database is referred to as the sTCW database.
+<ol type='a'>
+<li>    When using UniProt for annotation, the GO, Pfam, EC and KEGG identifiers are extracted and 
+added to the sTCW database. The GO database is used to add the GO level information. The <tt><big>viewSingleTCW</big></tt> has a "Basic GO Query". 
+<li>The <tt><big>runSingleTCW</big></tt> will take protein sequences and quantitative counts as input (hence, the sequences in TCW may be assembled consensus sequences, gene models or proteins, so the generic term 'sequence' is used for all these cases). All the other TCW programs can also use protein sequences. 
+</ol>
+</ol>
+
+<p>There are also many small feature enhancements and some bug fixes. Here are some of them:
+<ol>
+<li>The "1st best hit" has been changed to the "Best Eval" and the "Best Hit" has been changed
+to the "Best Anno", where the second uses the hit that does not have phrases such as
+"uncharacterized protein" in its description.
+<li>Either the new Blast+ or the legacy Blast can be used.
+<li>Remove all usages of InnoDB.
+<li>A new column of fold change has been added to <tt><big>viewSingleTCW</tt></big>.
+<li>Tables can be 'copied' to the clipboard.
+</ol> 
+
+
+
+<p>
+<a href=#top>Goto top</a>
+				</font>
+
+<p>
+<!--#include virtual="./ssi/end.html" -->
+
+</HTML>
+

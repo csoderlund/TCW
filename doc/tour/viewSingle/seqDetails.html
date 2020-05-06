@@ -1,0 +1,122 @@
+<html>
+<!--#set var=TITLE value="Tour: Sequence Details" -->
+<!--#include virtual="../../ssi/head.html" -->
+<body bgcolor="#FFFFFF" text="#000000" onLoad="init('seq')">
+<!--#include virtual="../ssi/start2t.html" -->
+
+<a name=start>
+<!--#include virtual="./ssi/view_stcw.html" -->
+
+<center><code>Sequence Details</code>
+<table  border="0" cellspacing="0" cellpadding="2" height="18">
+<tr><td align="left" bgcolor="#666666" class="white" style="padding-bottom:4px;">
+<a href="#details" class="white">Details</a> |
+<a href="#frame" class="white">Frame</a> |
+<a href="#align"  class="white" >Align</a> |
+<a href="#goterm"  class="white">GO</a> 
+</td></tr>
+</table>
+</center>	
+
+<p>
+The <tt>Sequence Detail</tt> view can be displayed from the Main Table by selecting a sequence followed by 
+<tt>View Selected Sequence</tt>. 
+<!--------------------------------------------!>
+<h3>Details</h3>
+The image is an example of the detail page. 
+<a  href="img/seqDetail.png">
+<img width=800 src="img/seqDetail.png" border=1></a>
+<p>
+<table>
+<tr><td>
+<p>Second row of options:
+<ul>
+<li>The <tt>Counts</tt> pull-down  can change
+the <tt>Counts:</tt> to <tt>RPKM</tt> or <tt>Replicates</tt>. 
+<li>The <tt>All hits</tt> can be changed to display only <tt>Best Hit, Best per AnnoDB, 
+Unique Species, Distinct Regions</tt>.
+<li>The  <tt>Copy/Export</tt> options are shown on the right.
+</ol>
+<td>
+<a  href="img/seqExport.png">
+<img width=250 src="img/seqExport.png" border=1></a>
+</table>
+<!---------------------------------------------!>
+<p>
+<a name=frame>
+<table width='100%'><tr><td align='left' >
+<h3>Frame</h3>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+<table>
+<tr><td valign="top">
+The Start and Stop are highlighted in Green. The location of the best
+hit is shown in italics, where it forms a perfect ORF in this example (Stop is not shown). 
+The sequence can be shown in alternative frames using the 
+<tt>Frame</tt> pull-down.
+<p>The TCW selected best frame is indicated by the addional information shown on the right (beside Stop). 
+The TCW algorithm uses hit information, 5th-order Markov score,
+and start/stop codons to compute the best frame.
+<td>
+<a  href="img/seqFrame.png">
+<img width=600 src="img/seqFrame.png" border=1></a>
+</table>
+<!---------------------------------------------------------!>
+<p>
+<a name=align>
+<table width='100%'><tr><td align='left' >
+<h3>Align</h3>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+<table>
+<tr><td valign="top"> 
+<p>Dynamic programming is used
+to compute the alignment. 
+<p>The green is gaps, the pink is non-synonymous mismatches and the purple is synonymous mismatches. 
+<p>Selecting a hit followed by "Alignment" shows a multi-line sequence view.
+<p>There are options to show the alignment in all frames and/or to show alignments to multiple hits.
+<td>
+<br><a  href="img/seqAlign.png">
+<img width=700 src="img/seqAlign.png" border=1></a>
+</table>
+<!---------------------------------------------------------!>
+<p>
+<a name=goterm>
+<table width='100%'><tr><td align='left' >
+<h3>GO</h3>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+<table>
+<tr><td valign="top">
+<td>The
+image on the right shows the union of the GO terms for sequence NNU_025907.
+<p>Most of the columns are obvious, except the following two:
+<br>&#10148;<tt>Level</tt>: A GO term can be at multiple levels in the tree. This number is its maximum level.
+<br>&#10148;<tt>Evidence</tt>: This shows evidence code for the protein being assigned the GO term. The number before an Evidence code is the number of hits that were assigned to the GO with the corresponding evidence.
+
+<td><a  href="img/seqGoAll.png">
+<img width=700 src="img/seqGoAll.png" border=1></a>
+</table>
+<p>
+
+<table>
+<tr><td valign="top">
+Selecting a GO term followed by <tt>Hits</tt> provides details of the hits that are assigned the GO.
+<td><a  href="img/seqGoHit.png">
+<img width=550 src="img/seqGoHit.png" border=1></a>
+
+<tr>
+<td valign="top">
+Selecting a GO term followed by <tt>Ancestor</tt> provides the list of ancestors for the GO.
+<td><a  href="img/seqGoAnc.png">
+<img width=550 src="img/seqGoAnc.png" border=1></a>
+</table>
+
+
+<table width='100%'><tr><td align='left' >
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+</table>
+
+<!--#include virtual="../../ssi/end.html" -->
+
+

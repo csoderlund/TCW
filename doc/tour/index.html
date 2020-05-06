@@ -1,0 +1,34 @@
+<html>
+<!--#set var=TITLE value="TCW Tour" -->
+<!--#include virtual="../ssi/head.html" -->
+<body bgcolor="#FFFFFF" text="#000000" onLoad="init('tour')">
+<!--#include virtual="./ssi/start0t.html" -->
+
+<table width=80% cellpadding=5 align="center">
+<tr><td colspan=2><font color=green>This has not been updated since v2.13 (1Apr19), so is a little out of date. </font>
+<tr><td><a href=viewSingle/overview.html>Overview<td>An overview containing summary results and processing.
+<br>It is displayed in <code>viewSingleTCW</code> for a database on startup.
+<tr><td colspan=2><b>The TCW has six graphical interfaces:</b>
+<tr>
+<td><a class=code href=runAS/index.html>runAS</a><td>provides the UniProt and GO information for <code>runSingleTCW</code>
+<tr>
+<td><a class=code href=runSingle/index.html>runSingleTCW</a><td>build an annotated database for a single species
+<tr>
+<td><a class=code href=runDE/index.html>runDE</a><td>add differential expression (DE) results to the single species database
+<tr>
+<td><a class=code href=viewSingle/index.html>viewSingleTCW</a><td>query and display a single species database
+<tr>
+<td><a class=code href=runMulti/index.html>runMultiTCW</a><td>build a multi-species database from single-species databases and perform clusterings
+<tr>
+<td><a class=code  href=viewMulti/index.html>viewMultiTCW</a><td>query and display a multi species database
+<tr><td>&nbsp;
+
+<tr><td colspan=2><code>runDE</code>, <code>viewSingleTCW</code>, and <code>viewMultiTCW</code> startup with a <a href=chooser.html>TCW database chooser</a> window to select the desired TCW database.
+<tr><td colspan=2>This tour is just a brief overview. The 
+<a href="../doc/stcw/UserGuide.html" class="ext" target="_blank">singleTCW UserGuide</a>
+and <a href="../doc/mtcw/UserGuide.html" class="ext" target="_blank">multiTCW UserGuide</a> walk the user through
+the demos, providing more detail. There is no detailed document on the viewSingleTCW and
+viewMultiTCW, but there are Help pages associated with every view.
+</table>
+<!--#include virtual="../ssi/end.html" -->
+

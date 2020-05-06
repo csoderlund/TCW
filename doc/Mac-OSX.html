@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<HTML>
+<!--#set var=TITLE value="TCW installing on Mac-OSX" -->
+<!--#include virtual="./ssi/head.html" -->
+<!--#include virtual="./ssi/start1.html" -->
+<a name=top>
+
+
+<h3>Running TCW on Mac-OSX</h3>
+I've run TCW extensively on my Mac, and found a few slight Java problems:
+<ul>
+<li>The Export sequences from a table does not work when there are many sequences. Edit the viewSingleTCW file to increase the memory size,
+and don't do anything in the TCW interface or click on the table until the file is written. If that doesn't work, limit the size of the table
+to be written.
+<li>In runSingleTCW and runMultiTCW, the interface does not always automatically update until I click in the window.
+<li>Pop-up windows can get hidden behind the main window, and it makes TCW appear to be frozen -- move the main TCW window to find the
+hidden window.
+<li>The buttons are all white, and the highlighting on the GO tree is very light. Occasionally, the highlighting causes text to disappear.
+<li>The UniProt search links do not work.
+</ul>
+<h3>Installation on Mac-OSX</h3>
+Here are my notes from my installation on my personal Mac v10.9.5 with Java v1.7.0_67. The "curl" and "cpan" commands were already working, so I did not need to install them. (This was done in Dec 2014).
+
+<h3>MySQL</h3>
+
+<ol>
+<li>Download from <a href=http://dev.mysql.com class="ext" target="_blank">dev.mysql.com/download/mysql</a> mysql-5.6.21-osx10.9-x86_64.dmg (or the appropriate version) and install. 
+<br>It only has one *.pkg which installs everything you need. Install the .pkg. 
+<br>There will be a mySQL icon on your System Preferences, where you can start/stop the MySQL server.
+<br>&nbsp;
+<li>Set password and test:
+<pre>
+        /usr/local/mysql/bin/mysqladmin -u root password [your password]
+</pre>
+If you are using tcsh, you can set the following in your .tcshrc (for bash, do the equivalent):
+<pre>
+	alias mysql '/usr/local/mysql/bin/mysql -u root -p[your password]'
+</pre>
+Test:
+<pre>
+        mysql
+        >create database mytest;
+        >drop database mytest;
+</pre>
+<li>In the HOSTS.cfg of the TCW package, set DB_user=[mysql userid], DB_password=[mysql password]
+
+</ol>
+<p>At this point, runSingleTCW and runMultiTCW can build databases and view them. However, 
+you just cannot run DE calculations without R or OrthoMCL without Perl-mysql interface.
+
+<h3>Perl-mySQL interface</h3>
+In order to run OrthoMCL in multiTCW, the Perl interface to mySQL must be installed. See 
+<a href=http://bixsolutions.net/forum/thread-8.html class="ext" target="_blank">bixsolutions.net/forum/thread-8</a>. 
+
+<pre>
+added 'set $path=($path /usr/local/perl/bin)' to my .tcshrc
+
+>cpan install DBD::mysql
+
+cd .cpan/build/DBD-mysql-4.029-[a unique string will end this directory name]
+sudo ln -s /usr/local/mysql/lib/*.dylib
+perl Makefile.PL --testuser=[mysql userid] --testpassword=[mysql password]
+make 
+make test
+sudo make install
+sudo ln -s /usr/local/mysql/lib/libmysqlclient.18.dylib /usr/lib/libmysqlclient.18.dylib
+</pre>
+This was a real pain to figure out, and may be different on your machine. 
+
+<h3>R and R-Java interface</h3>
+<ol>
+<li>Install R <a href=http://cran.r-project.org/bin/macosx class="ext" target="_blank">//cran.r-project.org/bin/macosx</a>.
+<br>&nbsp;
+<li>Install the Java-R interface and DE packages:
+<pre>
+	R
+	>install.packages("rJava")
+	>source("http://bioconductor.org/bioLite.R")
+	>biocLite("edgeR")
+	>biocLite("multtest")
+	>biocLite("goseq")
+	>etc as documented in the TCW DE documentation
+</pre>
+<li>Set your $R_HOME (assuming tcsh):
+<pre>
+	setenv R_HOME /Library/Frameworks/R.framework/Resources
+</pre>
+<li>Edit "runDE" to change the -D  to:
+<pre>
+	-Djava.library.path=/Library/Frameworks/R.Framework/Resources/library/rJava/jri
+</pre>
+</ol>
+<h3>External packages</h3>
+All the external packages are included in the TCW package except BLAST. You can download it from:
+<pre>
+	ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-2.2.30+-universal-macosx.tar.gz
+	tar zxvf ncbi-blast-2.2.30+-universal-macosx.tar.gz
+</pre>
+Either put blast where your  $path can find it, or specify it in the HOSTS.cfg, e.g.
+<pre>
+	blast_path=[your path]/ncbi-blast-2.2.30+/bin
+</pre>
+
+<!--#include virtual="./ssi/end.html" -->
+
+</HTML>
+

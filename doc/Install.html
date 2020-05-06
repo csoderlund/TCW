@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<HTML>
+<!--#set var=TITLE value="TCW Installation" -->
+<!--#include virtual="./ssi/head.html" -->
+<!--#include virtual="./ssi/start1.html" -->
+<a name=top>
+<!----------- Software requirements --------------->
+<b>Contents:</b>
+<ul>
+<li><a href=#soft1>Software requirements</a>
+<li><a href=#install>Installation</a>
+<li><a href=#soft2>Optional software</a>
+<li><a href=#soft3>Supplied external software</a>
+</ul>
+See <a href=External.html class="ext" target="_blank">External software</a> for references.
+
+<a name=soft1>
+<h2>Software Requirements</h2>		
+
+		<code>TCW</code> is written in Java and was developed under Linux and Mac 
+		(see <a href=Mac-OSX.html class="ext" target="_blank">Mac Installation</a>).  
+		Viewing and query are possible on any platform supporting Java, though backend processing is only supported for Linux and Mac.
+		A 64-bit multi-processor is needed for the back-end processing (i.e. building databases). 
+		<code>TCW</code> was compiled into a jar file using Java version 1.7.0_161, so should
+work on any subsequent Java release, e.g. it has been tested on Java version 9.0.1.
+	<p>	
+		<p>	
+		<table border=1 cellpadding=5 width="100%">
+			<tr><td><i>Software</td><td><i>Version</td><td><i>Source</td><td><i>Additional info</i></td></tr>
+			<tr><td class='emph'>MySQL</td><td>5.0 or later</td>
+			    <td><a href="http://www.mysql.com" class="ext" target="_blank">MySQL website</a></td>
+			    <td>If either <code>viewSingleTCW</code> or <code>viewMultiTCW</code> will be used as applets, 
+			the firewall must allow the appropriate port; see <a href="stcw/Trouble.html#ports" class="ext" target="_blank">MySQL port access</a>.
+			<br>If you will be using the optional <a href=stcw/AssemGuide.html class="ext" target="_blank">assembly feature</a>, Innodb table must be enabled.
+			</td>
+			</tr>		
+			<tr><td class='emph'>Java</td>
+			     <td>7 or later</td>
+			     <td><a href="http://www.java.com/en/download/" class="ext" target="_blank">Java.com</a></td>
+			     <td>Get the Java Runtime Environment (JRE).
+We <b>strongly</b> recommend you use this package, not the version called <tt>IceTea6</tt>.
+</td>
+			</tr>
+			<tr><td  class='emph'><code>BLAST</code></td><td>2.x</td><td>
+		<a href="http://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download" class="ext" target="_blank">NCBI</a></td>
+				<td>Used for optional assembly, annotation and interactive <code>BLAST</code> in <code>viewSingleTCW</code>. 
+				</td></tr>		
+		</table>
+	
+<p>
+<!----------- Installation --------------->
+	<a name="install"></a>
+	<table width='100%'><tr><td align='left' >
+<h2>Installation</h2>
+	</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a></table>
+
+	<i><b>Step 1:</b></i> 
+		Decide where you want the main TCW directory to go, and
+		untar the package in that location.
+		<pre>
+		tar -xvf TCW_3.tar.gz
+		</pre>
+		The untar will create a <code>TCW_3</code> directory, with the following content:
+<pre>
+Executables:		
+		execAnno	execAssm.pl	execLoadLib.pl	
+		runAS	runSingleTCW	runDE	runMultiTCW
+		viewSingleTCW	viewSingleTCW
+Directories:
+		java/jars	external	external_osx
+		doc	scripts		R-scripts	projects 
+Text files:
+		HOSTS.cfg	README		LICENSE
+		</pre>
+		
+	<i><b>Step 2:</b></i> 
+		MySQL must be installed and running with <b>read AND write</b> access.
+		To verify, type:
+		<pre>
+		mysql -h server -u username -p
+		</pre>
+		where "server" and "username" are the values given by your
+		system administrator. The program should prompt you for the password, and then
+		display the "mysql>" prompt. Type "exit" to return to the shell command line.			
+		<p>
+		Note: The user must have sufficient privileges to create a new database. For the web applet, 
+		you may need to use a port other than the default
+		MySQL port; see <a href="stcw/Trouble.html#ports" class="ext" target="_blank">MySQL port access</a>.
+
+	
+		<p><i>Check max_allowed_packet</i>
+		<br>Startup mysql and enter the command: <tt>show variables like "max_allowed_packet";</tt>
+		<br>If it is small (e.g. 1048576), it will be very slow to build big databases. Increase it as follows:
+		<br>Enter the mysql command: <tt>set global max_allowed_packet=1073741824;</tt>
+		
+	
+	<p>
+	<i><b>Step 3:</b></i> Locate external binaries 
+		<p>TCW uses external <code>BLAST</code> binaries (use <code>BLAST</code>+).  
+		It is easiest if these programs are accessible in the system path.  You can check this using the 'which' shell command, e.g.
+		<p>For <code>BLAST+</code>:
+		<pre>
+		which makeblastdb
+		which blastp
+		</pre>
+		If the 'which' command fails to locate any of these binaries, 
+		make sure they are installed and then add them to your system path.  
+		(Alternately, find the paths to these binaries and specify them in the HOSTS.cfg file, see next section.)	
+	
+<a name=step4></a>
+<p>
+	<i><b>Step 4:</b></i>
+	Open the <tt>HOSTS.cfg</tt> file in an editor.
+		<pre class=tt>
+DB_host=localhost     
+DB_user=              
+DB_password=          
+
+#leave blank to use your default <code>BLAST</code> path (i.e. in your PATH)
+#blast_path=    # provide only path, e.g. /usr/local/bin
+
+#leave blank to use the TCW supplied <code>DIAMOND</code>
+#diamond_path=
+
+#the path must be supplied to use usearch (last tested 1/31/18)
+#usearch_path
+		</pre> 
+			<p>
+		Add your database username and password to the two lines <tt>DB_user</tt> and <tt>DB_password</tt>. Note, the
+		database user must have sufficient access privileges to create a new database! 
+		
+		</font>
+		
+	<a name="soft2"></a>
+	<table width='100%'><tr><td align='left' >
+<h2>Optional software</h2>
+	</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a></table>
+
+<table border=1 cellpadding=5 width="100%">
+			<tr><td><i>Software</td><td><i>Version</td><td><i>Source</td><td><i>Additional info</i></td></tr>
+
+				
+			<tr><td  class='emph'>R</td><td>3.2</td><td><a href="http://www.r-project.org/" class="ext" target="_blank">R Project</a></td>
+			<td>Used for <tt>runDE</tt> to compute differential expression. 
+			
+			TCW will work with earlier versions (at least since release 2.15), but its best to use the latest.
+See <a href="stcw/DiffExp.html" class="ext" target="_blank">DiffExp</a> for more information.</td></tr>
+			
+			
+
+		</tr>
+		
+		<tr><td class='emph'><code>Usearch</code></td><td>Tested with v10.0.240 (1/31/18) 32-bit only
+			<td><a href=http://www.drive5.com/usearch/download.html class="ext" target="_blank">Usearch</a>
+			<td>For super-fast annotation in <tt>runSingleTCW</tt> (last tested 1/31/18). 
+		</tr>
+<tr><td class='emph'><code>KaKs_Calculator</code></td><td>Tested with v.1.2 (Apr 2006 - last update).
+			<td><a href=http://bigd.big.ac.cn/tools/kaks/download class="ext" target="_blank">
+			<code>KaKs_Calculator</code></a> (google for other download sites).
+			<td>For KaKs analysis for <code>runMultiTCW</code>. 
+		</tr>
+		</table>
+<p>
+	<a name="soft3"></a>
+	<table width='100%'><tr><td align='left' >
+<h2>Suppled external software</h2>
+	</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a></table>
+You do not need to do anything to use the supplied packages. They are in the release directories
+<tt>/external</tt> (Linux) or <tt>/external_osx</tt> (Mac). 
+	<table border=1 cellpadding=5 width="100%">
+		<tr><td><i>Software</td><td><i>Version</td><td><i>Source</td><td><i>Additional info</i></td></tr>	
+		
+		<tr><td colspan=4><i>Supplied with package for singleTCW and multiTCW</i></td>
+		<tr><td class='emph'><code>DIAMOND</code></td><td>Tested with v0.9.22.123 (9/1/18)
+			<td><a href=http://ab.inf.uni-tuebingen.de/software/diamond class="ext" target="_blank"><code>DIAMOND</code></a>
+			<td>For super-fast annotation in <tt>runSingleTCW</tt>. 
+			
+		<tr><td colspan=4><i>Supplied with packages for singleTCW</i></td>
+		<tr>
+			<td class='emph'>JRI</td><td>0.9-4</td>
+			<td><a href="http://www.rforge.net/JRI/" class="ext" target="_blank">www.rforge.net/JRI</a></td>
+         	<td>The library <tt>libjri.so</tt> is supplied, which
+         	provides the interface to R for <tt>runDE</tt>.
+ <font color=red>This may be an older version than your R installation (it is v3.0), in which case it will need to be replaced.</font>
+		</tr>
+         <tr><td class='emph'><code>CAP3</td><td>Download 04/15/05, 32-bit</td>
+			<td><a href="http://seq.cs.iastate.edu/cap3.html" class="ext" target="_blank">seq.cs.iastate.edu/cap3.html</a></td>
+         	<td>Used for optional assembly. Other versions may give slightly different results. 
+		We recommend using the 32-bit version on all platforms due to problems with the 64-bit.
+		<font color=red>If this fails during assembly, then this version does not work on your machine. You could try
+		using cap3.linux.i686_exon64 (supplied - rename it to cap3)</font>
+		</td>
+		</tr>	
+		
+	<tr><td colspan=4><i>Supplied with packages for multiTCW</i></td>	
+         
+         <tr>
+			<td class='emph'><code>OrthoMCL</code></td><td>2.0.3</td>
+			<td><a href="http://orthomcl.org" class="ext" target="_blank">orthomcl.org</a></td>
+         	<td>One of three available methods for clustering</td>
+		</tr>
+         <tr>
+			<td class='emph'><code>MCL</code></td><td>10-201</td>
+			<td><a href="http://micans.org/mcl/" class="ext" target="_blank">micans.org/mcl</a></td>
+         	<td>Used by <code>OrthoMCL</code></td>
+		</tr>
+         <tr>
+			<td class='emph'><code>MAFFT</code></td><td>v7.407</td>
+			<td><a href="https://mafft.cbrc.jp/alignment/software/" class="ext" target="_blank">https://mafft.cbrc.jp/alignment/software/</a></td>
+         	<td>For computing multiple alignment of clusters for scoring and viewing</td>
+		</tr>
+		 <tr>
+			<td class='emph'><code>MstatX</code></td><td>11-Nov-18</td>
+			<td><a href="https://github.com/gcollet/MstatX" class="ext" target="_blank">https://github.com/gcollet/MstatX</a></td>
+         	<td>For scoring multiple alignment of clusters</td>
+		</tr>
+		<tr>
+			<td class='emph'><code>MUSCLE</code></td><td>3.8.31</td>
+			<td><a href="http://www.drive5.com/muscle" class="ext" target="_blank">www.drive5.com/muscle</a></td>
+         	<td>For computing multiple alignment of clusters for viewing</td>
+		</tr>
+        
+		</table>
+	
+<p>The references for all TCW external software are provided in <a href=External.html class="ext" target="_blank">external references</a>
+<p>
+<!--#include virtual="./ssi/end.html" -->
+</HTML>
+

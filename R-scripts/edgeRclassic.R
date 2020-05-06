@@ -12,8 +12,7 @@ if (nGroup1==1 && nGroup2==1) {
     y <- estimateDisp(y, design)
     et <- exactTest(y) 
 } 
-# Use the following for non-adjusted: results <- et$table$PValue
-# 4th column is FDR
 res <- topTags(et, n=nrow(et), adjust.method="BH")
-results <- res$table[,4]
+# Columns are:  logFC    logCPM        PValue          FDR
+results <- res$table$FDR
 rowNames <- rownames(res)

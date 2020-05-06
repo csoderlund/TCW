@@ -1,0 +1,93 @@
+<html>
+<pre>
+Start Taxonomic UniProt                             03-Aug-19 12:48:28
+   Check Directories
+      Creating directory: ./projects/DBfasta/UniProt_Aug2019
+      Creating directory: ./projects/DBfasta/UniProt_Aug2019/sp_fungi/
+      Creating directory: ./projects/DBfasta/UniProt_Aug2019/sp_plants/
+      Creating directory: ./projects/DBfasta/UniProt_Aug2019/tr_plants/
+   Check complete
+   Download SwissProt files                             03-Aug-19 12:48:28
+      Downloading uniprot_sprot_fungi.dat.gz
+      curl complete ./projects/DBfasta/UniProt_Aug2019/sp_fungi/uniprot_sprot_fungi.dat.gz   0m:5s
+      Downloading uniprot_sprot_plants.dat.gz
+      curl complete ./projects/DBfasta/UniProt_Aug2019/sp_plants/uniprot_sprot_plants.dat.gz   0m:6s
+   
+   Download TrEMBL files                                03-Aug-19 12:48:40
+      Downloading uniprot_trembl_plants.dat.gz
+      curl complete ./projects/DBfasta/UniProt_Aug2019/tr_plants/uniprot_trembl_plants.dat.gz   8m:24s
+   
+   Create FASTA files                                   03-Aug-19 12:57:04
+      Make FASTA from ./projects/DBfasta/UniProt_Aug2019/sp_fungi/uniprot_sprot_fungi.dat.gz
+         34,106 written to uniprot_sprot_fungi.fasta                     0m:4s  (3Mb)
+      Make FASTA from ./projects/DBfasta/UniProt_Aug2019/sp_plants/uniprot_sprot_plants.dat.gz
+         42,597 written to uniprot_sprot_plants.fasta                    0m:4s  (3Mb)
+      Make FASTA from ./projects/DBfasta/UniProt_Aug2019/tr_plants/uniprot_trembl_plants.dat.gz
+         9,534,192 written to uniprot_trembl_plants.fasta                9m:25s  (3Mb)
+Complete Taxonomic UniProt                                               18m:10s
+
+Start Full UniProt                                  03-Aug-19 13:15:46
+   Check Directories 
+      Creating directory: ./projects/DBfasta/UniProt_Aug2019/sp_fullSubset/
+   Download SwissProt                                   03-Aug-19 13:15:46
+      Downloading uniprot_sprot.dat.gz
+      curl complete ./projects/DBfasta/UniProt_Aug2019/sp_fullSubset/uniprot_sprot.dat.gz   0m:43s
+   Create subset files                                  03-Aug-19 13:16:29
+      Make .dat subset ./projects/DBfasta/UniProt_Aug2019/sp_fullSubset/uniprot_sprot_fullSubset.dat.gz
+         Count taxonomic entries
+             34,106 IDs in uniprot_sprot_fungi.fasta
+             42,597 IDs in uniprot_sprot_plants.fasta
+         Allocate memory for 76,703 total entries
+         Record taxonomic entries
+             76,703 IDs will not be written to subset
+         Complete making list                                            0m:0s  (10Mb)
+         Sort list
+         Write .dat.gz subset file 
+            483,834 wrote from 560,537 (86%)                             2m:17s  (10Mb)
+      Complete creating .dat subset file                                 2m:19s
+      Make FASTA from ./projects/DBfasta/UniProt_Aug2019/sp_fullSubset/uniprot_sprot_fullSubset.dat.gz
+         483,834 written to uniprot_sprot_fullSubset.fasta               0m:38s  (10Mb)
+Complete Full UniProt                                                    3m:41s  (10Mb)
+
+Start GO processing go_Aug2019                      03-Aug-19 13:21:24
+   UniProt directory: ./projects/DBfasta/UniProt_Aug2019
+   GO temporary directory: ./projects/DBfasta/GO_tmpAug2019
+   URL: http://archive.geneontology.org/
+   Create ./projects/DBfasta/GO_tmpAug2019
+      Downloading go_daily-termdb-tables.tar.gz
+      curl complete ./projects/DBfasta/GO_tmpAug2019/go_daily-termdb-tables.tar.gz   0m:1s
+      Exec: tar xf go_daily-termdb-tables.tar.gz
+       pwd: ./projects/DBfasta/GO_tmpAug2019
+   Loading go_daily-termdb-tables.tar.gz to go_Aug2019
+      Exec: mysqladmin -h localhost -u ragcol -pP96zEhUwRaCurQ5 create go_Aug2019
+      Exec: sh load.sh
+       pwd: ./projects/DBfasta/GO_tmpAug2019/go_daily-termdb-tables/
+   Loading ./projects/DBfasta/UniProt_Aug2019 to go_Aug2019
+      Processing sp_fungi/uniprot_sprot_fungi.dat.gz
+            34,106 UniProts                                              0m:11s  (10Mb)
+      Processing sp_plants/uniprot_sprot_plants.dat.gz
+            42,597 UniProts                                              0m:13s  (10Mb)
+      Processing tr_plants/uniprot_trembl_plants.dat.gz
+            9,534,192 UniProts                                           23m:14s  (10Mb)
+      Processing sp_fullSubset/uniprot_sprot_fullSubset.dat.gz
+            483,834 UniProts                                             2m:12s  (11Mb)
+      Totals:
+         GO: 18,166,675  Pfam: 9,427,721  KEGG: 1,843,338  EC: 1,039,014  InterPro: 24,330,955
+   Modify TCW GO database go_Aug2019
+      Add gonum to term
+      Add gonum of term_id1 and term_id2 to graph_path
+         Initialize columns...
+         Bulk update of graph_path...
+      Add gonum to term2term
+         Bulk update of term2term for id1...
+         Bulk update of term2term for id2...
+      Create a table of levels
+         19,590 Parent-child
+         988,393 tree entries for biological_process
+         196,238 tree entries for cellular_component
+         23,799 tree entries for molecular_function
+      Add GO level numbers to term
+   Complete TCW GO database modifications                                5m:57s  (11Mb)
+Complete creating GO database go_Aug2019                                 32m:36s  (10Mb)
+</pre>
+</html>

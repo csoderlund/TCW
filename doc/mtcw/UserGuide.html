@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html>
+<!--#set var=TITLE value="runMultiTCW Guide" -->
+<!--#include virtual="../ssi/head.html" -->
+<body bgcolor="#FFFFFF" text="#000000" onLoad="init('mtcw')">
+<a name=top>
+<!--#include virtual="../ssi/start2.html" -->
+
+
+<p>
+MultiTCW (mTCW) is the comparative module of Transcriptome Computational Workbench.
+This module takes as input two or more singleTCW databases (sTCWdb). It has been tested with input of four sTCWdbs (134k total sequences);
+though it can probably handle more input, the <code>viewMultiTCW</code> queries get very slow.
+
+<p>
+Note, familiarity with <a href="../stcw/UserGuide.html" class="ext" target="_blank">singleTCW</a> is essential, as MultiTCW 
+projects are created by merging existing sTCW projects. 
+	
+<h2>Contents</h2>
+<ul>
+<li><a href="#start">Overview</a>
+	<ul>
+	<li><a href="#soft">Software Requirements and Installation</a></li>
+	</ul>
+<li><a href="#demo">Running the demo</a> - <font color=green>Highly recommended to do this.</font>
+<li><a href="#steps">The four steps</a>
+	<ul>
+	<li><a href="#two">Top three rows</a>
+	<li><a href="#step1">Step 1. single TCW database</a>
+	<li><a href="#step2">Step 2. Compare sequences</a>
+	<li><a href="#step3">Step 3. Cluster Methods</a>
+		<ul>
+		<li><a href="#bbh">BBH</a>
+		<li><a href="#close">Closure</a>
+		<li><a href="#omcl">OrthoMCL</a>			      
+		<li><a href="#selfclust">User-defined clusters</a>
+		</ul>
+	<li><a href="#step4">Step 4. Statistics</a>
+		<ul>
+		<li><a href=#kaks>Details on running <code>KaKs_calculator</code></a>	
+		</ul>
+	</ul>
+	
+<li><a href="#details">Additional Details</a>
+	<ul>
+	<li><a href="#time">Timings</a>
+	<li><a href="#trouble">Trouble shooting</a>		
+	<li><a href="#view">View/Query with <code>viewMultiTCW</code></a>
+	<li><a href="#appl">Running <code>viewMultiTCW</code> as an applet</a></li>
+	</ul>
+<li><a href="#refs">References</a>
+</ul>
+			
+<!----------------Overview --------------------------------->
+<a name=over>
+<table width='100%'><tr><td align='left' >
+<h2>Overview </h2>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a></td></tr></table>
+
+Common abbreviations:
+<table border=0>
+<tr><td>mTCW<td>&nbsp;&nbsp;&nbsp;multiTCW database 
+<tr><td>sTCW<td>&nbsp;&nbsp;&nbsp;singleTCW database
+
+<tr><td>NT<td>&nbsp;&nbsp;&nbsp;Nucleotide (transcript, gene) 
+<tr><td>AA<td>&nbsp;&nbsp;&nbsp;Amino acid (translated ORF, protein)
+
+<tr><td>NT-sTCW<td>&nbsp;&nbsp;&nbsp;singleTCW created from NT sequences. 
+<tr><td>AA-sTCW<td>&nbsp;&nbsp;&nbsp;singleTCW created from AA sequences.
+
+<tr><td>NT-mTCW<td>&nbsp;&nbsp;&nbsp;multiTCW build from "only" NT-sTCW. 
+<tr><td>AA-mTCW<td>&nbsp;&nbsp;&nbsp;multiTCW build from only AA-sTCW or a mix of AA-sTCW and NT-sTCW.
+</table>
+<p>	
+	<code>runMultiTCW</code>
+	<ol>
+	<li>Input:
+		<ul>
+			<li>Two or more sTCW databases. The 
+					sequences, their annoDB hits, RPKM and DE p-values are imported to the multiTCW database.  
+			<li>For NT-sTCW, the mTCWdb will contain for each seqID the nucleotide, CDS, and protein sequences. The protein
+sequence is created from the CDS sequence, which is created from the TCW computed ORF.
+			
+			<li>(Optional) A file of clusters.
+			
+		</ul>	
+	<li>The results are the best if: 
+	<ul><li>The sTCW databases are annotated the same. 
+	<li>The conditions names are exactly the same (when applicable). For example, if two species both
+	have counts for the tissue type 'leaf', the condition name provided in runSingleTCW must be the same for both (e.g. leaf), though the name is case-insensitive.
+	<li>The DE column names are exactly the same (when applicable), as in the previous point.
+	</ul>
+	
+	<li>Computation: 
+		<ul>
+		<li>Compare the AA sequences using <code>diamond</code> or <code>blast</code>, 
+			and the NT sequences with <code>blastn</code>.
+		<li>Compute one or more sets of clusters using the BBH (bi-directional best hit), Closure, orthoMCL<sup>1</sup>, 
+			or user-supplied clusters.
+		<li>For a NT-mTCW database created from only NT-sTCW databases, 
+		statistics such as Ka/Ks<sup>2</sup>, synonymous, etc are computed.
+		</ul>
+	</ol>
+
+<!----------- Getting started ------------------->
+<a name=soft></a>
+<table width='100%'><tr><td align='left' >
+<h3>Software Requirements and Installation</h3>		
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+<!----------- Software requirements --------------->
+
+The multiTCW executables were installed when you installed TCW (see <a href="../Install.html" class="ext" target="_blank">Installation</a>). 
+
+<table border=1 cellpadding=5 width="100%">
+			<tr><td><i>Software</td><td><i>Version</td><td><i>Source</td><td><i>Additional info</i></td></tr>
+			
+			
+			<tr><td colspan=4><i>Optional package for transcript comparison:</i></td>
+			<tr><td class='emph'>
+				<code>KaKs_Calculator</code></td>
+				<td>v.1.2.
+				<td><a href=http://bigd.big.ac.cn/tools/kaks/download class="ext" target="_blank"><code>KaKs_Calculator</code></a> 
+				<br>(google for other download sites).
+				<td>For KaKs analysis for <code>runMultiTCW</code>. 
+			</tr>
+			
+			<tr><td colspan=4><i>Additional&nbsp;packages (supplied with TCW)<sup>+</sup>:</i></td>
+			
+			<tr>
+				<td><code>OrthoMCL</code></td>
+				<td>2.0</td>
+				<td><a href="http://orthomcl.org" class="ext" target="_blank"><code>OrthoMCL</code></a></td>
+				<td>Clusters orthologous proteins in <code>runMultiTCW</code>. 
+				<br>Uses Perl and MySQL, which requires DBI::mysql</td></tr>
+			<tr>
+			<td><code>MAFFT</code></td><td>v7.407</td>
+			<td><a href="https://mafft.cbrc.jp/alignment/software/" class="ext" target="_blank"><code>MAFFT</code></a></td>
+         	<td>For computing multiple alignment of clusters in <code>runMultiTCW</code> for scoring and viewing
+         	in <code>viewMultiTCW</code></td>
+		</tr>
+		 <tr>
+			<td><code>MstatX</code></td><td>11-Nov-18</td>
+			<td><a href="https://github.com/gcollet/MstatX" class="ext" target="_blank"><code>MstatX</code></a></td>
+         	<td>For scoring multiple alignment of clusters</td>
+		</tr>
+			
+			<tr>
+				<td><code>MUSCLE</code></td>
+				<td>3.8.31</td>
+				<td><a href="http://www.drive5.com/muscle/" class="ext" target="_blank"><code>MUSCLE</code></a></td>
+				<td>Multiple alignment of protein cluster in <code>viewMultiTCW</code>.</td></tr>
+			
+</table>
+<br>
+<sup>+</sup> Linux binaries are supplied under the <tt>external</tt> directory and the Mac binaries are supplied under the <tt>external_osx</tt>. You do not need to do anything special as TCW will find the packages here if
+they are not in your path. We cannot guarantee the packages will work on every linux/mac machine; if they do not,
+you will need to replace them. 
+
+<p>
+<!------------------DEMO --------------------------->
+<a name=demo></a>
+<table width='100%'><tr><td align='left' >
+<h2>Running the Demo</h2>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+	This section is essential for learning how to use <code>runMultiTCW</code>, 
+	and describes how to make a multiTCW project starting from the two singleTCW demos. You can use <tt>demoTra</tt>, <tt>demoAsm</tt>, <tt>demoPro</tt>
+for a three way comparison that includes an AA-sTCW. However, the three 'ex' demos, which are included in the package, have more homology so make a better example, so that is what the webpage will use.
+
+
+<table width=100% cellpadding=5><tr>
+<td>
+	Using <code>runSingleTCW</code>, create <tt>sTCW_exBar</tt>, as follows:
+
+	<ol>
+	<li><tt>./runSingleTCW</tt>
+	<li>Select "exBar" from the Project dropdown. 
+	<li>The 'ex' demos use the same <tt>UniProt_demo</tt> and GO database as the 'demo' examples. To quickly create these three databases,
+<ol type="i">
+<li>Only sp_invertebrates and tr_invertebrates are checked. 
+<li>You may want to select the search program <code>diamond</code> using the the "Edit" button.
+<li> You may want to set the GO database to "none" in "Options" -- it can be added later.
+</ol>
+	<li>Execute the three steps to load data, instantiate and annotated.
+<li>Use <code>runDE</code> to had to add the differential expression p-value for each pair of conditions.
+	
+	</ol>
+	
+<td width=450 style="padding-left:10px;">
+<a  href="img/exBar.png">
+<img width=450 src="img/exBar.png" border=1></a>
+</table>
+Create sTCW_exFoo as above. If you want to include a 3rd sTCW, create sTCW_exFly.
+	
+<p>			
+To create the multiTCW project, start by running the mTCW Manager,
+<pre>./runMultiTCW</pre> 
+This brings up the Manager interface, shown on the lower right (though all fields will be blank). 
+		
+<table width=100% cellpadding=5>
+<tr><td width=450 valign=top>	
+Click <b>Add Project</b> to create a new project. Enter
+"ex" in the entry box, and click <b>ok</b>.
+The Manager interface will have <tt>mTCW database</tt> filled in as <tt>mTCW_ex</tt>,
+which will be the MySQL database name. 
+<p>The following are the steps to take, where more detail is provided below.
+<ol>
+<li>Using the <b>Add</b> beside the "single TCW databases":
+Add the <tt>exBar</tt>, <tt>exFoo</tt> and <tt>exFly</tt> databases.
+<li>Select <b>Build Database</b>.
+<li>Select <b>Run Search</b>. 
+<li>Select <b>Add Pairs from Hits</b>.
+<li>Using the <b>Add</b> button beside the "Cluster Methods" table, add one or more methods.
+Execute "Add New Clusters";
+the added methods in the table will be italized. You may
+add additional methods at any time. 
+<li>Select <b>Run Stats</b>. When it completes, the label will change to "No action selected".
+<li>Exit <code>runMultiTCW</code> in order to run <code>KaKs_calculator</code>.
+<ol>
+<li>Download the <code>KaKs_Calculator</code>.
+<li>Change directory to <tt>projcmp</tt>. Put the <code>KaKs_Calculator</code> executable in this
+directory.
+<li>Change directory to <tt>ex/KaKs</tt>. Execute "<tt>sh runKaKs</tt>".
+<li>Start up <code>runMultiTCW</code> again. The label on the 4th section should say
+"Read KaKs", if it does not, select <b>Settings</b> and select it. Then <b>Run Stats</b>.
+<li>Select <b>Launch viewMultiTCW</b> to query the results.
+</ol>
+</ol>
+
+The overview will look similar to this <a href=ex.html class="ext" target="_blank">Overview</a>.
+
+<td width=450 valign=top style="padding-left:10px;">
+				<a name="Fig1">
+				<a  href="img/runMultiTCW.png">
+				<img width=400 src="img/runMultiTCW.png" border=1></a>
+			</td>
+</table>
+
+<a name=details></a>
+<table width='100%'><tr><td align='left' >
+<h2>The four steps</h2>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a></td></tr></table>
+The following continues to use exBar and exFoo as examples of sTCW databases, but will work for
+any set of sTCW databases.
+<a name=two></a>
+<h3>Top three rows</h3>
+<center>
+<a  href="img/topTwoRows.png"><img width=400 src="img/topTwoRows.png" border=1></a>
+</center>
+<table border=0 cellspacing=3>
+<tr><td valign=top>Add Project<td>A popup window will appear where you enter the project name. On 'OK', the
+following occurs:
+<br>(1) A project directory will be created under <tt>projcmp</tt> with the project name. 
+<br>(2) A file called <tt>mTCW.cfg</tt> is created and written to the project directory. 
+<br>(3) The database
+will be the same name with the prefix 'mTCW_' added.
+
+<tr><td valign=top>Help<td>A pop-up window that provides similar information to this UserGuide.
+<tr><td valign=top>Project<td>The drop-down lists all sub-directories under <tt>projcmp</tt>. When you
+select one, the projects <tt>mTCW.cfg</tt> file will be read and values entered  into the interface.
+<tr><td valign=top>Save<td>Everything you enter gets saved into <tt>mTCW.cfg</tt> every time you make
+a change. However, you can initiate the save with this button if you want to be sure the
+new information is save.
+<tr><td valign=top>Remove<td>See below.
+<tr><td valign=top>Overview<td>Once you have selected a project, you can select 'Overview' to see
+its state.
+<tr><td valign=top>mTCW database<td>By default, the mySQL name will be <tt>mTCW_&lt;project-name&gt;</tt>. You
+can change the name, though it must start with <tt>mTCW_</tt>.
+</table>
+<p>
+<b>Remove</b>: Select one or more options. When you select 'Ok', you will be prompt to verify each removal.
+<table>
+<td width=550 valign=top style="padding-left:10px;">
+<table border=0 cellspace=3>
+<tr><td valign=top nowrap>Pairs.. from database<td> Removes the pairs and clusters so you
+can start over without running <b>Build Database</b> again, 
+e.g. if you want to use a different hit file, create all new clusters, etc. Once the pairs are removed,
+you can change the settings and then re-add the Pairs.
+<tr><td valign=top nowrap>mTCW database<td> Remove the database but leave the project on disk.
+<tr><td colspan=2><i>From disk</i>
+<tr><td valign=top nowrap>Pairs and method files<td> If you remove the pairs and clusters from 
+database, it is a good idea to remove all associated files from disk using this option. 
+<tr><td valign=top nowrap>Hit files<td> If you recreate the database and you think there may
+be changes to the sequences in it, you definitely want to remove the hit files so that
+it allows you to re-search. Or, if you want to re-run a search program, you need to first remove the hit files using
+this option.
+<tr><td valign=top nowrap>All files<td> If you no longer are using the project, you can delete
+the database (above) and the all relevant files here.
+</table>
+<td width=250  style="padding-left:10px;">
+	<a  href="img/remove.png"><img width=400 src="img/remove.png" border=1></a>
+</td>
+</table>
+
+<a name=step1></a>
+<h3>1. single TCW databases</h3>
+SingleTCW databases can be created from nucleotide (NT-sTCW) or proteins (AA-sTCW). A multiTCW
+database can be created with a mix of NT-sTCW and AA-sTCW databases. If the multiTCW is created
+with on AA-sTCW or a mix, only the PCC statistics are available (see <a href="#step4">Step 4. Pair Statistics</a>).
+<table width=100% cellpadding=5>
+<tr>
+<td width=450 valign=top>		
+Click the <b>Add</b> button next to <tt>Single TCW databases</tt>.  
+This brings up the sTCW selection panel shown on the right.
+
+<p>Click <b>Select sTCW Database</b> produces a popup of existing sTCW databases. 
+Choose the sTCW from the list.
+<p>The 'prefix' is only used in the Method files, so it does not matter what it is as long as its unique.
+<p>The remark can be anything, and can be added/changed after the database is created. Avoid special characters such as quotes.
+
+<p>When you select <b>Keep</b>, it will take you back to the main panel and
+this database will be shown in the "single TCW databases" table. 
+<p>Repeat to add all the sTCWdbs you want to compare.
+</td>
+<td width=450 valign=top style="padding-left:10px;">
+	<a  href="img/addSingle.png"><img width=350 src="img/addSingle.png" border=1></a>
+</td>
+</tr>		
+</table>
+
+
+<a name=step2></a>
+<h3>2. Compare sequences</h3>
+<table width=100% cellpadding=5>	
+<tr>
+<td width=450 valign=top>	
+The <b>Run Search</b> puts the results in <tt>hitsAA.tab</tt> and <tt>hitsNT.tab</tt>;
+these names cannot be changed.
+<p>On the "Settings" page, you can change the search program.
+By default, blast is run with "-use_sw_tback" for the nucleotide self-blast, 
+which is very important as it runs dynamic programming for the final score. 
+<p>Once the search is run, you can no longer change the parameters; if you want to change the
+parameter and re-run the search, remove the hit files using the main panel <b>Remove...</b>.
+
+
+
+<p><b>Add Pairs from hits</b> loads the pairs from the hits result file.
+
+<td width=450 valign=top style="padding-left:10px;">
+<a  href="img/hitSettings.png"><img width=400 src="img/hitSettings.png" border=1></a>
+</td>
+</tr>
+</table>
+
+<a name=step3></a>
+<h3>3. Cluster Methods</h3>
+<table width=100% cellpadding=5>	
+<tr>
+<td width=450 valign=top>	
+	
+<tr>
+<td width=450 valign=top>		
+Click <b>Add</b> in section "<tt>Cluster Methods</tt>"  to add a new clustering method; this brings up the 
+Method panel. The drop-down beside "Method" shows BBH, Closure, OrthoMCL, and User defined. 
+You can add any number of cluster methods. You can add the same method multiple times with different parameters,
+where only the "Prefix" has to be different.
+All methods need a unique prefix, which is used to prefix the cluster names, e.g. 
+a method with prefix "BB8" will have cluster names BB8_00001, BB8_00002, etc. The
+prefix can only be 5 characters, but make it a meaningful 5 characters.	
+
+<p>When the multiTCW database is created from nucleotide sTCW databases, it is
+advantageous to have BBH be at least one of the methods as these pairs are used for the overall
+summary and for the KaKs pairs.
+
+<p>The Help page for clustering provides more detail, but the following is an overview.
+
+<a name=bbh>
+<h4>BBH</h4>
+The BBH finds the bi-directional best hit based on hit e-value. 
+It uses the hits that were loaded
+into the database with <b>Add Pairs from Hits</b>. The following explains the parameters:
+<table>
+<tr><td>
+<ol>
+<li>Amino acid or nucleotide (for NT-mTCW only). 
+<li>%Similarity - the hit similarity (Identity).
+<li>%Coverage - the alignment length is divided by the length of the sequence times 100 to get the
+%Coverage for each sequence of the pair (Cov1 and Cov2). You can choose "Either", which requires
+that either Cov1>%Coverage OR Cov2>%Coverage. If you choose "Both", then Cov1>%Coverage AND Cov2>%Coverage.
+For example, for an alignment:
+<pre>
+Seq1    -------------------------------
+Seq2     ----------	
+</pre>
+This will pass the filter %Coverage>=80 if "Either" is selected, but not "Both".
+<li>The "Select sTCWdbs" will only be present if there are more than two sTCWdbs loaded into the mTCWdb.
+The rules are as follows:
+<ol type='a'>
+<li>Select two sTCWdbs for the standard BBH of one pair per cluster.
+<li>Select N (N&gt;2) sTCWdbs, and clusters of exactly size N will be created, where each pair in the cluster is a BBH pair.
+<li>Do not select any sTCWdbs, and one cluster set will be created from all pairs of sTCWdbs.
+</ol>
+
+</ol>
+<td width=450 valign=top style="padding-left:10px;">
+<a  href="img/method.png"><img width=400 src="img/method.png" border=1></a>
+</td>
+</tr>
+</table>
+
+
+<a name=close>
+<h4>Closure</h4>
+<table><tr><td>
+Closure has the following requirements: 
+<ol>
+<li>All sequences in a cluster must have a hit
+with all other sequences in the cluster. 
+<li>Each sequence must pass the filters with at least
+one other sequence in the cluster, where the filter parameters are exactly as described for BBH. 
+</ol>
+The algorithm uses the hits from the database.
+<td width=450 valign=top style="padding-left:10px;">
+<a  href="img/methodCL.png"><img width=400 src="img/methodCL.png" border=1></a>
+</td>
+</tr>
+</table>
+		
+<a name=omcl>
+<h4>OrthMCL</h4>
+<table><tr><td>
+<code>OrthoMCL</code> requires numerous steps to run, and uses a temporary MySQL database; 
+TCW organizes all these details. 
+
+<p><code>OrthoMCL</code> uses the hit file <tt>hitsAA.tab</tt>. It does not guarantee that
+all sequences in a cluster have a hit with each other.
+
+
+<p><code>OrthoMCL</code> occasionally fails -- every time this has happened to me, I rerun and it works.
+<td width=450 valign=top style="padding-left:10px;">
+<a  href="img/methodOL.png"><img width=400 src="img/methodOL.png" border=1></a>
+</td>
+</tr>
+</table>
+
+<a name=selfclust>
+<h4>User-defined clusters</h4>
+<table><tr><td>
+For this you create a file specifying the groupings, and the interface simply uploads that file. Hit results
+are not used. The group file has the following format:
+<pre>
+..
+D26: tra|tra_030 tra|tra_184 tra|tra_094 pro|pro_100
+D27: tra|tra_045 tra|tra_209 pro|pro_011
+...
+</pre>
+
+Each line starts with "DN", where N is the group number, and then has a space-separated list of the 
+sequences in the group, prefixed by the project prefix that you entered when you set up the mTCW. 
+<td width=450 valign=top style="padding-left:10px;">
+<a  href="img/methodUD.png"><img width=400 src="img/methodUD.png" border=1></a>
+</td>
+</tr>
+</table>		
+	
+<a name=step4></a>
+<h3>4. Run Stats</h3>
+<table width=100% cellpadding=5>	
+<tr>
+<td width=550 valign=top>	
+The statistics are broken into four sections:
+<ol>
+
+<li>Run on the total hit pairs in the database:
+<ul>
+<li>The PCC (Pearson Correlation Coefficient) is only relevant if there are
+shared conditions, as it is used to determine how similar the RPKM values of the
+conditions are. It is run on all pairs in the database.
+</ul>
+
+<li>Alignment of hit pairs in clusters. 
+This is "only" relevant for a mTCW database created from only nucleotide sTCW databases:
+<ul>
+<li>For each alignment, the following is performed:
+<ul>
+<li>Synonymous codons, nonsynonymous codons, %match, #gaps, GC content, etc.
+<li>The summary statistics shown on the Overview for "Pairs".
+<li>Outputs the Ka/Ks files for input into <code>KaKs_calculator</code><sup>2</sup>.
+</ul>
+
+</ul>
+</ul>
+<li>Only if Ka/Ks input files exist.
+<ul>
+<li><b>Run Stats</b> with <b>Write</b> selected to output the files for input to <code>KaKs_calculator</code>
+<li>Run the <code>KaKs_calculator</code> from a terminal window.
+<li>Execute <b>Run Stats</b> again with <b>Read</b> selected.
+
+</ul>
+
+<li>Multiple alignment of clusters. 
+<ul>
+<li>Align all clusters using <code>MAFFT</code><sup>3</sup>.
+<li>Compute consensus length, standard deviation of length, sum-of-pairs score, and Trident score using <code>MstatX</code><sup>4</sup>.
+</ul>
+</ol>
+<td width=300 valign=top style="padding-left:10px;">
+<a  href="img/stats.png"><img width=280 src="img/stats.png" border=1></a>
+</td>
+</tr>
+</table>
+
+After adding clusters and running stats, you can add more clusters. In order to update the stats after adding more clusters:
+<ol>
+<li>Select <b>Compute pair stats</b> will align any new unaligned pairs in clusters and update the summary.
+<li>Select <b>KaKs Write</b> will align ALL pairs in clusters and update the summary.
+</ol>
+
+<a name=kaks></a>
+<h4>Details on running <code>KaKs_calculator</code></h4>
+After the KaKs files have been created using <b>Run Stats</b>:
+<ul>
+<li>Exit <code>runMultiTCW</code> or use a different terminal window.
+<li>Change directories to <tt>projcmp</tt>. Put the <code>KaKs_calculator</code>
+executable in this directory. 
+<li>Change directories to <tt>projcmp/&lt;project-name&gt;/KaKs</tt>. There will be 
+multiple files with the name <tt>oTCWn.awt</tt> where n starts at '1'. They
+each have pairs of aligned sequences minus the gaps. There is also a file
+called <tt>runKaKs</tt> which has the commands to run <code>KaKs_calculator</code>
+on each file, e.g. 
+<pre>
+../../KaKs_calculator -i oTCW1.awt -o iTCW1.tsv -m YN &
+../../KaKs_calculator -i oTCW2.awt -o iTCW2.tsv -m YN &
+../../KaKs_calculator -i oTCW3.awt -o iTCW3.tsv -m YN &
+../../KaKs_calculator -i oTCW4.awt -o iTCW4.tsv -m YN &
+</pre>
+If you prefer to use a different method than 'YN', edit this file to change it to
+whatever method you want (see the <code>KaKs_calculator</code> documentation).
+<li>From the command line, type <tt>sh runKaKs</tt>.
+<li>Read the KaKs files:
+<ol>
+<li>If you have exited <code>runMultiTCW</code> and start it back up, the label
+beside the pair statistics <b>Setting</b> will say "Read KaKs". Just select <b>Run Stats</b>
+and the files will be read.
+<li>If you had not exited <code>runMultiTCW</code> but ran <tt>runKaKs</tt> for another
+terminal window, the label will still say "No action to be performed". Select <b>Settings</b>,
+select "Read KaKs files", Keep. Now <b>Run Stats</b>.
+</ol>
+<li>Run on all clusters in database
+</ul>
+
+
+<!----------- Creating a project ------------------->
+<a name=details></a>
+<table width='100%'><tr><td align='left' >
+<h2>Additional details</h2>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+<a name=time>
+<table width='100%'><tr><td align='left' >
+<h3>Timings</h3>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+The following times are from the log files for building an mTCW database with three NT-sTCWdbs.
+<table border=1 cellspacing=5>
+<tr><th>Step<th>Time<th>Added
+<tr><td>Build Database<td>5h:0m:36s<td>138,907 sequences
+<tr><td>Add Pairs<td>2h:3m:04s<td>454,568 pairs
+<tr><td>Add New Clusters<td>1h:23m:05s<td>46,831 clusters
+<tr><td>Run Stats<td>1h:33m:15s<td>116,109 alignments
+</table>
+<p>The longest task is to <b>Add GOs</b> (timing not shown); this task can be done at anytime, so it is recommended to wait until everything else is finalized before adding the GOs.
+<p>The search program (e.g. blast) is run on <b>#CPU</b>, but all mTCW tasks only use one CPU.
+ 	
+<a name=trouble>
+<table width='100%'><tr><td align='left' >
+<h3>Trouble shooting</h3>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+<code>runMultiTCW</code> is not very forgiving if datasets or cluster methods are entered wrong.
+Its easiest to just to <b>Remove</b> the offending dataset or cluster and re-enter it.
+<p>A file called <tt>mTCW.error.log</tt> is created if there is an error. If its not clear how to
+fix the problem, send the file to <tt>tcw@agcol.arizona.edu</tt>.
+
+<a name=view>
+<table width='100%'><tr><td align='left' >
+<h3>View/Query with <code>viewMultiTCW<tcode></h3>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+<table width='100%'>
+<tr><td width=450 valign=top>
+The clusters can be viewed by either:
+<ol>
+<li>Click the <b>Launch viewMultiTCW</b> button in the <code>runMultiTCW</code> interface.
+<li>Execute '<tt>./viewMultiTCW</tt>' and a window of existing mTCW databases will be displayed, where
+databases can be selected for display.
+<li>Execute '<tt>./viewMultiTCW &lt;database name&gt;</tt>', e.g. <tt>./viewMultiTCW demo</tt>
+displays the window on the right.
+</ol>
+There is <tt>Help</tt> on all the <code>viewMultiTCW</code> views, and <a href="http://www.agcol.arizona.edu/software/tcw/tour/viewMulti/index.shtml" class="ext" target="_blank">Tour</a> shows snapshots of some of the <code>viewMultiTCW</code> windows.
+
+<td width=450 valign=top style="padding-left:10px;">
+<a  href="img/viewMultiTCW.png"><img width=500 src="img/viewMultiTCW.png" border=1></a>
+</td>
+</tr>
+</table>
+
+<a name=appl>
+<table width='100%'><tr><td align='left' >
+<h3>Running as an applet</h3>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+The <code>viewMultiTCW</code> can be used as an applet, as follows:
+<ol>
+<li>The <tt>mtcw.jar</tt> file must be signed with a code signing certificate, e.g. using Digicert (which is easy, but costs), or your university may have an account with InCommon, which provides code-signing' certificates. 
+<li>You need mysql-connector-java-5.0.5-bin.jar (contact tcw at agcol.arizona.edu if you would like us to provide you a copy).
+<li>Modify the following code as appropriate, and put it in your cgi-bin.
+</ol>
+		
+		<pre>
+		&lt;HTML&gt;
+		&lt;HEAD&gt;
+		&lt;TITLE&gt;viewMultiTCW&lt;/TITLE&gt;
+		&lt;/HEAD&gt;
+		&lt;BODY&gt;
+		Running viewMultiTCW  (please wait)
+  		&lt;applet 
+    		CODE="cmp.viewer.MTCWApplet"
+        	ARCHIVE="<tt>location_of_your_jars</tt>/mtcw.jar,jars/mysql-connector-java-5.0.5-bin.jar"
+    		width=0 height=0
+  		MAYSCRIPT&gt;
+  		&lt;param name="ASSEMBLY_DB" value="<tt>mTCW_your_db_name</tt>"&gt;
+  		&lt;param name="DB_URL"      value="<tt>www.your URL</tt>"&gt;
+  		&lt;param name="DB_USER"     value="<tt>your username (read-only)</tt>"&gt;
+  		&lt;param name="DB_PASS"     value="<tt>your password</tt>"&gt;
+  		&lt;hr&gt;
+  		Unable to display the viewMultiTCW applet. Please verify your Java installation.
+  		&lt;hr&gt;
+  		&lt;/applet&gt;
+		&lt;/BODY&gt;
+		&lt;/HTML&gt;
+		</pre>
+Applet users may have to adjust their applet memory; see instructions
+in the <a href="../stcw/Trouble.html#memset" class="ext" target="_blank">Troubleshooting Guide</a>.
+<p>
+<!------------ References -----------------!>   		
+		<a name=refs></a>
+		<table width='100%'><tr><td align='left' >
+		<h2>References</h2>
+		</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+		<ol>
+
+
+<li>Li, L., Stoeckert, C.J., Jr. and Roos, D.S. (2003) 
+	OrthoMCL: identification of ortholog groups for eukaryotic genomes. Genome Res, 13, 2178-2189.
+<li>Zhang Z, Li J, Xiao-Qian Z, Wang J, Wong, G, Yu J (2006) KaKs_Calculator: Calculating Ka and Ks through model selection and model averaging. Geno. Prot. Bioinfo. Vol 4 No 4. 259-263.
+<li>Katoh K, Standley DM (2013) MAFFT Multiple Sequence Alignment Software Version 7: Improvements in Performance and Usability. Molecular Biology and Evolution Vol 30, Issue 4  772:780
+<li>Guillaume Collet (2012) https://github.com/gcollet/MstatX.
+<li> Edgar RC (2004) MUSCLE: multiple sequence alignment with high accuracy and high throughput. Nucleic Acids Res 32: 1792-1797.
+</ol>
+
+<br>
+
+<!--#include virtual="../ssi/end.html" -->
+
+</html> 

@@ -1,0 +1,147 @@
+<html>
+<!--#set var=TITLE value="Tour: runSingleTCW" -->
+<!--#include virtual="../../ssi/head.html" -->
+<body bgcolor="#FFFFFF" text="#000000" onLoad="init('runS')">
+<!--#include virtual="../ssi/start2t.html" -->
+
+<a name=start>
+<center><code>runSingleTCW</code>
+<table  border="0" cellspacing="0" cellpadding="2" height="18">
+<tr><td align="left" bgcolor="#666666" class="white" style="padding-bottom:4px;">
+<a href="#main" class="white">Main Window</a> |
+<a href="#add" class="white">Additional Windows</a> |
+<a href="#refs"  class="white" >References</a>
+</td></tr>
+</table>
+</center>	
+
+<p><code>runSingleTCW</code> takes as input transcriptome and expression level files, builds a 
+database, and annotates the transcriptomes. 
+See <a href="../../stcw/UserGuide.html" class="ext" target="_blank">sTCW UserGuide</a> for details. 
+
+<a name=main>
+<h3>Main window</h3>
+
+<table>
+<tr><td>
+			<p>1. <b>Load Data</b>
+<ol type="a"><li>The input may be transcripts with optional read counts, proteins with optional 
+spectral counts, 
+or sequences to be assembled such as  Sanger ESTs, 454 reads, and/or transcript libraries. 
+
+<li>The <tt>Add</tt> window allows you to define a dataset along with its conditions (e.g. tissue, treatment, etc). 
+<br>It allows you to define the count file(s) for transcript or protein libraries,  where the 
+information will be listed under <tt>Associated Counts</tt> on the main window. 
+<ul>
+<li>If there are replicates, you may define
+them with the <tt>Define Replicates</tt> window.
+</ul> 
+</ol>
+
+				<p>2. <b>Instantiate</b>
+<ol type="a">
+<li>Skip Assembly - the sequences can be instantiated with no assembly.
+<li>Assembly - the sequences can be assembled. If Read sequences (i.e. ESTs) are mixed with
+transcripts that have read counts, the EST dataset 'counts' for the contig will be the number
+of ESTs in the given contig, and the transcripts will retain their counts from the input.
+</ol>
+				<p>3. <b>Annotate Sequences</b> 
+<ol type="a">
+<li>Use <a href=../runAS/index.shtml class=ext target="_blank">runAS</a> to download and format UniProts and the GO databases; these
+are input to (b) and (c).
+<li>Add one or more databases to search against, which can be protein or nucleotide.
+<li>In the <tt>Options</tt> window, define the GO database 
+
+</ol>
+				<p>4. <b>Add Remarks and Locations</b>
+<p> Remarks and Locations (i.e. chromosome, start, end, strand) can be added to sequences and queried in the viewSingleTCW.
+				
+
+	</td>
+	<td>
+	<center><font size=2>(Click any image to see larger)</font></center>
+	<a name="Fig1">
+			<a  href="img/runSingle.png">
+			<img width=500 src="img/runSingle.png" border=1></a>
+	</td>
+	</tr>
+</table>
+
+<!------------------------!>
+<a name=add>
+<h3>Additional windows</h3>
+
+<table cellspacing="10">
+<tr>
+<td valign=top><b>Load Data -  Add/Edit</b> Selecting <tt>Add</tt> shows this window. Selecting <tt>Edit</tt> shows
+a similar window, but only the Attribute values can be changed after the database has been created. 
+The counts can be in one file or generated with the <tt>Build combined count file</tt> option. 
+On <tt>Save</tt>, the condition names will be written in the <tt>Associated Counts</tt> table on the 
+main window.
+<br>
+<a  href="img/runSingleLib.png">
+			<img width=450 src="img/runSingleLib.png" border=1></a>
+
+<td>
+<p><b>Build count file</b> -  <tt>Generate File</tt> will generate a file called Combined_read_count.csv file
+where the columns are conditions with their respective counts.
+
+<br><a  href="img/runSingleSample.png">
+			<img width=450 src="img/runSingleSample.png" border=1></a>			
+
+<p><b>Define Replicates (Main window)</b> If the <tt>Associated Counts</tt> table has replicates, 
+they can be defined in this window, which will update the table as shown above in the Main window.
+<br><a  href="img/runSingleRep.png">
+	<img width=450 src="img/runSingleRep.png" border=1></a>
+
+<tr><td>&nbsp;
+<tr><td colspan=2>
+<b>Annotate Sequences - Add/Edit</b> Databases to search against are referred to as "annoDBs". 
+Any FASTA file can be used an annoDB, though TCW gives special support to using UniProt taxonomic
+databases; besides allowing taxonomic specific querying in viewSingleTCW, 
+the UniProt .dat file is used to extract GO, KEGG, EC and PFam information. 
+(A script is provide to download and format the UniProt databases).
+<p>
+As the UniProt Trembl databases increase in size (tr_bacteria.dat is 76GB as of 5/17/15), it has
+become impractical to search these with BLAST<sup>1</sup>. Fortunately, the 
+<a href=http://ab.inf.uni-tuebingen.de/software/diamond class="ext" target="_blank">diamond</a><sup>2</sup>
+and <a href=http:http://www.drive5.com/usearch/download.html class="ext" target="_blank">usearch<a/><sup>3</sup>
+programs provide supper fast results
+(see <a href=../doc/stcw/Search.html class="ext" target="_blank">fast searching</a>) for timing and results.
+<br><center>
+<a  href="img/runSingleAnno.png">
+			<img width=500 src="img/runSingleAnno.png" border=1></a>
+</center>
+</table>
+<p>
+
+<!------------------------!>
+<a name=refs>
+<table width='100%'><tr><td align='left' >
+<h3>References</h3>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+<ol>
+<li><b>BLAST</b> is used for assembly, annotation and interactive searching in viewSingleTCW. 
+<br>Altschul SF, Madden TL, Schaffer AA, Zhang J, Zhang Z, et al. (1997) Gapped BLAST and PSI-BLAST: a new generation of protein database search programs. Nucleic Acids Res 25: 3389-3402.
+<li><b>Diamond</b> can be used for annotation of blastx and blastp searches.
+<br>Buchfink B, Xie C, Huson D (2015) Fast and Sensitive Protein Alignment 
+using DIAMOND, Nature Methods, 12, 59-60 doi:10.1038/nmeth.3176.
+<li><b>Usearch</b> can be used for annotation for blastp and modified blastx searches.
+<br>Edgar,RC (2010) Search and clustering orders of magnitude faster than BLAST, Bioinformatics 26(19), 2460-2461.
+<li><b>CAP3</b> is used for assembly. 
+<br>Huang X, Madan A (1999) CAP3: A DNA sequence assembly program. Genome Res 9: 868-877.
+<li><b>UniProt</b> is recommended for protein annotation as the GO and other information can 
+be extracted by the TCW and added to the database. 
+<br>Dimmer EC, Huntley RP, Alam-Faruque Y, Sawford T, O'Donovan C, et al. (2012) The UniProt-GO Annotation database in 2011. Nucleic Acids Res 40: D565-570.
+<li><b>Gene Ontology</b> mySQL database is used for levels and descriptions. 
+<br>GO Consortium (2012) The Gene Ontology: enhancements for 2011. Nucleic Acids Res 40: D559-564.
+</ol>
+	
+<table width='100%'><tr><td align='left' >
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+</table>
+
+<!--#include virtual="../../ssi/end.html" -->
+
+
