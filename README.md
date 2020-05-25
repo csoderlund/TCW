@@ -6,7 +6,7 @@
 
 **Description:** For single-transcriptome (singleTCW) - similarity search against annotation databases, GO annotation, ORF finding and differential analysis. For multi-transcriptome (multiTCW) - compute similar pairs, provide statistics for pairs, compute clusters, provide statistics for clusters. Both singleTCW and multiTCW provide graphical interfaces for extensive query and display of the results.
 
-**Requirements:** Java and MySQL to build the database and view the results.  R for differential analysis.  The BLAST executable is necessary. The KaKs_Calculator is optional for the multi-transcriptome analysis. All other external software used by TCW is contained in the package tar file. 
+**Requirements:** Java and MySQL to build the database and view the results (MySQL v8 currently does not work with TCW, but this will be fixed in the next release).  R for differential analysis.  The BLAST executable is necessary. The KaKs_Calculator is optional for the multi-transcriptome analysis. All other external software used by TCW is contained in the package tar file. 
 
 **TCW package:** To use TCW, download the TCW package from the link at the top. The tar file contains all necessary jar files, R scripts and demo files. Follow the instructions at http://www.agcol.arizona.edu/software/tcw/doc/. 
 
