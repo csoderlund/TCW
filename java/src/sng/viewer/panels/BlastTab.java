@@ -36,7 +36,6 @@ import sng.viewer.STCWFrame;
 import util.methods.BlastArgs;
 import util.ui.UIHelpers;
 import util.ui.UserPrompt;
-import util.methods.BlastRun;
 import util.methods.ErrorReport;
 import util.methods.FileHelpers;
 import util.methods.Static;
@@ -66,7 +65,7 @@ public class BlastTab extends Tab
 		
 		// blastn default is megablast, so do can use same defaults 
 		int cpu=1;
-		blastDefaults = BlastArgs.getBlastxOpDefaults()  + " -num_threads " + cpu;
+		blastDefaults = BlastArgs.getBlastxOptions()  + " -num_threads " + cpu;
 		dmndDefaults =  BlastArgs.getDiamondOpDefaults() + " --threads " + cpu;
 		
 		// added after Blast is performed
@@ -325,41 +324,15 @@ public class BlastTab extends Tab
 	 */
 	private void runSearch() throws Exception
 	{		
-		if (!getBlastPath()) return;
-		
 		String pgm = (dmndCheck.isSelected()) ? "Diamond" : "Blast";
 		if (blastPathPanel != null) blastPathPanel.removeAll();
 		resultSection.removeAll();
 		pnlRealMain.revalidate();
 		resultTable = null;
 
-	// Where to write the files...
-		if (!isApplet)
-		{
-			baseDir = new File(Globalx.HITDIR); 
-			if(!baseDir.exists()) baseDir.mkdir();
-		}
-		else
-		{
-			// applet - use a tmp dir but try to use the same one instead of constantly 
-			// dumping seq files into new dirs
-			if (baseDir ==  null || !baseDir.isDirectory())
-			{
-				// goal here is to find the tmp dir and then use our own file name
-				baseDir = File.createTempFile("tcw_blast", ""); 
-				baseDir.delete();
-				String path = baseDir.getAbsolutePath();
-				Pattern p = Pattern.compile("(.*tcw_blast).*");
-				Matcher m = p.matcher(path);
-				if (m.matches())
-				{
-					path = m.group(1);
-					baseDir = new File(path);
-					if (baseDir.isDirectory()) FileHelpers.deleteDir(path);
-				}
-				baseDir.mkdir();
-			}
-		}
+		baseDir = new File(Globalx.HITDIR); 
+		if(!baseDir.exists()) baseDir.mkdir();
+		
 	// Create database
 		String ID = theParentFrame.getdbID();
 		runCreateDB(ID);
@@ -718,18 +691,17 @@ public class BlastTab extends Tab
 				pFormatDB.waitFor();
 			}
 			String diamondPath = BlastArgs.getDiamondPath() + " " + action + " ";
-    			String args = " -q " + queryPath + " -d " + seqPath + " -o " + outPath;
-    			String fmt =  (isTab) ? " --outfmt 6 " : " --outfmt 0 ";
+    		String args = " -q " + queryPath + " -d " + seqPath + " -o " + outPath;
+    		String fmt =  (isTab) ? " --outfmt 6 " : " --outfmt 0 ";
     				
-    			return diamondPath + args + fmt + params;
+    		return diamondPath + args + fmt + params;
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Format for diamond"); return null;}
 	}
 	/*****************************************************************
 	 * Blast is very slow if ONLY the query is formatted, so its done opposite of diamond
 	 */
-	private String runSetupBlast(String action,
-			String seqPath, String queryPath, String outPath, 
+	private String runSetupBlast(String action, String seqPath, String queryPath, String outPath, 
 			String params, boolean isTab) {
 		try {
 			boolean doFormat=true;
@@ -760,20 +732,22 @@ public class BlastTab extends Tab
 				if(nhr.exists() && nin.exists() && nsq.exists()) doFormat=false;		
 			}
 			if (doFormat) {
-				String cmd = (isTargetPR ? BlastArgs.getFormatp(seqPath) : 
-						BlastArgs.getFormatn(seqPath));
+				String cmd = (isTargetPR ? BlastArgs.getFormatp(seqPath) : BlastArgs.getFormatn(seqPath));
 				if (traceCheck.isSelected()) Out.prt("Executing: " + cmd);
 				Process pFormatDB = Runtime.getRuntime().exec(cmd);
 				pFormatDB.waitFor();
 			}
+			String blastPath = BlastArgs.getBlastPath() + action; // CAS303
+			
 			String args =  " -query " + queryPath + " -db " + seqPath + " -out " + outPath +  " ";
 			  
-		    	String fmt = (isTab) ? " -outfmt 6 " : " -outfmt 0 ";
+		    String fmt = (isTab) ? " -outfmt 6 " : " -outfmt 0 ";
 		   
-		    	return action + args + fmt + params;
+		    return blastPath + args + fmt + params;
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Format for blast"); return null;}
 	}
+	/** CAS303
 	private boolean getBlastPath() {
 		try {
 			if (!BlastArgs.foundABlast())
@@ -786,7 +760,7 @@ public class BlastTab extends Tab
 							JOptionPane.OK_OPTION);
 					return false;
 				}
-				BlastArgs.evalBlastPath(bpath, "", "");
+				BlastArgs.evalBlastPath(bpath, "");
 				if (!BlastArgs.foundABlast())
 				{
 					if (theParentFrame.isApplet()) {
@@ -807,6 +781,7 @@ public class BlastTab extends Tab
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Getting blast path"); return false;}
 	}
+	**/
 	private void setEnableDB(boolean seq, boolean orf, boolean db) {
 		seqCheck.setSelected(seq);
 		orfCheck.setSelected(orf);
@@ -833,7 +808,7 @@ public class BlastTab extends Tab
 		}
 	}
 	private void reset() {
-		blastDefaults = BlastArgs.getBlastxOpDefaults()  + " -num_threads 1";
+		blastDefaults = BlastArgs.getBlastxOptions()  + " -num_threads 1";
 		dmndDefaults =  BlastArgs.getDiamondOpDefaults() + " --threads 1";
 		if (dmndCheck.isSelected()) txtParams.setText(dmndDefaults); // else, the above replace what was in the txtParams
 		

@@ -8,12 +8,29 @@ import java.util.List;
 import java.util.Date;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+
+import util.database.Globalx;
+
 import java.text.SimpleDateFormat;
 
 import java.io.*;
 
 public class FileHelpers 
 {
+	// CAS303
+	public static String getUserDir() {
+		return System.getProperty("user.dir");
+	}
+	public static String getOsArch() {
+		return System.getProperty("os.name") + " (" + System.getProperty("os.arch") + ")";
+	}
+	public static boolean isMac() {
+		return System.getProperty("os.name").toLowerCase().contains("mac");
+	}
+	public static String getExtDir() {
+		if (isMac()) return Globalx.macDir;
+		return Globalx.lintelDir;
+	}
 	static public String getSize(long fileSize) {
 		String size="";
 		
@@ -65,37 +82,23 @@ public class FileHelpers
 		}
 	}
 
-	public static String getFileDate(String fileName) {
-		File f = new File(fileName);
-	   	if  (!(f.isFile() && f.exists())) return null;
-	   	
-		long d = f.lastModified();
-	   	Date date = new Date(d);
-	   	SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-	   	return fmt.format(date);
+	/***********************************************************
+	 * Directory
+	 */
+	static public boolean createDir(String dir) {
+		File nDir = new File(dir);
+		if (nDir.exists()) {
+			System.err.println("+++ Directory exists '" +  nDir.getAbsolutePath() + "'.");
+			return false;
+		}
+		else {
+			if (!nDir.mkdir()) {
+				System.err.println("*** Failed to create directory '" + nDir.getAbsolutePath() + "'.");
+				return false;
+			}
+		}	
+		return true;
 	}
-	
-	public static String getFileDateTime(String fileName) {
-		File f = new File(fileName);
-	   	if  (!(f.isFile() && f.exists())) return null;
-	   	
-		long d = f.lastModified();
-	   	Date date = new Date(d);
-	   	return date.toString();
-	}
-	
-	public static void copyFile( File in, File out ) throws Exception 
-	{
-	     FileChannel sourceChannel = new
-	          FileInputStream(in).getChannel();
-	     FileChannel destinationChannel = new
-	          FileOutputStream(out).getChannel();
-	     sourceChannel.transferTo(0, sourceChannel.size(), destinationChannel);
-
-	     sourceChannel.close();
-	     destinationChannel.close();
-	}
-
 	public static boolean existDir(String strPath) {
 		if (strPath == null) return false;
 	   	File path = new File(strPath);
@@ -111,19 +114,19 @@ public class FileHelpers
 	}
 	// The recurse on this does not work. Use deleteDirTrace(File)
 	public static boolean deleteDir (File path) {
-    	    if ( !(path.exists()) && path.isDirectory() ) return false;
+		if ( !(path.exists()) && path.isDirectory() ) return false;
 	     
-    	    try {
-    	    		List <File> files = getFileListing(path.toString());
+		try {
+    	    List <File> files = getFileListing(path.toString());
     	    
-		    for(int i=0; i<files.size(); i++) {
+    	    for(int i=0; i<files.size(); i++) {
 		    	   File f = files.get(i);
-	           if(f.isDirectory()) deleteDir(f.getName());
-	           else f.delete();
+		    	   if(f.isDirectory()) deleteDir(f.getName());
+		    	   else f.delete();
 		    }
 		    path.delete();
-    	    }
-    	    catch (Exception e) { return false;}
+		}
+		catch (Exception e) { return false;}
 	    return true;
 	}
 	public static boolean deleteDirTrace(String strPath) {
@@ -187,30 +190,61 @@ public class FileHelpers
 		return result;
     }
     
-    public static boolean fileExists(String filepath)
-    {
-	    	if (filepath == null) return false;
-	    	File f = new File(filepath);
-	    	return f.isFile() && f.exists();
-    }
-    
-    public static boolean isAbsolutePath(String filepath)
-    {
-	    	if (filepath == null) return false;
-	    	File f = new File(filepath);
-	    	return f.isAbsolute();
-    }
-    
-    public static String addAbsolutePath(String absPath, String filepath)
-    {
-    		if (filepath == null) return null;
-    		File f = new File(filepath);
-    		if (f.isAbsolute() || filepath.equals(""))
-    			return filepath;
-    	
-    		return absPath + "/" + filepath;
-    }
-    static public File getFile(String projPath, String file) {
+	public static boolean copyDir(File src, File dest, String [] ignore) {
+		try {
+	    	if (src.isDirectory()) {
+	    		if(!dest.exists()) {//if directory not exists, create it
+	    		   dest.mkdir();
+	    		   System.out.println("Directory copied from " + src + "  to " + dest);
+	    		}
+
+	    		String files[] = src.list();
+	    		for (String file : files) {
+	    		   File srcFile = new File(src, file);
+	    		   
+	    		   boolean copy=true;
+	    		   if (ignore!=null) {
+	    			   if (srcFile.isDirectory()) {
+		    			for (int i=0; i<ignore.length && copy; i++) 
+		    				if (file.equals(ignore[i])) {
+		    					Out.prt(">>> Ignoring TCW directory " + ignore[i]);
+		    					copy=false;
+		    				}
+	    			   }
+		    	   }
+	    		   if (copy) {
+	    			   File destFile = new File(dest, file);
+	    			   copyDir(srcFile,destFile, null);//recursive copy
+	    		   }
+	    		}
+	    		return true;
+	    	} 
+	    	else {
+	    		//if file, then copy it
+	    		InputStream in = new FileInputStream(src);
+    	        OutputStream out = new FileOutputStream(dest);
+
+    	        byte[] buffer = new byte[1024];
+
+    	        int length;
+    	        //copy the file content in bytesto support all file types
+    	        while ((length = in.read(buffer)) > 0){
+    	        		out.write(buffer, 0, length);
+    	        }
+
+    	        in.close();
+    	        out.close();
+    	        System.out.println("File copied from " + src + " to " + dest);
+    	        return true;
+	    	}
+		}
+	    catch (Exception e) {ErrorReport.prtReport(e, "Copy " + src + " to " + dest); return false;}
+	}
+	
+	/************************************************************
+	 * File
+	 */
+	static public File getFile(String projPath, String file) {
 		try {
 			File f = new File(file);
 			if (f.exists()) return f;
@@ -233,75 +267,81 @@ public class FileHelpers
 		catch (Exception e) {ErrorReport.prtReport(e, "Checking file " + file);}
 		return null;
 	}
-	
-	static public boolean createDir(String dir) {
-		File nDir = new File(dir);
-		if (nDir.exists()) {
-			System.err.println("+++ Directory exists '" +  nDir.getAbsolutePath() + "'.");
-			return false;
-		}
-		else {
-			if (!nDir.mkdir()) {
-				System.err.println("*** Failed to create directory '" + nDir.getAbsolutePath() + "'.");
-				return false;
-			}
-		}	
-		return true;
+	public static String getFileDate(String fileName) {
+		File f = new File(fileName);
+	   	if  (!(f.isFile() && f.exists())) return null;
+	   	
+		long d = f.lastModified();
+	   	Date date = new Date(d);
+	   	SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+	   	return fmt.format(date);
 	}
-	/*******************************************************
-	 * @param src - copy contents of this directory
-	 * @param dest - to this directory
-	 * @param ignore - but ignore these directories directly under src
-	 */
-	public static boolean copyDir(File src, File dest, String [] ignore) {
-		try {
-		    	if (src.isDirectory()) {
-		    		if(!dest.exists()) {//if directory not exists, create it
-		    		   dest.mkdir();
-		    		   System.out.println("Directory copied from " + src + "  to " + dest);
-		    		}
 	
-		    		String files[] = src.list();
-		    		for (String file : files) {
-		    		   File srcFile = new File(src, file);
-		    		   
-		    		   boolean copy=true;
-		    		   if (ignore!=null) {
-		    			   if (srcFile.isDirectory()) {
-			    			for (int i=0; i<ignore.length && copy; i++) 
-			    				if (file.equals(ignore[i])) {
-			    					Out.prt(">>> Ignoring TCW directory " + ignore[i]);
-			    					copy=false;
-			    				}
-		    			   }
-			    	   }
-		    		   if (copy) {
-		    			   File destFile = new File(dest, file);
-		    			   copyDir(srcFile,destFile, null);//recursive copy
-		    		   }
-		    		}
-		    		return true;
-		    	}else{
-		    		//if file, then copy it
-		    		InputStream in = new FileInputStream(src);
-	    	        OutputStream out = new FileOutputStream(dest);
-
-	    	        byte[] buffer = new byte[1024];
-
-	    	        int length;
-	    	        //copy the file content in bytesto support all file types
-	    	        while ((length = in.read(buffer)) > 0){
-	    	        		out.write(buffer, 0, length);
-	    	        }
-
-	    	        in.close();
-	    	        out.close();
-	    	        System.out.println("File copied from " + src + " to " + dest);
-	    	        return true;
-		    	}
-		}
-	    	catch (Exception e) {ErrorReport.prtReport(e, "Copy " + src + " to " + dest); return false;}
+	public static String getFileDateTime(String fileName) {
+		File f = new File(fileName);
+	   	if  (!(f.isFile() && f.exists())) return null;
+	   	
+		long d = f.lastModified();
+	   	Date date = new Date(d);
+	   	return date.toString();
 	}
+	
+	public static void copyFile( File in, File out ) throws Exception 
+	{
+		 FileInputStream inFile = new FileInputStream(in);
+	     FileChannel sourceChannel =   inFile.getChannel();
+	     
+	     FileOutputStream outFile = new FileOutputStream(out);
+	     FileChannel destinationChannel = outFile.getChannel();
+	     sourceChannel.transferTo(0, sourceChannel.size(), destinationChannel);
+
+	     inFile.close(); sourceChannel.close();
+	     outFile.close(); destinationChannel.close();
+	}
+	
+    public static boolean fileExists(String filepath)
+    {
+	    	if (filepath == null) return false;
+	    	File f = new File(filepath);
+	    	return f.exists() && f.isFile();
+    }
+    public static boolean fileExec(String filepath)
+    {
+	    	if (filepath == null) return false;
+	    	File f = new File(filepath);
+	    	return f.exists() && f.isFile() && f.canExecute();
+    }
+    public static boolean tryExec(String pgm, boolean prt) 
+    {
+    	try {
+    		Process p = Runtime.getRuntime().exec(pgm);
+    		p.waitFor();
+    		return true;
+    	}
+    	catch(Exception e){
+    		if (prt) Out.PrtError("Cannot find " + pgm + " in user's path");
+    		return false;
+    	}
+    }
+    /************************************************************
+     * String ops on paths
+     */
+    public static boolean isAbsolutePath(String filepath)
+    {
+	    	if (filepath == null) return false;
+	    	File f = new File(filepath);
+	    	return f.isAbsolute();
+    }
+    
+    public static String addAbsolutePath(String absPath, String filepath)
+    {
+    		if (filepath == null) return null;
+    		File f = new File(filepath);
+    		if (f.isAbsolute() || filepath.equals(""))
+    			return filepath;
+    	
+    		return absPath + "/" + filepath;
+    }
 	
 	public static String removeCurrentPath(String file) {
 		String path="";
@@ -355,6 +395,9 @@ public class FileHelpers
 	    }
 		return null;
 	}
+	/**************************************************************
+	 * Written to update directory structure
+	 */
 	// Written to merge /libraries with /projects
 	static public boolean mergeDir(String src, String dest, boolean trace) { 
 		try {
@@ -449,6 +492,59 @@ public class FileHelpers
 			return true;
 		}
 		catch (Exception e){e.printStackTrace(); return false;}
+	}
+	// CAS303 Move external_osx to ext/mac and external to ext/lintel
+	static public boolean makeExt() {
+		try {
+			String newDir = getExtDir(); // ext/mac or ext/lintel
+			if (existDir(newDir)) return true;
+			
+			Out.Print("Directory does not exist: " + newDir + "; move old external to /ext");
+			Out.Print("OS: " + getOsArch());
+			
+			String oldDir = (isMac()) ? "external_osx" : "external";
+			
+			if (!existDir(oldDir)) {
+				Out.Print("Directory does not exist: " + oldDir);
+				Out.die("Cannot create TCW v3.0.3 ext directory; see SystemGuide.html");
+			}
+			Out.Print("/external     should be renamed /Ext/linux");
+			Out.Print("/external_osx should be renamed /Ext/mac");
+			if (!FileHelpers.yesNo("Do you want TCW to move the directories?")) return false;
+			
+			if (!createDir(Globalx.extDir)) {
+				Out.Print("Cannot create directory: " + Globalx.extDir);
+				Out.die("Cannot create TCW v3.0.3 ext directory; see SystemGuide.html");
+			}
+			if (existDir("external_osx")) {
+				File from = new File("external_osx");
+				File to = new File(Globalx.macDir);
+				
+				boolean success = from.renameTo(to);
+				if (!success) {
+					deleteDir(Globalx.extDir);
+					Out.die("Cannot rename external_osx to " + Globalx.macDir);
+				}
+				else Out.Print("Rename external_osx to " + Globalx.macDir);
+			}
+			if (existDir("external")) {
+				File from = new File("external");
+				File to = new File(Globalx.lintelDir);
+				
+				boolean success = from.renameTo(to);
+				if (!success) {
+					deleteDir(Globalx.extDir);
+					Out.die("Cannot rename external_osx to " + Globalx.lintelDir);
+				}
+				else Out.Print("Rename external_osx to " + Globalx.lintelDir);
+			}
+			return true;
+		}
+		catch (Exception e){
+			deleteDir(Globalx.extDir);
+			ErrorReport.die(e, "Cannot create /ext; see SystemGuide.html"); 
+			return false;
+		}
 	}
     public FileHelpers () { }; // Don't instantiate
 }

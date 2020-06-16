@@ -45,8 +45,10 @@ import util.database.DBConn;
 import util.database.HostsCfg;
 import cmp.database.Version;
 import util.methods.ErrorReport;
+import util.methods.FileHelpers;
 import util.methods.Out;
 import util.methods.Static;
+import util.methods.TCWprops;
 import util.ui.TCWEditorPane;
 import util.ui.UIHelpers;
 
@@ -90,8 +92,7 @@ public class MTCWFrame extends JFrame {
 		openFrames.add(this);
 		
 		ErrorReport.setErrorReportFileName(Globals.CmpErrorLog);
-		setBlast();
-		hostsObj = new HostsCfg();
+		setHosts();
 		
 		theSettings = new ViewerSettings(this);
 		setWindowSettings("chooseMultiTCW");
@@ -140,8 +141,8 @@ public class MTCWFrame extends JFrame {
 			setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 			
 			ErrorReport.setErrorReportFileName(Globals.CmpErrorLog);
-			hostsObj = new HostsCfg();
-			setBlast();
+			
+			setHosts();
 			strHostName = hostsObj.host();//java.net.InetAddress.getLocalHost().getHostName();
 			strDBUser = hostsObj.user();//userData[0];
 			strDBPass = hostsObj.pass();//userData[1];			
@@ -190,7 +191,6 @@ public class MTCWFrame extends JFrame {
 		
 		ErrorReport.setErrorReportFileName(Globals.CmpErrorLog);
 		
-		bIsApplet = isApplet;
 		UIHelpers.setIsApplet(isApplet);
 		if (!isApplet) 
 		{
@@ -468,15 +468,36 @@ public class MTCWFrame extends JFrame {
 			add(scrollPane);
 		}
 	}
-	private void setBlast() {
-		if (blastIsSet) return;
-		blastIsSet = true;
+	private void setHosts() {
+		if (hostIsSet) return;
+		
+		hostIsSet = true;
 		try {
 			new File("HOSTS.cfg");
-			new HostsCfg();
+			hostsObj = new HostsCfg();
+			
+			// Blast path gets checked in HostsCfg
+			// Check muscle/muscle, mafft, mstat
+			System.err.println("Check external");
+			String cmdPath = TCWprops.getExtDir();
+			if (!FileHelpers.existDir(cmdPath)) {
+				Out.PrtError("directory does not exists: " + cmdPath);
+				return;
+			}
+			checkExternal(cmdPath + Globals.Ext.mafftExe);
+			checkExternal(cmdPath + Globals.Ext.muscleExe);
+			checkExternal(cmdPath + Globals.Ext.mstatxExe);
 		}
 		catch(Exception e) {System.err.println("Error reading HOSTS.cfg"); }
-
+	}
+	private void checkExternal(String filePath) {
+		try {
+			if (!FileHelpers.fileExists(filePath))
+				Out.PrtError("file does not exists: " + filePath);
+			else if (!FileHelpers.fileExec(filePath))
+				Out.PrtError("file is not executable: " + filePath);
+		}
+		catch(Exception e) {System.err.println("Check External"); }
 	}
 	private void setWindowSettings(final String prefix) {
 		// Load window dimensions from preferences
@@ -511,7 +532,7 @@ public class MTCWFrame extends JFrame {
 		});
 	}
 	public String getDBName() { return strDBName; }	
-	public boolean isApplet() { return bIsApplet; }
+	public boolean isApplet() { return false; }
 	
 	private class MyShutdown extends Thread { // runs at program exit for each JFrame
 		public void run() {
@@ -557,7 +578,7 @@ public class MTCWFrame extends JFrame {
 	
 	private static ResultSet curResult = null;
 	
-	private boolean blastIsSet = false, bIsApplet = false;
+	private boolean hostIsSet = false;
 	
 	private HostsCfg hostsObj=null;
 	private String strHostName = "", strDBName = "", strDBUser = "", strDBPass = "";

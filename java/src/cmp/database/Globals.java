@@ -3,8 +3,6 @@ package cmp.database;
 import java.awt.Color;
 
 import util.database.Globalx;
-import util.methods.Converters;
-import util.methods.TCWprops;
 
 public final class Globals {
 	public static final boolean isRelease=true;
@@ -26,7 +24,7 @@ public final class Globals {
 	public static final String StatsDIR =      "Stats";
 	public static final String sumFile =       "summary.txt";
 	
-	public static final String KaKsDIR = "KaKs";
+	public static final String KaKsDIR = "KaKs"; // See Ext below
 	public static final String KaKsCmd = "runKaKs";
 	public static final String KaKsOutPrefix = "oTCW";
 	public static final String KaKsOutSuffix = ".awt"; // pairs of aligned for input to KaKs
@@ -44,13 +42,8 @@ public final class Globals {
 	public static final String TypeAA = "AA (Protein)";
 	public static final String TypeNT = "NT (DNA)";
 	
-	public static final int AA=0;
-	public static final int NT=1;
-	public static final int CDS=2;
-	
-	public static final int bSEQ=0;
-	public static final int bPAIR=1;
-	public static final int bGRP=2;
+	public static final int AA=0, NT=1, CDS=2;
+	public static final int bSEQ=0, bPAIR=1, bGRP=2;
 	
 	// Unique description and No shared description. The specialID makes them sort to bottom
 	public static final String specialID = "*";
@@ -80,11 +73,25 @@ public final class Globals {
 	
 	// Cutoff for Pearson's Correlation Coefficient for perPCC
 	public static final double PCCcutoff = 0.8;
-
 	
-	public static final int COLUMN_SELECT_WIDTH = 75;
-	public static final int COLUMN_PANEL_WIDTH = 900;
+	public static final int COLUMN_SELECT_WIDTH = 75, COLUMN_PANEL_WIDTH = 900;
 	
+	// Blast is also external, but taken care of in BlastArgs
+	public static class Ext { 
+		public final static int MUSCLE = 0;
+		public final static int MAFFT = 1;
+		// This can be changed to one of the other MstatX functions, however,
+		// it would need to be changed in the summary.html and GrpTable.html documentation.
+		public final static String score2="Trident";
+		
+		public final static String mstatxExe = "/mstatX/mstatx";
+		public final static String muscleExe = "/muscle/muscle";
+		public final static String mafftExe = "/mafft/mafft.bat";
+		public final static String kaksExe  = "/KaKs_Calculator";
+		public final static String orthoDir = "/OrthoMCL";
+		public final static String orthoTryExe = "/OrthoMCL/bin/orthomclInstallSchema"; // try first one
+	}
+		
 	public static class Compile {	
 		//Method Classes
 		public static final String GROUP_FILE_BEST_RECIP = "BBH";
@@ -112,10 +119,6 @@ public final class Globals {
 	    public static final String DATABASE_HOST_URL = "DB_host";
 		public static final String DATABASE_ANNOTATE_USER = "DB_user";
 		public static final String DATABASE_ANNOTATE_PASSWORD = "DB_password";
-		
-	    public static final String DATABASE_HOST_URL_OLD = "PAVE_host";
-		public static final String DATABASE_ANNOTATE_USER_OLD = "PAVE_user";
-		public static final String DATABASE_ANNOTATE_PASSWORD_OLD = "PAVE_password";
 
 		//File/directory locations
 	    public static final String TEMP_DIR = 	".mtcw";		
@@ -151,16 +154,7 @@ public final class Globals {
 		}
 	}
 	
-	public static class MultiAlign { 
-		public final static int MUSCLE = 0;
-		public final static int MAFFT = 1;
-		// This can be changed to one of the other MstatX functions, however,
-		// it would need to be changed in the summary.html and GrpTable.html documentation.
-		public final static String score2="Trident";
-		
-		public final static String muscleExe = "/muscle/muscle";
-		public final static String mafftExe = "/mafft/mafft.bat";
-	}
+	
 	
 	public static class Viewer {
 	    public static final String DB_NAME_PREFIX = "sTCW"; // for compiling comparison database

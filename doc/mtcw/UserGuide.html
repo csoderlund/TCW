@@ -46,7 +46,6 @@ projects are created by merging existing sTCW projects.
 	<li><a href="#time">Timings</a>
 	<li><a href="#trouble">Trouble shooting</a>		
 	<li><a href="#view">View/Query with <code>viewMultiTCW</code></a>
-	<li><a href="#appl">Running <code>viewMultiTCW</code> as an applet</a></li>
 	</ul>
 <li><a href="#refs">References</a>
 </ul>
@@ -109,54 +108,10 @@ sequence is created from the CDS sequence, which is created from the TCW compute
 </td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
 <!----------- Software requirements --------------->
 
-The multiTCW executables were installed when you installed TCW (see <a href="../Install.html" class="ext" target="_blank">Installation</a>). 
+The multiTCW executables were installed when you installed TCW 
+(see <a href="../Install.html" class="ext" target="_blank">Installation</a>). 
 
-<table border=1 cellpadding=5 width="100%">
-			<tr><td><i>Software</td><td><i>Version</td><td><i>Source</td><td><i>Additional info</i></td></tr>
-			
-			
-			<tr><td colspan=4><i>Optional package for transcript comparison:</i></td>
-			<tr><td class='emph'>
-				<code>KaKs_Calculator</code></td>
-				<td>v.1.2.
-				<td><a href=http://bigd.big.ac.cn/tools/kaks/download class="ext" target="_blank"><code>KaKs_Calculator</code></a> 
-				<br>(google for other download sites).
-				<td>For KaKs analysis for <code>runMultiTCW</code>. 
-			</tr>
-			
-			<tr><td colspan=4><i>Additional&nbsp;packages (supplied with TCW)<sup>+</sup>:</i></td>
-			
-			<tr>
-				<td><code>OrthoMCL</code></td>
-				<td>2.0</td>
-				<td><a href="http://orthomcl.org" class="ext" target="_blank"><code>OrthoMCL</code></a></td>
-				<td>Clusters orthologous proteins in <code>runMultiTCW</code>. 
-				<br>Uses Perl and MySQL, which requires DBI::mysql</td></tr>
-			<tr>
-			<td><code>MAFFT</code></td><td>v7.407</td>
-			<td><a href="https://mafft.cbrc.jp/alignment/software/" class="ext" target="_blank"><code>MAFFT</code></a></td>
-         	<td>For computing multiple alignment of clusters in <code>runMultiTCW</code> for scoring and viewing
-         	in <code>viewMultiTCW</code></td>
-		</tr>
-		 <tr>
-			<td><code>MstatX</code></td><td>11-Nov-18</td>
-			<td><a href="https://github.com/gcollet/MstatX" class="ext" target="_blank"><code>MstatX</code></a></td>
-         	<td>For scoring multiple alignment of clusters</td>
-		</tr>
-			
-			<tr>
-				<td><code>MUSCLE</code></td>
-				<td>3.8.31</td>
-				<td><a href="http://www.drive5.com/muscle/" class="ext" target="_blank"><code>MUSCLE</code></a></td>
-				<td>Multiple alignment of protein cluster in <code>viewMultiTCW</code>.</td></tr>
-			
-</table>
-<br>
-<sup>+</sup> Linux binaries are supplied under the <tt>external</tt> directory and the Mac binaries are supplied under the <tt>external_osx</tt>. You do not need to do anything special as TCW will find the packages here if
-they are not in your path. We cannot guarantee the packages will work on every linux/mac machine; if they do not,
-you will need to replace them. 
 
-<p>
 <!------------------DEMO --------------------------->
 <a name=demo></a>
 <table width='100%'><tr><td align='left' >
@@ -170,10 +125,9 @@ for a three way comparison that includes an AA-sTCW. However, the three 'ex' dem
 
 <table width=100% cellpadding=5><tr>
 <td>
-	Using <code>runSingleTCW</code>, create <tt>sTCW_exBar</tt>, as follows:
+	Using <code>runSingleTCW</code>, create <tt>sTCW_exBar</tt> as follows:
 
 	<ol>
-	<li><tt>./runSingleTCW</tt>
 	<li>Select "exBar" from the Project dropdown. 
 	<li>The 'ex' demos use the same <tt>UniProt_demo</tt> and GO database as the 'demo' examples. To quickly create these three databases,
 <ol type="i">
@@ -190,11 +144,13 @@ for a three way comparison that includes an AA-sTCW. However, the three 'ex' dem
 <a  href="img/exBar.png">
 <img width=450 src="img/exBar.png" border=1></a>
 </table>
-Create sTCW_exFoo as above. If you want to include a 3rd sTCW, create sTCW_exFly.
+Create <tt>sTCW_exFoo</tt> and <tt>sTCW_exFly</tt> as above. 
 	
 <p>			
 To create the multiTCW project, start by running the mTCW Manager,
-<pre>./runMultiTCW</pre> 
+<pre>
+	./runMultiTCW
+</pre> 
 This brings up the Manager interface, shown on the lower right (though all fields will be blank). 
 		
 <table width=100% cellpadding=5>
@@ -217,10 +173,8 @@ add additional methods at any time.
 <li>Select <b>Run Stats</b>. When it completes, the label will change to "No action selected".
 <li>Exit <code>runMultiTCW</code> in order to run <code>KaKs_calculator</code>.
 <ol>
-<li>Download the <code>KaKs_Calculator</code>.
-<li>Change directory to <tt>projcmp</tt>. Put the <code>KaKs_Calculator</code> executable in this
-directory.
-<li>Change directory to <tt>ex/KaKs</tt>. Execute "<tt>sh runKaKs</tt>".
+<li>Change directory to <tt>projcmp/ex/KaKs</tt>. 
+<li>Execute "<tt>sh runKaKs</tt>".
 <li>Start up <code>runMultiTCW</code> again. The label on the 4th section should say
 "Read KaKs", if it does not, select <b>Settings</b> and select it. Then <b>Run Stats</b>.
 <li>Select <b>Launch viewMultiTCW</b> to query the results.
@@ -269,24 +223,23 @@ can change the name, though it must start with <tt>mTCW_</tt>.
 </table>
 <p>
 <b>Remove</b>: Select one or more options. When you select 'Ok', you will be prompt to verify each removal.
-<table>
-<td width=550 valign=top style="padding-left:10px;">
-<table border=0 cellspace=3>
-<tr><td valign=top nowrap>Pairs.. from database<td> Removes the pairs and clusters so you
-can start over without running <b>Build Database</b> again, 
+<table border=0 cellspacing=3>
+<tr><td>
+<ul>
+<li><tt>Pairs and clusters 
+from database</tt>: Removes the pairs and clusters so you can start over without running <b>Build Database</b> again, 
 e.g. if you want to use a different hit file, create all new clusters, etc. Once the pairs are removed,
 you can change the settings and then re-add the Pairs.
-<tr><td valign=top nowrap>mTCW database<td> Remove the database but leave the project on disk.
-<tr><td colspan=2><i>From disk</i>
-<tr><td valign=top nowrap>Pairs and method files<td> If you remove the pairs and clusters from 
+<li><tt>mTCW database</tt>: Remove the database but leave the project on disk.
+<li><tt>Pairs and method files from disk</tt>: If you remove the pairs and clusters from 
 database, it is a good idea to remove all associated files from disk using this option. 
-<tr><td valign=top nowrap>Hit files<td> If you recreate the database and you think there may
+<li><tt>Hit files from disk</tt>: If you recreate the database and you think there may
 be changes to the sequences in it, you definitely want to remove the hit files so that
 it allows you to re-search. Or, if you want to re-run a search program, you need to first remove the hit files using
 this option.
-<tr><td valign=top nowrap>All files<td> If you no longer are using the project, you can delete
+<li><tt>All files from disk</tt>: If you no longer are using the project, you can delete
 the database (above) and the all relevant files here.
-</table>
+
 <td width=250  style="padding-left:10px;">
 	<a  href="img/remove.png"><img width=400 src="img/remove.png" border=1></a>
 </td>
@@ -331,7 +284,6 @@ By default, blast is run with "-use_sw_tback" for the nucleotide self-blast,
 which is very important as it runs dynamic programming for the final score. 
 <p>Once the search is run, you can no longer change the parameters; if you want to change the
 parameter and re-run the search, remove the hit files using the main panel <b>Remove...</b>.
-
 
 
 <p><b>Add Pairs from hits</b> loads the pairs from the hits result file.
@@ -511,21 +463,18 @@ After adding clusters and running stats, you can add more clusters. In order to 
 After the KaKs files have been created using <b>Run Stats</b>:
 <ul>
 <li>Exit <code>runMultiTCW</code> or use a different terminal window.
-<li>Change directories to <tt>projcmp</tt>. Put the <code>KaKs_calculator</code>
-executable in this directory. 
-<li>Change directories to <tt>projcmp/&lt;project-name&gt;/KaKs</tt>. There will be 
+<li>Change directories to <tt>projcmp/&lt;project-name&gt;/KaKs</tt>. 
+There will be 
 multiple files with the name <tt>oTCWn.awt</tt> where n starts at '1'. They
 each have pairs of aligned sequences minus the gaps. There is also a file
 called <tt>runKaKs</tt> which has the commands to run <code>KaKs_calculator</code>
 on each file, e.g. 
 <pre>
-../../KaKs_calculator -i oTCW1.awt -o iTCW1.tsv -m YN &
-../../KaKs_calculator -i oTCW2.awt -o iTCW2.tsv -m YN &
-../../KaKs_calculator -i oTCW3.awt -o iTCW3.tsv -m YN &
-../../KaKs_calculator -i oTCW4.awt -o iTCW4.tsv -m YN &
+/Users/cari/Workspace/TCW_3/Ext/mac/KaKs_Calculator -i oTCW1.awt -o iTCW1.tsv -m YN &
+/Users/cari/Workspace/TCW_3/Ext/mac/KaKs_Calculator -i oTCW2.awt -o iTCW2.tsv -m YN &
 </pre>
 If you prefer to use a different method than 'YN', edit this file to change it to
-whatever method you want (see the <code>KaKs_calculator</code> documentation).
+whatever method you want (see the <code>KaKs_Calculator</code> documentation).
 <li>From the command line, type <tt>sh runKaKs</tt>.
 <li>Read the KaKs files:
 <ol>
@@ -593,43 +542,7 @@ There is <tt>Help</tt> on all the <code>viewMultiTCW</code> views, and <a href="
 </tr>
 </table>
 
-<a name=appl>
-<table width='100%'><tr><td align='left' >
-<h3>Running as an applet</h3>
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
-The <code>viewMultiTCW</code> can be used as an applet, as follows:
-<ol>
-<li>The <tt>mtcw.jar</tt> file must be signed with a code signing certificate, e.g. using Digicert (which is easy, but costs), or your university may have an account with InCommon, which provides code-signing' certificates. 
-<li>You need mysql-connector-java-5.0.5-bin.jar (contact tcw at agcol.arizona.edu if you would like us to provide you a copy).
-<li>Modify the following code as appropriate, and put it in your cgi-bin.
-</ol>
-		
-		<pre>
-		&lt;HTML&gt;
-		&lt;HEAD&gt;
-		&lt;TITLE&gt;viewMultiTCW&lt;/TITLE&gt;
-		&lt;/HEAD&gt;
-		&lt;BODY&gt;
-		Running viewMultiTCW  (please wait)
-  		&lt;applet 
-    		CODE="cmp.viewer.MTCWApplet"
-        	ARCHIVE="<tt>location_of_your_jars</tt>/mtcw.jar,jars/mysql-connector-java-5.0.5-bin.jar"
-    		width=0 height=0
-  		MAYSCRIPT&gt;
-  		&lt;param name="ASSEMBLY_DB" value="<tt>mTCW_your_db_name</tt>"&gt;
-  		&lt;param name="DB_URL"      value="<tt>www.your URL</tt>"&gt;
-  		&lt;param name="DB_USER"     value="<tt>your username (read-only)</tt>"&gt;
-  		&lt;param name="DB_PASS"     value="<tt>your password</tt>"&gt;
-  		&lt;hr&gt;
-  		Unable to display the viewMultiTCW applet. Please verify your Java installation.
-  		&lt;hr&gt;
-  		&lt;/applet&gt;
-		&lt;/BODY&gt;
-		&lt;/HTML&gt;
-		</pre>
-Applet users may have to adjust their applet memory; see instructions
-in the <a href="../stcw/Trouble.html#memset" class="ext" target="_blank">Troubleshooting Guide</a>.
-<p>
+
 <!------------ References -----------------!>   		
 		<a name=refs></a>
 		<table width='100%'><tr><td align='left' >

@@ -703,11 +703,9 @@ public class ManagerData {
 		public String getSearchPgm() {return searchPgm; }
 		public boolean outParams() {
 			if (searchPgm.equals("blast"))
-				if (strParams.equals(BlastArgs.getBlastxOpDefaults())) return false;
+				if (strParams.equals(BlastArgs.getBlastxOptions())) return false;
 			if (searchPgm.equals("diamond"))
 				if (strParams.equals(BlastArgs.getDiamondOpDefaults())) return false;
-			if (searchPgm.equals("usearch"))
-				if (strParams.equals(BlastArgs.getUsearchOpDefaults())) return false;
 			return true;
 		}
 		

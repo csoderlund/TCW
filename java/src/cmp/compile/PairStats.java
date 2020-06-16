@@ -13,18 +13,25 @@ import java.util.HashSet;
 import cmp.compile.panels.CompilePanel;
 import cmp.database.Globals;
 import cmp.align.*;
+
 import util.database.DBConn;
 import util.methods.ErrorReport;
 import util.methods.Out;
+import util.methods.FileHelpers;
 
 public class PairStats {
 	private final int MIN_ALIGN = 20; // not write to KaKs file
+	private String kaksEx = "KaKs_Calulator"; // add prefix
 	
 	public int run(CompilePanel compilePanel, boolean bKaKs) {
 		theCompilePanel = compilePanel;
 		isKaKs = bKaKs;
 		long startTime = Out.getTime();
 		Out.PrtDateMsg("Compute DP alignment for all cluster pairs");
+		
+		if (isKaKs) {
+			kaksEx = FileHelpers.getUserDir() + "/" + FileHelpers.getExtDir() + Globals.Ext.kaksExe + " ";
+		}
 		
 		try {
 			mDB = theCompilePanel.getDBconn(); 
@@ -74,6 +81,7 @@ public class PairStats {
 			if (cntWrite>0)  {
 				Out.PrtSpCntMsg(2, cntWrite,  "KaKs alignments written to files");
 				Out.PrtSpMsg(2, "From the projects KaKs directory, execute 'sh " + Globals.KaKsCmd + "' ");
+				Out.PrtSpMsg(3, "It uses path: " + kaksEx);
 				if (cntBadAlign>0 || cntShortCDS>0) {
 					Out.PrtSpMsg(3, "Not written to KaKs files: ");
 					Out.PrtSpCntMsgNz(3, cntBadAlign, "Could not be aligned ");
@@ -129,7 +137,7 @@ public class PairStats {
 				
 				String in = Globals.KaKsInPrefix + fileCnt + Globals.KaKsInSuffix;
 				String ot = Globals.KaKsOutPrefix + fileCnt + Globals.KaKsOutSuffix;
-				outKsKsCmd.write("../../KaKs_calculator -i " + ot + " -o " + in + " -m YN &\n");
+				outKsKsCmd.write(kaksEx + " -i " + ot + " -o " + in + " -m YN &\n");
 				outKsKsCmd.flush();
 				fileCnt++;
 				

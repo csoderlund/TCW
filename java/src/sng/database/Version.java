@@ -14,7 +14,6 @@ public class Version {
 	public static final String URL = 		Globalx.URL;
 	public static final String TCWhead = 	Globalx.TCWhead;
 	
-	public static final String strDBver = "5.4"; // singleTCW database version
 	public static final String sTCWhead = "sTCW v" + strTCWver + " " + strRelDate; 	
 	public static final String sTCWtitle = "viewSingleTCW v" + strTCWver;
 	private static final int REQUIRED_JAVA_MAJOR_VERSION = 1; 

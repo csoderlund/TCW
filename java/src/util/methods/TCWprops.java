@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileReader;
 
 import sng.database.Globals;
+import util.database.Globalx;
 
 
 
@@ -373,6 +374,8 @@ public class TCWprops
 				}		
 			}
 		}	
+		br.close();
+		
 		fixProps(mProps);
 		checkRequiredFields();
 		if (mType == PropType.Lib)
@@ -438,6 +441,7 @@ public class TCWprops
 				error++;
 			}
 		}	
+		br.close();
 		if (error>0) {
 			if (!FileHelpers.yesNo("Continue? ")) ErrorReport.die(" user terminated ");
 		}
@@ -630,6 +634,7 @@ public class TCWprops
 			}
 			libSecs.set(i, libSecs.get(i) + line + "\n");
 		}
+		reader.close();
 		mLibProps = new Vector<Properties>();
 		for (i = 1; i < libSecs.size(); i++)
 		{
@@ -656,13 +661,11 @@ public class TCWprops
 			}
 		}
 	}
-	public static boolean isMac() {
-		return System.getProperty("os.name").toLowerCase().contains("mac");
-	}
-	public static String getExtDir()
+	
+	public static String getExtDir() // this is also in FileHelpers
 	{
-		if (isMac()) return "external_osx";
-		return "external";
+		if (FileHelpers.isMac()) return Globalx.macDir;
+		return Globalx.lintelDir;
 	}
 	public static void newDB() {
 		mProps=null;

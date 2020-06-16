@@ -188,7 +188,7 @@ public class STCWFrame extends JFrame {
 			
 			if (!dbObj.checkDBver(hostsObj)) System.exit(-1);
 			dbName = dbObj.getdbName();
-			metaData = new MetaData(this, hostsObj.getCapPath(), bIsApplet);
+			metaData = new MetaData(this, hostsObj.getCapPath());
 			
 			System.out.println("   Build interface");
 			

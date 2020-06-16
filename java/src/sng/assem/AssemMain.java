@@ -416,13 +416,13 @@ public class AssemMain
 				Log.msg("Dataset containing long clones:" + clist,LogLevel.Basic);
 			}
 		}
-		checkCommands(); 
+		if (!bSkipAssembly) checkCommands(); 
 
 		// Find out if we need to ask them about using previous megablast files, before
 		// longer operations commence
 		boolean useOldBlastFiles = false;
 
-		clearFastaFiles();
+		// CAS303 obsolete uniblast reference in clearFastaFiles();
 		
 		if (deleteAssembly) 
 			deleteAssembly(mAID);
@@ -452,6 +452,8 @@ public class AssemMain
 		 */
 		if (!mDB.hasInnodb())
 			Log.die("Unable to proceed because MySQL database does not support InnoDB tables.");
+		if (BlastArgs.isBlastExt()) // CAS303
+			Log.die("The full blast path must be in HOSTS.cfg");
 		
 		int tc = 1;
 
@@ -604,7 +606,6 @@ public class AssemMain
 			Log.msg("Debug is on", LogLevel.Basic);
 			checkContigIntegrity(false);
 		}
-		else
 		{
 			cleanUpAssembly();
 			Utils.deleteDir(assemDir);
@@ -626,22 +627,6 @@ public class AssemMain
 			System.exit(0);
 	}	
 
-	private void clearFastaFiles()
-	{
-		// delete the fasta files on disk in case the new assembly results in different ones,
-		// e.g. if user changed their "use trans names" selection
-		File ubdir = new File(mProjDir,"uniblasts");
-		if (ubdir.isDirectory())
-		{
-			for (File f : ubdir.listFiles())
-			{
-				if (f.getName().contains(".fasta"))
-				{
-					f.delete();
-				}
-			}
-		}
-	}
 	private void deleteAssembly(int aid) throws Exception
 	{
 		Log.head("Delete previous instantiation", LogLevel.Basic);
@@ -915,7 +900,7 @@ public class AssemMain
 		Utils.recordCmd(mAID,"InitBuryFormatdb",cmd,mDB);
 		Utils.appendToFile(cmd,mInitialBuryDir,"cmd.list");
 		Utils.runCommand(BlastArgs.cmdLineToArray(cmd), mInitialBuryDir, false, true, null,0);
-
+		
 		int minLen = mClones[0].mSeqLen;
 		for (Clone c : mClones)
 		{
@@ -1565,6 +1550,7 @@ public class AssemMain
 				int pidx2 = p2.mIdx;
 				if (p1 != p2 && pidx1 == pidx2)
 				{
+					r.close();
 					throw(new Exception("pair index problem"));
 				}
 				if (pidx1 == pidx2)
@@ -1622,6 +1608,7 @@ public class AssemMain
 				line = null;
 				fields = null;			
 			}
+			r.close();
 		}
 		for (MatePair p : mPairs)
 		{
@@ -1794,8 +1781,9 @@ public class AssemMain
 				line = null;
 				fields = null;
 			}
+			r.close();
 		}				
-
+	
 		Log.indentMsg("Loaded " + nOlap + " unpaired overlaps for clique creation",LogLevel.Basic);
 		int nUnk = unkClone.size();
 		if (nUnk > 0) 
@@ -4524,6 +4512,7 @@ public class AssemMain
 					if (iMod > 0 && iMod % 10000 == 0) ps2.executeBatch();
 				}
 			}
+			reader.close();
 		}
 		ps.executeBatch(); ps.close();
 		ps2.executeBatch(); ps2.close();

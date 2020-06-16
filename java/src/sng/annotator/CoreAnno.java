@@ -16,6 +16,7 @@ import util.align.AlignCompute;
 import util.align.AlignPairOrig;
 import util.align.AlignData;
 import util.database.DBConn;
+import util.methods.BlastArgs;
 import util.methods.ErrorReport;
 import util.methods.Out;
 
@@ -112,6 +113,7 @@ public class CoreAnno {
 		Out.Print("");
 		Out.PrtDateMsg("Start sequence comparisons");
 		long time = Out.getTime();
+		
 		
 		if (!blastObj.runSelfBlast("blastn")) return false;		
 		if (!blastObj.runSelfBlast("tblastx")) return false;

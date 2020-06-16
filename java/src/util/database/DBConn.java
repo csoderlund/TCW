@@ -1,6 +1,8 @@
-
 package util.database;
 
+/***********************************************************
+ * Most database operations are performed via this method for TCW
+ */
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -28,6 +30,8 @@ public class DBConn
 	public String mDBName;
 	public String mHost;
     public String jdbcStr = "";
+    static private String chrSQL = "characterEncoding=utf8"; // utf8mb4, CAS303
+    static public String driver = "com.mysql.jdbc.Driver";
 
 	Connection mConn = null;
 	Statement mStmt = null;
@@ -38,40 +42,37 @@ public class DBConn
             mDBName = dbname;
             mUser = user;
             mPass = pass;
-            jdbcStr = "jdbc:mysql://" + mHost + "/"  + mDBName;
-            jdbcStr += "?useServerPrepStmts=false&rewriteBatchedStatements=true";
+            jdbcStr = createDBstr(host, dbname);  
+            jdbcStr += "&useServerPrepStmts=false&rewriteBatchedStatements=true"; 
             renew();
     }
-    // The next is for connection w/o specific database, for doing e.g. "show databases".
+    // For connection w/o specific database, for doing e.g. "show databases".
     // User needs sufficient permissions to do this. 
     public DBConn(String host, String user, String pass) throws Exception
     {
             mHost = host;
             mUser = user;
             mPass = pass;
-            jdbcStr = "jdbc:mysql://" + mHost ;
+            jdbcStr = createDBstr(host, null);
             renew();
     }	
 	public Connection getDBconn() { return mConn;}
 	
 	public void renew() throws Exception
 	{
-		Class.forName("com.mysql.jdbc.Driver");
+		Class.forName(driver);
 		mStmt = null;
 		if (mConn != null && !mConn.isClosed()) mConn.close();
 		for (int i = 0; i <= maxTries; i++)
 		{
-			try
-			{
+			try {
 				mConn = DriverManager.getConnection(jdbcStr, mUser,mPass);
 				break;
 			} 
 			catch (SQLException e)
 			{
-				if (i == maxTries)
-				{
-					ErrorReport.die(e, "Unable to connect to " 	+ jdbcStr
-							+ "\nJava Exception: " + e.getMessage());
+				if (i == maxTries) {
+					ErrorReport.die(e, "Unable to connect to " 	+ jdbcStr + "\nJava Exception: " + e.getMessage());
 				}
 			}
 			Thread.sleep(100);
@@ -325,11 +326,12 @@ public class DBConn
 			executeUpdate(cmd);
 		}
 	}
+	// CAS303 added ` around oldCol so the new reserved keyword 'rank' can be rename.
 	public void tableCheckRenameColumn(String table, String oldCol, String newCol, String type) throws Exception
 	{
 		if (tableColumnExists(table,oldCol))
 		{
-			String cmd = "alter table " + table + " change column " + oldCol + " " + newCol + " " +  type ;
+			String cmd = "alter table " + table + " change column `" + oldCol + "` " + newCol + " " +  type ;
 			executeUpdate(cmd);
 		}
 	}
@@ -515,8 +517,7 @@ public class DBConn
     }
     public DBConn createDBAndNewConnection(String dbName) throws Exception
     {
-        try
-        {
+        try {
             executeUpdate("create database " + dbName);
             return  new DBConn(mHost, dbName, mUser, mPass);
 
@@ -538,31 +539,26 @@ public class DBConn
      * ******************************************/
     public static void deleteMysqlDB(String host, String db, String user, String pass) throws Exception
     {
-        Class.forName("com.mysql.jdbc.Driver");
-        String dbstr = "jdbc:mysql://" + host;
+        Class.forName(driver);
+        String dbstr = createDBstr(host, null);
         Connection con = null;
 
-        try
-        {
-                con = DriverManager.getConnection(dbstr, user, pass);
-                Statement st = con.createStatement();
-                st.execute("drop database " + db);
-                con.close();
+        try {
+            con = DriverManager.getConnection(dbstr, user, pass);
+            Statement st = con.createStatement();
+            st.execute("drop database " + db);
+            con.close();
         }
-        catch (Exception e)
-        {
-                System.err.println( "Cannot delete mySQL database " + db );
-                e.printStackTrace();
-        }
+        catch (Exception e) {ErrorReport.prtReport(e, "Cannot delete mySQL database " + db); }
     }
     public static boolean oldDBisEmpty(String host, String db, String user, String pass) 
 	{
-		String dbstr = "jdbc:mysql://" + host + "/" + db;
+		String dbstr = createDBstr(host, db);
 		Connection con = null; 
 
 		try
 		{
-			Class.forName("com.mysql.jdbc.Driver");
+			Class.forName(driver);
 			con = DriverManager.getConnection(dbstr, user, pass);
 			Statement s = con.createStatement();
 			ResultSet rs = s.executeQuery("show tables like 'clone'");
@@ -578,21 +574,18 @@ public class DBConn
 			con.close();
 			return nClones == 0;			
 		} 
-		catch (Exception e)
-		{
-			// Should never get here as DB existence is already checked
-			ErrorReport.die(e, "Database " + db + " not found on host " + host);	
-		}
+		catch (Exception e) {} // already checked
+		
 		return false;
 	}	
 	public static boolean deleteDB(String host, String db, String user, String pass) 
 	{
-		String dbstr = "jdbc:mysql://" + host + "/mysql";
+		String dbstr = createDBstr(host, "mysql"); // "jdbc:mysql://" + host + "/mysql";
 		Connection con = null; 
 
 		try
 		{
-			Class.forName("com.mysql.jdbc.Driver");
+			Class.forName(driver);
 			con = DriverManager.getConnection(dbstr, user, pass);
 			Statement s = con.createStatement();
 			s.executeUpdate("drop database " + db);
@@ -607,9 +600,9 @@ public class DBConn
 	}	
 	public static void createMysqlDB(String host, String db, String user, String pass) throws Exception
 	{
-		Class.forName("com.mysql.jdbc.Driver");
+		Class.forName(driver);
 
-		String dbstr = "jdbc:mysql://" + host;
+		String dbstr = createDBstr(host, null);
 		Connection con = null; 
 
 		try
@@ -626,16 +619,18 @@ public class DBConn
 			ErrorReport.die(e, "Database " + db + " could not be created on host " + host);	
 		}
 	}
-	public static boolean connectionValid(String host, String dbName, String user, String pass) {
+	public static boolean connectionValid(String host, String db, String user, String pass) {
         try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection conn = DriverManager.getConnection("jdbc:mysql://" + host + "/"      + dbName, user, pass);
+            Class.forName(driver);
+            String dbstr = createDBstr(host, db);
+            
+            Connection conn = DriverManager.getConnection(dbstr, user, pass);
 
             SQLWarning warn = conn.getWarnings();
             while (warn != null) {
                     System.out.println("SQLState: " + warn.getSQLState());
                     System.out.println("Message:  " + warn.getMessage());
-                    System.out.println("Vendor:   " + warn.getErrorCode());
+                    System.out.println("Error:   " + warn.getErrorCode());
                     System.out.println("");
                     warn = warn.getNextWarning();
             }
@@ -648,12 +643,11 @@ public class DBConn
     }
 	public static boolean checkMysqlDB(String msg, String host, String db, String user, String pass) 
 	{
-		String dbstr = "jdbc:mysql://" + host + "/" + db;
+		String dbstr = createDBstr(host, db);
 		Connection con = null; 
 
-		try
-		{
-			Class.forName("com.mysql.jdbc.Driver");
+		try {
+			Class.forName(driver);
 			con = DriverManager.getConnection(dbstr, user, pass);
 			con.close();
 			return true;
@@ -663,68 +657,121 @@ public class DBConn
 	}	
 	public static boolean checkMysqlServer(String host, String user, String pass)
     {
-        // First try to find the driver
         boolean ret = false;
-        try
-        {
-            Class.forName("com.mysql.jdbc.Driver");
+        try {
+            Class.forName(driver);
         }
-        catch(Exception e)
-        {
-            System.err.println("Unable to find MySQL driver");
+        catch(Exception e) {
+            ErrorReport.die("Unable to find MySQL driver: " + driver);
         }
         
-        String dbstr = "jdbc:mysql://" + host;
-
-        try
-        {
+        String dbstr = createDBstr(host, null); // CAS303;
+        try {
             Connection con = DriverManager.getConnection(dbstr, user, pass);
             con.close();
             ret = true;
         }
-        catch (Exception e)
-        {	
-            System.err.println("Cannot connect to MySQL on host=" + host + " user=" + user);
-        }
+        catch (Exception e) { } // CAS303 prints in calling routine	
+            
         return ret;
     }
-    public static boolean checkMaxAllowedPacket(String host, String user, String pass)
+    public static boolean checkVariables(String host, String user, String pass, boolean bAll)
     {
         boolean ret = false;
-        try
-        {
-            Class.forName("com.mysql.jdbc.Driver");
+        
+        try {
+            Class.forName(driver);
         }
-        catch(Exception e)
-        {
-            System.err.println("Unable to find MySQL driver");
+        catch(Exception e) {
+        	ErrorReport.die("Unable to find MySQL driver: " + driver);
+            return false;
         }
-        String dbstr = "jdbc:mysql://" + host;
-
-        try
-        {
-            Connection con = DriverManager.getConnection(dbstr, user, pass);
-            Statement st = con.createStatement();
-    			ResultSet rs = st.executeQuery("show variables like 'max_allowed_packet'");
-    			if (rs.next()) {
-    				long packet = rs.getLong(2);
-    				//System.err.println("   MySQL exists with max_allowed_packet " + packet);
-    				
-    				if (packet<=1048576) {
-    					System.err.println("++++ max_allowed_packet too small");
-    					System.err.println("     Inserts will be slow and large queries will likely fail");
-    					System.err.println("     start MySQL, then 'SET GLOBAL max_allowed_packet=1073741824'");
-    					//st.execute("SET GLOBAL max_allowed_packet=1073741824");
-    				}
-    			}
+      
+        String dbstr = createDBstr(host, null);
+       
+        try {
+        	int cntFlag=0;
+        	Connection con;
+        	Statement st;
+        	
+        	try {
+        		con = DriverManager.getConnection(dbstr, user, pass);
+        		st = con.createStatement();
+        	}
+        	catch (SQLException e)
+            {	
+            	ErrorReport.prtReport(e, "Check MySQL database");
+                System.err.println("Cannot connect to MySQL on host=" + host + " user=" + user);
+                System.err.println(dbstr);
+                System.err.println(e.getMessage()); 
+                return false;
+            }
+			
+            ResultSet rs = st.executeQuery("show variables like 'max_allowed_packet'");
+			if (rs.next()) {
+				long packet = rs.getLong(2);
+				
+				System.err.println("   max_allowed_packet=" + packet);
+				if (packet<=1048576) {
+					cntFlag++;
+					System.err.println("     Suggest: SET GLOBAL max_allowed_packet=1073741824;");
+				}
+			}
+			
+			rs = st.executeQuery("show variables like 'innodb_buffer_pool_size'");
+			if (rs.next()) {
+				long packet = rs.getLong(2);
+				
+				System.err.println("   innodb_buffer_pool_size=" + packet);
+				if (packet< 134217728) {
+					cntFlag++;
+					System.err.println("   Suggest: SET GLOBAL innodb_buffer_pool_size=1073741824;");
+				}
+			}
+			
+			rs = st.executeQuery("show variables like 'innodb_flush_log_at_trx_commit'");
+			if (rs.next()) {
+				int b = rs.getInt(2);
+				System.err.println("   innodb_flush_log_at_trx_commit=" + b);
+				if (b==1) {
+					cntFlag++;
+					System.err.println("   Suggest: SET GLOBAL innodb_flush_log_at_trx_commit=0");
+				}
+			}
+			
+			rs = st.executeQuery("show variables like 'local_infile'");
+			if (rs.next()) {
+				String s = rs.getString(2);
+				System.err.println("   local_infile=" + s);
+				if (s.contentEquals("no")) {
+					cntFlag++;
+					System.err.println("   Suggest: SET GLOBAL local_infile = 1;");
+					System.err.println("   For some configuration, this is necessary for runAS");
+				}
+			}
+			
+			if (cntFlag>0) System.err.println("  MySQL variables suggested changes: " + cntFlag);
+			else System.err.println("  MySQL variables are okay ");
             con.close();
             ret = true;
         }
-        catch (Exception e)
+        catch (SQLException e)
         {	
-            System.err.println("Cannot connect to MySQL on host=" + host + " user=" + user);
+        	ErrorReport.prtReport(e, "Check MySQL variables");
             System.err.println(e.getMessage()); 
         }
+       
         return ret;
+    }
+    // CAS303 - add chrSQL
+    static public String createDBstr(String host, String db) {
+    	if (db==null) {
+    		String h = host.replace(";", ""); // in case a ';' is at end of localhost in HOSTs.cfg
+    		return "jdbc:mysql://" + h + "?" + chrSQL; 
+    	}
+    	else {
+    		String h = host.replace(";", "");
+    		return "jdbc:mysql://" + h + "/" + db + "?" + chrSQL;
+    	}
     }
 }

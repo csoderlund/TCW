@@ -64,9 +64,7 @@ and the acronym PAVE is still found in some places as it was the original name f
       	</ul>
 <br>
 		<li><a href="#view">View/Query (<code>viewSingleTCW</code>)</a>
-		<ul>
-			<li><a href="#appl">Running as an applet</a>
-		</ul>
+		
 	</ul>
 			
 		<p>
@@ -130,15 +128,15 @@ and the acronym PAVE is still found in some places as it was the original name f
 		</table>
 		
 <p>There may be one or more yes/no prompts for you to answer at the
-terminal; <font color=red>keep an eye on the terminal until it says "Start annotating sequences"</font>,
+terminal; <font color=green>keep an eye on the terminal until it says "Start annotating sequences"</font>,
 at which point, it will run without any further prompts. For example, 
 if the <tt>GO database</tt> has not been built yet (see Step 5), the following will be written to the terminal:		
-<pre class=tt>
+<pre>
 +++Warning: GO_tree go_demo is missing; ignoring GO step
 --Please confirm above parameters. Continue with annotation?  (y/n)?
 				</pre>
 				Answer 'y' to continue.
-<p>The output to the terminal and to the file <tt>projects/demoTra/logs/annotator.log</tt> will look something like 
+<p>The output to the terminal and to the file <tt>projects/demoTra/logs/anno.log</tt> will look something like 
 <a href=anno.log.html class="ext" target="_blank">this log</a> (this includes the GO annotation).
 				
 			<p>4. Click the <tt class=c>Add Remarks or Location</tt> button (bottom of window), a window will popup (not shown).
@@ -151,9 +149,9 @@ if the <tt>GO database</tt> has not been built yet (see Step 5), the following w
 		<p>5. To build the GO database, see <a href="AnnoDBs.html#demo" class="ext" target="_blank">
 		Demo annotation setup</a>. Then execute <tt class=c>GO Only</tt>.
 
-<p><i><b>Time for adding the GOs</b></i>: This takes longer than the other TCW steps, where it takes around 2 to 5 minutes for this demo. It has been timed
-on Linux with both Oracle MySQL and MariaDB 10.0.11, and on Mac with Oracle MySQL. However, the time for Linux MariaDB 5.5.56 was significantly longer,
-and the reason has not been determined. If it takes a lot longer than 4 minutes for this step, check your max_allows_packet (see <a href=Trouble.html class="ext" target="_blank">Trouble shooting</a>).
+<p><font color=green>Time for adding the GOs</font>: This take longer than the other TCW steps, where it can takes around 2 to 5 minutes for this demo.  
+If it takes a lot longer than 4 minutes for this step, 
+check your <tt>max_allows_packet</tt> (see <a href=../Trouble.html class="ext" target="_blank">Trouble shooting</a>).
 					
 			<p>6. To compute differential expression (DE), install R and the respective packages. From the command line, execute
 <pre class=tt>
@@ -163,7 +161,7 @@ and the reason has not been determined. If it takes a lot longer than 4 minutes 
 				packages, and how to add DE p-values to the TCW database. If Step 5 has been run, then you can also add
 				the p-values for the GO.
 
-		<p>
+		<p>See <a href=tra.html class="ext" target="_blank">overview</a> for the final demoTra overview..
 <a name=new></a>
 <table width='100%'><tr><td align='left' >		
 <h2>CREATING A NEW PROJECT</h2>
@@ -405,7 +403,6 @@ the Sequence Dataset panel, and this filename will be automatically entered into
 </td>
 </tr>	
 </table>
-
 		
 <p>If your files are not in one directory, or not named correctly, you will need to add them individually
 using the <tt class=c>Add Rep File</tt>. You probably will need to edit the "Rep name" column; to edit the name,
@@ -417,7 +414,6 @@ the main window.
 
 
 <p>	
-
 		<a name=asse></a>
 		<table width='100%'><tr><td align='left' >
 <h2>Instantiation (with optional assembly)</h2>	
@@ -425,10 +421,10 @@ the main window.
 
 <p><tt class=c>Skip Assembly</tt>:
 If the input is already assembled transcript sequences, or protein sequences, or gene sequences, 
-check this option. 
+check this option.
 If the datasets are ESTs, or multiple transcript datasets that you want to assemble together,
-do not select this option. You can tune the assembly with <tt class=c>Options</tt>, but it typically is not
-necessary.
+do not select this option and see <a href=./AssemGuide.html  class="ext" target="_blank">Assembly Guide</a>.
+
 <p>Press <tt class=c>Instantiate</tt> to either assemble or finalize the sequences in the database.
 				
 		
@@ -638,7 +634,7 @@ enough; in this case, once <code>runSingleTCW</code> is ready to annotate your d
 </pre>
 You can increase the memory size in the <code>execAnno</code> script.
 <p>
-Also see <a href=Trouble.html class="ext" target="_blank">Trouble shooting</a>.
+Also see <a href=../Trouble.html class="ext" target="_blank">Trouble shooting</a>.
 <p>
 		<a name=DiffExp></a>
 		<table width='100%'><tr><td align='left' >
@@ -712,57 +708,8 @@ brings up a panel of mySQL databases with the <tt>sTCW_</tt> prefix, where datab
 <li>From the command line using the <tt>singleTCW ID</tt> or <tt>database name</tt> as a parameter (e.g. <tt>viewSingleTCW tra</tt>).
 <li>Through the button at the bottom of the Manager interface (<a href="#Fig1">Fig. 1</a>). 
 </ol>
-		The <a href=http://www.agcol.arizona.edu/software/tcw/tour class="ext" target="_blank">TCW Tour</a> shows the various displays. 
-		<p>
+		The <a href=../tour class="ext" target="_blank">TCW Tour</a> shows the various displays. 
 		
-<a name=appl></a>
-<table width='100%'><tr><td align='left' >
-<h3>Running as an applet</h3>
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a></td></tr></table>
-To run it as an applet:
-<ol>
-<li>The <tt>stcw.jar</tt> has to be <b><i>signed</i></b>, e.g. purchase the code-signing certificate from a site such as Digicert (very easy to do), or your university
-may have an InCommon account you can use.
-<li>You will need the mysql-connector-java-5.0.5-bin.jar (email tcw at agcol.arizona.edu for more information).
-<li>Modify the following code as appropriate and put it in your cgi-bin:
-</ol>	
-		<pre>
-		&lt;HTML&gt;
-		&lt;HEAD&gt;
-		&lt;TITLE&gt;viewSingleTCW&lt;/TITLE&gt;
-		&lt;/HEAD&gt;
-		&lt;BODY&gt;
-		Running viewSingleTCW  (please wait)
-  		&lt;applet 
-    		CODE="jpave.viewer.STCWApplet"
-        	ARCHIVE="<tt>your_location_of_the_jar</tt>/stcw.jar,jars/mysql-connector-java-5.0.5-bin.jar"
-    		width=0 height=0
-  		MAYSCRIPT&gt;
-  		&lt;param name="ASSEMBLY_DB" value="sTCW_<tt>your_db_name</tt>"&gt;
-  		&lt;param name="DB_URL"      value="<tt>www.your.hostname</tt>"&gt;
-  		&lt;param name="DB_USER"     value="<tt>your username (read-only)</tt>"&gt;
-  		&lt;param name="DB_PASS"     value="<tt>your password</tt>"&gt;
-  		&lt;param name="ASSEMBLY_ID" value="<tt>your singleTCW ID</tt>"&gt;
-  		&lt;param name="DESCRIPTION" value=""&gt;
-  		&lt;hr&gt;
-  		Unable to display the viewSingleTCW applet. Please verify your Java installation.
-  		&lt;hr&gt;
-  		&lt;/applet&gt;
-		&lt;/BODY&gt;
-		&lt;/HTML&gt;
-		</pre>
-<i>Important Notes:</i> 
-<ul>
-<li>Before using it on the web, run it as a desktop application as it may need to
-update the Overview page. 
-<br>That is, every time the database is changed, the Overview needs
-to be updated, which is done when you execute <code>viewSingleTCW</code> or the <tt>Overview</tt> option from
-any of the "run" executables. If it is not updated before running from the web, the web applet will
-not work because it cannot write to the database for overview update. 
-<li>Also, you may need to use a port other than the default
-MySQL port; see <a href="Trouble.html#ports" class="ext" target="_blank">MySQL port access</a>.
-Also, users may need to increase their allowed memory for Java applets,
-see <a href="Trouble.html#memset" class="ext" target="_blank">Out of memory</a>.
 </ul>	
 
 <br>

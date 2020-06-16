@@ -1,12 +1,14 @@
 #!/bin/sh
-# setenv R_HOME to location of complete R install, e.g. /usr/lib64/R
-# which must have the /etc under it with Renviron
+# setenv R_HOME to location of complete R install
 
-# Linux: may be able to use external/jri unless its the wrong versions
-JPATH=external/jri
+
+# Linux: setenv R_HOME /usr/lib64/R
+#JPATH=/usr/lib64/R/library/rJava/jri
+JPATH=Ext/linux/jri
 echo Using Linux path
 
-# Mac-OSX: setenv R_HOME /Library/Frameworks/R.framework/Resources
+# MacOS: setenv R_HOME /Library/Frameworks/R.framework/Resources
+#JPATH=Ext/mac/jri
 #JPATH=/Library/Frameworks/R.framework/Resources/library/rJava/jri 
 #echo Using MAC-OS path
 

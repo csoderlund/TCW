@@ -9,29 +9,52 @@
 <font color="#000000" face="Verdana, Arial, Helvetica, sans-serif" size="2"> 
 <p><b><big><u>TCW Version 3.0</u></b></big>
 
-<p>Release v3.0.2 5-May-20
+<p><b>v3.0.3 16-June-20</b>
+<ol>
+<li>MySQL:
+<ul>
+<li>The code has been updated to work with MySQL v8. 
+<li>The MySQL schema has a slight change, which TCW applies the first time a sTCW database.
+<li><tt>./runSingleTCW -v</tt> to check important MySQL variables
+</ul>
+<li>External programs:
+<ul>
+<li>The directory <tt>external</tt> has been renamed <tt>Ext/linux</tt> and <tt>external_osx</tt>
+renamed <tt>Ext/mac</tt>. 
+<li>Blast has been added to the package in <tt>Ext/linux</tt> and  <tt>Ext/mac</tt>.
+<li>TCW was tested with MacOS 10.15 (Catalina), where some of the external programs that
+worked on MacOS 10.9 no longer worked; these have been updated. 
+<li>TCW does a better job of checking and providing errors,
+and <a href=./Trouble.html  class="ext" target="_blank">Trouble Shooting</a> has better instructions on how to fix problems.
+</ul>
+<li>TCW can no longer be run as an Applet.
+<li>SingleTCW has a little more information on the first line of the overview.
+<li>The documentation has been updated.
+</ol>
+
+<p><b>v3.0.2 5-May-20</b>
 
 <p>runDE: The R-script/edgeRglm.R has been changed from importing the p-values to importing the FDR values.
 <br>Github: The /doc directory of html instructions has been added to Github.
 
-<p>Release v3.0.1 30-Oct-19
+<p><b>v3.0.1 30-Oct-19</b>
 <ul>
 <li>SingleTCW:
 <ol>
-<li>MariaDB 10.4.7 broke the assembler, which has been fixed. Note, it runs slower with MariaDB compared to MySQL.
-<li>The overview is available after 'Build Database' in order to show the libraries loaded.
+	<li>MariaDB 10.4.7 broke the assembler, which has been fixed. 
+	<li>The overview is available after 'Build Database' in order to show the libraries loaded.
 </ol>
 <li>MultiTCW:
 <ol>
-<li>For runMultiTCW, selecting a different database from the dropdown is a little faster.
-<li>In viewMultiTCW, the KaKs columns and queries are only available if the data has been loaded.
+	<li>For runMultiTCW, selecting a different database from the dropdown is a little faster.
+	<li>In viewMultiTCW, the KaKs columns and queries are only available if the data has been loaded.
 </ol>
 </ul>
 
-<p>Release v3.0 10Aug19
+<p><b>v3.0 10-Aug-19</b>
 <ol>
-<li>With this release, the code is on github.com/csoderlund/tcw.
-<li>There was a major internal code cleanup.
+	<li>With this release, the code is on github.com/csoderlund/tcw.
+	<li>There was a major internal code cleanup.
 </ol>
 
 <p><b><big><u>Lost release notes after 1Apr19</u></b></big>

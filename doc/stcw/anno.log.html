@@ -1,213 +1,241 @@
 <html>
 <pre>
-Reading sTCW.cfg
-CPUs/Threads = 1
-pairs_limit = 50
-selfblast file = 
-DB#1
-  DBfasta_1 = UniProt_demo/sp_plants/uniprot_sprot_plants.fasta
-  DBtaxo_1 = plants
-DB#2
-  DBfasta_2 = UniProt_demo/sp_fungi/uniprot_sprot_fungi.fasta
-  DBtaxo_2 = fungi
-DB#3
-  DBfasta_3 = UniProt_demo/sp_invertebrates/uniprot_sprot_invertebrates.fasta
-  DBtaxo_3 = invertebrates
-DB#4
-  DBfasta_4 = UniProt_demo/sp_fullSubset/uniprot_sprot_fullSubset.fasta
-  DBtaxo_4 = fullSubset
-DB#5
-  DBfasta_5 = UniProt_demo/tr_plants/uniprot_trembl_plants.fasta
-  DBtaxo_5 = plants
-DB#6
-  DBfasta_6 = UniProt_demo/tr_fungi/uniprot_trembl_fungi.fasta
-  DBtaxo_6 = fungi
-DB#7
-  DBfasta_7 = UniProt_demo/tr_invertebrates/uniprot_trembl_invertebrates.fasta
-  DBtaxo_7 = invertebrates
+--------------- Annotate Sequences 3.0.3---------------   12-Jun-20 12:47:51
+
+Check database sTCW_demoTra
    sTCW ID:      tra
-   Create:       2016-08-22
+   Create:       2020-05-20
    User Name:    cari
-   Project Path: /data/agcolusers/cari/TCW_2/projects/demoTra
-   This is the first annotation.
+   Project Path: /Users/cari/Workspace/TCW_3/projects/demoTra
+   Database has no annotation.
 
 Checking blast and annoDB fasta files
-   1. blast SwissProt Fasta File: projects/DBfasta/UniProt_demo/sp_plants/uniprot_sprot_plants.fasta
-   2. blast SwissProt Fasta File: projects/DBfasta/UniProt_demo/sp_fungi/uniprot_sprot_fungi.fasta
-   3. blast SwissProt Fasta File: projects/DBfasta/UniProt_demo/sp_invertebrates/uniprot_sprot_invertebrates.fasta
-   4. blast SwissProt Fasta File: projects/DBfasta/UniProt_demo/sp_fullSubset/uniprot_sprot_fullSubset.fasta
-   5. diamond Trembl Fasta File: projects/DBfasta/UniProt_demo/tr_plants/uniprot_trembl_plants.fasta
-   6. diamond Trembl Fasta File: projects/DBfasta/UniProt_demo/tr_fungi/uniprot_trembl_fungi.fasta
+   1. diamond SwissProt Fasta File: projects/DBfasta/UniProt_demo/sp_plants/uniprot_sprot_plants.fasta
+   2. diamond SwissProt Fasta File: projects/DBfasta/UniProt_demo/sp_invertebrates/uniprot_sprot_invertebrates.fasta
+   3. diamond SwissProt Fasta File: projects/DBfasta/UniProt_demo/sp_fungi/uniprot_sprot_fungi.fasta
+   4. diamond SwissProt Fasta File: projects/DBfasta/UniProt_demo/sp_bacteria/uniprot_sprot_bacteria.fasta
+   5. diamond SwissProt Fasta File: projects/DBfasta/UniProt_demo/sp_fullSubset/uniprot_sprot_fullSubset.fasta
+   6. diamond Trembl Fasta File: projects/DBfasta/UniProt_demo/tr_plants/uniprot_trembl_plants.fasta
    7. diamond Trembl Fasta File: projects/DBfasta/UniProt_demo/tr_invertebrates/uniprot_trembl_invertebrates.fasta
    Create pairs self blast
+   Create pairs translated self blast
 Complete check files
 
 Check GO database 
    GO database = go_demo
-   Add GO terms
-
-Prepare for annotation
+      Add GO terms
+   
+Start annotating sequences                           12-Jun-20 12:47:56
    211 Sequences loaded 
-Start annotating sequences     22-Aug-16 13:25:41
-   Annotate sequences with blast hits from 7 DB file(s)
-      DB#1 uniprot_sprot_plants.fasta 579kb       22-Aug-16 13:25:41
-         Creating /data/agcolusers/cari/TCW_2/projects/demoTra/uniblasts directory
-         Create sequence file: projects/demoTra/uniblasts/tra_unitrans.fasta
+   Annotate sequences with sequence hits from 7 DB file(s)
+         Creating /Users/cari/Workspace/TCW_3/projects/demoTra/hitResults directory
+         Create sequence file: /projects/demoTra/hitResults/tra_sequences.fa
             Wrote 211 sequence records
-         Use:     blast -evalue 1e-10 -max_target_seqs 25  -num_threads 1
-         OutFile: projects/demoTra/uniblasts/tra_SPpla.tab
+      DB#1 uniprot_sprot_plants.fasta 2Mb       12-Jun-20 12:47:56
          Using existing formated files
-         DB blast completed                                                0m:10s
-      DB#1 hits: tra_SPpla.tab
-         191 annotated sequences                                           0m:03s      1Mb
-         2798 protein-sequence additional pairs 
+         Ext/mac/diamond/diamond blastx -q /Users/cari/Workspace/TCW_3/projects/demoTra/hitResults/tra_sequences.fa -d /Users/cari/Workspace/TCW_3/projects/DBfasta/UniProt_demo/sp_plants/uniprot_sprot_plants.fasta -o /Users/cari/Workspace/TCW_3/projects/demoTra/hitResults/tra_SPpla.dmnd.tab --masking 0 --max-hsps 1 --top 20 -p 4
+         Complete diamond                                                0m:0s
+      DB#1 hits: tra_SPpla.dmnd.tab
+         193 annotated sequences                                         0m:0s  (4Mb)
+         1248 protein-sequence additional pairs 
       DB#1 descriptions: uniprot_sprot_plants.fasta
-         892 unique hits descriptions added from 1000                      0m:01s      2Mb
+         747 unique hits descriptions added from 2933                    0m:0s  (8Mb)
+         Update hit coverage 
 
-      DB#2 uniprot_sprot_fungi.fasta 386kb       22-Aug-16 13:25:56
-         Use:     blast -evalue 1e-10 -max_target_seqs 25  -num_threads 1
-         OutFile: projects/demoTra/uniblasts/tra_SPfun.tab
+      DB#2 uniprot_sprot_invertebrates.fasta 2Mb       12-Jun-20 12:47:57
          Using existing formated files
-         DB blast completed                                                0m:05s
-      DB#2 hits: tra_SPfun.tab
-         121 annotated sequences                                           0m:00s      2Mb
-         1402 protein-sequence additional pairs 
-      DB#2 descriptions: uniprot_sprot_fungi.fasta
-         584 unique hits descriptions added from 603                       0m:02s      1Mb
+         Ext/mac/diamond/diamond blastx -q /Users/cari/Workspace/TCW_3/projects/demoTra/hitResults/tra_sequences.fa -d /Users/cari/Workspace/TCW_3/projects/DBfasta/UniProt_demo/sp_invertebrates/uniprot_sprot_invertebrates.fasta -o /Users/cari/Workspace/TCW_3/projects/demoTra/hitResults/tra_SPinv.dmnd.tab --masking 0 --max-hsps 1 --top 20 -p 4
+         Complete diamond                                                0m:0s
+      DB#2 hits: tra_SPinv.dmnd.tab
+         121 annotated sequences                                         0m:0s  (4Mb)
+         482 protein-sequence additional pairs 
+      DB#2 descriptions: uniprot_sprot_invertebrates.fasta
+         285 unique hits descriptions added from 2403                    0m:0s  (5Mb)
+         Update hit coverage 
 
-      DB#3 uniprot_sprot_invertebrates.fasta 275kb       22-Aug-16 13:26:05
-         Use:     blast -evalue 1e-10 -max_target_seqs 25  -num_threads 1
-         OutFile: projects/demoTra/uniblasts/tra_SPinv.tab
+      DB#3 uniprot_sprot_fungi.fasta 2Mb       12-Jun-20 12:47:58
          Using existing formated files
-         DB blast completed                                                0m:05s
-      DB#3 hits: tra_SPinv.tab
-         133 annotated sequences                                           0m:00s      2Mb
-         1356 protein-sequence additional pairs 
-      DB#3 descriptions: uniprot_sprot_invertebrates.fasta
-         485 unique hits descriptions added from 503                       0m:00s      2Mb
+         Ext/mac/diamond/diamond blastx -q /Users/cari/Workspace/TCW_3/projects/demoTra/hitResults/tra_sequences.fa -d /Users/cari/Workspace/TCW_3/projects/DBfasta/UniProt_demo/sp_fungi/uniprot_sprot_fungi.fasta -o /Users/cari/Workspace/TCW_3/projects/demoTra/hitResults/tra_SPfun.dmnd.tab --masking 0 --max-hsps 1 --top 20 -p 4
+         Complete diamond                                                0m:0s
+      DB#3 hits: tra_SPfun.dmnd.tab
+         112 annotated sequences                                         0m:0s  (4Mb)
+         947 protein-sequence additional pairs 
+      DB#3 descriptions: uniprot_sprot_fungi.fasta
+         566 unique hits descriptions added from 2416                    0m:0s  (7Mb)
+         Update hit coverage 
 
-      DB#4 uniprot_sprot_fullSubset.fasta 524kb       22-Aug-16 13:26:12
-         Use:     blast -evalue 1e-10 -max_target_seqs 25  -num_threads 1
-         OutFile: projects/demoTra/uniblasts/tra_SPful.tab
+      DB#4 uniprot_sprot_bacteria.fasta 1Mb       12-Jun-20 12:47:59
          Using existing formated files
-         DB blast completed                                                0m:08s
-      DB#4 hits: tra_SPful.tab
-         144 annotated sequences                                           0m:01s      2Mb
-         2178 protein-sequence additional pairs 
-      DB#4 descriptions: uniprot_sprot_fullSubset.fasta
-         913 unique hits descriptions added from 980                       0m:01s      2Mb
+         Ext/mac/diamond/diamond blastx -q /Users/cari/Workspace/TCW_3/projects/demoTra/hitResults/tra_sequences.fa -d /Users/cari/Workspace/TCW_3/projects/DBfasta/UniProt_demo/sp_bacteria/uniprot_sprot_bacteria.fasta -o /Users/cari/Workspace/TCW_3/projects/demoTra/hitResults/tra_SPbac.dmnd.tab --masking 0 --max-hsps 1 --top 20 -p 4
+         Complete diamond                                                0m:0s
+      DB#4 hits: tra_SPbac.dmnd.tab
+         59 annotated sequences                                          0m:0s  (4Mb)
+         819 protein-sequence additional pairs 
+      DB#4 descriptions: uniprot_sprot_bacteria.fasta
+         532 unique hits descriptions added from 2020                    0m:0s  (7Mb)
+         Update hit coverage 
 
-      DB#5 uniprot_trembl_plants.fasta 1Mb       22-Aug-16 13:26:23
-         Use:     diamond -e 1e-03 -k 25 -t tmpDmnd --threads 1
-         OutFile: projects/demoTra/uniblasts/tra_TRpla.tab
+      DB#5 uniprot_sprot_fullSubset.fasta 4Mb       12-Jun-20 12:47:59
          Using existing formated files
-         DB blast completed                                                0m:32s
-      DB#5 hits: tra_TRpla.tab
-         207 annotated sequences                                           0m:01s      2Mb
-         3308 protein-sequence additional pairs 
-      DB#5 descriptions: uniprot_trembl_plants.fasta
-         1255 unique hits descriptions added from 1504                     0m:01s      3Mb
+         Ext/mac/diamond/diamond blastx -q /Users/cari/Workspace/TCW_3/projects/demoTra/hitResults/tra_sequences.fa -d /Users/cari/Workspace/TCW_3/projects/DBfasta/UniProt_demo/sp_fullSubset/uniprot_sprot_fullSubset.fasta -o /Users/cari/Workspace/TCW_3/projects/demoTra/hitResults/tra_SPful.dmnd.tab --masking 0 --max-hsps 1 --top 20 -p 4
+         Complete diamond                                                0m:0s
+      DB#5 hits: tra_SPful.dmnd.tab
+         134 annotated sequences                                         0m:0s  (4Mb)
+         1361 protein-sequence additional pairs 
+      DB#5 descriptions: uniprot_sprot_fullSubset.fasta
+         686 unique hits descriptions added from 5360                    0m:0s  (8Mb)
+         Update hit coverage 
 
-      DB#6 uniprot_trembl_fungi.fasta 847kb       22-Aug-16 13:26:58
-         Use:     diamond -e 1e-03 -k 25 -t tmpDmnd --threads 1
-         OutFile: projects/demoTra/uniblasts/tra_TRfun.tab
+      DB#6 uniprot_trembl_plants.fasta 10Mb       12-Jun-20 12:48:01
          Using existing formated files
-         DB blast completed                                                0m:31s
-      DB#6 hits: tra_TRfun.tab
-         164 annotated sequences                                           0m:00s      3Mb
-         1893 protein-sequence additional pairs 
-      DB#6 descriptions: uniprot_trembl_fungi.fasta
-         918 unique hits descriptions added from 1117                      0m:01s      3Mb
+         Ext/mac/diamond/diamond blastx -q /Users/cari/Workspace/TCW_3/projects/demoTra/hitResults/tra_sequences.fa -d /Users/cari/Workspace/TCW_3/projects/DBfasta/UniProt_demo/tr_plants/uniprot_trembl_plants.fasta -o /Users/cari/Workspace/TCW_3/projects/demoTra/hitResults/tra_TRpla.dmnd.tab --masking 0 --max-hsps 1 --top 20 -p 4
+         Complete diamond                                                0m:1s
+      DB#6 hits: tra_TRpla.dmnd.tab
+         209 annotated sequences                                         0m:1s  (4Mb)
+         4723 protein-sequence additional pairs 
+      DB#6 descriptions: uniprot_trembl_plants.fasta
+         4056 unique hits descriptions added from 13890                  0m:2s  (28Mb)
+         Update hit coverage 
 
-      DB#7 uniprot_trembl_invertebrates.fasta 699kb       22-Aug-16 13:27:32
-         Use:     diamond -e 1e-03 -k 25 -t tmpDmnd --threads 1
-         OutFile: projects/demoTra/uniblasts/tra_TRinv.tab
+      DB#7 uniprot_trembl_invertebrates.fasta 5Mb       12-Jun-20 12:48:06
          Using existing formated files
-         DB blast completed                                                0m:31s
-      DB#7 hits: tra_TRinv.tab
-         175 annotated sequences                                           0m:00s      3Mb
-         2127 protein-sequence additional pairs 
+         Ext/mac/diamond/diamond blastx -q /Users/cari/Workspace/TCW_3/projects/demoTra/hitResults/tra_sequences.fa -d /Users/cari/Workspace/TCW_3/projects/DBfasta/UniProt_demo/tr_invertebrates/uniprot_trembl_invertebrates.fasta -o /Users/cari/Workspace/TCW_3/projects/demoTra/hitResults/tra_TRinv.dmnd.tab --masking 0 --max-hsps 1 --top 20 -p 4
+         Complete diamond                                                0m:0s
+      DB#7 hits: tra_TRinv.dmnd.tab
+         163 annotated sequences                                         0m:0s  (5Mb)
+         2425 protein-sequence additional pairs 
       DB#7 descriptions: uniprot_trembl_invertebrates.fasta
-         872 unique hits descriptions added from 1040                      0m:00s      4Mb
+         1644 unique hits descriptions added from 6884                   0m:1s  (14Mb)
+         Update hit coverage 
 
-      Set DB filters for 208 contigs 
-         Sequences with hits to multiple frames: 4
-      Finish filter                                                        0m:04s      4Mb
+      Process all hits for 209 sequences 
+            3 Sequences with hits to multiple frames 
+      Finish filter                                                      0m:2s  (5Mb)
       Creating species table
-         Read from database....
-         Insert into database....
-      Finish creating species table                                        0m:00s      3Mb
-+++Warning: 217 species length warnings -- see file hitsWarnings.txt
-   Total 208 annotated  3 unannotated                                      2m:28s      3Mb
+         Read species per sequence from database (1,211)
+                12k  total hits                                        
+               992   total species
+         Insert species counts into database
+         Insert species totals per database
+      Finish creating species table                                      0m:0s  (5Mb)
+
+   Finished 209 annotated  2 unannotated                                 0m:15s
     
    Annotate  with GC and ORF
-      ### Training data from annoDB hits
-      ### Abs(Log Len Ratio)<= 0.2
-      ### Use hit if evalue<= 1.0E-5
+      ### Use ATG only for start site
+      ### Rule 1: Use Good hit: E-value <=1E-10 or Sim >= 20%
+      ### Rule 2: Use longest ORF if Log Len Ratio > 0.5
+      ### Rule 3: Use best Markov score
+      ###         Train using best hits
+      ### Good coverage: Hit overlap >= 95% with Sim 60% (internal params)
 
-      Loading protein information.... 
-           208 Sequences with protein hits 
-           167 Sequences used for training 
-             2 Sequences with Stops within hits - ignored
-            39 E-value >  1.0e-50 - ignored
-           52k Total codons
-      Writing ORF information to files in projects/demoTra
-         From 211 (100.0%)  selected ORFs:                
-           190 (90.0%) ORF >=300
-           195 (92.4%) Longest ORF
-            55 (26.1%) Has Start&Stop
-           208 (98.6%) Has Best Annotation
-           202 (95.7%) LLR>=0 Codon Usage
-           202 (95.7%) LLR>=0 Hexamer Usage
-           136 (64.5%) Best codon LLR
-           868 Average ORF length
+      Load all sequence from database
+             211 Sequences to process
+               2 Sequences with no hits 
+             209 Sequences with hit
+             209 Good hit
+              59 Good coverage 
+               5 Hits with stops, find longest non-Stop region in hit
+      Complete load
+      Start computation of coding potential
+         Train and write hit regions to /projects/demoTra/orfFiles/hitRegions.fa
+             204 Sequences used for training 
+            175k Bases used for training
+         Compute Codon frequency and write to /projects/demoTra/orfFiles/scoreCodon.txt
+         Compute Markov loglikelihood and write to /projects/demoTra/orfFiles/scoreMarkov.txt
+         Save training results to database
+      Complete training                                                  0m:3s  (6Mb)
+      Start ORF computation
+      Writing ORF information to database and files in /projects/demoTra/orfFiles
+      Complete ORF computation                                           0m:0s  (6Mb)
+
+      Save all best ORFs to the database
+      Save 1266 all frame ORFs to the database
+      Finish saving ORF data                                             0m:0s  (6Mb)
+      ----------------------------------------------------------------------
+      Total ORFs: 211 (100.0%)
+            Has Hit             209 (99.1%)    ORF>=300         191 (90.5%)    MultiFrame     3  (1.4%)  
+            Is Longest ORF      200 (94.8%)    Has Start&Stop    53 (25.1%)    >=9 Ns in ORF  0    (0%)  
+            Markov Best Score  211 (100.0%)    Has Start|Stop   164 (77.7%)    Stops in Hit   5  (2.4%)  
+            All of the above    199 (94.3%)    Average ORF len         860         
+         
+            Additional ORF info                   For seqs with hit           209     Hit w/good coverage           59  
+            Markov Good Frame    211 (100.0%)     Longest & Markov    199 (95.2%)     Longest & Markov     59 (100.0%)  
+            ORF=Hit               123 (58.3%)     Is Longest ORF      199 (95.2%)     Is Longest ORF       59 (100.0%)  
+            ORF>Hit                76 (36.0%)     Markov Best Score  209 (100.0%)     Markov Best Score    59 (100.0%)  
+            ORF~Hit                10  (4.7%)     Markov Good Frame  209 (100.0%)     Markov Good Frame    59 (100.0%)  
+            ORF>Hit & HasEnds      21 (10.0%)     Has Start & Stop     53 (25.4%)     Has Start & Stop      45 (76.3%)  
+            ORF=Hit & HasEnds      30 (14.2%)     Not hit frame                 0     ORF=Hit & HasEnds     29 (49.2%)  
+                              
          Frame: 3(13.3%)  2(19.9%)  1(22.3%)  -1(17.1%)  -2(15.2%)  -3(12.3%) 
-   Complete annotation with ORF and GC                                     0m:03s      4Mb
-Finished annotating sequences                                          Total= 2m:32s
- 
-Start sequence comparisons     22-Aug-16 13:28:13
+                                                              
+      GC Content: 48.65%
+            Pos1  18.3%              5UTR    CDS   3UTR              5UTR     CDS    3UTR  
+            Pos2  13.7%    %GC      43.91  48.78  36.27    Length     22k    181k     25k  
+            Pos3  16.6%    CpG-O/E   0.88   0.71   0.63    AvgLen   102.3   859.7   117.1  
+                                          
+      ----------------------------------------------------------------------
+      Wrote 41 ORFs to allGoodORFs.pep.fa and allGoodORFs.scores.txt
+   Complete annotation with ORF and GC                                   0m:4s
+
+Finished annotating sequences                                           0m:20s
+
+Start sequence comparisons                           12-Jun-20 12:48:16
    Running Sequence selfblast 
-         Execute:     /opt/users/bin/blastplus/blastn
-         Parameters:  -evalue 1e-10 -max_target_seqs 25 
-         OutFile:     projects/demoTra/uniblasts/tra_blast_self.tab
-         Format database projects/demoTra/uniblasts/tra_unitrans.fasta
-         Complete formatting, start search                                 0m:00s
-   Complete /opt/users/bin/blastplus/blastn self-blast                     0m:00s
+         Format file for blast
+         Ext/mac/blast/makeblastdb -dbtype nucl -in /Users/cari/Workspace/TCW_3/projects/demoTra/hitResults/tra_sequences.fa
+         Complete formatting                                             0m:0s
+         Ext/mac/blast/blastn -query /Users/cari/Workspace/TCW_3/projects/demoTra/hitResults/tra_sequences.fa -db /Users/cari/Workspace/TCW_3/projects/demoTra/hitResults/tra_sequences.fa -out /Users/cari/Workspace/TCW_3/projects/demoTra/hitResults/tra_blast_self.tab -outfmt 6 -evalue 1e-20 -max_hsps 1 -num_threads 4 
+Complete blastn                                      12-Jun-20 12:48:16   0m:0s
+   Running Sequence translated selfblast
+         Using existing formated files
+         Ext/mac/blast/tblastx -query /Users/cari/Workspace/TCW_3/projects/demoTra/hitResults/tra_sequences.fa -db /Users/cari/Workspace/TCW_3/projects/demoTra/hitResults/tra_sequences.fa -out /Users/cari/Workspace/TCW_3/projects/demoTra/hitResults/tra_blast_tself.tab -outfmt 6 -evalue 1e-05 -max_hsps 1 -max_target_seqs 25 -num_threads 4 
+Complete tblastx                                     12-Jun-20 12:48:17   0m:1s
    Find pairs to align
-       20 Pairs from self-blast 
-       20 Total unique pairs 
-   Aligning 20 pairs
-Finished 20 contig comparisons                                         Total= 0m:05s
- 
-Start GO update                22-Aug-16 13:28:19
+      415 Pairs from tblastx self-blast 
+        0 Additional pairs from self-blast 
+      415 Total unique pairs 
+   Aligning best 30 out of 415 pairs, due to Pairs limit in Options
+Finished 30 sequence comparisons                                         0m:3s
+
+Start GO update                                      12-Jun-20 12:48:20
    Create database GO tables
    Computing GOs for:
              211 Sequence
-           5,919 Unique hits
-   Add GO/Interpro/Kegg/Pfam/EC to unique hits table...
-      5692 GO, 5856 Interpro, 3078 KEGG, 5655 PFam, 2378 EC                0m:00s     23Mb
-   Determine assigned GOs ...
-      Build hit to assigned GO mapping...
-           2,552 assigned GOs                                              0m:01s     27Mb
-      Create hit to assigned GO table ...
-          31,169 hit-GO pairs                                              0m:02s     28Mb
-      Find all ancestors...                     
-      Copy graph_path from go_demo for GOs...
-           5,516 assigned and ancestor GOs                                 0m:07s     42Mb
-   Assign GOs to sequences ...           
-             207 sequences have bestEval or bestAnno with GOs 
-               0 sequences do not have bestEval or bestAnno with GOs 
-               4 sequences that have no GO                                 0m:15s     42Mb
+           8,516 Unique hits
+   Add GO/Interpro/Kegg/Pfam/EC to unique hits table
+           8,088 GO
+           8,324 Interpro
+           3,932 KEGG
+           8,161 PFam
+           3,419 EC                                                      0m:0s  (87Mb)
+   Build hit-GO table
+      Get hits  
+           8,088 hits to process                                         0m:0s  (91Mb)
+      Hit to GO mapping                       
+           2,223 assigned GOs                                            0m:1s  (93Mb)
+      Insert into hit-go table...
+          37,418 hit-GO pairs                                            0m:6s  (93Mb)
+      Find all inherited...                     
+           5,002 assigned and inherited GOs                              0m:3s  (111Mb)
+   Build Seq-GO table ...           
+      Insert into seq-go table...    
+             200 sequences have bestEval or bestAnno with GOs 
+               7 sequences do not have bestEval or bestAnno with GOs 
+               4 sequences have no GO                                    0m:8s  (111Mb)
       Update database with best Hit with GO per sequence...           
-             207  update sequences with best Hit with GO                   0m:00s     22Mb
-   Create GO information table
-           5,516 added unique GOs                                          0m:07s     22Mb
-   Add GO tree
-         129,334 branches                                                  0m:08s     22Mb
-Finish GO update                                                       Total= 0m:44s
- 
+             207  update sequences with best Hit with GO                 0m:0s  (88Mb)
+   Build GO tables
+      Create graph_path from go_demo for GOs
+           5,002  processed                                              0m:3s  (88Mb)
+      Create GO information table
+           5,002 added unique GOs                                        0m:9s  (88Mb)
+      Create GO tree
+          93,395 branches                                                0m:3s  (87Mb)
+Finish GO update                                                         0m:37s
+Complete Overview                                                        0m:0s
 
-End annotation for demoTra                                            Total= 3m:22s
+End annotation for demoTra                                              1m:7s
+-----------------------------------------------------
 </pre>
 </html>
- 

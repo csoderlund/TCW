@@ -486,27 +486,11 @@ public class CoreDB {
     /***************************************************
      * Static methods
      */
-	// called from overview and above
-	static public void addColumnKludge(DBConn mDB) {
-		try {
-			if (!mDB.tableColumnExists("schemver", "annoVer")) {
-				mDB.executeUpdate("alter table schemver add annoVer tinytext");
-				mDB.executeUpdate("alter table schemver add annoDate tinytext");
-			}
-			if (!mDB.tableColumnExists("assem_msg", "orf_msg")) {
-				mDB.executeUpdate("alter table assem_msg add orf_msg text");
-			}
-			if (!mDB.tableColumnExists("assem_msg", "gc_msg")) {
-				mDB.executeUpdate("alter table assem_msg add gc_msg text");
-			}
-		}
-		catch (Exception e) {ErrorReport.reportError(e, "Updating annotation verion");}
-	}
+	
 	// called from DoORF and DoUniProt.processAllDBblastFiles
 	static public void updateAnnoVer(DBConn mDB) {
 		try {
-			addColumnKludge(mDB);
-			mDB.executeUpdate("update schemver set annoVer='" + Version.strTCWver + "'");
+			mDB.executeUpdate("update schemver set annoVer='" +  Version.strTCWver + "'");
 			mDB.executeUpdate("update schemver set annoDate='" + Version.strRelDate + "'");
 		}
 		catch (Exception e) {ErrorReport.reportError(e, "Updating annotation verion");}

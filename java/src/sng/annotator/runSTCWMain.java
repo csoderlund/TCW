@@ -94,7 +94,7 @@ public class runSTCWMain
 		// 3. create log file
 		if (bdoAnno || doGO || doRecalcORF) {
 			Out.createLogFile(getCurProjPath(), Globals.annoFile);
-			Out.PrtDateMsg("\n--------------- Annotate Sequences ---------------");
+			Out.PrtDateMsg("\n--------------- Annotate Sequences " + Globalx.strTCWver + "---------------");
 		}
 		
 		// 4. create database connection
@@ -175,7 +175,6 @@ public class runSTCWMain
 		catch (Exception e) {}
 
 	/*** Finally do executions ***/
-		Out.Print("\n-------------------------------------------------------");
 			
 		if (bDelAnno) 
 			if (!sqlObj.deleteAnnotation(true)) {
@@ -213,6 +212,7 @@ public class runSTCWMain
 				Overview viewObj;
 				if (cover1>0 || cover2>0) viewObj = new Overview(mDB, cover1, cover2);
 				else viewObj = new Overview(mDB);
+				
 				viewObj.createOverview(new Vector <String> () );
 			}
 			catch (Exception e) {}

@@ -803,8 +803,8 @@ public class DoUniProt
         			annoSet.clear(); hitList.clear();
         		}// end loop through contig list
         		
-        		// finished setting all filters
-        		mDB.executeUpdate("update pja_db_unitrans_hits set rank=(filter_best+filter_ovbest)");
+        		// finished setting all filters   CAS303 changed rank to best_rank for mySQL v8
+        		mDB.executeUpdate("update pja_db_unitrans_hits set best_rank=(filter_best+filter_ovbest)");
         		
         		System.err.print("                                                           \r");
         		Out.PrtSpCntMsgZero(2, countSP, "replaced bestAnno with best SwissProt");

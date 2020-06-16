@@ -131,28 +131,36 @@ public class ViewerSettings {
 		public String [] getSelectedColumns() { return getString("PAIRCOLUMNS").split(","); }
 		
 		public void setSelectedColumns(String [] columns) {
-			String storeVal = columns[0];
-			for(int x=1; x<columns.length; x++) storeVal += "," + columns[x];
-			putString("PAIRCOLUMNS", storeVal);
+			if (columns.length>0) {
+				String storeVal = columns[0];
+				for(int x=1; x<columns.length; x++) storeVal += "," + columns[x];
+				putString("PAIRCOLUMNS", storeVal);
+			}
 		}
 	}
 	public class MemberSettings {
 		public String [] getSelectedColumns() { return getString("MEMBERCOLUMNS").split(","); }
 		
 		public void setSelectedColumns(String [] columns) {
-			String storeVal = columns[0];
-			for(int x=1; x<columns.length; x++) storeVal += "," + columns[x];
-			putString("MEMBERCOLUMNS", storeVal);
+			if (columns.length>0) {
+				String storeVal = columns[0];
+				for(int x=1; x<columns.length; x++) storeVal += "," + columns[x];
+				putString("MEMBERCOLUMNS", storeVal);
+			}
 		}
 	}
 	
 	public class SeqSettings {
-		public String [] getSelectedColumns() { return getString("SEQCOLUMNS").split(","); }
+		public String [] getSelectedColumns() { 
+			return getString("SEQCOLUMNS").split(","); 
+		}
 		
 		public void setSelectedColumns(String [] columns) {
-			String storeVal = columns[0];
-			for(int x=1; x<columns.length; x++) storeVal += "," + columns[x];
-			putString("SEQCOLUMNS", storeVal);
+			if (columns.length>0) {// CAS303 else crash on columns[0]
+				String storeVal = columns[0];
+				for(int x=1; x<columns.length; x++) storeVal += "," + columns[x];
+				putString("SEQCOLUMNS", storeVal);
+			}
 		}
 	}
 	

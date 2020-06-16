@@ -55,8 +55,8 @@ public class Overview {
     public void overview (Vector<String> lines ) throws Exception
     {   
         try {   
-        		boolean found=true;
-        		String pga_msg="", meta_msg="";
+        	boolean found=true;
+        	String pga_msg="", meta_msg="";
     		
             ResultSet rset = mDB.executeQuery("SELECT pja_msg FROM assem_msg");
             if (rset.next() ) {
@@ -100,22 +100,21 @@ public class Overview {
     /*****************************************************
      * 
      ****************************************************/
-    private String computeOverview(Vector <String> lines) 
-    {
-        	try {   
-        		long stime = Out.getTime();
-            setFlags();
-    		    computeSections(lines, true); 
-    		    if (lines.size()<3)
-    		        lines.add("Error creating overview");
-        	    
-        		String text = "";
-        		for (int i=0; i< lines.size(); i++)
-        			text = text + lines.get(i) + "\n";
-      
-        		if (text.contains("\"")) {
-        			text = text.replace("\"", "'"); // crashes if double-quote in title
-        		}
+    private String computeOverview(Vector <String> lines)  {
+    	try {   
+    		long stime = Out.getTime();
+    		setFlags();
+		    computeSections(lines, true); 
+		    if (lines.size()<3)
+		        lines.add("Error creating overview");
+    	    
+    		String text = "";
+    		for (int i=0; i< lines.size(); i++)
+    			text = text + lines.get(i) + "\n";
+  
+    		if (text.contains("\"")) {
+    			text = text.replace("\"", "'"); // crashes if double-quote in title
+    		}
          	// If this is a SKIP_ASSEMBLY, there is no entry so it needs to be inserted
             ResultSet rset = mDB.executeQuery("SELECT pja_msg FROM assem_msg where AID=1");
             if (rset.next() ) {
@@ -132,32 +131,32 @@ public class Overview {
             		// second part is separate so the message is not so long
                 Vector <String> mlines = new Vector <String> ();
                
-            	 	finalAnnoDBs(mlines);
+            	finalAnnoDBs(mlines);
                 finalLegend(mlines);
                  
-	    			for (int i=0; i< mlines.size(); i++) {
-	    				mtext = mtext + mlines.get(i) + "\n";
-	    				lines.add(mlines.get(i));
-	    			}
+    			for (int i=0; i< mlines.size(); i++) {
+    				mtext = mtext + mlines.get(i) + "\n";
+    				lines.add(mlines.get(i));
+    			}
             }
-    			String fullText = text + "\n" + mtext;
-    			if (mDB.tableColumnExists("assem_msg", "meta_msg"))
-    				mDB.executeUpdate("update assem_msg set meta_msg = \"" + mtext + "\" where AID=1"); 
-    			else // strictly to update published v1.3.7 without any other changes
-    				mDB.executeUpdate("update assem_msg set pja_msg = \"" + fullText + "\" where AID=1");
+			String fullText = text + "\n" + mtext;
+			if (mDB.tableColumnExists("assem_msg", "meta_msg"))
+				mDB.executeUpdate("update assem_msg set meta_msg = \"" + mtext + "\" where AID=1"); 
+			else // strictly to update published v1.3.7 without any other changes
+				mDB.executeUpdate("update assem_msg set pja_msg = \"" + fullText + "\" where AID=1");
             rset.close();
             			
            	writeHTML(fullText);
            	Out.PrtMsgTime("Complete Overview", stime);
            	return fullText;
-        	}  
+        }  
         catch ( Exception err ) {
     		    ErrorReport.reportError(err,"Error: adding overview");
             return null;
         }    
     }
     private boolean computeSections(Vector<String> lines, boolean ask) {
-    		try {
+    	try {
 		    Out.prt("\nUpdating overview, this can take awhile on large databases, " +
 		    		" but only is done when database content has changed...");
 		    Out.prt("   Dataset statistics....");
@@ -195,31 +194,46 @@ public class Overview {
     private boolean inputSection(Vector<String> lines) 
     {
 	    try {	 
-	    		if (mDB==null) { 
-	    			lines.add( "Project: cannot create overview");
-	    			return false;
-	    		}
+    		if (mDB==null) { 
+    			lines.add( "Project: cannot create overview");
+    			return false;
+    		}
 	        strAssmID = mDB.executeString( "SELECT assemblyid from assembly");
 	        if (strAssmID==null || strAssmID=="" || strAssmID.contains("Not assembled")) {
-	        		hasTranscripts=false;
-	        		lines.add( "Project: Not instantiated yet");
+	        	hasTranscripts=false;
+	        	lines.add( "Project: Not instantiated yet");
 	        }
-	        else {
-	        		lines.add( "Project: " + strAssmID  + "   #Seqs: " + dff.format(numSeqs)); 
-	        }
-	        	lines.add(" ");
-	        	lines.add("INPUT");
-	        
-	        	if (!inputExp(lines)) return false;
-	        	if (!inputSeq(lines)) return false;
+	        else { // CAS303 add more information in header
+	        	String h = "Project: " + strAssmID ;
+	        	if (isProteinDB) h += "  Protein";
+	        	else if (!hasNoAssembly) h  += "  Assembled";
 	        	
-	        	if (hasTranscripts==false) return false;
+	        	h +=                    "   #Seqs: " + dff.format(numSeqs);
+	        	if (nUniqueHits>0) h += "   #Hits: " + dff.format(nUniqueHits);
+	        	if (nUniqueGOs>0)  h += "   #GOs: " + dff.format(nUniqueGOs);
+	        	
+	        	h += "   ";
+	        	if (hasRPKM) h += " RPKM ";
+	        	if (hasSeqDE) h += " DE ";
+	        	if (hasGODE) h += " GO-DE ";
+	        	
+	        	if (hasPairwise) h += "  Pairs";
+	        	
+	        	lines.add(h); 
+	        }
+        	lines.add(" ");
+        	lines.add("INPUT");
+        
+        	if (!inputExp(lines)) return false;
+        	if (!inputSeq(lines)) return false;
+        	
+        	if (hasTranscripts==false) return false;
 	        return true;
 	    }
-        	catch ( Exception err ) {
-        		ErrorReport.reportError(err,"Error: processing data for overview libriries");
-        		return false;
-        	}
+    	catch ( Exception err ) {
+    		ErrorReport.reportError(err,"Error: processing data for overview libriries");
+    		return false;
+    	}
     }
     
     private boolean inputExp(Vector<String> lines) {
@@ -393,8 +407,7 @@ public class Overview {
         try {
 		    int nCtgHits = mDB.executeCount( "SELECT count(*) FROM contig WHERE bestmatchid is not null" );
 		    zPrtMsg(nCtgHits, "Sequences with hits");
-		    
-		    int nUniqueHits = mDB.executeCount( "SELECT count(*) FROM pja_db_unique_hits ");	
+		    	
 		    zPrtMsg(nUniqueHits,"Unique hits");
 		    
 		    int nTotalHits = mDB.executeCount( "SELECT count(*) FROM pja_db_unitrans_hits ");
@@ -412,8 +425,7 @@ public class Overview {
 		    
 		    int nCtgGOs=0, nCtgBestGOs=0, nHitGOs=0, nSlims=0;
 		    String  slimSubset="";
-		    if (hasGO) {
-                nUniqueGOs = mDB.executeCount( "SELECT count(*) FROM go_info ");  
+		    if (hasGO) {  
                 zPrtMsg(nUniqueGOs,"Unique GOs");
                 
                 nCtgGOs = mDB.executeCount( "SELECT count(DISTINCT CTGID) FROM pja_unitrans_go" );        
@@ -540,38 +552,38 @@ public class Overview {
 		    			" WHERE hit.DBID=" + dbid +
 		    			" order by seq.CTGID, seq.blast_rank");			
 	     		
-		    		while (rs.next()) {
-		    			int hLen = rs.getInt(1);
-		    			int pSim = rs.getInt(2);
-		    			int align = Math.abs(rs.getInt(4)-rs.getInt(3)+1);
-		    			int rank = rs.getInt(5);
-		    			int idx = rs.getInt(6);
-		    			if (noHit[idx] && rank!=1) {
-		    				badRank++;
-		    				if (badRank<=3) Out.PrtWarn("First hit but rank is " + rank + " #DB" + dbid + 
-		    						" " + rs.getString(7));
-		    				if (badRank==3) {
-		    					Out.PrtSpMsg(1,"Further messages surpressed; listed in log file. The hit file and DB fasta file may be inconsistent.");
-		    				}
-		    			}
-		    			if (noHit[idx]) {
-		    				noHit[idx]=false;
-		    				if (pSim>=COVER1) {
-		    					double polap = ((double)align/(double)hLen)*100.0;
-		    					if (polap>=COVER1) cover1[dbid]++;
-		    					
-		    					if (pSim>=COVER2 && polap>=COVER2) cover2[dbid]++;
-		    				}
-		    				bestSimSum[dbid] += (double) pSim;
-		    			}
-		    			totSimSum[dbid] += (double) pSim;
-		    		}
-		    		rs.close();
-		    		
-		    		// even if the indices are not sequential (from assembly), 
-		    		// this is only counting the ones with a value
-		    		for (int i=0; i<maxIdx; i++) if (!noHit[i]) hitSeq[dbid]++;
-		    	   	zPrtMsg(hitSeq[dbid], " Seqs with hits for DB#" + dbid + "             ");
+     			while (rs.next()) {
+	    			int hLen = rs.getInt(1);
+	    			int pSim = rs.getInt(2);
+	    			int align = Math.abs(rs.getInt(4)-rs.getInt(3)+1);
+	    			int rank = rs.getInt(5);
+	    			int idx = rs.getInt(6);
+	    			if (noHit[idx] && rank!=1) {
+	    				badRank++;
+	    				if (badRank<=3) Out.PrtWarn("First hit but rank is " + rank + " #DB" + dbid + 
+	    						" " + rs.getString(7));
+	    				if (badRank==3) {
+	    					Out.PrtSpMsg(1,"Further messages surpressed; listed in log file. The hit file and DB fasta file may be inconsistent.");
+	    				}
+	    			}
+	    			if (noHit[idx]) {
+	    				noHit[idx]=false;
+	    				if (pSim>=COVER1) {
+	    					double polap = ((double)align/(double)hLen)*100.0;
+	    					if (polap>=COVER1) cover1[dbid]++;
+	    					
+	    					if (pSim>=COVER2 && polap>=COVER2) cover2[dbid]++;
+	    				}
+	    				bestSimSum[dbid] += (double) pSim;
+	    			}
+	    			totSimSum[dbid] += (double) pSim;
+	    		}
+	    		rs.close();
+	    		
+	    		// even if the indices are not sequential (from assembly), 
+	    		// this is only counting the ones with a value
+	    		for (int i=0; i<maxIdx; i++) if (!noHit[i]) hitSeq[dbid]++;
+	    	   	zPrtMsg(hitSeq[dbid], " Seqs with hits for DB#" + dbid + "             ");
 	     	}
 	   /* Loop through annoDBs creating table */
 	        String [] dfields =  {"ANNODB",  "ONLY", "EVAL", "ANNO", "UNIQUE", "TOTAL", "AVG", "HIT-SEQ (#SEQ)", "BEST  AVG", "COVER", "COVER"};
@@ -587,41 +599,41 @@ public class Overview {
 	        int r=1;     
 	        
 	        while(rs.next()) {
-        	        	String s, s2;
-        	        	int c=0, j;
-        	      
-        	        	int dbid = rs.getInt(1);
-        	        	
-        	        	s = rs.getString(2).toUpperCase(); 					  //dbtype
-        	        	s2 = rs.getString(3);	rows[r][c++] = s+"-"+s2; // taxonomy
-        	       	   
-        	        	j = rs.getInt(5);		rows[r][c++] = Out.kbFText(j);    //nOnlyDB
-        	        	j = rs.getInt(6);		rows[r][c++] = Out.kbFText(j);		//nBestHits
-        	        	j = rs.getInt(7);		rows[r][c++] = Out.kbFText(j);	   //nOVBesthits
-        	        	
-        	        j = rs.getInt(4);		rows[r][c++] = Out.kbFText(j);    //nUniqueHits
-        	        
-        	        int totPairs = rs.getInt(8);	rows[r][c++] = Out.kbFText(totPairs);  //total hit-seq pairs    	        
-        	       	rows[r][c++] = Out.avg(totSimSum[dbid], totPairs);  
-       	       	
-        	       	int hseq = hitSeq[dbid];
-        	      	rows[r][c++] =  Out.kbFText(hseq) + " " + Out.perFtxtP(hseq, numSeqs); 
-         	  
-        	        rows[r][c++] =  Out.avg(bestSimSum[dbid], hseq); 
-        	        rows[r][c++] =  Out.perFtxt(cover1[dbid], hseq); 
-        	        rows[r][c++] =  Out.perFtxt(cover2[dbid], hseq); 
+	        	String s, s2;
+	        	int c=0, j;
+	      
+	        	int dbid = rs.getInt(1);
+	        	
+	        	s = rs.getString(2).toUpperCase(); 					  //dbtype
+	        	s2 = rs.getString(3);	rows[r][c++] = s+"-"+s2; // taxonomy
+	       	   
+	        	j = rs.getInt(5);		rows[r][c++] = Out.kbFText(j);    //nOnlyDB
+	        	j = rs.getInt(6);		rows[r][c++] = Out.kbFText(j);		//nBestHits
+	        	j = rs.getInt(7);		rows[r][c++] = Out.kbFText(j);	   //nOVBesthits
+    	        	
+    	        j = rs.getInt(4);		rows[r][c++] = Out.kbFText(j);    //nUniqueHits
+    	        
+    	        int totPairs = rs.getInt(8);	rows[r][c++] = Out.kbFText(totPairs);  //total hit-seq pairs    	        
+    	       	rows[r][c++] = Out.avg(totSimSum[dbid], totPairs);  
+   	       	
+    	       	int hseq = hitSeq[dbid];
+    	      	rows[r][c++] =  Out.kbFText(hseq) + " " + Out.perFtxtP(hseq, numSeqs); 
+     	  
+    	        rows[r][c++] =  Out.avg(bestSimSum[dbid], hseq); 
+    	        rows[r][c++] =  Out.perFtxt(cover1[dbid], hseq); 
+    	        rows[r][c++] =  Out.perFtxt(cover2[dbid], hseq); 
         	    
 	            r++;
 	        }
 	        rs.close();
 	        
 	        makeTable(nCol, r, dfields, djust, lines); // finish database
-    		}    
+    	}    
         catch ( Exception err ) {
         		ErrorReport.reportError(err,"processing data for overview annotation");
         		return false;
         }
-    		return true;
+    	return true;
     }
    
  // SPECIES table
@@ -629,13 +641,13 @@ public class Overview {
     {
     		try {
 	      
-        	    int nSpecies = mDB.executeCount(  "SELECT count(*) FROM pja_db_species "); 
-        	    if (nSpecies==0) return true;
-        	    
-        	 	lines.add("   Top " + NSPECIES + " species from total: "+ dff.format(nSpecies));
-        	 	zPrtMsg(nSpecies, "species");
-        	 	
-        	    String [] sfields = {"SPECIES (25 char)", " EVAL", " ANNO", "TOTAL", "","SPECIES", " EVAL", " ANNO", "TOTAL"};
+    	    int nSpecies = mDB.executeCount(  "SELECT count(*) FROM pja_db_species "); 
+    	    if (nSpecies==0) return true;
+    	    
+    	 	lines.add("   Top " + NSPECIES + " species from total: "+ dff.format(nSpecies));
+    	 	zPrtMsg(nSpecies, "species");
+    	 	
+    	    String [] sfields = {"SPECIES (25 char)", " EVAL", " ANNO", "TOTAL", "","SPECIES", " EVAL", " ANNO", "TOTAL"};
             int nGrp = 4;
         	    int nCol = sfields.length;
             int nRow = (int) ((float)(NSPECIES/2)+1.0);
@@ -643,56 +655,56 @@ public class Overview {
             int [] justify2 = {1, 0, 0, 0, 1, 1, 0, 0, 0};
             rows = new String[nRow][nCol];
                 	
-	        	ResultSet rset = mDB.executeQuery("SELECT species, count, nBestHits, nOVBestHits FROM pja_db_species " + 
-	  			      " ORDER BY nBestHits DESC, nOVBestHits DESC, count DESC");
-	    
-	        	int r = 0, c = 0, inc=0, oCnt=0, oBest=0, oAnno=0, ne=0, na=0, t=0;
-	        	while(rset.next()) {
-	        		String s = rset.getString(1);
-	        		if (s.length()>25) s = s.substring(0,25);
-	       
-	        		t = rset.getInt(2);
-	        		ne = rset.getInt(3);
-	        		na = rset.getInt(4);
+        	ResultSet rset = mDB.executeQuery("SELECT species, count, nBestHits, nOVBestHits FROM pja_db_species " + 
+  			      " ORDER BY nBestHits DESC, nOVBestHits DESC, count DESC");
+    
+        	int r = 0, c = 0, inc=0, oCnt=0, oBest=0, oAnno=0, ne=0, na=0, t=0;
+        	while(rset.next()) {
+        		String s = rset.getString(1);
+        		if (s.length()>25) s = s.substring(0,25);
+       
+        		t = rset.getInt(2);
+        		ne = rset.getInt(3);
+        		na = rset.getInt(4);
 
-	        		if (r == nRow && inc == 0) {      			
-	        		    	r = 0;
-	        		    	inc = nGrp;
-	        		}
-	        		else if (r == nRow-1 && inc == nGrp){
-	        		    	oCnt+=t;
-	        		    	oBest+=ne;
-	        		    	oAnno+=na;
-	        		    	continue;
-	        		}
-	        		c=inc;
-	        		if (inc == nGrp) rows[r][c++] = " ";	        		
-	            	rows[r][c++] = s;	            	   		
-	        		rows[r][c++] = Out.kbFText(ne);
-	        		rows[r][c++] = Out.kbFText(na);	
-	        		rows[r][c++] = Out.kbFText(t);
-	        			
-	        		r++;        		
-	        	}	
-	        	rset.close();
-	        	
-	        	if (inc==nGrp && r==nRow-1) {
-	        		rows[r][nGrp]= " "; 
-	        		rows[r][nGrp+1]= "Other";
-	        		rows[r][nGrp+2] = Out.kbFText(oBest);
-	        		rows[r][nGrp+3] = Out.kbFText(oAnno);
-	        		
-	        		rows[r][nGrp+4] = Out.kbFText(oCnt);
+        		if (r == nRow && inc == 0) {      			
+        		    	r = 0;
+        		    	inc = nGrp;
         		}
-	        	else if (inc==0) {nRow = r; nCol=nGrp;}
-	        	      
-	        	makeTable(nCol, nRow, sfields, justify2, lines);
-	        	
-    			return true;
+        		else if (r == nRow-1 && inc == nGrp){
+        		    	oCnt+=t;
+        		    	oBest+=ne;
+        		    	oAnno+=na;
+        		    	continue;
+        		}
+        		c=inc;
+        		if (inc == nGrp) rows[r][c++] = " ";	        		
+            	rows[r][c++] = s;	            	   		
+        		rows[r][c++] = Out.kbFText(ne);
+        		rows[r][c++] = Out.kbFText(na);	
+        		rows[r][c++] = Out.kbFText(t);
+        			
+        		r++;        		
+        	}	
+        	rset.close();
+        	
+        	if (inc==nGrp && r==nRow-1) {
+        		rows[r][nGrp]= " "; 
+        		rows[r][nGrp+1]= "Other";
+        		rows[r][nGrp+2] = Out.kbFText(oBest);
+        		rows[r][nGrp+3] = Out.kbFText(oAnno);
+        		
+        		rows[r][nGrp+4] = Out.kbFText(oCnt);
+    		}
+        	else if (inc==0) {nRow = r; nCol=nGrp;}
+        	      
+        	makeTable(nCol, nRow, sfields, justify2, lines);
+        	
+			return true;
         }
         catch ( Exception err ) {
-        		ErrorReport.reportError(err,"processing data for overview annotation");
-        		return false;
+        	ErrorReport.reportError(err,"processing data for overview annotation");
+        	return false;
         }
     }
     // ANNO DBS
@@ -884,13 +896,13 @@ public class Overview {
      **/
     private boolean expStats(Vector<String> lines) 
     {
-    		lines.add( "EXPRESSION" );
-    		if (hasRPKM==false) {
-    			lines.add("   None");
-    			lines.add("");
-    			return true;
-    		}	
-    		if (!expStatsRPKM(lines)) return false;
+		lines.add( "EXPRESSION" );
+		if (hasRPKM==false) {
+			lines.add("   None");
+			lines.add("");
+			return true;
+		}	
+		if (!expStatsRPKM(lines)) return false;
     		
         if (hasSeqDE==false) return true;
         if (!expStatsDE((double)numSeqs, "Sequence", "contig", lines)) return false;
@@ -1067,14 +1079,14 @@ public class Overview {
  	    rows[r][1] = dff.format(nClones);
  	    r++;
  	    
- 	    	if (hasBuried) {
- 	    		int nBuried = mDB.executeCount(  "SELECT COUNT(*) FROM contig " +
- 	    		        "JOIN contclone ON contig.contigid=contclone.contigid " +
- 	    		        "WHERE buried=1");
- 	    		rows[r][0] = "   Buried:";
- 	    		rows[r][1] = dff.format(nBuried);
- 	    		r++;
- 	    	}
+    	if (hasBuried) {
+    		int nBuried = mDB.executeCount(  "SELECT COUNT(*) FROM contig " +
+    		        "JOIN contclone ON contig.contigid=contclone.contigid " +
+    		        "WHERE buried=1");
+    		rows[r][0] = "   Buried:";
+    		rows[r][1] = dff.format(nBuried);
+    		r++;
+    	}
  		if (hasMatePairs) {
  		    int nMatePairs = mDB.executeCount(  "SELECT SUM(frpairs) " +
  				"FROM contig");
@@ -1331,35 +1343,35 @@ public class Overview {
     		return true;
     }
     private void writeHTML(String text) {
-    		try {
-    			if (strAssmID==null) return; // CASz 10oct19
-    			String file=strAssmID + ".html";
-    			if (new File("./projects").exists()) {
-    				File h = new File("./projects/" + Globalx.HTMLDIR);
-    				if (!h.exists()) {
-    					System.out.println("Creating directory projects/" + Globalx.HTMLDIR);
-    					h.mkdir();
-    				}
-    				if (h.exists()) file = "./projects/"  + Globalx.HTMLDIR + "/" + file;
-    			}
-    			Out.prt("Writing overview HTML file: " + file);
-    			FileOutputStream out = new FileOutputStream(file);
-    			PrintWriter fileObj = new PrintWriter(out); 
-    			fileObj.println("<html>");
-    			fileObj.println("<title>" + strAssmID + " overview</title>");
-    			fileObj.println("<body>");
-    			fileObj.println("<center>");
-    			fileObj.println("<h2>TCW overview for " + strAssmID + " </h2>");
-    			fileObj.println("<table width=700 border=1><tr><td>");
-    			fileObj.println("<pre>");
-        		fileObj.println(text);
-        		fileObj.println("</pre>");
-        		
-        		fileObj.println("</body>");
-        		fileObj.println("</html>");
-        		fileObj.close();
-    		}
-    		catch (Exception err) {ErrorReport.reportError(err," writing HTML of overview");}
+		try {
+			if (strAssmID==null) return; // CASz 10oct19
+			String file=strAssmID + ".html";
+			if (new File("./projects").exists()) {
+				File h = new File("./projects/" + Globalx.HTMLDIR);
+				if (!h.exists()) {
+					System.out.println("Creating directory projects/" + Globalx.HTMLDIR);
+					h.mkdir();
+				}
+				if (h.exists()) file = "./projects/"  + Globalx.HTMLDIR + "/" + file;
+			}
+			Out.prt("Writing overview HTML file: " + file);
+			FileOutputStream out = new FileOutputStream(file);
+			PrintWriter fileObj = new PrintWriter(out); 
+			fileObj.println("<html>");
+			fileObj.println("<title>" + strAssmID + " overview</title>");
+			fileObj.println("<body>");
+			fileObj.println("<center>");
+			fileObj.println("<h2>TCW overview for " + strAssmID + " </h2>");
+			fileObj.println("<table width=700 border=1><tr><td>");
+			fileObj.println("<pre>");
+    		fileObj.println(text);
+    		fileObj.println("</pre>");
+    		
+    		fileObj.println("</body>");
+    		fileObj.println("</html>");
+    		fileObj.close();
+		}
+		catch (Exception err) {ErrorReport.reportError(err," writing HTML of overview");}
     }
     
     /*
@@ -1396,6 +1408,9 @@ public class Overview {
   	       if (nDBHits > 0) hasDBhitData = true;
   	        
   	       nAnnoDBs = mDB.executeCount (  "SELECT count(*) FROM pja_databases ");
+  	       if (nAnnoDBs>0) {
+  	    	   nUniqueHits = mDB.executeCount( "SELECT count(*) FROM pja_db_unique_hits ");
+  	       }
   	       
   	       // pairs ?
 		   int nPairs = mDB.executeCount( "SELECT COUNT(*) FROM pja_pairwise");
@@ -1412,14 +1427,13 @@ public class Overview {
   	       if (libs.size()>0) {
 	  	       	Vector <String> del = new Vector <String> ();
 	  	       	for (String lib : libs) {
-	  	    	   		String col = "L__" + lib;
-	  	    	   		int cnt = mDB.executeCount( "Select count(*) from contig where " + col + ">1");
-	  	    	   		if (cnt==0) del.add(lib);
+  	    	   		String col = "L__" + lib;
+  	    	   		int cnt = mDB.executeCount( "Select count(*) from contig where " + col + ">1");
+  	    	   		if (cnt==0) del.add(lib);
 	  	       	}
 	  	       	// Seriously kludgy. There is no way to tell the difference between
-	  	       	// A library of assembled sequences and unassembled library with no exp levels
+	  	       	// a library of assembled sequences and unassembled library with no exp levels
 	  	       	// that caused an error in chkLibExpLevel in setUIForGroupFromFieldsForLibrary in FieldTab
-	  	       	// what a convoluted mess
   	       		for (String lib : del) {
   	       			libs.remove(lib);
   	       			//stmt.executeUpdate("update library set ctglib=1 where libid='" + lib + "'" );
@@ -1438,6 +1452,8 @@ public class Overview {
            if (mDB.tableExists("go_info") && mDB.tableExists("pja_gotree")) {
                hasGO = true;
            
+               nUniqueGOs = mDB.executeCount( "SELECT count(*) FROM go_info ");
+               
                rset = mDB.executeQuery("SHOW COLUMNS FROM go_info");
                while(rset.next()) {
                    String col = rset.getString(1);
@@ -1542,7 +1558,7 @@ public class Overview {
 	private String strAssmID = "";
 	private boolean hasAnno = true, hasTranscripts=true;; 
 	// set flags
-	private int numSeqs = 0, nUniqueGOs=0, nAnnoDBs=0;
+	private int numSeqs = 0, nUniqueHits=0, nUniqueGOs=0, nAnnoDBs=0;
     private boolean hasMatePairs=false, hasBuried=false;
     private boolean hasNoAssembly = false, hasGO;
     private boolean hasDBhitData = false, hasPairwise=false;

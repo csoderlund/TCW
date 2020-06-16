@@ -44,8 +44,8 @@ import sng.dataholders.SequenceData;
 import sng.viewer.STCWFrame;
 import util.methods.ErrorReport;
 import util.methods.Static;
-import util.methods.TCWprops;
 import util.methods.Out;
+import util.methods.FileHelpers;
 import util.ui.MenuMapper;
 import util.ui.MultilineTextPanel;
 import util.ui.UIHelpers;
@@ -137,7 +137,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		if(theHitTable != null)
 			tableAndHeader.add ( resultScroll );
 		
-		if (nHits > 0 && !TCWprops.isMac()) {// URL doesn't work on Mac, but does in applet
+		if (nHits > 0 && !FileHelpers.isMac()) {// URL doesn't work on Mac, but does in applet
 			
 			MultilineTextPanel textPanel = null;
 			try {
@@ -720,22 +720,22 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 			int order = 1;
 			if(!sortAsc) order = -1;
 			
-			switch(field) {
+			switch(field) { // CAS303 replaced new Double and new Integer with (Double) and (Integer)
 			case SORT_BY_NAME: return order * hitName.compareTo(obj.hitName);
-			case SORT_BY_EVAL: return order * (new Double(eval)).compareTo(new Double(obj.eval));
-			case SORT_BY_pSEQ: return order * (new Integer(pSeqAlign)).compareTo(new Integer(obj.pSeqAlign));
-			case SORT_BY_pHIT: return order * (new Integer(pHitAlign)).compareTo(new Integer(obj.pHitAlign));
-			case SORT_BY_FRAME: return order * (new Integer(nFrame)).compareTo(new Integer(obj.nFrame));
-			case SORT_BY_PERCENT: return order * (new Integer(nPercent)).compareTo(new Integer(obj.nPercent));
+			case SORT_BY_EVAL: return order * ((Double) (eval)).compareTo((Double) (obj.eval));
+			case SORT_BY_pSEQ: return order * ((Integer) (pSeqAlign)).compareTo((Integer)(obj.pSeqAlign));
+			case SORT_BY_pHIT: return order * ((Integer)(pHitAlign)).compareTo((Integer)(obj.pHitAlign));
+			case SORT_BY_FRAME: return order * ((Integer)(nFrame)).compareTo((Integer)(obj.nFrame));
+			case SORT_BY_PERCENT: return order * ((Integer)(nPercent)).compareTo((Integer)(obj.nPercent));
 			case SORT_BY_BEST: return order * strBest.compareTo(obj.strBest);
 			case SORT_BY_TYPE: return order * strType.compareTo(obj.strType);
 			case SORT_BY_DESCRIP: return order * strDesc.compareTo(obj.strDesc);
 			case SORT_BY_SPECIES: return order * strSpecies.compareTo(obj.strSpecies);
 			case SORT_BY_HASGO: return order * nGO.compareTo(obj.nGO);
-			case SORT_BY_ALIGN: return order * (new Integer(nAlignLen)).compareTo(new Integer(obj.nAlignLen));
-			case SORT_BY_SeqSTART: return order * (new Integer(nStart)).compareTo(new Integer(obj.nStart));
-			case SORT_BY_SeqEND: return order * (new Integer(nEnd)).compareTo(new Integer(obj.nEnd));
-			case SORT_BY_BIT: return order * (new Double(dBit)).compareTo(new Double(obj.dBit));
+			case SORT_BY_ALIGN: return order * ((Integer)(nAlignLen)).compareTo((Integer)(obj.nAlignLen));
+			case SORT_BY_SeqSTART: return order * ((Integer)(nStart)).compareTo((Integer)(obj.nStart));
+			case SORT_BY_SeqEND: return order * ((Integer)(nEnd)).compareTo((Integer)(obj.nEnd));
+			case SORT_BY_BIT: return order * ((Double)(dBit)).compareTo((Double)(obj.dBit));
 			}
 			return 0;
 		}
@@ -1163,14 +1163,14 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
           		
           		"t.uniprot_id, t.percent_id, t.alignment_len," +
           		"t.ctg_start, t.ctg_end, " +
-          		"t.e_value, t.blast_rank, t.filtered, t.rank, t.filter_gobest,  " +
+          		"t.e_value, t.blast_rank, t.filtered, t.best_rank, t.filter_gobest,  " + // CAS303 rank->best_rank
           		"t.prot_cov, t.ctg_cov, t.bit_score " +
           		
           		"FROM pja_db_unique_hits as q " +
           		"JOIN pja_db_unitrans_hits as t " +
           		"WHERE t.DUHID = q.DUHID " + 
           		"AND   t.CTGID = " + ctgData.getCTGID() + 
-          		" order by t.e_value ASC, t.rank DESC";
+          		" order by t.e_value ASC, t.best_rank DESC";
        
 		  HashSet <String> annodbs = new HashSet <String> (); 
 		  Vector <String> order = new Vector <String> (); // to keep ordered by e-value

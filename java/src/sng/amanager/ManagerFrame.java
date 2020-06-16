@@ -94,8 +94,6 @@ public class ManagerFrame extends JFrame {
 		hostsObj = new HostsCfg();
 		host = hostsObj.host();
 		
-		BlastArgs.availSearch();
-		
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent we) {

@@ -102,12 +102,11 @@ databases; besides allowing taxonomic specific querying in viewSingleTCW,
 the UniProt .dat file is used to extract GO, KEGG, EC and PFam information. 
 (A script is provide to download and format the UniProt databases).
 <p>
-As the UniProt Trembl databases increase in size (tr_bacteria.dat is 76GB as of 5/17/15), it has
+As the UniProt Trembl databases increase in size, it has
 become impractical to search these with BLAST<sup>1</sup>. Fortunately, the 
 <a href=http://ab.inf.uni-tuebingen.de/software/diamond class="ext" target="_blank">diamond</a><sup>2</sup>
-and <a href=http:http://www.drive5.com/usearch/download.html class="ext" target="_blank">usearch<a/><sup>3</sup>
-programs provide supper fast results
-(see <a href=../doc/stcw/Search.html class="ext" target="_blank">fast searching</a>) for timing and results.
+programs provide supper fast results.
+
 <br><center>
 <a  href="img/runSingleAnno.png">
 			<img width=500 src="img/runSingleAnno.png" border=1></a>
@@ -127,8 +126,7 @@ programs provide supper fast results
 <li><b>Diamond</b> can be used for annotation of blastx and blastp searches.
 <br>Buchfink B, Xie C, Huson D (2015) Fast and Sensitive Protein Alignment 
 using DIAMOND, Nature Methods, 12, 59-60 doi:10.1038/nmeth.3176.
-<li><b>Usearch</b> can be used for annotation for blastp and modified blastx searches.
-<br>Edgar,RC (2010) Search and clustering orders of magnitude faster than BLAST, Bioinformatics 26(19), 2460-2461.
+
 <li><b>CAP3</b> is used for assembly. 
 <br>Huang X, Madan A (1999) CAP3: A DNA sequence assembly program. Genome Res 9: 868-877.
 <li><b>UniProt</b> is recommended for protein annotation as the GO and other information can 

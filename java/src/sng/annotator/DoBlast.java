@@ -19,7 +19,7 @@ import util.methods.Out;
 
 public class DoBlast {
 	final String seqFileSuffix = Globals.seqFile;
-	final String selfSuffix = "blast_self.tab";
+	final String selfSuffix =  "blast_self.tab";
 	final String tselfSuffix = "blast_tself.tab";
 	
 	final int maxHitIDlen = 30; // hard coded in Schema.java
@@ -29,7 +29,7 @@ public class DoBlast {
 	
 	public void setMainObj(DoUniProt db, CoreAnno a, CoreDB s) {sqlObj = s;}
 	
-	// called from CoreMain to get state
+	// called from CoreAnno and runSTCWMain to get state
 	public boolean doPairs() { 
 		if (selfBlastFile != null && selfBlastFile!="") return true;
 		if (tselfBlastFile != null && selfBlastFile!="") return true;
@@ -146,8 +146,7 @@ public class DoBlast {
 					
 			String fName = seqBlastPrefix + tt;
 			
-			if (dbInfo.get(ix).searchPgm.equals("diamond")) 		fName += Globalx.diamondSuffix;
-			else if (dbInfo.get(ix).searchPgm.equals("usearch")) fName += Globalx.usearchSuffix;
+			if (dbInfo.get(ix).searchPgm.equals("diamond")) fName += Globalx.diamondSuffix;
 			
 			dbInfo.get(ix).tabularFile  = fName  + ".tab";
 			
@@ -407,7 +406,7 @@ public class DoBlast {
 				action =  "blastn";
 				if (!searchPgm.equals("blast")) {
 					dbInfo.get(ix).blastArgs="";
-					if (searchPgm.equals("diamond") || searchPgm.equals("usearch"))
+					if (searchPgm.equals("diamond"))
 						Out.PrtWarn("Cannot use " + searchPgm + " with nucleotide annoDB -- using blast");
 					pgm = "blast";
 				}
@@ -539,7 +538,7 @@ public class DoBlast {
 	}
 	private boolean runDBblast(int ix)
 	{
-		if (!BlastArgs.blastExists()) {
+		if (!BlastArgs.searchPgmExists()) {
 			System.err.println("Error: No blast program detected or identified in HOSTS.cfg");
 			return false;
 		}
@@ -550,13 +549,13 @@ public class DoBlast {
 		String blastParams = dbInfo.get(ix).blastArgs;
 		String tabFile = dbInfo.get(ix).tabularFile;
 		String action =  dbInfo.get(ix).exec;		// blastn, blastp, blastx
-		String pgm =     dbInfo.get(ix).searchPgm;   // blast, diamond, usearch
+		String pgm =     dbInfo.get(ix).searchPgm;   // blast, diamond
 		boolean isAAdb = dbInfo.get(ix).isProtein;
 		boolean isAAtcw= sqlObj.isAAtcw();
 		int ncpu = runSTCWMain.getCPUs();
-    		long startTime = Out.getTime();
+    	long startTime = Out.getTime();
     	
-    		String file = dbInfo.get(ix).DBfastaNoPath;
+    	String file = dbInfo.get(ix).DBfastaNoPath;
   
 		Out.PrtSpMsg(2, "DB#" + dbInfo.get(ix).dbNum + " " + file  + " " +
 				FileHelpers.getSize(dbInfo.get(ix).fileSize) + "       " + TimeHelpers.getDate());

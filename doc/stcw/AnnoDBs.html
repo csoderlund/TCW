@@ -15,9 +15,8 @@ to download the databases to compared against. TCW provides support
 for downloading the taxonomic and full UniProts
 and mapping from the UniProt IDs to GO, KEGG, Pfam, EC, and InterPro.
 <p><b>Tested</b>:
-<code>runAS</code> has been tested on Mac OSX 10.9.5 and Linux.  
-I would really appreciated you letting me know if you have any problems.
-Email <tt>cari at agcol.arizona.edu</tt> or <tt>tcw at agcol.arizona.edu</tt>.
+<code>runAS</code> has been tested on Linux, MacOS 10.9 and 10.15.  
+If you have any problems, please let me know at <tt>tcw at agcol.arizona.edu</tt>.
 
 <p><b>Contents:</b>
 <ul>
@@ -44,35 +43,40 @@ Email <tt>cari at agcol.arizona.edu</tt> or <tt>tcw at agcol.arizona.edu</tt>.
 <table width='100%'><tr><td align='left' >	
 <h2>Overview</h2>
 </td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a></td></tr></table>
-
-<b><i>Requirements</i></b>: 
-The setup uses <code>curl</code> for downloading and <code>mySQL</code> for the GO database.
-For mySQL, the command <tt>mysqladmin</tt> is used, so
-you may need to define its path, e.g. on Mac, 
-<pre>
-alias mysqladmin '/usr/local/mysql/bin/mysqladmin'    #tcsh
-alias mysqladmin='/usr/local/mysql/bin/mysqladmin'    #bash
-</pre>
-Note -- if you do not have <code>curl</code>, <code>runAS</code> will still work, though may not be
-as reliable.
-
-<p><b><i>Terminology</i></b>: the term "AnnoDB" refers to any database that will be used for annotation,
+<b><i>Terminology</i></b>: 
+<p>The term "AnnoDB" refers to any database that will be used for annotation,
 i.e. the sequences in TCW will be searched against all AnnoDB databases and the hits stored
 in the TCW database for query. For a TCW created with nucleotide sequences, an annoDB may be nucleotide or protein. For
-a TCW created with protein sequences, an annoDB can only be protein. TCW can use the super-fast 
-<a href=http://ab.inf.uni-tuebingen.de/software/diamond/ class="ext" target="_blank"><code>DIAMOND</code></a>.
+a TCW created with protein sequences, an annoDB can only be protein. 
 <p>If multiple species are to be compared using <code>multiTCW</code>, it is important they all
 use the same set of AnnoDBs and GO database.
 
+<p><b><i>Requirements</i></b>: 
 
-<p><b><i>Processing steps of <code>runAS</code></i></b>:
+<p>The setup uses <code>curl</code> for downloading annoDBs and the GO database.
+Note -- if you do not have <code>curl</code>, <code>runAS</code> will still work, though may not be
+as reliable.
+
+<p>For mySQL, the command <tt>mysqladmin</tt> is used, so
+you may need to define its path, e.g. on Mac, 
+<pre>
+	alias mysqladmin '/usr/local/mysql/bin/mysqladmin'    #tcsh
+	alias mysqladmin='/usr/local/mysql/bin/mysqladmin'    #bash
+</pre>
+
+<p>With MySQL v8, to add the GO database, you may need to set following MySQL variable:
+<pre>
+	SET GLOBAL local_infile = 1;
+</pre>
+
+<p><b><i>Processing steps</b></i>:
 <ol>
 <li>Create the directory for the downloads and generated FASTA files. 
 <br>The default location is the TCW sub-directory <tt>projects/DBfasta</tt>, but it can be put elsewhere.
 <li>Download Taxonomic UniProts ".dat" files and create FASTA files. 
 <li>Download full UniProt, remove entries from taxonomic databases, and create FASTA files.
 <li>Create GO database, which contains mappings from UniProt IDs to GO, KEGG, EC, Pfam and InterPro.
-<ol>
+<ol type='a'>
 <li>Download  <tt>go_&lt;date&gt;-termdb-tables.tar.gz</tt>.
 <li>Create a local mySQL GO database with the information from this tar file. 
 <li>Add information to the local GO database from the .fasta and .dat files in the UniProt directory.
@@ -133,7 +137,7 @@ download the SwissProt of all relevant taxonomies and the Full SwissProt databas
 then I include the TrEMBL of the most relevant taxonomies.
 <p><tt class=c>Check</tt>: Selecting this button highlights everything that has been done.
 For example, the figure on the upper right shows that the directory
-<tt>UniProt_Sep2018</tt> has been created and only Archaea SwissProt has been downloaded and processed. 
+<tt>UniProt_Jun2020</tt> has been created and only Archaea SwissProt has been downloaded and processed. 
 The <tt class=c>Check</tt> automatically runs on startup.
 
 <table>
@@ -211,64 +215,41 @@ can gzip them as <code>DIAMOND</code> can search against gzipped files.
 <table width='100%'><tr><td align='left' >
 <h2>Memory and Time</h2>
 </td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a></td></tr></table>
-As of <b>26-Nov-17</b>, the table shows the sizes of the UniProt .dat files that will be downloaded
-if selected.
-To view the latest sizes, go to 
-<pre>
-ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/taxonomic_division
-ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete
-</pre>
+To view the current sizes of the UniProt taxonomic divisions and complete database:
+<ul>
+<li>Go to <a href=https://www.uniprot.org/downloads class="ext" target="_blank">UniProt Downloads</a>.
+<li>In the second line from the top, it says "For downloading complete data sets we recommend using <b>ftp.uniprot.org</b>."
+Click the <b>ftp.uniprot.org</b>. 
+<li>This brings up the UniProt download directories in a Finder window. You may view it as "Guest".
+<li>Click "Current_release", "knowledgebase". Here you will see "complete" and "taxonomic_divisions".
+<li>View these two directories along with the sizes.
+</ul>
 
-<p>Sizes (rounded) in Megabytes for the .dat.gz file  
-<table border=1>
-<tr><td>&nbsp;<td colspan=2>26-Nov-17<td colspan=2>18-Jul-18
-<tr><td><b>Taxonomic</b><td><b>SwissProt</b><td><b>TrEMBL</b><td><b>SwissProt</b><td><b>TrEMBL</b>
-<tr><td>Archaea<td>14<td>1014<td>14<td>1,417
-<tr><td>Bacteria<td>201<td><b>41,447</b><td>204<td><b>50,488</b>
-<tr><td>Fungi<td>45<td>4,665<td>46<td>5,134
-<tr><td>Human<td>86<td>141<td>87<td>144
-<tr><td>Invertebrates<td>31<td>5,110<td>31<td>5,535
-<tr><td>Mammals<td>18<td>859<td>18<td>1,424
-<tr><td>Plants<td>47<td>3,630<td>47<td>4,387
-<tr><td>Rodents<td>54<td>306<td>54<td>317
-<tr><td>Vertebrates<td>16<td>1,815<td>17<td>1,998
-<tr><td>Viruses<td>14<td>1,958<td>14<td>2,439
-<tr><td>Full<td>542<td><b>61,308</b><td>553<td><b>73,658</b>
-</table>
-<p>In addition to the .dat.gz files, you also need space for the .fasta file. 
-Here are a few numbers from Aug 2018:
-<table border>
-<tr><td><b>Type</t><td><b>Taxonomic</b><td><b>dat.gz</b><td><b>.fasta</b>
-<tr><td>SP<td>Invertebrates<td>31M<td>14M
-<tr><td>TR<td>Invertebrates<td>5.3G<td>4.5G
-</table>
-The FASTA files are not written in gzipped format.
+When TCW extracts the sequence into a FASTA file, it is not written in a gzipped format.
 
 <p>Strong suggestions:
 <ul>
 <li><font color=red>Only download what is relevant!</font> 
 <br>For example, download both SwissProt and TrEMBL taxonomic databases
 for your species of interest, plus any related taxonomies, then only download the full SwissProt.
-<li>Avoid the TrEMBL Bacteria and Full UniProt unless you really need them.
 <li><i>Do not perform constant downloads, it is a drain on the UniProt servers.</i> 
-<br>They do not
-change that fast, and it changes 'best' hits in TCW, which can disturb any on-going analysis.
+<br>The UniProts do not change that fast, and it changes 'best' hits in TCW, which can disturb any on-going analysis.
 </ul>
 
 <p><b>Times</b>: The following shows the times for downloading 2 SwissProt and 1 TrEMBL files 
 using a ~500 Mbsp download connection and 128Gb of RAM. 
 <pre>
- curl complete ./projects/DBfasta/UniProt_Aug2019/sp_fungi/uniprot_sprot_fungi.dat.gz      0m:5s
- curl complete ./projects/DBfasta/UniProt_Aug2019/sp_plants/uniprot_sprot_plants.dat.gz    0m:6s
- curl complete ./projects/DBfasta/UniProt_Aug2019/tr_plants/uniprot_trembl_plants.dat.gz   8m:24s
- 
- 34,106 written to uniprot_sprot_fungi.fasta                     0m:4s  (3Mb)
- 42,597 written to uniprot_sprot_plants.fasta                    0m:4s  (3Mb)
- 9,534,192 written to uniprot_trembl_plants.fasta                9m:25s (3Mb)
+	curl complete ./projects/DBfasta/UniProt_Aug2019/sp_fungi/uniprot_sprot_fungi.dat.gz      0m:5s
+	curl complete ./projects/DBfasta/UniProt_Aug2019/sp_plants/uniprot_sprot_plants.dat.gz    0m:6s
+	curl complete ./projects/DBfasta/UniProt_Aug2019/tr_plants/uniprot_trembl_plants.dat.gz   8m:24s
+
+	34,106 written to uniprot_sprot_fungi.fasta                     0m:4s  (3Mb)
+	42,597 written to uniprot_sprot_plants.fasta                    0m:4s  (3Mb)
+	9,534,192 written to uniprot_trembl_plants.fasta                9m:25s (3Mb)
 </pre>
 <p><b>Time for creating GO database:</b> The following is the times for build the GO database for 4 SwissProt, Full SwissProt, and 2 TrEMBL.
 <pre>
- Complete creating GO database go_Aug2019                        32m:36s (10Mb)
+	Complete creating GO database go_Aug2019                        32m:36s (10Mb)
 </pre>
 NOTE: It takes much longer if you have many large TrEMBL taxononic databases downloaded, where it may
 take over night.
@@ -305,13 +286,13 @@ which takes about 10 minutes.
 <h4>Details about the Demo setup</h4>
 In the <tt>projects/DBfasta</tt> directory, there is the sub-directory <tt>UniProt_demo</tt> and <tt>GO_tmpdemo</tt>, 
 which contains the following:
-<pre class=tt>
-GO_tmpdemo:
-go_daily-termdb-tables.tar.gz
+<pre>
+	GO_tmpdemo:
+	go_daily-termdb-tables.tar.gz
 
-UniProt_demo:
-sp_bacteria/	sp_fungi/	   sp_plants/	      tr_plants/
-sp_fullSubset/	sp_invertebrates/  tr_invertebrates/
+	UniProt_demo:
+	sp_bacteria/	sp_fungi/	   sp_plants/	      tr_plants/
+	sp_fullSubset/	sp_invertebrates/  tr_invertebrates/
 </pre>
 Each taxonomic directory has a <tt>.dat</tt> and a <tt>.fasta</tt> file, 
 which are very small subsets of the original UniProt taxonomic <tt>.dat</tt> file. 
@@ -361,7 +342,7 @@ in identifying where the hitID is from.
 
 <h4>UniProt:</h4>
 <pre>
->sp|Q9V2L2|1A1D_PYRAB Putative 1-ami OS=Pyrococcus abyssi GN=PYRAB00630 PE=3 SV=1v
+	>sp|Q9V2L2|1A1D_PYRAB Putative 1-ami OS=Pyrococcus abyssi GN=PYRAB00630 PE=3 SV=1v
 </pre>
 <ul>
 <li>For TrEMBL, the first two characters would be 'tr'. The 'sp' or 'tr' are the <tt>DB type</tt>
@@ -385,7 +366,7 @@ may have multiple entries separated by "CNTL+A"; only the first entry is used.
 
 <p>New format:
 <pre>
->XP_642837.1 hypothetical protein DDB_G0276911 [Dictyostelium discoideum AX4]
+	>XP_642837.1 hypothetical protein DDB_G0276911 [Dictyostelium discoideum AX4]
 </pre>
 <ul>
 <li>The first entry is the identifier (e.g. XP_642837.1). 
@@ -395,7 +376,7 @@ Note, there is no longer a way to detect the database origin within the file, he
 </ul>
 <br>Old format:
 <pre>
->gi|66818355|ref|XP_642837.1| hypothetical protein DDB_G0276911 [Dictyostelium discoideum AX4]
+	>gi|66818355|ref|XP_642837.1| hypothetical protein DDB_G0276911 [Dictyostelium discoideum AX4]
 </pre>
 <ul>
 <li>The 'gi' is the <tt>DB type</tt>.
@@ -407,7 +388,7 @@ Note, there is no longer a way to detect the database origin within the file, he
 <h4>Generic:</h4> 
 If you have a file other than UniProt or nr, make the descriptor names as follows:
 <pre>
->CC|ID description OS=species
+	>CC|ID description OS=species
 </pre>
 <ul>
 <li>CC is the type code, and will be used as the <tt>DB type</tt> in TCW.

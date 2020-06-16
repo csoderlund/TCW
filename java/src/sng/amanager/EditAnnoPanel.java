@@ -346,9 +346,8 @@ public class EditAnnoPanel extends JPanel {
 	
 	private void setParamDefaults () {
 		String selected = cmbSearchPgms.getSelectedItem();
-		if (selected.equals("blast")) txtParams.setText(BlastArgs.getBlastxOpDefaults());
+		if (selected.equals("blast")) txtParams.setText(BlastArgs.getBlastxOptions());
 		else if (selected.equals("diamond")) txtParams.setText(BlastArgs.getDiamondOpDefaults());
-		else if (selected.equals("usearch")) txtParams.setText(BlastArgs.getUsearchOpDefaults());
 		else txtParams.setText("");
 	}
 	public void setSearchPgm(String pgm) {

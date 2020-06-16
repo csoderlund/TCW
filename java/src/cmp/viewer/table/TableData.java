@@ -150,42 +150,41 @@ public class TableData implements Serializable {
     
 	public void addRowsWithProgress(ResultSet rset, FieldData theFields, JTextField progress) {
 		 try {
-		    progress.setText("Start displaying rows....");
-	    		String [] symbols = theFields.getDisplayFieldSymbols();
-	    		boolean firstRow = true;
-	    		boolean cancelled = false;
-	    		
-	    		while(rset.next() && !cancelled) {
-	    			
-	        		Vector<Object> rowData = new Vector<Object> ();
-	    			rowData.setSize(symbols.length);
-	    			if(firstRow)
-	    				vHeaders.get(0).setColumnClass(Integer.class);
-	    			
-	    			for(int x=0; x<symbols.length; x++) {
+		 	progress.setText("Start displaying rows....");
+    		String [] symbols = theFields.getDisplayFieldSymbols();
+    		boolean firstRow = true;
+    		boolean cancelled = false;
+    		
+    		while(rset.next() && !cancelled) {	
+    			
+        		Vector<Object> rowData = new Vector<Object> ();
+    			rowData.setSize(symbols.length);
+    			if(firstRow)
+    				vHeaders.get(0).setColumnClass(Integer.class);
+    			
+    			for(int x=0; x<symbols.length; x++) {
 					Object tempVal = rset.getObject(symbols[x]);
         				
 					if(firstRow && tempVal != null) {
 						vHeaders.get(x).setColumnClass(tempVal.getClass());
 					}
-	        			rowData.set(x, tempVal);
-	    			}
-	    			
-	    			firstRow = false;
-	    				
-	    			if(progress != null && (vData.size() % DISPLAY_INTERVAL == 0)) {
-	    				if(progress.getText().equals("Cancelled"))
-	    					cancelled = true;
-	    				else {
-	    					progress.setText("Loaded " + vData.size() + " rows...");
-	    				}
-	    			}
-	        		if (rowData.size() > 0) vData.add(rowData);
+	        		rowData.set(x, tempVal);
 	    		}
-	    		progress.setText("");
-	    	} 
+    			
+    			firstRow = false;
+    				
+    			if(progress != null && (vData.size() % DISPLAY_INTERVAL == 0)) {
+    				if (progress.getText().equals("Cancelled")) 
+    					cancelled = true;
+    				else 
+    					progress.setText("Loaded " + vData.size() + " rows...");
+    			}
+        		if (rowData.size() > 0) vData.add(rowData);
+    		}
+    		progress.setText("");
+    	} 
 	 	catch (Exception e) {ErrorReport.reportError(e, "Error building table");}
-	    	catch(Error e) {ErrorReport.reportFatalError(e, "Fatal error building table", null);}
+	    catch(Error e) {ErrorReport.reportFatalError(e, "Fatal error building table", null);}
     }
     
     public boolean isReadOnly() { return bReadOnly; }
@@ -200,11 +199,11 @@ public class TableData implements Serializable {
             int x = 0;
             Vector<Object> tempV;
             while(iter.hasNext()) {
-                    arrData[x] = new Object[arrHeaders.length];
-                    tempV = iter.next();
-                    tempV.copyInto(arrData[x]);
-                    tempV.clear();
-                    x++;
+                arrData[x] = new Object[arrHeaders.length];
+                tempV = iter.next();
+                tempV.copyInto(arrData[x]);
+                tempV.clear();
+                x++;
             }
             vData.clear();
 
@@ -332,7 +331,7 @@ public class TableData implements Serializable {
 					retval = ((Integer)o1[nColumn]).compareTo((Integer)o2[nColumn]);
 				else if(arrHeaders[nColumn].getColumnClass() == Long.class) {
 					if(o1[nColumn] instanceof String)
-						retval = (new Long((String)o1[nColumn])).compareTo(new Long((String)o2[nColumn]));
+						retval = ((Long)o1[nColumn]).compareTo((Long)o2[nColumn]);
 					else
 						retval = ((Long)o1[nColumn]).compareTo((Long)o2[nColumn]);
 				}

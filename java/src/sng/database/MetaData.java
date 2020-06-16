@@ -14,7 +14,6 @@ import java.util.Arrays;
 import sng.viewer.STCWFrame;
 import util.database.DBConn;
 import util.methods.ErrorReport;
-import util.methods.Out;
 
 public class MetaData {
 	private  final String L = Globals.LIBCNT;
@@ -23,12 +22,11 @@ public class MetaData {
 	
 	public MetaData () {} // For GO.java so can get evidence code list, which is pre-built
 	
-	public MetaData (STCWFrame frame, String cap3, boolean ba) { 
+	public MetaData (STCWFrame frame, String cap3) { 
 		if (cap3!=null && cap3!="") {
 			pathCAP3=cap3;
 			bHasCAP3=true;
 		}
-		bIsApplet = ba;
 		theMainFrame = frame;
 		DBConn mDB = frame.getNewDBC();
 		setMetaData(mDB);
@@ -449,10 +447,10 @@ public class MetaData {
 	 public boolean hasNgroup() { return bHasNgroup;}
 	 public boolean hasORFs() {return bHasORFs;}
 	 
+	 // To assemble from SeqDetails
 	 public boolean hasCAP3() {return bHasCAP3;}
 	 public String pathCAP3() { return pathCAP3;}
 
-	 public boolean isApplet() {return bIsApplet;}
 	/*******************************************************************/
 	 private int nSeqs = 0;
 	 private boolean bHasAssembly = false;
@@ -490,7 +488,6 @@ public class MetaData {
 	 private boolean bHasCAP3 = false;
 	 private String pathCAP3 = null;
 
-	 private boolean bIsApplet = false;
 	// load on demand
 	 private String deLibColList = null;
 	 private boolean bHasReps = false;

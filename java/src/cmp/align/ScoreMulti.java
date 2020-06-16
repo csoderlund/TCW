@@ -14,6 +14,7 @@ import cmp.database.Globals;
 
 import util.database.Globalx;
 import util.methods.ErrorReport;
+import util.methods.FileHelpers;
 import util.methods.Out;
 import util.methods.RunCmd;
 import util.methods.Static;
@@ -90,8 +91,8 @@ public class ScoreMulti {
 	public double scoreMstatX(boolean prt, boolean prtCmd, String alignedFile, String resultFile) {
 		 try {
 			 scoreVec.clear();
-			 String cmd = TCWprops.getExtDir() + "/mstatX/mstatx";
-			 String type = Globals.MultiAlign.score2.toLowerCase();
+			 String cmd = TCWprops.getExtDir() + Globals.Ext.mstatxExe;
+			 String type = Globals.Ext.score2.toLowerCase();
 			 cmd +=  " -s " + type + "  -i " + alignedFile + " -o " + resultFile;
 			 
 			 RunCmd rCmd = new RunCmd();
@@ -104,6 +105,11 @@ public class ScoreMulti {
 			 double sum=0.0;
 			 int nCols=0;
 			 String line="";
+			 
+			 if (!FileHelpers.fileExists(resultFile)) { // CAS303
+				 Out.Print(cmd);
+				 Out.die("Did not produce output file - fatal error");
+			 }
 			 BufferedReader in = new BufferedReader(new FileReader(resultFile));
 			 while((line = in.readLine()) != null) {
 				 String [] tok = line.split("\\s+");

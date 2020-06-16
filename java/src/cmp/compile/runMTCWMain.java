@@ -28,11 +28,6 @@ import cmp.compile.panels.MethodOrthoMCLPanel;
 import cmp.compile.panels.MethodClosurePanel;
 import cmp.compile.panels.MethodLoadPanel;
 import cmp.compile.panels.CompileFrame;
-import cmp.compile.Summary;
-import cmp.compile.MethodLoad;
-import cmp.compile.MethodOrthoMCL;
-import cmp.compile.MethodBBH;
-import cmp.compile.MethodClosure;
 import cmp.database.Globals;
 import cmp.database.Schema;
 

@@ -225,7 +225,7 @@ public class Out {
     }
     static public void PrtErr(String msg)
 	{
-	    	Print("Error: " + msg);
+	    	Print("***Error: " + msg);
 	}	
 	static public void PrtError(String msg)
 	{

@@ -1,6 +1,6 @@
 # Makefile for sTCW and mTCW 
 JAVA_PATH=/usr
-#JAVA_PATH=/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home
+#JAVA_PATH=/Library/Java/JavaVirtualMachines/jdk-14.0.1.jdk/Contents/Home
 
 JAVA_FILES=	./src/sng/runDE/*.java \
 			./src/sng/runAS/*.java \

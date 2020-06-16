@@ -27,8 +27,8 @@ public class MultiStats {
 	public void scoreAll() { // runMulti
 		try {
 			long startTime = Out.getTime();
-			MultiAlignData algObj =  new MultiAlignData(Globals.MultiAlign.MAFFT);
-			MultiAlignData algObj2 = new MultiAlignData(Globals.MultiAlign.MUSCLE);
+			MultiAlignData algObj =  new MultiAlignData(Globals.Ext.MAFFT);
+			MultiAlignData algObj2 = new MultiAlignData(Globals.Ext.MUSCLE);
 			String [] alignedSeqs, alignedNames;
 			double score1, score2;
 			
@@ -44,9 +44,13 @@ public class MultiStats {
 					"conLen=?, sdLen=?, score1=?, score2=?, conSeq=? where PGid=?");
 			PreparedStatement ps3 = mDB.prepareStatement("update pog_members set " +
 					" alignMap=? where UTstr=? and PGid=?");
-			int cnt=0;
+			int cnt=0, cntErr=0;
 			mDB.openTransaction(); 
 			for (int grpID=nMin; grpID<=nMax; grpID++) {
+				if (cntErr>20) { // CAS303
+					Out.PrtErr("Too many alignment errors - aborting");
+					return;
+				}
 				int nSeqs = loadSeqsFromDB(grpID);
 				if (nSeqs<=1)  continue; // may have been run already
 				
@@ -64,20 +68,22 @@ public class MultiStats {
 					len[s] =  seqs[s].length();
 					sumLen += seqs[s].length();
 				}
-				int rc = algObj.runAlignPgm(false, false, true);
+				int rc = algObj.runAlignPgm(false, false, true); // prtCmd, prtScore, isAA
 				
 				if (rc!=0) {
 					String cl = mDB.executeString("select PGstr from pog_groups where PGid=" + grpID);
-					Out.PrtError("MAFFT failed for cluster " + cl + " -- try MUSCLE...");
+					Out.prt("*** MAFFT failed for cluster " + cl + " -- try MUSCLE...");
+					cntErr++;
 					
 					for (int s=0; s<nSeqs; s++)  algObj2.addSequence(name[s], seqs[s]);
 					int rc2 = algObj2.runAlignPgm(false, false, true);
 					if (rc2!=0) {
-						Out.PrtError("MUSCLE failed for cluster " + cl);
+						Out.prt("*** MUSCLE failed for cluster " + cl);
 						if (rc < -1) Out.die("Fatal Error on alignments"); 
 						
 						ps1.setInt(1, grpID);
 						ps1.execute();
+						cntErr++;
 						continue;
 					}
 					alignedSeqs =  algObj2.getSequences();

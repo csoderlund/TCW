@@ -9,7 +9,6 @@ package cmp.compile;
 import java.io.*;
 import java.sql.ResultSet;
 
-import cmp.compile.MethodLoad;
 import cmp.compile.panels.CompilePanel;
 import cmp.compile.panels.MethodPanel;
 import cmp.compile.panels.RunCmd;
@@ -30,12 +29,13 @@ public class MethodOrthoMCL {
 		 long startTime = Out.getTime();
 		 long allTime = startTime;
 			
-		 doSteps(idx);
+		 boolean rc = doSteps(idx);
+		 if (!rc) return false;
 		 
 		 Out.PrtSpMsgTime(1, "Finish computing orthoMCL ", startTime);
 		 Out.PrtSpMsg(1, "");
 		 
-				// load from file that orthoMCL output
+		// load from file that orthoMCL output
 		 if (! new MethodLoad(cmpDBC).run(idx, groupFile, cmpPanel)) {
 			 Out.PrtSpMsg(2, "Sometimes orthoMCL fails, but then successed on a rerun -- try 'Add new clusters' again");
 			 return false;
@@ -45,35 +45,32 @@ public class MethodOrthoMCL {
 		 return true;
 	}
 	
-	private void doSteps(int idx) {
+	private boolean doSteps(int idx) {
 	try{		 
 		Out.PrtSpMsg(1, "Start processing...");
-		File OMCDir = new File(TCWprops.getExtDir() + "/OrthoMCL");
+		File OMCDir = new File(TCWprops.getExtDir() + Globals.Ext.orthoDir);
 		File binDir = new File(OMCDir,"bin");
 		String tempDB = "TMP_" + cmpPanel.getProjectName();
 		ResultSet rs;
+		int rc = -1; 
 		
-		if (!OMCDir.exists())
-		{
-			Out.PrtError("Can't find OrthoMCL directory " + OMCDir.getAbsolutePath());
-			return;		
+		if (!OMCDir.exists()){
+			Out.PrtError("Cannot find OrthoMCL directory " + OMCDir.getAbsolutePath());
+			return false;		
 		}
-		if (!binDir.exists())
-		{
-			Out.PrtError("Can't find OrthoMCL bin directory " + binDir.getAbsolutePath());
-			return;		
+		if (!binDir.exists()){
+			Out.PrtError("Cannot find OrthoMCL bin directory " + binDir.getAbsolutePath());
+			return false;		
 		}
 		
 		File projDir = new File(cmpPanel.getCurProjAbsDir());
 		
 		// Directory for doing the work
 		File tmpDir = new File(projDir,"OMCLTEMP");
-		if (tmpDir.exists())
-		{
+		if (tmpDir.exists()) {
 			FileHelpers.clearDir(tmpDir);
 		}
-		else
-		{
+		else {
 			tmpDir.mkdir();
 		}
 		File cfgFile = new File(tmpDir,"orthomcl.config");
@@ -81,8 +78,7 @@ public class MethodOrthoMCL {
 		
 		Out.PrtSpMsg(2, "Create OrthoMCL temporary database");
 		rs = cmpDBC.executeQuery("show databases like '" + tempDB + "'");
-		if (rs.first())
-		{
+		if (rs.first()) {
 			cmpDBC.executeUpdate("drop database " + tempDB);
 		}
 		DBConn odb = cmpDBC.createDBAndNewConnection(tempDB);
@@ -107,28 +103,32 @@ public class MethodOrthoMCL {
 		// Schema install
 		File schemInst = new File(binDir,"orthomclInstallSchema");
 		String cmd = schemInst.getAbsolutePath() + " " + cfgFile.getAbsolutePath();
-		System.out.println(cmd);
-		RunCmd.runCommand(cmd.split("\\s+"), tmpDir, false, true, null,0);
+		
+		rc = RunCmd.runCommand(cmd.split("\\s+"), tmpDir, false, true, null,0);
+		if (rc!=0) { // CAS303 added check on rc for all commands
+			System.out.println(cmd);
+			Out.PrtErr("Cannot continue OrthoMCL due to non-zero return code: " + rc);
+			return false;
+		}
 
 		// orthoMCL uses the original combined file
 		File blastDir = new File(projDir, Globals.CompilePanel.BLASTDIR);
 		File combFile = new File(blastDir, Globals.CompilePanel.ALL_AA_FASTA);
 		if (!combFile.exists() || combFile.length() < 10)
-			if (!runMTCWMain.generateFastaFromDB(cmpPanel)) return;
+			if (!runMTCWMain.generateFastaFromDB(cmpPanel)) return false;
 		
 		String blastFileStr = cmpPanel.getBlastPanel().getBlastFileForMethods(0);
-		if (blastFileStr == null)
-		{
-			Out.PrtError("No hit file! Generate hit file, then rerun." );
-			return;
+		if (blastFileStr == null) {
+			Out.PrtErr("No hit file! Generate hit file, then rerun." );
+			return false;
 			
 		}
 		File blastFile = new File(blastFileStr); 
-		if (!blastFile.exists())
-		{
-			Out.PrtError("Can't find hit file " + blastFile.getAbsolutePath());
-			return;
+		if (!blastFile.exists()) {
+			Out.PrtErr("Cannot find hit file " + blastFile.getAbsolutePath());
+			return false;
 		}
+		
 		File tempFasta = new File(tmpDir,"fasta_temp");
 		if (tempFasta.exists()) FileHelpers.clearDir(tempFasta);
 		else tempFasta.mkdir();
@@ -139,28 +139,49 @@ public class MethodOrthoMCL {
 		cmd = binDir.getAbsolutePath() + "/orthomclBlastParser " + blastFile.getAbsolutePath() + " " + tempFasta.getAbsolutePath();
 		
 		Out.PrtSpMsg(2, "Running orthomclBlastParser");
-		RunCmd.runCommand(cmd.split("\\s+"), tmpDir, false, true, ssFile,0);
+		rc = RunCmd.runCommand(cmd.split("\\s+"), tmpDir, false, true, ssFile,0);
+		if (rc!=0) {
+			Out.prt("Cmd: " + cmd);
+			Out.PrtErr("Cannot continue OrthoMCL due to non-zero return code: " + rc);
+			return false;
+		}
 		Out.PrtSpMsgTime(3, "Finish", t);
-
+		
 		t = Out.getTime();
 		cmd = binDir.getAbsolutePath() + "/orthomclLoadBlast " + cfgFile.getAbsolutePath() + " " + ssFile.getAbsolutePath();
 		
 		Out.PrtSpMsg(2, "Running orthomclLoadBlast");
-		RunCmd.runCommand(cmd.split("\\s+"), tmpDir, false, true, null,0);
+		rc = RunCmd.runCommand(cmd.split("\\s+"), tmpDir, false, true, null,0);
+		if (rc!=0) {
+			Out.prt("Cmd: " + cmd);
+			Out.PrtErr("Cannot continue OrthoMCL due to non-zero return code: " + rc);
+			return false;
+		}
+		
 		Out.PrtSpMsgTime(3, "Finish", t);	
 		
 		t = Out.getTime();
 		cmd = binDir.getAbsolutePath() + "/orthomclPairs " + cfgFile.getAbsolutePath() + " log-pairs cleanup=no";
 		
 		Out.PrtSpMsg(2, "Running orthomclPairs");
-		RunCmd.runCommand(cmd.split("\\s+"), tmpDir, false, true, null,0);
+		rc = RunCmd.runCommand(cmd.split("\\s+"), tmpDir, false, true, null,0);
+		if (rc!=0) {
+			Out.prt("Cmd: " + cmd);
+			Out.PrtErr("Cannot continue OrthoMCL due to non-zero return code: " + rc);
+			return false;
+		}
 		Out.PrtSpMsgTime(3, "Finish", t);
 		
 		t = Out.getTime();
 		cmd = binDir.getAbsolutePath() + "/orthomclDumpPairsFiles " + cfgFile.getAbsolutePath();
 		
 		Out.PrtSpMsg(2, "Running orthomclDumpPairsFiles");
-		RunCmd.runCommand(cmd.split("\\s+"), tmpDir, false, true, null,0);
+		rc = RunCmd.runCommand(cmd.split("\\s+"), tmpDir, false, true, null,0);
+		if (rc!=0) {
+			Out.prt("Cmd: " + cmd);
+			Out.PrtErr("Cannot continue OrthoMCL due to non-zero return code: " + rc);
+			return false;
+		}
 		Out.PrtSpMsgTime(3, "Finish", t);
 		
 		t = Out.getTime();
@@ -169,7 +190,12 @@ public class MethodOrthoMCL {
 		cmd = binDir.getAbsolutePath() + "/mcl mclInput --abc -I " + inflVal + " -o mclOutput";
 		
 		Out.PrtSpMsg(2, "Running mcl");
-		RunCmd.runCommand(cmd.split("\\s+"), tmpDir, false, false, null,0);
+		rc = RunCmd.runCommand(cmd.split("\\s+"), tmpDir, false, false, null,0);
+		if (rc!=0) {
+			Out.prt("Cmd: " + cmd);
+			Out.PrtErr("Cannot continue OrthoMCL due to non-zero return code: " + rc);
+			return false;
+		}
 		Out.PrtSpMsgTime(3, "Finish", t);
 
 		File finalOut = new File(groupFile);
@@ -178,6 +204,7 @@ public class MethodOrthoMCL {
 		File cshFile = new File(tmpDir,"final.csh");
 		BufferedWriter cshW = new BufferedWriter(new FileWriter(cshFile));
 		cmd = binDir.getAbsolutePath() + "/orthomclMclToGroups D 1 < mclOutput >" + finalOut.getAbsolutePath();
+		
 		Out.PrtSpMsg(2, "Running orthomclMclToGroups");
 		cshW.write(cmd + "\n");
 		cshW.flush();cshW.close();
@@ -189,7 +216,8 @@ public class MethodOrthoMCL {
 		odb.close();
 		cmpDBC.executeUpdate("drop database " + tempDB);
 		FileHelpers.deleteDir(tmpDir);
-	}catch (Exception e) {ErrorReport.reportError(e, "Error in OrthoMCL"); }
+		return true;
+	}catch (Exception e) {ErrorReport.reportError(e, "Error in OrthoMCL"); return false; }
 	}
 	private boolean setParams(int idx, DBConn db, CompilePanel panel) {
 		MethodPanel theMethod = panel.getMethodPanel();

@@ -1,12 +1,23 @@
 <!DOCTYPE html>
 <HTML>
-<!--#set var=TITLE value="TCW installing on Mac-OSX" -->
+<!--#set var=TITLE value="TCW installing on MacOS" -->
 <!--#include virtual="./ssi/head.html" -->
 <!--#include virtual="./ssi/start1.html" -->
 <a name=top>
 
 
-<h3>Running TCW on Mac-OSX</h3>
+<h2>Running TCW on MacOS</h2>
+
+The following includes:
+<ul>
+<li><a href=#prob>Problems on Mac</a>
+<li><a href=#cat1>Installation on MacOS 10.15.4</a> (May2020)
+<li><a href=#ext>Running /Ext/mac external programs</a>
+</ul>
+
+<a name=prob> 
+<h3>Problems on Mac</h3>
+
 I've run TCW extensively on my Mac, and found a few slight Java problems:
 <ul>
 <li>The Export sequences from a table does not work when there are many sequences. Edit the viewSingleTCW file to increase the memory size,
@@ -18,89 +29,112 @@ hidden window.
 <li>The buttons are all white, and the highlighting on the GO tree is very light. Occasionally, the highlighting causes text to disappear.
 <li>The UniProt search links do not work.
 </ul>
-<h3>Installation on Mac-OSX</h3>
-Here are my notes from my installation on my personal Mac v10.9.5 with Java v1.7.0_67. The "curl" and "cpan" commands were already working, so I did not need to install them. (This was done in Dec 2014).
 
-<h3>MySQL</h3>
 
-<ol>
-<li>Download from <a href=http://dev.mysql.com class="ext" target="_blank">dev.mysql.com/download/mysql</a> mysql-5.6.21-osx10.9-x86_64.dmg (or the appropriate version) and install. 
-<br>It only has one *.pkg which installs everything you need. Install the .pkg. 
-<br>There will be a mySQL icon on your System Preferences, where you can start/stop the MySQL server.
-<br>&nbsp;
-<li>Set password and test:
-<pre>
-        /usr/local/mysql/bin/mysqladmin -u root password [your password]
-</pre>
-If you are using tcsh, you can set the following in your .tcshrc (for bash, do the equivalent):
-<pre>
-	alias mysql '/usr/local/mysql/bin/mysql -u root -p[your password]'
-</pre>
-Test:
-<pre>
-        mysql
+
+<a name=cat1>
+<h3>
+		Installation on MacOS 10.5.4 (Catalina)
+</h3>
+	Here are my notes from my installation on my personal Mac v10.15 with Java v14.0.1 (May 2020) It is necessary
+	to use TCW v5.0.3 or higher with MySQL v8.  
+	<h4>
+		MySQL
+	</h4>
+	<ol>
+		<li>Download from <a href="http://dev.mysql.com" class="ext" target="_blank">
+		dev.mysql.com</a> mysql-8.0.17-macos10.14-x86_64.dmg.
+		Click the '.dmg' file and follow the instructions. 
+		<p>
+		<li>
+		There will be a mySQL icon on your System Preferences, where you can start/stop the MySQL server. <br>
+		&nbsp; 
+		<li>Test: I use tcsh, so I enter the following into the .tcshrc file: <pre>
+	alias mys '/usr/local/mysql/bin/mysql -u root -p[password]'
+		</pre>
+		From the command line, I execute <tt>source .tcshrc</tt>. If you are using zch or bash, you will need to use their equivalent commands. 
+		<p>
+			From the command line, enter 'mys', and then at the prompt: <pre>
         >create database mytest;
         >drop database mytest;
-</pre>
-<li>In the HOSTS.cfg of the TCW package, set DB_user=[mysql userid], DB_password=[mysql password]
-
-</ol>
-<p>At this point, runSingleTCW and runMultiTCW can build databases and view them. However, 
-you just cannot run DE calculations without R or OrthoMCL without Perl-mysql interface.
-
-<h3>Perl-mySQL interface</h3>
-In order to run OrthoMCL in multiTCW, the Perl interface to mySQL must be installed. See 
-<a href=http://bixsolutions.net/forum/thread-8.html class="ext" target="_blank">bixsolutions.net/forum/thread-8</a>. 
-
+			</pre>
+			<li>In the HOSTS.cfg of the TCW package, set DB_user=[mysql userid], DB_password=[mysql password] 
+	</ol>
+	<p>
+		At this point, runSingleTCW and runMultiTCW can build databases and view them. 
+		However, you just cannot run DE calculations without R or OrthoMCL without Perl-mysql interface. 
+		
+	<h4>
+		R and R-Java interface
+	</h4>
+		<ol>
+		<li>Download from <a href=//cran.r-project.org/bin/macosx>cran.r-project.org/bin/macosx</a> the
+		file R-4.0.0.pkg. Click to install.
+		<p>
+		<li>Type 'R' at the terminal prompt, then the following:
 <pre>
-added 'set $path=($path /usr/local/perl/bin)' to my .tcshrc
-
->cpan install DBD::mysql
-
-cd .cpan/build/DBD-mysql-4.029-[a unique string will end this directory name]
-sudo ln -s /usr/local/mysql/lib/*.dylib
-perl Makefile.PL --testuser=[mysql userid] --testpassword=[mysql password]
-make 
-make test
-sudo make install
-sudo ln -s /usr/local/mysql/lib/libmysqlclient.18.dylib /usr/lib/libmysqlclient.18.dylib
+>install.packages("rJava")
+>if (!requireNamespace("biocManager", quietly=TRUE))
+>install.packages("BiocManager")
+>BiocManager::install(version = "3.11")
+>BiocManager::install("edgeR")
+>BiocManager::install("goseq")
+>BiocManager::install("DESeq2")
 </pre>
-This was a real pain to figure out, and may be different on your machine. 
-
-<h3>R and R-Java interface</h3>
+<li>Set your $R_HOME (assuming tcsh)
+<pre>
+setenv R_HOME /Library/Frameworks/R.framework/Resources
+</pre>
+<li>Make sure <code>runDE</code> has the following: 
+<pre>
+-Djava.library.path=/Library/Frameworks/R.Framework/Resources/library/rJava/jri
+</pre>
+		</ol>
+		<h4>
+			Perl-mySQL interface
+		</h4>
+		When I googled Perl-MySQL MacOX 10.15, I saw people are running into difficulties with this.
+		One person wrote:
+		<p><font color=green><small>
+		"The solution is simple: Don't use the Apple flavors of Perl, build your own from scratch and use that. Then:
+		<br>cpan install DBI
+		<br>cpan install DBD::mysql"
+		</font></small>
+		<p>I have not tried this yet.
+	
+<a name=ext>
+<h3>
+	Running /Ext/mac external programs
+</h3>
+MacOS 10.15 has made it difficult to run programs downloaded from the web unless its been
+authenticated by Apple. Running through TCW,
+you will either get popup that states "xxx cannot be opened because developer cannot be verified", or
+the program will just fail. Do the following:
 <ol>
-<li>Install R <a href=http://cran.r-project.org/bin/macosx class="ext" target="_blank">//cran.r-project.org/bin/macosx</a>.
-<br>&nbsp;
-<li>Install the Java-R interface and DE packages:
-<pre>
-	R
-	>install.packages("rJava")
-	>source("http://bioconductor.org/bioLite.R")
-	>biocLite("edgeR")
-	>biocLite("multtest")
-	>biocLite("goseq")
-	>etc as documented in the TCW DE documentation
-</pre>
-<li>Set your $R_HOME (assuming tcsh):
-<pre>
-	setenv R_HOME /Library/Frameworks/R.framework/Resources
-</pre>
-<li>Edit "runDE" to change the -D  to:
-<pre>
-	-Djava.library.path=/Library/Frameworks/R.Framework/Resources/library/rJava/jri
-</pre>
+<li>Using the Finder, select the program and Open With "Terminal" or "iTerm".
+<li>You will get a pop-up, select "Open".
+<li>After that, you will be able to run it via TCW.
 </ol>
-<h3>External packages</h3>
-All the external packages are included in the TCW package except BLAST. You can download it from:
+I did not have to do this for <code>Blast</code>, but I did need to do it for the other <tt>/Ext/mac</tt> programs.
+All were straight-forward except for <code>mafft</code>; I had to authenticate all the following in the <tt>mafftdir</tt>
+directory: 
 <pre>
-	ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-2.2.30+-universal-macosx.tar.gz
-	tar zxvf ncbi-blast-2.2.30+-universal-macosx.tar.gz
+bin/
+	mafft
+libexec/
+	version
+	countlen
+	splittbfast
+	tbfast
+	disttbfast
+	dvtditr
+	f2cl
 </pre>
-Either put blast where your  $path can find it, or specify it in the HOSTS.cfg, e.g.
+There is a way to allow any downloaded program to execute by using:
 <pre>
-	blast_path=[your path]/ncbi-blast-2.2.30+/bin
+sudo spctl --master-disable
 </pre>
-
+Then in Preferences, Security&Privacy, General, select 'anywhere'. I did not try this.
 <!--#include virtual="./ssi/end.html" -->
 
 </HTML>

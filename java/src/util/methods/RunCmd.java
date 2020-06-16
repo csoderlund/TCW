@@ -130,36 +130,36 @@ public class RunCmd {
 		}
 		return runStdOut(cmd, outFile, errFile, prt);
 	}
-	// Eclipse shows an error, but it works
+	
 	private int runStdOut(String cmd, String outFile, String errFile, boolean prt) {
 		int exitVal=0;
-	    	try {
-	    		String[] args = cmd.split("\\s+");
-	    		ProcessBuilder pb = new ProcessBuilder(args);
-	    		pb.redirectOutput(new File(outFile));
-	    		pb.redirectError(new File(errFile));
-	    		Process p = pb.start(); 
-	    		
-	    		exitVal = p.waitFor();
-	    		
-	    		return exitVal;
-	    	}
-	    	catch (MalformedURLException e) {
-	    		ErrorReport.reportError(e, "Run Cmd: MalformedURLException");
-	    		if (!prt) Out.prt("Cmd: " + cmd);
-	    		exitVal=-3;
-	    	}
+    	try {
+    		String[] args = cmd.split("\\s+");
+    		ProcessBuilder pb = new ProcessBuilder(args);
+    		pb.redirectOutput(new File(outFile));
+    		pb.redirectError(new File(errFile));
+    		Process p = pb.start(); 
+    		
+    		exitVal = p.waitFor();
+    		
+    		return exitVal;
+    	}
+    	catch (MalformedURLException e) {
+    		ErrorReport.reportError(e, "Run Cmd: MalformedURLException");
+    		if (!prt) Out.prt("Cmd: " + cmd);
+    		exitVal=-3;
+    	}
 	    catch (IOException e) {
 	    		ErrorReport.reportError(e, "Run Cmd: IOException - check permissions");
 	    		if (!prt) Out.prt("Cmd: " + cmd);
 	    		exitVal=-2;
-	    	}
-	    	catch (Exception e) { 
-	    		ErrorReport.reportError(e, "Run Cmd: command failed");
-	    		if (!prt) Out.prt("Cmd: " + cmd);
-	    		exitVal=-1;
-	    	}
-	    	return exitVal;
+    	}
+    	catch (Exception e) { 
+    		ErrorReport.reportError(e, "Run Cmd: command failed");
+    		if (!prt) Out.prt("Cmd: " + cmd);
+    		exitVal=-1;
+    	}
+    	return exitVal;
 	}
 	/*******************************************************************/
 	public int runCmdStdin(String cmd, String dir, Vector <File> stdin) {

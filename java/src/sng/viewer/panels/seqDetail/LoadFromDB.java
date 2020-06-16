@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -63,7 +62,6 @@ public class LoadFromDB {
 	public ContigData loadDetail ( String strContigID ) 
     		throws Exception
     {	
-        ResultSet rset = null;
         ContigData curContig = new ContigData ();
         try
         {          
@@ -76,11 +74,12 @@ public class LoadFromDB {
                  		"FROM contig " +
                  		"WHERE contig.contigid = '" + strContigID + "' ";
 
-            rset = mDB.executeQuery( strQuery );
+            ResultSet rset = mDB.executeQuery( strQuery );
             if ( !rset.next() ) {
             		throw new RuntimeException ( 
         					"Loading data for sequence  " + strContigID );
             }
+           
             int CTGID = rset.getInt(1);
             curContig.setCTGID(CTGID);
             curContig.setContigID( rset.getString( 2 ) );
@@ -116,22 +115,19 @@ public class LoadFromDB {
             boolean hasGO=false;
          	if (mDB.tableExist("go_info") && mDB.tableExist("pja_gotree"))
          		hasGO=true;
-        	
+         	rset.close();
+             
             if (hasGO) {
-                rset = mDB.executeQuery("select count(*) from pja_unitrans_go as ug " +
+                ResultSet rset2 = mDB.executeQuery("select count(*) from pja_unitrans_go as ug " +
                 		" where ug.direct=1 and ug.ctgid=" + CTGID);
-                rset.next();
-                curContig.setCntGO(rset.getInt(1));
-                rset.close();
+                rset2.next();
+                curContig.setCntGO(rset2.getInt(1)); 
+                rset2.close();
             }
         }
         catch(Exception e) {
         		ErrorReport.reportError(e, "Error: reading database newLoadConsensusAndData");
         		throw e;
-        }
-        finally 
-        {
-            if ( rset != null ) rset.close();
         }
         return curContig;
     }
@@ -150,7 +146,7 @@ public class LoadFromDB {
           		
           		"t.uniprot_id, t.percent_id, t.alignment_len," +
           		"t.ctg_start, t.ctg_end, t.prot_start, t.prot_end, " +
-          		"t.e_value, t.bit_score,  t.blast_rank, t.isProtein, t.filtered, t.rank " +
+          		"t.e_value, t.bit_score,  t.blast_rank, t.isProtein, t.filtered, t.best_rank " +
           		
           		"FROM pja_db_unique_hits as q " +
           		"JOIN pja_db_unitrans_hits as t " +
@@ -217,8 +213,8 @@ public class LoadFromDB {
 	            	line.append(species);	line.append("\t");        
 	            	line.append(desc);		line.append("\t"); 
 	            	line.append(rank);		line.append("\t"); 
-	            BlastHitData hitData = new BlastHitData(BlastHitData.DB_UNITRANS, line.toString());
-	            hitData.setCTGID(ctgData.getCTGID());
+	            	BlastHitData hitData = new BlastHitData(BlastHitData.DB_UNITRANS, line.toString());
+	            	hitData.setCTGID(ctgData.getCTGID());
 	    			seq.setBlastHitData(hitData);
 	    			hitList.add(seq);
 	    		}
@@ -290,7 +286,6 @@ public class LoadFromDB {
 	private ContigData loadDetailForContig ( String strContigID ) 
     		throws Exception
     {	
-        ResultSet rset = null;
         ContigData curContig = new ContigData ();
         try
         {       
@@ -299,16 +294,17 @@ public class LoadFromDB {
             			"numclones, frpairs, est_5_prime, est_3_prime, est_loners, " +
             			"snp_count, indel_count, gc_ratio, cnt_pairwise," +
             			"o_frame, o_coding_start, o_coding_end, o_coding_has_begin, o_coding_has_end,  " +
-                 	"bestmatchid,  cnt_swiss, cnt_trembl, cnt_nt, cnt_gi," +
-                 	"cnt_gene, cnt_species,  cnt_overlap, cnt_annodb, user_notes  " +                                                      
+            			"bestmatchid,  cnt_swiss, cnt_trembl, cnt_nt, cnt_gi," +
+            			"cnt_gene, cnt_species,  cnt_overlap, cnt_annodb, user_notes  " +                                                      
                  		"FROM contig " +
                  		"WHERE contig.contigid = '" + strContigID + "' ";
 
-            rset = mDB.executeQuery( strQuery );
+            ResultSet rset = mDB.executeQuery( strQuery );
             if ( !rset.next() ) {
             		throw new RuntimeException ( 
         					"Loading data for sequence  " + strContigID );
             }
+           
             int CTGID = rset.getInt(1);
             curContig.setCTGID(CTGID);
             curContig.setContigID( rset.getString( 2 ) );
@@ -351,25 +347,22 @@ public class LoadFromDB {
               			rset.getInt(28), rset.getInt(29), rset.getInt(30));
             curContig.setUserNotes( rset.getString(31));
                    
+            rset.close();
+            
             boolean hasGO=false;
-         	if (mDB.tableExist("go_info") && mDB.tableExist("pja_gotree"))
-         		hasGO=true;
+         	if (mDB.tableExist("go_info") && mDB.tableExist("pja_gotree")) hasGO=true;
         	
             if (hasGO) {
-                rset = mDB.executeQuery("select count(*) from pja_unitrans_go as ug " +
+                ResultSet rset2 = mDB.executeQuery("select count(*) from pja_unitrans_go as ug " +
                 		" where ug.direct=1 and ug.ctgid=" + CTGID);
-                rset.next();
-                curContig.setCntGO(rset.getInt(1));
-                rset.close();
+                rset2.next();
+                curContig.setCntGO(rset2.getInt(1));
+                rset2.close();
             }
         }
         catch(Exception e) {
         		ErrorReport.reportError(e, "Error: reading database newLoadConsensusAndData");
         		throw e;
-        }
-        finally 
-        {
-            if ( rset != null ) rset.close();
         }
         return curContig;
     }
@@ -420,7 +413,7 @@ public class LoadFromDB {
 			{	
 				int q = qualVect.get(0);
 				for (int i=1; i<nSeqLen; i++) {
-					if (seqString.charAt(i) == Globals.gapCh) qualVect.add(i, new Integer(0));
+					if (seqString.charAt(i) == Globals.gapCh) qualVect.add(i, 0);
 					else qualVect.add(i, q);
 				}	
 			}

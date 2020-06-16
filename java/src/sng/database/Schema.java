@@ -39,34 +39,34 @@ enum DBVer
 	Ver42, // 4.2 - go columns (135, 137 and 140 updates)
 	Ver50, // 5.0 - more go (1.5)
 	Ver51, // 5.1 - change cnt_taxo to cnt_annodb
-	Ver52,  // 5.2 - add user_remark
-	Ver53,	// 5.3 add assem_msg.spAnno and assem_msg.go_ec
-	Ver54	// 5.4 add o_markov and rename p_coding fields to proper usage
-	        // the Engine was not set for all tables.
+	Ver52, // 5.2 - add user_remark
+	Ver53, // 5.3 add assem_msg.spAnno and assem_msg.go_ec
+	Ver54, // 5.4 add o_markov and rename p_coding fields; the Engine was not set for all tables.
+	Ver55  // MySQL V8 changed rank to best_rank
 }
 
 /********************************************
  * DYNAMIC FIELDS:
  * The following are not in the below schema, but added later.
- * 	L__<lib> for counts, LN__<lib> for RPKM  - based on lib name		(this file)
+ * 	L__<lib> for counts, LN__<lib> for RPKM  - based on lib name	(this file)
  * 	P_<libLib> for pvalues -- add if computed						(QRProcess)
  * 	assem_msg.peptide -- add if protein databases 					(Library)
  * 	assem_msg.hasLoc --  add if has location information 			(Library and AddRemarkPanel)
  *  assem_msg.goDE -- DE:Pval list for goseq p-values				(QRProcess)
  * 	contig.seq_ngroup -- add if group has number, e.g. scaffold123 	(AddRemarkPanel)
- * 	ORF tables -- tuple_orf, tuple_usage								(DoORF) 
+ * 	ORF tables -- tuple_orf, tuple_usage							(DoORF) 
  * 	GO tables -- go_info, pja_gotree, pja_uniprot_go, pja_unitrans_go (createGOtables)
  */
 public class Schema 
 {
 	DBConn mDB;
-	DBVer  dbVer =  DBVer.Ver54; // default to this, as in other cases we get it from the schemver table
-	String dbVerStr = null;    // read from database
+	DBVer  dbVer =  DBVer.Ver55; // default to this, as in other cases we get it from the schemver table
+	String dbVerStr = null;      // read from database
 	
-	DBVer  curVer = DBVer.Ver54; 
-	String curVerStr = "5.4";
-	public static String currentVerString() {return "5.4";}
-	public static DBVer currentVer() { return DBVer.Ver54;}
+	DBVer  curVer = DBVer.Ver55; 
+	String curVerStr = "5.5";
+	public static String currentVerString() {return "5.5";}
+	public static DBVer  currentVer() 		{return DBVer.Ver55;}
 	
 	public Schema(DBConn db)
 	{
@@ -79,7 +79,7 @@ public class Schema
 			rs.first();
 			dbVerStr = rs.getString("schemver");
 			
-			if (dbVerStr.equals("3.5"))	dbVer = DBVer.Ver35;
+			if (dbVerStr.equals("3.5"))			dbVer = DBVer.Ver35;
 			else if (dbVerStr.equals("4.0"))	dbVer = DBVer.Ver40;
 			else if (dbVerStr.equals("4.1"))	dbVer = DBVer.Ver41;
 			else if (dbVerStr.equals("4.2"))	dbVer = DBVer.Ver42;
@@ -88,24 +88,25 @@ public class Schema
 			else if (dbVerStr.equals("5.2"))	dbVer = DBVer.Ver52;
 			else if (dbVerStr.equals("5.3"))	dbVer = DBVer.Ver53;
 			else if (dbVerStr.equals("5.4"))	dbVer = DBVer.Ver54;
-			else System.err.println("Unknown version string " + dbVerStr + 
-					" in schemver table; default to 1.0");
+			else if (dbVerStr.equals("5.5"))	dbVer = DBVer.Ver55;
+			else System.err.println("Unknown version string " + dbVerStr + " in schemver table");
 		}
 		catch (Exception e){}
 	}
 	/*******************************************************************
 	 * SCHEMA -- contains all columns except dynamic
 	 */
+	
 	public void loadSchema() throws Exception
 	{
+		try {
 		ResultSet rs = mDB.executeQuery("show tables");
 		if (rs.first())
 		{
 			ErrorReport.die("Cannot create database: tables already exist!");	
 		}
-		String sql = "" +
-			"create table schemver " +
-			"( " +
+		String sql = 
+			"create table schemver ( " +
 			"	schemver tinytext, " +
 			"	annoVer tinytext, "	+
 			"   annoDate tinytext " + 
@@ -118,9 +119,8 @@ public class Schema
 		 // assem_msg.peptide is added if protein databases
 		 // assem_msg.hasLoc if has location information (Library.java)
 		 // assem_msg.goDE if goseq has been run (QRProcess)
-		sql = "" +
-			"create table assem_msg " +
-			"	( " +
+		sql = 
+			"create table assem_msg ( " +
 			"	AID integer NOT NULL PRIMARY KEY, " +
 			"	msg text, " +
 			"   pja_msg text default null," +  // contains OVERVIEW
@@ -131,34 +131,29 @@ public class Schema
 			"   go_msg text default null, "	+  //  name of goterm file, which contains date
 			"   go_ec  text default null, " +  //  evidence codes in db
 			"	go_slim tinytext default null"  +  // either goDB subset 
-			"	) " +
-			"	ENGINE=MyISAM; ";
+			"	) ENGINE=MyISAM; ";
 		mDB.executeUpdate(sql);
 			
-		sql = "" +
-				"create table assembly  " +
-				"	( " +
-				"	AID integer default 1, " + // obsolete
-				"	assemblyid varchar(30) NOT NULL, " +
-				"	 username varchar(30),  " +
-				"	 descr tinytext, " +
-				"	 assemblydate date NOT NULL, " +
-				"	 projectpath tinytext, " +
-				"	 annotationdate date, " +
-				"	completed tinyint NOT NULL, " +
-				"	completedate date, " +
-				"	erate float default 0, " +
-				"	exrate float default 0, " +
-				"	ppx tinyint default 0, " + // used to be N value for 1EN for normalizing expression levels
-				" " +
-				"	UNIQUE INDEX unq1(assemblyid) " +
-				"	) " +
-				"	ENGINE=MyISAM; " ;
+		sql = 
+			"create table assembly  ( " +
+			"	AID integer default 1, " + // obsolete
+			"	assemblyid varchar(30) NOT NULL, " +
+			"	 username varchar(30),  " +
+			"	 descr tinytext, " +
+			"	 assemblydate date NOT NULL, " +
+			"	 projectpath tinytext, " +
+			"	 annotationdate date, " +
+			"	completed tinyint NOT NULL, " +
+			"	completedate date, " +
+			"	erate float default 0, " +
+			"	exrate float default 0, " +
+			"	ppx tinyint default 0, " + // used to be N value for 1EN for normalizing expression levels
+			"	UNIQUE INDEX unq1(assemblyid) " +
+			"	) ENGINE=MyISAM; " ;
 		mDB.executeUpdate(sql);
 		
-		sql = "" +
-			"create table library " +
-			"	( " +
+		sql = 
+			"create table library ( " +
 			"	LID integer PRIMARY KEY AUTO_INCREMENT, " +
 			"	libid varchar(30) NOT NULL, " +
 			"	 fastafile varchar(250) NOT NULL, " +
@@ -181,21 +176,19 @@ public class Schema
 			"	 defqual tinytext, " +
 			"	 libsize int NOT NULL, " +
 			"	 avglen int default 0, " +
-			"     medlen int default 0, " +
-			"     ctglib boolean default 0, " +
+			"    medlen int default 0, " +
+			"    ctglib boolean default 0, " +
 			"    prefix tinytext, " +
 			"	orig_libid varchar(30), " +
 			"   parent varchar(30), " +
 			"   reps TEXT," +
-			"	 UNIQUE INDEX unq1(libid) " +
-			"	) " +
-			"	ENGINE=MyISAM; ";
+			"	UNIQUE INDEX unq1(libid) " +
+			"	) ENGINE=MyISAM; ";
 		mDB.executeUpdate(sql);
 		
 		// Not a clone, its a read or EST
-		sql = "" +
-			"create table clone " +
-			"	( " +
+		sql = 
+			"create table clone ( " +
 			"	CID bigint NOT NULL PRIMARY KEY AUTO_INCREMENT, " +
 			"	cloneid varchar(30) NOT NULL, " +
 			"	 origid varchar(30) NOT NULL, UNIQUE INDEX (origid),  " +
@@ -212,51 +205,43 @@ public class Schema
 			"	UNIQUE INDEX unq1(cloneid), /* we should remove this restriction!! needs jpave fix */ " +
 			"	INDEX lid1(LID, cloneid), " +
 			"	INDEX lid2(LID,CID) " +
-			" " +
-			"	) " +
-			"	ENGINE=MyISAM; ";
+			"	) ENGINE=MyISAM; ";
 		mDB.executeUpdate(sql);	
-		sql = "" +
-			"create table clone_exp " +
-			"	( " +
+		
+		sql = 
+			"create table clone_exp ( " +
 			"	CID bigint NOT NULL , " +
 			"	LID integer NOT NULL, " +
 			"	count integer NOT NULL, " +
 			"	rep smallint unsigned default 0, " +
 			"	UNIQUE INDEX unq1(CID,LID,rep) " +
-			" " +
-			"	) " +
-			"	ENGINE=MyISAM; ";
+			"	) ENGINE=MyISAM; ";
 		mDB.executeUpdate(sql);	
 	
-		sql = "" +
-				"create table contclone " +
-				"	( " +
-				"	CTGID bigint NOT NULL,  " +
-				"	CID bigint NOT NULL, " +
-				"	contigid varchar(30) NOT NULL, " +
-				"	cloneid varchar(30) NOT NULL, " +
-				"	orient char(1) NOT NULL, " +
-				"	leftpos integer NOT NULL, " +
-				"	gaps MEDIUMTEXT, " +
-				"	extras MEDIUMTEXT, " +
-				"	ngaps integer default 0, " +
-				"   mismatch mediumint default 0, " + 
-				"   numex mediumint default 0, " + 
-				"	buried TINYINT default 0, " +
-				"	prev_parent bigint default 0, " +
-				"	pct_aligned smallint default 0,  " +
-				"	 INDEX idx1(contigid,cloneid), " +
-				"	 PRIMARY KEY prim(CTGID,CID) " +
-				" " +
-				"	) " +
-				"	ENGINE=MyISAM; ";
-			mDB.executeUpdate(sql);
+		sql = 
+			"create table contclone ( " +
+			"	CTGID bigint NOT NULL,  " +
+			"	CID bigint NOT NULL, " +
+			"	contigid varchar(30) NOT NULL, " +
+			"	cloneid varchar(30) NOT NULL, " +
+			"	orient char(1) NOT NULL, " +
+			"	leftpos integer NOT NULL, " +
+			"	gaps MEDIUMTEXT, " +
+			"	extras MEDIUMTEXT, " +
+			"	ngaps integer default 0, " +
+			"   mismatch mediumint default 0, " + 
+			"   numex mediumint default 0, " + 
+			"	buried TINYINT default 0, " +
+			"	prev_parent bigint default 0, " +
+			"	pct_aligned smallint default 0,  " +
+			"	 INDEX idx1(contigid,cloneid), " +
+			"	 PRIMARY KEY prim(CTGID,CID) " +
+			"	) ENGINE=MyISAM; ";
+		mDB.executeUpdate(sql);
 		
 		// sequence table (contig is the same as unitran below).
-		sql = "" +
-			"create table contig " +
-			"	( " +
+		sql = 
+			"create table contig ( " +
 			"	CTGID bigint NOT NULL PRIMARY KEY AUTO_INCREMENT, " +
 			"	AID integer NOT NULL, " +
 			"	TCID integer default 0, " +  // for assembly
@@ -315,15 +300,15 @@ public class Schema
 			"	consensus_bases INT, " +
 			
 			// assembled
-			"	orient char(1), " +
-			"	 numclones INT NOT NULL, " +
-			"	 frpairs int NOT NULL, " +
-			"	 has_ns BOOLEAN default 0, " +
-			"	 nstart integer default 0, " +
+			"	orient 		char(1), " +
+			"	 numclones 	INT NOT NULL, " +
+			"	 frpairs 	int NOT NULL, " +
+			"	 has_ns 	BOOLEAN default 0, " +
+			"	 nstart 	integer default 0, " +
 			"	 est_5_prime SMALLINT, " +
 			"	 est_3_prime SMALLINT, " +
-			"	 est_loners SMALLINT, " +
-			"	 rstat FLOAT default 0, " +
+			"	 est_loners  SMALLINT, " +
+			"	 rstat 		FLOAT default 0, " +
 			"	 recap BOOLEAN default 0,  " +
 			"	 longest_clone VARCHAR(30), " +
 			"	 mate_CTGID bigint default 0, " +
@@ -337,43 +322,41 @@ public class Schema
 			"	INDEX idx6(bestmatchid), " +   // for updating description
 			"	INDEX idx4(tcid), " +
 			"	INDEX idx5(sctgid) " +
-			"	) " +
-			"	ENGINE=MyISAM; ";
-		mDB.executeUpdate(sql);
-	
-		sql = "" +
-			"create table contig_counts " +
-			"	(contigid varchar(30) NOT NULL, " +
-			"	 libid varchar(30) NOT NULL, " +
-			"	 count int NOT NULL, " +
-			" " +
-			"	 PRIMARY KEY (contigid, libid) " +
 			"	) ENGINE=MyISAM; ";
 		mDB.executeUpdate(sql);
+	
+		sql = 
+			"create table contig_counts (" +
+			"	contigid varchar(30) NOT NULL, " +
+			"	libid varchar(30) NOT NULL, " +
+			"	 count int NOT NULL, " +
+			"	 PRIMARY KEY (contigid, libid) " +
+			" ) ENGINE=MyISAM; ";
+		mDB.executeUpdate(sql);
 		
-		sql = "create table pja_databases " +
-			"(" +
-			"DBID 		integer not null PRIMARY KEY AUTO_INCREMENT, " +
-			"AID 		integer not null, " +
-			"path 		varchar(250), " +
+		sql = 
+			"create table pja_databases (" +
+			"DBID 			integer not null PRIMARY KEY AUTO_INCREMENT, " +
+			"AID 			integer not null, " +
+			"path 			varchar(250), " +
 			"dbtype 		varchar(10), " + // tr, sp, nt, Ref90....
-			"taxonomy 	varchar(20), " + // plants, invert, vert,...
-			"isProtein 	boolean, " +
+			"taxonomy 		varchar(20), " + // plants, invert, vert,...
+			"isProtein 		boolean, " +
 			"nOnlyDB		integer  unsigned default 0,"  +   // #contigs only hits
-			"nBestHits integer unsigned default 0, " +     // #contigs best Eval
-			"nOVBestHits integer  unsigned default 0, " +  // #contigs best Anno
+			"nBestHits 		integer unsigned default 0, " +     // #contigs best Eval
+			"nOVBestHits 	integer  unsigned default 0, " +  // #contigs best Anno
 			"nTotalHits 	integer  unsigned default 0, " +   // #contigs with hit
-			"nUniqueHits integer  unsigned default 0, " +  // #proteins/nt unique
+			"nUniqueHits 	integer  unsigned default 0, " +  // #proteins/nt unique
 			"dbDate 		date, " +
-			"addDate 	date, " +
-			"subset		boolean default false, " + // v2.10 not used 
-			"parameters text,  " +							// db4.1
+			"addDate 		date, " +
+			"subset			boolean default false, " + // v2.10 not used 
+			"parameters 	text,  " +							// db4.1
 			"INDEX(DBID) " +
 			") ENGINE=MyISAM; ";
 			mDB.executeUpdate(sql);
 		
 		// unitrans=contig=sequence; should be seq_hits	
-		sql = "" + 
+		sql = 
 		"create table pja_db_unitrans_hits " +
 		"	(PID 			bigint not null PRIMARY KEY AUTO_INCREMENT, " +
 		"	 CTGID 			bigint not null, " +
@@ -382,43 +365,44 @@ public class Schema
 		"	 contigid 		varchar(30) NOT NULL, " +
 		"	 uniprot_id 	varchar(30) NOT NULL, " +  // hitID  ...
 		"	 dbtype			varchar(10), " + 
-		"	 taxonomy 		varchar (20)," +			 
+		"	 taxonomy 		varchar(20)," +			 
 		// search (e.g. blast) fields
 		" 	 percent_id		SMALLINT  unsigned, " +
 		"	 alignment_len	INTEGER  unsigned, " +		
 		"	 mismatches		SMALLINT  unsigned, " +
 		"	 gap_open		SMALLINT  unsigned, " +
 		"	 ctg_start		MEDIUMINT unsigned, " +			// seq_start
-		"	 ctg_end			MEDIUMINT unsigned, " +			// seq_end
+		"	 ctg_end		MEDIUMINT unsigned, " +			// seq_end
 		"    ctg_cov        smallint unsigned default 0, " +  // db5.4 percent sequence coverage
-		"	 prot_start 		MEDIUMINT unsigned, " +			// hit_start
-		"	 prot_end   		MEDIUMINT unsigned, " +			// hit_end
+		"	 prot_start 	MEDIUMINT unsigned, " +			// hit_start
+		"	 prot_end   	MEDIUMINT unsigned, " +			// hit_end
 		"    prot_cov       smallint unsigned default 0, " +  // db5.4 percent hit coverage
-		"	 e_value 		DOUBLE PRECISION, " +
+		"	 e_value 		DOUBLE PRECISION, " +			
 		"	 bit_score 		float, " +
-		// computed fields 
-		"	 blast_rank 		smallint unsigned default 0, " +
-		"	 rank 			smallint unsigned default 0," +// filter_best + filter_ovbest + filter_gobest
+		// computed fields
+		"	 blast_rank 	smallint unsigned default 0, " +
+															     // CAS303 rank failed in v8; changed to best_rank
+		"	 best_rank 			smallint unsigned default 0, " + // filter_best + filter_ovbest + filter_gobest
 		"	 isProtein 		boolean default 0, " +			
 		"    filtered		tinyint  unsigned default 0, " +	// bit sting of following filters	
 		"	 filter_best  	boolean default 0, " +           // bestEval
 		"	 filter_ovbest	boolean default 0, " +           // bestAnno
 		"	 filter_gobest	boolean default 0, " +           // best with GO
-		"	 filter_olap		boolean default 0, " +  
-		"	 filter_top3		boolean default 0, " +
+		"	 filter_olap	boolean default 0, " +  
+		"	 filter_top3	boolean default 0, " +
 		"	 filter_species	boolean default 0, " +
-		"	 filter_gene		boolean default 0, " +
-		" INDEX(filter_best), " +
-		" INDEX(filter_ovbest), " +
-		" INDEX(uniprot_id), " +
-		" INDEX(contigid), " +
-		" INDEX(DUHID), " +  
-		" INDEX(CTGID) " +
+		"	 filter_gene	boolean default 0, " +
+		"    INDEX(filter_best), " +
+		"    INDEX(filter_ovbest), " +
+		"    INDEX(uniprot_id), " +
+		"    INDEX(contigid), " +
+		"    INDEX(DUHID), " +  
+		"    INDEX(CTGID) " +
 		"	) ENGINE=MyISAM; ";
 		mDB.executeUpdate(sql);
 	
-		sql = "create table pja_db_unique_hits " +
-		"(" +
+		sql = 
+		"create table pja_db_unique_hits (" +
 		"DUHID 			integer not null PRIMARY KEY AUTO_INCREMENT, " +
 		"AID 			integer not null, " +
 		"DBID 			integer not null, " +  	// database this came from
@@ -449,8 +433,8 @@ public class Schema
 		"	) ENGINE=MyISAM; ";
 		mDB.executeUpdate(sql);
 	
-		sql = "create table pja_db_species " +
-		"(" +
+		sql = 
+		"create table pja_db_species (" +
 		"AID 			bigint not null, " +
 		"species 		varchar (100), " +     		
 		"count    		int unsigned default 0, " +  // total count
@@ -460,44 +444,43 @@ public class Schema
 		mDB.executeUpdate(sql);
 		
 		// results for Pairs table
-		sql = "create table pja_pairwise " +
-				"(" +
-				"PWID 		integer not null PRIMARY KEY AUTO_INCREMENT, " +
-				"AID 		integer not null, " +				
-				"contig1 	varchar(30) NOT NULL, " +
-				"contig2 	varchar(30) NOT NULL, " +
-				" " +
-				"coding_frame1 TINYINT, " +
-				"coding_frame2 TINYINT, " +
-				" " +	
-				"NT_olp_ratio	Float default 0, " +				// len_of_olap/longest_ctgLen
-				"NT_olp_score	int  unsigned default 0, " +		// #match 	sim=(score/len)*100.0
-				"NT_olp_len		int  unsigned default 0, " +		// length of overlap
-				" " +				
-				"AA_olp_ratio	Float default 0, " +
-				"AA_olp_score	int  unsigned default 0, " +
-				"AA_olp_len		int  unsigned default 0, " +
-				" " +		
-				"in_self_blast_set 		BOOLEAN default 0, " +
-				"in_uniprot_set 			BOOLEAN default 0, " +
-				"in_translated_self_blast BOOLEAN default 0, " +
-				// if have protein results
-				" shared_hitID			varchar(30), " +
-				// selfblast result
-				" e_value 				DOUBLE PRECISION, " +
-				" percent_id				SMALLINT  unsigned default 0, " +
-				" alignment_len			INTEGER  unsigned default 0, " +
-				" ctg1_start				SMALLINT default 0, " +
-				" ctg1_end				SMALLINT default 0, " +
-				" ctg2_start 			SMALLINT default 0, " +
-				" ctg2_end				SMALLINT default 0  " +
-				" ) ENGINE=MyISAM; ";
-				mDB.executeUpdate(sql);
+		sql = 
+		"create table pja_pairwise (" +
+			"PWID 		integer not null PRIMARY KEY AUTO_INCREMENT, " +
+			"AID 		integer not null, " +				
+			"contig1 	varchar(30) NOT NULL, " +
+			"contig2 	varchar(30) NOT NULL, " +
+			" " +
+			"coding_frame1 TINYINT, " +
+			"coding_frame2 TINYINT, " +
+			" " +	
+			"NT_olp_ratio	Float default 0, " +				// len_of_olap/longest_ctgLen
+			"NT_olp_score	int  unsigned default 0, " +		// #match 	sim=(score/len)*100.0
+			"NT_olp_len		int  unsigned default 0, " +		// length of overlap
+			" " +				
+			"AA_olp_ratio	Float default 0, " +
+			"AA_olp_score	int  unsigned default 0, " +
+			"AA_olp_len		int  unsigned default 0, " +
+			" " +		
+			"in_self_blast_set 		BOOLEAN default 0, " +
+			"in_uniprot_set 		BOOLEAN default 0, " +
+			"in_translated_self_blast BOOLEAN default 0, " +
+			// if have protein results
+			" shared_hitID			varchar(30), " +
+			// selfblast result
+			" e_value 				DOUBLE PRECISION, " +			
+			" percent_id			SMALLINT  unsigned default 0, " +
+			" alignment_len			INTEGER  unsigned default 0, " +
+			" ctg1_start			SMALLINT default 0, " +
+			" ctg1_end				SMALLINT default 0, " +
+			" ctg2_start 			SMALLINT default 0, " +
+			" ctg2_end				SMALLINT default 0  " +
+			" ) ENGINE=MyISAM; ";
+			mDB.executeUpdate(sql);
 
 		// The following tables are used for assembling reads
-		sql = "" +
-				"create table snp " +
-				"( " +
+		sql = 
+			"create table snp ( " +
 				"	SNPID bigint not null PRIMARY KEY AUTO_INCREMENT, " +
 				"	CTGID bigint not null, " +
 				"	pos integer not null, " +
@@ -506,96 +489,78 @@ public class Schema
 				"	numvars smallint, " +
 				"	snptype tinytext, " +
 				"	score float default 0, " +
-				" " +
 				"	INDEX(CTGID) " +
-				") " +
-				"ENGINE=MyISAM; " ;
+				") ENGINE=MyISAM; " ;
 			mDB.executeUpdate(sql);
-		sql = "" +
-			"create table snp_clone " +
-			"( " +
+			
+		sql = 
+			"create table snp_clone ( " +
 			"	SNPID bigint not null, " +
 			"	CID bigint not null, " +
 			"	snptype tinytext, " +
-			" " +
 			"	UNIQUE INDEX(SNPID, CID), " +
 			"	INDEX(CID) " +
-			" " +
-			") " +
-			"ENGINE=MyISAM; " ;
+			") ENGINE=MyISAM; " ;
 		mDB.executeUpdate(sql);
 				
-		sql = "" +
-				"create table assemlib " +
-				"	( " +
-				"	AID integer NOT NULL, " +
-				"	LID integer NOT NULL, " +
-				"	assemblyid varchar(30) NOT NULL, " +
-				"	 libid varchar(30) NOT NULL, " +
-				"	singletons int default 0, " + 
-				"   contigs int default 0,  " +
-				"   uniqueContigs int default 0, " +
-				"	goreads bigint default 0, " +
-				"   UNIQUE INDEX (assemblyid,LID)," +
-				"   UNIQUE INDEX (AID,LID)" +
-				"	) " +
-				"	ENGINE=MyISAM; ";
-			mDB.executeUpdate(sql);
+		sql = 
+			"create table assemlib ( " +
+			"	AID integer NOT NULL, " +
+			"	LID integer NOT NULL, " +
+			"	assemblyid varchar(30) NOT NULL, " +
+			"	 libid varchar(30) NOT NULL, " +
+			"	singletons int default 0, " + 
+			"   contigs int default 0,  " +
+			"   uniqueContigs int default 0, " +
+			"	goreads bigint default 0, " +
+			"   UNIQUE INDEX (assemblyid,LID)," +
+			"   UNIQUE INDEX (AID,LID)" +
+			"	) ENGINE=MyISAM; ";
+		mDB.executeUpdate(sql);
 			
-			sql = "" +
-				"create table ASM_assemtime " +
-				"( " +
-				"	AID integer not null, " +
-				"	stage tinytext, " +
-				"	time_start datetime " +
-				") " +
-				"ENGINE=MyISAM; ";
-			mDB.executeUpdate(sql);
-				
-			sql = "" +
-				"create table ASM_params " +
-				"( " +
-				"	AID integer not null, " +
-				"	pname tinytext, " +
-				"	pvalue text " +
-				" " +
-				") " +
-				"ENGINE=MyISAM; " ;
-			mDB.executeUpdate(sql);
-			sql = "" +
-				"create table ASM_cmdlist " +
-				"( " +
-				"	AID integer not null, " +
-				"	descr VARCHAR(100), " +
-				"	cmdstr text, " +
-				"	 " +
-				"	UNIQUE INDEX unq(AID,descr) " +
-				") " +
-				"ENGINE=MyISAM; " ;
-			mDB.executeUpdate(sql);
+		sql = 
+			"create table ASM_assemtime ( " +
+			"	AID integer not null, " +
+			"	stage tinytext, " +
+			"	time_start datetime " +
+			") ENGINE=MyISAM; ";
+		mDB.executeUpdate(sql);
 			
-			// the rest of these tables are removed after assembly
-			sql = "" +
-				"create table ASM_tc_iter " +
-				"( " +
-				"	TCID integer PRIMARY KEY AUTO_INCREMENT, " +
-				"	AID integer NOT NULL, " +
-				"	tctype tinytext NOT NULL, " +
-				"	tcnum integer, " +
-				"	finished tinyint default 0, " +
-				"	clustiter_done smallint default 0, " +
-				"	ctgs_start integer default 0, " +
-				"	ctgs_end integer default 0, " +
-				"	merges_tried integer default 0, " +
-				"	merges_ok integer default 0 " +
-				" " +
-				") " +
-				"ENGINE=INNODB; " ;
-			mDB.executeUpdate(sql);
+		sql = 
+			"create table ASM_params ( " +
+			"	AID integer not null, " +
+			"	pname tinytext, " +
+			"	pvalue text " +
+			") ENGINE=MyISAM; " ;
+		mDB.executeUpdate(sql);
+		sql = 
+			"create table ASM_cmdlist ( " +
+			"	AID integer not null, " +
+			"	descr VARCHAR(100), " +
+			"	cmdstr text, " +
+			"	UNIQUE INDEX unq(AID,descr) " +
+			") ENGINE=MyISAM; " ;
+		mDB.executeUpdate(sql);
+		
+		// the rest of these tables are removed after assembly
+		sql =
+			"create table ASM_tc_iter ( " +
+			"	TCID integer PRIMARY KEY AUTO_INCREMENT, " +
+			"	AID integer NOT NULL, " +
+			"	tctype tinytext NOT NULL, " +
+			"	tcnum integer, " +
+			"	finished tinyint default 0, " +
+			"	clustiter_done smallint default 0, " +
+			"	ctgs_start integer default 0, " +
+			"	ctgs_end integer default 0, " +
+			"	merges_tried integer default 0, " +
+			"	merges_ok integer default 0 " +
+			") ENGINE=INNODB; " ;
+		mDB.executeUpdate(sql);
+		
 		// WN if you change buryclone you need to change reBuryClones in SNPMain.
-		sql = "" +
-			"create table buryclone " +
-			"	( " +
+		sql =
+			"create table buryclone ( " +
 			"	AID integer NOT NULL, " +
 			"	CID_child bigint NOT NULL, INDEX(CID_child), " +
 			"	CID_parent bigint NOT NULL, INDEX(CID_parent), " +
@@ -608,36 +573,31 @@ public class Schema
 			"	 PRIMARY KEY prim(AID, CID_child), " +
 			"	 INDEX idx1(assemblyid, childid), " +
 			"	 TCID integer default 0 " + /*	-- to permit rollback of TC stages  */
-			" ) " +
-			"	ENGINE=MyISAM; ";
+			" ) ENGINE=MyISAM; ";
 		mDB.executeUpdate(sql);
-		sql = "" +
-			"create table ASM_cliques " +
-			"( " +
+		
+		sql = 
+			"create table ASM_cliques ( " +
 			"	AID integer NOT NULL, " +
 			"	CQID bigint PRIMARY KEY AUTO_INCREMENT, " +
 			"	type tinytext, " +
 			"	nclone integer default 0, " +
 			"	assembled tinyint default 0, " +
 			"	cap_success tinyint default 0 " +
-			") " +
-			"ENGINE=INNODB; ";
+			") ENGINE=INNODB; ";
 		mDB.executeUpdate(sql);
-		sql = "" +
-			"create table ASM_clique_clone " +
-			"( " +
+		
+		sql = 
+			"create table ASM_clique_clone ( " +
 			"	CQID bigint, " +
 			"	CID bigint, " +
 			"	PRIMARY KEY(CQID,CID), " +
-			" " +
 			"	FOREIGN KEY (CQID) REFERENCES ASM_cliques(CQID) ON DELETE CASCADE  " +
-			") " +
-			"ENGINE=INNODB; ";
+			") ENGINE=INNODB; ";
 		mDB.executeUpdate(sql);
 			
-		sql = "" +
-			"create table ASM_scontig " +
-			"( " +
+		sql = 
+			"create table ASM_scontig ( " +
 			"	SCID bigint PRIMARY KEY AUTO_INCREMENT, " +
 			"	AID integer NOT NULL, " +
 			"	CTID1 bigint not null, " +
@@ -645,16 +605,14 @@ public class Schema
 			"	TCID integer not null, " +
 			"	merged_to integer default 0, " +
 			"	capbury_done tinyint default 0, " +
-			" " +
 			"	UNIQUE INDEX unq1(CTID1,CTID2), " +
 			"	INDEX idx1(TCID), " +
 			"	FOREIGN KEY (TCID) REFERENCES ASM_tc_iter(TCID) ON DELETE CASCADE " +
-			") " +
-			"ENGINE=INNODB; ";
+			") ENGINE=INNODB; ";
 		mDB.executeUpdate(sql);
-		sql = "" +
-			"create table ASM_tc_edge " +
-			"( " +
+		
+		sql = 
+			"create table ASM_tc_edge ( " +
 			"	EID bigint PRIMARY KEY AUTO_INCREMENT, " +
 			"	TCID integer, " +
 			"	SCID1 bigint, " +
@@ -677,11 +635,12 @@ public class Schema
 			"	 FOREIGN KEY (TCID) REFERENCES ASM_tc_iter(TCID) ON DELETE CASCADE , " +
 			"	 FOREIGN KEY (SCID1) REFERENCES ASM_scontig(SCID) ON DELETE CASCADE , " +
 			"	 FOREIGN KEY (SCID2) REFERENCES ASM_scontig(SCID) ON DELETE CASCADE  " +
-			") " +
-			"ENGINE=INNODB; ";
+			") ENGINE=INNODB; ";
 		mDB.executeUpdate(sql);
 
 		addRstat();
+		}
+		catch (Exception e) {ErrorReport.die(e, "Creating schema");}
 	}
 	
 	private void addRstat() throws Exception
@@ -689,9 +648,8 @@ public class Schema
 		ResultSet rs = mDB.executeQuery("show tables like 'rstat_thresh'");
 		if (!rs.first())
 		{
-			String sql = "" +
-				"create table rstat_thresh " +
-				"( " +
+			String sql = 
+				"create table rstat_thresh ( " +
 				"	assemblyid varchar(30), " +
 				"	libid1 varchar(30), " +
 				"	libid2 varchar(30), " +
@@ -701,8 +659,7 @@ public class Schema
 				"	obscount int not null, " +
 				"	conf float not null, " +
 				"	INDEX(assemblyid, libid1, libid2) " +
-				") " +
-				"ENGINE=MyISAM; " ;
+				") ENGINE=MyISAM; " ;
 			mDB.executeUpdate(sql);		
 		}
 	}
@@ -727,7 +684,8 @@ public class Schema
 			String ecStr = "";
 			for (int i=0; i<ecList.length; i++)  ecStr += ecList[i] + " boolean default 0, ";
 			
-			db.executeUpdate("create table go_info (" +
+			db.executeUpdate(
+			"create table go_info (" +
 					" gonum int, " +
 					" descr tinytext, " +
 					" term_type enum('biological_process','cellular_component','molecular_function'), " +
@@ -737,20 +695,24 @@ public class Schema
 					" slim boolean default 0, " +   
 					ecStr +
 					" unique(gonum), " +
-					" index(gonum) ) ENGINE=MyISAM;");
+					" index(gonum) " +
+					") ENGINE=MyISAM;");
 			
 			// Same info as in pja_db_unique_hits.goList, i.e. direct assignments
 			if (db.tableExists("pja_uniprot_go")) db.executeUpdate("drop table pja_uniprot_go");
-			db.executeUpdate("create table pja_uniprot_go (" +
+			db.executeUpdate(
+				"create table pja_uniprot_go (" +
 					" DUHID bigint, " +
 					" gonum bigint, " +
 					" EC varchar(3) default ''," +
 					" index(gonum), " +
-					" index(DUHID)) ENGINE=MyISAM;");
+					" index(DUHID)" +
+				    ") ENGINE=MyISAM;");
 			
 			// entry for each sequence-GO entry for all GOs found in set of hits for sequence
 			if (db.tableExists("pja_unitrans_go")) db.executeUpdate("drop table pja_unitrans_go");
-			db.executeUpdate("create table pja_unitrans_go (" +
+			db.executeUpdate(
+				"create table pja_unitrans_go (" +
 					" CTGID bigint, " +
 					" gonum int, " +
 					// the next 5 go together
@@ -764,40 +726,47 @@ public class Schema
 					" slim boolean default 0, " +   
 					" unique(CTGID,gonum), " +
 					" index(CTGID)," +             
-					" index(gonum)) ENGINE=MyISAM;");
+					" index(gonum) " +
+					" ) ENGINE=MyISAM;");
 			
 			// used in BasicGO to build trimmed set
 			if (db.tableExists("pja_gotree")) db.executeUpdate("drop table pja_gotree");
-			db.executeUpdate("create table pja_gotree (" +
+			db.executeUpdate(
+					"create table pja_gotree (" +
 					" tblidx int unsigned primary key auto_increment, " +
 	    				" gonum int unsigned, " +
 	    				" level smallint unsigned, " +
 	    				" name tinytext, " +
 	    				" nTotalReads bigint unsigned default 0," + 
 	    				" term_type enum('biological_process','cellular_component','molecular_function')," +
-	    				" index(gonum) ) ENGINE=MyISAM;");
+	    				" index(gonum) " +
+	    				" ) ENGINE=MyISAM;");
 			
 			// this is used in GOtree.java
 			// if distance=1, then immediate parent so in term2term
 			// GO database: graph_path table except use child/ancestor instead of their term1_id and term2_id
 			if (db.tableExists("go_graph_path")) db.executeUpdate("drop table go_graph_path");
-			db.executeUpdate("create table go_graph_path (" +
+			db.executeUpdate(
+					"create table go_graph_path (" +
 					" relationship_type_id tinyint unsigned, " +
 					" distance smallint unsigned, " + //e.g. if A part_of B is_a C part_of D, then distance=3 for A part_of D 
 					" relation_distance smallint unsigned, " + // e.g. if A part_of B is_a C part_of D, then relation_distance=2 for A part_of D 
 	    				" child int unsigned, " +
 	    				" ancestor int unsigned, " +
 	    				" index(child), " +
-	    				" index(ancestor)) ENGINE=MyISAM;");
+	    				" index(ancestor)" +
+	    				" ) ENGINE=MyISAM;");
 			
-			// this is used in GOtree.java -- why need it and graph_path? 
+			// this is used in GOtree.java 
 			if (db.tableExists("go_term2term")) db.executeUpdate("drop table go_term2term");
-			db.executeUpdate("create table go_term2term (" +
+			db.executeUpdate(
+				"create table go_term2term (" +
 					" relationship_type_id tinyint unsigned, " +
 					" child int unsigned, " +
-	    				" parent int unsigned, " +
-	    				" index(child), " +
-	    				" index(parent)) ENGINE=MyISAM;");
+	    			" parent int unsigned, " +
+	    			" index(child), " +
+	    			" index(parent)" +
+	    			" ) ENGINE=MyISAM;");
 		}
 		catch(Exception e){ErrorReport.die(e, "Error adding GO tables to schema");}
 	}
@@ -809,10 +778,11 @@ public class Schema
 		return (dbVer == currentVer());	
 	}
 	
-	public void update() throws Exception
+	public String update() throws Exception
 	{
-		if (current()) return;
-		System.err.println("Database schema is " +dbVerStr + "; current schema is " + curVerStr);
+		if (current()) return dbVerStr;
+		
+		System.err.println("Database schema is " + dbVerStr + "; current schema is " + curVerStr);
 		
 		if (!FileHelpers.yesNo("The database needs to be updated; continue?"))
 		{
@@ -823,10 +793,9 @@ public class Schema
 			else {
 				System.err.println("Schema is version " + dbVerStr + ", expecting version " + curVerStr );
 				System.err.println("Run TCW anyway -- warning, may not work");
-				return;
+				return dbVerStr;
 			}
 		}
-		
 		if (dbVer==DBVer.Ver35) updateTo40();
 		if (dbVer==DBVer.Ver40) updateTo41();
 		if (dbVer==DBVer.Ver41) updateTo42();
@@ -835,8 +804,25 @@ public class Schema
 		if (dbVer==DBVer.Ver51) updateTo52();
 		if (dbVer==DBVer.Ver52) updateTo53();
 		if (dbVer==DBVer.Ver53) updateTo54();
+		if (dbVer==DBVer.Ver54) updateTo55();
+		return dbVerStr;
 	}
-	
+	/*************************************************
+	 * May2020 v3.0.3 change for MySQL v8
+	 */
+	private void updateTo55() {
+		try {
+			Out.Print("Update to sTCW schema db5.5 for " + Version.sTCWhead);
+			
+			mDB.tableCheckRenameColumn("pja_db_unitrans_hits", "rank",  " best_rank", "smallint unsigned");
+			
+			mDB.executeUpdate("update schemver set schemver='5.5'");
+			dbVer = DBVer.Ver55;
+			dbVerStr = curVerStr;
+			Out.Print("Finish update for sTCW Schema db5.5");
+		}
+		catch (Exception e) {ErrorReport.reportError(e, "Error on update schema to v5.5");}	
+	}
 	/*************************************************
 	 * 4/11/19 V2.14
 	 */
@@ -856,6 +842,7 @@ public class Schema
 			
 			mDB.executeUpdate("update schemver set schemver='5.4'");
 			dbVer = DBVer.Ver54;
+			dbVerStr = "5.4";
 			Out.Print("Finish update for sTCW Schema db5.4");
 		}
 		catch (Exception e) {ErrorReport.reportError(e, "Error on update schema to v5.4");}	
@@ -871,6 +858,7 @@ public class Schema
 			mDB.tableCheckAddColumn("assem_msg", "go_ec", "text default null", null);
 			mDB.executeUpdate("update schemver set schemver='5.3'");
 			dbVer = DBVer.Ver53;
+			dbVerStr = "5.3";
 			Out.Print("Finish update for sTCW Schema db5.3");
 		}
 		catch (Exception e) {ErrorReport.reportError(e, "Error on update schema to v5.3");}	
@@ -884,6 +872,7 @@ public class Schema
 			mDB.tableCheckAddColumn("contig", "user_notes", "VARCHAR(255)", "notes");
 			mDB.executeUpdate("update schemver set schemver='5.2'");
 			dbVer = DBVer.Ver52;
+			dbVerStr = "5.2";
 			Out.Print("Finish update for sTCW Schema db5.2");
 		}
 		catch (Exception e) {ErrorReport.reportError(e, "Error on update schema to v5.2");}	
@@ -912,6 +901,7 @@ public class Schema
 	     	
 			mDB.executeUpdate("update schemver set schemver='5.1'");
 			dbVer = DBVer.Ver51;
+			dbVerStr = "5.1";
 			Out.Print("Finish update for sTCW Schema db5.1");
 		}
 		catch (Exception e) {ErrorReport.reportError(e, "Error on update schema to v5.1");}	
@@ -942,15 +932,17 @@ public class Schema
 				}
 			}	
 			// added rank to schema in 2015, but never added to  updateToVxx
-			mDB.tableCheckAddColumn("pja_db_unitrans_hits", "rank", "tinyint default 0", "blast_rank");
-			int cnt = mDB.executeCount("select count(*) from pja_db_unitrans_hits where rank>0");
+			// CAS303 rank changed to best_rank in v303
+			mDB.tableCheckAddColumn("pja_db_unitrans_hits", "best_rank", "tinyint default 0", "blast_rank");
+			int cnt = mDB.executeCount("select count(*) from pja_db_unitrans_hits where best_rank>0");
 			if (cnt==0) {
 				System.err.println("Update for filter hits ");
 				mDB.executeUpdate("update pja_db_unitrans_hits " +
-						"set rank=(filter_best+filter_ovbest+filter_gobest)");
+						"set best_rank=(filter_best+filter_ovbest+filter_gobest)");
 			}
 			mDB.executeUpdate("update schemver set schemver='5.0'");
 			dbVer = DBVer.Ver50;
+			dbVerStr = "5.0";
 			System.err.println("Finish update for V1.5 (Schema db5.0)");
 		}
 		catch (Exception e) {ErrorReport.reportError(e, "Error on update v1.5");}
@@ -1291,15 +1283,14 @@ public class Schema
 		}
 	}
 	// Since we clean up the INNODB tables, this is needed to add them back if
-		// an assembly is re-done.
+	// an assembly is re-done.
 	public void addASMTables() throws Exception
 	{
 		String sql;
 		if (!mDB.tableExist("ASM_tc_iter"))
 		{
-			sql = "" +
-			"create table ASM_tc_iter " +
-			"( " +
+			sql = 
+			"create table ASM_tc_iter ( " +
 			"	TCID integer PRIMARY KEY AUTO_INCREMENT, " +
 			"	AID integer NOT NULL, " +
 			"	tctype tinytext NOT NULL, " +
@@ -1310,9 +1301,7 @@ public class Schema
 			"	ctgs_end integer default 0, " +
 			"	merges_tried integer default 0, " +
 			"	merges_ok integer default 0 " +
-			" " +
-			") " +
-			"ENGINE=INNODB; " ;
+			") ENGINE=INNODB; " ;
 			mDB.executeUpdate(sql);
 		}
 		if (!mDB.tableExist("ASM_cliques"))

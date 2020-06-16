@@ -67,12 +67,13 @@ public class DoGO {
 		else {
 			if (!checkUnZipped()) return;
 		}
-		
 		if (!checkDBdelete()) return;
-		if (!loadGOschema()) return;
 		
 		try {
+			if (!loadGOschema()) return; 
+			
 			goDB = connectToGODB(goDBname);
+			
 			if (!loadGOdbfromUniProt(upDir)) {
 				goDB.close();
 				return;
@@ -125,24 +126,30 @@ public class DoGO {
 			String cmd;
 			String params = "-h " + hostObj.host() + " -u " + hostObj.user() + " -p" + hostObj.pass();
 			cmd = "mysqladmin " + params + " create " + goDBname;
-    			if (!doCmd(cmd, null, "create mySQL database", true)) return false;
+    		if (!doCmd(cmd, null, "create mySQL database", true)) return false;
     			
-    			File [] files = new File(goFullDir).listFiles();
-    			
-    			Vector <String> txt = new Vector <String> ();
-    			for (int i=0; i<files.length; i++) {
-    				String fname = files[i].getName();
-    				if (fname.endsWith(".txt")) txt.add(fname);
-    			}
-    			BufferedWriter out = new BufferedWriter(new FileWriter(goFullDir+"load.sh", false));
-    			
-    			out.write("cat *.sql | mysql " + params + " " + goDBname + "\n");
-    			for (String f : txt) 
-    				out.write("mysqlimport " + params + " -L " + goDBname + " " + f + "\n");
-    			out.close();
-    			cmd = "sh load.sh";
-    			if (!doCmd(cmd, goFullDir, "load GO into database", false)) return false;
-    			
+			File [] files = new File(goFullDir).listFiles();
+			Vector <String> txt = new Vector <String> ();
+			for (int i=0; i<files.length; i++) {
+				String fname = files[i].getName();
+				if (fname.endsWith(".txt")) txt.add(fname);
+			}
+			
+			String shFile = "load.sh";
+			BufferedWriter out = new BufferedWriter(new FileWriter(goFullDir+shFile, false));
+			out.write("cat *.sql | mysql " + params + " " + goDBname + "\n");
+			for (String f : txt) 
+				out.write("mysqlimport " + params + " -L " + goDBname + " " + f + "\n");
+			out.close();
+			
+			cmd = "sh " + shFile;
+			// CAS303 the mysqlimport failed on Mac 10.15 MySQL v8; the local_infile fixed the problem
+			if (!doCmd(cmd, goFullDir, "load GO into database", false)) {
+				System.out.println("Try: ");
+				System.out.println("mysql> set global local_infile = 1;");
+				return false;
+			}
+			
 			return true;
 		}
 		catch (Exception e) {ErrorReport.prtReport(e,  action);}

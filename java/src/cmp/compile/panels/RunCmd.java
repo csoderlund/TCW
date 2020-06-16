@@ -26,7 +26,6 @@ public class RunCmd {
 	public static int runCommand(String[] args, File dir, boolean showStdOut, boolean showStdErr, File outFile, int nThread)
 	throws Exception
 	{
-		//System.out.println(Utils.join(args,":"));
 		String cmd = args[0];
 		cmd = cmd.replaceAll(".*/", "");
 		if (mCmdCounts != null)
@@ -34,7 +33,7 @@ public class RunCmd {
 			if (!mCmdCounts.containsKey(cmd)) 
 			{
 				mCmdCounts.put(cmd, 0);
-				mCmdTimes.put(cmd, new Long(0));
+				mCmdTimes.put(cmd, 0L); // CAS303 new Long -> 0L
 			}
 			mCmdCounts.put(cmd,1 + mCmdCounts.get(cmd));
 		}

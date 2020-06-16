@@ -6,6 +6,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.util.Vector;
 
+import util.methods.ErrorReport;
 import util.methods.Out;
 
 public class RunCmd {
@@ -20,15 +21,18 @@ public class RunCmd {
 	public int run(String cmd, String dir) { return runCmd(cmd, dir, true);}
 	
 	public int runP(String cmd, String dir, boolean prtStdErr) {
-		Out.PrtSpMsg(2, "Exec: " + cmd);
-		if (dir!=null) Out.PrtSpMsg(2, " pwd: " + dir);
-		
-		int rc = runCmd(cmd, dir, prtStdErr);
-		if (rc!=0) {
-			Out.PrtError("Command failed " + rc);
+		try {
+			Out.PrtSpMsg(2, "Exec: " + cmd);
+			if (dir!=null) Out.PrtSpMsg(2, "From: " + dir);
+			
+			int rc = runCmd(cmd, dir, prtStdErr);
+			if (rc!=0) {
+				Out.PrtError("Command failed " + rc);
+				return rc;
+			}
 			return rc;
 		}
-		return rc;
+		catch (Exception e) {ErrorReport.prtReport(e, "run command"); return -1;}
 	}
 	public int runCmd(String cmd, String dir, boolean prtStdErr) {
 	 	int exitVal=0;
@@ -38,17 +42,17 @@ public class RunCmd {
 	    		
 	    		Process p = Runtime.getRuntime().exec(args, null, f);
 	    		p.getOutputStream().flush();
-			OutputHandler oh = new OutputHandler(p.getErrorStream());
-			InputHandler ih = new InputHandler(p.getOutputStream());
-			
-			if (prtStdErr) oh.start();
-			ih.start();
-			
-			p.waitFor();
-			
-			oh.Stop();
-			ih.Stop();
-	    		exitVal = p.exitValue();
+				OutputHandler oh = new OutputHandler(p.getErrorStream());
+				InputHandler ih = new InputHandler(p.getOutputStream());
+				
+				if (prtStdErr) oh.start();
+				ih.start();
+				
+				p.waitFor();
+				
+				oh.Stop();
+				ih.Stop();
+		    	exitVal = p.exitValue();
 	    	}
 	    	catch (MalformedURLException e) {
 	    		e.printStackTrace();

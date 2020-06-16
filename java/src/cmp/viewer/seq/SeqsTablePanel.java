@@ -39,7 +39,6 @@ import javax.swing.table.TableColumnModel;
 
 import util.database.DBConn;
 import util.methods.ErrorReport;
-import util.methods.Out;
 import util.methods.Static;
 
 import cmp.database.Globals;
@@ -404,28 +403,28 @@ public class SeqsTablePanel extends JPanel {
 	}
 	private String buildQueryStr(DBConn mdb) {
         try {
-        		FieldData theFields = FieldData.getSeqFields(theViewerFrame.getSeqLibList(), 
-					theViewerFrame.getSeqDEList(), theViewerFrame.getMethodPrefixes());
-	       
-	        	String from, strQuery;
-	        	if (strSubQuery==null || strSubQuery.equals("")) strSubQuery= " 1 ";
-	        	if (viewType==bGRP) { 
-	        		from = 	" FROM " + TABLE + " " + theFields.getJoins() + 
-	        				" LEFT JOIN pog_members ON pog_members.UTid = unitrans.UTid" +
-	        				" WHERE " + strSubQuery;
-	        		strQuery = "SELECT " + theFields.getDBFieldQueryList() +  from +
-	        				" group by unitrans.UTstr";
-	        	}
-	        	else {  // join on unitrans.HITid=unique_hits.HITid
-	        	    from = 	" FROM " + TABLE + " " + theFields.getJoins() + 
-	        				" WHERE " + strSubQuery;
-	        	    strQuery = "SELECT " + theFields.getDBFieldQueryList() + from;
-	        	}
-	        	int cnt  = mdb.executeCount("select count(*) " + from);
+    		FieldData theFields = FieldData.getSeqFields(theViewerFrame.getSeqLibList(), 
+				theViewerFrame.getSeqDEList(), theViewerFrame.getMethodPrefixes());
+       
+        	String from, strQuery;
+        	if (strSubQuery==null || strSubQuery.equals("")) strSubQuery= " 1 ";
+        	if (viewType==bGRP) { 
+        		from = 	" FROM " + TABLE + " " + theFields.getJoins() + 
+        				" LEFT JOIN pog_members ON pog_members.UTid = unitrans.UTid" +
+        				" WHERE " + strSubQuery;
+        		strQuery = "SELECT " + theFields.getDBFieldQueryList() +  from +
+        				" order by unitrans.UTstr"; // CAS303 group  -> order
+        	}
+        	else {  // join on unitrans.HITid=unique_hits.HITid
+        	    from = 	" FROM " + TABLE + " " + theFields.getJoins() + 
+        				" WHERE " + strSubQuery;
+        	    strQuery = "SELECT " + theFields.getDBFieldQueryList() + from;
+        	}
+        	int cnt  = mdb.executeCount("select count(*) " + from);
 	        String per = Static.perText(cnt, theViewerFrame.getInfo().getCntSeq());
-	        	loadStatus.setText("Getting " + cnt + " " + per + " filtered sequences from database" );
+	        loadStatus.setText("Getting " + cnt + " " + per + " filtered sequences from database" );
        	
-        		return strQuery;
+        	return strQuery;
         } catch(Exception e) {ErrorReport.reportError(e, "Error processing query");return null;}
 	}
 	/**********************************************************
@@ -497,15 +496,15 @@ public class SeqsTablePanel extends JPanel {
 		}
 	}
 	 public String getSelectedColumn(String column) {
-	     	if(theTable.getSelectedRowCount() == 0) return null;
-	     	
-	     	int colIndex =	theTableData.getColumnHeaderIndex(column);
-	     	int [] sels = theTable.getSelectedRows();
-	     	String seqID =  ((String)theTableData.getValueAt(sels[0], colIndex));
-	     	return seqID;
+     	if(theTable.getSelectedRowCount() == 0) return null;
+     	
+     	int colIndex =	theTableData.getColumnHeaderIndex(column);
+     	int [] sels = theTable.getSelectedRows();
+     	String seqID =  ((String)theTableData.getValueAt(sels[0], colIndex));
+     	return seqID;
     }
     public String getSelectedAASeq() {
-    		if(theTable.getSelectedRowCount() == 0) return null;
+    	if(theTable.getSelectedRowCount() == 0) return null;
      	
      	return loadSelectedSeq(FieldData.AASEQ_SQL);
     }
@@ -530,25 +529,25 @@ public class SeqsTablePanel extends JPanel {
 	public int getSelectedRow() { return theTable.getSelectedRows()[0];}
 	public int [] getSelectedRows() { return theTable.getSelectedRows();}
 	public String getGroupQueryList(Integer [] UTids) {
-			String sourceTable = "pog_groups.PGid";
-			
-			String subquery = "";
+		String sourceTable = "pog_groups.PGid";
+		
+		String subquery = "";
 
-			if(UTids.length == 1) {
-				subquery = sourceTable + " = " + UTids[0];
+		if(UTids.length == 1) {
+			subquery = sourceTable + " = " + UTids[0];
+		}
+		else if(UTids.length == 2) {
+			subquery = sourceTable + " = " + UTids[0];
+			subquery += " OR " + sourceTable + " = " + UTids[1];
+		}
+		else {
+			subquery = sourceTable + " IN (" + UTids[0];
+			for(int x=1; x<UTids.length; x++) {
+				subquery += ", " + UTids[x];
 			}
-			else if(UTids.length == 2) {
-				subquery = sourceTable + " = " + UTids[0];
-				subquery += " OR " + sourceTable + " = " + UTids[1];
-			}
-			else {
-				subquery = sourceTable + " IN (" + UTids[0];
-				for(int x=1; x<UTids.length; x++) {
-					subquery += ", " + UTids[x];
-				}
-				subquery += ")";
-			}
-			return subquery;    	
+			subquery += ")";
+		}
+		return subquery;    	
 	}
 	 /* SeqTopRowPanel next and prev */
     public int getTranslatedRow(int row) {
@@ -602,17 +601,17 @@ public class SeqsTablePanel extends JPanel {
    
     //When the view table gets sorted, sort the master table to match (Called by TableData)
     public void sortMasterColumn(String columnName, boolean ascending) {
-	    	int index = theTableData.getColumnHeaderIndex(columnName);
-	    	theTableData.sortByColumn(index, ascending);
+	    int index = theTableData.getColumnHeaderIndex(columnName);
+	    theTableData.sortByColumn(index, ascending);
     }
     
     private void showProgress() {
-	    	removeAll();
-	    	repaint();
-	    	setBackground(Globals.BGCOLOR);
-	    	loadStatus = Static.createTextFieldNoEdit(100);
-	    	JButton btnStop = Static.createButton("Stop", true);
-	    	btnStop.addActionListener(new ActionListener() {
+    	removeAll();
+    	repaint();
+    	setBackground(Globals.BGCOLOR);
+    	loadStatus = Static.createTextFieldNoEdit(100);
+    	JButton btnStop = Static.createButton("Stop", true);
+    	btnStop.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if(buildThread != null) loadStatus.setText("Cancelled");
 			}
@@ -654,7 +653,7 @@ public class SeqsTablePanel extends JPanel {
 	    	temp.add(showColumnSelect);
 	    	temp.add(Box.createHorizontalStrut(5));
 	    	temp.add(clearColumn);
-		temp.add(Box.createHorizontalStrut(5));
+	    	temp.add(Box.createHorizontalStrut(5));
 	    	temp.add(txtStatus);
 	    	temp.setMaximumSize(temp.getPreferredSize());
 	    	add(temp);
@@ -709,32 +708,32 @@ public class SeqsTablePanel extends JPanel {
 		private static final long serialVersionUID = 3118619652018757230L;
 
 		public MultiLineHeaderRenderer() {
-	    	    setOpaque(true);
-	    	    setBorder(BorderFactory.createLineBorder(Color.BLACK));
-	    	    setBackground(Globals.BGCOLOR);
-	    	    ListCellRenderer renderer = getCellRenderer();
-	    	    ((JLabel)renderer).setHorizontalAlignment(JLabel.CENTER);
-	    	    setCellRenderer(renderer);
-    	  	}
+    	    setOpaque(true);
+    	    setBorder(BorderFactory.createLineBorder(Color.BLACK));
+    	    setBackground(Globals.BGCOLOR);
+    	    ListCellRenderer renderer = getCellRenderer();
+    	    ((JLabel)renderer).setHorizontalAlignment(JLabel.CENTER);
+    	    setCellRenderer(renderer);
+	  	}
     	 
-	    	 public Component getTableCellRendererComponent(JTable table, Object value,
-	    	                   boolean isSelected, boolean hasFocus, int row, int column) {
-	    	    setFont(table.getFont());
-	    	    String str = (value == null) ? "" : value.toString();
-	    	    BufferedReader br = new BufferedReader(new StringReader(str));
-	    	    String line;
-	    	    Vector<String> v = new Vector<String>();
-	    	    try {
-	    	      while ((line = br.readLine()) != null) {
-	    	        v.addElement(line);
-	    	      }
-	    	      br.close(); 
-	    	    } catch (Exception e) {ErrorReport.reportError(e, "Error rendering table cells");}
-	    	    
-	    	    setListData(v);
-	    	    return this;
-	    	  }
-    	}
+    	 public Component getTableCellRendererComponent(JTable table, Object value,
+    	                   boolean isSelected, boolean hasFocus, int row, int column) {
+    	    setFont(table.getFont());
+    	    String str = (value == null) ? "" : value.toString();
+    	    BufferedReader br = new BufferedReader(new StringReader(str));
+    	    String line;
+    	    Vector<String> v = new Vector<String>();
+    	    try {
+    	      while ((line = br.readLine()) != null) {
+    	        v.addElement(line);
+    	      }
+    	      br.close(); 
+    	    } catch (Exception e) {ErrorReport.reportError(e, "Error rendering table cells");}
+    	    
+    	    setListData(v);
+    	    return this;
+    	  }
+	}
     
     private SortTable theTable = null;
     private TableData theTableData = null;

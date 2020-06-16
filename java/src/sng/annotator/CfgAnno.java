@@ -126,7 +126,7 @@ public class CfgAnno {
 				}
 				else {
 					Out.PrtSpMsg(1,"Run selfblast with default parameters");
-					blastObj.setSelfBlastArgs(BlastArgs.getBlastnOpDefaults());
+					blastObj.setSelfBlastArgs(BlastArgs.getBlastnOptions());
 				}
 			}
 			
@@ -143,7 +143,7 @@ public class CfgAnno {
 				}
 				else {
 					Out.PrtSpMsg(1,"Run translated selfblast with default parameters");
-					blastObj.setTSelfBlastArgs(BlastArgs.getBlastpOpDefaults());
+					blastObj.setTSelfBlastArgs(BlastArgs.getBlastpOptions());
 				}
 			}
 		}

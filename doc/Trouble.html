@@ -1,33 +1,101 @@
 <!DOCTYPE html>
 <html>
-<!--#set var=TITLE value="sTCW Troubleshooting" -->
-<!--#include virtual="../ssi/head.html" -->
-<a name=top>
-<!--#include virtual="../ssi/start2.html" -->
+<!--#set var=TITLE value="TCW Troubleshooting" -->
+<!--#include virtual="./ssi/head.html" -->
+<!--#include virtual="./ssi/start1.html" -->
 
-		
+<a name=top>
 <!------------- Trouble -------------------->
 <a name=trouble></a>
 <h2>Troubleshooting</h2>
 Content:
 <ul>
-<li><a href=#max>MySQL slow build</a>
+<li><a href=#mysql>MySQL slow</a>
 <li><a href=#db>MySQL connection errors</a>
-<li><a href=#ports>MySQL port access</a>
 <li><a href=#mem>Out of memory</a>
+<li><a href=#ext>Ext executable problems</a>
 <li><a href=#run>singleTCW errors</a>
-<li><a href=#asm>Assembly errors</a>
 </ul>
 
-<a name="max">
-<h3>MySQL slow build</h3>
-<i>Check max_allowed_packet</i>
-<br>Startup mysql and enter the command: <tt>show variables like "max_allowed_packet";</tt>
-<br>If it is small (e.g. 1048576), it will be very slow to build big databases. 
-<br>Increase it by entering the command: <tt>set global max_allowed_packet=1073741824;</tt>
+<!---------------------------------------------------------!>
+<hr>
+<h2>MySQL suggested settings</h2>
 
+<a name="mysql">
+<h3>Slow to load sequence and annotation</h3>
+
+Two MySQL settings are especially important for SyMAP performance (and generally for InnoDB table
+performance). 
+<p>
+<table cellspacing=3 cellpadding=2 border=1 rules=all>
+	<tr>
+		<td align=left valign=top><tt>innodb_buffer_pool_size</td>
+		<td>
+The default is too low for most purposes. You should set this to around 1Gb if possible (note that 
+the units are bytes). 
+		</td>
+	</tr>
+	<tr>
+		<td align=left valign=top><tt>innodb_flush_log_at_trx_commit</td>
+		<td>
+The default setting is 1, which results in very slow uploading of data.
+		</td>
+	</tr>
+</table>
+<p>
+To check the values, start mysql and type:
+<pre>
+show variables like "innodb_buffer_pool_size"; 
+show variables like "innodb_flush_log_at_trx_commit"; 
+</pre>
+To change the variables, then type:
+<pre>
+set global innodb_buffer_pool_size=1073741824;
+set global innodb_flush_log_at_trx_commit=0;
+</pre>
+Alternatively, You can set these in the MySQL configuration file <tt>my.cnf</tt> and restart MySQL. 
+Note that <tt>my.cnf</tt> is typically located at <tt>/etc/my.cnf</tt>, on both Linux and Mac.
+
+<p>Different machines and MySQL installations can produce different results with these variables.
+If the SyMAP demo-seq to demo-seq2 load and synteny computations seem slow, 
+try different combinations of these two variables to see what performs the fastest inserts.
+
+<a name="slow">
+<h3>Slow queries</h3>
+<table cellspacing=3 cellpadding=2 border=1 rules=all>
+	<tr>
+		<td align=left valign=top><tt>max_allowed_packet</td>
+		<td>
+This should be at least 500M if possible (the units are bytes). 
+		</td>
+	</tr>	
+</table>
+<p>
+To check the value, start mysql and type:
+<pre>show variables like "max_allowed_packet"; </pre>
+To change this variable, then type:
+<pre>set global max_allowed_packet=1073741824;</pre>
+
+
+<h3>runAS</h3>
+The following is necessary for <code>runAS</code> to create the TCW-GO database.
+<table cellspacing=3 cellpadding=2 border=1 rules=all>
+	<tr>
+		<td align=left valign=top><tt>local_infile</td>
+		<td>
+Set to 1. 
+		</td>
+	</tr>	
+</table>
+<p>To change the variable in MySQL:
+
+<pre>
+set global local_infile=1
+</pre>
+
+<p><a href="#top">Return to top</a><br>
 <a name="db">
-<h3>MySQL connection errors</h3>
+<h2>MySQL connection errors</h2>
 
 If TCW cannot connect to the database, generally the problem is the access privileges of the DB_user
  in the HOSTS.cfg (firewalls are another common problem, as discussed in the next section). 
@@ -50,36 +118,9 @@ to be corrected. If it succeeds, then try to add and drop a test database:
 If this fails you can still run TCW, but you will need an administrator to create
 the TCW database since <tt>runSingleTCW</tt> cannot do it. 
 
-<p>
-
-<a name="ports">
-<h3>MySQL port access</h3>
-Users running the TCW web applet need to able to connect from their computer, wherever it happens to be located,
-to the MySQL server on which the data is hosted. This connection is often blocked by firewalls,
-which can be either on the server's network, blocking incoming connections, or on the user's network, blocking outgoing
-connections. 
-<p>
-If the MySQL connection is blocked by a firewall, there are two options which we have had success with:
-<ol>
-<li> Request network adminstrators to open a hole for the MySQL connection (which will usually be on port 3306)
-<li> Use port forwarding on the MySQL server to forward an un-blocked port such as 80 or 443 to 3306. This works only if the un-blocked port
-is not being used on the same server (note that 80 and 443 correspond to standard and secure HTTP, respectively, so at least one will
-be in use if a webserver is running). 
-</ol>
-
-The second solution is the most robust since it works for all clients, even if their own networks are blocking outgoing MySQL connections. This is
-important if you have a public site receiving random visitors and need to guarantee a good experience.  
-<p>
-Another option is to run the MySQL server on a non-standard port (not 3306). This is easy to do, however most other ports will
-also be blocked, and most systems won't let you start MySQL on a non-blocked port such as 80 or 443. Hence, forwarding is simpler. 
-<p>
-Once you have a working port set up, modify the java applet <tt>DB_URL</tt>tag by appending the port, e.g.:
-<br><br><tt>
-&lt;param name="DB_URL" value="www.your.hostname:80"&gt;
-</tt>
-
+<p><a href="#top">Return to top</a><br>
 <a name=memset></a>
-<h3>Out of memory</h3>
+<h2>Out of memory</h2>
 <p>Java applications must specify their memory usage in advance, so it is very 
 important to set it high enough. The setting is adjusted by editing the appropriate launch script,
 by increasing the "-Xmx" parameter value on the java command line.   
@@ -107,8 +148,32 @@ to find the java installation directory, and look in its <tt>bin</tt> directory.
 Once you have the Control Panel open, look for a panel where you can enter the runtime parameters
 for java applets, and add "-Xmx1024m", for 1Gb (which should be plenty). 
 
+<p><a href="#top">Return to top</a><br>
+<a name=ext></a>
+<h2>Ext executable problems</h2>
+<h3>Not executable</h3>
+If on startup, you get a message like:
+<pre>
+***Error: file is not executable: ext/mac/mafft/mafft.bat
+</pre>
+
+From the <tt>/Ext</tt> directory, <tt>chmod -R 775 mafft</tt> to give all necessary
+executables and scripts in the directory permission to execute.
+
+<p>NOTE: MacOS 10.15 (Catalina) does not allow downloaded programs to execute. Running through TCW,
+you will either get popup that states "xxx cannot be opened because developer cannot be verified", or
+the program will just fail. See <a href=./Mac-OSX.html#ext class="ext" target="_blank">MacOS</a>.
+
+
+<h3>External program fails</h3>
+Generally, the command is written to the terminal by TCW. Copy and paste it at the command line. By executing it like
+this, you will see all the external programs messages.
+<p>If this does not work, try executing it in the <tt>/Ext</tt> directory.
+<p>See <a href=./Install.html#replace  class="ext" target="_blank">Install Replace Executable</a>.
+<p><a href="#top">Return to top</a><br>
+
 <a name=run></a>
-<h3>SingleTCW errors</h3>
+<h2>SingleTCW errors</h2>
 <code>runSingleTCW</code> and <code>viewSingleTCW</code>:
 If errors occur in either of these two programs, a message is written to the terminal
 and the Java stack-trace is written to the file <tt>sTCW.error.log</tt>. This can 
@@ -132,9 +197,10 @@ You can increase the memory size in the <tt>execAnno</tt> script.
 
 <a name=asm></a>
 <h3>Assembly errors</h3>
-See <a href=AssemGuide.html#trouble>Assembly trouble shooting</a>.
+See <a href=./stcw/AssemGuide.html#trouble  class="ext" target="_blank">Assembly trouble shooting</a>.
 <p>
-<!--#include virtual="../ssi/end.html" -->
+<p><a href="#top">Return to top</a><br>
+<!--#include virtual="./ssi/end.html" -->
 
 
 </html> 

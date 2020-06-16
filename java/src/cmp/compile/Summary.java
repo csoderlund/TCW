@@ -296,7 +296,7 @@ public class Summary {
     		int cnt = mDB.executeCount("select count(*) from pog_groups where score1>0 limit 1");
     		if (cnt==0) return; 
     		
-    		String [] dfields = {"Prefix", "conLen", "sdLen", "   Score","SD  ", Globals.MultiAlign.score2, "SD  "};
+    		String [] dfields = {"Prefix", "conLen", "sdLen", "   Score","SD  ", Globals.Ext.score2, "SD  "};
     		int [] djust = 	    {1,      0,     0,        0,     0,     0,       0};
     		int nCol = djust.length;
     		String [][] rows = new String[nMethod][nCol];

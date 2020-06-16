@@ -20,7 +20,6 @@ import java.lang.StringBuilder;
 
 import sng.assem.enums.*;
 import util.database.DBConn;
-import util.methods.Out;
 import util.methods.TCWprops;
 
 // Container for various static helper routines. 
@@ -205,26 +204,21 @@ public class Utils
 			
 			}
 
-		} catch (Exception e)
-		{
-			return false;
-		}
-
-		//unreachable return false;
+		} catch (Exception e) {return false;}
 	}
 
 	static String getFirstLine(File f) throws Exception
 	{
 		BufferedReader fh = new BufferedReader(new FileReader(f));
-		return fh.readLine();
+		String line = fh.readLine();
+		fh.close();
+		return line;
 	}
 
 	static void clearDir(String dir)
 	{
 		File d = new File(dir);
 		clearDir(d);
-
-
 	}
 
 	static void fastaPrint(BufferedWriter fh, String name, StringBuffer str)
@@ -261,20 +255,19 @@ public class Utils
 	public static int runCommand(String[] args, File dir, boolean showStdOut, boolean showStdErr, File outFile, int nThread)
 	throws Exception
 	{
-		//System.out.println(Utils.join(args,":"));
 		String cmd = args[0];
 		cmd = cmd.replaceAll(".*/", "");
+		
 		if (mCmdCounts != null)
 		{
 			if (!mCmdCounts.containsKey(cmd)) 
 			{
 				mCmdCounts.put(cmd, 0);
-				mCmdTimes.put(cmd, new Long(0));
+				mCmdTimes.put(cmd, 0L); // CAS303 new Long(0) replaced with 0L
 			}
 			mCmdCounts.put(cmd,1 + mCmdCounts.get(cmd));
 		}
-		//Utils.intTimerStart(nThread);
-		
+	
 		Process p = Runtime.getRuntime().exec(args,null,dir);
 		
 		BufferedReader stdOut = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -308,7 +301,6 @@ public class Utils
 				while (stdError.ready())
 				{
 					errStr.append((char)stdError.read());
-					//System.err.append((char) stdError.read());
 				}
 			}
 			else
@@ -360,8 +352,7 @@ public class Utils
 		{
 			Log.msg(errStr.toString(), LogLevel.Detail);	
 		}
-		//Long time = Utils.intTimerEnd(nThread,cmd);
-		//mCmdTimes.put(cmd, time + mCmdTimes.get(cmd));
+		
 		int ev = p.exitValue();
 		p.getInputStream().close();
 		p.getOutputStream().close();

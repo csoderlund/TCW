@@ -963,8 +963,8 @@ public class DoORF {
 	        rows[r][c] = "ORF=Hit";  			rows[r++][c+1] = perCntText(cntTestORFeq, h);
 	        rows[r][c] = "ORF>Hit";  			rows[r++][c+1] = perCntText(cntTestORFgt,h);
 	        rows[r][c] = "ORF~Hit";  			rows[r++][c+1] = perCntText(cntTestORFappr,h);       
-	        	rows[r][c] = "ORF>Hit & HasEnds";    rows[r++][c+1] = perCntText(cntTestORFgtEnds,h);
-	        	rows[r][c] = "ORF=Hit & HasEnds";    rows[r++][c+1] = perCntText(cntTestORFeqEnds,h);
+	        rows[r][c] = "ORF>Hit & HasEnds";    rows[r++][c+1] = perCntText(cntTestORFgtEnds,h);
+	        rows[r][c] = "ORF=Hit & HasEnds";    rows[r++][c+1] = perCntText(cntTestORFeqEnds,h);
 	  
 	        	r=0; c=2;
 	        h=cntTestHasHit;
@@ -972,7 +972,7 @@ public class DoORF {
 	        rows[r][c] = "   Longest & Markov";		rows[r++][c+1] = perCntText(cntTestHitLongBestMK,h);
 	        rows[r][c] = "   Is Longest ORF";  		rows[r++][c+1] = perCntText(cntTestHitLongest,h);
 	        rows[r][c] = "   Markov Best Score";  	rows[r++][c+1] = perCntText(cntTestHitBestMK,h);
-	        	rows[r][c] = "   Markov Good Frame";  	rows[r++][c+1] = perCntText(cntTestHitGoodMK,h);	
+	        rows[r][c] = "   Markov Good Frame";  	rows[r++][c+1] = perCntText(cntTestHitGoodMK,h);	
 	        rows[r][c] = "   Has Start & Stop";  	rows[r++][c+1] = perCntText(cntTestHitHasEnds,h);	
 	        rows[r][c] = "   Not hit frame";  	    rows[r++][c+1] = Out.df(cntTestHitneORF);
 	        
@@ -982,9 +982,9 @@ public class DoORF {
 	        rows[r][c] = "   Longest & Markov";		rows[r++][c+1] = perCntText(cntTestGTHitLongBestMK,h);
 	        rows[r][c] = "   Is Longest ORF";  		rows[r++][c+1] = perCntText(cntTestGTHitLongest,h);
 	        rows[r][c] = "   Markov Best Score";  	rows[r++][c+1] = perCntText(cntTestGTHitBestMK,h);
-	        	rows[r][c] = "   Markov Good Frame";  	rows[r++][c+1] = perCntText(cntTestGTHitGoodMK,h);	       
-	        	rows[r][c] = "   Has Start & Stop";  	rows[r++][c+1] = perCntText(cntTestGTHitHasEnds,h);  	
-	        	rows[r][c] = "   ORF=Hit & HasEnds";  	rows[r++][c+1] = perCntText(cntTestGThasEnds,h);
+        	rows[r][c] = "   Markov Good Frame";  	rows[r++][c+1] = perCntText(cntTestGTHitGoodMK,h);	       
+        	rows[r][c] = "   Has Start & Stop";  	rows[r++][c+1] = perCntText(cntTestGTHitHasEnds,h);  	
+        	rows[r][c] = "   ORF=Hit & HasEnds";  	rows[r++][c+1] = perCntText(cntTestGThasEnds,h);
 	        	 
 	        msg = Out.makeTable(nCol, r+1, null, justify, rows);
 	        lines = msg.split("\n");
@@ -1004,7 +1004,7 @@ public class DoORF {
 			// Save to database
 			try {
 				String gcOverview = gcObj.prtFinal();
-				CoreDB.updateAnnoVer(mDB); // adds orf_msg if not new 1.3.7 database
+				CoreDB.updateAnnoVer(mDB); // updates annoDate
 				String ov = overview + "\n" + gcOverview;
 	 			mDB.executeUpdate("update assem_msg" +
 	 					" set orf_msg='" + prtObj.orfOverviewLegend + "'" + ", gc_msg='" + ov + "'");
@@ -1240,7 +1240,7 @@ public class DoORF {
 		// from contig table
 		int seqID;
 		String name, remark="", seq;
-		int seqLen, pid=0, pidov=0, pidgo=0; // pidgo could be used to check for non-NT, but isn't right now
+		int seqLen, pid=0, pidov=0; // pidgo could be used to check for non-NT, but isn't right now
 		String seqRev=""; // compute when needed.
 		
 		// from hits table
@@ -1263,7 +1263,7 @@ public class DoORF {
 			if (p>0) {
 				pid = p;
 				if (p!=po) pidov = po;
-				if (pg!=p && pg!=po) pidgo = pg;
+				//if (pg!=p && pg!=po) pidgo = pg;
 				hasAnno=true;
 			}
 		
@@ -1975,7 +1975,7 @@ public class DoORF {
 		 	 		cnt++;
 		 	 		if (cnt%100==0) Out.r("Process " + cnt);
 				}
-			 	if (hitFile!=null) hitFile.close();
+			 	hitFile.close();
 			 	kmerMap.clear();
 				Out.PrtSpCntMsgZero(3, cntDup, "skipped sequences");
 			 }
@@ -2018,6 +2018,7 @@ public class DoORF {
 					}
 					else seq += line.toLowerCase(); 
 				}
+				reader.close();
 				if (!seq.equals("") && notDup(name, seq)) { // last one
 					countCodons(seq);
 					countMarkov(seq);

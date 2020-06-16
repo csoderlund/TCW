@@ -36,6 +36,7 @@ import javax.swing.event.CaretListener;
 
 
 import sng.database.Globals;
+import sng.runAS.DoGO;
 import util.methods.BlastArgs;
 import util.methods.ErrorReport;
 import util.methods.Out;
@@ -680,14 +681,14 @@ public class AnnoOptionsPanel extends JPanel {
 		Vector<String> retVal = new Vector<String> ();
 		retVal.add("   None   ");
 		try {
-			Class.forName("com.mysql.jdbc.Driver");
-			String dbstr = "jdbc:mysql://" + hostsObj.host() + "/";
-			Connection con = null; 
+			Class.forName(DBConn.driver);
+			String dbstr = DBConn.createDBstr(hostsObj.host() + "/", null); // CAS303
 
-			con = DriverManager.getConnection(dbstr, hostsObj.user(), hostsObj.pass());
+			Connection con = DriverManager.getConnection(dbstr, hostsObj.user(), hostsObj.pass());
 			Statement st = con.createStatement();
 				
-			ResultSet rset = st.executeQuery("show databases LIKE 'go_%'");
+			
+			ResultSet rset = st.executeQuery("show databases LIKE '" + DoGO.goPreDB + "%'");
 			while(rset.next()) {
 				retVal.add(rset.getString(1));
 			}

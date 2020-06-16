@@ -92,31 +92,32 @@ public class DBInfo {
         return null;
 	}
 	
-	/***** DBInfo method *********************************/
+	/**
+	 ******** Class  DBInfo method *******************************
+	 ***/
+	public DBInfo() {}
+	
 	public boolean checkDBver(HostsCfg hostsObj) {
-		if (dbVerStr.equals(Version.strDBver)) return true;
 		if (UIHelpers.isApplet()) return false;
 		
 		try {
 			DBConn dbc = new DBConn(hostsObj.host(), dbName,hostsObj.user(), hostsObj.pass());
+			
 			Schema s = new Schema(dbc);
-			if (!s.current()) s.update();
-			dbVerStr = Version.strDBver;
+			if (!s.current()) dbVerStr = s.update();
+			
 			dbc.close();
 			return true;
 		}
-		catch (Exception e) {
-			ErrorReport.reportError(e, "Unable to update schema");
-		}
+		catch (Exception e) {ErrorReport.reportError(e, "Unable to update schema");}
 		
 		return false;
 	}
-	/*** Class *****/
-	public DBInfo() {}
+	
 	public String toString() {
 		String str = id + "    [" + dbName + " " + assemblydate + " " + username + "]";
 		String v = dbVerStr;
-		if (!v.equals(Version.strDBver)) str += " db" + v;
+		if (!v.equals(Schema.currentVerString())) str += " db" + v;
 		return str;
 	}
 	public String getDescription() {

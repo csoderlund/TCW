@@ -7,18 +7,21 @@ import java.text.DecimalFormat;
 // shared by sTCW and mTCW
 // They both have their own database/Globals.java
 public class Globalx {
-	public static final String strRelDate = "(5-May-20)"; 
-	public static final String strTCWver = "3.0.2";
+	public static final String strRelDate = "(16-June-20)"; 
+	public static final String strTCWver = "3.0.3";
 	public static final String URL = "http://www.agcol.arizona.edu ";
 	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate;
 	public static final String error="***";
 	
+	public final static String extDir = "Ext"; // CAS303 changed from external and external_osx
+	public final static String lintelDir = extDir + "/linux";
+	public final static String macDir = extDir + "/mac";
+	
 	public final static String diamondSuffix = ".dmnd";
-	public final static String usearchSuffix = ".usch"; // not tested for awhile
 	
 	public static final String HOSTS = 		"HOSTS.cfg";
-	public static final String STCW 	= 		"sTCW_"; 
-	public static final String MTCW 	= 		"mTCW_"; 
+	public static final String STCW 	= 	"sTCW_"; 
+	public static final String MTCW 	= 	"mTCW_"; 
 	
 	// on MAC, directory names are case in-sensitive
 	public static final String LIBDIR 	= "projects"; // 11/18/18 libraries directory merged with projects
@@ -35,7 +38,7 @@ public class Globalx {
 	// for specific project
 	public final static String logDir  	=   "logs";
 	public static final String BLASTDIR = 	"hitResults";  // runSingle: results from annotation; runMulti: self-blast
-	public static final String ORFDIR = 		"orfFiles";
+	public static final String ORFDIR = 	"orfFiles";
 	
 	// TCW directory for viewSingle and viewMulti to put results the user can view
 	public static final String HITDIR =   	"ResultHits"; // viewSingle: sequences are written and blasts occur

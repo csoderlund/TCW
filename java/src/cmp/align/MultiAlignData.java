@@ -24,7 +24,7 @@ import util.methods.Static;
 import util.methods.TCWprops;
 
 public class MultiAlignData {
-	private final static int MUSCLE = Globals.MultiAlign.MUSCLE;
+	private final static int MUSCLE = Globals.Ext.MUSCLE;
 	private final static int SEQUENCE_LINE_LENGTH = 80;
 	private final static String BASEDIR = Globalx.ALIGNDIR;
 	private static final String inFileName = "inSeq.fa";
@@ -130,24 +130,25 @@ public class MultiAlignData {
 			if (out.exists()) out.delete();
 			
 			String cmdPath = TCWprops.getExtDir();
-			if (alignPgm==MUSCLE) cmdPath +=  Globals.MultiAlign.muscleExe;
-			else 				  cmdPath +=  Globals.MultiAlign.mafftExe;
+			if (alignPgm==MUSCLE) cmdPath +=  Globals.Ext.muscleExe;
+			else 				  cmdPath +=  Globals.Ext.mafftExe;
 			
 			RunCmd rCmd = new RunCmd();
 			
-			if (alignPgm==Globals.MultiAlign.MUSCLE) {
+			if (alignPgm==Globals.Ext.MUSCLE) {
 				cmd = cmdPath + " -in " + seqFile + " -out " + outAlignedFile;
 				rc = rCmd.runP(cmd, prtCmd);
 			}
 			else { 
 				int cpus = Runtime.getRuntime().availableProcessors(); 
-				// -- reorder 
 				cmd = cmdPath + " --auto --reorder --thread " + cpus + " " + seqFile;
 				String traceFile = outDir + traceFileName;
+				
 				rc = rCmd.runP(cmd, outAlignedFile, traceFile, prtCmd);
 			}
 			if (rc!=0) {
-				computeFailure("Failed alignment", "Failed");
+				Out.prt(cmd); // CAS303
+				//computeFailure("Failed alignment", "Failed"); CAS303 prints in calling routine
 				return rc;
 			}
 			
@@ -158,7 +159,7 @@ public class MultiAlignData {
 			
 			computeConsensus(isAA);// create consensus at position 0
 			if (prtScores) {
-				String xx = (alignPgm==Globals.MultiAlign.MUSCLE) ? "MUSCLE " : "MAFFT ";
+				String xx = (alignPgm==Globals.Ext.MUSCLE) ? "MUSCLE " : "MAFFT ";
 				Out.PrtSpMsgTime(0, xx + (nameVec.size()-1) + " in " + outAlignedFile, time);
 			}
 			if (isAA) computeScores(prtScores, prtCmd); 

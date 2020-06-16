@@ -3,6 +3,7 @@ package sng.runDE;
 /****************************************
  * Graphical interface for computing DE (runDE)
  * v2.11 - remove built-in DE methods
+ * v3.0.3 - change all showOptionDialog(null,.. to showOptionDialog(getInstance(); the null hide window on Java 14.
  */
 import java.awt.Color;
 import java.io.BufferedReader;
@@ -50,7 +51,6 @@ import javax.swing.tree.TreeSelectionModel;
 
 import sng.database.DBInfo;
 import sng.database.Globals;
-import sng.database.MetaData;
 import sng.database.Overview;
 import util.database.Globalx;
 import util.database.HostsCfg;
@@ -174,14 +174,14 @@ public class QRFrame extends JDialog implements WindowListener {
 		}
 
 		if (addCol) {
-			int ret = JOptionPane.showOptionDialog(null, 
+			int ret = JOptionPane.showOptionDialog(getInstance(), // CAS303 change null to getInstance()
 					"Compute " + colName + " \nContinue?",
 					"Save Result in p-value column", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 			if (ret == JOptionPane.NO_OPTION) return;
 			Out.Print("\nStart DE execution - add results to column " + colName);
 		}
 		else {
-			int ret = JOptionPane.showOptionDialog(null, 
+			int ret = JOptionPane.showOptionDialog(getInstance(), 
 					"You have not selected to Save results in TCW database. \nContinue?",
 					"Save Result in p-value column", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 			if (ret == JOptionPane.NO_OPTION) return;
@@ -192,7 +192,8 @@ public class QRFrame extends JDialog implements WindowListener {
 		qrProcess.doExecute(rScriptFile, filCnt, filCPM, filCPMn, 
 					disp, doFDR,  pColName, addCol,  grp1, grp2);
 	}
-
+	
+	
 	private void doExecuteAll(){
 		TreeSet<String> grp1 = new TreeSet <String> ();
 		TreeSet<String> grp2 = new TreeSet <String> ();	
@@ -211,7 +212,7 @@ public class QRFrame extends JDialog implements WindowListener {
 		String libs = libNames.get(0);
 		for (int i= 1; i<libNames.size(); i++) libs += "," + libNames.get(i);
 		String msg = "\nDo all pairs for " + libs + "\n and save to auto-named columns?";	
-		int ret = JOptionPane.showOptionDialog(null, msg,
+		int ret = JOptionPane.showOptionDialog(getInstance(), msg,
 				"Confirm All Pairs", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 		if (ret != JOptionPane.YES_OPTION)
 		{
@@ -330,7 +331,7 @@ public class QRFrame extends JDialog implements WindowListener {
 			if (warn>0) msg += " with " + warn + " overwrite (see terminal)";
 			if (err>0) msg += " and " + err + " ignored entries (see terminal)";
 
-			int ret = JOptionPane.showOptionDialog(null, msg,
+			int ret = JOptionPane.showOptionDialog(getInstance(), msg,
 					"runDE", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 		
 			if (ret != JOptionPane.YES_OPTION)
@@ -602,7 +603,7 @@ public class QRFrame extends JDialog implements WindowListener {
 			for (int i=0; i<P_Col.length; i++) {
 				if (P_Col[i].equals(colName)) {			
 					if (msg==1) {
-						int ret = JOptionPane.showOptionDialog(null, "Column " + colName + 
+						int ret = JOptionPane.showOptionDialog(getInstance(), "Column " + colName + 
 				" is already used. Do you want to overwrite the previous scores?\n" +
 				"(see Help about generating column names)",
 				"Existing column", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
@@ -661,7 +662,7 @@ public class QRFrame extends JDialog implements WindowListener {
 			}
 		}
 		String msg = (all) ? "Compute GOseq for all DE columns" : "Compute GOseq for " + selected;
-		int ret = JOptionPane.showOptionDialog(null, msg + "\nContinue?",
+		int ret = JOptionPane.showOptionDialog(getInstance(), msg + "\nContinue?",
 				"GOseq", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 		if (ret == JOptionPane.NO_OPTION) return;
 		
@@ -1119,7 +1120,7 @@ public class QRFrame extends JDialog implements WindowListener {
 					if(cmbPvalColumns.getSelectedIndex() > 0) {
 						String column = (String)cmbPvalColumns.getSelectedItem();
 						if (!column.equals(allCols)) {
-							int ret = JOptionPane.showOptionDialog(null, "Remove " + column + "?",
+							int ret = JOptionPane.showOptionDialog(getInstance(), "Remove " + column + "?",
 									"Remove column", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 							if (ret == JOptionPane.YES_OPTION)
 							{
@@ -1127,7 +1128,7 @@ public class QRFrame extends JDialog implements WindowListener {
 							}
 						}
 						else {
-							int ret = JOptionPane.showOptionDialog(null, "Remove all p-value columns?",
+							int ret = JOptionPane.showOptionDialog(getInstance(), "Remove all p-value columns?",
 									"Remove column", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 							if (ret == JOptionPane.YES_OPTION)
 							{

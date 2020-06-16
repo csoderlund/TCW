@@ -15,8 +15,12 @@ import javax.swing.JFrame;
 import sng.database.Version;
 import util.database.HostsCfg;
 import util.methods.ErrorReport;
+import util.methods.FileHelpers;
+import util.methods.Out;
+import util.methods.TCWprops;
 import util.ui.UIHelpers;
 import cmp.compile.runMTCWMain;
+import cmp.database.Globals;
 
 public class CompileFrame extends JFrame {
 	private static final long serialVersionUID = -3595052029641659355L;
@@ -27,13 +31,12 @@ public class CompileFrame extends JFrame {
 		theParent = parent;
 		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.PAGE_AXIS));
 		setWindowSettings("runMultiTCW");
-		setBlast();
+		setHosts();
 		runMultiTCW();
 	}
 	
 	private void runMultiTCW() {
 		Vector<String> hostNames = new Vector<String>();
-		hostsObj = new HostsCfg();
 		hostNames.add(hostsObj.host());
 		setTitle("runMultiTCW " + Version.strTCWver); 
 		
@@ -86,15 +89,37 @@ public class CompileFrame extends JFrame {
 			}
 		});
 	}
-	private void setBlast() {
+	private void setHosts() {
 		if (blastIsSet) return;
 		blastIsSet = true;
 		try {
 			new File("HOSTS.cfg");
-			new HostsCfg();
+			hostsObj = new HostsCfg();
+			
+			// Blast path gets checked in HostsCfg
+			// Check muscle/muscle, mafft, mstat
+			String cmdPath = TCWprops.getExtDir();
+			if (!FileHelpers.existDir(cmdPath)) {
+				Out.PrtError("directory does not exists: " + cmdPath);
+				return;
+			}
+			checkExternal(cmdPath + Globals.Ext.mafftExe);
+			checkExternal(cmdPath + Globals.Ext.muscleExe);
+			checkExternal(cmdPath + Globals.Ext.mstatxExe);
+			checkExternal(cmdPath + Globals.Ext.kaksExe);
+			checkExternal(cmdPath + Globals.Ext.orthoTryExe);
 		}
 		catch(Exception e) {System.err.println("Error reading HOSTS.cfg"); }
 
+	}
+	private void checkExternal(String filePath) {
+		try {
+			if (!FileHelpers.fileExists(filePath))
+				Out.PrtError("file does not exists: " + filePath);
+			else if (!FileHelpers.fileExec(filePath))
+				Out.PrtError("file is not executable: " + filePath);
+		}
+		catch(Exception e) {System.err.println("Check External"); }
 	}
 	private runMTCWMain theParent = null;
 	private boolean blastIsSet = false;

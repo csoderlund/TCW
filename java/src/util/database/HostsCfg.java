@@ -11,54 +11,62 @@ import java.io.InputStreamReader;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import javax.swing.JApplet;
-
 import util.methods.BlastArgs;
 import util.methods.ErrorReport;
 import util.methods.TCWprops;
+import util.methods.FileHelpers;
 
 public class HostsCfg 
 {
 	final String CAP3_DEF = TCWprops.getExtDir() + "/CAP3/cap3";
 	final String HOSTS = Globalx.HOSTS;
+	final String localHost = "localhost";
 	
 	public HostsCfg() 
 	{	
+		if (!theHost.contentEquals("")) return; // already run
 		try
 		{
-			if (theHost.equals(""))
+			File f = new File(HOSTS);
+			if (!f.isFile())
 			{
-				File f = new File(HOSTS);
-				if (!f.isFile())
-				{
-					System.err.println("Can't find " + HOSTS);
-					System.exit(0);
-				}
-				theHost="localhost"; //default
-				loadHOSTS(f);
-				checkLocalHost();
-				checkDBConnect();
-				getBlastPath();	
+				System.err.println("Cannot find " + HOSTS);
+				System.exit(0);
 			}
+			
+			theHost=localHost; //default
+			loadHOSTFile(f);
+			checkDBConnect();
+			
+			getSearchPath(false);	
 		}
 		catch(Exception e){ErrorReport.die("Error reading HOSTS.cfg!!");}
 	}
-	// Used by the applets. It doesn't do localhost checks.
-	public HostsCfg(String h, String u, String p)
-	{
-		theHost = h;
-		theUser = u;
-		thePass = p;
+	
+	// -v Only - Used by runSingleTCW to check database variables
+	public HostsCfg(boolean chkVar) { // value doesn't matter
+		if (!theHost.contentEquals("")) return; // already run
 		
-		String[] f2 = theHost.split(":");
-		if (f2.length == 2)
+		try
 		{
-			theHost = f2[0];
-			thePort = f2[1];
+			File f = new File(HOSTS);
+			if (!f.isFile())
+			{
+				System.err.println("Cannot find " + HOSTS);
+				System.exit(0);
+			}
+			theHost="localhost"; //default
+			loadHOSTFile(f);
+			
+			DBConn.checkVariables(theHost, theUser, thePass, true);
+			getSearchPath(true);
 		}
-		isLocalHost = false;
+		catch(Exception e){ErrorReport.die("Error reading HOSTS.cfg!!");}
 	}
-	private void loadHOSTS(File f) throws Exception
+	/*******************************************************
+	 * Reads HOSTS.cfg
+	 */
+	private void loadHOSTFile(File f) throws Exception
 	{
 		theUser="";
 		BufferedReader br = new BufferedReader(new FileReader(f));
@@ -83,94 +91,35 @@ public class HostsCfg
 				System.exit(0);
 			}
 			seen.add(key.toLowerCase());
-			if (key.equalsIgnoreCase("db_host"))
-			{
-				theHost = val;
-				String[] f2 = theHost.split(":");
-				if (f2.length == 2)
-				{
-					theHost = f2[0];
-					thePort = f2[1];
-				}
-			}
-			else if (key.equalsIgnoreCase("db_port")) thePort = val;
+			
+			if (key.equalsIgnoreCase("db_host")) theHost = val;
 			else if (key.equalsIgnoreCase("db_user")) theUser = val;
 			else if (key.equalsIgnoreCase("db_password")) thePass = val;
+			// else if (key.equalsIgnoreCase("db_port")) thePort = val; CAS303 was for applet
 			else otherParams.put(key, val);
 		}
 		br.close(); 
 		if (theUser.equals("")) ErrorReport.die("DB_user has no value in " + HOSTS);
 	}
 
-	// Find all the aliases for the current machine, and see if
-	// the specified host is one of them
-	private void checkLocalHost()
-	{
-		try
-		{
-			localHostAliases.add("localhost");
-			if (theHost.equalsIgnoreCase("localhost"))
-			{
-				theHost = "localhost";
-				isLocalHost = true;
-			}
-			String hostName = getHostName();
-			localHostAliases.add(hostName);
-			if (hostName.equalsIgnoreCase(theHost))
-			{
-				isLocalHost = true;
-			}
-			hostName = java.net.InetAddress.getLocalHost().getHostName();
-			localHostAliases.add(hostName);
-			if (hostName.equalsIgnoreCase(theHost))
-			{
-				isLocalHost = true;
-			}		
-			hostName = java.net.InetAddress.getLocalHost().getCanonicalHostName();
-			localHostAliases.add(hostName);
-			if (hostName.equalsIgnoreCase(theHost))
-			{
-				isLocalHost = true;
-			}			
-			hostName = java.net.InetAddress.getLocalHost().getHostAddress();
-			localHostAliases.add(hostName);
-			if (hostName.equalsIgnoreCase(theHost))
-			{
-				isLocalHost = true;
-			}			
-			if (localHostAliases.size() <= 1)
-			{
-				System.err.println("Unable to determine local host name or address");
-			}
-			if (isLocalHost)
-			{
-				if (!theHost.equals("localhost"))
-				{
-					System.err.println("Using host:" + theHost + " which is the local host");
-				}
-			}
-		}
-		catch(Exception e)
-		{
-			System.out.println("Error: reading HOSTs.cfg file");
-			e.printStackTrace();
-		}
-	}
+	
 	private void checkDBConnect()
 	{
-		if (DBConn.checkMaxAllowedPacket(theHost, theUser, thePass)) {
+		if (DBConn.checkMysqlServer(theHost, theUser, thePass)) {
 			return;
 		}
 		
 		System.err.println("Could not connect to MySQL server using the information in HOSTS.cfg");
+		
+		// CAS303 moved here as only used when cannot connect
+		// this all may not be necessary
+		checkLocalHost(); 
 		if (!isLocalHost)
 		{
-			System.err.println("The host (" + theHost + ") does not appear to be an alias of localhost");
-			System.err.println("known aliases are:");
+			System.err.println("The host (" + theHost + ") does not connect to MySQL server");
+			System.err.println("Known aliases are of the localhost:");
 			for (String alias : localHostAliases)
-			{
 				System.err.println(alias);
-			}
 			System.exit(0);
 		}
 		else
@@ -187,39 +136,62 @@ public class HostsCfg
 					return;
 				}
 				else
-				{
 					System.err.println(alias + ": fail");
-				}
 			}
 		}
 		System.exit(0);
 	}
-	
-	private void getBlastPath() 
+	// Find all the aliases for the current machine, and see if the specified host is one of them
+	private void checkLocalHost()
 	{
-	    String bpath = "", dpath="", upath="";
-	    
-		if (otherParams.containsKey("blast_path"))
+		try
 		{
-			bpath = otherParams.get("blast_path").trim();
-			if (bpath.endsWith("/")) bpath = bpath.substring(0, bpath.length()-1);
+			localHostAliases.add(localHost);
+			if (theHost.equalsIgnoreCase(localHost)) {
+				theHost = localHost;
+				isLocalHost = true;
+			}
+			String hostName = getHostName();
+			localHostAliases.add(hostName);
+			if (hostName.equalsIgnoreCase(theHost)) {
+				isLocalHost = true;
+			}
+			
+			hostName = java.net.InetAddress.getLocalHost().getHostName();
+			localHostAliases.add(hostName);
+			if (hostName.equalsIgnoreCase(theHost)){
+				isLocalHost = true;
+			}
+			
+			hostName = java.net.InetAddress.getLocalHost().getCanonicalHostName();
+			localHostAliases.add(hostName);
+			if (hostName.equalsIgnoreCase(theHost)) {
+				isLocalHost = true;
+			}	
+			
+			hostName = java.net.InetAddress.getLocalHost().getHostAddress();
+			localHostAliases.add(hostName);
+			if (hostName.equalsIgnoreCase(theHost)) {
+				isLocalHost = true;
+			}			
+			
+			if (isLocalHost) {
+				if (!theHost.equals(localHost)) {
+					System.err.println("Using host:" + theHost + " which is the local host");
+				}
+			}
 		}
-		if (otherParams.containsKey("diamond_path"))
+		catch(Exception e)
 		{
-			dpath = otherParams.get("diamond_path").trim();
-			if (dpath.endsWith("/")) dpath = dpath.substring(0, dpath.length()-1); 
+			System.out.println("Error: reading HOSTs.cfg file");
+			ErrorReport.prtReport(e, "Reading HOSTs.cfg file");
 		}
-		if (otherParams.containsKey("usearch_path"))
-		{
-			upath = otherParams.get("usearch_path").trim();
-			if (upath.endsWith("/")) upath = upath.substring(0, upath.length()-1); 
-		}
-		BlastArgs.evalBlastPath(bpath, dpath, upath);
 	}
-	
 	private String getHostName() throws Exception
 	{
-		String name = getEnv("HOSTNAME");
+		String name="";
+		if (System.getenv().containsKey("HOSTNAME")) name = System.getenv("HOSTNAME");
+		if (!name.contentEquals("")) return name;
 		
         Process p = Runtime.getRuntime().exec("uname -n");
         BufferedReader stdInput = new BufferedReader(new 
@@ -229,14 +201,7 @@ public class HostsCfg
 		
 		return name;
 	}
-	private String getEnv(String key)
-	{
-		if (System.getenv().containsKey(key))
-		{
-			return System.getenv(key);
-		}
-		return "";
-	}
+	
 	/********************************************
 	 * Public
 	 */
@@ -263,6 +228,30 @@ public class HostsCfg
 		}
 		return null;
 	}
+	
+	/*************************************************
+	 * External directory
+	 */
+	
+	private void getSearchPath(boolean prt) // the paths can be hard-coded in HOSTS.cfg
+	{
+		FileHelpers.makeExt(); // CAS303 one time only, move external->ext/lintel
+		
+	    String bpath = "", dpath="";
+	    
+		if (otherParams.containsKey("blast_path"))
+		{
+			bpath = otherParams.get("blast_path").trim();
+			if (bpath.endsWith("/")) bpath = bpath.substring(0, bpath.length()-1);
+		}
+		if (otherParams.containsKey("diamond_path"))
+		{
+			dpath = otherParams.get("diamond_path").trim();
+			if (dpath.endsWith("/")) dpath = dpath.substring(0, dpath.length()-1); 
+		}
+		BlastArgs.evalBlastPath(bpath, dpath, prt);
+	}
+	
 	public String getCapPath() 
 	{
 		String capPath="";
@@ -276,18 +265,10 @@ public class HostsCfg
 	public String host() {return theHost;}
 	public String user() {return theUser;}
 	public String pass() {return thePass;}
-	public String port() {return thePort;}
 	
-	private String theHost="";      
-	private String theUser="";
-	private String thePass="";
-	private String thePort="";
+	private String theHost="", theUser="", thePass="";
 	private boolean isLocalHost = false;
 	
 	private TreeSet<String> localHostAliases = new TreeSet<String>();
 	private TreeMap<String,String> otherParams = new TreeMap<String,String>();
-	
-	private JApplet applet = null;
-	public JApplet getApplet() { return applet; }
-	public void setApplet(JApplet applet) { this.applet = applet; }
 }

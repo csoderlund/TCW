@@ -106,7 +106,7 @@ public class FieldData {
 			 // if the name starts with Globalx.scoreField, can have any value; otherwise, expect -1 to 1
 			 addGrp(c++, Globalx.scoreField, Integer.class,       GRP_TABLE,  "score1" , 
 					 "Sum-of-pairs: Average of the column scores. Larger score indicates more similar.",  false);
-			 String scoreName = Globals.MultiAlign.score2;
+			 String scoreName = Globals.Ext.score2;
 			 addGrp(c++, scoreName, Integer.class,       GRP_TABLE,  "score2" , 
 					 scoreName + " score using the MstatX package. A '1' is most conserved.",  false);
 		}

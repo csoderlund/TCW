@@ -54,8 +54,8 @@ public class SeqsTopRowPanel extends JPanel  {
 	private static final int bSEQ=Globals.bSEQ;
 	private static final int bPAIR=Globals.bPAIR;
 	private static final int bGRP=Globals.bGRP;
-	private final static int MUSCLE = Globals.MultiAlign.MUSCLE;
-	private final static int MAFFT = Globals.MultiAlign.MAFFT;
+	private final static int MUSCLE = Globals.Ext.MUSCLE;
+	private final static int MAFFT = Globals.Ext.MAFFT;
 	
 	private static final String helpHTML = "SeqTable.html";
 	

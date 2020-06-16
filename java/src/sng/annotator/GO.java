@@ -398,8 +398,9 @@ public class GO
 			tcwDB.closeTransaction();
 			Out.r("                                               ");
 			
+			// CAS303 change rank to best_rank for Mysql v8
 			tcwDB.executeUpdate("update pja_db_unitrans_hits " +
-					"set rank=(filter_best+filter_ovbest+filter_gobest)");
+					"set best_rank=(filter_best+filter_ovbest+filter_gobest)");
 			prtCntMsgMem(cnt," update sequences with best Hit with GO", time);
 			seqPIDgoMap.clear();
 			
