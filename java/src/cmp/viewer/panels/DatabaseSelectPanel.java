@@ -9,7 +9,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -338,7 +337,7 @@ public class DatabaseSelectPanel extends JPanel {
 	}
 	private void launchSelection() {
         DatabaseData data = getSelection();
-        MTCWFrame theFrame = new MTCWFrame(data.getHost(), data.getDBName(), false, null, null);
+        MTCWFrame theFrame = new MTCWFrame(data.getHost(), data.getDBName(), null, null);
         theFrame.setVisible(true);
 	}
 	

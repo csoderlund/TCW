@@ -87,20 +87,20 @@ then edit the attributes of the conditions
 </table>
 
 <h3>Step 2. Instantiation</h3>
-If the input file is a set of reads, they should be assembled. Protein and transcript sequences
-can be loaded without assembly. 
 
 <table border=0 cellspacing=5>
-<tr><td valign="top" nowrap>Use Sequence Names from File<td>When the input sequence will not be assembled, this option may be checked to use
+<tr><td valign="top" nowrap>Use Sequence Names from File<td><td>When the input sequence will not be assembled, 
+this option may be checked to use
 the original sequence names, though the names <b>must</b> be composed of characters, digits or "_", and may not
-be greater than 30 characters.
+be greater than 25 characters.
 <tr><td valign="top">Skip Assembly<td>When the input sequences will be assembled, uncheck this box. The Options may be used
 to define details of the assembly, though the default parameters are well-tested.
+<tr><td  valign="top">#CPU<td>For assembly, if your machine has more than one CPU (thread/processor),
+make sure that the "#CPUs" is set to the number in order to speed up processing.
 </table>
 
-For assembly, if your machine has more than one CPU (thread/processor),
-make sure that the "#CPUs" is set to the number in order to speed up processing.
-
+The TPM (Transcripts Per Kilobase Million) is computed.
+To compute RPKM (Reads Per Kilobase Million) instead, see 'execAssm -h'.
 
 
 <h3>Step 3. Annotate</h3>

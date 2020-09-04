@@ -280,7 +280,7 @@ public class SequenceData implements Serializable {
 		for (int i = newSequence.length() - 1; i >= 0; --i) {
 			if (newSequence.charAt(i) == Globals.gapCh) {
 				if (newQualities != null
-						&& ((Integer) newQualities.get(i)).intValue() != 0)
+						&& newQualities.get(i).intValue() != 0)
 					throw new RuntimeException("Bad quality value");
 
 				// Remove gap from sequence
@@ -598,7 +598,7 @@ public class SequenceData implements Serializable {
 		if (qualities == null) return 40;
 
 		int nAdjIdx = n + nOffsetVal;
-		return ((Integer) qualities.get(nAdjIdx)).intValue();
+		return qualities.get(nAdjIdx).intValue();
 	};
 	// ContigData and ContigPanel
 	// called by drawing routine (see AlignmentPanelBase)  and generateSNPData
@@ -667,7 +667,7 @@ public class SequenceData implements Serializable {
 
 				// Insert a zero into the quality list for the sequence
 				if (qualities != null)
-					qualities.add(nAdjIdx, new Integer(0));
+					qualities.add(nAdjIdx, 0);
 
 				if (!isGap)
 					++nNonGapBases;
@@ -696,7 +696,7 @@ public class SequenceData implements Serializable {
 			int q = inQualities.get(0);
 			for (int i=1; i<strInSeq.length(); i++) {
 				if (strInSeq.charAt(i) == Globals.gapCh)
-					inQualities.add(i, new Integer(0));
+					inQualities.add(i, 0);
 				else
 					inQualities.add(i, q);
 			}
@@ -708,7 +708,7 @@ public class SequenceData implements Serializable {
 			// Insert a gap in the quality list everywhere there is one in the sequence
 			for (int i = 0; i < strInSeq.length(); ++i)
 				if (strInSeq.charAt(i) == Globals.gapCh)
-					inQualities.add(i, new Integer(0));
+					inQualities.add(i, 0);
 		}
 		return inQualities;
 	}
@@ -794,7 +794,7 @@ public class SequenceData implements Serializable {
 
 		for (int i = 0; i < quals.size();) {
 			for (int j = 0; j < NUMS_PER_ROW && i < quals.size(); ++j, ++i) {
-				qualsFile.print(((Integer) quals.get(i)).intValue());
+				qualsFile.print(quals.get(i).intValue());
 				qualsFile.print(' ');
 			}
 			qualsFile.println();

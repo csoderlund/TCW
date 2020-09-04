@@ -27,7 +27,7 @@ to be written.
 <li>Pop-up windows can get hidden behind the main window, and it makes TCW appear to be frozen -- move the main TCW window to find the
 hidden window.
 <li>The buttons are all white, and the highlighting on the GO tree is very light. Occasionally, the highlighting causes text to disappear.
-<li>The UniProt search links do not work.
+<li>The UniProt search links do not work; hence, are not provided on Mac.
 </ul>
 
 
@@ -36,7 +36,7 @@ hidden window.
 <h3>
 		Installation on MacOS 10.5.4 (Catalina)
 </h3>
-	Here are my notes from my installation on my personal Mac v10.15 with Java v14.0.1 (May 2020) It is necessary
+	Here are my notes from my installation on my personal Mac v10.15 with Java v14.0.1 (May 2020). It is necessary
 	to use TCW v5.0.3 or higher with MySQL v8.  
 	<h4>
 		MySQL
@@ -61,8 +61,9 @@ hidden window.
 			<li>In the HOSTS.cfg of the TCW package, set DB_user=[mysql userid], DB_password=[mysql password] 
 	</ol>
 	<p>
-		At this point, runSingleTCW and runMultiTCW can build databases and view them. 
-		However, you just cannot run DE calculations without R or OrthoMCL without Perl-mysql interface. 
+		At this point, <code>runSingleTCW</code> and <code>runMultiTCW</code> can build databases and view them. 
+		However, you will not be able to run DE calculations without installing R, or <code>OrthoMCL</code> 
+		without installing the Perl-mysql interface. 
 		
 	<h4>
 		R and R-Java interface
@@ -95,13 +96,27 @@ setenv R_HOME /Library/Frameworks/R.framework/Resources
 		</h4>
 		When I googled Perl-MySQL MacOX 10.15, I saw people are running into difficulties with this.
 		One person wrote:
-		<p><font color=green><small>
-		"The solution is simple: Don't use the Apple flavors of Perl, build your own from scratch and use that. Then:
-		<br>cpan install DBI
-		<br>cpan install DBD::mysql"
-		</font></small>
+		<font color=green><pre>
+	"The solution is simple: Don't use the Apple flavors of Perl, build your own from scratch and use that. Then:
+	cpan install DBI
+	cpan install DBD::mysql"
+		</font></pre>
 		<p>I have not tried this yet.
-	
+<p>The following instructions are from an earlier version of this document (for MacOS 10.9.5):
+<pre>
+	added 'set $path=($path /usr/local/perl/bin)' to my .tcshrc
+
+	>cpan install DBD::mysql
+
+	cd .cpan/build/DBD-mysql-4.029-[a unique string will end this directory name]
+	sudo ln -s /usr/local/mysql/lib/*.dylib
+	perl Makefile.PL --testuser=[mysql userid] --testpassword=[mysql password]
+	make 
+	make test
+	sudo make install
+	sudo ln -s /usr/local/mysql/lib/libmysqlclient.18.dylib /usr/lib/libmysqlclient.18.dylib
+</pre>
+
 <a name=ext>
 <h3>
 	Running /Ext/mac external programs

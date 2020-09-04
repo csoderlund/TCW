@@ -14,8 +14,6 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.event.CaretEvent;
-import javax.swing.event.CaretListener;
 
 
 import sng.database.Globals;
@@ -145,31 +143,31 @@ public class EditCountPanel extends JPanel {
 		ManagerData.CountData x = curManData.getCountLibAt(index);
 		setEnabled(false);
 		setValue(EXP_LIB_SYMBOLS, x.getCondID());
-		setValue(ATTRIBUTE_SYMBOLS[0], x.getTitle());
-		setValue(ATTRIBUTE_SYMBOLS[1], x.getOrganism());
-		setValue(ATTRIBUTE_SYMBOLS[2], x.getCultivar());
-		setValue(ATTRIBUTE_SYMBOLS[3], x.getStrain());
-		setValue(ATTRIBUTE_SYMBOLS[4], x.getTissue());
-		setValue(ATTRIBUTE_SYMBOLS[5], x.getStage());
-		setValue(ATTRIBUTE_SYMBOLS[6], x.getTreatment());
+		setValue(ATTRIBUTE_SYMBOLS[0], x.getAttr().getTitle());
+		setValue(ATTRIBUTE_SYMBOLS[1], x.getAttr().getOrganism());
+		setValue(ATTRIBUTE_SYMBOLS[2], x.getAttr().getCultivar());
+		setValue(ATTRIBUTE_SYMBOLS[3], x.getAttr().getStrain());
+		setValue(ATTRIBUTE_SYMBOLS[4], x.getAttr().getTissue());
+		setValue(ATTRIBUTE_SYMBOLS[5], x.getAttr().getStage());
+		setValue(ATTRIBUTE_SYMBOLS[6], x.getAttr().getTreatment());
 	
-		setValue(ATTRIBUTE_SYMBOLS[7], x.getYear());
-		setValue(ATTRIBUTE_SYMBOLS[8], x.getSource());
+		setValue(ATTRIBUTE_SYMBOLS[7], x.getAttr().getYear());
+		setValue(ATTRIBUTE_SYMBOLS[8], x.getAttr().getSource());
 	}
 
 	private void updateExpLibUI() {
 		ManagerData curManData = theParentFrame.getCurManData();
 		ManagerData.CountData x = curManData.getCountLibAt(nCurrentExpLibIndex);
 		x.setCondID(getValue(EditCountPanel.EXP_LIB_SYMBOLS));
-		x.setTitle(getValue(EditCountPanel.ATTRIBUTE_SYMBOLS[0])); 
-		x.setOrganism(getValue(EditCountPanel.ATTRIBUTE_SYMBOLS[1]));
-		x.setCultivar(getValue(EditCountPanel.ATTRIBUTE_SYMBOLS[2]));
-	    x.setStrain(getValue(EditCountPanel.ATTRIBUTE_SYMBOLS[3]));
-		x.setTissue(getValue(EditCountPanel.ATTRIBUTE_SYMBOLS[4]));
-		x.setStage(getValue(EditCountPanel.ATTRIBUTE_SYMBOLS[5]));
-		x.setTreatment(getValue(EditCountPanel.ATTRIBUTE_SYMBOLS[6]));
-		x.setYear(getValue(EditCountPanel.ATTRIBUTE_SYMBOLS[7]));
-		x.setSource(getValue(EditCountPanel.ATTRIBUTE_SYMBOLS[8]));
+		x.getAttr().setTitle(getValue(EditCountPanel.ATTRIBUTE_SYMBOLS[0])); 
+		x.getAttr().setOrganism(getValue(EditCountPanel.ATTRIBUTE_SYMBOLS[1]));
+		x.getAttr().setCultivar(getValue(EditCountPanel.ATTRIBUTE_SYMBOLS[2]));
+	    x.getAttr().setStrain(getValue(EditCountPanel.ATTRIBUTE_SYMBOLS[3]));
+		x.getAttr().setTissue(getValue(EditCountPanel.ATTRIBUTE_SYMBOLS[4]));
+		x.getAttr().setStage(getValue(EditCountPanel.ATTRIBUTE_SYMBOLS[5]));
+		x.getAttr().setTreatment(getValue(EditCountPanel.ATTRIBUTE_SYMBOLS[6]));
+		x.getAttr().setYear(getValue(EditCountPanel.ATTRIBUTE_SYMBOLS[7]));
+		x.getAttr().setSource(getValue(EditCountPanel.ATTRIBUTE_SYMBOLS[8]));
 	}
 	private String getValue(String symbol) {
 		if (symbol.equals(EXP_LIB_SYMBOLS)) return tfID.getText();
@@ -196,11 +194,6 @@ public class EditCountPanel extends JPanel {
 		lblID.setEnabled(b);
 		tfID.setEnabled(b);
 	}
-	private CaretListener updateListener = new CaretListener() {
-		public void caretUpdate(CaretEvent e) {
-			
-		}
-	};
 	
 	private JPanel createRowPanel() {
 		JPanel retVal = new JPanel();
@@ -210,8 +203,6 @@ public class EditCountPanel extends JPanel {
 		
 		return retVal;
 	}
-	private JPanel getInstance() { return this; }
-	
 	private JLabel lblID = null;
 	private JTextField tfID  = null;
 	

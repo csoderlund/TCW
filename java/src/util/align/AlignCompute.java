@@ -69,7 +69,7 @@ public class AlignCompute
         // just one contig in set
   	   TreeSet<String> contigSet = listData.getContigIDSet(); 
   	   Iterator<String> it = contigSet.iterator();
-       ContigData ctgData1 = listData.findContig( (String)it.next() );	
+       ContigData ctgData1 = listData.findContig( it.next() );	
 		
        for (String hitName : selected) {
     	   		String seq = seqPanel.getHitSeq(hitName);

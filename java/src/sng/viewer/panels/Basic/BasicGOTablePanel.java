@@ -160,7 +160,7 @@ public class BasicGOTablePanel {
 			    	int ecNum = ecColNames.length;
 			    	chkECColumns = new JCheckBox[ecNum];
 			    	int nRow = ecNum;
-			    	if (ecNum>rowBreak) nRow=(int) ((double)(ecNum/2.0)+0.5);
+			    	if (ecNum>rowBreak) nRow=(int) ((ecNum/2.0)+0.5);
 			  
 			    	JPanel subPanel1 = Static.createPagePanel();
 			    subPanel1.setAlignmentY(Component.TOP_ALIGNMENT);
@@ -215,7 +215,7 @@ public class BasicGOTablePanel {
 			    	
 			    	int deNum = deColNames.size();
 			    int 	nRow = deNum;
-			    	if (deNum>rowBreak) nRow=(int) ((double)(deNum/2.0)+0.5);
+			    	if (deNum>rowBreak) nRow=(int) ((deNum/2.0)+0.5);
 			    	
 		    		JPanel deSubPanel1 = Static.createPagePanel();
 		    		deSubPanel1.setAlignmentY(Component.TOP_ALIGNMENT);
@@ -999,12 +999,7 @@ public class BasicGOTablePanel {
 		return theQuery;
 	}
 	public void exportTable(int type) {
-		boolean success = new ExportGO().run(type);
-		
-		if (success && UIHelpers.isApplet()) {
-			String [] msg = {"Export complete"};
-			UserPrompt.displayInfo("Export", msg);
-		}
+		new ExportGO().run(type);
 	}
 	public String makeCopyTableString(String delim) {
  		StringBuilder retVal = new StringBuilder();
@@ -1399,37 +1394,37 @@ public class BasicGOTablePanel {
 						headerLine += line + "\n";
 						continue;
 					}
-		    			String [] tok = line.split("\t");
-		    			if (tok[0].equals("Domain")) {
-		    				columnLine = line;
-		    				nCol = (tok.length-startNseq)+1;
-		    				continue;
+	    			String [] tok = line.split("\t");
+	    			if (tok[0].equals("Domain")) {
+	    				columnLine = line;
+	    				nCol = (tok.length-startNseq)+1;
+	    				continue;
+	    			}
+	    			double score=0.0;
+	    			int count=0;
+	    			
+	    			String domain = tok[0];
+	    			if (domain.trim().equals("")) domain=last;
+	    			else last=domain;
+	    			
+	    			String desc = tok[1];
+	    			for (int i=startNseq, j=0; i<tok.length; i++, j++) {
+		    			if (isSeq) {
+		    				count = Static.getInteger((tok[i].trim()));
+		    				if (count<0) return prtError("Incorrect #Seqs: " + tok[i]);
 		    			}
-		    			double score=0.0;
-		    			int count=0;
-		    			
-		    			String domain = tok[0];
-		    			if (domain.trim().equals("")) domain=last;
-		    			else last=domain;
-		    			
-		    			String desc = tok[1];
-		    			for (int i=startNseq, j=0; i<tok.length; i++, j++) {
-			    			if (isSeq) {
-			    				count = Static.getInteger((tok[i].trim()));
-			    				if (count<0) return prtError("Incorrect #Seqs: " + tok[i]);
-			    			}
-			    			else { // for DE
-			    				score = Static.getDouble(tok[i].trim());
-			    				if (score<0) return prtError("Incorrect p-value: " + tok[i]);
-			    			}
-			    			
-			    			if (domain.startsWith("b")) 		domainAdd(biolMap, desc, score, count, j);
-			    			else if (domain.startsWith("c")) domainAdd(cellMap, desc, score, count, j);
-			    			else if (domain.startsWith("m")) domainAdd(moleMap, desc, score, count, j);
-			    			else return prtError("Bad domain: " + domain);
-			    			nCnts++;
+		    			else { // for DE
+		    				score = Static.getDouble(tok[i].trim());
+		    				if (score<0) return prtError("Incorrect p-value: " + tok[i]);
 		    			}
-			    		nGO++;
+		    			
+		    			if (domain.startsWith("b")) 		domainAdd(biolMap, desc, score, count, j);
+		    			else if (domain.startsWith("c")) domainAdd(cellMap, desc, score, count, j);
+		    			else if (domain.startsWith("m")) domainAdd(moleMap, desc, score, count, j);
+		    			else return prtError("Bad domain: " + domain);
+		    			nCnts++;
+	    			}
+		    		nGO++;
 				}
 				Out.PrtSpMsg(2, "Read Total GOs: " + nGO + " Total counts: " + nCnts);
 				reader.close();

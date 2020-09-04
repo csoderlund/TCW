@@ -32,7 +32,7 @@ public class SeqsQueryPanel extends JPanel {
 	public static final String tag = MTCWFrame.SEQ_PREFIX;
 	public static final String helpHTML = "SeqQuery.html";
 	
-	private static final String [] SECTIONS = { "Basic", "Datasets", "Cluster Sets", "RPKM/FPKM" };
+	private static final String [] SECTIONS = { "Basic", "Datasets", "Cluster Sets", "TPM" };
 	private static final String [] SECTIONS_DESC = 	{ "","", "","" }; // description doesn't look good on applet
 
 	public SeqsQueryPanel(MTCWFrame parentFrame) {
@@ -643,23 +643,7 @@ public class SeqsQueryPanel extends JPanel {
 		private boolean isInt=true;
 		private int width=90;
 	}
-	private JRadioButton toolTipRadioButton(String label, String descript, boolean enable) {
-		JRadioButton radio = new JRadioButton(label);
-		radio.setBackground(Color.white);
-		radio.setSelected(enable);
-		
-		final String desc = descript;
-		radio.addMouseListener(new MouseAdapter() 
-		{
-			public void mouseEntered(MouseEvent e) {
-			    theViewerFrame.setStatus(desc);
-			}
-			public void mouseExited(MouseEvent e) {
-			    theViewerFrame.setStatus("");
-			}
-		});
-		return radio;
-	}
+	
 	private JLabel toolTipLabel(String label, String descript, boolean enable) {
 		JLabel tmp = new JLabel(label);
 		tmp.setBackground(Color.white);

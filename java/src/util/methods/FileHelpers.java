@@ -161,7 +161,7 @@ public class FileHelpers
 			}
 		}
 	}
-	static void clearDir(String dir)
+	public static void clearDir(String dir)
 	{
 		File d = new File(dir);
 		clearDir(d);

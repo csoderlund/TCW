@@ -72,7 +72,7 @@ public class DisplayFloat implements Comparable<DisplayFloat>
 	
 	public int compareTo ( DisplayFloat r )
 	{
-		DisplayFloat rNum = (DisplayFloat)r;
+		DisplayFloat rNum = r;
 		return Double.compare( d, rNum.d );
 	}
 	public String toString ( ) 

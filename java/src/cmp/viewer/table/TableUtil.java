@@ -68,7 +68,6 @@ public class TableUtil {
 	private static final String PAIR_ID = FieldData.PAIRID; 	
 	private static final String GRP_SQL = FieldData.GRP_SQLID;
 	private static final String GRP_ID = FieldData.CLUSTERID;
-	private static final String HIT_ID = FieldData.HITID;
 	private static final String GO_FORMAT = Globals.GO_FORMAT;
 	
 	private static final String GrpPrefix = "ClusTable";
@@ -233,7 +232,7 @@ public class TableUtil {
 					out.flush();
 					cnt++;
 				}
-				if (!theViewerFrame.isApplet() && (cnt%100)==0)
+				if (cnt%100==0)
 					System.err.print("   Wrote " + cnt + " clusters...\r");
 				rs.close();
 			}
@@ -286,7 +285,7 @@ public class TableUtil {
 					out.flush();
 					cnt++;
 				}
-				if (!theViewerFrame.isApplet() && (cnt%100)==0)
+				if ((cnt%100)==0)
 					System.err.print("   Wrote " + cnt + " pairs...\r");
 				rs.close();
 			}
@@ -319,7 +318,7 @@ public class TableUtil {
 					out.flush();
 					cnt++;
 				}
-				if (!theViewerFrame.isApplet() && (cnt%100)==0)
+				if ((cnt%100)==0)
 					System.err.print("   Wrote " + cnt + " sequences...\r");
 				rs.close();
 			}
@@ -465,7 +464,7 @@ public class TableUtil {
 				}
 				
 				cnt++;
-				if (!UIHelpers.isApplet() && cnt==100) {
+				if (cnt==100) {
 					Out.rp("  processed ", cnt, nSeq);
 					cnt=0;
 				}
@@ -494,7 +493,7 @@ public class TableUtil {
 					outBW.write(goStr +  "\t" + n + "\n");
 					
 					cnt++;
-					if (!UIHelpers.isApplet() && cnt==1000) {
+					if (cnt==1000) {
 						Out.r("  write " + cnt);
 						cnt=0;
 					}
@@ -529,7 +528,7 @@ public class TableUtil {
 				else if (gd.domain.startsWith("mol")) cntMol++;
 				
 				cnt++;
-				if (!UIHelpers.isApplet() && cnt==1000) {
+				if (cnt==1000) {
 					Out.r("  GO info " + cnt);
 					cnt=0;
 				}
@@ -545,7 +544,7 @@ public class TableUtil {
 				for (GOdata gd : goList) {
 					outBW.write(gd.goStr + "\t" + gd.cntStr  + "\t" + gd.lev + "\t" + gd.domain +   "\t" + gd.desc + "\n");
 					cnt++;
-					if (!UIHelpers.isApplet() && cnt==1000) {
+					if (cnt==1000) {
 						Out.r("  write " + cnt);
 						cnt=0;
 					}
@@ -561,7 +560,7 @@ public class TableUtil {
 					savDomain = gd.domain;
 					outBW.write(d + "\t" + gd.desc  + "\t" + gd.cntStr + "\n");
 					cnt++;
-					if (!UIHelpers.isApplet() && cnt==1000) {
+					if (cnt==1000) {
 						Out.r("  write " + cnt);
 						cnt=0;
 					}

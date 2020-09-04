@@ -25,7 +25,7 @@ public class UIqueryIncExLib extends JPanel implements ItemSelectable {
 	private ItemListener listener;
 	private JLabel leadLabel = null, midLabel = null, endLabel = null;
 	private JTextField numField = null;
-	private JComboBox optionsCtrl = null;
+	private JComboBox <String> optionsCtrl = null;
 	private double dNumVal = -1;
 	private JCheckBox chkSelect = null;
 	
@@ -68,7 +68,7 @@ public class UIqueryIncExLib extends JPanel implements ItemSelectable {
 		});
 		
 	
-		optionsCtrl = new JComboBox(options1);
+		optionsCtrl = new JComboBox <String> (options1);
 		optionsCtrl.setSelectedIndex(defaultOpt);
 		optionsCtrl.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {

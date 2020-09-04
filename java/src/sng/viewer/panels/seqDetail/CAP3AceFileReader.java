@@ -49,7 +49,7 @@ public class CAP3AceFileReader
 			iterContig = contigList.iterator();
 			while ( iterContig.hasNext() && !bFound )
 			{
-				ContigData curContig = (ContigData)iterContig.next();
+				ContigData curContig = iterContig.next();
 				bFound = curContig.getSequenceByName( curSeq ) != null;
 			}
 			
@@ -80,7 +80,7 @@ public class CAP3AceFileReader
 		// Make a psuedo cluster out of the results so we can display it
 		MultiCtgData theCluster = new MultiCtgData ();
 		for (int i = 0; i < contigList.size(); ++i)
-			theCluster.addContig( (ContigData)contigList.get(i) );		
+			theCluster.addContig( contigList.get(i) );		
         return theCluster;
 	}
 	
@@ -370,7 +370,7 @@ public class CAP3AceFileReader
 					break;
 			}
 				
-			qualities.add( new Integer ( getCurInt ( tokens ) ) );		
+			qualities.add( getCurInt ( tokens ) );		
 		}	
 		return qualities;
 	}

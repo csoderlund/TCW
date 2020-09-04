@@ -119,7 +119,7 @@ public class DrawContigPanel extends MainAlignPanel
 	public int getNumBuried() {
 		int count = 0;
 		
-		Iterator iter = rowsOfESTS.iterator();
+		Iterator  <Object> iter = rowsOfESTS.iterator();
 		while (iter.hasNext()) {
 			Object row = iter.next();
 			if (row instanceof SequenceData) {
@@ -129,8 +129,8 @@ public class DrawContigPanel extends MainAlignPanel
 				SequenceData est1 = ((SequenceData[])row)[0]; 
 				SequenceData est2 = ((SequenceData[])row)[1]; 
 				
-				if (((SequenceData)est1).isBuried()) count++;
-				if (((SequenceData)est2).isBuried()) count++;
+				if (est1.isBuried()) count++;
+				if (est2.isBuried()) count++;
 			}
 		}		
 		return count;
@@ -191,10 +191,6 @@ public class DrawContigPanel extends MainAlignPanel
 		repaint ();
 	}
 
-	public void setClusterPanel ( MainToolAlignPanel intheClusterPanel )
-	{
-		theClusterPanel = intheClusterPanel;
-	}
 	
 	//	--------------Base Class Over-rides----------------------------//
 	
@@ -624,10 +620,10 @@ public class DrawContigPanel extends MainAlignPanel
 		// Place ESTs into rows according to the current sort order
 		boolean bHaveMate, bNextIsMate, bDrawWithMate; 
 		
-		rowsOfESTS = new Vector ( ); // SequenceData or SequenceData[]
+		rowsOfESTS = new Vector <Object>( ); // SequenceData or SequenceData[]
 		bNextIsMate = false;
 		
-		int nY = read_TOP_Y_POS_START;
+	
 		for ( int i = 0; i < theContig.getNumSequences (); ++i )
 		{
 			SequenceData cloneData = theContig.getSequenceAt( i );
@@ -677,7 +673,6 @@ public class DrawContigPanel extends MainAlignPanel
 						!cloneMateData.isBuried()) rowsOfESTS.add( ESTPair );
 				++i;
 			}
-			nY += READ_Y_ROW_HEIGHT;
 		}		
         // Calculate the pixel dimensions of the grid holding the letters for the bases
         insideHEIGHT = headerHEIGHT + rowsOfESTS.size() * READ_Y_ROW_HEIGHT;          
@@ -696,7 +691,7 @@ public class DrawContigPanel extends MainAlignPanel
 	
 	public boolean scrollToMate ( String str )
 	{
-		JPanel matesPanel = (JPanel)splitPairMap.get ( str );
+		JPanel matesPanel = splitPairMap.get ( str );
 		if ( matesPanel == null )
 			return false;
 		else
@@ -818,14 +813,14 @@ public class DrawContigPanel extends MainAlignPanel
 		repaint ();		
 	}
 	
-	public void getSelectedContigIDs ( TreeSet set ) 
+	public void getSelectedContigIDs ( TreeSet <String> set ) 
 	{
 		String str = theContig.getContigID();
 		if (str==null || str.length() == 0) return;
 		if ( hasSelection ()) set.add( str );	
 	};
 	
-	public void setSelectedContigIDs ( TreeSet set ) 
+	public void setSelectedContigIDs ( TreeSet <String> set ) 
 	{ 
 		String str = theContig.getContigID();
 		if (str==null || str.length() == 0) selectNone();
@@ -838,7 +833,7 @@ public class DrawContigPanel extends MainAlignPanel
 		return !selectedESTs.isEmpty();
 	}
 	
-	public void setSelectedSequences ( TreeSet toSelect )
+	public void setSelectedSequences ( TreeSet <String> toSelect )
 	{	
 		// Clear the old selection
 		selectNone ();
@@ -912,12 +907,12 @@ public class DrawContigPanel extends MainAlignPanel
 		refSeq.appendToFASTAFiles( seqFile, qualFile );
 	}
 	
-	public void addSelectedSequencesToFASTA ( PrintStream seqFile, PrintStream qualFile/*, boolean bExternal*/ ) throws Exception
+	public void addSelectedSequencesToFASTA ( PrintStream seqFile, PrintStream qualFile ) throws Exception
 	{
-		Iterator iter = selectedESTs.iterator();
+		Iterator <String> iter = selectedESTs.iterator();
 		while ( iter.hasNext() )
 		{
-			SequenceData curEST = theContig.getSequenceByName( (String)iter.next() );
+			SequenceData curEST = theContig.getSequenceByName( iter.next() );
 			curEST = curEST.newSeqDataNoGap(); 
 			curEST.appendToFASTAFiles( seqFile, qualFile );				
 		}
@@ -942,7 +937,7 @@ public class DrawContigPanel extends MainAlignPanel
 		System.err.println("Complete writing " + cnt + " sequences and quals to file");
 	}
 	
-	public void addSelectedSequencesToSet ( TreeSet set )
+	public void addSelectedSequencesToSet ( TreeSet <String> set )
 	{ 
 		set.addAll( selectedESTs );		
 	}
@@ -1042,8 +1037,6 @@ public class DrawContigPanel extends MainAlignPanel
 	private final int MATE_NOT_IN_CONTIG = 5;
 	
 	private final String strRefSeqName;
-	// The tab for the cluster if the panel is on the cluster view
-	private MainToolAlignPanel theClusterPanel = null;  
 												
 	private Graphics2D g2; // what draws stuff
 
@@ -1051,7 +1044,7 @@ public class DrawContigPanel extends MainAlignPanel
 	// Maps the EST name, to its "find EST" panel
 	private TreeMap<String,JPanel> splitPairMap = new TreeMap<String,JPanel> (); 
     MultilineTextPanel textPanel;
-	private Vector rowsOfESTS = null; // SequenceData or SequenceData[]
+	private Vector <Object> rowsOfESTS = null; // SequenceData or SequenceData[]
 	private int nHighlightX = 0;
 	private int nLastRowClicked = -1;
 	

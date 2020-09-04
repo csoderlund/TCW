@@ -35,7 +35,6 @@ import util.database.DBConn;
 import util.database.Globalx;
 import util.ui.UIHelpers;
 import util.ui.UserPrompt;
-import util.methods.Static;
 
 public class GOtree {
 	private static final String GO_FORMAT = Globalx.GO_FORMAT;
@@ -97,17 +96,12 @@ public class GOtree {
 						showButton.setEnabled(true);
 						return;
 					}
-					
-					JDialog dialog = null;
-					if (UIHelpers.isApplet())
-						dialog = UserPrompt.calcPopup(theMainFrame, action[type] + "  \n for " + gostr + " ");
-					
+						
 					Vector <String> lines = 
 							showGoRelatedInTable(go, descr, goset, trimSet, goTabPanelObj);
 					
 					actObj.doOutAction(lines);
 					
-					if (dialog!=null) dialog.dispose();
 					showButton.setEnabled(true);
 				}
 				catch (Exception e) {ErrorReport.prtReport(e, "GO query failed");}
@@ -145,10 +139,6 @@ public class GOtree {
 						return;
 					}
 					
-					JDialog dialog = null;
-					if (UIHelpers.isApplet())
-						dialog = UserPrompt.calcPopup(theMainFrame, action[type] + "  \n for " + gostr + " ");
-					
 					Vector <String> lines = null;
 					if (type==ANCESTORS) {
 						lines = showGoAncByLevelList(go, descr);
@@ -177,7 +167,6 @@ public class GOtree {
 					
 					actObj.doOutAction(lines);
 					
-					if (dialog!=null) dialog.dispose();
 					showButton.setEnabled(true);
 				}
 				catch (Exception e) {ErrorReport.prtReport(e, "GO query failed");}
@@ -200,8 +189,6 @@ public class GOtree {
 				try {
 					String msg = action[type] + " " +  hitID;
 					showButton.setEnabled(false);
-					JDialog dialog = null;
-					if (UIHelpers.isApplet()) dialog = UserPrompt.calcPopup(theMainFrame, msg);
 					
 					Vector <String> lines = null;
 					if (type==SELECTED_HIT_ASSIGNED) lines = showHitGoList(hitID);
@@ -215,7 +202,7 @@ public class GOtree {
 						lines.toArray(alines);
 						UserPrompt.displayInfoMonoSpace(theMainFrame, msg, alines);
 					}
-					if (dialog!=null) dialog.dispose();
+					
 					showButton.setEnabled(true);
 				}
 				catch (Exception e) {ErrorReport.prtReport(e, "GO query failed");}
@@ -1181,16 +1168,10 @@ public class GOtree {
 		Thread thread = new Thread(new Runnable() {
 			public void run() {
 				try {		
-					JDialog dialog = null;
-					if (UIHelpers.isApplet() || goMap.size()>1000)
-						dialog = UserPrompt.calcPopup(theMainFrame, action[showType]);
-					
 					AllDialog allObj = new AllDialog(showType);
 					allObj.setVisible(true);
 					
 					if (allObj.getSelection()) allObj.doAction(goMap);
-					
-					if (dialog!=null) dialog.dispose();
 				}
 				catch (Exception e) {ErrorReport.prtReport(e, "GO query failed");}
 			}

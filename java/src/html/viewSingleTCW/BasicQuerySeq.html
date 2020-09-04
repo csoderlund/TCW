@@ -7,6 +7,10 @@ This provides some basic sequence searches; for more involved searches, use
 the <b>Filter</b> bullet on the left panel.  This allows you to "build" a table
 of results from multiple queries, which can be Copied to Clipboard, 
 Exported, or view the individual sequences with "View Selected Sequence". 
+
+<hr>
+<h2>Search:</h2>
+
 <ul>
 <p>
 Choose one of three search modes and enter a string to search on.  
@@ -14,7 +18,7 @@ Choose one of three search modes and enter a string to search on.
 <li><b>Seq ID:</b> Sequence name 
 <li><b>TCW:</b> TCW Remarks are entered when the database is built; they provide information
 on the ORFs, and if the sequence has hits in multiple frames.
-<li><b>User:</b> TCW Remarks may be associated with each sequence (entered with <tt>runSingleTCW</tt>).
+<li><b>User:</b> User Remarks may be associated with each sequence (entered with <tt>runSingleTCW</tt>).
 </ul>
 <i>Search rules:</i> 
 <ul>
@@ -28,10 +32,39 @@ NOTE: since '%' is a special character, it cannot be in a search string as a lit
 <b>Load File</b>: The file should contain one Sequence ID per line (make sure <b>Seq IDs</b>
 is selected), or one Remark per line (make sure <b>Remark</b> is selected). This performs an exact search.
 
-
 <p>Click <b>BUILD TABLE</b> or <b>ADD to TABLE</b> to execute the search,
 which starts a new table or adds to an existing table, respectively. 
 <br>Columns can be added/removed (<b>Columns</b>), 
 rearranged by dragging and sorted. 
 
+<hr>
+<h2>Columns</h2>
+<table border=0 cellspacing=5>
+<tr><td valign=top nowrap>TCW Remark<td>Assigned by TCW during ORF computation
+<tr><td valign=top nowrap>User Remark<td>Uploaded by User.
+<tr><td valign=top nowrap>Count<td>Total count from all conditions/libraries. 
+<tr><td valign=top nowrap>Longest<td>If not assembled, this is the input sequence name. If assembled, this is the
+longest sequence (EST, Read) in the contig.
+<tr><td valign=top nowrap>Best HitID<td>The HitID of the hit with the best e-value.
+</table>
+
+
+<hr>
+<h2>Top row of options</h2>
+<ul>
+<li><b>View Sequence</b>: Select a one or more seqIDs in the table, 
+then select 'View Sequences'.
+The sequences will be shown in the main table, where you can select it to view the
+'Sequence Details'.
+<p>
+<li><b>Copy...</b>: Select one sequence to copy to clipboard the SeqID, Best HitID, or Longest.
+<p>
+<li><b>Table...</b>: 
+<ul>
+<li>Copy table: The table will be copied so that you can paste it into a file.
+<li>Export: A window will pop-up with a file chooser, and the table will be
+written to the selected file.
+</ul>
+</ul>
+</html>
 

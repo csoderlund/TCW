@@ -14,8 +14,6 @@ import sng.database.MetaData;
 import sng.util.FieldMapper;
 import sng.viewer.STCWFrame;
 import util.database.Globalx;
-import util.methods.Out;
-
 
 public class FieldContigData implements Serializable
 {	
@@ -35,26 +33,26 @@ public class FieldContigData implements Serializable
 	private static final String PVAL = Globals.PVALUE;
 	
 	// Number in same order as listed on Select columns; columns will display in this order
-    public static final int RECORD_NUM_FIELD 		= 900;   
-    public static final int SEQ_ID_FIELD 			= 1000; 
+    public static final int SEQ_IDX_FIELD 		= 900;   
+    public static final int SEQ_ID_FIELD 			= 901; 
     public static final int TOTAL_EXP_FIELD			= 1001;
     public static final int SEQ_LENGTH_FIELD 		= 1002;
  
     public static final int NUMBER_EST_FIELD 		= 1003;
-    public static final int NUMBER_BURIED_FIELD 		= 1004;	
+    public static final int NUMBER_BURIED_FIELD 	= 1004;	
     public static final int NUMBER_UNBURIED_FIELD 	= 1005;	
     
-    public static final int HAS_NS_ID_FIELD 			= 1006;
+    public static final int HAS_NS_ID_FIELD 		= 1006;
     public static final int EST_MATE_PAIRS_FIELD 	= 1007;  
     public static final int EST_LONERS_FIELD 		= 1008;  
     public static final int EST_5_PRIME_FIELD 		= 1009;  
     public static final int EST_3_PRIME_FIELD		= 1010;  
-    public static final int LONGEST_EST_FIELD 		= 1011;	
     
-    public static final int CNT_NS_FIELD				= 1012;
+    public static final int LONGEST_EST_FIELD 		= 1011;
+    public static final int CNT_NS_FIELD			= 1012;
     public static final int GC_RATIO_FIELD 			= 1013;	
     public static final int NOTES_FIELD				= 1014;
-    public static final int USER_NOTES_FIELD			= 1015;
+    public static final int USER_NOTES_FIELD		= 1015;
     
     public static final int PAIRWISE_FIELD			= 1016;
     
@@ -64,13 +62,13 @@ public class FieldContigData implements Serializable
     public static final int SEQ_END					= 1023;
     public static final int SEQ_STRAND				= 1024;
    
-    public static final int CNT_TAXO					= 1030;
+    public static final int CNT_TAXO				= 1030;
     public static final int CNT_SPECIES				= 1031;
-    public static final int CNT_GENE					= 1032;
+    public static final int CNT_GENE				= 1032;
     public static final int CNT_OVERLAP				= 1033;
     public static final int CNT_SWISS				= 1034;
     public static final int CNT_TREMBL				= 1035;
-    public static final int CNT_NCBI					= 1036;
+    public static final int CNT_NCBI				= 1036;
     public static final int CNT_NT					= 1037;
     
     //since # of libraries is dynamic, can only label the start of the range
@@ -80,12 +78,12 @@ public class FieldContigData implements Serializable
     public static final int CONTIG_SET_COUNT 		= 1900;
     
     public static final int N_FOLD_LIB				= 2700;
-    public static final int N_FOLD_LIB_LIMIT			= 2899;
+    public static final int N_FOLD_LIB_LIMIT		= 2899;
     
     public static final int RSTAT_FIELD				= 2900;
-    public static final int P_VALUES					= 2901;
+    public static final int P_VALUES				= 2901;
     
-    public static final int SNP_COUNT_FIELD 			= 3002;  
+    public static final int SNP_COUNT_FIELD 		= 3002;  
     public static final int SNP_INDEL_FIELD			= 3003;
     
     public static final int FIRST_BEST_UNIPROT_FIELD 	= 3004;
@@ -93,7 +91,7 @@ public class FieldContigData implements Serializable
     public static final int FIRST_BEST_SPECIES			= 3006;
     public static final int FIRST_BEST_DBTYPE_FIELD		= 3007;
     public static final int FIRST_BEST_TAXO_FIELD		= 3008;
-    public static final int FIRST_BEST_EVALUE_FIELD 		= 3009;
+    public static final int FIRST_BEST_EVALUE_FIELD 	= 3009;
     public static final int FIRST_BEST_BIT_SCORE_FIELD 	= 3010;
     public static final int FIRST_BEST_PERCENT_IDENT		= 3011;
     public static final int FIRST_BEST_ALIGN_LEN_FIELD 	= 3012;
@@ -133,12 +131,12 @@ public class FieldContigData implements Serializable
     public static final int GO_BEST_UNIPROT_FIELD 		= 3050;
     public static final int GO_BEST_DESCRIPTION			= 3051;
     public static final int GO_BEST_SPECIES				= 3052;
-    public static final int GO_BEST_DBTYPE_FIELD			= 3053;
+    public static final int GO_BEST_DBTYPE_FIELD		= 3053;
     public static final int GO_BEST_TAXO_FIELD			= 3054;
     public static final int GO_BEST_EVALUE_FIELD 		= 3055;
-    public static final int GO_BEST_BIT_SCORE_FIELD 		= 3056;
+    public static final int GO_BEST_BIT_SCORE_FIELD 	= 3056;
     public static final int GO_BEST_PERCENT_IDENT		= 3057;
-    public static final int GO_BEST_ALIGN_LEN_FIELD 		= 3058;
+    public static final int GO_BEST_ALIGN_LEN_FIELD 	= 3058;
     public static final int GO_BEST_CTG_START_FIELD		= 3059;
     public static final int GO_BEST_CTG_END_FIELD		= 3060;
     public static final int GO_BEST_CTG_COV_FIELD		= 3061;
@@ -154,9 +152,9 @@ public class FieldContigData implements Serializable
     public static final int ORF_CODING_FRAME 		= 4002;
     public static final int ORF_CODING_LENGTH 		= 4004; 
     public static final int ORF_HAS_START 			= 4007; 
-    public static final int ORF_HAS_END 				= 4008; 
+    public static final int ORF_HAS_END 			= 4008; 
     public static final int ORF_START 				= 4009; 
-    public static final int ORF_END 					= 4010; 
+    public static final int ORF_END 				= 4010; 
     public static final int ORF_MARKOV				= 4011;
     
     public static final int PROTEIN_FRAME 			= 5002; 
@@ -168,12 +166,12 @@ public class FieldContigData implements Serializable
     public static final String GROUP_NAME_SEQ_SET	= "Sequence Set";
     public static final String GROUP_DESC_SEQ_SET	= "Sequences with counts";
     
-    public static final String GROUP_NAME_LIB		= "Counts and RPKM";
-    public static final String GROUP_DESC_LIB		
+    public static String GROUP_NAME_LIB		= "Counts and RPKM";
+    public static String GROUP_DESC_LIB		
     		= "Counts and/or RPKM per condition (or assembled sequences). Note: RPKM may be FPKM, depends on how input counts computed.";
     
     public static final String GROUP_NAME_RSTAT		= "N-Fold and Rstat";
-    public static final String GROUP_DESC_RSTAT 	    = "Fold change between two conditions, and the R-statistic (Stekel et al. (2000)) over all conditions";
+    public static final String GROUP_DESC_RSTAT 	= "Fold change between two conditions, and the R-statistic (Stekel et al. (2000)) over all conditions";
 
     public static final String GROUP_NAME_PVAL		= "Differential Expression";
     public static final String GROUP_DESC_PVAL 		= "Columns of DE p-values";
@@ -194,9 +192,9 @@ public class FieldContigData implements Serializable
     public static final String GROUP_NAME_SNPORF 	= "SNPs and ORFs";
     public static final String GROUP_DESC_SNPORF 	= "Information on SNPs (if assembled) and best ORF";
 
-    public static final String TABLE_FIRST_BEST 			= "firstbest";
+    public static final String TABLE_FIRST_BEST 		= "firstbest";
     public static final String TABLE_OVER_BEST			= "overbest";
-    public static final String TABLE_GO_BEST				= "gobest";
+    public static final String TABLE_GO_BEST			= "gobest";
     
     public static final String TABLE_FIRST_BEST_DETAIL 	= "firstbestdetail";
     public static final String TABLE_OVER_BEST_DETAIL	= "overbestdetail";
@@ -211,6 +209,11 @@ public class FieldContigData implements Serializable
     		QueryContigTab qTab = parentFrame.getQueryContigTab();
     		MetaData metaData = parentFrame.getMetaData();
     	
+    	String norm = metaData.getNorm();
+    	if (norm.contentEquals("TPM")) { // CAS304
+    		GROUP_NAME_LIB		= "Counts and TPM";
+    		GROUP_DESC_LIB		= "Counts and/or TPM per condition (or assembled sequences)";
+    	}
 		String [] allLibraryNames = qTab.getAllLibraryNames();
 		String [] allLibraryTitles = qTab.getAllLibraryTitles(); 
 		String [] pLabels = qTab.getAllPValNames();	
@@ -219,10 +222,10 @@ public class FieldContigData implements Serializable
         FieldMapper mapper = new FieldMapper ("ContigData", allLibraryNames,  parentFrame);
 
      // General
-        mapper.addIntField ( RECORD_NUM_FIELD, "Seq #", "contig", "CTGID",
+        mapper.addIntField ( SEQ_IDX_FIELD, "Seq #", "contig", "CTGID",
         		GROUP_NAME_CONTIG, GROUP_DESC_CONTIG, 
         		"Index of the query result.   " );
-  
+   
         // The heading "Seq ID" is used in the Main Table for export
         mapper.addStringField( SEQ_ID_FIELD, "Seq ID", "contig", "contigid", 
         		GROUP_NAME_CONTIG, GROUP_DESC_CONTIG, 
@@ -279,6 +282,11 @@ public class FieldContigData implements Serializable
 	        mapper.addStringField( LONGEST_EST_FIELD, "Longest", "contig", "longest_clone", 
 	        		GROUP_NAME_CONTIG, GROUP_DESC_CONTIG, 
 	        		"Identifier for the longest sequence in the contig." );
+        }
+        else {
+        	mapper.addStringField( LONGEST_EST_FIELD, "Longest", "contig", "longest_clone", 
+	        		GROUP_NAME_CONTIG, GROUP_DESC_CONTIG, 
+	        		"Original sequence name." );
         }
         if (metaData.hasORFs()) {
 	        mapper.addPercentField( GC_RATIO_FIELD, "%GC", "contig", "gc_ratio", 
@@ -380,7 +388,7 @@ public class FieldContigData implements Serializable
        
   // Best match. 
         if (metaData.hasHits()) addHits(mapper, metaData);
-       
+        
   // SNP
         if (metaData.hasAssembly()) {
         		mapper.addIntField( SNP_COUNT_FIELD, "SNP Count", "contig", "snp_count", 
@@ -510,30 +518,30 @@ public class FieldContigData implements Serializable
         mapper.setFieldSubQuery(FIRST_BEST_PRO_COV_FIELD, "firstbestprotcov", TABLE_FIRST_BEST + ".prot_cov");
         
         if(metaData.hasGOs()) {
-        	 	mapper.addStringField( FIRST_BEST_GO, "EV GO", TABLE_FIRST_BEST_DETAIL, 
-    	        		"goList", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-    	        		"GO Terms for the overall Best E-value." );
-        	 	mapper.setFieldSubQuery(FIRST_BEST_GO, "firstbestgo", TABLE_FIRST_BEST_DETAIL + ".goList");
-        	 	
-    	        	mapper.addStringField( FIRST_BEST_INTERPRO, "EV Interpro", TABLE_FIRST_BEST_DETAIL, 
-    	        		"interpro", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-    	        		"Interpro ID for the overall Best E-value." );
-    	        	mapper.setFieldSubQuery(FIRST_BEST_INTERPRO, "firstbestinterpro", TABLE_FIRST_BEST_DETAIL + ".interpro");
+    	 	mapper.addStringField( FIRST_BEST_GO, "EV GO", TABLE_FIRST_BEST_DETAIL, 
+	        		"goList", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
+	        		"GO Terms for the overall Best E-value." );
+    	 	mapper.setFieldSubQuery(FIRST_BEST_GO, "firstbestgo", TABLE_FIRST_BEST_DETAIL + ".goList");
+    	 	
+	        mapper.addStringField( FIRST_BEST_INTERPRO, "EV Interpro", TABLE_FIRST_BEST_DETAIL, 
+	        		"interpro", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
+	        		"Interpro ID for the overall Best E-value." );
+	        mapper.setFieldSubQuery(FIRST_BEST_INTERPRO, "firstbestinterpro", TABLE_FIRST_BEST_DETAIL + ".interpro");
+    	
+        	mapper.addStringField( FIRST_BEST_KEGG, "EV KEGG", TABLE_FIRST_BEST_DETAIL, 
+        		"kegg", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
+        		"KEGG ID for the overall Best E-value." );
+        	mapper.setFieldSubQuery(FIRST_BEST_KEGG, "firstbestkegg", TABLE_FIRST_BEST_DETAIL + ".kegg");
         	
-	        	mapper.addStringField( FIRST_BEST_KEGG, "EV KEGG", TABLE_FIRST_BEST_DETAIL, 
-	        		"kegg", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-	        		"KEGG ID for the overall Best E-value." );
- 	        	mapper.setFieldSubQuery(FIRST_BEST_KEGG, "firstbestkegg", TABLE_FIRST_BEST_DETAIL + ".kegg");
- 	        	
-	        	mapper.addStringField( FIRST_BEST_PFAM, "EV PFam", TABLE_FIRST_BEST_DETAIL, 
-	        		"pfam", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-	        		"PFam ID for the overall Best E-value." );
+        	mapper.addStringField( FIRST_BEST_PFAM, "EV PFam", TABLE_FIRST_BEST_DETAIL, 
+        		"pfam", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
+        		"PFam ID for the overall Best E-value." );
 	         mapper.setFieldSubQuery(FIRST_BEST_PFAM, "firstbestpfam", TABLE_FIRST_BEST_DETAIL + ".pfam");
 	         	
-	        	mapper.addStringField( FIRST_BEST_EC, "EV EC", TABLE_FIRST_BEST_DETAIL, 
-	        		"ec", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-	        		"EC (enzyme) ID for the overall Best E-value." );
-	        	mapper.setFieldSubQuery(FIRST_BEST_EC, "firstbestec", TABLE_FIRST_BEST_DETAIL + ".ec");
+        	mapper.addStringField( FIRST_BEST_EC, "EV EC", TABLE_FIRST_BEST_DETAIL, 
+        		"ec", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
+        		"EC (enzyme) ID for the overall Best E-value." );
+        	mapper.setFieldSubQuery(FIRST_BEST_EC, "firstbestec", TABLE_FIRST_BEST_DETAIL + ".ec");
         }
         //////////////////////////////////////////////
         // Overall Best match
@@ -597,6 +605,7 @@ public class FieldContigData implements Serializable
         		"Percent coverage of sequence for the BestAnno." );
         mapper.setFieldSubQuery(OVER_BEST_CTG_COV_FIELD, "overctgcov", TABLE_OVER_BEST + ".ctg_cov");
         
+        
         mapper.addIntField( OVER_BEST_PRO_START_FIELD, "AN HitStart", TABLE_OVER_BEST, 
         		"prot_start", GROUP_NAME_OVER_BEST, GROUP_DESC_OVER_BEST, 
         		"Start of match to the HSP for the overall BestAnno." );
@@ -611,35 +620,37 @@ public class FieldContigData implements Serializable
         		"prot_cov", GROUP_NAME_OVER_BEST, GROUP_DESC_OVER_BEST, 
         		"Percent coverage of hit for the BestAnno." );
         mapper.setFieldSubQuery(OVER_BEST_PRO_COV_FIELD, "overhitcov", TABLE_OVER_BEST + ".prot_cov");
+  
         
         if(metaData.hasGOs()) {
-        		mapper.addStringField( OVER_BEST_GO, "AN GO", TABLE_OVER_BEST_DETAIL, 
-    	        		"goList", GROUP_NAME_OVER_BEST, GROUP_DESC_OVER_BEST, 
-    	        		"GO Terms for the overall BestAnno." );
-        		mapper.setFieldSubQuery(OVER_BEST_GO, "overbestgo", TABLE_OVER_BEST_DETAIL + ".goList");
-        		
-        		mapper.addStringField( OVER_BEST_INTERPRO, "AN Interpro",   TABLE_OVER_BEST_DETAIL, 
-    	        		"interpro", GROUP_NAME_OVER_BEST, GROUP_DESC_OVER_BEST, 
-    	        		"Interpro IDs for the overall BestAnno." );
-        		mapper.setFieldSubQuery(OVER_BEST_INTERPRO, "overinterpro", TABLE_OVER_BEST_DETAIL + ".interpro");
-	        	
-	        	mapper.addStringField( OVER_BEST_KEGG, "AN KEGG",    TABLE_OVER_BEST_DETAIL, 
-	        		"kegg", GROUP_NAME_OVER_BEST, GROUP_DESC_OVER_BEST, 
-	        		"KEGG ID for the overall BestAnno." );
-	        	mapper.setFieldSubQuery(OVER_BEST_KEGG, "overkegg", TABLE_OVER_BEST_DETAIL + ".kegg");
-	        	
-	        	mapper.addStringField( OVER_BEST_PFAM, "AN PFam",   TABLE_OVER_BEST_DETAIL, 
-	        		"pfam", GROUP_NAME_OVER_BEST, GROUP_DESC_OVER_BEST, 
-	        		"PFam ID for the overall BestAnno." );  
-	        	mapper.setFieldSubQuery(OVER_BEST_PFAM, "overpfam", TABLE_OVER_BEST_DETAIL + ".pfam");
-	        	
-	        	mapper.addStringField( OVER_BEST_EC, "AN EC",       TABLE_OVER_BEST_DETAIL, 
-	        		"ec", GROUP_NAME_OVER_BEST, GROUP_DESC_OVER_BEST, 
-	        		"EC (Enzyme) ID for the overall BestAnno." );
-	        	mapper.setFieldSubQuery(OVER_BEST_EC, "overenzyme", TABLE_OVER_BEST_DETAIL + ".ec");
+    		mapper.addStringField( OVER_BEST_GO, "AN GO", TABLE_OVER_BEST_DETAIL, 
+	        		"goList", GROUP_NAME_OVER_BEST, GROUP_DESC_OVER_BEST, 
+	        		"GO Terms for the overall BestAnno." );
+    		mapper.setFieldSubQuery(OVER_BEST_GO, "overbestgo", TABLE_OVER_BEST_DETAIL + ".goList");
+    		
+    		mapper.addStringField( OVER_BEST_INTERPRO, "AN Interpro",   TABLE_OVER_BEST_DETAIL, 
+	        		"interpro", GROUP_NAME_OVER_BEST, GROUP_DESC_OVER_BEST, 
+	        		"Interpro IDs for the overall BestAnno." );
+    		mapper.setFieldSubQuery(OVER_BEST_INTERPRO, "overinterpro", TABLE_OVER_BEST_DETAIL + ".interpro");
+        	
+        	mapper.addStringField( OVER_BEST_KEGG, "AN KEGG",    TABLE_OVER_BEST_DETAIL, 
+        		"kegg", GROUP_NAME_OVER_BEST, GROUP_DESC_OVER_BEST, 
+        		"KEGG ID for the overall BestAnno." );
+        	mapper.setFieldSubQuery(OVER_BEST_KEGG, "overkegg", TABLE_OVER_BEST_DETAIL + ".kegg");
+        	
+        	mapper.addStringField( OVER_BEST_PFAM, "AN PFam",   TABLE_OVER_BEST_DETAIL, 
+        		"pfam", GROUP_NAME_OVER_BEST, GROUP_DESC_OVER_BEST, 
+        		"PFam ID for the overall BestAnno." );  
+        	mapper.setFieldSubQuery(OVER_BEST_PFAM, "overpfam", TABLE_OVER_BEST_DETAIL + ".pfam");
+        	
+        	mapper.addStringField( OVER_BEST_EC, "AN EC",       TABLE_OVER_BEST_DETAIL, 
+        		"ec", GROUP_NAME_OVER_BEST, GROUP_DESC_OVER_BEST, 
+        		"EC (Enzyme) ID for the overall BestAnno." );
+        	mapper.setFieldSubQuery(OVER_BEST_EC, "overenzyme", TABLE_OVER_BEST_DETAIL + ".ec");
         }
 // Best GO
         if (!metaData.hasGOs()) return;
+          
         ///////////////////////////////////////////////////////
         mapper.addStringField( GO_BEST_UNIPROT_FIELD, "WG Hit ID", TABLE_GO_BEST, 
         		"uniprot_id", GROUP_NAME_GO_BEST, GROUP_DESC_GO_BEST, 
@@ -686,6 +697,7 @@ public class FieldContigData implements Serializable
         		"Alignment length of the best HSP of the BestHitWithGO." ); 
         mapper.setFieldSubQuery(GO_BEST_ALIGN_LEN_FIELD, "goalignlen", TABLE_GO_BEST + ".alignment_len");
         
+        
         mapper.addIntField( GO_BEST_CTG_START_FIELD, "WG SeqStart", TABLE_GO_BEST, 
         		"ctg_start", GROUP_NAME_GO_BEST, GROUP_DESC_GO_BEST, 
         		"Start of the match to the sequence for the BestHitWithGO." );
@@ -699,7 +711,8 @@ public class FieldContigData implements Serializable
         mapper.addIntField( GO_BEST_CTG_COV_FIELD, "WG %SeqCov", TABLE_GO_BEST, 
         		"ctg_cov", GROUP_NAME_GO_BEST, GROUP_DESC_GO_BEST, 
         		"Percent coverage of the sequence for the BestHitWithGO." );
-        mapper.setFieldSubQuery(GO_BEST_PRO_COV_FIELD, "goctgcov", TABLE_GO_BEST + ".prot_cov");
+        mapper.setFieldSubQuery(GO_BEST_CTG_COV_FIELD, "goctgcov", TABLE_GO_BEST + ".ctg_cov");
+        
         
         mapper.addIntField( GO_BEST_PRO_START_FIELD, "WG HitStart", TABLE_GO_BEST, 
         		"prot_start", GROUP_NAME_GO_BEST, GROUP_DESC_GO_BEST, 
@@ -710,36 +723,36 @@ public class FieldContigData implements Serializable
         		"prot_end", GROUP_NAME_GO_BEST, GROUP_DESC_GO_BEST, 
         		"End of match of the HSP for the BestHitWithGO." );
         mapper.setFieldSubQuery(GO_BEST_PRO_END_FIELD, "goprotend", TABLE_GO_BEST + ".prot_end");
-        
+   
         mapper.addIntField( GO_BEST_PRO_COV_FIELD, "WG %HitCov", TABLE_GO_BEST, 
         		"prot_cov", GROUP_NAME_GO_BEST, GROUP_DESC_GO_BEST, 
         		"Percent coverage of hit for the BestHitWithGO." );
         mapper.setFieldSubQuery(GO_BEST_PRO_COV_FIELD, "goprotcov", TABLE_GO_BEST + ".prot_cov");
-        
-    		mapper.addStringField( GO_BEST_GO, "WG GO", TABLE_GO_BEST_DETAIL, 
-	        		"goList", GROUP_NAME_GO_BEST, GROUP_DESC_GO_BEST, 
-	        		"GO Terms for the BestHitWithGO." );
-    		mapper.setFieldSubQuery(GO_BEST_GO, "gobestgo", TABLE_GO_BEST_DETAIL + ".goList");
-    		
-    		mapper.addStringField( GO_BEST_INTERPRO, "WG Interpro", TABLE_GO_BEST_DETAIL, 
-	        		"interpro", GROUP_NAME_GO_BEST, GROUP_DESC_GO_BEST, 
-	        		"Interpro IDs for the BestHitWithGO." );
-    		mapper.setFieldSubQuery(GO_BEST_INTERPRO, "gointerpro", TABLE_GO_BEST_DETAIL + ".interpro");
-    		 
-        	mapper.addStringField( GO_BEST_KEGG, "WG KEGG", TABLE_GO_BEST_DETAIL, 
-        		"kegg", GROUP_NAME_GO_BEST, GROUP_DESC_GO_BEST, 
-        		"KEGG ID for the BestHitWithGO." );
-        	mapper.setFieldSubQuery(GO_BEST_KEGG, "gokegg", TABLE_GO_BEST_DETAIL + ".kegg");
-        	  
-        	mapper.addStringField( GO_BEST_PFAM, "WG PFam", TABLE_GO_BEST_DETAIL, 
-        		"pfam", GROUP_NAME_GO_BEST, GROUP_DESC_GO_BEST, 
-        		"PFam ID for the BestHitWithGO." ); 
-        	mapper.setFieldSubQuery(GO_BEST_PFAM, "gopfam", TABLE_GO_BEST_DETAIL + ".pfam");
-        	
-        	mapper.addStringField( GO_BEST_EC, "WG EC", TABLE_GO_BEST_DETAIL, 
-        		"ec", GROUP_NAME_GO_BEST, GROUP_DESC_GO_BEST, 
-        		"EC (Enzyme) ID for the BestHitWithGO." );
-        	mapper.setFieldSubQuery(GO_BEST_EC, "goenzyme", TABLE_GO_BEST_DETAIL + ".ec");
+   
+		mapper.addStringField( GO_BEST_GO, "WG GO", TABLE_GO_BEST_DETAIL, 
+        		"goList", GROUP_NAME_GO_BEST, GROUP_DESC_GO_BEST, 
+        		"GO Terms for the BestHitWithGO." );
+		mapper.setFieldSubQuery(GO_BEST_GO, "gobestgo", TABLE_GO_BEST_DETAIL + ".goList");
+		
+		mapper.addStringField( GO_BEST_INTERPRO, "WG Interpro", TABLE_GO_BEST_DETAIL, 
+        		"interpro", GROUP_NAME_GO_BEST, GROUP_DESC_GO_BEST, 
+        		"Interpro IDs for the BestHitWithGO." );
+		mapper.setFieldSubQuery(GO_BEST_INTERPRO, "gointerpro", TABLE_GO_BEST_DETAIL + ".interpro");
+		 
+    	mapper.addStringField( GO_BEST_KEGG, "WG KEGG", TABLE_GO_BEST_DETAIL, 
+    		"kegg", GROUP_NAME_GO_BEST, GROUP_DESC_GO_BEST, 
+    		"KEGG ID for the BestHitWithGO." );
+    	mapper.setFieldSubQuery(GO_BEST_KEGG, "gokegg", TABLE_GO_BEST_DETAIL + ".kegg");
+    	  
+    	mapper.addStringField( GO_BEST_PFAM, "WG PFam", TABLE_GO_BEST_DETAIL, 
+    		"pfam", GROUP_NAME_GO_BEST, GROUP_DESC_GO_BEST, 
+    		"PFam ID for the BestHitWithGO." ); 
+    	mapper.setFieldSubQuery(GO_BEST_PFAM, "gopfam", TABLE_GO_BEST_DETAIL + ".pfam");
+    	
+    	mapper.addStringField( GO_BEST_EC, "WG EC", TABLE_GO_BEST_DETAIL, 
+    		"ec", GROUP_NAME_GO_BEST, GROUP_DESC_GO_BEST, 
+    		"EC (Enzyme) ID for the BestHitWithGO." );
+    	mapper.setFieldSubQuery(GO_BEST_EC, "goenzyme", TABLE_GO_BEST_DETAIL + ".ec");
     }
     /*
      *    There is no reason for creating the mySQL statement here, except for using 
@@ -784,18 +797,18 @@ public class FieldContigData implements Serializable
      */
     public String getSeqFilterSQL (QueryContigTab queryObj, FieldMapper fields, FieldContigTab fTab)
     {
-	    	String strQuery = "";
-	    	String strRStat = "";
+	    String strQuery = "";
+	    String strRStat = "";
 	    	
-	    	String [] libs = queryObj.getAllRequiredLibs(fTab);
-	    	fields.setNFoldLibNames(libs);
-	    	boolean usesCounts = queryObj.usesCounts();
-	    	if(libs != null && libs.length > 0) {    		
-	    		for(int x=0; x<libs.length; x++) {
-	    			if (usesCounts) strRStat += "," + L + libs[x] + " AS LIB" + (x+1);
-	    			strRStat += ", " + LN + libs[x] + " AS LIBN" + (x+1);
-	    		}
+	    String [] libs = queryObj.getAllRequiredLibs(fTab);
+	    fields.setNFoldLibNames(libs);
+	    boolean usesCounts = queryObj.usesCounts();
+	    if(libs != null && libs.length > 0) {    		
+	    	for(int x=0; x<libs.length; x++) {
+	    		if (usesCounts) strRStat += "," + L + libs[x] + " AS LIB" + (x+1);
+	    		strRStat += ", " + LN + libs[x] + " AS LIBN" + (x+1);
 	    	}
+	    }
    		strQuery = "SELECT " + fields.getDBFieldList() + strRStat + " FROM contig";
    
    		String queryJoin =  "";

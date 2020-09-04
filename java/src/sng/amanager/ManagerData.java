@@ -5,6 +5,9 @@ package sng.amanager;
  * Import annoDB
  * Reads HOSTS.cfg
  */
+// CAS304 for -Xlint
+//  changed SeqData and CountData extends Attributes to having an attribute object 
+//  removed equal method for CountData and AnnodbData
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -87,8 +90,7 @@ public class ManagerData {
 			if(!projFile.exists()) {
 				Out.PrtSpMsg(1,"Creating " + cfg);
 				BufferedWriter out = new BufferedWriter(new FileWriter(projFile));
-				
-				out = new BufferedWriter(new FileWriter(projFile));
+		
 				out.write("# " + projectName +  " " + LIBCFG + " "  + Globalx.strTCWver + "\n");
 				out.write("STCW_db  = " + db + "   # sTCW database\n");
 				out.close();
@@ -132,15 +134,16 @@ public class ManagerData {
 	
 	private void saveMetaData(SeqData trans, BufferedWriter out) {
 		try {
-			if(trans.getTitle().length() > 0)	out.write("title     = " + trans.getTitle() + "\n");
-			if(trans.getCultivar().length() > 0)	out.write("cultivar  = " + trans.getCultivar() + "\n");
-			if(trans.getTissue().length() > 0)	out.write("tissue    = " + trans.getTissue() + "\n");
-			if(trans.getStage().length() > 0)	out.write("stage     = " + trans.getStage() + "\n");
-			if(trans.getTreatment().length() > 0)out.write("treatment = " + trans.getTreatment() + "\n");
-			if(trans.getOrganism().length() > 0)	out.write("organism  = " + trans.getOrganism() + "\n");
-			if(trans.getStrain().length() > 0)	out.write("strain    = " + trans.getStrain() + "\n");
-			if(trans.getYear().length() > 0)		out.write("year      = " + trans.getYear() + "\n");
-			if(trans.getSource().length() > 0)	out.write("source    = " + trans.getSource() + "\n");
+			Attributes attrObj = trans.getAttr();
+			if(attrObj.getTitle().length() > 0)	out.write("title     = " + attrObj.getTitle() + "\n");
+			if(attrObj.getCultivar().length() > 0)	out.write("cultivar  = " + attrObj.getCultivar() + "\n");
+			if(attrObj.getTissue().length() > 0)	out.write("tissue    = " + attrObj.getTissue() + "\n");
+			if(attrObj.getStage().length() > 0)	out.write("stage     = " + attrObj.getStage() + "\n");
+			if(attrObj.getTreatment().length() > 0)out.write("treatment = " + attrObj.getTreatment() + "\n");
+			if(attrObj.getOrganism().length() > 0)	out.write("organism  = " + attrObj.getOrganism() + "\n");
+			if(attrObj.getStrain().length() > 0)	out.write("strain    = " + attrObj.getStrain() + "\n");
+			if(attrObj.getYear().length() > 0)		out.write("year      = " + attrObj.getYear() + "\n");
+			if(attrObj.getSource().length() > 0)	out.write("source    = " + attrObj.getSource() + "\n");
 			out.write("\n");
 			out.flush();
 		}
@@ -148,15 +151,16 @@ public class ManagerData {
 	}
 	private void saveMetaData(CountData exp, BufferedWriter out) {
 		try {
-			if(exp.getTitle().length() > 0)		out.write("title     = " + exp.getTitle() + "\n");
-			if(exp.getCultivar().length() > 0)	out.write("cultivar  = " + exp.getCultivar() + "\n");
-			if(exp.getTissue().length() > 0)		out.write("tissue    = " + exp.getTissue() + "\n");
-			if(exp.getStage().length() > 0)		out.write("stage     = " + exp.getStage() + "\n");
-			if(exp.getTreatment().length() > 0)	out.write("treatment = " + exp.getTreatment() + "\n");
-			if(exp.getOrganism().length() > 0)	out.write("organism  = " + exp.getOrganism() + "\n");
-			if(exp.getStrain().length() > 0)		out.write("strain    = " + exp.getStrain() + "\n");
-			if(exp.getYear().length() > 0)		out.write("year      = " + exp.getYear() + "\n");
-			if(exp.getSource().length() > 0)		out.write("source    = " + exp.getSource() + "\n");
+			Attributes a = exp.getAttr();
+			if(a.getTitle().length() > 0)		out.write("title     = " + a.getTitle() + "\n");
+			if(a.getCultivar().length() > 0)	out.write("cultivar  = " + a.getCultivar() + "\n");
+			if(a.getTissue().length() > 0)		out.write("tissue    = " + a.getTissue() + "\n");
+			if(a.getStage().length() > 0)		out.write("stage     = " + a.getStage() + "\n");
+			if(a.getTreatment().length() > 0)	out.write("treatment = " + a.getTreatment() + "\n");
+			if(a.getOrganism().length() > 0)	out.write("organism  = " + a.getOrganism() + "\n");
+			if(a.getStrain().length() > 0)		out.write("strain    = " + a.getStrain() + "\n");
+			if(a.getYear().length() > 0)		out.write("year      = " + a.getYear() + "\n");
+			if(a.getSource().length() > 0)		out.write("source    = " + a.getSource() + "\n");
 			out.write("\n");
 			out.flush();
 		}
@@ -253,6 +257,7 @@ public class ManagerData {
 							"Use sed -i 's/,/ /g' <file> to replace commas with spaces.";
 					Out.PrtWarn(msg);
 					Out.PrtSpMsg(2, "Line: " + line);
+					projReader.close();
 					return null;
 				}
 			}
@@ -310,7 +315,7 @@ public class ManagerData {
 	
 	// for updating the database
     public String getTransLib(int index) {
-		SeqData t = seqObjList.get(index);
+		Attributes t = seqObjList.get(index).getAttr();
 		String theStatement = "UPDATE library SET ";
 		theStatement += "title = '" + fix(t.getTitle()) + "', ";
 		theStatement += "organism = '" + fix(t.getOrganism()) + "', ";
@@ -321,21 +326,22 @@ public class ManagerData {
 		theStatement += "treatment = '" + fix(t.getTreatment()) + "', ";
 		theStatement += "year = '" + fix(t.getYear()) + "', ";
 		theStatement += "source = '" + fix(t.getSource()) + "' ";
-		theStatement += "WHERE libid = '" + t.getSeqID() + "'";
+		theStatement += "WHERE libid = '" + seqObjList.get(index).getSeqID() + "'";
 		return theStatement;
     }
     public String getCountLib(int index) {
-    		CountData c = countObjList.get(index);
-    		String theStatement = "UPDATE library SET ";
-		theStatement += "title = '" + fix(c.getTitle()) + "', ";
-		theStatement += "organism = '" + fix(c.getOrganism()) + "', ";
-		theStatement += "cultivar = '" + fix(c.getCultivar()) + "', ";
-		theStatement += "strain = '" + fix(c.getStrain()) + "', ";
-		theStatement += "tissue = '" + fix(c.getTissue()) + "', ";
-		theStatement += "stage = '" + fix(c.getStage()) + "', ";
-		theStatement += "treatment = '" + fix(c.getTreatment()) + "', ";
-		theStatement += "year = '" + fix(c.getYear()) + "', ";
-		theStatement += "source = '" + fix(c.getSource()) + "' ";
+    	CountData c = countObjList.get(index);
+    	Attributes a = c.getAttr();
+    	String theStatement = "UPDATE library SET ";
+		theStatement += "title = '" + fix(a.getTitle()) + "', ";
+		theStatement += "organism = '" + fix(a.getOrganism()) + "', ";
+		theStatement += "cultivar = '" + fix(a.getCultivar()) + "', ";
+		theStatement += "strain = '" + fix(a.getStrain()) + "', ";
+		theStatement += "tissue = '" + fix(a.getTissue()) + "', ";
+		theStatement += "stage = '" + fix(a.getStage()) + "', ";
+		theStatement += "treatment = '" + fix(a.getTreatment()) + "', ";
+		theStatement += "year = '" + fix(a.getYear()) + "', ";
+		theStatement += "source = '" + fix(a.getSource()) + "' ";
 		theStatement += "WHERE libid = '" + c.getCondID() + "'";
 		return theStatement;
     }
@@ -530,24 +536,25 @@ public class ManagerData {
 	 * 	note: Read libraries have 'libid' like expressions libraries, but are grouped with TransLibs.
 	 *  Conditions and repNames are linked by CountData.strSeqID field
 	 */
-	public class SeqData extends Attributes {
+	public class SeqData  {
 		public SeqData() {}
 		public SeqData(String id, boolean b) {
 			strSeqID=id;
 			isTrans=b;
 		}
-		public void setSeqID(String id) { strSeqID = id; }
+		public void   setSeqID(String id) { strSeqID = id; }
 		public String getSeqID() { return strSeqID; }		
-		public void setSeqFile(String filename) { strSeqFile = filename; }
+		public void   setSeqFile(String filename) { strSeqFile = filename; }
 		public String getSeqFile() { return strSeqFile; }	
-		public void setQualFile(String filename) { strQualFile = filename; }
+		public void   setQualFile(String filename) { strQualFile = filename; }
 		public String getQualFile() { return strQualFile; }		
-		public void setExpFile(String filename) { strCountFile = filename; }
+		public void   setExpFile(String filename) { strCountFile = filename; }
 		public String getCountFile() { return strCountFile; }
-		public void setFivePrimeSuffix(String suffix) { strFivePrimeSuf = suffix; }
+		public void   setFivePrimeSuffix(String suffix) { strFivePrimeSuf = suffix; }
 		public String getFivePrimeSuffix() { return strFivePrimeSuf; }
-		public void setThreePrimeSuffix(String suffix) { strThreePrimeSuf = suffix; }
+		public void   setThreePrimeSuffix(String suffix) { strThreePrimeSuf = suffix; }
 		public String getThreePrimeSuffix() { return strThreePrimeSuf; }
+		public Attributes getAttr() { return attrObj;}
 
 		public String strSeqID = "";
 		public String strSeqFile = "";
@@ -556,13 +563,14 @@ public class ManagerData {
 		public String strFivePrimeSuf = "";
 		public String strThreePrimeSuf = "";
 		public boolean isTrans=true;
+		public Attributes attrObj = new Attributes();
 		
 		public String [] repArray; // used in for readLIBcfg
 	}
 	/***************************************************
 	 * Data for Count (expression level) libraries
 	 */
-	public class CountData extends Attributes {
+	public class CountData {
 		// add one count/rep from EditTransLibPanel reading file
 		public CountData(String libid, String seqid) {
 			strCondID = libid;
@@ -600,15 +608,16 @@ public class ManagerData {
 			}
 			for (String r : repList) repMap.put(r, this);
 			
-			setTitle(seqObj.getTitle());
-			setCultivar(seqObj.getCultivar());
-			setTissue(seqObj.getTissue());
-			setStage(seqObj.getStage());
-			setTreatment(seqObj.getTreatment());
-			setOrganism(seqObj.getOrganism());
-			setStrain(seqObj.getStrain());
-			setYear(seqObj.getYear());
-			setSource(seqObj.getSource());
+			Attributes sAttrObj = seqObj.getAttr();
+			attrObj.setTitle(sAttrObj.getTitle());
+			attrObj.setCultivar(sAttrObj.getCultivar());
+			attrObj.setTissue(sAttrObj.getTissue());
+			attrObj.setStage(sAttrObj.getStage());
+			attrObj.setTreatment(sAttrObj.getTreatment());
+			attrObj.setOrganism(sAttrObj.getOrganism());
+			attrObj.setStrain(sAttrObj.getStrain());
+			attrObj.setYear(sAttrObj.getYear());
+			attrObj.setSource(sAttrObj.getSource());
 		}
 		
 		public void setCondID(String id) { strCondID = id; }
@@ -618,18 +627,13 @@ public class ManagerData {
 		public int getNumReps() { return repList.size(); }
 		public Vector <String> getRepList() { return repList;}
 		public void setRepList(Vector <String> rl) { repList = rl;}
+		public Attributes getAttr() {return attrObj;}
 		
 		private String strCondID = "";
 		private String strSeqID = "";
 		private String strReps = "";
 		private Vector <String> repList = new Vector <String> ();
-
-		public boolean equals(Object exp) {
-			if(exp instanceof CountData)
-				return strCondID.equals(((CountData)exp).strCondID) 
-						&& strSeqID.equals(((CountData)exp).strSeqID);
-			return false;
-		}
+		private Attributes attrObj = new Attributes ();
 	}
 	/**************************************************************
 	 * Attributes for either Transcript/Read or Expression Level Libraries
@@ -649,23 +653,23 @@ public class ManagerData {
 			return true;
 		}
 
-		public void setTitle(String title) { strTitle = title; }
+		public void   setTitle(String title) { strTitle = title; }
 		public String getTitle() { return strTitle; }	
-		public void setCultivar(String cultiVar) { strCultivar = cultiVar; }
+		public void   setCultivar(String cultiVar) { strCultivar = cultiVar; }
 		public String getCultivar() { return strCultivar; }		
-		public void setTissue(String tissue) { strTissue = tissue; }
+		public void   setTissue(String tissue) { strTissue = tissue; }
 		public String getTissue() { return strTissue; }		
-		public void setStage(String stage) { strStage = stage; }
+		public void   setStage(String stage) { strStage = stage; }
 		public String getStage() { return strStage; }		
-		public void setTreatment(String treatment) { strTreatment = treatment; }
+		public void   setTreatment(String treatment) { strTreatment = treatment; }
 		public String getTreatment() { return strTreatment; }		
-		public void setOrganism(String organism) { strOrganism = organism; }
+		public void   setOrganism(String organism) { strOrganism = organism; }
 		public String getOrganism() { return strOrganism; }		
-		public void setStrain(String strain) { strStrain = strain; }
+		public void   setStrain(String strain) { strStrain = strain; }
 		public String getStrain() { return strStrain; }		
-		public void setYear(String year) { strYear = year; }
+		public void   setYear(String year) { strYear = year; }
 		public String getYear() { return strYear; }		
-		public void setSource(String source) { strSource = source; }
+		public void   setSource(String source) { strSource = source; }
 		public String getSource() { return strSource; }
 		
 		private String strTitle = "";
@@ -707,16 +711,6 @@ public class ManagerData {
 			if (searchPgm.equals("diamond"))
 				if (strParams.equals(BlastArgs.getDiamondOpDefaults())) return false;
 			return true;
-		}
-		
-		public boolean equals(Object obj) {
-			if(obj instanceof AnnodbData) {
-				AnnodbData ad = (AnnodbData)obj;
-				if(ad.strTaxo.equals(strTaxo))
-					return ad.strFastaDB.equals(strFastaDB);
-				return ad.strTaxo.equals(strTaxo);
-			}
-			return false;
 		}
 		
 		private boolean bLoaded = false;
@@ -867,13 +861,14 @@ public class ManagerData {
 					key = lineVal[0].trim();
 					value = lineVal[1].trim();
 
-					if(key.equalsIgnoreCase("PAVE_db") || key.equalsIgnoreCase("STCW_db")) {
-						strTCWdb=value; continue;
+					if(key.equalsIgnoreCase("STCW_db")) {
+						strTCWdb=value; 
+						continue;
 					}
 					// these 3 are now read from HOSTS.cfg
-					if(key.equalsIgnoreCase("PAVE_host") || key.equalsIgnoreCase("DB_host") ) {continue;}
-					if(key.equalsIgnoreCase("PAVE_user") || key.equalsIgnoreCase("DB_user")) {continue;}
-					if(key.equalsIgnoreCase("PAVE_password") || key.equalsIgnoreCase("DB_password") ) {continue;}
+					if (key.equalsIgnoreCase("DB_host") ) {continue;}
+					if (key.equalsIgnoreCase("DB_user")) {continue;}
+					if (key.equalsIgnoreCase("DB_password") ) {continue;}
 					
 					if (key.equalsIgnoreCase("libid")) { //  assemble or count
 						seqObj = new SeqData(value, false);
@@ -887,6 +882,7 @@ public class ManagerData {
 					if (seqObj==null) {
 						System.err.println("Incorrect line in LIB.cfg -- " + line);
 						UserPrompt.showError("Incorrect line in LIB.cfg (see terminal)");
+						libReader.close();
 						return;
 					}
 					if (key.equals("reps")) seqObj.repArray =  value.split(",");
@@ -902,7 +898,7 @@ public class ManagerData {
 					else if(key.equalsIgnoreCase("fiveprimesuf")) seqObj.strFivePrimeSuf = value;
 					else if(key.equalsIgnoreCase("threeprimesuf")) seqObj.strThreePrimeSuf = value;
 					else if(key.equalsIgnoreCase("expfile")) seqObj.strCountFile = value;
-					else seqObj.setAttribute(key, value);
+					else seqObj.getAttr().setAttribute(key, value);
 				} // end while loop through file
 				libReader.close();
 			

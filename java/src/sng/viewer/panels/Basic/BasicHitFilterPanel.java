@@ -70,7 +70,7 @@ public class BasicHitFilterPanel extends JPanel {
 	private static final String GO_FORMAT = Globals.GO_FORMAT;
 	private static final double DEFAULT_EVAL = 1e-30;
 	private static final String DEFAULT_SIM = "50";
-	private static final String DEFAULT_ALIGN = "50";
+	
 	private static final double DEFAULT_DE = 0.05;
 	private static final double DEFAULT_RPKM = 1;
 	private static final NumberFormat formatd = new DecimalFormat("0E0");
@@ -111,6 +111,8 @@ public class BasicHitFilterPanel extends JPanel {
 		metaData = frame.getMetaData();
 		hasGO = metaData.hasGOs();
 		totalSeqHitPairs = metaData.totalSeqHitPairs();
+		norm = metaData.getNorm(); // CAS304
+		
 		initColumns();
 		
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -1614,8 +1616,8 @@ public class BasicHitFilterPanel extends JPanel {
 				Dimension dim = txtCount.getPreferredSize();
 				dim.width = WIDTH;
 				dim.height = HEIGHT;
-				theModel = new DefaultListModel();
-				theList = new JList(theModel);
+				theModel = new DefaultListModel <String> ();
+				theList = new JList <String> (theModel);
 				listScroll = new JScrollPane(theList);
 				listScroll.setPreferredSize(dim);
 				listScroll.setMaximumSize(dim);
@@ -1725,7 +1727,7 @@ public class BasicHitFilterPanel extends JPanel {
 				return panel;
 			}
 			public int getNumSelectedElements() {return theList.getSelectedIndices().length;}
-			public int getNumElements() {return theList.getModel().getSize();	}
+			
 			public int getNumSpecies() {return theModel.size();}
 			public void setStatus(String text) { txtCount.setText(text); }
 			public void clear() {theModel.removeAllElements();}
@@ -1749,7 +1751,7 @@ public class BasicHitFilterPanel extends JPanel {
 			public String []  getValAsArray() {
 				String [] retVal = new String[theModel.getSize()];
 				for(int x=0; x< theModel.getSize(); x++)
-					retVal[x] = (String)theModel.getElementAt(x);
+					retVal[x] = theModel.getElementAt(x);
 				return retVal;
 			}
 			public void setAllValues(String [] values) {
@@ -1760,14 +1762,14 @@ public class BasicHitFilterPanel extends JPanel {
 				Vector<String> list = new Vector<String> ();
 				int [] vals = theList.getSelectedIndices();
 				for(int x=0; x<vals.length; x++)
-					list.add((String)theModel.getElementAt(vals[x]));
+					list.add(theModel.getElementAt(vals[x]));
 				return list;
 			}
 			public void removeSelectedValues() {
 				Vector<String> saveVals = new Vector<String> ();
 				for(int x=0; x<theModel.getSize(); x++) {
 					if(!theList.isSelectedIndex(x))
-						saveVals.add((String)theModel.elementAt(x));
+						saveVals.add(theModel.elementAt(x));
 				}
 				theModel.clear();
 				for (String v : saveVals) theModel.addElement(v);
@@ -1781,7 +1783,7 @@ public class BasicHitFilterPanel extends JPanel {
 			public void addValues(boolean bAll, Vector<String> vals) {
 				Vector<String> list = new Vector<String> ();
 				for(int x=0; x < theModel.getSize(); x++) 
-					list.add((String)theModel.getElementAt(x));
+					list.add(theModel.getElementAt(x));
 				theModel.clear();
 				
 				if (bAll) list.addAll(vals);
@@ -1836,8 +1838,8 @@ public class BasicHitFilterPanel extends JPanel {
 			private final static int WIDTH = 300;
 			private final static int HEIGHT = 400;
 			private JTextField txtCount = null;
-			private JList theList = null;
-			private DefaultListModel theModel = null;
+			private JList <String> theList = null;
+			private DefaultListModel <String> theModel = null;
 			private JScrollPane listScroll = null;
 			
 			private JButton btnClearOrFind = null;
@@ -1888,7 +1890,7 @@ public class BasicHitFilterPanel extends JPanel {
 			headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.LINE_AXIS));
 			headerPanel.setBackground(Color.white);
 			
-			String header = "<HTML><H2>Filter on RPKM";
+			String header = "<HTML><H2>Filter on " + norm;
 			header += (pvalColNames==null) ? "</H2>" : 
 				" and/or DE p-values</H2>"  ;
 			header += (libColNames.length <=1) ? "</HTML>"  :
@@ -1982,7 +1984,7 @@ public class BasicHitFilterPanel extends JPanel {
 			
 		// RPKM >= [] for [Every/Any] selected
 			JPanel libRow = Static.createRowPanel();
-			libRow.add(new JLabel("RPKM"));
+			libRow.add(new JLabel(norm));
 			libRow.add(new JLabel(">="));
 			
 			txtRPKM  = new JTextField(DOUBLE_SIZE);
@@ -1992,7 +1994,7 @@ public class BasicHitFilterPanel extends JPanel {
 			
 			libRow.add(new JLabel("from"));
 			String [] libLabels = {"EVERY", "ANY"};
-			libCombo = new JComboBox(libLabels);
+			libCombo = new JComboBox <String> (libLabels);
 			libRow.add(libCombo);
 			libRow.add(new JLabel("selected"));
 			
@@ -2059,7 +2061,7 @@ public class BasicHitFilterPanel extends JPanel {
 			
 			row.add(new JLabel("from"));
 			String [] labels = {"EVERY", "ANY"};
-			pvalCombo = new JComboBox(labels);
+			pvalCombo = new JComboBox <String> (labels);
 			row.add(pvalCombo);
 			row.add(new JLabel("selected"));
 			
@@ -2185,7 +2187,7 @@ public class BasicHitFilterPanel extends JPanel {
 	          			if (!list.equals("")) list += op;
 	          			list += libColNames[x];
 	          		}
-				ret = "RPKM>=" + txtRPKM.getText() + " " + list;
+				ret = norm + ">=" + txtRPKM.getText() + " " + list;
 			}
 			if (cntD>0) {
 				String list="";
@@ -2262,11 +2264,11 @@ public class BasicHitFilterPanel extends JPanel {
 		
 		private JCheckBox [] chkLibColNames = null;
 		private JTextField txtRPKM = null;
-		private JComboBox libCombo=null;
+		private JComboBox <String> libCombo=null;
 		
 		private JCheckBox [] chkPvalColNames = null;
 		private JTextField txtDE = null;
-		private JComboBox pvalCombo=null;
+		private JComboBox <String> pvalCombo=null;
 		private JRadioButton chkUpDE=null, chkDownDE=null, chkEitherDE=null;
 		
 		private boolean [] bSaveLibSelect = null;
@@ -2454,7 +2456,7 @@ public class BasicHitFilterPanel extends JPanel {
 			libPanel.setAlignmentY(TOP_ALIGNMENT);
 			
 			JPanel libRow = Static.createRowPanel();
-			String l = (isGrp) ? "Best RPKM" : "RPKM";
+			String l = (isGrp) ? "Best " + norm : norm;
 			libRow.add(new JLabel(l));
 			libPanel.add(libRow);		
 					
@@ -2979,4 +2981,5 @@ public class BasicHitFilterPanel extends JPanel {
 	private JButton btnFindFile = null;
 	private int totalSeqHitPairs=0;
 	private String filters="";
+	private String norm="RPKM";
 }

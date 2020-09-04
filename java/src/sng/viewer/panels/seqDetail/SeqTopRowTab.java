@@ -594,7 +594,7 @@ public class SeqTopRowTab extends Tab {
 	 **************************************************/
 	private void addPrevNextTab(int nNewRecordNum )
 	{	
-		Tab parentTab = (Tab)getParentTab();
+		Tab parentTab = getParentTab();
 		String strTitle = ((ContigListTab)parentTab).getContigIDAtRow(nNewRecordNum);
 		if (strTitle==null) return;
 		

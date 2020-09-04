@@ -528,19 +528,19 @@ public class BasicHitQueryTab extends Tab {
 			int nCol=theFilterPanel.NUM_SEQ_COL;
 			if (column<nCol) {
 				switch(column) {
-				case 0: return order * (new Integer(nRowNum)).compareTo(obj.nRowNum);
+				case 0: return order * ((Integer) nRowNum).compareTo((Integer) obj.nRowNum);
 				case 1: return order * compareStrings(strSeqID, obj.strSeqID);
-				case 2: return order * (new Integer(seqLen)).compareTo(obj.seqLen);
+				case 2: return order * ((Integer) seqLen).compareTo((Integer) obj.seqLen);
 				
 				case 3: return order * compareStrings(strHitID,obj.strHitID);
 				case 4: return order * compareStrings(strBest, obj.strBest);
-				case 5: return order * (new Integer(nRank)).compareTo(obj.nRank);
+				case 5: return order * ((Integer) nRank).compareTo((Integer) obj.nRank);
 				
-				case 6: return order * (new Double(evalue)).compareTo(obj.evalue);
-				case 7: return order * (new Integer(sim)).compareTo(obj.sim);
-				case 8: return order * (new Integer(seqAlign)).compareTo(obj.seqAlign);
-				case 9: return order * (new Integer(hitAlign)).compareTo(obj.hitAlign);
-				case 10: return order * (new Integer(align)).compareTo(obj.align);
+				case 6: return order * ((Double) evalue).compareTo((Double) obj.evalue);
+				case 7: return order * ((Integer) sim).compareTo((Integer) obj.sim);
+				case 8: return order * ((Integer) seqAlign).compareTo((Integer) obj.seqAlign);
+				case 9: return order * ((Integer) hitAlign).compareTo((Integer) obj.hitAlign);
+				case 10: return order * ((Integer) align).compareTo((Integer) obj.align);
 				
 				case 11: return order * compareStrings(strDesc, obj.strDesc);
 				case 12: return order * compareStrings(strSpecies, obj.strSpecies);
@@ -551,7 +551,7 @@ public class BasicHitQueryTab extends Tab {
 			nCol+=6;
 			if (hasGO && column<nCol) {
 				switch(column) {
-				case 15: return order * (new Integer(nGO)).compareTo(obj.nGO);
+				case 15: return order * ((Integer) nGO).compareTo((Integer) obj.nGO);
 				case 16: return order * compareStrings(strGO, obj.strGO);
 				case 17: return order * compareStrings(strIP, obj.strIP);
 				case 18: return order * compareStrings(strKEGG, obj.strKEGG);
@@ -561,11 +561,11 @@ public class BasicHitQueryTab extends Tab {
 			}
 			if (column < (nCol+numLibs)) {
 				int index = column-nCol;
-				return order * (new Double(libCounts[index])).compareTo(obj.libCounts[index]);
+				return order * (libCounts[index]).compareTo(obj.libCounts[index]);
 			}
 			nCol+=numLibs;
 			int index = column-nCol;
-			return order * (new Double(Math.abs(pvalCounts[index]))).compareTo(Math.abs(obj.pvalCounts[index]));
+			return order * ((Double) Math.abs(pvalCounts[index])).compareTo((Double) Math.abs(obj.pvalCounts[index]));
 		}
 		
 		public HitGroupData getGroupItem() {
@@ -718,20 +718,20 @@ public class BasicHitQueryTab extends Tab {
 			int nCol=theFilterPanel.NUM_HIT_COL;
 			if (column<nCol) {
 				switch(column) {
-				case 0: return order * (new Integer(nRowNum)).compareTo(obj.nRowNum);
+				case 0: return order * ((Integer) nRowNum).compareTo((Integer) obj.nRowNum);
 				case 1: return order * compareStrings(strHitID, obj.strHitID);
-				case 2: return order * (new Integer(hitLen)).compareTo(obj.hitLen);
+				case 2: return order * ((Integer) hitLen).compareTo((Integer) obj.hitLen);
 				
-				case 3: return order * (new Integer(nSeqs)).compareTo(obj.nSeqs);
-				case 4: return order * (new Integer(nBest)).compareTo(obj.nBest);
-				case 5: return order * (new Integer(nRank1)).compareTo(obj.nRank1);
+				case 3: return order * ((Integer) nSeqs).compareTo((Integer) obj.nSeqs);
+				case 4: return order * ((Integer) nBest).compareTo((Integer) obj.nBest);
+				case 5: return order * ((Integer) nRank1).compareTo((Integer) obj.nRank1);
 				
 				
-				case 6: return order * (new Double(evalue)).compareTo(obj.evalue);
-				case 7: return order * (new Integer(sim)).compareTo(obj.sim);
-				case 8: return order * (new Integer(seqAlign)).compareTo(obj.seqAlign);
-				case 9: return order * (new Integer(hitAlign)).compareTo(obj.hitAlign);
-				case 10: return order * (new Integer(align)).compareTo(obj.align);
+				case 6: return order * ((Double) evalue).compareTo((Double) obj.evalue);
+				case 7: return order * ((Integer) sim).compareTo((Integer) obj.sim);
+				case 8: return order * ((Integer) seqAlign).compareTo((Integer) obj.seqAlign);
+				case 9: return order * ((Integer) hitAlign).compareTo((Integer) obj.hitAlign);
+				case 10: return order * ((Integer) align).compareTo((Integer) obj.align);
 				
 				case 11: return order * compareStrings(strDesc, obj.strDesc);
 				case 12: return order * compareStrings(strSpecies, obj.strSpecies);
@@ -742,7 +742,7 @@ public class BasicHitQueryTab extends Tab {
 			if (hasGO) nCol += 6;
 			if (hasGO && column<nCol) {
 				switch(column) {
-				case 15: return order * (new Integer(nGO)).compareTo(obj.nGO);
+				case 15: return order * ((Integer) nGO).compareTo((Integer) obj.nGO);
 				case 16: return order * compareStrings(strGO, obj.strGO);
 				case 17: return order * compareStrings(strIP, obj.strIP);
 				case 18: return order * compareStrings(strKEGG, obj.strKEGG);
@@ -752,11 +752,11 @@ public class BasicHitQueryTab extends Tab {
 			}
 			if (column< nCol+numLibs) {
 				int index = column-nCol;
-				return order * (new Double(nLibCounts[index])).compareTo(obj.nLibCounts[index]);
+				return order * ( nLibCounts[index]).compareTo(obj.nLibCounts[index]);
 			}
 			nCol+=numLibs;
 			int index = column-nCol;
-			return order * (new Double(Math.abs(nPvalCounts[index]))).compareTo(Math.abs(obj.nPvalCounts[index]));
+			return order * ((Double) Math.abs(nPvalCounts[index])).compareTo((Double) Math.abs(obj.nPvalCounts[index]));
 		}
 		public String strHitID;
 		public int nSeqs;

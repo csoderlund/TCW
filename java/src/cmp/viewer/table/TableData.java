@@ -189,7 +189,7 @@ public class TableData implements Serializable {
     
     public boolean isReadOnly() { return bReadOnly; }
 
-    public void finalize() {
+    public void showTable() { // CAS304 was finalize, which apparently means something to java that is depreciated
             arrHeaders = new TableDataHeader[vHeaders.size()];
             vHeaders.copyInto(arrHeaders);
             vHeaders.clear();

@@ -4,11 +4,7 @@ package cmp.compile;
  * Note: pairwise is created from blast files in Pairwise.java
  */
 import java.io.*;
-import java.sql.ResultSet;
-import java.util.HashMap;
-import java.util.HashSet;
 
-import util.database.DBConn;
 import util.methods.BlastRun;
 import util.methods.ErrorReport;
 import util.methods.FileHelpers;

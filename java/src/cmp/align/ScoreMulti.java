@@ -71,7 +71,7 @@ public class ScoreMulti {
 			if (sum<0) score = -score;
 			
 			 if (prt) // only done for viewMulti
-					scoreVec.add(String.format("Sum %d  columns %d",sum, (int)nCols));
+					scoreVec.add(String.format("Sum %d  columns %d",sum, nCols));
 			return score;
 		 }
 		 catch(Exception e) {ErrorReport.reportError(e, "scoreAvgSumOfPairs");}
@@ -123,7 +123,7 @@ public class ScoreMulti {
 			 }
 			 in.close();
 			 if (prt) // only done for viewMulti
-					scoreVec.add(String.format("Sum %.3f  columns %d",sum, (int)nCols));
+					scoreVec.add(String.format("Sum %.3f  columns %d",sum, nCols));
 			 return sum/(double) nCols;
 		 }
 		 catch(Exception e) {ErrorReport.reportError(e, "scoreTrident");}

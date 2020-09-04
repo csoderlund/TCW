@@ -6,8 +6,6 @@ import javax.swing.JOptionPane;
 
 import sng.viewer.STCWFrame;
 import util.methods.Out;
-import util.ui.UIHelpers;
-import util.ui.UserPrompt;
 
 
 public class ExportFile {
@@ -74,13 +72,8 @@ public class ExportFile {
 			bAppend = (n==2) ? true : false;
 			
 			theMainFrame.setLastPath(f.getPath());
-			
-			boolean isApplet = UIHelpers.isApplet();
-			if(isApplet) {
-			    UserPrompt.showMsg("Exporting a file across the network is very slow.\n" +
-			    		"A message box will popup when done.");
-			}
-		} else bAppend = false;
+		} 
+		else bAppend = false;
 		
 		return f;	
 	}

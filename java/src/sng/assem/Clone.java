@@ -9,28 +9,22 @@ import java.sql.ResultSet;
 import sng.assem.enums.*;
 import util.database.DBConn;
 
-
 public class Clone
 {
 	static Properties mProps = null;
 
 	// these members used in all instances
-	String mName; // name, without r/f
-	String mFullName;  // renamed to .r, .f
+	String mCloneName;      // name, without r/f
+	String mFullName;  		// renamed to .r, .f
 	String mOrigName;
 	RF mRF;
 	String mSeq = "";
 	String mQual = "";
 	int mSeqLen = 0;		// this should always be correct, even if full sequence not loaded
-	//int mSeqGoodLen = 0;   // number of agct
 	int mQualLen = 0;
+	int mID = 0;
 	
 	// These members used in assembly (not library load)
-	// Memory could definitely be saved by breaking some of these
-	// out into separate data structures to used when needed.
-	// But it doesn't seem to be a problem.
-	
-	int mID = 0;
 	int mMateID = 0;
 	int mBuryCode = 0;
 	Clone mParent = null;
@@ -67,22 +61,21 @@ public class Clone
 	int mNParents = 0;
 	boolean mNoAlign = false; 
 	
-	// Called from load library
-	public Clone(Properties props, String fullname,
-			String clonename, RF rf, String origname)
+	// Called from load library; mID is set after sequence is added to db
+	public Clone(Properties props, String origname,  String clonename, String dbName, RF rf)
 	{
-		if (mProps == null)
-			mProps = props;
-		mName = clonename;
-		mFullName = fullname;
-		mRF = rf;
+		if (mProps == null) mProps = props;
+		
+		mCloneName = clonename; // may have .r and .f removed
+		mFullName = dbName; 	// may have '-' replaced; may have suffix replace with .r and .f
 		mOrigName = origname;
+		mRF = rf;				// R, F or UNK		
 	}
-
+	
 	// Called from assembly
 	public Clone(String fullname, String clonename, RF rf, int id, int mate_id, String seq,  int seqlen, Library lib, int libID, DBConn db)
 	{
-		mName = clonename;
+		mCloneName = clonename;
 		mFullName = fullname;
 		mID = id;
 		mMateID = mate_id;
@@ -95,29 +88,11 @@ public class Clone
 		mLID = libID;
 	}
 
-	public String msgStr(String msg)
-	{
-		return mFullName + ":" + msg;
-	}
-	public void checkQual(boolean fatal) throws Exception
+	public void checkQual(boolean fatal) 
 	{
 		int qlen = mQual.split("\\s+").length;
-		String msg = "seq:" + mSeqLen + " qual:" + qlen;
-		if (mSeqLen != qlen)
-		{
-			msgStr(msg);
-			if (fatal)
-			{
-				throw(new Exception(msgStr(msg)));
-			}
-		}
-	}
-	public void clearParentsKids()
-	{
-		mKids.clear();
-		mParents.clear();
-		mParent = null;
-		mBuryLevel = 0;
+		String msg = mFullName + ": seq:" + mSeqLen + " qual:" + qlen;
+		if (mSeqLen != qlen) Log.die(msg);
 	}
 
 	public void loadSequences(DBConn db) throws Exception

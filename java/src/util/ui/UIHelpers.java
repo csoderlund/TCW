@@ -2,10 +2,10 @@ package util.ui;
 /***********************************************
  * There are also shared UI static methods in methods.Static
  */
+// CAS304 removed applet stuff
 import java.awt.*;
 
 import javax.swing.*;
-import java.lang.reflect.Method;
 import java.net.URL;
 
 public class UIHelpers 
@@ -133,65 +133,48 @@ public class UIHelpers
           else
                 centerScreen ( win );
     }  
-	
+	// this is only used from MultilineTextPanel for SeqDetailPanel (which is no called for Mac)
 	public static boolean tryOpenURL ( URL theLink )
     {
-    	// Show document with applet if we have one
-		if ( theApplet != null )
-		{
-			theApplet.getAppletContext().showDocument( theLink, "_blank" );
-			return true;
-		}
-		
 		// Otherwise unless we become a web start application
-	    	// we are stuck with the below...  I copied this from: http://www.centerkey.com/java/browser/.
-	    	String osName = System.getProperty("os.name"); 
-	    	try 
-	    	{ 
-	    		if (osName.startsWith("Mac OS")) 
-	    		{ 
-	    			Class<?> fileMgr = Class.forName("com.apple.eio.FileManager"); 
-	    			Method openURL = fileMgr.getDeclaredMethod("openURL", new Class[] {String.class}); 
-	    			openURL.invoke(null, new Object[] {theLink}); 
-	    			return true;
-	    		} 
-	    		else if (osName.startsWith("Windows")) 
-	    		{
-	    			Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + theLink); 
-	    			return true;
-	    		}
-	    		else 
-	    		{ 
-	    			//assume Unix or Linux 
-	    			String[] browsers = { "firefox", "opera", "konqueror", "epiphany", "mozilla", "netscape" }; 
-	    			String browser = null; 
-	    			for (int count = 0; count < browsers.length && browser == null; count++) 
-	    				if (Runtime.getRuntime().exec( new String[] {"which", browsers[count]}).waitFor() == 0) 
-	    					browser = browsers[count]; 
-	    			if (browser == null) 
-	    				return false;
-	    			else 
-	    			{
-	    				Runtime.getRuntime().exec(new String[] {browser, theLink.toString()});
-	    				return true;
-	    			}
-	    		}
-	    	}
-	    	catch (Exception e) 
-	    	{ 	
-	    		e.toString();
-	    	}
+    	// we are stuck with the below...  I copied this from: http://www.centerkey.com/java/browser/.
+    	String osName = System.getProperty("os.name"); 
+    	try 
+    	{ 
+    		if (osName.startsWith("Mac OS")) // CAS304 this does not work, and is no used for Mac
+    		{ 
+    			//Class<?> fileMgr = Class.forName("com.apple.eio.FileManager"); 
+    			//Method openURL = fileMgr.getDeclaredMethod("openURL", new Class[] {String.class}); 
+    			//openURL.invoke(null, new Object[] {theLink}); 
+    			return false;
+    		} 
+    		else if (osName.startsWith("Windows")) 
+    		{
+    			Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + theLink); 
+    			return true;
+    		}
+    		else 
+    		{ 
+    			//assume Unix or Linux 
+    			String[] browsers = { "firefox", "opera", "konqueror", "epiphany", "mozilla", "netscape" }; 
+    			String browser = null; 
+    			for (int count = 0; count < browsers.length && browser == null; count++) 
+    				if (Runtime.getRuntime().exec( new String[] {"which", browsers[count]}).waitFor() == 0) 
+    					browser = browsers[count]; 
+    			if (browser == null) 
+    				return false;
+    			else 
+    			{
+    				Runtime.getRuntime().exec(new String[] {browser, theLink.toString()});
+    				return true;
+    			}
+    		}
+    	}
+    	catch (Exception e) 
+    	{ 	
+    		e.toString();
+    	}
 	    	
 		return false;
     }
-	    
-	static public void setApplet ( JApplet inApplet )
-	{
-		isApplet = true;
-		theApplet = inApplet;
-	}
-	static public boolean isApplet() {return isApplet;} 
-	static public void setIsApplet(boolean is) {isApplet = is;}
-	static JApplet theApplet = null;
-	static boolean isApplet = false;
 }

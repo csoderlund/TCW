@@ -15,7 +15,7 @@ public class ManagerMain {
 		
 		if (hasArgStart(args, "-h") || hasArgStart(args, "--h")) {
 			System.out.println("Usage: runSingleTCW [-v]");
-			System.out.println("       -v print important MySQL variables");
+			System.out.println("       -v print important MySQL variables and Search paths");
 			System.exit(0);
 		}
 		if (hasArg(args, "-d")) {

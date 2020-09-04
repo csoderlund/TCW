@@ -22,7 +22,6 @@ import javax.swing.JPopupMenu;
 
 import util.methods.Static;
 
-import cmp.database.Globals;
 import cmp.viewer.MTCWFrame;
 import cmp.viewer.seq.SeqsTablePanel;
 

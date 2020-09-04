@@ -191,8 +191,8 @@ public class Static {
 		return separate;
 		**/
 	}
-   static public JComboBox createZoom() {
-	   	JComboBox menuZoom = new JComboBox ();
+   static public JComboBox<MenuMapper> createZoom() {
+	   	JComboBox <MenuMapper> menuZoom = new JComboBox<MenuMapper> ();
 		menuZoom.addItem( new MenuMapper ( "Zoom 1:1", 1 ) );
 		menuZoom.addItem( new MenuMapper ( "Zoom 1:2", 2 ) );
 		menuZoom.addItem( new MenuMapper ( "Zoom 1:3", 3 ) );
@@ -213,8 +213,8 @@ public class Static {
 		
 		return menuZoom;
    }
-   static public JComboBox createCombo(Vector <String> labels) {
-	   	JComboBox cbox = new JComboBox();
+   static public JComboBox<String> createCombo(Vector <String> labels) {
+	   	JComboBox<String> cbox = new JComboBox<String>();
 	   	cbox.setBackground(Globalx.BGCOLOR);
 	  
 		for (int i=0; i<labels.size(); i++) 
@@ -227,8 +227,8 @@ public class Static {
 		cbox.setMaximumSize ( dim );
 		return cbox;
   }
-   static public JComboBox createCombo(String [] labels) {
-	   	JComboBox cbox = new JComboBox();
+   static public JComboBox<String> createCombo(String [] labels) {
+	   	JComboBox<String> cbox = new JComboBox<String>();
 	   	cbox.setBackground(Globalx.BGCOLOR);
 	  
 		for (int i=0; i<labels.length; i++) 

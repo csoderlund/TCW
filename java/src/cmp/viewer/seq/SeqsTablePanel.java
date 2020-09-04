@@ -2,17 +2,14 @@ package cmp.viewer.seq;
 /*****************************************************
  * Sequence table: called from SeqsTopRowPanel to display the table.
  */
-import java.awt.Color;
+
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.BufferedReader;
-import java.io.StringReader;
 import java.sql.ResultSet;
-import java.util.Enumeration;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -21,20 +18,16 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import util.database.DBConn;
@@ -50,7 +43,6 @@ import cmp.viewer.table.TableData;
 
 public class SeqsTablePanel extends JPanel {
 	private static final long serialVersionUID = 1L;
-	private static boolean initFirstAppletUnitransRun = true;
 	public  static final int MAX_SELECT=20;
 	
 	private static final int bSEQ=Globals.bSEQ;
@@ -165,7 +157,7 @@ public class SeqsTablePanel extends JPanel {
         theTableData.setColumnHeaders(theFields.getDisplayFields(), theFields.getDisplayTypes());
         
         theTableData.addRowsWithProgress(rset, theFields, loadStatus);
-        theTableData.finalize();
+        theTableData.showTable();
        
         int nRow = theTableData.getNumRows(); 
         String status =  nRow + " of " + totalSeq + " " + Static.perText(nRow, totalSeq);
@@ -190,13 +182,7 @@ public class SeqsTablePanel extends JPanel {
     		String []  descriptions = 	FieldData.getSeqDescrip(lib, de, met);
     		boolean [] defaults = 		FieldData.getSeqSelections(lib.length, de.length, met.length);
     		
-    	 	boolean [] selections = null;
-    		if(theViewerFrame.isApplet() && initFirstAppletUnitransRun) {
-    			initFirstAppletUnitransRun = false;
-    			selections = getColumnSelections(columns, defaults, null);
-    		}
-    		else
-    			selections = getColumnSelections(columns, defaults,
+    	 	boolean [] selections = getColumnSelections(columns, defaults,
     							theViewerFrame.getSettings().getSeqSettings().getSelectedColumns());   		
 	    	
 	    	chkFields = new JCheckBox[columns.length];
@@ -591,12 +577,15 @@ public class SeqsTablePanel extends JPanel {
 
         theTable.setTableHeader(new SortHeader(theTable.getColumnModel()));
         
-        //If a header contains a '\n' multiple lines will appear using this renderer
+        /* CAS304 If a header contains a '\n' multiple lines will appear using this renderer
+         * the Sequence table has headings like 'UTR5 CpG' which may want to use this for.
+         * but didn't work anyway
         MultiLineHeaderRenderer renderer = new MultiLineHeaderRenderer();
         Enumeration<TableColumn> en = theTable.getColumnModel().getColumns();
         while (en.hasMoreElements()) {
-          ((TableColumn)en.nextElement()).setHeaderRenderer(renderer);
+          (en.nextElement()).setHeaderRenderer(renderer);
         } 
+        */
 	}
    
     //When the view table gets sorted, sort the master table to match (Called by TableData)
@@ -703,37 +692,7 @@ public class SeqsTablePanel extends JPanel {
 	    	}
 	    	private boolean [] bColumnAscending = null;
     }
-    
-    public class MultiLineHeaderRenderer extends JList implements TableCellRenderer {
-		private static final long serialVersionUID = 3118619652018757230L;
-
-		public MultiLineHeaderRenderer() {
-    	    setOpaque(true);
-    	    setBorder(BorderFactory.createLineBorder(Color.BLACK));
-    	    setBackground(Globals.BGCOLOR);
-    	    ListCellRenderer renderer = getCellRenderer();
-    	    ((JLabel)renderer).setHorizontalAlignment(JLabel.CENTER);
-    	    setCellRenderer(renderer);
-	  	}
-    	 
-    	 public Component getTableCellRendererComponent(JTable table, Object value,
-    	                   boolean isSelected, boolean hasFocus, int row, int column) {
-    	    setFont(table.getFont());
-    	    String str = (value == null) ? "" : value.toString();
-    	    BufferedReader br = new BufferedReader(new StringReader(str));
-    	    String line;
-    	    Vector<String> v = new Vector<String>();
-    	    try {
-    	      while ((line = br.readLine()) != null) {
-    	        v.addElement(line);
-    	      }
-    	      br.close(); 
-    	    } catch (Exception e) {ErrorReport.reportError(e, "Error rendering table cells");}
-    	    
-    	    setListData(v);
-    	    return this;
-    	  }
-	}
+   
     
     private SortTable theTable = null;
     private TableData theTableData = null;

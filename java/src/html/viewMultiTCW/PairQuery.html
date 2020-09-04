@@ -18,25 +18,32 @@ set and may take awhile to display.
 </ul>
 
 <h3>+Basic</h3>
-Click the radio button and enter the search value.
-<table border=1>
-<tr><td>Pair #<td> Search for the number shown in the <tt>Pair #</tt> column. This results in only
+Click the check box and enter the search value.
+<table border=1 cellpadding=3>
+<tr><td><tt>Pair #</tt><td> Search for the number shown in the <tt>Pair #</tt> column. This results in only
 one pair being displayed.
-<tr><td>Seq ID (substring)<td>If the SeqID of either sequence in the pair contains the given substring, the
+<tr><td><tt>Seq ID</tt><td>If the SeqID of either sequence in the pair contains the given substring, the
 resulting pair will be displayed. 
-<tr><td>PCC<td> This is only relevant if there are RPKM values in the database. The Pearson
+<tr><td><tt>Best Hit ID</tt><td>If the assigned Best Hit ID of  pair contains the given substring, the
+resulting pair will be displayed. 
+<tr><td><tt>Description</tt><td>Displays all pairs that have the substring in the  description column.
+<tr><td><tt>PCC</tt><td> This is only relevant if there are TPM values in the database. The Pearson
 Correlation Coefficient (PCC) is computed for all pairs to determine the correlation of the
-RPKM values. 
-<tr><td>Description<td>Displays all pairs that have the substring in the  description column.
+TPM values. 
 </table>
-
+<p>Substring queries (<tt>Seq ID</tt>, <tt>Best Hit ID</tt>, <tt>Description</tt>):
+<ul>
+<li>The search is not case-sensitive and will find the substring anywhere in the ID or description.
+<li>The second two options have a <tt>Has</tt> and <tt>Not</tt> choice beside
+them; if <tt>Not</tt> is selected, show all pairs that do NOT have the substring. 
+</ul>
 <h3>+Hit</h3>
 
 <table border=1>
-<tr><td>AA pairs<td> A 'yes' will display all pairs that have protein hit. A
+<tr><td><tt>AA pairs</tt><td> A 'yes' will display all pairs that have protein hit. A
 'no' will display all pairs without a hit score.
-<tr><td>E-value<td> Select the radio button and enter the hit e-value to search on.
-<tr><td>%Similarity<td> Select the radio button and enter the hit %Similarity to search on.
+<tr><td><tt>E-value</tt><td> Select the radio button and enter the hit e-value to search on.
+<tr><td><tt>%Similarity</tt><td> Select the radio button and enter the hit %Similarity to search on.
 </table>
 The same three filters are available for the nucleotide search.
 
@@ -46,14 +53,14 @@ Selecting <tt>Has Stats</tt> or
 how the database was built as to whether a pair has Stats or has KaKs. 
 
 <br><br>For all queries that have a "&gt;=" and "&lt;", a blank entry will be ignored, but one 
-of the two entry boxes must have a number if the corresponding radio button
+of the two entry boxes must have a number if the corresponding check box
 is selected. 
 
-<br><br>Stats: All queries correspond to columns of the same name, e.g. "%Cexact" corresponds
+<br><br><tt>Has Stats</tt>: All queries correspond to columns of the same name, e.g. "%Cexact" corresponds
 to the column "%Cexact", where putting the mouse over the column name (in the column panel)
 defines it in the lower left hand corner as "Percent of codons that have an exact match".
 
-<br><br>KaKs: This is the synonymous substitution rate (Ka) divided by the nonsynonymous
+<br><br><tt>Has KaKs</tt>: This is the synonymous substitution rate (Ka) divided by the nonsynonymous
 substitution rate (Ks). KaKs&lt;1 is considered purifying selection and KaKs&gt;1
 is considered positive selection. The KaKs value is given a p-value, which can also
 be queried on. If Ka='-' then KaKs is ~0.0; if Ks='-', then KaKs is undefined; both of these

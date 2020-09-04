@@ -2,7 +2,6 @@ package cmp.align;
 
 import java.util.Vector;
 
-import util.align.AlignPairOrig;
 import util.database.Globalx;
 import util.methods.Out;
 

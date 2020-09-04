@@ -122,7 +122,7 @@ public class SeqDetailsPanel extends JPanel {
 			if (!libStr.equals(""))
 				textArea += "           " + libStr + "\n" +
 						"   Counts: " + rawStr + "\n" +
-						"   RPKM  : " + normStr + "\n\n";
+						"   TPM   : " + normStr + "\n\n";
 			
 			textArea += grps + "\n";
 		}
@@ -578,18 +578,18 @@ public class SeqDetailsPanel extends JPanel {
 			int order = 1;
 			if(!sortAsc) order = -1;
 			
-			switch(field) {
+			switch(field) { // CAS304 new Integer (x) -> (Integer) x
 			case SORT_BY_NAME: return order * hitName.compareTo(obj.hitName);
 			case SORT_BY_TYPE: return order * type.compareTo(obj.type);
 			case SORT_BY_DESC: return order * desc.compareTo(obj.desc);
 			case SORT_BY_SPEC: return order * species.compareTo(obj.species);
-			case SORT_BY_GO: return order * (new Integer(nGO)).compareTo(new Integer(obj.nGO));
+			case SORT_BY_GO: return order * ((Integer) nGO).compareTo((Integer) obj.nGO);
 			case SORT_BY_BEST: return order * best.compareTo(obj.best);
-			case SORT_BY_EVAL: return order * (new Double(dEVal)).compareTo(new Double(obj.dEVal));
-			case SORT_BY_PERCENT: return order * (new Integer(nPercent)).compareTo(new Integer(obj.nPercent));
-			case SORT_BY_ALIGNLEN: return order * (new Integer(nAlignLen)).compareTo(new Integer(obj.nAlignLen));
-			case SORT_BY_START: return order * (new Integer(nStart)).compareTo(new Integer(obj.nStart));
-			case SORT_BY_END: return order * (new Integer(nEnd)).compareTo(new Integer(obj.nEnd));
+			case SORT_BY_EVAL: return order * ((Double) dEVal).compareTo((Double) obj.dEVal);
+			case SORT_BY_PERCENT: return order * ((Integer) nPercent).compareTo((Integer) obj.nPercent);
+			case SORT_BY_ALIGNLEN: return order * ((Integer) nAlignLen).compareTo((Integer) obj.nAlignLen);
+			case SORT_BY_START: return order * ((Integer) nStart).compareTo((Integer)obj.nStart);
+			case SORT_BY_END: return order * ((Integer)nEnd).compareTo((Integer) obj.nEnd);
 			}
 			return 0;
 		}
@@ -660,11 +660,11 @@ public class SeqDetailsPanel extends JPanel {
 			if(!sortAsc) order = -1;
 			
 			switch(field) {
-			case SORT_BY_PAIR: return order * (new Integer(pairID)).compareTo(new Integer(obj.pairID));
+			case SORT_BY_PAIR: return order * ((Integer) pairID).compareTo((Integer) obj.pairID);
 			case SORT_BY_NAME: return order * seqID.compareTo(obj.seqID);
-			case SORT_BY_NTEVAL: return order * (new Double(ntEval)).compareTo(new Double(obj.ntEval));
-			case SORT_BY_AAEVAL: return order * (new Double(aaEval)).compareTo(new Double(obj.aaEval));
-			case SORT_BY_PCC: return order * (new Double(pcc)).compareTo(new Double(obj.pcc));
+			case SORT_BY_NTEVAL: return order * ((Double) ntEval).compareTo((Double) obj.ntEval);
+			case SORT_BY_AAEVAL: return order * ((Double) aaEval).compareTo((Double) obj.aaEval);
+			case SORT_BY_PCC: return order * ((Double) pcc).compareTo((Double)obj.pcc);
 			case SORT_BY_DESC: return order * desc.compareTo(obj.desc);
 			case SORT_BY_METHODS: return order * methods.compareTo(obj.methods);
 			}

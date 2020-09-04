@@ -322,25 +322,22 @@ public class ContigListTab extends Tab
 			public void run() {
 				try {
 					btnTable.setEnabled(false);
-					boolean rc=false;
 					if(saveMode == EXPORT_TABLE) {
-						rc=contigTable.saveToFileTabDelim(filePrefix+"Columns" + Globalx.CSV_SUFFIX, getParentFrame());
+						contigTable.saveToFileTabDelim(filePrefix+"Columns" + Globalx.CSV_SUFFIX, getParentFrame());
 					}
 					else if(saveMode == EXPORT_SEQS) {
-                        rc=contigTable.saveToFasta(filePrefix+"Seqs"+ Globalx.FASTA_SUFFIX, getParentFrame());
+                        contigTable.saveToFasta(filePrefix+"Seqs"+ Globalx.FASTA_SUFFIX, getParentFrame());
                     }
                     else if(saveMode == EXPORT_ORF) {
-                        rc=contigTable.saveORFToFasta(filePrefix+"ORFs"+ Globalx.FASTA_SUFFIX, getParentFrame());
+                        contigTable.saveORFToFasta(filePrefix+"ORFs"+ Globalx.FASTA_SUFFIX, getParentFrame());
                     }
                     else if(saveMode == EXPORT_COUNTS) {
-						rc=contigTable.saveToFileCounts(filePrefix+"Reps" + Globalx.CSV_SUFFIX, getParentFrame(),
+						contigTable.saveToFileCounts(filePrefix+"Reps" + Globalx.CSV_SUFFIX, getParentFrame(),
 						   getParentFrame().getQueryContigTab().getAllLibraryNames()); 
 					}
                     else if(saveMode == EXPORT_SeqGO) { 
-						rc=contigTable.saveGOFromBest(filePrefix+"BestGO.txt", getParentFrame()); 
+						contigTable.saveGOFromBest(filePrefix+"BestGO.txt", getParentFrame()); 
 					}
-					String [] msg = {"Export complete"};
-					if (UIHelpers.isApplet() && rc) UserPrompt.displayInfo("Export", msg);
 					btnTable.setEnabled(true);
 				}
 				catch(Exception e) {ErrorReport.prtReport(e, "Error creating export file");}
@@ -359,11 +356,9 @@ public class ContigListTab extends Tab
 				try {
 					btnTable.setEnabled(false);
 					
-                    boolean rc=contigTable.saveHitsToFasta(eh.getHitFile(), getParentFrame(), eh.getHitSQL()); 
+                    contigTable.saveHitsToFasta(eh.getHitFile(), getParentFrame(), eh.getHitSQL()); 
 					
                     btnTable.setEnabled(true);
-					String [] msg = {"Export complete"};
-					if (UIHelpers.isApplet() && rc) UserPrompt.displayInfo("Export", msg);
 				}
 				catch(Exception e) {ErrorReport.prtReport(e, "Error creating export file");}
 			}
@@ -381,13 +376,10 @@ public class ContigListTab extends Tab
 				try {
 					btnTable.setEnabled(false);
 					
-                    boolean rc=contigTable.saveGOtoFile(et.getGOfile(), getParentFrame(),
+                    contigTable.saveGOtoFile(et.getGOfile(), getParentFrame(),
                     		et.getGOLevel(), et.getGOEval(), et.getTermType()); 
 					
                     btnTable.setEnabled(true);
-					
-					String [] msg = {"Export complete"};
-					if (UIHelpers.isApplet() && rc) UserPrompt.displayInfo("Export", msg);
 				}
 				catch(Exception e) {ErrorReport.prtReport(e, "Error creating export file");}
 			}

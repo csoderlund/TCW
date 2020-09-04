@@ -496,7 +496,7 @@ public class LoadFromDB {
  			throws Exception {
 		
  		for (int i = 0; i < contigList.size(); ++i) {
- 			ContigData contig = (ContigData) contigList.get(i);
+ 			ContigData contig =  contigList.get(i);
  			crossIndexCAP3Output(contig);
  		}
  	}
@@ -551,7 +551,7 @@ public class LoadFromDB {
 
  		// See what clones are left to find
  		for (int i = 0; i < curClones.size(); ++i) {
- 			SequenceData curSeq = (SequenceData) curClones.elementAt(i);
+ 			SequenceData curSeq =  curClones.elementAt(i);
  			missingESTs.remove(curSeq.getName());
  		}
  	

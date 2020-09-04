@@ -3,14 +3,13 @@ package sng.assem.helpers;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import sng.assem.helpers.*;
-
 
 // Lightweight map of strings to objects, to replace e.g. TreeMap<String,Clone> mName2Clone
 // No checking for multiple insert with same string key
 // After inserts, must be sorted before use
 // Stores the strings and objects in parallel arrays, which get sorted in parallel
 // Threadsafe
+// CAS304 added suppress
 public class Str2Obj<E>
 {
 	static Integer syncObj = 0;
@@ -69,10 +68,12 @@ public class Str2Obj<E>
 			{
 				throw(new Exception("containsKey on unsorted Str2Obj! "));
 			}
+			@SuppressWarnings("rawtypes")
 			int idx = Arrays.binarySearch((Comparable[])mStrList, (Comparable)key, new ObjCmp());
 			return (idx >= 0);
 		}
 	}
+	@SuppressWarnings("unchecked")
 	public E get(String key) throws Exception
 	{	
 		synchronized(syncObj)
@@ -81,6 +82,7 @@ public class Str2Obj<E>
 			{
 				throw(new Exception("get on unsorted Str2Obj! "));
 			}
+			@SuppressWarnings("rawtypes")
 			int idx = Arrays.binarySearch((Comparable[])mStrList, (Comparable)key, new ObjCmp());
 			if (idx < 0) return null;
 			return (E)mObjList[idx];
@@ -177,8 +179,10 @@ public class Str2Obj<E>
             aa[f] = vv;
         }
     }	
+	@SuppressWarnings("rawtypes")
 	public class ObjCmp implements Comparator<Comparable>
 	{
+		@SuppressWarnings("unchecked")
 		public int compare(Comparable a, Comparable b)
 		{
 			if (a == null)

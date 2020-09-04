@@ -394,7 +394,5 @@ public class AlignMultiPanel extends AlignBasePanel {
 	static private final int nInsetGap = 5;
 	static private final int nRowHeight = 15;
 	
-	private boolean bAllowPaint = false;
 	private ScoreAA scoreObj = new ScoreAA();
-	private boolean isAA;
 }

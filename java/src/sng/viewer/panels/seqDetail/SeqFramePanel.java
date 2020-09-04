@@ -33,7 +33,6 @@ import sng.dataholders.MultiCtgData;
 import sng.viewer.STCWFrame;
 import util.align.AAStatistics;
 import util.methods.ErrorReport;
-import util.methods.Out;
 import util.methods.Static;
 import util.methods.Markov;
 import util.ui.UIHelpers;
@@ -92,9 +91,9 @@ public class SeqFramePanel extends JPanel {
 		toolPanel = Static.createRowPanel();
 		
 		if (isProtein) {
-			frameDropDown = new JComboBox ();
-			topDropDown = new JComboBox ();
-			hitDropDown = new JComboBox();
+			frameDropDown = new JComboBox <String> ();
+			topDropDown = new JComboBox <String>();
+			hitDropDown = new JComboBox <String> ();
 			startCheckBox = Static.createCheckBox("dummy", false);
 			cdsCheckBox = Static.createCheckBox("dummy", false);
 			hitCheckBox = Static.createCheckBox("dummy", false); 
@@ -684,7 +683,7 @@ public class SeqFramePanel extends JPanel {
 	private HashMap <String, Double> tupleMap = null;
 	
 	private JPanel toolPanel = null;
-	private JComboBox frameDropDown = null, topDropDown = null, hitDropDown = null;
+	private JComboBox <String> frameDropDown = null, topDropDown = null, hitDropDown = null;
 	private JCheckBox startCheckBox = null, cdsCheckBox = null, hitCheckBox=null;
 	private int topAction=0, hitAction=0; 
 	private boolean showCDS=false, showStart=false, showHit=false; 

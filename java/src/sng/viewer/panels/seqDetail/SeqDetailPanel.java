@@ -79,6 +79,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		}
 		
 		metaData = frame.getMetaData();
+		norm = metaData.getNorm(); // CAS304
 		isAAtcw = metaData.isProteinDB();
 		if (metaData.hasGOs()) dbhits[0] += ", WG)";
 		else dbhits[0] += ")";
@@ -137,7 +138,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		if(theHitTable != null)
 			tableAndHeader.add ( resultScroll );
 		
-		if (nHits > 0 && !FileHelpers.isMac()) {// URL doesn't work on Mac, but does in applet
+		if (nHits > 0 && !FileHelpers.isMac()) {// URL doesn't work on Mac, but does in linux
 			
 			MultilineTextPanel textPanel = null;
 			try {
@@ -163,12 +164,12 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 	
 	private JPanel createSecondRow ( )
 	{		
-		menuLib = new JComboBox ();
+		menuLib = new JComboBox <MenuMapper> ();
 		Dimension dim = new Dimension ( 100, (int)menuLib.getPreferredSize().getHeight() );
 		menuLib.setPreferredSize( dim );
 		menuLib.setMaximumSize ( dim );
 		menuLib.addItem( new MenuMapper ( "Counts", 1 )); 
-		menuLib.addItem( new MenuMapper ( "RPKM", 2 )); 
+		menuLib.addItem( new MenuMapper ( norm, 2 )); 
 		if (metaData.hasReps()) menuLib.addItem( new MenuMapper ( "Replicates", 3 )); 
 
 		menuLib.setBackground(Color.WHITE);
@@ -187,7 +188,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 			}
 		);		
 		/// DB Hits
-		menuHit = new JComboBox ();
+		menuHit = new JComboBox <MenuMapper> ();
 		dim = new Dimension ( 180, (int)menuLib.getPreferredSize().getHeight() );
 		menuHit.setPreferredSize( dim );
 		menuHit.setMaximumSize ( dim );
@@ -263,18 +264,20 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 				}
 			}));
 	
-			copypopup.add(new JMenuItem(new AbstractAction("Sequence - translated ORF (best frame)") {
-				private static final long serialVersionUID = 4692812516440639008L;
-				public void actionPerformed(ActionEvent e) {
-					String x = getORFtransString();
-					if (x!=null) saveTextToClipboard(x);
-					else {
-						JOptionPane.showMessageDialog(theMainFrame, 
-								"No frame for sequence. Cannot translate.", 
-								"Translated", JOptionPane.PLAIN_MESSAGE);
+ 			if (metaData.hasORFs()) { // CAS304
+				copypopup.add(new JMenuItem(new AbstractAction("Sequence - translated ORF (best frame)") {
+					private static final long serialVersionUID = 4692812516440639008L;
+					public void actionPerformed(ActionEvent e) {
+						String x = getORFtransString();
+						if (x!=null) saveTextToClipboard(x);
+						else {
+							JOptionPane.showMessageDialog(theMainFrame, 
+									"No frame for sequence. Cannot translate.", 
+									"Translated", JOptionPane.PLAIN_MESSAGE);
+						}
 					}
-				}
-			}));
+				}));
+ 			}
 		}
 		JButton jbCopy = Static.createButton("Copy...", true);
 		jbCopy.addMouseListener(new MouseAdapter() {
@@ -424,7 +427,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 			//// Table 2 - library counts either non-zero only or all; five per row
 			if (libNames!=null) {
 				c=r=0;
-				if (normLibs) rows[r][c] = "RPKM:  ";
+				if (normLibs) rows[r][c] = norm + ":  ";
 				else rows[r][c] =          "Counts:";
 				c++;
 				for(int x=0 ; x<libNames.length; x++) {
@@ -581,6 +584,8 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		if (theHitData!=null) theHitData.clear();
 		theHitData = new ArrayList<HitListData> ();
 	
+		if (hitData==null) Out.die("hit null " + nHits);
+		if (hitData.length==0) Out.die("hit 0 " + nHits);
 		for (int i=0; i<nHits; i++) {
 			HitListData hd = hitData[i];
 			int fbit = hd.filter;
@@ -1159,7 +1164,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		
 		String strQ = 	"SELECT  " +
           		"q.DUHID, q.description, q.sequence, q.species, q.dbtype, q.taxonomy, " +
-          		"q.goBrief, q.interpro, q.kegg, q.pfam, q.ec, q.length," +  // goBrief, not goList because just want #n from front
+          		"q.goBrief, q.interpro, q.kegg, q.pfam, q.ec, " +  // goBrief, not goList because just want #n from front
           		
           		"t.uniprot_id, t.percent_id, t.alignment_len," +
           		"t.ctg_start, t.ctg_end, " +
@@ -1189,7 +1194,6 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 	    		  String kegg = rs.getString(i++);
 	    		  String pfam = rs.getString(i++);
 	    		  String ec = rs.getString(i++);
-	    		  int hLen = rs.getInt(i++);
 	    		  
 	    		  String hitName = rs.getString(i++);
 	    		  int percent = rs.getInt(i++); 
@@ -1329,12 +1333,13 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 	private JTextArea textAreaTop = null;
 	private JTable theHitTable = null;
 	private JScrollPane resultScroll = null;
-	private JComboBox menuLib = null;
-	private JComboBox menuHit = null;
+	private JComboBox <MenuMapper> menuLib = null;
+	private JComboBox <MenuMapper> menuHit = null;
 	
 	private STCWFrame theMainFrame = null; 
 	private MetaData metaData = null;
 	
 	private String [][] rows = null;
 	private HitTableModel theModel = null;
+	private String norm="RPKM"; // CAS304
 }

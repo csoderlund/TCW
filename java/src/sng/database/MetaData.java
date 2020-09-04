@@ -64,6 +64,10 @@ public class MetaData {
 			bIsProteinDB = mDB.tableColumnExists("assem_msg", "peptide") ;
 			bHasLoc = mDB.tableColumnExists("assem_msg", "hasLoc");
 			bHasNgroup = mDB.tableColumnExists("contig", "seq_ngroup");
+			
+			if (mDB.tableColumnExists("assem_msg", "norm")) // CAS304
+				strNorm = mDB.executeString("select norm from assem_msg");
+			
 			cnt = mDB.executeCount("SELECT COUNT(*) FROM contig where o_frame!=0 LIMIT 1");	
 			if (cnt > 0) bHasORFs = true;
 			
@@ -119,26 +123,26 @@ public class MetaData {
 		 	cnt = mDB.executeCount("select count(*) from library where ctglib=1");
 		 	if (cnt>0) {
 		 		bHasSeqSets = true;
-		 		seqNames = new String [cnt];
-		 		seqTitles = new String [cnt];
+		 		seqLibNames = new String [cnt];
+		 		seqLibTitles = new String [cnt];
 		 		rs = mDB.executeQuery("select libid, title from library where ctglib=1");
 		 		int i=0;
 		 		while(rs.next()) {
-		 			seqNames[i] = rs.getString(1);
-		 			seqTitles[i++] = rs.getString(2);
+		 			seqLibNames[i] = rs.getString(1);
+		 			seqLibTitles[i++] = rs.getString(2);
 		 		}
 		 	}
 		 	// Count Sets
 		 	cnt = mDB.executeCount("select count(*) from library where ctglib=0");
 		 	if (cnt>0) {
 		 		bHasExpLevels = true;
-		 		libNames = new String [cnt];
-		 		libTitles = new String [cnt];
+		 		expLibNames = new String [cnt];
+		 		expLibTitles = new String [cnt];
 		 		rs = mDB.executeQuery("select libid, title from library where ctglib=0");
 		 		int i=0;
 		 		while(rs.next()) {
-		 			libNames[i] = rs.getString(1);
-		 			libTitles[i++] = rs.getString(2);
+		 			expLibNames[i] = rs.getString(1);
+		 			expLibTitles[i++] = rs.getString(2);
 		 		}
 		 	
 			 	if (mDB.tableExists("libraryDE")) {
@@ -408,8 +412,9 @@ public class MetaData {
       		"Unknown"};
 	/**********************************************************************/
 	
+	 public String getNorm() {return strNorm;}
 	 public int nContigs() { return nSeqs;}
-	 public int nContigSets() {if (seqNames==null) return 0; else return seqNames.length;}
+	 public int nContigSets() {if (seqLibNames==null) return 0; else return seqLibNames.length;}
 	 public boolean hasContigSets() { return bHasSeqSets; }
 	 public boolean hasNs() { return bHasNs; }
 
@@ -423,13 +428,13 @@ public class MetaData {
 	 public boolean isProteinDB () {return bIsProteinDB;}
 	 public boolean isNucleoDB() {return !bIsProteinDB;}
 
-	 public int getNumSeqSets() { return seqNames.length; }
-	 public String [] getSeqNames() { return seqNames; }
-	 public String [] getSeqTitles() { return seqTitles; }
+	 public int getNumSeqSets() { return seqLibNames.length; }
+	 public String [] getSeqNames() { return seqLibNames; }
+	 public String [] getSeqTitles() { return seqLibTitles; }
 	 public String [] getDENames() { return deNames; }
 	 public String [] getDETitles() { return deTitles; }
-	 public String [] getLibNames() { return libNames; }
-	 public String [] getLibTitles() { return libTitles; }
+	 public String [] getLibNames() { return expLibNames; }
+	 public String [] getLibTitles() { return expLibTitles; }
 	 public boolean hasDE() { return bHasDE;}
 	 public boolean hasExpLevels() { return bHasExpLevels; }
 	
@@ -455,16 +460,17 @@ public class MetaData {
 	 private int nSeqs = 0;
 	 private boolean bHasAssembly = false;
 	 private boolean bHasSeqSets = false;
-	 private String [] seqNames = null;
-	 private String [] seqTitles = null;
+	 private String [] seqLibNames = null;
+	 private String [] seqLibTitles = null;
+	 private String strNorm="RPKM";
 	
 	 private boolean bHasNs = false;
 	 private boolean bHasBuried = false;
 	 private boolean bHasMatePairs = false;
 	
 	 private boolean bHasExpLevels = false;
-	 private String [] libNames = null;
-	 private String [] libTitles = null;
+	 private String [] expLibNames = null;
+	 private String [] expLibTitles = null;
 	 private boolean bHasDE = false;
 	 private String [] deNames = null;
 	 private String [] deTitles = null;

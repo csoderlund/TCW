@@ -1,4 +1,3 @@
-
 package sng.assem;
 
 import java.io.BufferedReader;
@@ -15,12 +14,10 @@ import java.util.HashSet;
 import java.util.Vector;
 import java.util.Stack;
 import java.util.TreeMap;
-import java.util.HashMap;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 
 import sng.annotator.CoreDB;
 import sng.assem.enums.*;
@@ -39,20 +36,23 @@ import util.methods.*;
 // CASZ 1Sept19 got rid of a lot of dead code. Made private methods private (were all public)
 //      changed rs.getInt("name") to rs.getInt(num) in most places
 //      there is still lots of dead code and the DEBUG option crashes
+// CAS304 moved Skip Assembly stuff to AssemSkip, moved more stuff to checkAssmStuff.
+//		execAssem.pl changed to execAssem, so printUsage is used from here for 'execAssem'
 
 public class AssemMain
 {
-	private boolean debugTmp=false;
 	public ID2Obj<Integer> mMergesDone;
 	public TCWprops mProps;
-	public int mAID;
+	public int mAID=1;
 	public String mIDStr;
 	public ID2Obj<Clone> mID2Clone;
 	public Str2Obj<Clone> mName2Clone;
 	public MatePair[] mPairs;
 	public ID2Obj<Contig> mID2Contig;
 	
-	private static boolean mNoPrompts = false;
+	private static boolean mNoPrompts = false, bUseRPKM=false;
+	private boolean debugTmp=false;
+	
 	private final String assmTmpDir = "assem";
 	private DBConn mDB;
 	private DBConn mDB2; // For nested queries which are used a couple places (better solution: no nesting)
@@ -60,7 +60,7 @@ public class AssemMain
 	private File mProjDir,  mTopDir, mInitialBuryDir, mCliqueDir, mLogDir;
 	private File mSBFile = null;
 	
-	private Vector<Library> mLibs;
+	private Vector<Library> mSeqLibs;
 	private RStat mRstat;
 	
 	private ID2Obj<SubContig> mID2SubContig;
@@ -85,35 +85,26 @@ public class AssemMain
 	
 	private boolean bSkipAssembly=false;
 	
+	// execAssm and sng.amanager.RunCmd.actionCreateTrans
+	// -q and -r only apply to execAssm
 	public static void main(String[] args)
 	{
 		Version.printTCWversion();
 		
-		if (args.length == 0 || args[0].equals("-h"))
+		if (args.length == 0 || Utils.hasOption(args, "-h") || Utils.hasOption(args, "-help")  || Utils.hasOption(args, "--help"))
 			printUsage();
 
-		int argStart = 0;
-		if (args[0].equals("-q"))
-		{
-			argStart = 1;
-			mNoPrompts = true;
-		}
-		String dir = args[argStart];
-		String cfg = (args.length > 1 + argStart ? args[argStart + 1] : "sTCW.cfg");
+		if (Utils.hasOption(args, "-n")) mNoPrompts = true;
+		if (Utils.hasOption(args, "-r")) bUseRPKM=true;
+		
+		String dir = args[0];
+		String cfg = "sTCW.cfg";
 
-		try
-		{
+		try{
 			AssemMain assembler = new AssemMain(dir, cfg);
 			assembler.run(true);
 		} 
-		catch (Exception e)
-		{
-			System.err.println(e.getMessage());
-			System.err.println("Fatal error - exiting");
-			Log.exception(e);
-
-			System.exit(-1);
-		}
+		catch (Exception e) {Log.die(e, "Instantiate main method");}
 		System.exit(0);
 	}
 
@@ -134,30 +125,26 @@ public class AssemMain
 		new Utils();
 		Astats.init();
 		
-		// Try to find the projects directory. Hopefully we are not more than two levels from it.
+	// Project directory
 		String[] pdirs = { "./projects", "../projects", "../../projects" };
 		boolean found = false;
 		File f = null;
-		for (String d : pdirs)
-		{
+		for (String d : pdirs) {
 			f = new File(d);
-			if (f.isDirectory())
-			{
+			if (f.isDirectory()){
 				found = true;
 				break;
 			}
 		}
-		if (!found)
-		{
-			Log.die("Unable to find the 'projects' directory.");
-		} 	
+		if (!found) Log.die("Unable to find the 'projects' directory.");
+	
 		mProjDir = new File(f, dir);
-		if (!mProjDir.isDirectory())
-		{
+		if (!mProjDir.isDirectory()) {
 			System.err.println("Unable to find project directory " + dir	+ " in " + f.getAbsolutePath());
 			System.exit(0);
 		}
 		
+	// Props and logs
 		mProps = new TCWprops(TCWprops.PropType.Assem);
 		mProps.load(new File(mProjDir, cfg));
 
@@ -165,13 +152,8 @@ public class AssemMain
 		Utils.mProps = mProps;
 		
 		mIDStr = mProps.getProperty("SingleID");
-		if (mIDStr==null)  mIDStr = mProps.getProperty("AssemblyID");
-		if (mIDStr==null) {
-			Log.die("Missing SingleID in sTCW.cfg ");	
-		}
-		if (!Utils.validName(mIDStr)){
-			Log.die("Invalid SingleID " + mIDStr + ": may contain letters, numbers, underscores");	
-		}
+		if (mIDStr==null) Log.die("Missing SingleID in sTCW.cfg ");	
+		if (!Utils.validName(mIDStr))Log.die("Invalid SingleID " + mIDStr + ": may contain letters, numbers, underscores");	
 		
 		mLogDir = new File(mProjDir,Globalx.logDir);
 		Utils.checkCreateDir(mLogDir);
@@ -180,66 +162,24 @@ public class AssemMain
 		new Log(logfile); // sets log file
 		Log.addLogAction(LogLevel.Basic, LogAction.Terminal);
 		Log.addLogAction(LogLevel.Basic, LogAction.Log);
+		ErrorReport.setErrorReportFileName(Log.errFile); // CAS304 shared methods use ErrorReport
 
 		Log.head("Begin instantiate " + dir,LogLevel.Basic);
 		
 		long maxMem = Runtime.getRuntime().maxMemory()/(1024*1024);
-		String maxMemStr = Utils.getEnv("PAVE_MEM");
-		if (maxMemStr.equals(""))
-		{
-			maxMemStr = "" + maxMem;
-		}
-		
 		Log.indentMsg("Using " + maxMem + "M memory", LogLevel.Basic);
-		if (mNoPrompts)
-		{
-			Log.indentMsg("No-prompt mode", LogLevel.Basic);	
-		}
 		
-		if (!mProps.getProperty("User_EST_selfblast").equals("")) // obsolete
-		{
-			mSBFile = new File(mProps.getProperty("User_EST_selfblast"));
-			if (!mSBFile.exists())
-			{
-				mSBFile = new File(mProjDir,mProps.getProperty("User_EST_selfblast"));
-				if (!mSBFile.exists())
-				{
-					Log.die("Can't find User_EST_selfblast file " + mProps.getProperty("User_EST_selfblast"));
-				}
-			}
-		}		
-		
-		HostsCfg hosts = new HostsCfg();
-
-		String cap_cfg = hosts.getCapPath();
-		if (cap_cfg!=null && !cap_cfg.equals(""))
-		{
-			mProps.setProperty("CAP_CMD", cap_cfg);
-		}
-		String path = mProps.getProperty("CAP_CMD");
-		if (!path.equals("cap3") && !path.startsWith("/"))
-		{
-			File f2 = new File(path);
-			if (f2.exists())
-			{
-				path = f2.getAbsolutePath();
-				mProps.setProperty("CAP_CMD",path);
-			}
-			else
-			{
-				System.err.println("Error: cannot find CAP3 at path " + path);
-				mProps.setProperty("CAP_CMD", "cap3");
-			}
-		}
-		String b = mProps.getProperty("SKIP_ASSEMBLY");
-		if (b.equals("0")) 
-			Log.indentMsg("Using CAP3 command:" + mProps.getProperty("CAP_CMD"),LogLevel.Basic);
+		if (mNoPrompts) Log.indentMsg("No-prompt mode", LogLevel.Basic);
+		if (bUseRPKM) Log.indentMsg("Compute RPKM", LogLevel.Basic);
 		
 		String db = mProps.getProperty("STCW_db");
 		if (db==null || db.equals("")) {
 			System.err.println("Fatal error: STCW_db is not defined in sTCW.cfg");
 			return;
 		}
+	
+	// Database
+		HostsCfg hosts = new HostsCfg();
 		mDB = hosts.getDBConn(db);
 		if (mDB==null) {
 			System.err.println("Fatal error: Cannot open database '" + db + "'");
@@ -250,10 +190,7 @@ public class AssemMain
 		mDB2 = hosts.getDBConn(db);
 		
 		Schema schObj = new Schema(mDB);
-		if (!schObj.current())
-		{
-			schObj.update();				
-		}
+		if (!schObj.current()) schObj.update();				
 		
 		AceFile.mCapFailLog = null;
 		AceFile.mNumCapFails = 0;
@@ -268,14 +205,12 @@ public class AssemMain
 		
 		String msg="Instantiate";
 		bSkipAssembly=true;
-		if (mProps.getProperty("SKIP_ASSEMBLY").equals("0"))
-		{
+		if (mProps.getProperty("SKIP_ASSEMBLY").equals("0")) {
 			msg = "Assembly";
 			bSkipAssembly=false;
 			
 			rs = mDB.executeQuery("show columns from assem_msg like 'peptide'");
-			if (rs.first())
-			{
+			if (rs.first()) {
 				Utils.termOut("");
 				Utils.termOut("This is a protein project and cannot be assembled.");
 				Utils.termOut("Set 'Skip Assembly' to instantiate proteins.");
@@ -283,61 +218,117 @@ public class AssemMain
 			}
 		}
 		
+		
 		rs = mDB.executeQuery("select AID from assembly where assemblyid != '" + mIDStr + "'");
-		if (rs.first())
-		{
+		if (rs.first()) {
 			Utils.termOut("\n\nA different assembly/instantiation already exists in this database. " +
 					"Multiple assemblies per database are no longer supported.");
 			System.exit(0);
 		}
-		rs= mDB.executeQuery("select AID,completed from assembly where assemblyid='" + mIDStr + "'");
+		rs= mDB.executeQuery("select completed from assembly where assemblyid='" + mIDStr + "'");
+		
+	/** Resume? **/
 		boolean resume = false;
 		boolean deleteAssembly = false;
-		int maxTCnum = 0;
+		
 		String dbmsg =  mProps.getProperty("STCW_db") + " on host "+ mProps.getProperty("DB_host");
-		if (rs.next())
-		{
-			boolean completed = rs.getBoolean("completed");
-			mAID = rs.getInt("AID");
-			if (completed || bSkipAssembly)
-			{
-				Utils.termOut("\nA completed instantiation for \"" + mIDStr
-								+ "\" already exists in the database " + dbmsg);
-				if (!mNoPrompts)
-				{
-					if (!Utils.yesNo("Delete this instantiation and re-start it"))
-					{
+		if (rs.next()) {
+			if (mNoPrompts) {
+				Log.indentMsg("Previous instantiation is being deleted",LogLevel.Basic);
+				deleteAssembly = true;
+			}
+			else {
+				boolean completed = rs.getBoolean("completed");
+			
+				if (completed || bSkipAssembly) {
+					Utils.termOut("\nA completed instantiation for \"" + mIDStr+ "\" already exists in the database " + dbmsg);
+					if (Utils.yesNo("Delete this instantiation and re-start it")) {
+						deleteAssembly = true;
+					}
+					else {
 						System.err.println("Exit instantiation");
 						return;
 					}
 				}
-				else return;
+				else {
+					Utils.termOut("\nA partially-completed assembly with the same id \""+ mIDStr+ "\" already exists in the database " + dbmsg);
 				
-				deleteAssembly = true;			
-			} 
-			else
-			{
-				Log.msg("\nA partially-completed assembly with the same id \""+ mIDStr
-								+ "\" already exists in the database " + dbmsg, LogLevel.Basic);
-				if (!mNoPrompts && !Utils.yesNo("Resume this instantiation"))
-				{
-					if (!Utils.yesNo("Delete this assembly and re-start it"))
-						return;
-					deleteAssembly = true;
-				}
-				else
-				{
-					resume = true;
-					Log.msg("Previous assembly is being resumed",LogLevel.Basic);
+					if (Utils.yesNo("Resume this instantiation")) {
+						resume = true;
+						Log.indentMsg("Previous assembly is being resumed",LogLevel.Basic);
+					}
+					else if (Utils.yesNo("Delete this assembly and re-start it")) {
+						deleteAssembly = true;
+					}
+					else return;
 				}
 			}
 			if (!resume)
 				deleteSavedLogFiles();
 		}
+		
 		mBlastType = BlastType.valueOf(mProps.getProperty("BLAST_TYPE"));
+	
+	 // Libraries with sequences
+		mSeqLibs = new Vector<Library>();
+		int nLibClones = 0;
+		
+		rs = mDB.executeQuery("select library.libid, count(*) as nclones from library "
+				+ "join clone on clone.LID=library.LID group by library.LID");
+		while (rs.next()) {
+			String libid = rs.getString("libid");
+			int nclones = rs.getInt("nclones");
 
-		if (resume)
+			if (nclones > 0) {
+				Library lib = new Library(mDB2, libid);
+				mSeqLibs.add(lib);
+			}
+		}
+	
+		Log.head("Dataset",LogLevel.Basic);
+		Log.columnsInd(25, LogLevel.Basic, "Dataset", "#Seqs", "Load Date", "Seq File");
+		for (Library lib : mSeqLibs) {
+			nLibClones += lib.mNGoodSeq;
+			Log.columnsInd(25, LogLevel.Basic,lib.mIDStr, lib.mNGoodSeq, lib.mLoadDate,lib.mSeqFile.getName());
+		}
+		rs.close();
+		
+		if (!bSkipAssembly) checkAssmStuff(nLibClones); 
+
+		if (deleteAssembly)  deleteAssembly(mAID);
+				
+		renewConnections();
+		schObj.addASMTables(); // in case 
+		
+		if (!resume) {
+			createAssemblyInDB();
+			recordTime("Begin " + msg);	
+		}
+		else recordTime("Resume " + msg);	
+		
+		// CAS304 the norm column is added to schema, but there is no official DB update; it is only used in Overview
+		mDB.tableCheckAddColumn("assem_msg", "norm", "tinytext default null", null); 
+				
+		/***************************************************
+		 * XXX SKIP Assembly
+		 */
+		if (bSkipAssembly)
 		{
+			boolean bUseTransName = mProps.getProperty("USE_TRANS_NAME").equals("1");
+			new AssemSkip(mDB, mIDStr, mAID, mSeqLibs, bUseTransName, bUseRPKM);	
+			
+			schObj.dropInnoDBTables();
+			Log.msg("\n" + Out.getMsgTimeMem(">>>End Instantiate of " + mIDStr, startTime),LogLevel.Basic);
+			mDB.close();
+			Log.finish();
+			
+			System.exit(0); // DONE
+		}
+		/*********************************************
+		 * XXX ASSEMBLE
+		 */
+		int maxTCnum = 0;
+		if (resume && !bSkipAssembly) {
 			rs = mDB.executeQuery("select max(tcnum) as maxt from ASM_tc_iter where aid=" + mAID);
 			if (rs.first())
 			{
@@ -348,113 +339,15 @@ public class AssemMain
 		}
 		// to do: turn off
 		(new memCheckThread()).start();
-		
 		rs.close();
-		mLibs = new Vector<Library>();
-		int nLibClones = 0;
-		if (!mProps.getProperty("libraries").equals(""))
-		{
-			for (String libid : mProps.getProperty("libraries").split("\\s+"))
-			{
-				Library lib = new Library(mDB, libid);
-				if (!lib.loadFromDB())
-					Log.die("Can't find library " + libid + " in database");
-				mLibs.add(lib);
-			}
-		}
-		else
-		{
-			rs = mDB.executeQuery("select library.libid, count(*) as nclones from library join clone on " +
-					" clone.LID=library.LID group by library.LID");
-			while (rs.next())
-			{
-				String libid = rs.getString("libid");
-				int nclones = rs.getInt("nclones");
-				if (nclones > 0)
-				{
-					Library lib = new Library(mDB2, libid);
-					if (!lib.loadFromDB())
-						Log.die("Can't find dataset " + libid + " in database");
-					mLibs.add(lib);
-				}
-			}
-		}
-		Log.head("Dataset",LogLevel.Basic);
-		Log.columnsInd(25, LogLevel.Basic, "Dataset", "#Seqs", "Load Date", "Seq File");
-		for (Library lib : mLibs)
-		{
-			nLibClones += lib.mNumESTLoaded;
-			Log.columnsInd(25, LogLevel.Basic,lib.mIDStr, lib.mNumESTLoaded, lib.mLoadDate,
-					lib.mSeqFile.getName());
-		}
-		if (nLibClones > 100000)
-		{
-			mDB.checkInnodbBufPool();	
-		}
-			
-		int maxLen = Integer.parseInt(mProps.getProperty("MAX_MERGE_LEN"));
-		if (maxLen > 0)
-		{
-			Vector<String> longLibs = new Vector<String>();
-			int longClones = 0;
-			for (Library lib : mLibs)
-			{
-				rs = mDB.executeQuery("select count(*) as cnt from clone where length > " + maxLen);
-				rs.first();
-				int cnt = rs.getInt("cnt");
-				if (cnt > 0)
-				{
-					longLibs.add(lib.mIDStr);
-					longClones += cnt;
-				}
-			}
-			if (longLibs.size() > 0)
-			{
-				String clist = Utils.join(longLibs, ",");
-				Log.msg(longClones + " reads have length greater than " + maxLen,LogLevel.Basic);
-				Log.msg("These reads will not be assembled (to change, set property MAX_MERGE_LEN)",LogLevel.Basic);
-				Log.msg("Dataset containing long clones:" + clist,LogLevel.Basic);
-			}
-		}
-		if (!bSkipAssembly) checkCommands(); 
-
-		// Find out if we need to ask them about using previous megablast files, before
-		// longer operations commence
-		boolean useOldBlastFiles = false;
-
-		// CAS303 obsolete uniblast reference in clearFastaFiles();
 		
-		if (deleteAssembly) 
-			deleteAssembly(mAID);
-		renewConnections();
-		schObj.addASMTables(); // in case 
-		
-		if (!resume)
-		{
-			createAssemblyInDB();
-			recordTime("Begin " + msg);	
-		}
-		else recordTime("Resume " + msg);	
-		
-		/***************************************************
-		 * XXX SKIP Assembly
-		 */
-		if (bSkipAssembly)
-		{
-			skipAssembly();	
-			schObj.dropInnoDBTables();
-			Log.msg("\n" + Out.getMsgTimeMem(">>>End Instantiate", startTime),LogLevel.Basic);
-			Log.finish();
-			System.exit(0);
-		}
-		/*********************************************
-		 * XXX ASSEMBLE
-		 */
 		if (!mDB.hasInnodb())
 			Log.die("Unable to proceed because MySQL database does not support InnoDB tables.");
-		if (BlastArgs.isBlastExt()) // CAS303
-			Log.die("The full blast path must be in HOSTS.cfg");
-		
+		if (BlastArgs.isBlastExt()) {// CAS303
+			System.err.println("For assembly only, the full blast path must be in HOSTS.cfg.");
+			System.err.println("  You may use the blast in /Ext, but you must specify the full path name to it.");
+			Log.die("The full blast path must be in HOSTS.cfg!!!! ");
+		}
 		int tc = 1;
 
 		/****** Open files and directories for work and logs ***/
@@ -505,7 +398,7 @@ public class AssemMain
 			if (!Utils.checkUpToDate("FIRST_BURY","",""))
 			{
 				Log.head("Initial bury alignment",LogLevel.Basic);
-				doBuryBlast(useOldBlastFiles);
+				doBuryBlast(false); // CAS304 arg no longer used
 				renewConnections();
 				processBuries();
 			}
@@ -601,24 +494,28 @@ public class AssemMain
 		
 		finalizeContigs(tc);
 		renewConnections();
-		if (Utils.isDebug())
-		{
+		if (Utils.isDebug()) {
 			Log.msg("Debug is on", LogLevel.Basic);
 			checkContigIntegrity(false);
 		}
-		{
-			cleanUpAssembly();
-			Utils.deleteDir(assemDir);
-		}
+		cleanUpAssembly();
+		Utils.deleteDir(assemDir);
+	
 		fixAssemLibCounts();
+		computeTPM();
+		
+		if (debugTmp) {
+			Utils.recordTime("AssemblyDone",mAID,mDB);
+			Utils.timeSummary(LogLevel.Basic);
+		}
+		
 		mDB.executeUpdate("update assembly set completed=1, assemblydate=NOW() where aid=" + mAID);
-		Utils.recordTime("AssemblyDone",mAID,mDB);
-		long maxMem = Utils.mMaxMemMB;
-		Log.indentMsg("\nMax memory usage:" + maxMem + "M", LogLevel.Basic);
-		Utils.timeSummary(LogLevel.Basic);
+		
+		Log.indentMsg("Max memory usage:" + Utils.mMaxMemMB + "M", LogLevel.Basic);
+		
 		summarizeAssembly();
-		if (!Utils.isDebug()) 
-			schObj.dropInnoDBTables();
+		
+		if (!Utils.isDebug()) schObj.dropInnoDBTables();
 		
 		Log.msg("\n" + Out.getMsgTimeMem(">>>End Assembly", startTime),LogLevel.Basic);
 		Log.finish();
@@ -641,20 +538,24 @@ public class AssemMain
 		
 		// This could be done with one big cascading delete, but it's too slow.
 		// So clear out some of the tables by hand first. 
-		mDB.executeUpdate("delete from buryclone"); // WN one assembly per db!!
+		// 
+		mDB.executeUpdate("delete from buryclone"); 
 		mDB.executeUpdate("delete from contclone");
 		mDB.executeUpdate("delete from contig_counts");
-		mDB.executeUpdate("delete from snp");
+		mDB.tableDelete("snp");	   // CAS304 has autoincrement; reset	
 		mDB.executeUpdate("delete from snp_clone");
-		mDB.executeUpdate("delete from contig");
 		
+		// if P-values added, will still be there - tough
+		mDB.tableDelete("contig"); // CAS304 has autoincrement; 
 			
 		mDB.executeUpdate("delete from ASM_params");
 		mDB.executeUpdate("delete from ASM_assemtime");
 		mDB.executeUpdate("delete from ASM_cmdlist");
-		mDB.executeUpdate("delete from assem_msg");
 		mDB.executeUpdate("delete from assemlib");
 		mDB.executeUpdate("delete from assembly");
+		
+		mDB.executeUpdate("delete from assem_msg");
+		mDB.executeUpdate("insert assem_msg set msg='LibLoad', AID=1");
 		
 		CoreDB cdb = new CoreDB(mDB);
 		if (cdb.existsAnno()) {
@@ -783,10 +684,10 @@ public class AssemMain
 						+ "',NOW(),'"
 						+ mProjDir.getAbsolutePath() + "',0,NULL,'" + user + "','') ");
 		mAID = 1;
-		for (Library lib : mLibs)
+		for (Library lib : mSeqLibs)
 		{
 			mDB.executeUpdate("insert into assemlib (AID,LID,assemblyid,libid)"
-					+ " values(" + mAID + "," + lib.mID + ",'" + mIDStr + "','"
+					+ " values(" + mAID + "," + lib.mLID + ",'" + mIDStr + "','"
 					+ lib.mIDStr + "')");
 		}
 		PreparedStatement ps = mDB.prepareStatement("insert into ASM_params (aid,pname,pvalue) values(" + mAID + ",?,?)");
@@ -2089,9 +1990,9 @@ public class AssemMain
 		ID2Obj<MatePair> id2pair = new ID2Obj<MatePair>();
 		
 		int numpairs = 0;
-		for (Library lib : mLibs)
+		for (Library lib : mSeqLibs)
 		{
-			rs = mDB.executeQuery("select count(*) as count from clone where LID=" + lib.mID + " and mate_CID > 0");
+			rs = mDB.executeQuery("select count(*) as count from clone where LID=" + lib.mLID + " and mate_CID > 0");
 			rs.first();
 			int count = rs.getInt("count");
 			if (count % 2 != 0)
@@ -2106,9 +2007,9 @@ public class AssemMain
 		int maxID = 0;
 		int numclones = 0;
 		
-		for (Library lib : mLibs)
+		for (Library lib : mSeqLibs)
 		{
-			rs = mDB.executeQuery("select min(CID) as minc, max(CID) as maxc, count(*) as count from clone where LID=" + lib.mID + "");
+			rs = mDB.executeQuery("select min(CID) as minc, max(CID) as maxc, count(*) as count from clone where LID=" + lib.mLID + "");
 			rs.first();
 			int min = rs.getInt("minc");
 			int max = rs.getInt("maxc");
@@ -2141,10 +2042,10 @@ public class AssemMain
 		rs.close();
 		Log.msg(buries.numKeys() + " buried reads",LogLevel.Detail);
 		
-		for (Library lib : mLibs)
+		for (Library lib : mSeqLibs)
 		{
 			String query = "select CID,cloneid,sense,mate_CID,length from clone where LID='" 
-							+ lib.mID + "' order by CID asc";
+							+ lib.mLID + "' order by CID asc";
 			rs = mDB.executeQuery(query);
 			while (rs.next())
 			{
@@ -2164,7 +2065,8 @@ public class AssemMain
 				}
 
 				Clone cl = new Clone(rs.getString("cloneid"), rs.getString("cloneid"), rf, rs.getInt("CID"),
-					    rs.getInt("mate_CID"), "",rs.getInt("length"),  lib, lib.mID,mDB);
+					    rs.getInt("mate_CID"), "",rs.getInt("length"),  lib, lib.mLID,mDB);
+				/** CAS304 not used
 				if (lib.mLongestClone == null || cl.mSeqLen > lib.mLongestClone.mSeqLen)
 				{
 					lib.mLongestClone = cl;	
@@ -2173,7 +2075,7 @@ public class AssemMain
 				{
 					lib.mShortestClone = cl;	
 				}				
-				
+				**/
 				mName2Clone.put(cl.mFullName, cl);
 				mClones[cloneIdx] = cl;
 				cloneIdx++;
@@ -2265,17 +2167,63 @@ public class AssemMain
 	
 	private static void printUsage()
 	{
-		System.err.println("Usage:  AssemMain <directory>");
-		System.err.println("    <directory> must be under the 'projects' directory");
+		System.err.println("Usage:  AssemMain <project> [optional flags");
+		System.err.println("    The <project> directory must be under the 'projects' directory");
+		System.err.println("    A configuration file STCW.cfg must be located in this directory.");
+		System.err.println("    Using the values in STCW.cfg, datasets will be loaded to the MySQL database.");
+		System.err.println("Optional flags:");
+		System.err.println("    -r use RPKM instead of TPM ");
+		System.err.println("    -n no prompts (if the instantiation (or assembly) exists, it will be deleted");
 		System.exit(-1);
-
 	}
 
-	// Make sure we can find the programs we're going to need
-	private void checkCommands() throws Exception
+	private void checkAssmStuff(int nLibClones) throws Exception
 	{
 		checkCommand(BlastArgs.getFormatCmd());
 		checkCommand(BlastArgs.getBlastnExec());
+		
+		int maxLen = Integer.parseInt(mProps.getProperty("MAX_MERGE_LEN"));
+		if (maxLen > 0)
+		{
+			Vector<String> longLibs = new Vector<String>();
+			int longClones = 0;
+			for (Library lib : mSeqLibs)
+			{
+				int cnt = mDB.executeCount("select count(*) as cnt from clone where length > " + maxLen);
+				if (cnt > 0)
+				{
+					longLibs.add(lib.mIDStr);
+					longClones += cnt;
+				}
+			}
+			if (longLibs.size() > 0)
+			{
+				String clist = Utils.join(longLibs, ",");
+				Log.msg(longClones + " reads have length greater than " + maxLen,LogLevel.Basic);
+				Log.msg("These reads will not be assembled (to change, set property MAX_MERGE_LEN)",LogLevel.Basic);
+				Log.msg("Dataset containing long clones:" + clist,LogLevel.Basic);
+			}
+		}
+		HostsCfg hosts = new HostsCfg();
+		String cap_cfg = hosts.getCapPath();
+		if (cap_cfg!=null && !cap_cfg.equals("")) mProps.setProperty("CAP_CMD", cap_cfg);
+		String path = mProps.getProperty("CAP_CMD");
+		if (!path.equals("cap3") && !path.startsWith("/")) {
+			File f2 = new File(path);
+			if (f2.exists()) {
+				path = f2.getAbsolutePath();
+				mProps.setProperty("CAP_CMD",path);
+			}
+			else {
+				System.err.println("Error: cannot find CAP3 at path " + path);
+				mProps.setProperty("CAP_CMD", "cap3");
+			}
+		}
+		Log.indentMsg("Using CAP3 command:" + mProps.getProperty("CAP_CMD"),LogLevel.Basic);
+		if (nLibClones > 100000)
+		{
+			mDB.checkInnodbBufPool();	
+		}
 	}
 
 	private static void checkCommand(String cmd)
@@ -3378,22 +3326,14 @@ public class AssemMain
 				mAssem.threadDone(mNum);
 				mLocalDB.close();
 			}
-			catch (Exception e)
-			{
-				Log.msg("THREAD EXCEPTION: " + mNum + " edge:" + e.toString(),LogLevel.Detail);
-				Log.exception(e);
-				Log.msg("A fatal error has occurred; more information may be available in the detail log.",LogLevel.Basic);
-				Log.msg(e.getMessage(),LogLevel.Basic);
+			catch (Exception e){
+				Log.error(e, "THREAD EXCEPTION: " + mNum + " edge:" + e.toString());
 				mAssem.threadDone(mNum);
-				try
-				{
+				try {
 					mLocalDB.close();
 				}
-				catch(Exception e1)
-				{
-					System.exit(0);
-				}
-				System.exit(0);
+				catch(Exception e1){}
+				Log.die("Cluster");
 			}			
 		}
 	}
@@ -3672,23 +3612,14 @@ public class AssemMain
 				mAssem.threadDone(mNum);
 				mLocalDB.close();
 			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-				Log.msg("THREAD EXCEPTION: " + mNum + " edge:" + e.toString(),LogLevel.Detail);
-				Log.exception(e);
-				Log.msg("A fatal error has occurred",LogLevel.Basic);
-				Log.msg(e.getMessage(),LogLevel.Basic);
+			catch (Exception e){
+				Log.error(e, "THREAD EXCEPTION: " + mNum + " edge:" + e.toString());
 				mAssem.threadDone(mNum);
-				try
-				{
+				try{
 					mLocalDB.close();
 				}
-				catch(Exception e1)
-				{
-					System.exit(0);
-				}
-				System.exit(0);
+				catch(Exception e1){}
+				Log.die("Clique");
 			}
 		}
 		private void ReassembleContigs(File capDir,SubContig... ctgs) throws Exception
@@ -3761,23 +3692,14 @@ public class AssemMain
 				mAssem.threadDone(mNum);
 				mLocalDB.close();
 			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-				Log.msg("THREAD EXCEPTION: " + mNum + " edge:" + e.toString(),LogLevel.Detail);
-				Log.exception(e);
-				Log.msg("A fatal error has occurred",LogLevel.Basic);
-				Log.msg(e.getMessage(),LogLevel.Basic);
+			catch (Exception e) {
+				Log.error(e, "Thread exception: " + mNum + " edge:" + e.toString());
 				mAssem.threadDone(mNum);
-				try
-				{
+				try {
 					mLocalDB.close();
 				}
-				catch(Exception e1)
-				{
-					System.exit(0);
-				}
-				System.exit(0);
+				catch(Exception e1) { }
+				Log.die("Cap bury");
 			}
 		}
 	}
@@ -3817,8 +3739,7 @@ public class AssemMain
 					Log.msg("WARNING: Blast thread " + mNum + " exited with value " + ev, LogLevel.Basic);
 				}
 			}
-			catch (Exception e)
-			{
+			catch (Exception e) {
 				Log.die("Failed to run blast:" + cmd3);	
 			}
 			mAssem.threadDone(mNum);
@@ -3858,19 +3779,13 @@ public class AssemMain
 				mAssem.threadDone(mNum);
 				mLocalDB.close();
 			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-				Log.msg("THREAD EXCEPTION: " + mNum + " edge:" + e.toString(),LogLevel.Detail);
-				Log.exception(e);
-				Log.msg("A fatal error has occurred",LogLevel.Basic);
-				mAssem.threadDone(mNum);
-				try
-				{
+			catch (Exception e) {
+				Log.error(e, "THREAD EXCEPTION: " + mNum + " edge:" + e.toString());
+				try {
 					mLocalDB.close();
 				}
 				catch(Exception e1){}
-				System.exit(0);
+				Log.die("Finalize");
 			}
 		}
 	}		
@@ -4397,14 +4312,10 @@ public class AssemMain
 	
 				if (id1 >= id2) continue;			
 	
-				if (!mID2SubContig.containsKey(id1)) throw(new Exception("Subcontig not found " + id1));
-				if (!mID2SubContig.containsKey(id2)) throw(new Exception("Subcontig not found " + id2));
 	
 				SubContig sc1 = mID2SubContig.get(id1);
 				SubContig sc2 = mID2SubContig.get(id2);
 	
-				if (!mID2Contig.containsKey(sc1.mCTGID)) throw(new Exception("Subcontig has no contig " + id1));
-				if (!mID2Contig.containsKey(sc2.mCTGID)) throw(new Exception("Subcontig has no contig " + id2));
 	
 				Contig c1 = mID2Contig.get(sc1.mCTGID);
 				Contig c2 = mID2Contig.get(sc2.mCTGID);
@@ -4473,11 +4384,7 @@ public class AssemMain
 
 				int ctidx1 = mID2Contig.get(ctid1).mIdx;
 				int ctidx2 = mID2Contig.get(ctid2).mIdx;
-			
-				if (ctidx1 < 0 || ctidx2 < 0)
-				{
-					throw(new Exception("Un-indexed contig!"));
-				}
+	
 						
 				if (triedEdges.isSet(ctidx1, ctidx2))
 				{
@@ -4708,7 +4615,7 @@ public class AssemMain
 	private void fix_assemlib() throws Exception
 	{
 		TreeSet<String> curLibs = new TreeSet<String>();
-		for (Library lib : mLibs)
+		for (Library lib : mSeqLibs)
 		{
 			curLibs.add(lib.mIDStr);	
 		}
@@ -5561,62 +5468,7 @@ public class AssemMain
 		aceFile.clear();
 		return ret;
 	}
-    /// skip assembly
-	private void summarizeSkipAssembly() throws Exception
-	{		
-		ResultSet rs = null;
-
-		StringBuilder statsMsg = new StringBuilder();
-		
-		statsMsg.append(Log.head("Statistics",LogLevel.Basic));
-		
-		// Unitran lengths
-		int[] rangeMin = new int[8];
-		int[] rangeMax = new int[8];
-		int[] counts = new int[8];
-		
-		rangeMin[0] = 1; rangeMax[0] = 100;
-		rangeMin[1] = 101; rangeMax[1] = 500;
-		rangeMin[2] = 501; rangeMax[2] = 1000;
-		rangeMin[3] = 1001; rangeMax[3] = 2000;
-		rangeMin[4] = 2001; rangeMax[4] = 3000;
-		rangeMin[5] = 3001; rangeMax[5] = 4000;
-		rangeMin[6] = 4001; rangeMax[6] = 5000;
-		rangeMin[7] = 5001; rangeMax[7] = 1000000;
-		for (int i = 0; i < counts.length; i++) counts[i] = 0;
-		
-		rs = mDB.executeQuery("select length(consensus) as ccslen from contig");
-		while (rs.next())
-		{
-			int length = rs.getInt("ccslen");
-			for (int i = 0; i < rangeMin.length; i++)
-			{
-				if (rangeMin[i] <= length && rangeMax[i] >= length)
-				{
-					counts[i]++;	
-				}
-			}
-		}
-		statsMsg.append(Log.newLine(LogLevel.Basic));
-		statsMsg.append(Log.indentMsg("Sequence lengths (bp)",LogLevel.Basic));		
-		statsMsg.append(Log.columnsInd(11,LogLevel.Basic,"Length","1-100","101-500","501-1000","1001-2000","2001-3000","3001-4000","4001-5000",">5000"));
-		statsMsg.append(Log.columnsInd(11,LogLevel.Basic,"#Sequences",counts[0],counts[1],counts[2],counts[3],counts[4],counts[5],counts[6],counts[7]));
-
-		rangeMin = new int[6];
-		rangeMax = new int[6];
-		counts = new int[6];
-		
-		rangeMin[0] = 0; rangeMax[0] = 50;
-		rangeMin[1] = 51; rangeMax[1] = 60;
-		rangeMin[2] = 61; rangeMax[2] = 70;
-		rangeMin[3] = 71; rangeMax[3] = 80;
-		rangeMin[4] = 81; rangeMax[4] = 90;
-		rangeMin[5] = 91; rangeMax[5] = 100;
-
-		for (int i = 0; i < counts.length; i++) counts[i] = 0;
-
-		mDB.executeUpdate("replace into assem_msg (aid,msg) values(" + mAID + ",'" + statsMsg.toString() + "')");
-	}
+  
 	private void summarizeAssembly() throws Exception
 	{
 		ResultSet rs = null;
@@ -5625,15 +5477,15 @@ public class AssemMain
 		statsMsg.append(Log.columnsInd(25, LogLevel.Basic, "DATASET", "#SEQS", "#SINGLETONS", "#BURIED"));
 		
 		int finalTCID = Utils.finalTC(mDB,mAID);
-		for (Library lib : mLibs)
+		for (Library lib : mSeqLibs)
 		{
 			lib.collectStats(finalTCID);
-			int numEST = lib.mNumESTLoaded;
+			int numEST = lib.mNGoodSeq;
 			int numBuried = lib.mNumBuried;
 			int numSingle = lib.mNumSingle;
 			int buryPct = Utils.getPercent(numBuried,numEST);
 			int singlePct = Utils.getPercent(numSingle,numEST);
-			statsMsg.append(Log.columnsInd(25, LogLevel.Basic,lib.mIDStr, lib.mNumESTLoaded, numSingle + " (" + singlePct + "%)", numBuried + " (" + buryPct + "%)"));
+			statsMsg.append(Log.columnsInd(25, LogLevel.Basic,lib.mIDStr, lib.mNGoodSeq, numSingle + " (" + singlePct + "%)", numBuried + " (" + buryPct + "%)"));
 		}	
 		
 		// Reads
@@ -5648,7 +5500,7 @@ public class AssemMain
 		int nCapBuried = rs.getInt("count");
 		statsMsg.append(Log.indentMsg("Total buried: " + nBuried + "  Initial buries: " + (nBuried-nCapBuried) + "   Buried during assembly: " + nCapBuried,LogLevel.Basic));
 		
-		// Unitran EST counts
+		// Contig EST counts
 		rs = mDB.executeQuery("select max(tcid) as max from ASM_tc_iter where aid=" + mAID);
 		rs.first();
 		int maxTC = rs.getInt("max");
@@ -5666,12 +5518,13 @@ public class AssemMain
 		rs.first();
 		int nSinglePair = rs.getInt("count")/2;	
 		
+		// obsolete?
 		rs = mDB.executeQuery("select count(*) as count from contig where tcid=" + maxTC + " and notes like '%suspect%'");
 		rs.first();
 		int nSuspect = rs.getInt("count");		
 		
 		statsMsg.append(Log.newLine(LogLevel.Basic));
-		//statsMsg.append(Log.msg("   Summary",LogLevel.Basic));
+		
 
 		int[] rangeMin = new int[9];
 		int[] rangeMax = new int[9];
@@ -5695,11 +5548,11 @@ public class AssemMain
 		}
 		
 		statsMsg.append(Log.newLine(LogLevel.Basic));
-		statsMsg.append(Log.indentMsg("Contig aligned sequence counts",LogLevel.Basic));
+		statsMsg.append(Log.indentMsg("Contig sizes (#reads)",LogLevel.Basic));
 		statsMsg.append(Log.columnsInd(11,LogLevel.Basic,"Counts","=2","3-5","6-10","11=20","21-50","51-100","101-1000",">1000"));
 		statsMsg.append(Log.columnsInd(11,LogLevel.Basic,"#Contigs",counts[1],counts[2],counts[3],counts[4],counts[5],counts[6],counts[7],counts[8]));
 		
-		// Unitran lengths
+		// lengths
 		rangeMin = new int[8];
 		rangeMax = new int[8];
 		counts = new int[8];
@@ -5718,12 +5571,8 @@ public class AssemMain
 		while (rs.next())
 		{
 			int length = rs.getInt("ccslen");
-			for (int i = 0; i < rangeMin.length; i++)
-			{
-				if (rangeMin[i] <= length && rangeMax[i] >= length)
-				{
-					counts[i]++;	
-				}
+			for (int i = 0; i < rangeMin.length; i++) {
+				if (rangeMin[i] <= length && rangeMax[i] >= length) counts[i]++;	
 			}
 		}
 		statsMsg.append(Log.newLine(LogLevel.Basic));
@@ -5731,21 +5580,8 @@ public class AssemMain
 		statsMsg.append(Log.columnsInd(11,LogLevel.Basic,"Length","1-100","101-500","501-1000","1001-2000","2001-3000","3001-4000","4001-5000",">5000"));
 		statsMsg.append(Log.columnsInd(11,LogLevel.Basic,"#Contigs",counts[0],counts[1],counts[2],counts[3],counts[4],counts[5],counts[6],counts[7]));
 
-		rangeMin = new int[6];
-		rangeMax = new int[6];
-		counts = new int[6];
-		
-		rangeMin[0] = 0; rangeMax[0] = 50;
-		rangeMin[1] = 51; rangeMax[1] = 60;
-		rangeMin[2] = 61; rangeMax[2] = 70;
-		rangeMin[3] = 71; rangeMax[3] = 80;
-		rangeMin[4] = 81; rangeMax[4] = 90;
-		rangeMin[5] = 91; rangeMax[5] = 100;
-
-		for (int i = 0; i < counts.length; i++) counts[i] = 0;
-
 		statsMsg.append(Log.newLine(LogLevel.Basic));
-		statsMsg.append(Log.indentMsg("Total contigs:     " + nContigs, LogLevel.Basic));
+		statsMsg.append(Log.indentMsg("Total contigs:      " + nContigs, LogLevel.Basic));
 		statsMsg.append(Log.indentMsg("Contigs(>1 seq):    " + (nContigs-nSingletons), LogLevel.Basic));
 		if (nSinglePair > 0)
 		{
@@ -5756,8 +5592,6 @@ public class AssemMain
 		{
 			statsMsg.append(Log.indentMsg("Suspect contigs:    " + nSuspect, LogLevel.Basic));
 		}
-
-		mDB.executeUpdate("replace into assem_msg (aid,msg) values(" + mAID + ",'" + statsMsg.toString() + "')");
 	}
 	class NbhdCmp implements Comparator<Integer> //, intCmp
 	{
@@ -5779,9 +5613,6 @@ public class AssemMain
 			return 0;
 		}
 	}
-	
-
-	
 
 	private boolean doCliques() throws Exception
 	{
@@ -5807,189 +5638,97 @@ public class AssemMain
                		" and ctc.libid=assemlib.libid and contig.aid=assemlib.aid) " +
               	 " where library.libid=assemlib.libid and assemlib.aid=" + mAID + "");
 	}	
-	/***************************************************************
-	 * SKIP ASSEMBLY
-	 * Much of this code is copied in loadLibMain
+	/******************************************************
+	 * CAS304 compute TPM
+	 * RPKM is computed in code. Its easiest to just transform it here.
+	 * TPM = 10E6 x RPKM(sum(rpkm)) (Zhao 2020, Misuse of RPKM)
+	 * verified with test script performing normal computation
 	 */
-	private void skipAssembly() throws Exception
-	{
-		// Just make the contigs from the clones
-		ResultSet rs = mDB.executeQuery("select count(*) as nclones from clone");
-		rs.first();
-		int nclones = rs.getInt("nclones");
-		Log.head("Performing instantiate", LogLevel.Basic);
-		Log.indentMsg("Instantiating " + nclones + " sequences, may take a while", LogLevel.Basic);
-		mDB.executeQuery("set foreign_key_checks = 0");
-		fix_assemlib();
+	private void computeTPM() {
+	try {
+		System.err.print("                                                 \r");
 		
-		mDB.executeUpdate("alter table contig add tmpCID bigint default 0");
-		mDB.executeUpdate("insert into contig " +
-				"(AID,contigid,tmpCID,assemblyid,numclones,consensus,quality," +
-				"consensus_bases,frpairs,finalized) " +
-				"(select " + mAID + ",cloneid,CID,'" + mIDStr + "',1," +
-				"sequence,quality, length(sequence),0,1 from clone " +
-				"join assemlib on clone.LID=assemlib.LID " +
-				" where assemlib.AID=" + mAID + " order by CID asc)");
-		rs = mDB.executeQuery("select count(*) as count from contig where AID=" + mAID);
-		rs.first();
-		int ctgPad = rs.getString("count").length();
-		rs = mDB.executeQuery("select min(CTGID) as min from contig where AID=" + mAID);
-		rs.first();
-		int minID = rs.getInt("min");
+		String type = (bUseRPKM) ? "RPKM" : "TPM";
+		mDB.executeUpdate("update assem_msg set norm='" + type + "' where aid=" + mAID);
+		if (bUseRPKM) return;
 		
-		boolean hasLoc=false;
-		rs = mDB.executeQuery("show columns from assem_msg like 'hasLoc'");
-		if (rs.first()) hasLoc=true;
+		Log.indentMsg("\tCompute TPM", LogLevel.Basic);
 		
-		if (mProps.getProperty("USE_TRANS_NAME").equals("0") && !hasLoc)
-		{
-			mDB.executeUpdate("update contig set contigid=concat('" + mIDStr + 
-				"','_',lpad((CTGID-" + minID + "+1)," + ctgPad + ",0))");
-		}
-		mDB.executeUpdate("insert into contclone (CTGID,CID,contigid,cloneid,orient,leftpos,gaps,extras,ngaps, " +
-				"mismatch,numex,buried,prev_parent,pct_aligned) (select CTGID,tmpCID,contigid,cloneid,'U',1," +
-				"'','',0,0,0,0,0,100 from contig join clone on clone.CID=contig.tmpCID where contig.AID=" + 
-				mAID + " order by CTGID asc)");
-		mDB.executeUpdate("alter table contig drop tmpCID");
-		mDB.executeQuery("set foreign_key_checks = 1");
+		int cntSeq = mDB.executeCount("select count(*) from contig");
+		int cntLib = mDB.executeCount("select count(*) from library"); 
+		String [] libid = new String[cntLib];   
+		Ctg [] ctgInfo = new Ctg[cntSeq];   // CTGid is not the index into ctgInfo
+		double [] sumRPKM = new double [cntLib];
 		
-		Schema.addCtgLibFields(mDB);
-		allLibCounts(mDB);
-		mDB.executeUpdate("update contig set finalized=1 where AID=" + mAID);
-		mDB.executeUpdate("update assembly set completed=1, assemblydate=NOW() where AID=" + mAID);
+		Utils.singleLineMsg("Compute");
 		
-		if (!hasLoc) {
-			summarizeSkipAssembly(); 
-			return;
-		}
-		/******** For Gene Location inputs ************/
-		Log.indentMsg("Setting coordiantes", LogLevel.Basic);
-	
-		// Pattern is something like: LG_1:1-50(+)_1 where last _n is for duplicates
-		Pattern mBEDPat = Pattern.compile("(\\S+):(\\d+)-(\\d+)"); 
-		HashMap <String, String> origMap = new HashMap <String, String> ();
-		rs = mDB.executeQuery("select cloneid, origid from clone");
-		while (rs.next()) origMap.put(rs.getString(1), rs.getString(2));
+		int nl=0;
+		ResultSet rs = mDB.executeQuery("select libid from library");
+		while (rs.next()) libid[nl++] = rs.getString(1);
 		
-		HashMap <Integer, String> ctgMap = new HashMap <Integer, String> ();
-		rs = mDB.executeQuery("select CTGID, contigid from contig");
-		while (rs.next()) ctgMap.put(rs.getInt(1), rs.getString(2));
+		int nc=0;
+		String LN = Globalx.LIBRPKM;
+		String sql = "select CTGid ";
+		for (int i=0; i<cntLib; i++) sql += ", " + LN + libid[i];
+		sql += " from contig order by CTGid";
 		
-		int cntBad=0;
-		for (int ctgid : ctgMap.keySet()) {
-			String contigid = ctgMap.get(ctgid);
-			String origid = origMap.get(contigid);
-			Matcher m = mBEDPat.matcher(origid);
-			if (m.find()) 
-			{ 
-				String group = m.group(1);
-				int start = Integer.parseInt(m.group(2));
-				int end = Integer.parseInt(m.group(3));
-				String sense="+";
-				if (origid.contains("(-)")) sense = "-";
-				mDB.executeUpdate("update contig set seq_group='" + group + 
-			"', seq_start=" + start + ",seq_end=" + end +  ",seq_strand='" + sense + "'" +
-					" where CTGID=" + ctgid); 
+		rs = mDB.executeQuery(sql);
+		while (rs.next()) {
+			int ctgid = rs.getInt(1);
+			Ctg cObj = new Ctg(ctgid, cntLib);
+			ctgInfo[nc++] = cObj;
+				
+			for (int i=0; i<cntLib; i++) {
+				double r = rs.getDouble(i+2); 
+				cObj.add(i, r);
+				sumRPKM[i] += r;
 			}
-			else cntBad++;
 		}
-		if (cntBad>0)
-			Log.indentMsg("Warn: could not set for " + cntBad, LogLevel.Detail);
-		summarizeSkipAssembly(); 
+		rs.close();
+		
+		// Database
+		Utils.singleLineMsg("Save to database");
+		
+		sql = "update contig set  ";
+		for (int i=0; i<cntLib; i++) {
+			sql +=  LN + libid[i] + "=?";
+			if (i==0) LN = ", " + LN;
+		}
+		sql += " where CTGID=? ";
+		
+		double tpm;
+		PreparedStatement ps = mDB.prepareStatement(sql);
+		for (Ctg cObj : ctgInfo) {
+			nl=1;
+			for (int i=0; i<cntLib; i++) {
+				if (cObj.norm[i]==0.0) 
+					tpm=0.0;
+				else 
+					tpm = (1000000*cObj.norm[i])/sumRPKM[i];
+				
+				ps.setDouble(nl++, tpm);
+			}
+			ps.setInt(nl, cObj.ctgid);
+			ps.execute();
+		}
+		ps.close();
+		
+		mDB.executeUpdate("update assem_msg set norm='" + type + "' where aid=" + mAID);
+		
+		System.err.print("                                                 \r");
 	}
-	// Some of this code is replicated in several places; search LN__ to find them. 
-	private void allLibCounts(DBConn db) throws Exception
-	{
-		// Step 1: fill the contig_counts table, and the contig.L__ and contig.LN__ fields
-		// First initialize counts to zero for all libs, including the ones from expression files
-		Utils.singleLineMsg("Update counts");
-		db.executeUpdate("delete contig_counts.* from contig_counts, contig " +
-				"where contig_counts.contigid=contig.contigid and contig.AID=" + mAID);
-		db.executeUpdate("insert into contig_counts (select contigid, libid, 0 from contig,assemlib  where contig.aid=" + mAID + 
-				" and assemlib.AID=" + mAID + " order by contig.CTGID asc, assemlib.LID asc)");
-		// Now add the counts due to membership in the contig 
-		db.executeUpdate("update contig_counts set count=count+(select count(*) from contclone  " + 
-				" join clone on clone.cid=contclone.cid where contclone.contigid=contig_counts.contigid " +
-				" and clone.libid=contig_counts.libid) ");
-		
-		// Now add the counts that came from loading the expression files *clone_exp table)
-		db.executeUpdate("update contig_counts set count=count+(select IFNULL(sum(count),0) from clone_exp  " + 
-				" join clone on clone.cid=clone_exp.cid " + 
-				" join contclone on contclone.cid=clone.cid " + 
-				" join library on library.lid=clone_exp.lid " +
-				" where contclone.contigid=contig_counts.contigid " +
-				" and library.libid=contig_counts.libid and clone_exp.rep=0) ");
-
-		ResultSet rs;
-		Vector<String> Ls = new Vector<String>();
-		Vector<String> LNs = new Vector<String>();
-
-		Vector<String> libs = new Vector<String>();
-		rs = db.executeQuery("select libid from assemlib where AID=" + mAID);
-		while (rs.next())
-		{
-			libs.add(rs.getString("libid"));
+	catch (Exception e) {Log.error(e, "Compute TPM for assembled contigs"); }
+	}
+	private class Ctg {
+		Ctg (int ctgid, int nLib) {
+			this.ctgid = ctgid;
+			norm  =  new double [nLib];
+			for (int i=0; i<nLib; i++) norm[i]=0.0;
 		}
-		
-		for (String libid : libs)
-		{
-			String col = "L__" + libid;
-			String sql = "update contig,contig_counts " +
-					"set contig." + col + "=contig_counts.count " +
-					" where contig_counts.contigid=contig.contigid " +
-					" and contig_counts.libid='" + libid + "'";
-			mDB.executeUpdate(sql);
-			Utils.setRPKM(mDB, libid, 1);
+		void add(int i, double v) {
+			norm[i] = v;
 		}
-		mDB.executeUpdate("update assembly set ppx=0");
-
-		// Step 2: totalexp, totalexpN, and rstat
-		
-		// get just the expression libs
-		Utils.singleLineMsg("Rstat...");
-		rs = db.executeQuery("select library.libid,library.libsize from library " +
-				"join assemlib on assemlib.LID=library.LID where ctglib=0");
-		libs.clear();
-		Vector<Integer> libSizes = new Vector<Integer>();
-		while (rs.next())
-		{
-			String libid = rs.getString("libid");
-			int size = rs.getInt("libsize");
-			libs.add(libid);
-			String col = "L__" + libid;
-			String colN = "LN__" + libid;
-			
-			Ls.add(col);
-			LNs.add(colN);
-			libSizes.add(size);
-		}
-		if (Ls.size() > 0)
-		{
-			String LSum = Utils.join(Ls,"+");
-			String LNSum = Utils.join(LNs,"+");
-			db.executeUpdate("update contig " +
-					"set totalexp=(" +LSum + "), totalexpN=(" + LNSum + ") " +
-					"where AID=" + mAID);
-	
-			RStat rsObj = new RStat(libSizes.toArray(new Integer[1]));
-			String lSel =  Utils.join(Ls, ",");
-			rs = db.executeQuery("select " + lSel + ",CTGID from contig");
-			int[] ctgCounts = new int[libSizes.size()];
-			PreparedStatement ps = db.prepareStatement("update contig set rstat=? where CTGID=?");
-			while (rs.next())
-			{			
-				int CTGID = rs.getInt("CTGID");
-				for (int i = 0; i < ctgCounts.length; i++)
-				{
-					ctgCounts[i] = rs.getInt(Ls.get(i));
-				}
-				double rstat = rsObj.calcRstat(ctgCounts);
-				ps.setInt(2, CTGID);
-				ps.setFloat(1,(float)rstat);
-				ps.execute();
-			}
-			ps.close();
-			rs.close();
-		}
-	}	
+		int ctgid;
+		double [] norm;
+	}
 }

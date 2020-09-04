@@ -3,7 +3,6 @@ package sng.database;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Vector;
-import java.util.TreeMap;
 
 import util.database.DBConn;
 import util.methods.ErrorReport;
@@ -49,7 +48,7 @@ enum DBVer
  * DYNAMIC FIELDS:
  * The following are not in the below schema, but added later.
  * 	L__<lib> for counts, LN__<lib> for RPKM  - based on lib name	(this file)
- * 	P_<libLib> for pvalues -- add if computed						(QRProcess)
+ * 	P_<libLib> for pvalues -- add if computed						(QRProcess.saveDEcols)
  * 	assem_msg.peptide -- add if protein databases 					(Library)
  * 	assem_msg.hasLoc --  add if has location information 			(Library and AddRemarkPanel)
  *  assem_msg.goDE -- DE:Pval list for goseq p-values				(QRProcess)
@@ -117,11 +116,11 @@ public class Schema
 		mDB.executeUpdate(sql);
 		
 		 // assem_msg.peptide is added if protein databases
-		 // assem_msg.hasLoc if has location information (Library.java)
-		 // assem_msg.goDE if goseq has been run (QRProcess)
+		 // assem_msg.hasLoc  if has location information (Library.java) or AddRemarkPanel
+		 // assem_msg.goDE    if goseq has been run (QRProcess)
 		sql = 
 			"create table assem_msg ( " +
-			"	AID integer NOT NULL PRIMARY KEY, " +
+			"	AID integer NOT NULL PRIMARY KEY, " +	// obsolete, but everywhere (always 1)
 			"	msg text, " +
 			"   pja_msg text default null," +  // contains OVERVIEW
 			"   meta_msg text default null," +     // contains test at bottom of overview
@@ -130,7 +129,8 @@ public class Schema
 			"	gc_msg text default null,"  +  //  added in DoORF
 			"   go_msg text default null, "	+  //  name of goterm file, which contains date
 			"   go_ec  text default null, " +  //  evidence codes in db
-			"	go_slim tinytext default null"  +  // either goDB subset 
+			"	go_slim tinytext default null,"  +  // either goDB subset 
+			"   norm tinytext default null" +	// CAS304 RPKM or TPM
 			"	) ENGINE=MyISAM; ";
 		mDB.executeUpdate(sql);
 			
@@ -147,7 +147,7 @@ public class Schema
 			"	completedate date, " +
 			"	erate float default 0, " +
 			"	exrate float default 0, " +
-			"	ppx tinyint default 0, " + // used to be N value for 1EN for normalizing expression levels
+			"	ppx tinyint default 0, " + // Obsolete: used to be N value for 1EN for normalizing expression levels
 			"	UNIQUE INDEX unq1(assemblyid) " +
 			"	) ENGINE=MyISAM; " ;
 		mDB.executeUpdate(sql);
@@ -156,10 +156,12 @@ public class Schema
 			"create table library ( " +
 			"	LID integer PRIMARY KEY AUTO_INCREMENT, " +
 			"	libid varchar(30) NOT NULL, " +
-			"	 fastafile varchar(250) NOT NULL, " +
-			"	 fastqfile varchar(250) NOT NULL, " +
-			"	 fiveprimesuf varchar(10) NOT NULL,  " +
-			"	 threeprimesuf varchar(10) NOT NULL,  " +
+			"   ctglib boolean default 0, " +
+			"   parent varchar(30), " +
+			"   reps TEXT," +
+			"	libsize int NOT NULL, " +
+			"   fastafile varchar(250) NOT NULL, " +
+			
 			"	 title tinytext,  " +
 			"	 organism tinytext, " +
 			"	 cultivar tinytext, " +
@@ -174,14 +176,14 @@ public class Schema
 			"	 expdate datetime, " +
 			"	 exploaded boolean default 0, " + /* these are also added in LoadLibMain.fixExpCols */
 			"	 defqual tinytext, " +
-			"	 libsize int NOT NULL, " +
+			
 			"	 avglen int default 0, " +
 			"    medlen int default 0, " +
-			"    ctglib boolean default 0, " +
-			"    prefix tinytext, " +
-			"	orig_libid varchar(30), " +
-			"   parent varchar(30), " +
-			"   reps TEXT," +
+			"    prefix tinytext, " +				/* CAS304 obsolete (I think) */
+			"	 orig_libid varchar(30), " +
+			"	 fastqfile varchar(250) NOT NULL, " +
+			"	 fiveprimesuf varchar(10) NOT NULL,  " +
+			"	 threeprimesuf varchar(10) NOT NULL,  " +
 			"	UNIQUE INDEX unq1(libid) " +
 			"	) ENGINE=MyISAM; ";
 		mDB.executeUpdate(sql);
@@ -243,19 +245,12 @@ public class Schema
 		sql = 
 			"create table contig ( " +
 			"	CTGID bigint NOT NULL PRIMARY KEY AUTO_INCREMENT, " +
-			"	AID integer NOT NULL, " +
-			"	TCID integer default 0, " +  // for assembly
-			"	SCTGID bigint default 0, " + // for assembly
 			"	contigid varchar(30) NOT NULL, " +
-			
-			"	notes VARCHAR(255), " +
-			"	user_notes VARCHAR(255), " +	
+			"	consensus_bases INT, " +
+			"	numclones 	INT NOT NULL, " +
 			"   totalexp bigint unsigned default 0," +
-			"   totalexpN bigint unsigned default 0," +
+			"	longest_clone VARCHAR(30), " +			// instantiate when Skip; else annotate
 		
-			"	gc_ratio FLOAT, " +
-			"	 cnt_ns smallint default 0," +
-			
 			/* UniProt hits   */
 			"	bestmatchid VARCHAR(30), " +
 			"   PID bigint default 0, " +  		// best eval
@@ -282,6 +277,9 @@ public class Schema
 			"	p_frame 				TINYINT   default null, " +  // hit (protein) frame
 			"	p_eq_o_frame 		BOOLEAN, " +   				 // ORF frame equals hit frame
 			
+			"	notes VARCHAR(255), " +
+			"	user_notes VARCHAR(255), " +	
+			
 			/* Sequence locations on chromosomes*/
 			"   seq_group VARCHAR(30), " +   // e.g. scaffold_1
 			"   seq_start bigint default 0, " + 
@@ -292,30 +290,38 @@ public class Schema
 			"	snp_count SMALLINT, " +
 			"	indel_count SMALLINT, " +
 			
+			//other
+			"	rstat 		FLOAT default 0, " +		// instantiate
+			"	gc_ratio FLOAT, " +						// annotate
+			"	cnt_ns smallint default 0," +
+			"   totalexpN bigint unsigned default 0," +	// CAS304 never used; transferred to Multi, but not used there either
+			
 			// sequence info. Need to get rid of assemblid and orig_ccs, and single quality if all the same
-			"	assemblyid varchar(30) NOT NULL, " +
 			"	consensus MEDIUMTEXT NOT NULL, " + // holds 2**24
-			"	orig_ccs MEDIUMtext, " +  /* this gives a way to fix the contigs, in case doSNP has a bug and messes them up */
 			"	quality MEDIUMTEXT NOT NULL, " +
-			"	consensus_bases INT, " +
+			"	orig_ccs MEDIUMtext, " +  /* this gives a way to fix the contigs, in case doSNP has a bug and messes them up */
+			"	assemblyid varchar(30) NOT NULL, " +
 			
 			// assembled
-			"	orient 		char(1), " +
-			"	 numclones 	INT NOT NULL, " +
+			"	 orient 		char(1), " +
 			"	 frpairs 	int NOT NULL, " +
 			"	 has_ns 	BOOLEAN default 0, " +
 			"	 nstart 	integer default 0, " +
 			"	 est_5_prime SMALLINT, " +
 			"	 est_3_prime SMALLINT, " +
 			"	 est_loners  SMALLINT, " +
-			"	 rstat 		FLOAT default 0, " +
+			
 			"	 recap BOOLEAN default 0,  " +
-			"	 longest_clone VARCHAR(30), " +
 			"	 mate_CTGID bigint default 0, " +
 			"	 rftype tinytext, " +
 			"	 buried_placed boolean default 0, " +
+			
+			// for assembly
+			"	AID integer NOT NULL, " +		// obsolete, but everywhere
 			"	avg_pct_aligned smallint default 0, " +
 			"	finalized boolean default 0, " +
+			"	TCID integer default 0, " +  // for assembly
+			"	SCTGID bigint default 0, " + // for assembly
 
 			"	INDEX idx1(contigid), " +
 			"	INDEX idx2(assemblyid), " +
@@ -1210,54 +1216,30 @@ public class Schema
 	
 	/********************************************************
 	 * XXX Dynamic columns
+	 * CAS304 removed assemlib, and reading libsize
 	 */
 	public static void addCtgLibFields(DBConn db) throws Exception
 	{
-		TreeMap<String,Integer> lib2size = new TreeMap<String,Integer>();
-		TreeMap<Integer,Integer> assem2MaxSize = new TreeMap<Integer,Integer>();
-		ResultSet rs;
-		// First, get the library sizes, and the max lib size for each assembly,
-		// which we need for calculating the parts-per-N number
-		rs = db.executeQuery("select library.libid, libsize, aid from library " + 
-				" join assemlib on assemlib.lid=library.lid");
+		Vector <String> libName = new Vector <String> ();
+		
+		ResultSet rs = db.executeQuery("select libid from library"); 
+				
 		while (rs.next())
-		{
-			String libid = rs.getString("libid");
-			int size = rs.getInt("libsize");
-			int aid = rs.getInt("aid");
-			lib2size.put(libid, size);
-			if (!assem2MaxSize.containsKey(aid))
-			{
-				assem2MaxSize.put(aid,	0);
-			}
-			if (size > assem2MaxSize.get(aid)) 
-			{
-				assem2MaxSize.put(aid, size);
-			}
-		}
-		
-		if (!db.tableColumnExists("assembly", "ppx"))
-		{
-			db.executeUpdate("alter table assembly add ppx tinyint default 0");	
-		}	
-		
-		for (String col : lib2size.keySet())
-		{
-			//singleLineMsg("Adding " + ncols + " expression count columns");
-			Thread.sleep(1000);
-			String column = "L__" + col;
-			if (!db.tableColumnExists("contig", column))
-			{
-				db.executeUpdate("alter table contig add " + column + " bigint unsigned default 0");
-			}
-			column = "LN__" + col;
-			if (!db.tableColumnExists("contig", column))
-			{
-				db.executeUpdate("alter table contig add " + column + " float default 0.0");
-			}			
+			libName.add(rs.getString(1));
 
-			if (!db.tableColumnExists("contig", "totalexp"))
-			{
+		
+		for (String col : libName) {
+			Thread.sleep(1000);
+			
+			String column = Globals.LIBCNT + col;
+			if (!db.tableColumnExists("contig", column))
+				db.executeUpdate("alter table contig add " + column + " bigint unsigned default 0");
+		
+			column = Globals.LIBRPKM + col;
+			if (!db.tableColumnExists("contig", column))
+				db.executeUpdate("alter table contig add " + column + " float default 0.0");
+			
+			if (!db.tableColumnExists("contig", "totalexp")) {
 				db.executeUpdate("alter table contig add totalexp bigint unsigned default 0");
 				db.executeUpdate("alter table contig add totalexpN bigint unsigned default 0");
 			}

@@ -1,5 +1,8 @@
 package cmp.viewer.groups;
 
+/********************************************
+ * The Filters for Clusters
+ */
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -35,7 +38,7 @@ public class GrpQueryPanel extends JPanel {
 	public static final String ALLRadio = "All";
 	
 	private static final String [] SECTIONS = { "Basic", "Dataset", "Cluster Sets"};
-	private static final String [] SECTIONS_DESC = 	{ "", "", ""};// display wrong as applet
+	private static final String [] SECTIONS_DESC = 	{ "", "", ""};
 	public GrpQueryPanel(MTCWFrame parentFrame) {
 		theViewerFrame = parentFrame;
 		cntGrp = theViewerFrame.getInfo().getCntGrp();
@@ -271,8 +274,8 @@ public class GrpQueryPanel extends JPanel {
 	private JPanel createDataSetPanel() {
 		JPanel retVal = Static.createPagePanel();
 
-		theAssemCountPanel = new AssemblyCountPanel(theViewerFrame); 
-		retVal.add(theAssemCountPanel);
+		theDataSetPanel = new DatasetSubPanel(theViewerFrame); 
+		retVal.add(theDataSetPanel);
 		return retVal;
 	}
 	
@@ -283,10 +286,10 @@ public class GrpQueryPanel extends JPanel {
 		rgPerAnno.clear();
 		radTaxa[0].setSelected(true);
 		radMethods[0].setSelected(true);
-		theAssemCountPanel.setIncludeLimit("1");
-		theAssemCountPanel.setExcludeLimit("1");
-		theAssemCountPanel.setAllSelectedInc(false);
-		theAssemCountPanel.setAllSelectedEx(false);
+		theDataSetPanel.setIncludeLimit("1");
+		theDataSetPanel.setExcludeLimit("1");
+		theDataSetPanel.setAllSelectedInc(false);
+		theDataSetPanel.setAllSelectedEx(false);
 	}
 	
 	//Called by main frame to query the database
@@ -326,10 +329,10 @@ public class GrpQueryPanel extends JPanel {
 	
 	private String setDataSetQuery() {
 		String retVal = "";
-		if(theAssemCountPanel.getIncludedNames() != null) {
-			String [] labels = theAssemCountPanel.getIncludedNames();
-			String boolLabel = theAssemCountPanel.getIncAnd()?"AND":"OR";
-			int range = theAssemCountPanel.getIncludeLimit();
+		if(theDataSetPanel.getIncludedNames() != null) {
+			String [] labels = theDataSetPanel.getIncludedNames();
+			String boolLabel = theDataSetPanel.getIncAnd()?"AND":"OR";
+			int range = theDataSetPanel.getIncludeLimit();
 			
 			String query = "(pog_groups.A__" + labels[0] + " >= " + range;
 			for(int x=1; x<labels.length; x++) {
@@ -338,10 +341,10 @@ public class GrpQueryPanel extends JPanel {
 			query += ")";
 			retVal = Static.combineBool(retVal, query, true);
 		}
-		if(theAssemCountPanel.getExcludedNames() != null) {
-			String [] labels = theAssemCountPanel.getExcludedNames();
-			String boolLabel = theAssemCountPanel.getExAnd()?"AND":"OR";
-			int range = theAssemCountPanel.getExcludeLimit();
+		if(theDataSetPanel.getExcludedNames() != null) {
+			String [] labels = theDataSetPanel.getExcludedNames();
+			String boolLabel = theDataSetPanel.getExAnd()?"AND":"OR";
+			int range = theDataSetPanel.getExcludeLimit();
 			
 			String query = "(pog_groups.A__" + labels[0] + " <= " + range;
 			for(int x=1; x<labels.length; x++) {
@@ -355,10 +358,10 @@ public class GrpQueryPanel extends JPanel {
 
 	private String getDataSetSummary() {
 		String retVal = "";
-		if(theAssemCountPanel.getIncludedNames() != null) {
-			String [] labels = theAssemCountPanel.getIncludedNames();
-			String boolLabel = theAssemCountPanel.getIncAnd()?"AND":"OR";
-			int range = theAssemCountPanel.getIncludeLimit();
+		if(theDataSetPanel.getIncludedNames() != null) {
+			String [] labels = theDataSetPanel.getIncludedNames();
+			String boolLabel = theDataSetPanel.getIncAnd()?"AND":"OR";
+			int range = theDataSetPanel.getIncludeLimit();
 			
 			String query = "(" + labels[0] + " >= " + range;
 			for(int x=1; x<labels.length; x++) {
@@ -367,10 +370,10 @@ public class GrpQueryPanel extends JPanel {
 			query += ")";
 			retVal = Static.combineSummary(retVal, query);
 		}
-		if(theAssemCountPanel.getExcludedNames() != null) {
-			String [] labels = theAssemCountPanel.getExcludedNames();
-			String boolLabel = theAssemCountPanel.getExAnd()?"AND":"OR";
-			int range = theAssemCountPanel.getExcludeLimit();
+		if(theDataSetPanel.getExcludedNames() != null) {
+			String [] labels = theDataSetPanel.getExcludedNames();
+			String boolLabel = theDataSetPanel.getExAnd()?"AND":"OR";
+			int range = theDataSetPanel.getExcludeLimit();
 			
 			String query = "(" + labels[0] + " <= " + range;
 			for(int x=1; x<labels.length; x++) {
@@ -474,9 +477,9 @@ public class GrpQueryPanel extends JPanel {
 			add(txtVal);
 			
 			if (yesNo) {
-				yesButton = Static.createRadioButton("Yes",true);
+				yesButton = Static.createRadioButton("Has",true);
 				add(yesButton); add(Box.createHorizontalStrut(5));
-				noButton =  Static.createRadioButton("No",false);
+				noButton =  Static.createRadioButton("Not",false);
 				add(noButton); 
 				ButtonGroup group1 = new ButtonGroup();
 				group1.add(yesButton); group1.add(noButton);
@@ -609,23 +612,7 @@ public class GrpQueryPanel extends JPanel {
 		private boolean isInt=true;
 		private int width=90;
 	}
-	private JRadioButton toolTipRadioButton(String label, String descript, boolean enable) {
-		JRadioButton radio = new JRadioButton(label);
-		radio.setBackground(Color.white);
-		radio.setSelected(enable);
-		
-		final String desc = descript;
-		radio.addMouseListener(new MouseAdapter() 
-		{
-			public void mouseEntered(MouseEvent e) {
-			    theViewerFrame.setStatus(desc);
-			}
-			public void mouseExited(MouseEvent e) {
-			    theViewerFrame.setStatus("");
-			}
-		});
-		return radio;
-	}
+	
 	private JLabel toolTipLabel(String label, String descript, boolean enable) {
 		JLabel tmp = new JLabel(label);
 		tmp.setBackground(Color.white);
@@ -659,7 +646,7 @@ public class GrpQueryPanel extends JPanel {
 	private JRadioButton [] radTaxa = null;
 	
 	// Assembly
-	private AssemblyCountPanel theAssemCountPanel = null;
+	private DatasetSubPanel theDataSetPanel = null;
 	
 	private MTCWFrame theViewerFrame = null;
 	private String summary="", query="", tabPrefix="";;

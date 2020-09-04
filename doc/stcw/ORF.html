@@ -171,30 +171,31 @@ This will uses the option set using <code>runSingleTCW</code>.
 The following files are written into the project's subdirectory "orfFiles".
 The following examples are from the <tt>demoTra</tt> demo files. 
 
-<p><cap>Table 2. Output files of the <code>TCW ORF finder</code></cap>
+<p>Table 2. Output files of the <code>TCW ORF finder</code> with <tt>demoTra</tt> replaced
+with the database name.
 <table cellpadding=3 border=1>
-<tr><td><tt>bestORFs.pep.fa</tt><td>The translated CDS for the best ORF for each sequence. 
-<tr><td><tt>bestORFs.cds.fa</tt><td>The CDS for the best ORF for each sequence. 
-<tr><td><tt>allGoodORFs.pep.fa</tt><td>The translated CDSs for all good ORFs*.
-<tr><td><tt>allGoodORFs.scores.txt</tt><td>A list of the coordinates and scores for all good ORFs*.
-<tr><td><tt>bestORFs.scores.txt</tt><td>For the best ORF for each sequence, the 6-frame scores for the ORF.
+<tr><td><tt>demoTra_aaORFs.fa</tt><td>The translated CDS for the best ORF for each sequence. 
+<tr><td><tt>demoTra_ntORFs.fa</tt><td>The CDS for the best ORF for each sequence. 
+<tr><td><tt>demoTra_goodORFs.fa</tt><td>The translated CDSs for all good ORFs*.
+<tr><td><tt>AllGoodORFs.txt</tt><td>A list of the coordinates and scores for all good ORFs*.
+<tr><td><tt>BestORFscores.txt</tt><td>For the best ORF for each sequence, the 6-frame scores for the ORF.
 <tr><td><tt>ScoreCodon.txt</tt><td>The computed codon usage frequencies.
 <tr><td><tt>ScoreMarkov.txt</tt><td>The computed 5th-order Markov model loglikelihood.
 </table>
 <small>* Selected hit, or &gt;= 900nt, or Markov score is &gt;0 and best frame.</small>
 
 <a name=ex>
-<p>Example of <tt>allGoodORFs.scores.txt</tt>, where the first one listed is the selected ORF.
+<p>Example of <tt>AllGoodORFs.txt</tt>, where the first one listed is the selected ORF.
 <pre class=tt>
 ### Name   ntLen aaLen       Type Frame Start..Stop  Markov Codon   Remark
 tra_001_a    564  188  5p-partial   1     106..669    46.91  35.83  $ORF>Hit Hit:  2E-85 88% 79% (106..663)
 tra_002_a   2160  720  5p-partial   3      3..2162   140.08  68.49  $ORF>Hit Hit: 3E-181 53% 82% (6..2150)
 tra_002_b    198   66    Complete  -3   2272..2075     4.12   4.26
 </pre>
-<p>Example of <tt>bestORFs.scores.txt</tt> of the 6-frame scores for the best ORF:
+<p>Example of <tt>BestORFscores.txt</tt> of the 6-frame scores for the best ORF:
 <pre class=tt>
 >tra_002 type:5p-partial seqLen:3111 orfLen:2160 frame:3 coords:3..2162 Hit:3.3E-181,53%,82%
- Markov  140.08  -67.30  -30.65  -53.25  -27.04  -31.25    3
+ Markov  140.44  -64.85  -27.51  -55.59  -25.99  -26.71    3
 </pre>
 The first Markov score is for the ORF starting at 0 (hence, the current frame), 
 the next two are offset by 1 and 2 respectively, the last

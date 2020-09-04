@@ -54,59 +54,10 @@ public class Utils
 			int nuse = mCmdCounts.get(cmd);
 			Long time = mCmdTimes.get(cmd);
 			Long timeper = time/nuse;
-			//time /= 1000;
 			Log.columns(20,lvl,cmd,nuse,time,timeper);
 		}
 	}
-	static void resetStats(LogLevel lvl)
-	{
-		Log.msg("reset timer stats",lvl);
-		for (String cmd : mCmdTimes.keySet())
-		{
-			mCmdCounts.put(cmd,0);
-			mCmdTimes.put(cmd,0L);
-		}
-	}	
-	static int[] strArrayToInt(String[] sa)
-	{
-		int[] ia = new int[sa.length];
-		for (int i = 0; i < sa.length; i++)
-			ia[i] = Integer.parseInt(sa[i]);
-		return ia;
-	}
-	public static String strCollectionJoin(Collection c, String delim)
-	{
-		StringBuilder ret = new StringBuilder();
-		Iterator i = c.iterator();
-		while (i.hasNext())
-		{
-			ret.append(i.next().toString() + delim);
-		}
-		return ret.toString();
-	}
-	static String strArrayJoin(String[] sa, String delim)
-	{
-		StringBuilder out = new StringBuilder();
-		for (int i = 0; i < sa.length; i++)
-		{
-			out.append(sa[i]);
-			if (i < sa.length - 1)
-				out.append(delim);
-		}
-		return out.toString();
-	}
-	static String joinInts(int[] sa, String delim)
-	{
-		StringBuilder out = new StringBuilder();
-		for (int i = 0; i < sa.length; i++)
-		{
-			out.append("" + sa[i]);
-			if (i < sa.length - 1)
-				out.append(delim);
-		}
-		return out.toString();
-	}
-
+	
 	static public String strVectorJoin(java.util.Vector<String> sa, String delim)
 	{
 		StringBuilder out = new StringBuilder();
@@ -129,27 +80,11 @@ public class Utils
 		}
 		return out.toString();
 	}
-	static boolean intervalsTouch(int s1, int e1, int s2, int e2)
-	{
-		return intervalsOverlap(s1, e1, s2, e2, 0);
-	}
 
-	static boolean intervalsOverlap(int s1, int e1, int s2, int e2, int max_gap)
-	{
-		int gap = Math.max(s1, s2) - Math.min(e1, e2);
-		return (gap <= max_gap);
-	}
-
-	static int intervalOverlap(int s1, int e1, int s2, int e2)
-	{
-		int gap = Math.max(s1, s2) - Math.min(e1, e2);
-		return -gap;
-	}
-
-	static String join(Collection s, String delimiter)
+	static String join(Collection <String> s, String delimiter)
 	{
 		StringBuilder buffer = new StringBuilder();
-		Iterator iter = s.iterator();
+		Iterator <String> iter = s.iterator();
 		while (iter.hasNext())
 		{
 			buffer.append(iter.next().toString());
@@ -174,8 +109,7 @@ public class Utils
 	}
 	static public boolean yesNo(String question)
 	{
-		BufferedReader inLine = new BufferedReader(new InputStreamReader(
-				System.in));
+		BufferedReader inLine = new BufferedReader(new InputStreamReader(System.in));
 
 		System.err.print(question + " (y/n)? "); 
 		try
@@ -205,44 +139,6 @@ public class Utils
 			}
 
 		} catch (Exception e) {return false;}
-	}
-
-	static String getFirstLine(File f) throws Exception
-	{
-		BufferedReader fh = new BufferedReader(new FileReader(f));
-		String line = fh.readLine();
-		fh.close();
-		return line;
-	}
-
-	static void clearDir(String dir)
-	{
-		File d = new File(dir);
-		clearDir(d);
-	}
-
-	static void fastaPrint(BufferedWriter fh, String name, StringBuffer str)
-			throws Exception
-	{
-		if (name.length() > 0)
-		{
-			fh.append(">" + name);
-			fh.newLine();
-		}
-		for (int i = 0; i < str.length(); i += 50)
-		{
-			int end = Math.min(i + 50, str.length());
-			fh.append(str.subSequence(i, end));
-			fh.newLine();
-		}
-		fh.flush();
-	}
-
-	static String ucFirst(String in)
-	{
-		if (in.length() <= 1)
-			return in.toUpperCase();
-		return in.substring(0, 1).toUpperCase() + in.substring(1);
 	}
 
 	static int runCommand(String cmd, boolean showStdOut, boolean showStdErr, int nThread)
@@ -360,12 +256,6 @@ public class Utils
 		p.destroy();
 		return ev;
 	}
-	static void tmsg(String text)
-	{
-		System.err.println("DBG:" + text);
-	}
-
-
 
 	// Note problem, Java doesn't see unix links as existing, when viewed over NFS
 	 static void checkCreateDir(File dir)
@@ -463,8 +353,6 @@ public class Utils
 	{
 		if (d.isDirectory())
 		{
-			//Log.msg("clear directory " + d.getAbsolutePath());
-
 			for (File f : d.listFiles())
 			{
 				if (f.isDirectory() && !f.getName().equals(".") && !f.getName().equals("..")) 
@@ -474,7 +362,6 @@ public class Utils
 				f.delete();
 			}
 		}
-		//WN why needed?? checkCreateDir(d);
 	}
 	public static void deleteDir(File d)
 	{
@@ -511,25 +398,8 @@ public class Utils
 		mCmdCounts.put(cmd, 1 + mCmdCounts.get(cmd));
 		return elapsed;
 	}		
-	static void timerStart()
-	{
-		mTimeStart = new Date();
-	}
-	static void timerEnd()
-	{
-		Date now = new Date();
-		Long elapsed = now.getTime() - mTimeStart.getTime();
-		elapsed /= 1000;
-		if (elapsed < 300)
-		{
-			Log.msg("Finished in " + elapsed + " seconds",LogLevel.Detail);
-		}
-		else
-		{
-			elapsed /= 60;
-			Log.msg("Finished in " + elapsed + " minutes",LogLevel.Detail);
-		}
-	}
+	
+	
 	static String reverseComplement(String in)
 	{
 		in = (new StringBuffer(in)).reverse().toString().toUpperCase();
@@ -553,16 +423,8 @@ public class Utils
 		Log.head("Memory:" + mb + " Mb, " + kb + " Kb",LogLevel.Detail);
 		long free = Runtime.getRuntime().freeMemory();
 		mb = free/1000000;
-		if (mb < 100)
-		{
-//			System.err.println("Memory is running short!");
-		}
-
 	}
-	static public void dp (String str)
-	{
-		System.err.println(str);
-	}
+	
 	static boolean isDebug() throws Exception
 	{
 		return mProps.getProperty("DEBUG").equals("1");
@@ -583,11 +445,7 @@ public class Utils
 		boolean ret = m.matches();
 		return ret;
 	}
-	static void die(String str)
-	{
-		System.err.println(str);
-		System.exit(-1);
-	}
+	
 	// Save off a command string to the DB, so we have an unambiguous record of what is being run with what params
 	static void recordCmd(int aid, String desc, String cmd, DBConn db) throws Exception
 	{
@@ -600,13 +458,9 @@ public class Utils
 		ResultSet rs = db.executeQuery("select tcid from ASM_tc_iter where aid=" + aid + " and tctype='final'");
 		int tcid = 0;
 		if (rs.first())
-		{
 			tcid = rs.getInt("tcid");
-		}
 		else
-		{
 			Log.die("The assembly is not completed!");
-		}	
 		return tcid;
 	
 	}
@@ -623,16 +477,9 @@ public class Utils
 		if (denom == 0) return 0;
 		return (100*num)/denom;		
 	}
-	static int maxCtgPerClone(int TCID, DBConn db) throws Exception
-	{
-		ResultSet rs = db.executeQuery("select count(*) as count from contclone join contig on contig.ctgid=contclone.ctgid where contig.tcid=" + TCID + " group by contclone.cid order by count desc limit 1");
-		int ret = 0;
-		rs.first();
-		ret = rs.getInt("count");
-		rs.close();
-		return ret;
+	static boolean notEmpty(String x) {
+		return (x!=null && !x.contentEquals(""));
 	}
-	
 	public static void snpThresholds(double erate,double minScore, String label) throws Exception
 	{
 		Log.columns(10,LogLevel.Detail,"depth",label);
@@ -665,26 +512,7 @@ public class Utils
 		}
 		return "";
 	}
-	static public String getHostName() 
-	{
-		String name = getEnv("HOSTNAME");
-		try
-		{
-			if (true)//name.equals(""))
-			{
-	            Process p = Runtime.getRuntime().exec("uname -n");
-	            BufferedReader stdInput = new BufferedReader(new 
-	                 InputStreamReader(p.getInputStream()));
-	            name = stdInput.readLine().trim();       
-	            p.destroy();			
-			}
-		}
-		catch(Exception e)
-		{
-			System.err.println("Unable to determine local host name");
-		}
-		return name;
-	}
+	
 	static double cumulBinom(int depth, double perr, int nsnp)
 	{
 		if (perr <= 0 || perr >= 1) return 1.0; // should not happen as this condition checked elsewhere. 
@@ -719,33 +547,12 @@ public class Utils
 		
 		return sum;
 	}
-	static void setTPM(DBConn db, String libid, int x) throws Exception
+	public static boolean hasOption(String[] args, String name)
 	{
-		String col = "L__" + libid;
-		String colN = "LN__" + libid;
-		db.tableCheckChangeColumn("contig", colN, "float");
-		db.executeUpdate("update contig,library set contig." + colN + 
-				"=((1000000/library.libsize)*(" + col + "*1000/contig.consensus_bases)) " +
-				" where library.libid='" + libid + "'");
+		for (int i = 0;  i < args.length;  i++)
+			if (args[i].equals(name)) 
+				return true;
+		return false;
 	}
 	
-	// This routine updates the LN__XX column, assuming the L__X column as been set correctly
-	static void setRPKM(DBConn db, String libid, int x) throws Exception
-	{
-		//double libsize = (double)libsizes.get(libid);
-		//int normalized = (int)Math.floor(denom*(count/libsize));
-		//int rpkm = (int)Math.floor((1000000.0D/libsize)*(count/lenkb));
-		String col = "L__" + libid;
-		String colN = "LN__" + libid;
-		db.tableCheckChangeColumn("contig", colN, "float");
-		db.executeUpdate("update contig,library set contig." + colN + 
-				"=((1000000/library.libsize)*(" + col + "*1000/contig.consensus_bases)) " +
-				" where library.libid='" + libid + "'");
-	}
-	static public void debugTrace(String msg)
-	{
-		System.err.println("TRACE:" + msg);
-		System.err.println(new Exception().getStackTrace().toString());
-	}
-
 }

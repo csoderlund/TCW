@@ -1,7 +1,7 @@
 package cmp.viewer.groups;
 
 /*******************************************************
- * GrpQueryPanel
+ * Called from GrpQueryPanel for the Dataset section
  */
 import java.awt.Color;
 import java.awt.Component;
@@ -28,12 +28,12 @@ import util.database.Globalx;
 import cmp.viewer.MTCWFrame;
 import util.methods.Static;
 
-public class AssemblyCountPanel extends JPanel {
+public class DatasetSubPanel extends JPanel {
 	private static final long serialVersionUID = 5011440646805837338L;
 	
 	private static final String [] ASSEMBLY_COUNT_OPTIONS = { "All Datasets", "Any Dataset" };
 		
-	public AssemblyCountPanel(MTCWFrame parentFrame) {
+	public DatasetSubPanel(MTCWFrame parentFrame) {
 		theViewerFrame = parentFrame;
 		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -134,8 +134,8 @@ public class AssemblyCountPanel extends JPanel {
 		tempPanel.setMaximumSize(tempPanel.getPreferredSize());		
 		rangePanelEx.add(tempPanel);
 		
-		incList = new AssemList(theViewerFrame.getAsmList());
-		exList = new AssemList(theViewerFrame.getAsmList());
+		incList = new DataSetList(theViewerFrame.getAsmList());
+		exList = new DataSetList(theViewerFrame.getAsmList());
 
 		JPanel buttonPanelInc = Static.createPagePanel();
 		buttonPanelInc.add(btnSelAllInc); buttonPanelInc.add(Box.createVerticalStrut(5));
@@ -202,7 +202,7 @@ public class AssemblyCountPanel extends JPanel {
 	public boolean getIncAnd() { return cmbInc.getSelectedIndex() == 0; }
 	public boolean getExAnd() { return cmbEx.getSelectedIndex() == 0; }
 	
-	private AssemList incList = null, exList = null;
+	private DataSetList incList = null, exList = null;
 	private JButton btnSelAllInc = null, btnSelNoneInc = null, btnSelNotEx = null;
 	private JButton btnSelAllEx = null, btnSelNoneEx = null, btnSelNotInc = null;
 	private JTextField txtIncVal = null, txtExVal = null;
@@ -210,29 +210,30 @@ public class AssemblyCountPanel extends JPanel {
 	private MTCWFrame theViewerFrame = null;
 	
 	/******************************************************************/
-	private class AssemList extends JPanel {
+	private class DataSetList extends JPanel {
 		private static final long serialVersionUID = 5586648551611595554L;
 
-		public AssemList(String [] assemblies) {
+		public DataSetList(String [] assemblies) {
 			setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 			setAlignmentX(Component.LEFT_ALIGNMENT);
 			setBackground(theViewerFrame.getSettings().getFrameSettings().getBGColor());
 
-			AssemListItem [] theItems = new AssemListItem[assemblies.length];
+			DSetListItem [] theItems = new DSetListItem[assemblies.length];
 			for(int x=0; x<theItems.length; x++)
-				theItems[x] = new AssemListItem(assemblies[x], false);
+				theItems[x] = new DSetListItem(assemblies[x], false);
 			
-			theList = new JList(theItems);
+			theList = new JList <DSetListItem> (theItems);
 			theList.setCellRenderer(new TheListRenderer());
 			theList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			
 			theList.addMouseListener(new MouseAdapter() 
 			{
 				public void mouseClicked(MouseEvent e) {
-					JList list = (JList) e.getSource();
+					@SuppressWarnings("unchecked")
+					JList <DSetListItem> list = (JList <DSetListItem> ) e.getSource();
 					
 					int index = list.locationToIndex(e.getPoint());
-					AssemListItem item = (AssemListItem)list.getModel().getElementAt(index);
+					DSetListItem item = list.getModel().getElementAt(index);
 					item.setSelected(!item.isSelected());
 					list.repaint(list.getCellBounds(index, index));
 				}
@@ -246,7 +247,7 @@ public class AssemblyCountPanel extends JPanel {
 		public String [] getSelectedLabels() {
 			int numResults = 0;
 			for(int x=0; x<theList.getModel().getSize(); x++) {
-				if(((AssemListItem)theList.getModel().getElementAt(x)).isSelected()) {
+				if((theList.getModel().getElementAt(x)).isSelected()) {
 					numResults++;
 				}
 			}
@@ -255,8 +256,8 @@ public class AssemblyCountPanel extends JPanel {
 				String [] retVal = new String[numResults];
 				int pos = 0;
 				for(int x=0; x<theList.getModel().getSize(); x++) {
-					if(((AssemListItem)theList.getModel().getElementAt(x)).isSelected()) {
-						retVal[pos] = ((AssemListItem)theList.getModel().getElementAt(x)).toString();
+					if((theList.getModel().getElementAt(x)).isSelected()) {
+						retVal[pos] = (theList.getModel().getElementAt(x)).toString();
 						pos++;
 					}
 				}
@@ -268,7 +269,7 @@ public class AssemblyCountPanel extends JPanel {
 		
 		public void setAllSelected(boolean selected) {
 			for(int x=0; x<theList.getModel().getSize(); x++) {
-				((AssemListItem)theList.getModel().getElementAt(x)).setSelected(selected);
+				(theList.getModel().getElementAt(x)).setSelected(selected);
 			}
 			theList.repaint(100);
 		}
@@ -277,7 +278,7 @@ public class AssemblyCountPanel extends JPanel {
 			boolean [] retVal = new boolean[theList.getModel().getSize()];
 			
 			for(int x=0; x<retVal.length; x++) {
-				retVal[x] = ((AssemListItem)theList.getModel().getElementAt(x)).isSelected();
+				retVal[x] = (theList.getModel().getElementAt(x)).isSelected();
 			}
 			
 			return retVal;
@@ -285,17 +286,17 @@ public class AssemblyCountPanel extends JPanel {
 		
 		public void setSelectedNot(boolean [] selections) {
 			for(int x=0; x<selections.length; x++) {
-				((AssemListItem)theList.getModel().getElementAt(x)).setSelected(!selections[x]);
+				(theList.getModel().getElementAt(x)).setSelected(!selections[x]);
 			}
 			theList.repaint(100);
 		}
 		
-		private JList theList = null;
+		private JList <DSetListItem> theList = null;
 		private JScrollPane sPane = null;
 	}
 	/********************************************************************/
-	private class AssemListItem {
-		public AssemListItem(String label, boolean selected) {
+	private class DSetListItem {
+		public DSetListItem(String label, boolean selected) {
 			strLabel = label;
 			bIsSelected = selected;
 		}
@@ -308,15 +309,15 @@ public class AssemblyCountPanel extends JPanel {
 		private boolean bIsSelected = false;
 	}
 	
-	private class TheListRenderer extends JCheckBox implements ListCellRenderer
+	private class TheListRenderer extends JCheckBox implements  ListCellRenderer <Object>
 	{
 		private static final long serialVersionUID = -2234133731431277696L;
 
-		public Component getListCellRendererComponent(	JList list, Object value, int index,
+		public Component getListCellRendererComponent(	JList <?> list, Object value, int index,
 														boolean isSelected, boolean hasFocus)
 		{
 			setEnabled(list.isEnabled());
-			setSelected(((AssemListItem)value).isSelected());
+			setSelected(((DSetListItem)value).isSelected());
 			setFont(list.getFont());
 			setBackground(list.getBackground());
 			setForeground(list.getForeground());

@@ -170,7 +170,7 @@ public class AceFile
 			{
 				String name = matchRD.group(1);
 				Clone clone = mName2Clone.get(name);
-				int cid = clone.mID;
+				
 				StringBuilder gapsB = new StringBuilder();
 				StringBuilder readB = new StringBuilder();
 				while (br.ready())

@@ -321,7 +321,7 @@ public class SNPTable extends JTable implements TableModel
 	
 	private SNPData getSNPData ( int i )
 	{
-		return (SNPData)listSNPs.get(i);
+		return listSNPs.get(i);
 	}
 	
 	private class SNPCellRederer implements TableCellRenderer
@@ -384,7 +384,7 @@ public class SNPTable extends JTable implements TableModel
 	    
 	    for ( int i = 0; i < sortChangeListeners.size(); ++i )
 	    {
-	    	ActionListener curListener = (ActionListener)sortChangeListeners.get(i);
+	    	ActionListener curListener = sortChangeListeners.get(i);
 	    	curListener.actionPerformed( event );
 	    }	
 	}
@@ -398,7 +398,7 @@ public class SNPTable extends JTable implements TableModel
 	    
 	    for ( int i = 0; i < tableModelListeners.size(); ++i )
 	    {
-	    	curListener = (TableModelListener)tableModelListeners.get(i);
+	    	curListener = tableModelListeners.get(i);
 	    	curListener.tableChanged(eventAllRows);
 	    	curListener.tableChanged(eventColumnHeader);
 	    }	

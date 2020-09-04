@@ -71,7 +71,7 @@ public class CAP3exec {
 	    		Iterator<SequenceData> iterClone = clones.iterator();
 	    		while ( iterClone.hasNext() )
 	    		{
-	    			SequenceData seq = (SequenceData)iterClone.next();
+	    			SequenceData seq = iterClone.next();
 	    			seq.appendToFASTAFiles( seqStream, qualStream );
 	    		}
 	    		

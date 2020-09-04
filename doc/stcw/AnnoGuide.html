@@ -29,7 +29,7 @@ runSingleTCW interface that are already in the database.
 and reload all annoDBs that you want to keep. The original blast files can be reused.
 </ol>
 Both of these can be accomplished by editing the AnnoDB list in runSingleTCW, then
-re-running "Annotate Sequences", and responding to the yes/no prompts
+re-running <tt class=c>Step 3. Annotate</tt>, and responding to the yes/no prompts
 which will appear on the console, as follows (note, at any point during these
 question, you can Ctrl-C to stop the process):
 <p>
@@ -63,16 +63,13 @@ DB#1 blast
 ?--Yes = use this existing file; No = perform new blast;  (y/n)? 
 </div></pre>
 A 'y' will use the existing file and not redo the blast. 
-<p><font color=green>Note:</font> the file
-name of the blast output uses the database type (SP, TR, GI) and the first three letters of the 
-DBtaxo (e.g. SPpla is the SwissProt plant taxonomy database); if you have multiple databases
-with the same output name, it will append numbered suffixes.  
+
 <p>
 We have annotated many databases with no problems, however, if you are updating an 
 annotated database, it is worth making a dump of the database
 before beginning just to be on the safe side. This can be done with
 <pre>
-mysqldump -u &lt;user&gt; -p &lt;database_name&gt; &gt;! &lt;dump_file_name&gt;
+mysqldump -u &lt;user&gt; -p &lt;database_name&gt; &gt; &lt;dump_file_name&gt;
 </pre>
 
 

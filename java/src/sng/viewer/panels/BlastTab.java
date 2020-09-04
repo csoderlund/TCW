@@ -19,14 +19,15 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.sql.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 
 import sng.database.Globals;
 import sng.database.MetaData;
@@ -34,15 +35,12 @@ import sng.dataholders.SequenceData;
 import sng.util.Tab;
 import sng.viewer.STCWFrame;
 import util.methods.BlastArgs;
-import util.ui.UIHelpers;
 import util.ui.UserPrompt;
 import util.methods.ErrorReport;
-import util.methods.FileHelpers;
 import util.methods.Static;
 import util.methods.Out;
 import util.database.DBConn;
 import util.database.Globalx;
-import util.ui.TableColumnSizer;
 
 public class BlastTab extends Tab
 {
@@ -60,7 +58,6 @@ public class BlastTab extends Tab
 		setBackground(Color.white);
 		metaData = md;
 		theParentFrame = parentFrame;
-		isApplet = UIHelpers.isApplet();
 		isSTCWdbPR = metaData.isProteinDB();
 		
 		// blastn default is megablast, so do can use same defaults 
@@ -210,12 +207,9 @@ public class BlastTab extends Tab
 		pgmType.add(blastCheck);
 		blastCheck.setSelected(true);
 		
-		boolean useDmnd = (!isApplet && BlastArgs.isDiamond());
-		if (useDmnd) {
-			row.add(blastCheck);
-			row.add(dmndCheck);
-			row.add(Box.createHorizontalStrut(5));
-		}
+		row.add(blastCheck);
+		row.add(dmndCheck);
+		row.add(Box.createHorizontalStrut(5));
 		
 		row.add(new JLabel("Parameters: "));
 		txtParams = Static.createTextField(blastDefaults, 35);
@@ -264,7 +258,7 @@ public class BlastTab extends Tab
 		row.add(Box.createHorizontalStrut(3));
 		
 		traceCheck = Static.createCheckBox("Trace", false);
-		if (!isApplet) row.add(traceCheck);
+		row.add(traceCheck);
 		
 		row.add(Box.createHorizontalStrut(30));
 		JButton btnReset = new JButton("Reset");
@@ -432,14 +426,15 @@ public class BlastTab extends Tab
 	private boolean runCreateDB(String ID) {
 	try {
 		boolean bHaveDB=false;
-		ResultSet rs = null;
 		int cnt=0;
 		
 		if (seqSet.size()==0) {
 			DBConn mDB = theParentFrame.getNewDBC();
-			rs = mDB.executeQuery("select contigID from contig");
+			ResultSet rs = mDB.executeQuery("select contigID from contig");
 			while (rs.next()) seqSet.add(rs.getString(1)); // For View Sequence
+			rs.close(); mDB.close();
 		}
+		
 		if (seqCheck.isSelected()) {
 			if (isSTCWdbPR) {
 				isTargetPR=true; 
@@ -454,29 +449,27 @@ public class BlastTab extends Tab
 			bHaveDB = (seqFile.isFile()) ? true : false;
 			if (bHaveDB) return true;
 			
+			// Write file of sequences
 			DBConn mDB = theParentFrame.getNewDBC();
-			rs = mDB.executeQuery("select count(*) from contig");
-			rs.first();
-			int nclones = rs.getInt(1);			
+			int nclones = mDB.executeCount("select count(*) from contig");		
 			showStatus("Writing " + nclones + "  sequences to file ....");
 			
 			seqFile.createNewFile();
 			BufferedWriter w = new BufferedWriter(new FileWriter(seqFile));
 			
-			rs = mDB.executeQuery("select contigid, consensus from contig");
-			while (rs.next())
+			ResultSet rs1 = mDB.executeQuery("select contigid, consensus from contig");
+			while (rs1.next())
 			{
-				String name = rs.getString(1);
-				String seq = rs.getString(2);
+				String name = rs1.getString(1);
+				String seq =  rs1.getString(2);
 				w.write(">" + name);
 				w.newLine();
 				w.write(seq);
 				w.newLine();
 				cnt++;
 			}			
-			w.close();
-			if (rs!=null) rs.close();
-			mDB.close();
+			w.close(); rs1.close(); mDB.close();
+			
 			if (traceCheck.isSelected()) Out.prt("Wrote " + cnt + " to file ");
 			return true;
 		}
@@ -487,25 +480,24 @@ public class BlastTab extends Tab
 			bHaveDB = (seqFile.isFile()) ? true : false;
 			if (bHaveDB) return true;
 			
+			// Write file of ORF sequences
 			DBConn mDB = theParentFrame.getNewDBC();
-			rs = mDB.executeQuery("select count(*) from contig");
-			rs.first();
-			int nclones = rs.getInt(1);			
+			int nclones = mDB.executeCount("select count(*) from contig");		
 			showStatus("Writing " + nclones + "  translated ORFs to file ....");
 			
 			seqFile.createNewFile();
 			BufferedWriter w = new BufferedWriter(new FileWriter(seqFile));
 			
-			rs = mDB.executeQuery("SELECT contigid, o_frame, o_coding_start, o_coding_end, consensus " +
+			ResultSet rs2 = mDB.executeQuery("SELECT contigid, o_frame, o_coding_start, o_coding_end, consensus " +
  		           " FROM contig where o_frame!=0");
 
-			while (rs.next()) {
-				String name = rs.getString(1);
-				int fr = rs.getInt(2);
-			    int start = rs.getInt(3);
-			    int end = rs.getInt(4);
+			while (rs2.next()) {
+				String name = rs2.getString(1);
+				int fr =      rs2.getInt(2);
+			    int start =   rs2.getInt(3);
+			    int end =     rs2.getInt(4);
 			
-			    String strSeq = rs.getString(5);
+			    String strSeq = rs2.getString(5);
 			    String orf = SequenceData.getORFtrans(name, strSeq, fr, start, end);
 			     	
 			    w.write(">" + name + " AAlen=" + orf.length() + " frame=" + fr);
@@ -514,9 +506,8 @@ public class BlastTab extends Tab
 			    w.newLine(); 
 			    cnt++;
 			}
-			w.close();
-			if (rs!=null) rs.close();
-			mDB.close();
+			w.close(); rs2.close(); mDB.close();
+			
 			if (traceCheck.isSelected()) Out.prt("Wrote " + cnt + " to file ");
 			return true;
 		}
@@ -591,7 +582,7 @@ public class BlastTab extends Tab
 		resultTable.setBorder(BorderFactory.createLineBorder(Color.black));
 		resultTable.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		resultTable.setAutoCreateRowSorter(true);
-		TableColumnSizer.resizeColumns(resultTable);
+		resizeColumns(resultTable);
 		
 		resultTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent event) {
@@ -661,7 +652,7 @@ public class BlastTab extends Tab
 				public void actionPerformed(ActionEvent event) {
 					deleteFiles(baseDir);
 		}});	
-		if (!isApplet) row.add(btnClean);
+		row.add(btnClean);
 		resultRow = row;
 	}
 	/*****************************************************
@@ -670,8 +661,7 @@ public class BlastTab extends Tab
 	blastx - Align translated DNA query sequences against a protein reference database.
 	********************************************************/
 	private String runSetupDmnd(String action,
-			String seqPath, String queryPath, String outPath, 
-			String params, boolean isTab) {
+			String seqPath, String queryPath, String outPath, String params, boolean isTab) {
 		try {
 			if (!action.equals("blastp") && !action.equals("blastx")) {
 				showErr("To use diamond, the target must be a protein (AA-ORF or AA-DB).");
@@ -747,41 +737,7 @@ public class BlastTab extends Tab
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Format for blast"); return null;}
 	}
-	/** CAS303
-	private boolean getBlastPath() {
-		try {
-			if (!BlastArgs.foundABlast())
-			{
-				String bpath = inputBlastPath.getText().trim();
-				if (bpath.equals(""))
-				{
-					JOptionPane.showMessageDialog(theParentFrame, 
-							"Please enter the location of the BLAST programs", "", 
-							JOptionPane.OK_OPTION);
-					return false;
-				}
-				BlastArgs.evalBlastPath(bpath, "");
-				if (!BlastArgs.foundABlast())
-				{
-					if (theParentFrame.isApplet()) {
-						JOptionPane.showMessageDialog(theParentFrame, 
-								"The BLAST programs were not found at:\n" + bpath + 
-								"\nYour browser probably does not allow the execution of local programs", 
-								"", JOptionPane.OK_OPTION);
-					}
-					else {
-						JOptionPane.showMessageDialog(theParentFrame, 
-							"The BLAST programs were not found at:\n" + bpath, "", 
-							JOptionPane.OK_OPTION);
-					}
-					return false;
-				}
-			}
-			return true;
-		}
-		catch (Exception e) {ErrorReport.prtReport(e, "Getting blast path"); return false;}
-	}
-	**/
+	
 	private void setEnableDB(boolean seq, boolean orf, boolean db) {
 		seqCheck.setSelected(seq);
 		orfCheck.setSelected(orf);
@@ -928,12 +884,66 @@ public class BlastTab extends Tab
 			txtValue.setEnabled(enabled);
 			btnFindFile.setEnabled(enabled);
 		}
-		public String getText() { return txtValue.getText(); }
 		
 		private JTextField txtValue = null;
 		private JButton btnFindFile = null;
 	}
-	
+	/**
+     * resizes the columns in a JTable based on the data in that table. data
+     * scanned is limited to the first 25 rows.
+     */
+    private void resizeColumns(JTable table) 
+    {
+
+        final TableModel model = table.getModel();
+        final int columnCount = model.getColumnCount();
+        final ArrayList <Integer> charactersPerColumn = new ArrayList <Integer>();
+
+        for (int col = 0; col < columnCount; col++) {
+            charactersPerColumn.add(0);
+        }
+
+        // scan first 25 rows
+        final int rowsToScan = model.getRowCount();
+        for (int row = 0; row < rowsToScan; row++) {
+            for (int col = 0; col < columnCount; col++) {
+
+                // character counts for comparison
+                final int existingCharacterCount = (charactersPerColumn.get(col)).intValue();
+                final Object cellValue = model.getValueAt(row, col);
+                if (cellValue != null) {
+                    final Integer newCharacterCount = Integer.valueOf(cellValue.toString().length());
+
+                    // do we need to increase the character count?
+                    if (newCharacterCount.intValue() > existingCharacterCount) {
+                        charactersPerColumn.set(col, newCharacterCount);
+                    }
+                }
+
+            }
+        }
+
+        // prepare the table for column resizing
+        final TableColumnModel columnModel = table.getColumnModel();
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        
+        // set maximum character counts
+        final Integer maximumCharacterCount = 30; // CAS304 Integer.valueOf(24);
+        for (int col = 0; col < columnCount; col++) {
+            final int existingCharacterCount = (charactersPerColumn.get(col)).intValue();
+            if (existingCharacterCount > maximumCharacterCount.intValue()) {
+                charactersPerColumn.set(col, maximumCharacterCount);
+            }
+        }
+
+        // set column widths
+        for (int col = 0; col < columnCount; col++) {
+            final int existingCharacterCount = (charactersPerColumn.get(col)).intValue();
+            final int columnWidth = 18 + (existingCharacterCount * 7);
+            columnModel.getColumn(col).setPreferredWidth(columnWidth);
+        }        
+        
+    }
 	private JPanel pnlRealMain = null;
 	private JTextField txtStatus = null;
 	private JTextArea inputSeq = null;
@@ -951,8 +961,9 @@ public class BlastTab extends Tab
 	private JPanel blastPathPanel = null;
 	
 	private JPanel resultSection = null;
-	private JTable resultTable = null;
 	private JPanel resultRow = null;
+	
+	private JTable resultTable = null;
 	
 	private final JButton btnViewContig; // have to do this to use in action handler
 	private static File baseDir = null;
@@ -961,6 +972,6 @@ public class BlastTab extends Tab
 	private MetaData metaData = null;
 	private STCWFrame theParentFrame = null;
 	private String blastDefaults="", dmndDefaults="", dbName="", dbSelectName="";
-	private boolean isApplet=false, isSTCWdbPR=false, isTargetPR=false, isQueryPR=false;
+	private boolean isSTCWdbPR=false, isTargetPR=false, isQueryPR=false;
 	private HashSet <String> seqSet = new HashSet <String> ();
 }

@@ -103,7 +103,7 @@ public class STCWMain
 		}
 		STCWChooser.setupUIDefaults();
 		if (args.length > 0) {
-			STCWFrame frame = new STCWFrame ( hostsObj, dbObj, false); 
+			STCWFrame frame = new STCWFrame ( hostsObj, dbObj); 
 			frame.setVisible( true );
 		}
 		else {

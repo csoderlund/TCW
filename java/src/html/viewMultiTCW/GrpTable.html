@@ -92,7 +92,7 @@ the mouse over and shown in the lower left corner.
 <tr><td  valign="top">&nbsp;&nbsp;&nbsp;Taxa<td> Notation "nxN" where n is the number of distinct datasets included in the cluster,
 where N=1 if all the species are represented by single sequences and N="N" if any of the
 datasets have more than 1 member in the cluster.
-<tr><td  valign="top">&nbsp;&nbsp;&nbsp;perPCC<td> If the Pearson Correlation Coefficient of the RPKM values
+<tr><td  valign="top">&nbsp;&nbsp;&nbsp;perPCC<td> If the Pearson Correlation Coefficient of the TPM values
 was computed during the database build, then this column contains the percentage that are >=0.8. See below for
 more detail explanation.
 <tr><td  valign="top">&nbsp;&nbsp;&nbsp;Score<td>The average of the sum of each column, where the sum is the Sum-of-pairs score.
@@ -124,6 +124,7 @@ they have the same name. The column perPCC is the percent of pairs that have PCC
 For example, if a cluster has 4 sequences,
 it has (4*3)/2 = 6 pairs. If two of them have PCC>=0.8, then the perPCC will be 33%. A perPCC of
 100% means that their expression profiles on their shared conditions are highly correlated. 
-Select "Pairs" for a cluster to see the actual PCC values and "Sequences" to view the RPKM values.
+Select "Pairs" for a cluster to see the actual PCC values and "Sequences" to view the TPM values.
+<p>NOTE: pre-v3.0.4 release, RPKM was computed.
 
 

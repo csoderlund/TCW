@@ -44,12 +44,6 @@ public class ErrorReport {
 	}
 	
 	public static void reportFatalError(Error e, String debugInfo, JFrame parentFrame) {
-		if (UIHelpers.isApplet())
-		{
-			if (debugInfo!=null) System.out.println(debugInfo);
-			e.printStackTrace();
-			return;
-		}
 		reportError(e, debugInfo);
 		
 		int answer = 1;			
@@ -70,13 +64,6 @@ public class ErrorReport {
 		}
 	}
 	private static void reportError(Throwable e, String debugInfo, boolean replaceContents) {
-		if (UIHelpers.isApplet())
-		{
-			if (debugInfo!=null) System.err.println(debugInfo);
-			e.printStackTrace();
-			return;
-		}
-
 		PrintWriter pWriter = null;
 		try {
 			if(replaceContents) {
@@ -127,30 +114,15 @@ public class ErrorReport {
 	}
 	public static void die(Throwable e, String debugInfo) {
 		reportError(e, debugInfo);
-		dieIfStandalone();
+		System.exit(-1);
 	}
 	public static void die(String debugInfo, Throwable e) {
 		reportError(e, debugInfo);
-		dieIfStandalone();
+		System.exit(-1);
 	}
 	public static void die(String debugInfo) {
 		System.err.println("Fatal Error: " + debugInfo);
-		dieIfStandalone();
-	}
-	private static void dieIfStandalone() {
-		if (!UIHelpers.isApplet()) 
-		{
-			System.exit(-1);
-		}
-		else
-		{
-			// Try to loop so Java console stays open
-			while (true) 
-			{
-				try {Thread.sleep(1000);} 
-				catch(Exception e) {System.exit(-1);}
-			}
-		}
+		System.exit(-1);
 	}
 	
 	public static void ShowMemoryPercentFree()

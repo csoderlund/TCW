@@ -14,21 +14,25 @@ import java.awt.geom.Rectangle2D;
 import java.net.URL;
 import java.awt.event.MouseListener;
 
+/***********************************************
+ * inTextLines[i]: if text contains \n, then second part is URL
+ * usually its just used for text lines.
+ */
 public class MultilineTextPanel extends JPanel
 {
     public MultilineTextPanel ( Font inFont, Vector<String> inTextLines, 
     		int nInInset, int nInWidth, int nMinColumns ) throws Exception
     {
        try {
-    	   		FontMetrics metrics = getFontMetrics( inFont );
-    	   		setLayout ( null );
-        
-    	   		nWidth = nInWidth;
-    	   		nInset = nInInset;
-    	   		textLines = new String [ inTextLines.size() ];
-    	   		htmlLines = new URL [ inTextLines.size() ];
-    	   		nColumnSpace = nInInset * 3;
-    	   		int nMaxColumnWidth = ( nWidth - nInset * 2 + nColumnSpace ) / nMinColumns - nColumnSpace;
+	   		FontMetrics metrics = getFontMetrics( inFont );
+	   		setLayout ( null );
+    
+	   		nWidth = nInWidth;
+	   		nInset = nInInset;
+	   		textLines = new String [ inTextLines.size() ];
+	   		htmlLines = new URL [ inTextLines.size() ];
+	   		nColumnSpace = nInInset * 3;
+	   		int nMaxColumnWidth = ( nWidth - nInset * 2 + nColumnSpace ) / nMinColumns - nColumnSpace;
         
 	        // Go through the list of lines to
 	        // 1) Determine the column width
@@ -36,19 +40,17 @@ public class MultilineTextPanel extends JPanel
 	        nColumnWidth = 0;
 	        for ( int i = 0; i < inTextLines.size(); ++i )
 	        {
-		        	// Initialize both arrays
-		        	textLines [i] = null;
-		        	htmlLines [i] = null;
+		        textLines [i] = null;
+		        htmlLines [i] = null;
         	
-	        	// Get the current string and parse it
-	            String str = (String)inTextLines.get(i);
+	            String str = inTextLines.get(i);
 	            if ( str == null || str.length() == 0 ) continue;
+	            
 	            String [] strList = str.split( "\n" );
 	            textLines [i] = strList[0];
 	            if ( strList.length > 1 )
 	            		htmlLines [i] = new URL ( strList[1] );
 	            
-	            // Update the column width
 	            nColumnWidth = Math.max( metrics.stringWidth( textLines [i] ), nColumnWidth );
 	            nColumnWidth = Math.min( nColumnWidth, nMaxColumnWidth );
 	        }
@@ -75,8 +77,9 @@ public class MultilineTextPanel extends JPanel
 	                String str = textLines[nIdx];
 	                if ( str==null || str.length()==0 ) continue;
 	                    
-	                // Create a lable to display the text and handle the link/tool-tip
+	                // Create a label to display the text and handle the link/tool-tip
 	                JLabel label = createLabel ( textLines [nIdx], htmlLines[nIdx] );
+	                
 	                label.setFont( inFont );
 	                label.setLocation( (int)fX, (int)fY );
 	                Dimension size = new Dimension ( nColumnWidth, nRowHeight );

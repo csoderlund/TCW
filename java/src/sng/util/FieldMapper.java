@@ -140,7 +140,7 @@ public class FieldMapper
         int i = 0;
         Iterator<FieldData> iter = listFields.iterator();
         while ( iter.hasNext() ) {
-            FieldData theField = (FieldData)iter.next();        
+            FieldData theField = iter.next();        
             names [i] = theField.strName;
             ++i;
         }
@@ -185,7 +185,7 @@ public class FieldMapper
     		if (str==null) return null;
     		
         int n = getIndexForName ( str );
-        if ( n >= 0)  return (FieldData)listFields.get( n );
+        if ( n >= 0)  return listFields.get( n );
         
     		if (theParentFrame!=null) {
         		FieldContigTab fieldObj = theParentFrame.getFieldContigTab();
@@ -193,18 +193,22 @@ public class FieldMapper
 	        		n = fieldObj.getNFoldFieldID(str);
 	        		if (n>=0) {
 	        			addFloatField(n, str, null, null, null, null, null);
-	        			return (FieldData)listFields.get( getIndexForID(n) );
+	        			return listFields.get( getIndexForID(n) );
 	        		}
 	        	}
     		}
     	   	return null;
     }
     
+    public void prtFieldByID(int nField, String msg) {
+    	FieldData f = getFieldByID(nField);
+    	System.err.println(msg + ": " + f.nID + " " + f.strName + "  " + f.strTable + "  " + f.strSubQuery);
+    }
     private FieldData getFieldByID ( int nField )
     {
         int nIdx = getIndexForID ( nField );
         if ( nIdx < 0 ) nIdx = 0;
-        return (FieldData)listFields.get( nIdx );
+        return listFields.get( nIdx );
     }
     
     private int getIndexForName ( String strName )
@@ -213,7 +217,7 @@ public class FieldMapper
         if (isEmpty(strName) ) return -1;
         
         for ( int i = 0; i < listFields.size(); ++i ) {
-            FieldData curField = (FieldData)listFields.get(i);
+            FieldData curField = listFields.get(i);
             if ( curField.strName.equals( strName ) ) {
                 rc = i;
                 break;
@@ -225,7 +229,7 @@ public class FieldMapper
     private int getIndexForID ( int nField )
     {
         for ( int i = 0; i < listFields.size(); ++i ) {
-            FieldData curField = (FieldData)listFields.get(i);
+            FieldData curField = listFields.get(i);
             if ( curField.nID == nField )
                 return i;
         }
@@ -267,7 +271,7 @@ public class FieldMapper
         {
             if ( isFieldVisible ( theField.nID ))
             {
-            		tempVisibleFields.add(theField);
+            	tempVisibleFields.add(theField);
             }
         }
         visibleFields = tempVisibleFields.toArray(new FieldData[0]);
@@ -303,7 +307,7 @@ public class FieldMapper
 	    	int [] ret = new int [ listFields.size() ];
 	    	for ( int i = 0; i < listFields.size(); ++i )
 	    	{
-	    		ret [i] = ((FieldData)listFields.get(i)).nID;
+	    		ret [i] = (listFields.get(i)).nID;
 	    	}
 	    	return ret;
     } 
@@ -338,7 +342,7 @@ public class FieldMapper
 	    		for ( int i = 0; i < strVisFieldIDs.length; ++i ) {
 	    			int nFieldID = Integer.parseInt( strVisFieldIDs[i] ); 
 	    		    if ((getIndexForID(nFieldID)>=0) || isNFoldField(nFieldID)) {
-	    		    		fieldsInts.add(new Integer(nFieldID));
+	    		    		fieldsInts.add(nFieldID);
 	    		    }
 	    		}
 	    		visibleFieldIDs = Converters.intCollectionToIntArray ( fieldsInts );
@@ -359,7 +363,7 @@ public class FieldMapper
 	    	
 	    	Iterator<FieldData> iter = listFields.iterator();
 	    	while (iter.hasNext()) {
-	    		FieldData data = (FieldData)iter.next();
+	    		FieldData data = iter.next();
 	    		if (data.strGroupDescription != null 
 	    			&& !groupDescriptions.contains(data.strGroupDescription))
 	    		{
@@ -375,7 +379,7 @@ public class FieldMapper
 	    	
 	    	Iterator<FieldData> iter = listFields.iterator();
 	    	while (iter.hasNext()) {
-	    		FieldData data = (FieldData)iter.next();
+	    		FieldData data = iter.next();
 	    		if (strGroupName.equals(data.strGroup) && !fieldNames.contains(data.strName)) {
 	    			fieldNames.add(data.strName);
 	    		}
@@ -412,7 +416,7 @@ public class FieldMapper
 	    	
 	    	Iterator<FieldData> iter = listFields.iterator();
 	    	while (iter.hasNext()) {
-	    		FieldData data = (FieldData)iter.next();
+	    		FieldData data = iter.next();
 	    		if (strGroupName.equals(data.strGroup)) {
 	    			fieldNames.add(data.strDescription);
 	    		}
@@ -481,19 +485,21 @@ public class FieldMapper
         		return convertFromDBObject( data, obj );
         }
     }
-    // FieldContigData
+    // XXX FieldContigData
     // Returns the list of visible field names formatted to be part of a SQL statement
     public String getDBFieldList ( )
     {
-    		String strFields = null;
-    		FieldData [] fields = getVisibleFields ( );
+    	String strFields = null;
+    	FieldData [] fields = getVisibleFields ( );
         for ( int i = 0; i < fields.length; ++i )
         {
             if ( strFields != null ) strFields += ", ";
             else strFields = "";
-        	
+ 
             if ( fields[i] == null || fields[i].strField == null || fields[i].strField.length()==0)
             			strFields += "NULL"; // Place holder so we have the correct number of columns
+            else if (fields[i].nID==FieldContigData.SEQ_ID_FIELD) // CAS304 KLUDGE - it has strSubquery if GOs
+            	strFields += fields[i].strTable + "." + fields[i].strField;
             else if ( fields[i].strSubQuery != null )
             		strFields += fields[i].strSubQuery;
             else if ( fields[i].strTable != null )
@@ -501,6 +507,7 @@ public class FieldMapper
             else
                 strFields += fields[i].strField;                   
         }
+       
         return strFields;
     }
       
@@ -605,7 +612,7 @@ public class FieldMapper
         Iterator<FieldData> iter = listFields.iterator();
         while ( iter.hasNext() )
         {
-            FieldData theField = (FieldData)iter.next();
+            FieldData theField = iter.next();
             if ( theField.strTable != null && 
                     theField.strTable.equals(strTable) &&
                     	isFieldVisible ( theField.nID ) )
@@ -617,11 +624,7 @@ public class FieldMapper
     		if (x==null || x.length()==0) return true;
     		return false;
     }
-    private boolean compareStrings ( String a, String b )
-    {
-        if ( a == null || b == null ) return a == b;
-        else return a.equals( b );
-    }
+    
     /**
      * The following methods add a column to the listField vector
      * there is a method for each possible data type
@@ -708,9 +711,9 @@ public class FieldMapper
     
     public void setFieldSubQuery ( int nID, String strField, String strQuery )
     {
-	    	FieldData field = getFieldByID ( nID );
-	    	field.strField = strField;
-	    	field.strSubQuery = "(" + strQuery + ") as " + strField;
+    	FieldData field = getFieldByID ( nID );
+    	field.strField = strField;
+    	field.strSubQuery = "(" + strQuery + ") as " + strField;
     }
        
     /**
@@ -725,7 +728,7 @@ public class FieldMapper
         static final public int STRING_TYPE  = 4;
         static final public int PERCENT_TYPE = 5; // The value from the database is multiplied by 100
         static final public int RECORD_ID    = 6; // The record's position in the result set
-        
+       /** CAS304 not used? 
         public boolean equals ( Object in )
         {
         	if ( in instanceof FieldData ) {
@@ -739,7 +742,7 @@ public class FieldMapper
         	else
         		return false;
         }
-        
+        **/
         int nID = Integer.MIN_VALUE;// Unique ID for the field
         String strName = ""; 		// The name displayed to the end-user
         String strTable = null; 	    // The database table (maybe null)

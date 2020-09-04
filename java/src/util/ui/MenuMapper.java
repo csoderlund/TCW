@@ -1,8 +1,6 @@
 package util.ui;
 
 /**
- * @author brian
- *
  * A simple class to make it easier to have combo boxes where the
  * descriptive name maps to number internally.
  */
@@ -13,7 +11,7 @@ public class MenuMapper
 		strMenuName = strInName;
 		fNumber = (double)nInVal;
 	}
-	
+	/** CAS304
 	public boolean equals ( Object obj )
 	{
 		MenuMapper in = (MenuMapper)obj;
@@ -29,7 +27,7 @@ public class MenuMapper
 		}
 		else return false;
 	}
-	
+	*/
 	public String toString () { return strMenuName; };
 	
 	public int asInt ( ) { return (int)fNumber; }

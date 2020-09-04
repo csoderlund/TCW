@@ -438,7 +438,7 @@ public class MainAlignPanel extends JPanel
 		Iterator<JPanel> iterPanel = highlightPanels.iterator();
 		while ( iterPanel.hasNext() )
 		{
-			JPanel curPanel = (JPanel)iterPanel.next();
+			JPanel curPanel = iterPanel.next();
 			g2.setColor( curPanel.getBackground() );
 			g2.fill( curPanel.getBounds() );
 		}		

@@ -115,7 +115,7 @@ public class PairQueryPanel extends JPanel {
 		row = Static.createRowPanel();
 		rgPCC = new Range("PCC", "0.8", "", "pcc", 
 				"All pairs with the PCC within the range, where PCC is the " +
-				"Pearson Correlation Coefficient of RPKM values");
+				"Pearson Correlation Coefficient of TPM values");
 		row.add(rgPCC);
 		page.add(row);
 		
@@ -964,9 +964,9 @@ public class PairQueryPanel extends JPanel {
 			add(txtVal);
 			
 			if (yesNo) {
-				yesButton = Static.createRadioButton("Yes",true);
+				yesButton = Static.createRadioButton("Has",true);
 				add(yesButton); add(Box.createHorizontalStrut(5));
-				noButton =  Static.createRadioButton("No",false);
+				noButton =  Static.createRadioButton("Not",false);
 				add(noButton); 
 				ButtonGroup group1 = new ButtonGroup();
 				group1.add(yesButton); group1.add(noButton);
@@ -1069,7 +1069,6 @@ public class PairQueryPanel extends JPanel {
 	private Range rgStatCexact, rgStatCsyn, rgStatC4d, rgStatCnonsyn, rgStatAexact, rgStatApos, rgStatAneg;
 	
 	private JRadioButton kaZeroButton, kaEQksButton, kaLTksButton, kaGTksButton, hasKaKsButton, ignKaKsButton;
-	private JLabel kaLabel;
 	private Range rgKaKs;
 	private Range rgPval; 
 	

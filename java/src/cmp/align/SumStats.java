@@ -8,7 +8,6 @@ import java.sql.ResultSet;
 import java.util.Vector;
 
 import cmp.compile.Summary;
-import cmp.database.Globals;
 import util.database.DBConn;
 import util.database.Globalx;
 import util.methods.ErrorReport;
@@ -31,7 +30,7 @@ public class SumStats {
 		try {
 			CompressFromDB cObj = new CompressFromDB ();
 			cObj.loadFromDB();
-			cObj.processCompressedFromDB(false);
+			cObj.processCompressedFromDB();
 			return cObj.infoStr;
 		}
 		catch(Exception e) {ErrorReport.reportError(e, "write summary"); return "error";}
@@ -54,10 +53,9 @@ public class SumStats {
 	/**********************************************
 	 * viewMulti: Create both coding and kaks summary of input pairs
 	 */
-	public void fromView(final Vector <Integer> pairs, final boolean isApplet, final String summary) {
+	public void fromView(final Vector <Integer> pairs, final String summary) {
 		if (pairs.size()>1000) {
-			if (!isApplet)
-				if (!UserPrompt.showContinue("Table stats", "This is slow for over 1000 pairs."))
+			if (!UserPrompt.showContinue("Table stats", "This is slow for over 1000 pairs."))
 					return;
 			Out.PrtSpMsg(1, "Start table stats, this will take a few minutes......");
 		}
@@ -69,7 +67,7 @@ public class SumStats {
 					boolean success=true;
 					CompressFromDB cObj = new CompressFromDB ();
 					if (cObj.loadFromDB(pairs)) {
-						if (cObj.processCompressedFromDB(isApplet)) {
+						if (cObj.processCompressedFromDB()) {
 							Out.PrtSpMsg(1, "Start KaKs stats.....");
 							KaKs kObj = new KaKs();
 							kObj.loadFromDB(pairs);
@@ -99,7 +97,7 @@ public class SumStats {
 	}
 	/*************************************************************/
 	private class CompressFromDB {
-		private boolean processCompressedFromDB(boolean isApplet) { 
+		private boolean processCompressedFromDB() { 
 		try {
 			ScoreCDS scoreObj = new ScoreCDS ();
 			int cntNotAlign=0;
@@ -111,7 +109,7 @@ public class SumStats {
 					scoreObj.diffScoreAll(name, cdsObj, utr5Obj, utr3Obj);
 					
 					scoreObj.sumScore();
-					if (!isApplet && (i+1)%1000==0) Out.rp("processed", i, pairid.size());
+					if ((i+1)%1000==0) Out.rp("processed", i, pairid.size());
 				}
 				else cntNotAlign++;
 			}
@@ -263,7 +261,7 @@ public class SumStats {
 				
 				if (ka  >Globalx.dNullVal) {sumKa += ka;     nKa++;}
 				if (ks  >Globalx.dNullVal) {sumKs += ks;     nKs++;}
-				if (kaks>Globalx.dNullVal) {sumKaKs += kaks; nKaKs++; kkVec.add(kaks);}
+				if (kaks>Globalx.dNullVal) {kkVec.add(kaks);}
 				if (pval>Globalx.dNullVal) {sumPval += pval; nPval++;}
 				
 				// if change here, change in PairQueryPanel 
@@ -283,8 +281,8 @@ public class SumStats {
 		Vector <Double> kkVec = new Vector <Double> (); // for quartiles
 		int [] kcnt = new int [4]; 
 		int [] pcnt = new int [4]; 
-		double sumKa=0.0, sumKs=0.0, sumKaKs=0.0, sumPval=0.0;
-		int nKa=0, nKs=0, nKaKs=0, nPval=0;
+		double sumKa=0.0, sumKs=0.0,  sumPval=0.0;
+		int nKa=0, nKs=0, nPval=0;
 		
 		String infoStr = "";
 	} // End KaKs class

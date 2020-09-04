@@ -169,6 +169,10 @@ public class ProjectPanel extends JPanel {
 				newProjectName = JOptionPane.showInputDialog(theCompilePanel.getParentFrame(), 
 				        "Enter new project name", Globals.MTCW, JOptionPane.PLAIN_MESSAGE);
 				if(newProjectName == null) continue;
+				
+				if (newProjectName.startsWith(Globals.MTCW)) { // CAS304
+					newProjectName = newProjectName.substring(Globals.MTCW.length()+1);
+				}
 					
 				valid = true;
 				if (newProjectName.equals(Globals.Compile.summaryDir)) {
@@ -278,8 +282,8 @@ public class ProjectPanel extends JPanel {
 	}
 	
 	public String getCurProjName() { 
-		if(cmbProject.getSelectedIndex() == 0) return null;
-		else  return (String) cmbProject.getSelectedItem();
+		if (cmbProject.getSelectedIndex() == 0) return null;
+		else  return  cmbProject.getSelectedItem();
 	}
 	
 	public boolean checkDBName() {

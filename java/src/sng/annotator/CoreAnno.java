@@ -16,7 +16,6 @@ import util.align.AlignCompute;
 import util.align.AlignPairOrig;
 import util.align.AlignData;
 import util.database.DBConn;
-import util.methods.BlastArgs;
 import util.methods.ErrorReport;
 import util.methods.Out;
 

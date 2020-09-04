@@ -125,7 +125,7 @@ public class STCWChooser extends JFrame {
 		                       DefaultMutableTreeNode node =
 		                           (DefaultMutableTreeNode) dbTree.getLastSelectedPathComponent();
 		                       DBInfo dbObj = (DBInfo) node.getUserObject();
-				               new STCWFrame(hostsObj, dbObj, false);
+				               new STCWFrame(hostsObj, dbObj);
 		                   }
 		               }
 	        	   }
@@ -151,7 +151,7 @@ public class STCWChooser extends JFrame {
 	               DefaultMutableTreeNode node = (DefaultMutableTreeNode)
 	                   dbTree.getLastSelectedPathComponent();
 	               DBInfo dbObj = (DBInfo) node.getUserObject();
-	               new STCWFrame(hostsObj, dbObj, false);
+	               new STCWFrame(hostsObj, dbObj);
 	        	   }
 	        	   catch(Exception e) {ErrorReport.prtReport(e, "Error launching viewSingleTCW window");}
 	           }
@@ -331,39 +331,7 @@ public class STCWChooser extends JFrame {
 		UIManager.put("RadioButtonMenuItem.selectionBackground", selectColor);
 		UIManager.put("RadioButton.focus", selectColor);
 	}
-	/*********************************************************
-	 * Error messages for STCWFrame
-	 */
-	static public void addAppletMemory(Vector <String> errorStrings) {
-		errorStrings.add("First try increasing the size (-Xmx) in the viewSingleTCW file.");
-		errorStrings.add("If that does not work, increase your memory size as follows:");
-		errorStrings.add("");
-		errorStrings.add("For Windows:");
-		errorStrings.add("- From the Start menu button, select Settings, then Control Panel to open the Control Panel.");
-		errorStrings.add("- Double click the Java icon to open the 'Java Control Panel'.");
-		errorStrings.add("- Select the 'Java' tab.");
-		errorStrings.add("- Click the 'View' button under 'Java Applet Runtime Settings'.");
-		errorStrings.add("- For each row, click the 'Java Runtime Parameters' column and enter '-Xmx512m' without the quotes.");
-		errorStrings.add("- Click the 'OK' buttons to close the Control Panel.");
-		errorStrings.add("- Restart your browser.");
-		errorStrings.add("");
-		errorStrings.add("For Unix:");
-		errorStrings.add("- Open a terminal and change to the Java installation directory (e.g., /usr/jre1.6.0_03).");
-		errorStrings.add("- Execute bin/ControlPanel to open the 'Java Control Panel'.");
-		errorStrings.add("- Select the 'Java' tab.");
-		errorStrings.add("- Click the 'View' button under 'Java Applet Runtime Settings'.");
-		errorStrings.add("- For each row, click the 'Java Runtime Parameters' column and enter '-Xmx512m' without the quotes.");
-		errorStrings.add("- Click the 'OK' buttons to close the Control Panel.");
-		errorStrings.add("- Restart your browser.");
-		errorStrings.add("");
-		errorStrings.add("For Mac:");
-		errorStrings.add("- In the Finder, select 'Go' then select 'Computer'.");
-		errorStrings.add("- In the new window, select 'Applications', then 'Utilities', then 'Java'.");
-		errorStrings.add("- Double-click 'Java Plugin Settings' to open the 'Java Control Panel'.");
-		errorStrings.add("- Under 'Java Runtime Parameters' enter '-Xmx512m' without the quotes.");
-		errorStrings.add("- Click the 'Apply Now' button and close the Control Panel.");
-		errorStrings.add("- Restart your browser.");
-	}
+	
 	public void windowActivated(WindowEvent arg0) {}
 	public void windowClosing(WindowEvent arg0) {}
 	public void windowDeactivated(WindowEvent arg0) {}

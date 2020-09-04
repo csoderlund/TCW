@@ -87,7 +87,6 @@ public class LoadSingleGO {
 					hg.add(gonum, ec); 
 					// Seed goMap with all direct GOs
 					if (!goMap.containsKey(gonum)) goMap.put(gonum, new GOinfo());
-					goMap.get(gonum).nHits++;
 				}
 				hitMap.put(hitid, hg);
 			}
@@ -243,7 +242,6 @@ public class LoadSingleGO {
 						int gonum2 = rs.getInt(1);
 						if (!hitObj.goMap.containsKey(gonum2)) {
 							hitObj.goMap.put(gonum2, ec); // add inherited
-							goMap.get(gonum2).nHits++;
 							cnt++;
 							if (cnt%1000==0) Out.r("Add inherited to hit " + cnt);
 						}
@@ -443,7 +441,7 @@ public class LoadSingleGO {
 	private class GOinfo {
 		int level=0;
 		String desc="", term_type="";
-		int nSeqs=0, nHits=0;
+		int nSeqs=0;
 		double bestEval=1000.0; // this is in the database, but not used because can vary for filtered set.
 		boolean added=false, hasInfo=false;
 	}

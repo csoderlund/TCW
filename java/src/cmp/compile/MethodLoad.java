@@ -222,6 +222,7 @@ public class MethodLoad {
 						Out.PrtWarn("Example Line :" + line);
 						Out.PrtWarn("Too many bad prefixes -- check file");
 						bSuccess=false;
+						reader.close();
 						return;
 					}
 					continue;
@@ -251,6 +252,7 @@ public class MethodLoad {
 					if (skip>100 && add==0) {
 						Out.PrtError("Too many bad indentifiers and no good ones -- check file");
 						bSuccess=false;
+						reader.close();
 						return;
 					}
 					continue;

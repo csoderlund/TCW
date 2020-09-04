@@ -309,25 +309,7 @@ public class AlignPairView3Panel extends JPanel {
 			//scroller.getViewport().getView().setVisible( true );
 		} catch (Exception e) {ErrorReport.reportError(e);}
 	}
-	// not working
-	private void setZoom ( )
-	{
-		int nViewPortWidth = (int)scroller.getViewport().getBounds().getWidth();
-		int nOptBasesPer = 1;
-		int nCurAvailable;
-		int nCurBasesPer;
-		
-		// Notify all sub-panels
-		for (AlignPair3Panel curPanel : theGraphicPanels) {
-			nCurAvailable = nViewPortWidth - (int)curPanel.getGraphicalDeadWidth();
-			nCurBasesPer = (int) Math.ceil( curPanel.getTotalBases () / (double)nCurAvailable );
-			nOptBasesPer = Math.max( nOptBasesPer, nCurBasesPer );
-		}		
-		
-		// Set the optimum value
-		nOptBasesPer = Math.min( nOptBasesPer, menuZoom.getItemCount() );
-		menuZoom.setSelectedIndex ( nOptBasesPer - 1 );
-	}
+	
 	// don't think I need
 	private void handleClick(MouseEvent e) {
 		int viewX = (int) (e.getX() + scroller.getViewport().getViewPosition().getX());
@@ -392,7 +374,6 @@ public class AlignPairView3Panel extends JPanel {
 		}
     }
 
-	private boolean isNT=true;
 	private boolean isShowGraphic=true;
 	
 	private MTCWFrame theParentFrame = null;
@@ -401,7 +382,7 @@ public class AlignPairView3Panel extends JPanel {
 	private JPanel buttonPanel = null;
 	private JPanel mainPanel = null;
 
-	private JComboBox menuZoom = null;
+	private JComboBox <MenuMapper> menuZoom = null;
 	private JButton btnShowType = null;
 	private JButton btnAAalign=null;
 	private JButton btnNTalign=null;

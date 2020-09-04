@@ -5,8 +5,8 @@
 Heuristic search versus dynamic programming, where this display show the results of 
 dynamic programming (DP):
 <ul>
-<li>Hits were assigned to sequences using heuristic search programs such as <tt>Blast</tt>, <tt>Diamond</tt>, 
-or <tt>Ublast</tt> when the database was build, and
+<li>Hits were assigned to sequences using heuristic search programs (e.g. <tt>Blast</tt> or <tt>Diamond</tt>) 
+ when the database was build, and
 their coordinates stored in the database; any references to 'Hit' indicate these coordinates.
 <li>Dynamic programming is a slower search, but is considered more likely to get the correct alignment;
 this display uses a semi-global dynamic programming with 
@@ -24,15 +24,17 @@ after "Hit:" are from the search program results.
 in multiple frames). The UTR is not displayed for nucleotide hits. This is not
 available for "Selected hit(s) in all frames".
 
-<p><b>Hit</b> Highlights the region from the start to end using the sequence hit coordiates; if the
+<p><b>Hit</b> Highlights the region from the start to end using the sequence hit coordinates; if the
 sequence is nucleotide, they are 
 are converted to protein coordinates and shifted to take account of the gaps.
 
-<br><i>Caveats:</i>  (1) The alignment are occassionally off by plus one. (2) This is not
+<br><i>Caveats:</i>  (1) The alignment are occasionally off by plus one. (2) This is not
 available for "Selected hit(s) in all frames".
 
 <p><b>Alignment....</b> 
-This features requires that one of the alignment boxes be selected (anywhere in the rectangle). 
+This provides a multi-line character based alignment.
+This features requires that the 2nd sequence in an alignment pair be selected;
+if none is selected, then the first alignment pair will be aligned. 
 It pops up with the following options (see last section for definition of terms):
 <ol>
 <li><b>Original semi-global  with affine gaps</b>: This shows the same alignment as

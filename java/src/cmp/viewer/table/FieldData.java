@@ -94,7 +94,7 @@ public class FieldData {
 		if (hasPCC) {
 		   addGrp(c++, "%PCC", Integer.class,       GRP_TABLE,  "perPCC" , 
 				   "Percent of the pairs with PCC>=" + Globals.PCCcutoff 
-				+ " where PCC is Pearson correlation coefficient on the RPKM values ",  false);
+				+ " where PCC is Pearson correlation coefficient on the TPM values ",  false);
 		   addGrp(c++, "minPCC", Integer.class,     GRP_TABLE,  "minPCC" , "The minimal PCC for any pair of the cluster ", false);
 		}
 		if (hasMultiScore) {
@@ -441,7 +441,7 @@ public class FieldData {
 			SEQ_SECTION[0] = "General";
 			SEQ_SECTION[1] = "Best Hit"; 
 			SEQ_SECTION[2] = "Cluster Sets";
-			SEQ_SECTION[3] = "RPKM";
+			SEQ_SECTION[3] = "TPM";
 			SEQ_SECTION[4] ="Differential Expression";
 		}
 		else {
@@ -450,7 +450,7 @@ public class FieldData {
 			SEQ_SECTION[1] = "Regions";
 			SEQ_SECTION[2] = "Best Hit"; 
 			SEQ_SECTION[3] = "Cluster Sets";
-			SEQ_SECTION[4] = "RPKM";
+			SEQ_SECTION[4] = "TPM";
 			SEQ_SECTION[5] ="Differential Expression";
 		}
 		
@@ -582,7 +582,7 @@ public class FieldData {
 		for(int x=0; x<methods.length; x++) retVal[x + offset] = "Name of Cluster is " + methods[x];		
 		offset += methods.length;
 		
-		for(int x=0; x<lib.length; x++) retVal[x + offset] = "RPKM or FPKM (normalized count) for " + lib[x];
+		for(int x=0; x<lib.length; x++) retVal[x + offset] = "TPM (normalized count) for " + lib[x];
 		offset += lib.length;
 		
 		for(int x=0; x<de.length; x++) retVal[x + offset] = "Differential Expression for " + de[x];

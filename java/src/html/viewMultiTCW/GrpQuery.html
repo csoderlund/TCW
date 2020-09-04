@@ -12,38 +12,49 @@ set and may take wait time to display.
 </ul>
 <h3>+Basic</h3>
 <ul>
-<li>Filter on cluster ID, Best Hit ID or Description. 
+<li>Filter on <tt>cluster ID</tt>, <tt>Best Hit ID</tt> or <tt>Description</tt>.  
+<ul>
+<li>The substring will only be searched if the box is checked.
+<li>The search is not case-sensitive and will find the substring anywhere in the ID or description.
+<li>The second two options have a <tt>Has</tt> and <tt>Not</tt> choice beside
+them; if <tt>Not</tt> is selected, show all clusters that do NOT have the substring. For example,
+if the substring "uncharacterized" is entered for <tt>Description</tt> along with the <tt>Not</tt>,
+only clusters without the substring "uncharacterized" in the description will be shown.
+</ul>
+<li>The <tt>#shared description</tt> filters on the <tt>%Hit</tt> column.
 </ul>
 
 <h3>+Dataset</h3>
 The multiTCW database was created from one or more singleTCW databases, where each
 one is referred to as a dataset. Hence, each cluster contains sequences from one
 or more dataset.
-<p>
+<ul>
+<li>
 Select the datasets to <tt>Include</tt>, 
 along with setting the minimum number sequences from each selected dataset. 
 If desired, select the datasets to <tt>Exclude</tt>, 
 along with setting the maximum number of sequences from each selected dataset.
 
-<p>
+<li>
 For both the include and exclude filters, you can choose to apply the sequence limit to 
  <tt>All Datasets</tt> selected, or to <tt>Any Dataset</tt> selected; in the latter case 
 the cluster will be shown if it passes the filter for at least one of the selected dataset.
-
+</ul>
 <p><i>Example: </i> Include dataset X and dataset Y, exclude all other dataset, 
 and select Taxa type 2x1. The results will show only clusters 
 with two sequences, one from X and one from Y.
 
 <h3>+Cluster Sets</h3>
 <ul>
-<li>Filter on Taxa type, which is an
+<li>Filter on <tt>Taxa</tt> column, which is an
 indicator of the composition of the cluster, where Mx1 means it contains
 M different datasets with exactly one member from each, while MxN means
 there are M different datasets, and one or more datasets has more than one
 sequence. 
-<li>Filter on Method, which is the name of the clustering method (more than one
+<li>Filter on method, which is the name of the clustering method (more than one
 group of clusters can exist in the database, where each cluster set was built with
-a given 'Method'). 
+a given 'Method'). The method is not a column, but the <tt>Overview</tt> has a table of cluster
+prefixes with their method.
 </ul>
 
 </html>

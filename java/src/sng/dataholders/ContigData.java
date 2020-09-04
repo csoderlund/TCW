@@ -243,7 +243,7 @@ public class ContigData implements Comparable<ContigData>, Serializable {
 	static public String getCloneName(String strEST) {
 		if (strEST.endsWith(".f-r"))
 			return strEST.substring(0, strEST.length() - 4);
-		else if (strEST.endsWith(".r") || strEST.endsWith(".f"))
+		else if (strEST.endsWith(Globals.def5p) || strEST.endsWith(Globals.def3p))
 			return strEST.substring(0, strEST.length() - 2);
 		else
 			return strEST;
@@ -274,9 +274,8 @@ public class ContigData implements Comparable<ContigData>, Serializable {
 	public Vector <String> getUniProtURL() {
 		Vector<String> lines = new Vector<String>();
 	
-		lines.add("Blast sequence against "
-			+ "UniProt.org\nhttp://www.uniprot.org/blast/?query=" 
-			+ getSeqData().sequenceSansGaps());
+		lines.add("Blast sequence against UniProt.org\n"
+				+ "http://www.uniprot.org/blast/?query=" + getSeqData().sequenceSansGaps());
 		return lines;
 	}
 	/**
@@ -395,10 +394,10 @@ public class ContigData implements Comparable<ContigData>, Serializable {
 	// Returns the sequence by 0-based indexing relative to the contigs sort order
 	public SequenceData getSequenceAt(int i) {
 		updateStats(); 
-		return (SequenceData) estList.get(i);
+		return  estList.get(i);
 	};
 	public SequenceData getSequenceByName(String str) {
-		return (SequenceData) estNameMap.get(str);
+		return  estNameMap.get(str);
 	};
 	
 	public SequenceData getSequenceMate(SequenceData sequence) {
@@ -414,8 +413,8 @@ public class ContigData implements Comparable<ContigData>, Serializable {
 		String strBaseName = strName.substring(0, strName.length() - 2);
 		String strInEnd = strName.substring(strName.length() - 2);
 
-		if (strInEnd.equals(".f")) return strBaseName + ".r";
-		if (strInEnd.equals(".r")) return strBaseName + ".f";
+		if (strInEnd.equals(Globals.def5p)) return strBaseName + Globals.def3p;
+		if (strInEnd.equals(Globals.def3p)) return strBaseName + Globals.def5p;
 		return null;
 	}
 	
@@ -435,8 +434,8 @@ public class ContigData implements Comparable<ContigData>, Serializable {
 		if (nameA.length() != nameB.length())
 			return false;
 
-		if (!(nameA.endsWith(".r") && nameB.endsWith(".f"))
-				&& !(nameA.endsWith(".f") && nameB.endsWith(".r")))
+		if (!(nameA.endsWith(Globals.def3p) && nameB.endsWith(Globals.def5p))
+		 && !(nameA.endsWith(Globals.def5p) && nameB.endsWith(Globals.def3p)))
 			return false;
 
 		String groupA = nameA.substring(0, nameA.length() - 1);
@@ -463,7 +462,7 @@ public class ContigData implements Comparable<ContigData>, Serializable {
 	}
 	private Vector<SequenceData> getGroupAt(int nCloneIdx) {
 		buildGroupList();
-		return (Vector<SequenceData>) groupList.get(nCloneIdx);
+		return  groupList.get(nCloneIdx);
 	}
 
 	public void setGroupSortOrder(int n) {
@@ -726,7 +725,7 @@ public class ContigData implements Comparable<ContigData>, Serializable {
 		updateStats();
 		Iterator<SNPData> iter = listSNPs.iterator();
 		while (iter.hasNext()) {
-			SNPData snp = (SNPData) iter.next();
+			SNPData snp =  iter.next();
 			if (snp.getPosition() == i)
 				return snp.maybeSNP();
 		}
@@ -800,7 +799,7 @@ public class ContigData implements Comparable<ContigData>, Serializable {
 		nSNPInDels = 0;
 
 		for (int i = 0; i < listSNPs.size(); ++i) {
-			SNPData curSNP = (SNPData) listSNPs.get(i);
+			SNPData curSNP =  listSNPs.get(i);
 
 			nSNPDeletes += curSNP.getGapCount();
 
@@ -817,8 +816,8 @@ public class ContigData implements Comparable<ContigData>, Serializable {
 		// Sort the SNP vectors so that the ones with the least missing data are first
 		Collections.sort(listSNPs, new Comparator<SNPData>() {
 			public int compare(SNPData o1, SNPData o2) {
-				SNPData snp1 = (SNPData) o1;
-				SNPData snp2 = (SNPData) o2;
+				SNPData snp1 =  o1;
+				SNPData snp2 =  o2;
 				// Got null pointer on getMissingCountg, 
 				// but can't reproduce, so at least checking for it
 				if (snp2==null || snp1==null) {
@@ -836,7 +835,7 @@ public class ContigData implements Comparable<ContigData>, Serializable {
 		// Group SNPs
 		int nGroup = 0;
 		for (int i = 0; i < listSNPs.size(); ++i) {
-			SNPData curSNP = (SNPData) listSNPs.get(i);
+			SNPData curSNP =  listSNPs.get(i);
 			if (curSNP.getCoSegregationGroup() < 1) {
 				// Found an ungrouped SNP, group it with all matches
 				++nGroup;
@@ -846,7 +845,7 @@ public class ContigData implements Comparable<ContigData>, Serializable {
 				coSeqGroup.add(curSNP);
 
 				for (int j = i + 1; j < listSNPs.size(); ++j) {
-					SNPData otherSNP = (SNPData) listSNPs.get(j);
+					SNPData otherSNP = listSNPs.get(j);
 					if (otherSNP.getCoSegregationGroup() >= 1)
 						continue;
 
@@ -877,14 +876,14 @@ public class ContigData implements Comparable<ContigData>, Serializable {
 		for (int i = 0; i <= listSNPs.size(); ++i) {
 			SNPData curSNP = null;
 			if (i < listSNPs.size())
-				curSNP = (SNPData) listSNPs.get(i);
+				curSNP =  listSNPs.get(i);
 
 			if (curSNP != null && curSNP.getCoSegregationGroup() == nLastGroup)
 				++nLastCount;
 			else {
 				// Set the count for all members of the last group
 				for (int j = i - 1; j >= 0; --j) {
-					SNPData otherSNP = (SNPData) listSNPs.get(j);
+					SNPData otherSNP =  listSNPs.get(j);
 
 					// Break out of the loop if we've reached the end of the group
 					if (otherSNP.getCoSegregationGroup() != nLastGroup)
@@ -906,7 +905,7 @@ public class ContigData implements Comparable<ContigData>, Serializable {
 		// Find the densest SNP position
 		int nBestMissing = Integer.MAX_VALUE;
 		for (int i = 0; i < listSNPs.size(); ++i) {
-			SNPData curSNP = (SNPData) listSNPs.get(i);
+			SNPData curSNP =  listSNPs.get(i);
 			if (curSNP.getMissingCount() < nBestMissing) {
 				nBestMissing = curSNP.getMissingCount();
 			}

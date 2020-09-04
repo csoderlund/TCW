@@ -12,7 +12,6 @@ import java.io.PrintWriter;
 import java.io.FileOutputStream;
 import java.sql.ResultSet;
 
-import cmp.compile.MethodLoad;
 import cmp.compile.panels.CompilePanel;
 import cmp.compile.panels.MethodPanel;
 import cmp.database.Globals;
@@ -79,7 +78,7 @@ public class MethodClosure {
 		groupFile = root;
 		
 		Out.PrtSpMsg(1, "Prefix:     " + prefix);
-		Out.PrtSpMsg(1, "Coverage:   " + (int) covCutoff + " (" + covTypes[covMode] + ")");
+		Out.PrtSpMsg(1, "Coverage:   " + covCutoff + " (" + covTypes[covMode] + ")");
 		Out.PrtSpMsg(1, "Similarity: " + simCutoff);
 		Out.PrtSpMsg(1, "Remark:     " + comment);
 		Out.PrtSpMsg(1, "");

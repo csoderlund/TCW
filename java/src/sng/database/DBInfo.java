@@ -10,7 +10,6 @@ import util.database.DBConn;
 import util.database.HostsCfg;
 import util.database.Globalx;
 import util.methods.ErrorReport;
-import util.ui.UIHelpers;
 
 public class DBInfo {
 	/*** Static *****/
@@ -74,9 +73,7 @@ public class DBInfo {
             
             db.id = rs.getString("assemblyid");
             db.username = rs.getString("username");
-            db.projectpath = rs.getString("projectpath");
             db.assemblydate = rs.getString("assemblydate");
-            db.annotationdate = rs.getString("annotationdate"); 
             
             rs = mdb.executeQuery("SELECT schemver FROM schemver");
 			if ( rs.next() ) {
@@ -98,8 +95,6 @@ public class DBInfo {
 	public DBInfo() {}
 	
 	public boolean checkDBver(HostsCfg hostsObj) {
-		if (UIHelpers.isApplet()) return false;
-		
 		try {
 			DBConn dbc = new DBConn(hostsObj.host(), dbName,hostsObj.user(), hostsObj.pass());
 			
@@ -126,6 +121,6 @@ public class DBInfo {
 	public String getID() {return id;}
 	public String getdbName() {return dbName;}
 	
-	private String id="", username="", projectpath="", assemblydate="", annotationdate="", dbVerStr="";
+	private String id="", username="",  assemblydate="", dbVerStr="";
 	private String dbName;
 }

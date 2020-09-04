@@ -38,7 +38,6 @@ import sng.util.RunQuery;
 import sng.util.Tab;
 import sng.viewer.STCWFrame;
 import util.methods.Converters;
-import util.methods.Out;
 import util.methods.Static;
 import util.ui.CollapsiblePanel;
 import util.ui.ToggleTextComboField;
@@ -56,6 +55,11 @@ public class QueryContigTab extends Tab
 	{
 		super(inFrame, null); 
 		metaData = inFrame.getMetaData();
+		norm = metaData.getNorm();
+		if (norm.contentEquals("TPM")) {
+			LIBRARY_HEADER = "Counts and " + norm;
+			LIBRARY_DESCRIPTION = "Filter sequences based on counts or " + norm;
+		}
 		JLabel test = new JLabel ( "99999999" );
 		defaultLabelDims = test.getPreferredSize();
 		test = new JLabel ("999999"); // size of number text box
@@ -196,7 +200,7 @@ public class QueryContigTab extends Tab
 		chkCounts = new JRadioButton("use counts");
 		chkCounts.setBackground(Color.WHITE);
 		
-		String ppx = "use RPKM ";
+		String ppx = "use  " + norm + " ";
 		chkRPKM = new JRadioButton(ppx);
 		chkRPKM.setBackground(Color.WHITE);
 		chkCounts.addActionListener(btnListener);
@@ -339,7 +343,7 @@ public class QueryContigTab extends Tab
 		chkFilterPVal = new JCheckBox();
 		chkFilterPVal.addItemListener(filterPvalListener);
 		
-		cmbBoolPVal = new JComboBox();
+		cmbBoolPVal = new JComboBox <String> ();
 		cmbBoolPVal.setBackground(Color.WHITE);
 		cmbBoolPVal.addItem("EVERY");
 		cmbBoolPVal.addItem("ANY");
@@ -1226,7 +1230,7 @@ public class QueryContigTab extends Tab
 		
 		// filter set, create clause
 		boolean bNormalizedMode = chkRPKM.isSelected();
-		String sum =  bNormalizedMode ? "RPKM " : "Counts ";
+		String sum =  bNormalizedMode ? norm + " " : "Counts ";
 		String mode = bNormalizedMode ? "N" : "";
 		String prefix = "contig.L" + mode + "__" ;
 		
@@ -1682,7 +1686,7 @@ public class QueryContigTab extends Tab
 	//PVal controls
 	private JTextField txtPVal = null;
 	private JCheckBox chkFilterPVal = null;
-	private JComboBox cmbBoolPVal = null;
+	private JComboBox <String> cmbBoolPVal = null;
 	private JCheckBox [] colSelectPVal = null;
 	private JRadioButton[] colUpOnly = null;
 	private JRadioButton[] colDownOnly = null;
@@ -1724,8 +1728,8 @@ public class QueryContigTab extends Tab
 	//Labels
 	private static final String GENERAL_HEADER = "General";
 	private static final String GENERAL_DESCRIPTION = "Find sequences with the specified attributes.";
-	private static final String LIBRARY_HEADER = "Counts and RPKM";
-	private static final String LIBRARY_DESCRIPTION = "Filter sequences based on counts or RPKM";
+	private static String LIBRARY_HEADER = "Counts and RPKM";
+	private static String LIBRARY_DESCRIPTION = "Filter sequences based on counts or RPKM";
 	private static final String NFOLD_HEADER = "N-fold";
 	private static final String NFOLD_DESCRIPTION = "Filter on n-fold change between two conditions";
 	private static final String PVAL_HEADER = "Differential Expression";
@@ -1741,4 +1745,5 @@ public class QueryContigTab extends Tab
 	private int nChildren = 0;
 	private RunQuery theQuery = null;
 	private FieldContigData tempContigData = null;
+	private String norm="RPKM";
 }

@@ -430,20 +430,20 @@ public class QRProcess {
 			
 			if (re == null) initJRI();
 	        	
-	        	Out.Print("Assigning R variables");
-	        	/********************************************
-	        	 * XXX these assignments are used by the methods
-	        	 *
-	        	doCmd(groupR + " <- c(rep(\"Grp1\", " + nSamp1 + " ),rep(\"Grp2\", " +nSamp2 + "))"); 
-	        	doCmd("colnames(" + countDataR + ") <- " + colNamesR); gives error
-	        	*/
-	        	re.assign("gc",gc); 				Out.PrtSpMsg(1, "gc: GC values of sequences");
-	        	re.assign(rowNamesR,rowNames); 	Out.PrtSpMsg(1,rowNamesR + ": sequences (row) names");
+        	Out.Print("Assigning R variables");
+        	/********************************************
+        	 * XXX these assignments are used by the methods
+        	 *
+        	doCmd(groupR + " <- c(rep(\"Grp1\", " + nSamp1 + " ),rep(\"Grp2\", " +nSamp2 + "))"); 
+        	doCmd("colnames(" + countDataR + ") <- " + colNamesR); gives error
+        	*/
+        	re.assign("gc",gc); 				Out.PrtSpMsg(1, "gc: GC values of sequences");
+        	re.assign(rowNamesR,rowNames); 		Out.PrtSpMsg(1,rowNamesR + ": sequences (row) names");
 	        re.assign(grpNamesR, colNames); 	Out.PrtSpMsg(1,grpNamesR + ": group (column) names");
 	     	re.assign(repNamesR, allReps.toArray(new String[0])); 
-	     									Out.PrtSpMsg(1,repNamesR + ": replicate names");
+	     										Out.PrtSpMsg(1,repNamesR + ": replicate names");
 	     	
-	        re.assign("counts", counts);  	Out.PrtSpMsg(1,"counts: counts of sequences");
+	        re.assign("counts", counts);  		Out.PrtSpMsg(1,"counts: counts of sequences");
 	        	doCmd(countDataR + " <- array(counts,dim=c(" + nSeq + "," + nRepSamps + "))");
 	        doCmd("rm(counts)");
 	        doCmd("rownames(" + countDataR + ") <- " + rowNamesR);
@@ -454,7 +454,8 @@ public class QRProcess {
 	}
 	/****************************************************
 	 * Produces same cpm as: edgeR.cpm(y, normalized.lib.sizes=FALSE, log=FALSE)
-	 * 3Sept18 tested again on hind with latest edgeR. 
+	 * 3Sept18 tested again on hind with latest edgeR. It does not give the exact same answer
+	 * when edgeR samSize = lib.size*norm.factors (i.e. edgeR computed norm.factors are used)
 	 */
 	private boolean [] loadFilter(int filCnt, int filCPM, int filCPMn, 
 			int [][]cntMatrix, String [] colNames, String [] rowNames, Vector <String> repNames) {
@@ -494,8 +495,7 @@ public class QRProcess {
 			return isKeep;
 		}	
 		/** CPM **/
-		// This does not give the exact same answer as R CpM because it uses
-		// samSize = lib.size*norm.factors 
+	
 		Out.Print("Using CPM filter > " + filCPM  + " for >= " + filCPMn);
 		double [] samSize = new double [nRepSamp];
 		

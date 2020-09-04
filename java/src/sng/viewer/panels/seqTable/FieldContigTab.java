@@ -212,7 +212,8 @@ public class FieldContigTab extends Tab implements ActionListener {
 		});
 		libCntPanel.add(chkLibExpLevel);
 		
-		chkLibNExpLevel = Static.createCheckBox("RPKM Normalized Counts");
+		String norm = theParentFrame.getMetaData().getNorm(); // CAS304
+		chkLibNExpLevel = Static.createCheckBox(norm + " Normalized Counts");
 		chkLibNExpLevel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				updateLibSelectedGroupFields(FieldContigData.N_LIBRARY_COUNT_ALL, 

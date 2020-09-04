@@ -28,13 +28,10 @@ import util.methods.Static;
 import util.methods.Stats;
 import util.ui.DisplayFloat;
 import util.ui.DisplayInt;
-import util.ui.UIHelpers;
-import util.ui.UserPrompt;
 
 public class MainTable extends MainTableSort {
 	private static final long serialVersionUID = 6393222947327727667L;
 	private static final String GO_FORMAT = "GO:%07d";
-	private boolean isApplet=false;
 	
 	public MainTable (FieldMapper inFields, 
 						Vector <String> tableRows, 
@@ -44,7 +41,6 @@ public class MainTable extends MainTableSort {
 	{
 		super(inFields, tableRows, inDefaultFields, refreshListener);
         
-		isApplet = UIHelpers.isApplet();
 		if (nTotalRows == 0) return;	
 
         autofitColumns();  
@@ -188,7 +184,7 @@ public class MainTable extends MainTableSort {
             pw.print("\n");
             
             for (int row = 0;  row < rowCnt;  row++) {
-                if(!isApplet && row % 100 == 0) Out.r("Wrote " + row);
+                if(row % 100 == 0) Out.r("Wrote " + row);
                 for (int col = 1;  col < nCol;  col++) {
                     Object obj = getValueAt(row, col);
                     String s = (obj == null ? "" : obj.toString()); 
@@ -232,7 +228,7 @@ public class MainTable extends MainTableSort {
             String query = "SELECT consensus FROM contig WHERE contigid = '";
          
             for (int row = 0;  row < rowCnt;  row++) {
-                if(!isApplet && row % 100 == 0) Out.r("Wrote " + row);
+                if(row % 100 == 0) Out.r("Wrote " + row);
                 
                 String ctg= seqIDs[row]; 
                 rs = mdb.executeQuery(query + ctg + "'");
@@ -276,7 +272,7 @@ public class MainTable extends MainTableSort {
             String query = "SELECT DUHID, uniprot_id FROM pja_db_unitrans_hits WHERE contigid = '";
          
             for (int row = 0;  row < rowCnt;  row++) {
-                if(!isApplet && row % 100 == 0) Out.r("Found " + row);
+                if(row % 100 == 0) Out.r("Found " + row);
                 
                 String ctg= seqIDs[row]; 
                 rs = mdb.executeQuery(query + ctg + "' and " + filter);
@@ -295,9 +291,9 @@ public class MainTable extends MainTableSort {
             query = "SELECT hitID,description,species, dbtype, sequence, repid FROM pja_db_unique_hits WHERE DUHID = ";
             int cnt=0, nonUP=0;
             for (String hit : hitsPrt.keySet()) {
-            		int hitid = hitsPrt.get(hit);
-            		cnt++;
-                if(!isApplet && cnt % 100 == 0) Out.r("Wrote " + cnt);
+            	int hitid = hitsPrt.get(hit);
+            	cnt++;
+                if(cnt % 100 == 0) Out.r("Wrote " + cnt);
                 
                 rs = mdb.executeQuery(query + hitid);
                 if (rs.next()) {
@@ -354,7 +350,7 @@ public class MainTable extends MainTableSort {
             		           " FROM contig WHERE contigid = '";
            
             for (int row = 0;  row < rowCount;  row++) {
-                if(!isApplet && row % 100 == 0) Out.r("Processed " + row);
+                if(row % 100 == 0) Out.r("Processed " + row);
                 
                 String ctg = seqIDs[row]; 
                 ResultSet rset = mdb.executeQuery(query + ctg + "'");
@@ -465,7 +461,7 @@ public class MainTable extends MainTableSort {
         			}
         			expPW.println(sb.toString());
         			cnt++;
-        			if (!isApplet && cnt%100 == 0) Out.r("Wrote " + cnt);
+        			if (cnt%100 == 0) Out.r("Wrote " + cnt);
         		}
         		expPW.close();
         		rs.close(); mdb.close();
@@ -511,7 +507,7 @@ public class MainTable extends MainTableSort {
  	    			 
  	    		 int cnt=0, cntGO=0, cntNoGO=0;
              for (int row = 0;  row < rowCount;  row++) {
-                 if(!isApplet && row % 100 == 0) Out.r("Processed " + row);
+                 if(row % 100 == 0) Out.r("Processed " + row);
                  
                  String seqID = seqIDs[row]; 
                  ResultSet rset = mdb.executeQuery(query + seqID + "'");
@@ -619,7 +615,7 @@ public class MainTable extends MainTableSort {
                 }
                 rs.close();
               
-                if (!isApplet && cnt%100==0)
+                if (cnt%100==0)
   	 	          Out.r("Seq# " + (cnt+1) +
   	 	        		"   Unique GOs " + goCntMap.size() + "  #total GO-seqs " + cntGoSeqPairs );
                 cnt++;
@@ -671,7 +667,7 @@ public class MainTable extends MainTableSort {
 		        		pw.write("\n");
 		        		nrows++;
 		        		
-		        		if (!isApplet && nrows%100==0) Out.r("Output go#");
+		        		if (nrows%100==0) Out.r("Output go#");
 		        	}
 		        	else{Out.PrtError("Failed to find GO:" + gonum);}
 	        }
@@ -735,11 +731,6 @@ public class MainTable extends MainTableSort {
 			Out.prt(msg + " - " + label + " to " + filePath);
 			frame.lastSaveFilePath = filePath; 
 			
-			boolean isApplet = UIHelpers.isApplet();
-			if(isApplet) {
-			    UserPrompt.showMsg("Exporting a file across the network is very slow.\n" +
-			    		"A message box will popup when done.");
-			}
  			return new PrintWriter(new BufferedWriter(new FileWriter(f, append)));
  		} 
  		catch (Exception e) {ErrorReport.prtReport(e, "Error: cannot write file");}

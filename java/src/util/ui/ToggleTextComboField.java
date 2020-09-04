@@ -22,7 +22,7 @@ public class ToggleTextComboField extends JPanel implements ItemSelectable{
 	private static final long serialVersionUID = 1L;
 	private JCheckBox checkBox;
 	private JTextField textField;
-	private JComboBox optionList;
+	private JComboBox <String> optionList;
 	private JLabel trailingLabel;
 	ItemListener listener;
 	
@@ -54,7 +54,7 @@ public class ToggleTextComboField extends JPanel implements ItemSelectable{
 		add(checkBox);
 		add(Box.createHorizontalStrut(5));
 		
-		optionList = new JComboBox(options);
+		optionList = new JComboBox <String> (options);
 		optionList.setSelectedIndex(defaultOption);
 		optionList.setMaximumSize(optionList.getPreferredSize());
 		optionList.addItemListener(new ItemListener() {

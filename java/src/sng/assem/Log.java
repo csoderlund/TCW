@@ -2,6 +2,7 @@ package sng.assem;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.util.Formatter;
 import java.util.Date;
 import java.util.HashSet;
@@ -9,53 +10,49 @@ import java.util.HashMap;
 
 import sng.assem.enums.LogAction;
 import sng.assem.enums.LogLevel;
-import util.methods.ErrorReport;
+import sng.database.Version;
 import util.methods.TimeHelpers;
 
 
 // Logging helper class. 
-// Initialize it once to set the static members, and
-// then all methods can be called statically, so
+// Initialize it once to set the static members, and then all methods can be called statically, so
 // a log object does not need to be passed around. 
 
-// Most calls take a LogLevel enum, which tells which log to 
-// put the message in, and whether to display it to the screen.
-// (These actions are set up during initialization, using the
-// LogAction enum). 
+// Most calls take a LogLevel enum, which tells which log to  put the message in, and whether to display it to the screen.
+// (These actions are set up during initialization, using the LogAction enum). 
+//
+// 
 
 
 public class Log
 {
-	static public FileWriter logFW = null;
-	static public File logFile = null;
-	static private Formatter logFormat = null;
-	static public String mLogPath = "";
-
-	static public FileWriter dbgFW = null;
-	static public File dbgFile = null;
-	static private Formatter dbgFormat = null;
-	static public String mDbgPath = "";
-	static public String mLastMsg;
+	// log errors
+	static public String errFile = "sTCW.error1.log";
+	static private int nNumLog=0;
+	
+	// log status
+	static private FileWriter 	dbgFW = null;   // debug file
+	static private Formatter 	dbgFormat = null;
+	
+	static private FileWriter 	logFW = null;
+	static private Formatter 	logFormat = null;
+	static private String 		mLastMsg;
+	static public File 			logFile = null;
 	
 	static public HashMap<LogLevel,HashSet<LogAction>> mActions = null;
 
-	public Log()
-	{
+	public Log() {
 		mActions = new HashMap<LogLevel,HashSet<LogAction>>();		
 		for (LogLevel lvl : LogLevel.values())
-		{
 			mActions.put(lvl, new HashSet<LogAction>());
-		}
 	}
-	private Log(FileWriter fw)
-	{
+	private Log(FileWriter fw) {
 		this();
 		logFW = fw;
 		logFormat = new Formatter(logFW);
 	}
 
-	public Log(File file) throws Exception
-	{
+	public Log(File file) throws Exception {
 		this(new FileWriter(file, true));
 		logFile = file;
 		System.err.println("Log File:" + file.getAbsolutePath()); 
@@ -63,51 +60,30 @@ public class Log
 	public static void setDebugLog(File file) throws Exception
 	{
 		dbgFW = new FileWriter(file,false); 
-		dbgFile = file;
 		dbgFormat = new Formatter(dbgFW);
 	}
 	public static void addLogAction(LogLevel lvl, LogAction action)
 	{
 		if (!mActions.containsKey(lvl)) 
-		{
 			mActions.put(lvl, new HashSet<LogAction>());
-		}
+
 		mActions.get(lvl).add(action);
 	}
-	public static void exception(Exception e)
-	{   
-		System.err.println(e.getMessage() + " (see sTCW.error1.log)");
-		try
-		{
-			if (dbgFW != null)
-			{
-				for (StackTraceElement ste : e.getStackTrace())
-				{
-					dbgFW.write(ste.toString() + "\n");
-					dbgFW.flush();
-				}
-			}
-			if (Utils.isDebug()) e.printStackTrace();
-			FileWriter fw = new FileWriter(new File("sTCW.error1.log"));
-			fw.write(e.getMessage());
-			for (StackTraceElement elt : e.getStackTrace())
-			{
-				fw.write(elt.toString() + "\n");
-			}
-			fw.flush();
-			fw.close();			
-		}
-		catch (Exception foo)
-		{
-		}
-	}
+	
 	public static String head(String s, LogLevel lvl) 
 	{		
-		return msg("\n>>>" + s + " " + TimeHelpers.getDate() + "\n",lvl);
+		String x = String.format("%-40s", s);
+		return msg("\n>>>" + x + " " + TimeHelpers.getDate() + "\n",lvl);
 	}
 	public static String head(String s) 
 	{		
-		return msg("\n>>>" + s + " " + TimeHelpers.getDate() + "\n", LogLevel.Basic);
+		String x = String.format("%-40s", s);
+		return msg("\n>>>" + x + " " + TimeHelpers.getDate() + "\n", LogLevel.Basic);
+	}
+	public static String head2(String s) // no initial newline
+	{		
+		String x = String.format("%-40s", s);
+		return msg(">>>" + x + " " + TimeHelpers.getDate() + "\n", LogLevel.Basic);
 	}
 
 	public static String indentMsg(String s, LogLevel lvl)
@@ -143,11 +119,7 @@ public class Log
 				logFW.write(s + "\n");
 				logFW.flush();
 			}
-			if (mActions.get(lvl).contains(LogLevel.Basic)) 
-			{
-				logFW.write(s + "\n");
-				logFW.flush();
-			}
+			
 			if (mActions.get(lvl).contains(LogAction.DebugLog))
 			{
 				dbgFW.write(s + "\n");
@@ -274,27 +246,113 @@ public class Log
 		return mLastMsg;
 	}
 
-	public static void die(String s) 
+	public static synchronized void  write(char c) {
+		System.err.print(c);
+	}
+	public static void timeStamp() {
+      	Date date = new java.util.Date();
+ 		msg("Current Date Time : " + date.toString(),LogLevel.Detail);
+	}
+	
+	public static void errLog(String msg){
+		Log.indentMsg("Error -- " + msg, LogLevel.Basic);
+	}
+	public static void warnLog(String msg) {
+		Log.indentMsg("Warning -- " + msg, LogLevel.Basic);
+	}
+	static void termOut(String msg)
 	{
-		try
-		{
-			msg("Fatal Error: " + s,LogLevel.Basic);
+		System.err.println("\t" + msg);	
+	}
+	/*********************************************************
+	 * Error report
+	 * CAS304 add 
+	 */
+	private static void exception(Throwable e, String debugInfo, boolean replaceContents) {
+		
+		PrintWriter pWriter = null;
+		try {
+			if(replaceContents) {
+				pWriter = new PrintWriter(new FileWriter(errFile));
+				nNumLog = 0; 
+			}
+			else {
+				pWriter = new PrintWriter(new FileWriter(errFile, true));
+			}
+		} catch (Exception e1) {
+			System.err.println("An error has occurred, however TCW was unable to create an error log file " + errFile);
+			e1.printStackTrace();
+			return;
 		}
-		catch(Exception e)
-		{
+		if (nNumLog==0) {
+			pWriter.println("");
+			Date date = new java.util.Date();
+			pWriter.println("Current Date Time : " + date.toString());
+		}
+		nNumLog++; 
+		pWriter.println(debugInfo);
+		
+		if(debugInfo != null) {
+			System.err.println(debugInfo + "  " + e.getMessage());
+			System.err.println("See " + errFile);
+		}
+		else System.err.println("Error: see " + errFile);
+		
+		e.printStackTrace(pWriter);
+		pWriter.close();
+	}
+	private static void out(String debugInfo) {
+		PrintWriter pWriter = null;
+		try {
+			pWriter = new PrintWriter(new FileWriter(errFile, true));
+			if (nNumLog==0) {
+				pWriter.println("");
+				Date date = new java.util.Date();
+				pWriter.println("Current Date Time : " + date.toString());
+			}
+			nNumLog++; 
+			pWriter.println(debugInfo);
+			
+			pWriter.close();	
+		} catch (Exception e1) {
+			System.err.println("An error has occurred, however TCW was unable to create an error log file " + errFile);
+			e1.printStackTrace();
+			return;
+		}
+	}
+	public static void warnFile(String s) {
+		out( "Warning -- " + s);
+	}
+	public static void warn(String s) {
+		System.err.println( "Warning -- " +s);
+		out( "Warning -- " + s);
+	}
+	public static void errFile(String s) {
+		out( "Error   -- " + s);
+	}
+	public static void error(String s) {
+		System.err.println("Error   -- " +s);
+		out( "Error   -- " + s);
+	}
+	public static void warn(Exception e, String s) {
+		exception(e, "Warning -- " + s, false);
+	}
+	public static void error(Exception e, String s) {
+		exception(e, "Error   -- " + s, false);
+	}
+	
+	public static void die(Exception e, String s) { 
+		exception(e, "Error -- " + s, false);
+		die(s);
+	}
+	public static void die(String s) {
+		try {
+			msg("Fatal Error -- " + s,LogLevel.Basic);
+		}
+		catch(Exception e) {
 			System.err.println(s);
 			System.exit(-1);
 		}
 		System.exit(-1);
-	}
-
-	public static synchronized void  write(char c)
-	{
-		System.err.print(c);
-	}
-	public static void timeStamp()
-	{
-      	Date date = new java.util.Date();
- 		msg("Current Date Time : " + date.toString(),LogLevel.Detail);
 	}
 }

@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import sng.assem.enums.*;
 import sng.assem.helpers.*;
 import util.database.DBConn;
+import util.database.Globalx;
 
 // Single contig; direct result of a cap assembly.
 // Corresponds to the 'contig' database table.
@@ -867,7 +868,11 @@ public class SubContig
 		int val = (finalized ? 1 : 0);
 		db.executeUpdate("update contig set finalized=" + val + " where ctgid=" + mID);
 	}
-
+	/***********************************************************************
+	 * RPKM, Rstat, totalExp, totalExpN for current contig.
+	 * These are computed in AssemSkip for no assembly
+	 * For assembled contigs, only RPKM is currently computed
+	 */
 	public void libCounts(DBConn db) throws Exception
 	{
 		// First initialized to zero for all libs, including the ones from expression files
@@ -879,27 +884,32 @@ public class SubContig
 				" and clone.libid=contig_counts.libid) where contig_counts.contigid='" + mIDStr + "'");
 		
 		// Now add the counts that came from loading the expression files *clone_exp table)
-		db.executeUpdate("update contig_counts set count=count+(select IFNULL(sum(count),0) from clone_exp  " + 
+		db.executeUpdate("update contig_counts set count=count+"
+				+ "(select IFNULL(sum(count),0) from clone_exp  " + 
 				" join clone on clone.cid=clone_exp.cid " + 
 				" join contclone on contclone.cid=clone.cid " + 
 				" join library on library.lid=clone_exp.lid " +
 				" where contclone.contigid='" + mIDStr + "' " +
-				" and library.libid=contig_counts.libid and clone_exp.rep=0) where contig_counts.contigid='" + mIDStr + "' ");
+				" and library.libid=contig_counts.libid and clone_exp.rep=0) "
+				+ " where contig_counts.contigid='" + mIDStr + "' ");
 		
 		// transfer the counts to the contig table
-		ResultSet rs = db.executeQuery("select library.libid, count, library.ctglib, libsize from contig_counts join library on library.libid=contig_counts.libid " +
+		ResultSet rs = db.executeQuery(
+				"select library.libid, count, libsize, library.ctglib from contig_counts "
+				+ " join library on library.libid=contig_counts.libid " +
 				" where contigid='" + mIDStr + "' ");
 		TreeMap<String,Integer> counts = new TreeMap<String,Integer>();
 		TreeMap<String,Integer> libsizes = new TreeMap<String,Integer>();
 		TreeSet<String> ctgLibs = new TreeSet<String>();
-		while (rs.next())
+		while (rs.next()) // CAS304 change to numeral gets
 		{
-			String libid = rs.getString("libid");
-			int count = rs.getInt("count");
-			int size = rs.getInt("libsize");
+			String libid = rs.getString(1);
+			int count = rs.getInt(2);
+			int size = rs.getInt(3);
 			counts.put(libid,count);
 			libsizes.put(libid,size);
-			boolean ctglib = rs.getBoolean("ctglib");
+			
+			boolean ctglib = rs.getBoolean(4);
 			if (ctglib) ctgLibs.add(libid);
 		}
 		rs.close();
@@ -913,22 +923,24 @@ public class SubContig
 			//double libsize = (double)libsizes.get(libid);
 			//int normalized = (int)Math.floor(denom*(count/libsize));
 			//int rpkm = (int)Math.floor((1000000.0D/libsize)*(count/lenkb));
-			String col = "L__" + libid;
-			String colN = "LN__" + libid;
+			String col = Globalx.LIBCNT + libid;
+			String colN = Globalx.LIBRPKM + libid;
 			db.executeUpdate("update contig set " + col  + "=" + count + " where contigid='" + mIDStr + "'");
 			db.executeUpdate("update contig,library set " + colN + 
 					" =  (1000000/library.libsize)*(" + col + "*1000/consensus_bases) " +
 					" where library.libid='" + libid + "' and contigid='" + mIDStr + "'");
 			if (ctgLibs.contains(libid)) continue;
-			Ls.add("L__" + libid);
-			LNs.add("LN__" + libid);
+			Ls.add(col);
+			LNs.add(colN);
 		}
 		if (Ls.size() > 0)
 		{
 			String LSum = Utils.join(Ls,"+");
 			String LNSum = Utils.join(LNs,"+");
-			db.executeUpdate("update contig set totalexp=(" +LSum + "), totalexpN=(" + LNSum + ") where contigid='" + mIDStr + "'");
+			db.executeUpdate("update contig set totalexp=(" +LSum + "), totalexpN=(" + LNSum + ") "
+					+ " where contigid='" + mIDStr + "'");
 		}
+		db.executeUpdate("update assem_msg set norm='RPKM' where aid=" + mAID);
 	}
 	public void snpCounts(DBConn db) throws Exception
 	{
@@ -1614,7 +1626,7 @@ public class SubContig
 		for (int i = 0; i < maxCols; i++)
 		{
 			if (ccsArray[i] == 0) break;
-			newCCSBuild.append((char)ccsArray[i]);		
+			newCCSBuild.append(ccsArray[i]);		// CAS304 removed (char) before ccs...
 		}
 		String newCCS = newCCSBuild.toString();
 		if (newCCS.length() < ccsUnStarred.length())
@@ -2220,7 +2232,7 @@ public class SubContig
 			}
 			catch (Exception e)
 			{
-				System.err.println("Unknown clone in contig:" + c.mName);
+				System.err.println("Unknown clone in contig:" + c.mCloneName);
 				e.printStackTrace();
 				System.exit(0);
 			}

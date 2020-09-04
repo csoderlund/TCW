@@ -117,6 +117,7 @@ public class Pairwise {
 						Out.PrtWarn("Cannot parse line #" + cnt + " : " + line);
 						if (bad>10) {
 							Out.PrtError("Too many errors - abort");
+							reader.close();
 							return;
 						}
 						bad++;
@@ -127,11 +128,13 @@ public class Pairwise {
 					if (UTstr1.compareToIgnoreCase(UTstr2)>0) {
 						Out.PrtError("seqID1 must be less than seqID2: " + tok[0]);
 						Out.PrtError("Abort load!!!!");
+						reader.close();
 						return;
 					}
 					if (!seqMap.containsKey(UTstr1) || !seqMap.containsKey(UTstr2)) {
 						Out.PrtError("Both seqIDs not in database: " + tok[0]);
 						Out.PrtError("Abort load!!!!");
+						reader.close();
 						return;
 					}
 					if (method==null) method = tok[1];
@@ -276,7 +279,6 @@ public class Pairwise {
 			int cntPrt=0;
 			mDB.openTransaction(); 
 			
-			int tCnt=0;
 			// combinedFile has dataset|seqname, so blast file should be like this
 			while((curLine = br.readLine()) != null) {
 				if (curLine.length() == 0 || curLine.charAt(0) == '#') continue; 
@@ -716,7 +718,7 @@ public class Pairwise {
 				mDB.executeUpdate("update pog_groups SET perPCC = -1" ); 
 				
 				long time = Out.getTime();
-				Out.PrtDateMsg("Computing PCC on RPKM values");
+				Out.PrtDateMsg("Computing PCC on TPM values");
 				ResultSet rs;
 			
 		// get library column headers and make SQL and list

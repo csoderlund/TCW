@@ -222,7 +222,12 @@ public class LoadSingleTCW {
    			DBConn stcwDBC = runMTCWMain.getDBCstcw(cmpPanel, x);
    			if (!isProteinDB) {
 	   			String orfs = stcwDBC.executeString("select orf_msg from assem_msg");
-				if (orfs==null || orfs=="" || orfs.length()<10) {
+	   			boolean noOrf = (orfs==null || orfs=="" || orfs.length()<10);
+	   			if (noOrf) { // CAS304
+	   				int cnt = stcwDBC.executeCount("select count(*) from contigs where o_len>0");
+	   				noOrf = (cnt==0);
+	   			}
+				if (noOrf) {
 					String msg = "The sTCW database has not been annotated; you must at least execute 'ORF only'";
 					System.err.println(msg);
 					JOptionPane.showMessageDialog(null, "No annotation in database " + cmpPanel.getSpeciesSTCWid(x) + "\n"
@@ -596,7 +601,6 @@ public class LoadSingleTCW {
 				in.len = in.seq.length();
 				
 				seqMap.put(seqid, in);
-				asmMap.get(in.asmid).seqCnt++;
 			}
 			rs.close();
 			
@@ -739,7 +743,6 @@ public class LoadSingleTCW {
 	}
 	private class Asm {
 		int pCnt=0; // index into pgc, pcgp as adding these values - ends up = seqCnt
-		int seqCnt=0; // for each info added with this asmid
 		long [] cntG = new long [3];
 		long [] cntC = new long [3];
 		long [] cntCpG = new long [3];

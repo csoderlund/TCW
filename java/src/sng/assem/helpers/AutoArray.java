@@ -6,6 +6,7 @@ import java.util.Comparator;
 // Simple automatically growing array, less memory than Vector
 // If E implements Comparable, then can sort 
 // Thread safe
+// CAS304 added suppress warnings
 public class AutoArray<E> 
 {
 	static Integer syncObj = 0;
@@ -42,6 +43,7 @@ public class AutoArray<E>
 			return mNumFilled;
 		}
 	}
+	@SuppressWarnings("unchecked")
 	public E get(int i) throws Exception
 	{
 		if (i >= mNumFilled)
@@ -50,10 +52,7 @@ public class AutoArray<E>
 		}
 		return (E)mObjList[i];
 	}
-	public E[] getArray()
-	{
-		return (E[]) mObjList;
-	}
+	
 	public void add (E val) throws Exception
 	{
 		synchronized(syncObj)
@@ -81,6 +80,7 @@ public class AutoArray<E>
 	{
 		Arrays.sort(mObjList, 0,mNumFilled);
 	}
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void sort(Comparator cmp)
 	{
 		Arrays.sort(mObjList,0,mNumFilled,cmp);	

@@ -15,7 +15,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import util.methods.ErrorReport;
-import util.ui.TCWEditorPane;
 
 public class UserPrompt {
 	public static final Color PROMPT = new Color(0xEEFFEE);
@@ -47,7 +46,7 @@ public class UserPrompt {
 	/*******************************************************/
 	// send line-delimited string or array of strings
 	public static void displayInfoMonoSpace(Component parentFrame, String title, String theMessage) {
-		if (parentFrame==null || UIHelpers.isApplet()) 
+		if (parentFrame==null) 
 			 displayInfoMonoSpace(null, title, theMessage, false, false);
 		else displayInfoMonoSpace(parentFrame, title, theMessage, false, false);
 	}
@@ -57,7 +56,7 @@ public class UserPrompt {
 		for(int x=0; x<message.length; x++)
 			theMessage += message[x] + "\n";
 		
-		if (parentFrame==null || UIHelpers.isApplet()) 
+		if (parentFrame==null) 
 			 displayInfoMonoSpace(null, title, theMessage, false, false);
 		else displayInfoMonoSpace(parentFrame, title, theMessage, false, false);
 	}
@@ -68,7 +67,7 @@ public class UserPrompt {
 		String theMessage = "";
 		for(int x=0; x<message.length; x++) theMessage += message[x] + "\n";
 		
-		if (parentFrame==null || UIHelpers.isApplet()) 
+		if (parentFrame==null) 
 			 displayInfoMonoSpace(null, title, theMessage, false, false);
 		else displayInfoMonoSpace(parentFrame, title, theMessage, isModal, sizeToParent);
 	}

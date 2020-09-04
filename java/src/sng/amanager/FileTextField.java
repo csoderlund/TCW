@@ -346,11 +346,15 @@ public class FileTextField extends JPanel  {
 			while ((line = in.readLine()) != null) {
 				if (line.equals("[Term]")) {
 					if (first) {
-						if (gonum>0 && !name.equals("")) return true;
+						if (gonum>0 && !name.equals("")) {
+							in.close();
+							return true;
+						}
 						else {
 							if (!bStdout) JOptionPane.showMessageDialog(null, "Incorrect OBO file");
 							Out.PrtError("Incorrect OBO file:");
 							Out.PrtSpMsg(1, "Must contains lines starting with [Term], id:, and name:");
+							in.close();
 							return false;
 						}
 					}
@@ -365,6 +369,7 @@ public class FileTextField extends JPanel  {
 					name = line.substring(5).trim();
 				}
 			}
+			in.close();
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Checking file " + file);  good = false;}
 		

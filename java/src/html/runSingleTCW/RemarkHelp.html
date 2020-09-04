@@ -8,17 +8,13 @@
 <table border=1>
 <tr><td nowrap>Location File:<td> reads the file, removes any existing location information,
 and adds the location information to each sequence. 
-<tr><td nowrap>Remarks File:<td> reads the file and adds the remarks to any existing remark
+<tr><td nowrap>User Remarks File:<td> reads the file and adds the remarks to any existing <tt>User remark</tt>
 for the sequence.
 
-<tr><td nowrap>Remove Remark:<td> removes remarks from the sequence remark column.
+<tr><td nowrap>Remove Remark:<td> removes the remarks from the sequence <tt>User remark</tt> column.
 </table>
-<p>The TCW ORF finder adds remarks to the sequence remark column; they all start with a '$'.
-<table border=1>
-<tr><td nowrap>Ignore<td>Remove all remarks except TCW remarks.
-<tr><td nowrap>Only<td>Remove only TCW remarks.
-</table>
-If neither Ignore or Only is selected, all remarks are removed.
+<br>There is also a <tt>TCW Remark</tt>, which contains information from the ORF finder; this <tt>TCW Remark</tt> is not touch
+by the above commands.
 
 <h2>Locations</h2>
 The file is a set of rows where the first word of each row is
@@ -33,7 +29,7 @@ In <tt>viewSingleTCW</tt>, the location information can be viewed in
 the sequence table by selecting the columns under the "General" columns tab,
 and a Filter can be set to view only those sequences with a location.
 
-<h2>Remarks</h2>
+<h2>User Remarks</h2>
 The file is just a set of rows where the
 first word of each row is the sequence ID, and the rest of the row is added 
 as the Remark for the sequence. 
@@ -45,10 +41,10 @@ as the Remark for the sequence.
 </ul>
 
 <p>
-In <tt>viewSingleTCW</tt>, the Remark is a column that you can view in the table 
-by selecting it under the "General" columns tab, and a Filter can be set to view only those sequences with a remark.
+In <tt>viewSingleTCW</tt>, the <tt>User Remark</tt> is a column that you can view in the table 
+by selecting it under the <tt>General</tt> columns tab, and a Filter can be set to view only those sequences with a remark.
 <p>
-You can search on the remark in the "Basic Sequence Query". This is a great way to add additional information about your sequences.
+You can search on the <tt>User Remark</tt> in the <tt>Basic Sequence Query</tt>. This is a great way to add additional information about your sequences.
 <i>If you make the remarks "keyword=value" pairs, you can then search on the keyword
 to get a specific group of sequences.</i>
 </html>

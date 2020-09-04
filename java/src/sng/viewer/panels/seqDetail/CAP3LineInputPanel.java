@@ -177,15 +177,15 @@ public class CAP3LineInputPanel extends JPanel
 	}
 	private CAP3LineParameter getParameterAt ( int i )
 	{
-		return (CAP3LineParameter)optionList.get(i);		
+		return optionList.get(i);		
 	}
 	private JComponent getWidgetAt ( int i )
 	{
-		return (JComponent)widgetArray.get(i);
+		return widgetArray.get(i);
 	}
 	private JLabel getLabelAt ( int i )
 	{
-		return (JLabel)labelArray.get(i);
+		return labelArray.get(i);
 	}
    
 	protected class IntegerParameter implements CAP3LineParameter

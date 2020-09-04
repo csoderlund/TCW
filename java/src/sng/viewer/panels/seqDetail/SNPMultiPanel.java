@@ -38,7 +38,7 @@ public class SNPMultiPanel extends JPanel
 		Iterator<ContigData> iterContig = theCluster.getContigIterator();
 		while ( iterContig.hasNext() )
 		{
-			ContigData curContig = (ContigData)iterContig.next ();
+			ContigData curContig = iterContig.next ();
 			
 			SNPTable curTable = new SNPTable ( curContig );
 			int nTableWidth = 0;
@@ -131,7 +131,7 @@ public class SNPMultiPanel extends JPanel
 	
 	private JPanel createToolbar ( )
 	{		
-		menuSNPSort = new JComboBox ();
+		menuSNPSort = new JComboBox <MenuMapper> ();
 		Dimension dim = new Dimension ( 300, (int)menuSNPSort.getPreferredSize().getHeight() );
 		menuSNPSort.setPreferredSize( dim );
 		menuSNPSort.setMaximumSize ( dim );
@@ -151,7 +151,7 @@ public class SNPMultiPanel extends JPanel
 				}
 		);		
 		
-		menuESTSort = new JComboBox ();
+		menuESTSort = new JComboBox <MenuMapper> ();
 		menuESTSort.setPreferredSize( dim );
 		menuESTSort.setMaximumSize ( dim );
 		menuESTSort.addItem( new MenuMapper ( "Sort Seqs by Name", 
@@ -190,7 +190,7 @@ public class SNPMultiPanel extends JPanel
 		Iterator<SNPTable> iter = listSNPTables.iterator();
 		while ( iter.hasNext() )
 		{
-			SNPTable curTable = (SNPTable)iter.next();
+			SNPTable curTable = iter.next();
 			curTable.changeSNPSort( nNewSort );
 		}		
 	}
@@ -205,7 +205,7 @@ public class SNPMultiPanel extends JPanel
 		Iterator<SNPTable> iter = listSNPTables.iterator();
 		while ( iter.hasNext() )
 		{
-			SNPTable curTable = (SNPTable)iter.next();
+			SNPTable curTable = iter.next();
 			curTable.changeESTSort ( nNewSort );		
 		}		
 	}	
@@ -223,12 +223,12 @@ public class SNPMultiPanel extends JPanel
 		}
 	}
 	
-	private Object mixedItem = null;
+	private MenuMapper mixedItem = null;
 	private JScrollPane scroller;
 	private Vector<SNPTable> listSNPTables;
 	private JPanel multiSNPPanel;
 	private MultiCtgData theCluster;
-	private JComboBox menuSNPSort;
-	private JComboBox menuESTSort;
+	private JComboBox <MenuMapper> menuSNPSort;
+	private JComboBox <MenuMapper> menuESTSort;
     private static final long serialVersionUID = 1;
 }

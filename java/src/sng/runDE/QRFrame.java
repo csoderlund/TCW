@@ -326,6 +326,7 @@ public class QRFrame extends JDialog implements WindowListener {
 					cnt++;
 				}
 			}
+			file.close();
 			// prompt the user
 			String msg = "Found " + cnt + " good entries";
 			if (warn>0) msg += " with " + warn + " overwrite (see terminal)";
@@ -407,6 +408,7 @@ public class QRFrame extends JDialog implements WindowListener {
 					if (tok.length!=3) {
 						JOptionPane.showMessageDialog(getInstance(), 
 								"First line must be of format: group1 group2 column_name\nSee Help for more information", "Error", JOptionPane.PLAIN_MESSAGE);
+						file.close();
 						return;
 					}
 					String [] g1 = tok[0].split(":");
@@ -422,6 +424,7 @@ public class QRFrame extends JDialog implements WindowListener {
 								"Incorrect line: " + line + 
 								"\nScore lines must have two values: seqID score" +
 								"\nSee Help for more information", "Error", JOptionPane.PLAIN_MESSAGE);
+						file.close();
 						return;
 					}
 					String name = tok[0];
@@ -436,10 +439,12 @@ public class QRFrame extends JDialog implements WindowListener {
 								"Incorrect line: " + line + 
 								"\nThe second value must be the p-value.", 
 								"Error", JOptionPane.PLAIN_MESSAGE);
+						file.close();
 						return;
 					}
 				}
 			}
+			file.close();
 			// check that these correspond to conditions (i.e. library names)
 			for (String g : grp1) {
 				boolean found=false;
@@ -1118,7 +1123,7 @@ public class QRFrame extends JDialog implements WindowListener {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
 					if(cmbPvalColumns.getSelectedIndex() > 0) {
-						String column = (String)cmbPvalColumns.getSelectedItem();
+						String column = cmbPvalColumns.getSelectedItem(); // CAS304 remove (String)
 						if (!column.equals(allCols)) {
 							int ret = JOptionPane.showOptionDialog(getInstance(), "Remove " + column + "?",
 									"Remove column", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);

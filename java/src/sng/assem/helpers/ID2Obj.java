@@ -58,6 +58,8 @@ public class ID2Obj<E>
 			return (key >= 0 && key < mObjList.length && mObjList[key] != null);
 		}
 	}
+	// CAS304 add suppress
+	@SuppressWarnings("unchecked")
 	public E get(int key) throws Exception
 	{	
 		synchronized(syncObj)
@@ -72,7 +74,6 @@ public class ID2Obj<E>
 			}
 			throw(new Exception("ID2Obj: getting unset key:" + key + ":" + getClass().getName())); 
 		}
-		//return null;
 	}
 	public void checkGrow(int key) throws Exception
 	{

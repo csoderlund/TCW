@@ -294,9 +294,11 @@ public class BuildRepFilePanel extends JPanel {
 					return true;
 				}
 				catch (Exception e) {
+					br.close();
 					return false;
 				}
 			}
+			br.close();
 		}
 		catch (Exception e) {
 			ErrorReport.prtReport(e, "Error reading " + file);
@@ -325,6 +327,8 @@ public class BuildRepFilePanel extends JPanel {
 				}
 				line = br.readLine();
 			}
+			br.close();
+			
 			Collections.sort(seqIDs);		
 			System.out.println("   Sequences in file: " + seqIDs.size());
 			
@@ -362,6 +366,7 @@ public class BuildRepFilePanel extends JPanel {
 					catch (Exception e) {
 						System.err.println("Incorrect line: " + line);
 						UserPrompt.showError("Invalid file (see terminal)\n   " + filename);
+						br.close();
 						return;
 					}
 					
@@ -369,12 +374,14 @@ public class BuildRepFilePanel extends JPanel {
 					if (index < 0) {
 						System.err.println(seqID + " not in sequence file ");
 						UserPrompt.showError("Invalid file (see terminal)\n   " + filename);
+						br.close();
 						return;
 					}
 					else theDECounts[index] = count;
 					
 					line = br.readLine();
 				}
+				br.close();
 				System.out.println("      Lines read: " + lineCount + "        ");
 				theCounts.add(theDECounts);
 			}

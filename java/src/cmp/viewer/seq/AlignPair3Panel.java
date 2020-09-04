@@ -37,15 +37,12 @@ import cmp.align.ScoreAA;
 import cmp.align.PairAlignData;
 import cmp.viewer.MTCWFrame;
 import util.database.Globalx;
-import util.methods.Out;
 
 public class AlignPair3Panel  extends JPanel
 {
 	private static final char gapCh=Globalx.gapCh;
 	public static int GRAPHICMODE = 1;
 	public static int TEXTMODE = 0;
-	private Color background1 = new Color(0xEEFFEE);
-	private Color background2 = new Color(0xEEFFFF);
 	private static final Font textFont = new Font("Sans", Font.PLAIN, 11);
 	
 	public AlignPair3Panel ( MTCWFrame parentFrame, PairAlignData theAlignment)
@@ -54,9 +51,7 @@ public class AlignPair3Panel  extends JPanel
 		descLines = alignDataObj.getDescLines();
 		isDNA = alignDataObj.isNT();
 		
-		Color c = background2; // only works after redisplay
-		if (isDNA) c = background1; 
-		
+	
 		super.setBackground( Globalx.BGCOLOR );
 		super.setLayout(null); // Only descLines or graphics will show if declared with a regulat setLayout(new...
 								// but lose scroll with this.

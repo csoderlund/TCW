@@ -83,7 +83,7 @@ public class MethodClique {
 		groupFile = root;
 		
 		Out.PrtSpMsg(1, "Prefix:     " + prefix);
-		Out.PrtSpMsg(1, "Coverage:   " + (int) covCutoff + " (" + covTypes[covMode] + ")");
+		Out.PrtSpMsg(1, "Coverage:   " + covCutoff + " (" + covTypes[covMode] + ")");
 		Out.PrtSpMsg(1, "Similarity: " + simCutoff);
 		Out.PrtSpMsg(1, "Remark:     " + comment);
 		Out.PrtSpMsg(1, "");
@@ -327,7 +327,6 @@ public class MethodClique {
 	     * Finalize: A sequence can only be in one cluster. This prunes sequences from the smaller clusters.
 	     */
 	    void pruneClique() {
-	    		int cntGrp = tmpList.size(), cntFinal=0;
 	    		int next=0;
 	    		
 	    		while (next >= 0) {
@@ -358,7 +357,6 @@ public class MethodClique {
 	    			bGrp.id = grpCount++;
 	    			createGroup(bGrp);
 	    			tmpList.remove(next);
-	    			cntFinal++;
 	    		}
 	    }
 	    
@@ -477,7 +475,6 @@ public class MethodClique {
            if (this.degree > o.degree) return -1;
            return 0; 
        } 
-       int nGrps=0;
 	}
 	private class Pair implements Comparable <Pair>{
 		public Pair (String seq1, String seq2, double eval, int sim, int olap1, int olap2, int bit, int aaBest) {

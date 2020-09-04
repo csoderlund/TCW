@@ -22,7 +22,6 @@ import sng.util.CenteredMessageTab;
 import sng.util.Tab;
 import sng.viewer.STCWFrame;
 import sng.viewer.panels.MainToolAlignPanel;
-import sng.viewer.panels.seqTable.ContigListTab;
 import util.methods.ErrorReport;
 import util.ui.MenuMapper;
 import util.align.AlignCompute;
@@ -61,7 +60,7 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 		/********************************************
 		 *  XXX Create dropdown menu of pairwise display options
 		 */
-		displayDropDown = new JComboBox ();
+		displayDropDown = new JComboBox <MenuMapper>();
 		displayDropDown.setBackground(buttonColor);
 		Dimension dim = new Dimension ( 250, (int)displayDropDown.getPreferredSize().getHeight() );
 		displayDropDown.setPreferredSize( dim );
@@ -340,7 +339,7 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 	 **************************************************/
 	
 	private void addPrevNextTab(int nNewRecordNum) {
-		Tab parentTab = (Tab)getParentTab();
+		Tab parentTab = getParentTab();
 		int pairNum = ((PairListTab)parentTab).getPairNumAtRow(nNewRecordNum);
 		String strTitle = "Pair # " + 	pairNum;
 
@@ -423,7 +422,7 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 	/*******************************************************/
 	private int nRecordNum, nPairNum;	
 	private MetaData metaData = null;
-	private JComboBox displayDropDown = null;
+	private JComboBox <MenuMapper> displayDropDown = null;
 
 	private JPanel bottomPanel = null;
 	private JPanel displayedJPanel = null;

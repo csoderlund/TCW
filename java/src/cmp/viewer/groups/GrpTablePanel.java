@@ -12,10 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.BufferedReader;
-import java.io.StringReader;
 import java.sql.ResultSet;
-import java.util.Enumeration;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
@@ -25,21 +22,17 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import util.database.DBConn;
@@ -58,7 +51,6 @@ import cmp.viewer.table.*;
 
 public class GrpTablePanel extends JPanel {
 	private static final long serialVersionUID = -3827610586702639105L;
-	private static boolean initFirstAppletPOGRun = true;
  
 	private static final String TABLE = FieldData.GRP_TABLE;
 	private static final String GRPID = FieldData.GRP_SQLID;
@@ -394,7 +386,7 @@ public class GrpTablePanel extends JPanel {
         theTableData = new TableData(this);
         theTableData.setColumnHeaders(theFields.getDisplayFields(), theFields.getDisplayTypes());
         theTableData.addRowsWithProgress(rset, theFields, loadProgress);
-        theTableData.finalize();
+        theTableData.showTable();
 
         int nRow = theTableData.getNumRows();
         String status = nRow + " of " + totalGrp + " " + Static.perText(nRow, totalGrp);
@@ -423,14 +415,8 @@ public class GrpTablePanel extends JPanel {
 	    	String [] columns = FieldData.getGrpColumns(asmNames);
 	    	String [] descriptions = FieldData.getGrpDescript(asmNames);
 	    	boolean [] defaults = FieldData.getGrpSelections(asmNames.length);
-	    	boolean [] selections = null;
-    		
-    		if(theViewerFrame.isApplet() && initFirstAppletPOGRun) {
-    			initFirstAppletPOGRun = false;
-    			selections = getColumnSelections(columns, defaults, null);
-    		}
-    		else
-    			selections = getColumnSelections(columns, defaults, 
+	    	
+	    	boolean [] selections = getColumnSelections(columns, defaults, 
     							theViewerFrame.getSettings().getGrpSettings().getSelectedColumns());    
 	    	
 	    	chkFields = new JCheckBox[columns.length];
@@ -782,12 +768,13 @@ public class GrpTablePanel extends JPanel {
 
       theTable.setTableHeader(new SortHeader(theTable.getColumnModel()));
       
-      //If a header contains a '\n' multiple lines will appear using this renderer
+      /* CAS304 If a header contains a '\n' multiple lines will appear using this renderer
       MultiLineHeaderRenderer renderer = new MultiLineHeaderRenderer();
       Enumeration<TableColumn> en = theTable.getColumnModel().getColumns();
       while (en.hasMoreElements()) {
-        ((TableColumn)en.nextElement()).setHeaderRenderer(renderer);
+         (en.nextElement()).setHeaderRenderer(renderer);
       } 
+      */
   	}
   	
     //Called from a thread
@@ -828,37 +815,7 @@ public class GrpTablePanel extends JPanel {
 	    	}
 	    	private boolean [] bColumnAscending = null;
     }
-    
-    public class MultiLineHeaderRenderer extends JList implements TableCellRenderer {
-		private static final long serialVersionUID = 3118619652018757230L;
-
-		public MultiLineHeaderRenderer() {
-    	    setOpaque(true);
-    	    setBorder(BorderFactory.createLineBorder(Color.BLACK));
-    	    setBackground(Globals.BGCOLOR);
-    	    ListCellRenderer renderer = getCellRenderer();
-    	    ((JLabel)renderer).setHorizontalAlignment(JLabel.CENTER);
-    	    setCellRenderer(renderer);
-    	  }
-    	 
-    	  public Component getTableCellRendererComponent(JTable table, Object value,
-    	                   boolean isSelected, boolean hasFocus, int row, int column) {
-    	    setFont(table.getFont());
-    	    String str = (value == null) ? "" : value.toString();
-    	    BufferedReader br = new BufferedReader(new StringReader(str));
-    	    String line;
-    	    Vector<String> v = new Vector<String>();
-    	    try {
-    	      while ((line = br.readLine()) != null) {
-    	        v.addElement(line);
-    	      }
-    	      br.close(); 
-    	    } catch (Exception e) {ErrorReport.reportError(e, "Error rendering table cells");}
-    	   
-    	    setListData(v);
-    	    return this;
-    	  }
-    	}
+   
     public int getTranslatedRow(int row) {
 		if (theTable==null) return 0;
 

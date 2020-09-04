@@ -23,6 +23,9 @@ public class Globals {
 	public static final String 	gapStr = Globalx.gapStr;
 	public static final char 	gapCh = Globalx.gapCh;
 	
+	public static final String def5p = ".f";
+	public static final String def3p = ".r";
+	
 	public static final int SHORT_UTR = 10;
 	
 	public static final Color BGCOLOR = Color.WHITE;

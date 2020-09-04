@@ -216,7 +216,7 @@ public class EditMethodPanel extends JPanel {
 		if(isValid) {
 			if(!bEditMode) {
 				MethodPanel mPnl = theCompilePanel.getMethodPanel();
-				String method = (String) cmbMode.getSelectedItem();
+				String method =  cmbMode.getSelectedItem();
 				mPnl.addRow(method, prefix, cmt, getSettings());
 			}
 			theCompilePanel.getMethodPanel().updateTable();
@@ -256,7 +256,7 @@ public class EditMethodPanel extends JPanel {
 		else                pnlCust.setVisible(true);
 	}
 	
-	public String getMethodType() { return (String) cmbMode.getSelectedItem(); }
+	public String getMethodType() { return  cmbMode.getSelectedItem(); }
 	public void setMethodType(String method) { 
 		cmbMode.setSelectedItem(method);
 		updateMode(); 

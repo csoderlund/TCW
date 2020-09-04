@@ -9,6 +9,31 @@
 <font color="#000000" face="Verdana, Arial, Helvetica, sans-serif" size="2"> 
 <p><b><big><u>TCW Version 3.0</u></b></big>
 
+<p><b>v3.0.4 4-Sept-20</b>
+<br>This release is  mainly some clean-up, along with the computation of TPM replacing RPKM.
+<ol>
+<li><code>runSingleTCW</code>:
+<ul><li>Improve error recording on Build Database and Instantiate
+<li>Compute TPM for normalization instead of RPKM. However, RPKM can be computed by executing 
+<tt>execAssm &lt;project&gt; -r</tt>.
+</ul>
+
+<li><tt class=c>execLoadLib.pl</tt> is changed to the script <tt class=c>execLoadLib</tt>; 
+<tt class=c>execAssm.pl</tt> is changed to the script <tt class=c>execAssm</tt>. 
+The scripts accept the parameter "-n" to execute without any prompts; this is good for batch processing.
+
+
+<li><code>viewSingleTCW</code>:
+<ul>
+<li>Bug fix: The "Seq #" column would not display if GOs were in the database.
+<li>Clicking a heading to sort a table did not work well on MacOS, which has been fixed.
+<li>For viewing the multi-line text alignment, a sequence does not need to be selected.
+<li>The longest sequence name is a column loaded transcripts, as it provides the original name of the sequence.
+Also, the <tt class=c>Basic Sequence</tt> panel allows the longest sequence name to be copied to clipboard.
+</ul>
+<li>Internal clean-up to remove Java warnings 
+<li>The <tt class=c>/doc</tt> has been updated.
+</ol>
 <p><b>v3.0.3 16-June-20</b>
 <ol>
 <li>MySQL:

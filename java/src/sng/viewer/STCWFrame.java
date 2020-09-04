@@ -84,11 +84,10 @@ public class STCWFrame extends JFrame {
 	// Always uses the same preference file. So if in conflict with earlier versions, change name.
 	String prefRootName = "viewSingleTCW"; 
 	
-	public STCWFrame(HostsCfg hosts, DBInfo dbInfo, boolean isApplet) {
+	public STCWFrame(HostsCfg hosts, DBInfo dbInfo) {
 		initialize();
 		hostsObj = hosts;
 		dbObj = dbInfo;
-		bIsApplet = isApplet;
 		
 		buildInterface();
 
@@ -143,7 +142,7 @@ public class STCWFrame extends JFrame {
 					}
 					cleanupMemory();
 					--nFrames;
-					if (nFrames == 0 && !UIHelpers.isApplet()) {
+					if (nFrames == 0) {
 						System.exit(0);
 					} 
 				} 
@@ -224,10 +223,12 @@ public class STCWFrame extends JFrame {
 			tabbedPane.addTab(BasicSeqQuery, basicSeqQueryTab);
 			MenuTreeNode basicContigQueryNode = new MenuTreeNode(BasicSeqQuery, basicSeqQueryTab);
 			
-			basicHitQueryTab = new BasicHitQueryTab(this);
-			tabbedPane.addTab(BasicHitQuery, basicHitQueryTab);
-			MenuTreeNode basicHitQueryNode = new MenuTreeNode(BasicHitQuery, basicHitQueryTab);
-			
+			MenuTreeNode basicHitQueryNode = null;
+			if (metaData.hasHits()) { // CAS304
+				basicHitQueryTab = new BasicHitQueryTab(this);
+				tabbedPane.addTab(BasicHitQuery, basicHitQueryTab);
+				basicHitQueryNode = new MenuTreeNode(BasicHitQuery, basicHitQueryTab);
+			}
 			MenuTreeNode basicGOQueryNode = null;
 			if(metaData.hasGOs()) {
 				basicGOQueryTab = new BasicGOQueryTab(this);
@@ -266,8 +267,9 @@ public class STCWFrame extends JFrame {
 
 			MenuTreeNode basicHeader = new MenuTreeNode(BasicSection);
 			basicHeader.addChild(basicContigQueryNode);
-			basicHeader.addChild(basicHitQueryNode);
-			if(metaData.hasGOs())
+			if (basicHitQueryNode!=null)
+				basicHeader.addChild(basicHitQueryNode);
+			if (basicGOQueryNode!=null)
 				basicHeader.addChild(basicGOQueryNode);
 			basicHeader.addChild(blastNode);
 			root.addChild(basicHeader);
@@ -856,14 +858,11 @@ public class STCWFrame extends JFrame {
 		Vector<String> errorStrings = new Vector<String>();
 		if (err instanceof OutOfMemoryError) {
 			errorStrings.add("viewSingleTCW ran out of memory.");
-			if (bIsApplet) {
-				STCWChooser.addAppletMemory(errorStrings);
-			} else {
-				errorStrings.add("Increase the Java memory size for your system using the instructions below:");
-				errorStrings.add("- Edit the viewSingleTCW file.");
-				errorStrings.add("- Changed the text '-Xmx512m' to a larger number, e.g '-Xmx768'.");
-				errorStrings.add("- Save the file and restartSingleTCW.");
-			}
+			
+			errorStrings.add("Increase the Java memory size for your system using the instructions below:");
+			errorStrings.add("- Edit the viewSingleTCW file.");
+			errorStrings.add("- Changed the text '-Xmx512m' to a larger number, e.g '-Xmx768'.");
+			errorStrings.add("- Save the file and restartSingleTCW.");
 		} else {
 			errorStrings.add("The viewSingleTCW program encountered an error, we apologize for the inconvenience.");
 			errorStrings.add("Please send the error description below to tcw@agcol.arizona.edu.");
@@ -947,7 +946,6 @@ public class STCWFrame extends JFrame {
 	public HostsCfg getHosts() {return hostsObj;}
 	public DBConn getNewDBC() { return hostsObj.getDBConn(dbName);}
 	public Connection getNewConn() throws Exception {return hostsObj.getDBConn(dbName).getDBconn();}
-	public boolean isApplet() {return bIsApplet;}
 	public Preferences getPreferencesRoot() {return prefsRoot;}
 	
 	/******************************
@@ -1012,8 +1010,6 @@ public class STCWFrame extends JFrame {
 	private BlastTab blastTab  = null;
 	
 	public String lastSaveFilePath = ""; // All panels use this as the path, and set it if changed
-
-	private boolean bIsApplet=false;
 	
 	private Preferences prefsRoot=null; // set once and pass to anyone who needs it
 	private MetaData metaData = null;

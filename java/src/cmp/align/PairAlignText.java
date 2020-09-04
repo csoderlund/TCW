@@ -20,7 +20,6 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 
-import cmp.align.ScoreNT;
 import util.methods.Out;
 import util.methods.Static;
 import util.ui.UIHelpers;

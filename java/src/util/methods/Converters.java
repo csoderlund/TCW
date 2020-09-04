@@ -138,7 +138,7 @@ public class Converters
     public static void addIntArray ( int [] fromIntArray, Collection<Integer> toCollection )
     {
         for (int i = 0; i < fromIntArray.length; ++i)
-            toCollection.add( new Integer (fromIntArray[i]) );      
+            toCollection.add( fromIntArray[i] );      
     }
     
     public static int [] intCollectionToIntArray ( Collection<Integer> inCollection )
@@ -148,7 +148,7 @@ public class Converters
         Iterator<Integer> iter = inCollection.iterator();
         for ( int i = 0; i < inCollection.size(); ++i )
         {   
-            Integer aInt = (Integer)iter.next();
+            Integer aInt = iter.next();
             outArray[i] = aInt.intValue();
         }
         

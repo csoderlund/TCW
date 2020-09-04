@@ -21,6 +21,7 @@ import javax.swing.JTextField;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 
+import sng.database.Globals;
 import util.database.Globalx;
 import util.ui.UserPrompt;
 
@@ -29,14 +30,14 @@ public class EditTransLibPanel extends JPanel {
 	private final String LIBDIR = Globalx.PROJDIR + "/";
 	
 	public static final String [] TRANS_LIB_SYMBOLS = { "SeqID", "Sequence File", 
-		"Quality File", "Count File",  "   5' suffix", "   3' suffix"};
+		 "Count File", "Quality File", "   5' suffix", "   3' suffix"};
 	
 	public static final String [] ATTRIBUTE_SYMBOLS = 
 		{ "Title", "Species", "Cultivar", "Strain", "Tissue", "Stage", "Treatment",  
 		"Year", "Source" };
 	
 	private static final int COLUMN_LABEL_WIDTH = 140;
-	private static final int TEXTFIELD_WIDTH_SHORT = 8;
+	private static final int TEXTFIELD_WIDTH_SHORT = 6; // CAS304 was 8
 	private static final int TEXTFIELD_WIDTH = 30;
 
 	public EditTransLibPanel(ManagerFrame parentFrame) {
@@ -79,24 +80,27 @@ public class EditTransLibPanel extends JPanel {
 				String title = tfAttr[0].getText();
 				if (title==null || title.equals("")) {
 					title = tfSeqFile.getText();
-					title = title.substring(title.lastIndexOf("/")+1);
-					title = title.substring(0, title.indexOf("."));
-					tfAttr[0].setText(title);
+					if (!title.equals("")) { // CAS304
+						title = title.substring(title.lastIndexOf("/")+1);
+						title = title.substring(0, title.indexOf("."));
+						tfAttr[0].setText(title);
+					}
 				}
 			}
 		});
 
-		lblQualFile = new JLabel(TRANS_LIB_SYMBOLS[2]); 
-		tfQualFile = new FileTextField(theParentFrame, FileTextField.LIB, FileTextField.QUAL);
-
-		lblCountFile = new JLabel(TRANS_LIB_SYMBOLS[3]); 
+		lblCountFile = new JLabel(TRANS_LIB_SYMBOLS[2]); 
 		tfCountFile = new FileTextField(theParentFrame, FileTextField.LIB, FileTextField.COUNT);
+
+		lblQualFile = new JLabel(TRANS_LIB_SYMBOLS[3]); 
+		tfQualFile = new FileTextField(theParentFrame, FileTextField.LIB, FileTextField.QUAL);
 		
 		lbl5pSuffix = new JLabel(TRANS_LIB_SYMBOLS[4]);
-		tf5pSuffix = createTextField(TEXTFIELD_WIDTH_SHORT);
-	
+		tf5pSuffix = createTextField(4);
+		
 		lbl3pSuffix = new JLabel(TRANS_LIB_SYMBOLS[5]);
-		tf3pSuffix = createTextField(TEXTFIELD_WIDTH_SHORT);
+		tf3pSuffix = createTextField(4);
+		tf5pSuffix.setText(Globals.def5p); tf3pSuffix.setText(Globals.def3p);
 		
 		lblAttr = new JLabel[ATTRIBUTE_SYMBOLS.length];
 		tfAttr = new JTextField[ATTRIBUTE_SYMBOLS.length];
@@ -105,7 +109,7 @@ public class EditTransLibPanel extends JPanel {
 			tfAttr[x] = createTextField(TEXTFIELD_WIDTH);
 		}
 		
-		btnGenCountFile = new JButton("Build combined count file");
+		btnGenCountFile = new JButton("Build from multiple count files");
 		btnGenCountFile.setBackground(Globalx.MENUCOLOR);
 		btnGenCountFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -138,56 +142,51 @@ public class EditTransLibPanel extends JPanel {
 		row = createRowPanel();
 		row.add(lblSeqFile);
 		if(lblSeqFile.getPreferredSize().width < COLUMN_LABEL_WIDTH)
-			row.add(Box.createHorizontalStrut(COLUMN_LABEL_WIDTH - 
-					lblSeqFile.getPreferredSize().width));
+			row.add(Box.createHorizontalStrut(COLUMN_LABEL_WIDTH - lblSeqFile.getPreferredSize().width));
 		row.add(tfSeqFile);
 		row.add(Box.createHorizontalStrut(10));
 		row.add(new JLabel("- Required"));
 		pnlMainPanel.add(row);
-		pnlMainPanel.add(Box.createVerticalStrut(10));
-
-		row = createRowPanel();
-		row.add(lblQualFile);
-		if(lblQualFile.getPreferredSize().width < COLUMN_LABEL_WIDTH)
-			row.add(Box.createHorizontalStrut(COLUMN_LABEL_WIDTH - 
-					lblQualFile.getPreferredSize().width));
-		row.add(tfQualFile);
-		pnlMainPanel.add(row);
-		pnlMainPanel.add(Box.createVerticalStrut(10));
+		pnlMainPanel.add(Box.createVerticalStrut(20));
 
 		row = createRowPanel();
 		row.add(lblCountFile);
 		if(lblCountFile.getPreferredSize().width < COLUMN_LABEL_WIDTH)
-			row.add(Box.createHorizontalStrut(COLUMN_LABEL_WIDTH - 
-					lblCountFile.getPreferredSize().width));
+			row.add(Box.createHorizontalStrut(COLUMN_LABEL_WIDTH - lblCountFile.getPreferredSize().width));
 		row.add(tfCountFile);
 		pnlMainPanel.add(row);
 		pnlMainPanel.add(Box.createVerticalStrut(5));
 		
 		row = createRowPanel();
 		row.add(Box.createHorizontalStrut(COLUMN_LABEL_WIDTH));
+		row.add(new JLabel("or")); row.add(Box.createHorizontalStrut(5));
 		row.add(btnGenCountFile);
 		pnlMainPanel.add(row);
+		pnlMainPanel.add(Box.createVerticalStrut(20));
 
 		row = createRowPanel();
-		row.add(new JLabel("Sanger ESTs:"));
-		pnlMainPanel.add(row);
-		
-		row = createRowPanel();
-		row.add(lbl5pSuffix);
-		if(lbl5pSuffix.getPreferredSize().width < COLUMN_LABEL_WIDTH)
-			row.add(Box.createHorizontalStrut(COLUMN_LABEL_WIDTH - lbl5pSuffix.getPreferredSize().width));
-		row.add(tf5pSuffix);
+		row.add(lblQualFile);
+		if(lblQualFile.getPreferredSize().width < COLUMN_LABEL_WIDTH)
+			row.add(Box.createHorizontalStrut(COLUMN_LABEL_WIDTH - lblQualFile.getPreferredSize().width));
+		row.add(tfQualFile);
 		pnlMainPanel.add(row);
 		pnlMainPanel.add(Box.createVerticalStrut(10));
-
+		
 		row = createRowPanel();
-		row.add(lbl3pSuffix);
-		if(lbl3pSuffix.getPreferredSize().width < COLUMN_LABEL_WIDTH)
-			row.add(Box.createHorizontalStrut(COLUMN_LABEL_WIDTH - lbl3pSuffix.getPreferredSize().width));
-		row.add(tf3pSuffix);
+		JLabel lbl = new JLabel("Sanger ESTs ");
+		row.add(lbl);
+		if(lbl.getPreferredSize().width < COLUMN_LABEL_WIDTH)
+			row.add(Box.createHorizontalStrut(COLUMN_LABEL_WIDTH - lbl.getPreferredSize().width));
+		row.add(Box.createHorizontalStrut(10));
+		row.add(lbl5pSuffix);  row.add(Box.createHorizontalStrut(3));
+		row.add(tf5pSuffix);  row.add(Box.createHorizontalStrut(10));
+		row.add(lbl3pSuffix); row.add(Box.createHorizontalStrut(3));
+		row.add(tf3pSuffix);  row.add(Box.createHorizontalStrut(10)); 
+		row.add(new JLabel("(Defaults .f and .r)"));
 		pnlMainPanel.add(row);
+		
 		pnlMainPanel.add(Box.createVerticalStrut(20));
+		
 		pnlMainPanel.add(new JLabel("ATTRIBUTES:"));
 		pnlMainPanel.add(Box.createVerticalStrut(10));
 		
@@ -290,15 +289,15 @@ public class EditTransLibPanel extends JPanel {
 		tfCountFile.setText(x.getCountFile());
 		tf5pSuffix.setText(x.getFivePrimeSuffix());
 		tf3pSuffix.setText(x.getThreePrimeSuffix());
-		tfAttr[0].setText(x.getTitle());
-		tfAttr[1].setText(x.getOrganism());
-		tfAttr[2].setText(x.getCultivar());
-		tfAttr[3].setText(x.getStrain());
-		tfAttr[4].setText(x.getTissue());
-		tfAttr[5].setText(x.getStage());
-		tfAttr[6].setText(x.getTreatment());
-		tfAttr[7].setText(x.getYear());
-		tfAttr[8].setText(x.getSource());
+		tfAttr[0].setText(x.getAttr().getTitle());
+		tfAttr[1].setText(x.getAttr().getOrganism());
+		tfAttr[2].setText(x.getAttr().getCultivar());
+		tfAttr[3].setText(x.getAttr().getStrain());
+		tfAttr[4].setText(x.getAttr().getTissue());
+		tfAttr[5].setText(x.getAttr().getStage());
+		tfAttr[6].setText(x.getAttr().getTreatment());
+		tfAttr[7].setText(x.getAttr().getYear());
+		tfAttr[8].setText(x.getAttr().getSource());
 		
 		// If add, everything is editable
 		// If edit, if the !dbExists, can edit ID but not files (need to make then update right to be all editable); 
@@ -350,15 +349,15 @@ public class EditTransLibPanel extends JPanel {
 				}
 			}
 		}
-		x.setTitle(tfAttr[0].getText());
-		x.setOrganism(tfAttr[1].getText());
-		x.setCultivar(tfAttr[2].getText());
-		x.setStrain(tfAttr[3].getText());
-		x.setTissue(tfAttr[4].getText());
-		x.setStage(tfAttr[5].getText());
-		x.setTreatment(tfAttr[6].getText());	
-		x.setYear(tfAttr[7].getText());
-		x.setSource(tfAttr[8].getText());
+		x.getAttr().setTitle(tfAttr[0].getText());
+		x.getAttr().setOrganism(tfAttr[1].getText());
+		x.getAttr().setCultivar(tfAttr[2].getText());
+		x.getAttr().setStrain(tfAttr[3].getText());
+		x.getAttr().setTissue(tfAttr[4].getText());
+		x.getAttr().setStage(tfAttr[5].getText());
+		x.getAttr().setTreatment(tfAttr[6].getText());	
+		x.getAttr().setYear(tfAttr[7].getText());
+		x.getAttr().setSource(tfAttr[8].getText());
 		
 		return true;
 	}

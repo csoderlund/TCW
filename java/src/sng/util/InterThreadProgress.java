@@ -45,11 +45,7 @@ public class InterThreadProgress
 		progressPanel.add(theLabel);
 		progressPanel.add(Box.createVerticalStrut(50));
 		progressPanel.add(progressBar);
-		if (theFrame.isApplet()) {
-			// Canceling the second thread fails when using an applet
-			progressPanel.add(Box.createVerticalStrut(50));
-			progressPanel.add(btnClose);
-		}
+		
 		progressPanel.add(Box.createVerticalGlue());
     }
     

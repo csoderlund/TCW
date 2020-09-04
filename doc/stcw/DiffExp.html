@@ -12,14 +12,16 @@ as follows:
 <li>DE per sequence: R scripts for <code>EdgeR</code>, <code>DESeq2</code>. 
 <ul>
 <li>It is <i>important</i> that you study the documentation for the respective DE method to determine the
-best approach for your data, then customize one of the existing R-scripts or create a new one. 
-<li>The <a href=#scripts>R-scripts</a> explains how <code>runDE</code> writes the data to R variables, executes the R-script, then reads the results into sTCWdb.
+best approach for your data. You may either use one of the existing scripts,
+customize an existing script, or create a new one. 
+<li>The <a href=#scripts>R-scripts</a> sections explains how <code>runDE</code> writes the data to R variables, 
+executes the R-script, then reads the results into sTCWdb.
 </ul>
 
 <li>Over-represented GO categories: <code>GOseq</code>. 
 </ol>
-This document uses the "<tt>demoTra</tt>" project as an example, see
-<a href="UserGuide.html" class="ext" target="_blank">User Guide</a>. 
+This document uses the "<tt>demoTra</tt>" project as an example. See
+<a href="UserGuide.html" class="ext" target="_blank">User Guide</a> to see how it was built.
 
 <h3>Contents</h3>
 <table width=50%>
@@ -57,22 +59,12 @@ This document uses the "<tt>demoTra</tt>" project as an example, see
 <h2>1. Installing R and packages</h2>
 
 <h4>Installing R</h4>
-See <a href=https://www.r-project.org class="ext" target="_blank">R Project</a> for the latest instructions on installing R.
-See <a href="../Mac-OSX.html" class="ext" target="_blank">MacOS</a> for installation that worked on MacOS 10.15.
+<ul>
+<li>See <a href=https://www.r-project.org class="ext" target="_blank">R Project</a> for the latest instructions on installing R.
+<li>See <a href="../Mac-OSX.html" class="ext" target="_blank">MacOS</a> for installation that worked on MacOS 10.15.
+<li>See <a href="#Rperms">R directory permissions</a> for some permission suggestions.
+</ul>
 
-<p>The following was written around 2014, but may still work for Linux:
-<pre>
-	sudo yum install R-devel
-</pre>
-If you do not have <tt>sudo</tt> privileges (<tt>sudo</tt> allows a general user to run some commands as 
-the root user), you will need an administrator to do the install. 
-Note, even if R is already installed, you probably still need to run this command to install the
-"devel" libraries, which are needed for the rJava package used by <code>runDE</code> to interface with R. 
-<p>
-Unless you plan to run as root (not recommended), 
-or will be the only one running <code>runDE</code>, you will also want to set up R so that one user
-can install packages to be used by all users (see <a href="#Rperms">R directory permissions</a>). Note: you
-do NOT need R to view the DE results with <code>viewSingleTCW</code>.
 
 <h4>Installing rJava and R packages</h4>
 See <a href=../Install.html#R class="ext" target="_blank">rJava and R packages</a>.
@@ -151,7 +143,7 @@ selecting "Close" on <code>runDE</code>, which closed the java program but not R
 	Save workspace image? [y/n/c]: y
 	R
 </pre>
-This saves all variables written by <code>runDE</code> and the scripts (in this case <code>edgeRglm.R</code>. By restarting R, you can now
+This saves all variables written by <code>runDE</code> and the scripts (in this case <code>edgeRglm.R</code>). By restarting R, you can now
 explore the data, e.g.
 <pre>
 	> library(edgeR)
@@ -163,7 +155,7 @@ explore the data, e.g.
 <table>
 <tr><td>
 <i>View Results: </i>To view the resulting p-values, run '<tt>viewSingleTCW tra</tt>' from the command line,  
-and click <b>Columns</b>. The column options has a section 
+and click <tt class=c>&gt;&gt; Columns</tt>. The column options has a section 
 <tt>Differential Expression</tt> with the DE columns listed, e.g. the DE columns for <tt>demoTra</tt> are shown on the right. There is also
 a section for <tt>Conditions</tt>, which has the "Stem", "Root, and "Oleaf" column options. Select the desired columns (
 e.g. "Stem", "Root", "StRo"); you may then select a filter (e.g. all sequences that have an absolute p-value &lt; 0.05).
@@ -277,7 +269,7 @@ The order should correspond to the input order; if changed, then change the orde
 <a name="filter">
 <h4>Pre-filter</h4>
 This example uses a database with 26k sequences and 5 replicates for root and stem.
-The three filtering options  where run with defaults(table on lower left)
+The three filtering options were run with defaults (table on lower left)
 before input to <code>edgeR</code> (results in figure on lower right). 
 The first option filtered 1713 sequences and the second option filtered 7518; 
 with <code>edgeR</code>, the number of analyzed sequences effects the resulting DE value.
@@ -298,7 +290,7 @@ with <code>edgeR</code>, the number of analyzed sequences effects the resulting 
 </table>
 <font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 <sup>1</sup> Column in table on right.
-<br><sup>2</sup> CPM (Counts per million) is defined below.
+<br><sup>2</sup> CPM (Counts per million).
 </font>
 
 
@@ -313,15 +305,9 @@ The DE value (RoSt) is set to negative if Root&lt;Stem.
 
 In the figure on the right:
 <ol>
-<li>DE value 3.00: the filtered sequences (i.e. not input to the DE computation) have a value of 3.
-<li>DE value 2.00: the sequences that received an NA (i.e. no result) from the DE computation have a value of 2.
+<li>DE value 3.00: the filtered sequences have a value of 3.
+<li>DE value 2.00: the sequences that received an NA from the DE computation have a value of 2.
 </ol>
-
-<p>CPM (Counts per million) takes into account replicate size. 
-There will be N replicates/samples to be analyzed, e.g. there are 10 replicates for the above dataset.
-The CPM value for a sequence j replicate i is computed (count<sub>j</sub>/S<sub>i</sub>)*1E6, 
-where S<sub>i</sub> is sum of the counts for each replicate i.
-
   
 <p>
 To view the first 50 filtered sequences that do not have 'all' zero count values, 
@@ -378,7 +364,7 @@ to perform the screen.
 <h4>Group 1 - Group 2</h4> 
 <ul>
 <li>Select at least one condition from each group.
-<li>If you want to store the results in the database, check "Save results in P-value column".
+<li>If you want to store the results in the database, check <tt class=c>Save results in P-value column</tt>.
 If the groups have been selected, a column name will be auto-generated which you can change.
 When you change the groups for a subsequent execution, uncheck-then-check the column box
 to auto-generated a name for the new groups.
@@ -445,12 +431,12 @@ The p-values are read as absolute values since runDE makes values negative if Co
 <h2>4. Over-represented GO categories</h2>
 </td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
 If GO annotations are loaded (see <a href="UserGuide.html#anno" class="ext" target="_blank">User Guide</a>), you can
-compute p-values for enrichment of DE in GO categories using the <b>Execute GOseq</b> button. 
+compute p-values for enrichment of DE in GO categories using the <tt class=c>Execute GOseq</tt> button. 
 For this, you first choose one of the DE comparison pairs (or all of them), and a p-value threshold
 to define DE of individual transcripts (or a percentage ranking). 
 <p>
 The result is p-value columns for the GO, having
-the same names as the corresponding transcript DE columns, accessible through the "Basic GO Query" function of 
+the same names as the corresponding transcript DE columns, accessible through the <tt class=c>Basic GO Query</tt> function of 
 <code>viewSingleTCW</code>.
 <p>
 The meaning of a low p-value for a given GO is that the transcripts labeled by that
@@ -471,7 +457,13 @@ in terms of ranking, i.e., top 10% (the ranking is ordered by the p-values).
 <h2>5. R Directory Permissions</h2>
 </td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
 The following was written in 2014, so may be dated. 
-When you install an R package, it can go either to a shared location or to a user-specific location.
+
+<p>Unless you plan to run as root (not recommended), 
+or will be the only one running <code>runDE</code>, you will also want to set up R so that one user
+can install packages to be used by all users. Note: you
+do NOT need R to view the DE results with <code>viewSingleTCW</code>.
+
+<p>When you install an R package, it can go either to a shared location or to a user-specific location.
 Installing to the shared location is better, as others can then use the package, however in the default
 installation of R the shared directories are owned by the root user and their permissions must be
 changed to allow ordinary users to install shared packages. This is done as follows (unless you have 

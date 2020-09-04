@@ -36,7 +36,6 @@ import sng.database.Globals;
 //     Blosum50             the BLOSUM50 substitution matrix
 //  Output                  general text output
 //     SystemOut            output to the console (in the application)
-//     TextAreaOut          output to a TextArea (in the applet)
 
 // Notational conventions: 
 //   i in {0..n} indexes columns and sequence seq1

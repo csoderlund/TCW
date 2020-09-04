@@ -162,7 +162,6 @@ public class runSTCWMain
 				if (doAnnoDB || !hasGOtree) { 
 					Out.Print("Check GO database ");
 					if (checkGODB(false)) doGO=true;
-					else cntPrompts++; 
 				}
 		
 				Boolean ans = yesNo("Please confirm above parameters. Continue with annotation? ");
@@ -494,7 +493,6 @@ public class runSTCWMain
 	public static boolean yesNo(String question)
 	{
 		if (noPrompt) return true;
-		cntPrompts++;
 		BufferedReader inLine = new BufferedReader(new InputStreamReader(System.in));
 
 		System.err.print("?--" + question + " [y/n]: "); 
@@ -522,7 +520,6 @@ public class runSTCWMain
 		if (noPrompt) {
 			return ans[def]; 
 		}
-		cntPrompts++;
 		BufferedReader inLine = new BufferedReader(new InputStreamReader(System.in));
 		System.err.print("?--" + question + " "); 
 		try
@@ -574,6 +571,5 @@ public class runSTCWMain
 	static private String blastPath = null;
 	
 	static private String contMsg = null;
-	static private int cntPrompts=0; // not using right now - number of command line prompts
 	static private boolean noPrompt = false;
 }

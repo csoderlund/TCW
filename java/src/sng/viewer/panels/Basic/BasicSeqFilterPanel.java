@@ -48,7 +48,7 @@ public class BasicSeqFilterPanel extends JPanel {
 	// Any change here will work in this file, but needs to be changed in BasicSeqQueryTab.SeqData class!!!
 	// These are columns from database and do not include row#
 	private static final String rowCol = "Row#";
-	private static final String [] STATIC_COLUMNS   = { "Seq ID", "TCW Remark", "User Remark", "TotalRead", "Longest Read", "Best Eval HitID"};
+	private static final String [] STATIC_COLUMNS   = { "Seq ID", "TCW Remark", "User Remark", "Counts", "Longest", "Best HitID"};
 	private static final Class<?> [] COLUMN_TYPES =   { String.class, String.class, String.class, Integer.class, String.class , String.class}; 
 	private static final String [] MYSQL_COLUMNS = {
 		"contig.contigid", "contig.notes", "contig.user_notes", 

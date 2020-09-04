@@ -31,7 +31,6 @@ import util.database.Globalx;
 import util.methods.ErrorReport;
 import util.methods.Static;
 import util.methods.Out;
-import util.ui.UIHelpers;
 import util.ui.UserPrompt;
 
 import cmp.database.DBinfo;
@@ -95,9 +94,8 @@ public class SeqsTopRowPanel extends JPanel  {
 			String summary, String subQuery, int rownum) {
 		theViewerFrame = parentFrame;
 		hasGOs = (theViewerFrame.getInfo().getCntGO()>0);
-		hasAAdb = (theViewerFrame.getnAAdb()>0);
-		hasNTdb = (theViewerFrame.getnNTdb()>0);
-		hasDBalign = (theViewerFrame.getInfo().hasDBalign());
+		hasNTdbOnly = (theViewerFrame.getnNTdb()>0 && theViewerFrame.getnAAdb()==0);// CAS304 add AA check
+		hasDBalign = (theViewerFrame.getInfo().hasDBalign()); 
 		
 		tabName = tab;
 		strQuerySummary = summary;
@@ -173,10 +171,8 @@ public class SeqsTopRowPanel extends JPanel  {
         }
       
         createBtnMultiAlign();
-        if (!UIHelpers.isApplet())  { // Muscle & Mafft do not run from an applet
-        		topRow.add(btnMSArun);
-        		topRow.add(Box.createHorizontalStrut(3)); 
-        }
+        topRow.add(btnMSArun);
+		topRow.add(Box.createHorizontalStrut(3)); 
         topRow.add(Box.createHorizontalStrut(10)); 
         
         createBtnTable();
@@ -255,10 +251,8 @@ public class SeqsTopRowPanel extends JPanel  {
     				runBlast();
     			}
     	     });
-    	     if (!UIHelpers.isApplet()) { 
-    	    	 	botRow.add(btnBlast);
-    	    	 	botRow.add(Box.createHorizontalStrut(3));
-    	     }
+    	    botRow.add(btnBlast);
+    	 	botRow.add(Box.createHorizontalStrut(3));
     	     
     	    botRow.add(Box.createHorizontalStrut(3));
     	    JButton btnClear = Static.createButton("Clear", true);
@@ -325,7 +319,7 @@ public class SeqsTopRowPanel extends JPanel  {
  			}
  		});
 	    
-	    if (hasNTdb) { // Not available for protein sTCWs
+	    if (hasNTdbOnly) { // Not available for protein sTCWs
 		    pairPop.add(itemNT);
 		    pairPop.add(itemCDS);
 		    pairPop.add(itemUTR);
@@ -388,7 +382,7 @@ public class SeqsTopRowPanel extends JPanel  {
  				opMultiAlign(MAFFT, Globals.CDS);
  			}
  		});
-	    if (hasNTdb) multiPop.add(itemMafftCDS);
+	    if (hasNTdbOnly) multiPop.add(itemMafftCDS);
 	    
 	    JMenuItem itemMafftNT = new JMenuItem(new AbstractAction("MAFFT-NT") {
  			private static final long serialVersionUID = 1L;
@@ -396,7 +390,7 @@ public class SeqsTopRowPanel extends JPanel  {
  				opMultiAlign(MAFFT, Globals.NT);
  			}
  		});
-	    if (hasNTdb) multiPop.add(itemMafftNT);
+	    if (hasNTdbOnly) multiPop.add(itemMafftNT);
 	    
 	    btnMSArun.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
@@ -508,7 +502,7 @@ public class SeqsTopRowPanel extends JPanel  {
  				new TableUtil(theViewerFrame).exportSeqFa(theSeqTable.getTableSQLid(), FieldData.AASEQ_SQL, false);
  			}
  		}));
- 		if (!hasAAdb) {
+ 		if (hasNTdbOnly) {
 	 		popup.add(new JMenuItem(new AbstractAction("Export CDS sequences (" + Globalx.FASTA_SUFFIX + ")") {
 	 			private static final long serialVersionUID = 4692812516440639008L;
 	 			public void actionPerformed(ActionEvent e) {
@@ -941,6 +935,6 @@ public class SeqsTopRowPanel extends JPanel  {
 	private String tabName = "";
 	private String strQuerySummary = "", strSubQuery="";
 	private int nParentRow = -1, grpID = -1;
-	private boolean hasAAdb=false, hasNTdb=false, hasGOs=false, hasDBalign;
+	private boolean hasNTdbOnly=false, hasGOs=false, hasDBalign;
 	private int viewType=0;
 }

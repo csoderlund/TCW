@@ -183,34 +183,29 @@ public class MTCWFrame extends JFrame {
 		catch(Error e) {ErrorReport.reportFatalError(e, "Fatal error finding server name", null);}
 	}
 	/*********************************************************
-	 * Called from DatabaseSelect and MTCWapplet()
+	 * Called from DatabaseSelect
 	 */
-	public MTCWFrame(String host, String dbName, boolean isApplet, String dbUser, String dbPass) {
+	public MTCWFrame(String host, String dbName, String dbUser, String dbPass) {
 	try {
 		if(openFrames != null) openFrames.add(this);
 		
 		ErrorReport.setErrorReportFileName(Globals.CmpErrorLog);
 		
-		UIHelpers.setIsApplet(isApplet);
-		if (!isApplet) 
-		{
-			hostsObj = new HostsCfg();
-			dbUser = hostsObj.user();
-			dbPass = hostsObj.pass();
-		}		
+		hostsObj = new HostsCfg();
+		dbUser = hostsObj.user();
+		dbPass = hostsObj.pass();
+				
 		if(!DBConn.connectionValid(host, dbName,dbUser, dbPass)) {
 			System.out.println("Error: Database cannot be found, exiting. ");
 			System.out.println(host + " " + dbName + " " + dbUser);
-			if (isApplet) return;
-			else System.exit(-1);
+			System.exit(-1);
 		}
 		strDBName = dbName;
 		strHostName = host;
 		strDBUser = dbUser;
 		strDBPass = dbPass;
-		if (!isApplet) {
-			new Version(getDBConnection(), false);
-		}
+		
+		new Version(getDBConnection(), false);
 		
 		//Loads the profile, if none selected creates a default profile
 		theSettings = new ViewerSettings(this);
@@ -523,7 +518,7 @@ public class MTCWFrame extends JFrame {
 					userPrefs.putInt(prefix + "_frame_win_height", getHeight());
 					userPrefs.flush();
 					
-					if ((openFrames==null || openFrames.size() == 1) && !UIHelpers.isApplet()) {
+					if (openFrames==null || openFrames.size() == 1) {
 						System.exit(0);
 					} 
 
@@ -532,7 +527,6 @@ public class MTCWFrame extends JFrame {
 		});
 	}
 	public String getDBName() { return strDBName; }	
-	public boolean isApplet() { return false; }
 	
 	private class MyShutdown extends Thread { // runs at program exit for each JFrame
 		public void run() {
@@ -554,15 +548,7 @@ public class MTCWFrame extends JFrame {
 		}
 		catch (Exception e) {ErrorReport.reportError(e, "Error shuting down");}
 	}
-	static public void shutDownFromApplet() {
-		if(curResult != null) {
-			try {
-				curResult.close();
-				curResult = null;
-			}
-			catch(Exception e) {}
-		}
-	}
+	
 	private JSplitPane splitPane = null;
 	private MenuPanel menuPanel = null;
 	private JPanel mainPanel = null;

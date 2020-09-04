@@ -1,6 +1,5 @@
 package sng.assem;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.lang.StringBuilder;
 import java.util.TreeMap;
@@ -151,76 +150,9 @@ public class Aligner
 		int gapScore = -1;
 		int nMatchScore = 1; // if they both have an n, it may be meaningful
 
-		int maxDiff = (optimized ? 20 : Integer.MAX_VALUE);
 
-
-		//int tStart = 0;
 		Utils.intTimerStart(nThread);
-/*		if (optimized)
-		{
-			// Guess the start point of the alignment so we can use the optimization.
-			// The start point has to be correct within maxDiff for it to work. 
-			
-			int nmerSize = 8;
-			int nHits = 0;
-			int avgStart = 0;
-			for (int i = 0; i + nmerSize <= mQuery.length(); i++)
-			{
-				String nmer = mQuery.substring(i,i + nmerSize);
-				if (mNmerMap.containsKey(nmer))
-				{
-					if (mNmerMap.get(nmer).size() > 1) continue; // non-unique ones can throw off the average considerably
-					for (int tLoc : mNmerMap.get(nmer))
-					{
-						int tStart4 = tLoc - i; // project back the start point by the query position
-						nHits++;
-						avgStart += tStart4;
-					}
-				}
-			}
-			int minMatchLoc = Integer.MAX_VALUE;		
-			if (nHits > 10)
-			{
-				int tStart1 = avgStart/nHits;
-				nHits = 0;
-				avgStart = 0;
-				// pass two: get rid of outliers, which can throw off the average by too much
-				for (int i = 0; i + nmerSize <= mQuery.length(); i++)
-				{
-					String nmer = mQuery.substring(i,i + nmerSize);
-					if (mNmerMap.containsKey(nmer))
-					{
-						if (mNmerMap.get(nmer).size() > 1) continue; // non-unique ones can throw off the average considerably
-						for (int tLoc : mNmerMap.get(nmer))
-						{
-							int tStart3 = tLoc - i; // project back the start point by the query position
-							if (Math.abs(tStart3 - tStart1) >= 5*maxDiff) continue;
-							
-							minMatchLoc = Math.min(minMatchLoc,tLoc);
-							nHits++;
-							avgStart += tStart3;
-						}
-					}
-				}	
-				if (nHits < 10)
-				{
-					mBasesAligned = 0;
-					mNGaps = mQuery.length();
-					return;					
-				}
-				tStart = avgStart/nHits;
-				tStart -= 3;
-				if (tStart < minMatchLoc - maxDiff) tStart = minMatchLoc - maxDiff; // don't start too much before the first good match (can happen if badly trimmed at start)
-				if (tStart < 0) tStart = 0;
-			}
-			else
-			{
-				mBasesAligned = 0;
-				mNGaps = mQuery.length();
-				return;
-			}
-		}
-*/		
+
 		int qlen = mQuery.length();
 		int tlen = mTarget.length();
 		
@@ -289,113 +221,7 @@ public class Aligner
 				}
 			}
 		}
-		/*
-		// WN 5/14/12 Since wasn't using the optimization anyway, put the loop back to
-		// simpler form so can be more sure it's working. There seemed to be some glitches in DcG.  
-		// The outer loop is in terms of N = r + c in order to allow for the optimization, but it
-		// didn't turn out to be that beneficial. 
-		// The optimization is to cut off the inner loop when the score gets too far below the max score seen so far. 
-		// It is basically what megablast does.
 		
-		for (int N = 2 + tStart; N <= qlen + tlen; N++)
-		{
-			int startC = maxC; // for the optimization, start at the point which had the biggest score last time
-			for (int c = startC; c <= N ; c++)
-			{
-				int r = N - c;
-				if (r > qlen) continue;
-				if  ( c > tlen || r == 0) break;
-				
-				int thisScore = (mQuery.charAt(r-1) == mTarget.charAt(c-1)  ? matchScore : mismatchScore);
-				if (thisScore == matchScore && mQuery.charAt(r-1) == 'n')
-				{
-					thisScore = nMatchScore;	
-				}
-				
-				int scoreDiag = H[r-1][c-1] + thisScore;
-				int scoreTGap = H[r-1][c] + gapScore;
-				int scoreQGap = H[r][c-1] + gapScore;
-				
-				if (scoreDiag >= scoreTGap && scoreDiag >= scoreQGap)
-				{
-					H[r][c] = scoreDiag;
-					B[r][c] = 'D';
-				}
-				else if (scoreTGap >= scoreDiag && scoreTGap >= scoreQGap)
-				{
-					H[r][c] = scoreTGap;
-					B[r][c] = 'T';
-				}
-				else
-				{
-					H[r][c] = scoreQGap;
-					B[r][c] = 'Q';
-				}
-					
-				if (H[r][c] > maxScore)
-				{
-					maxScore = H[r][c];
-					maxR = r;
-					maxC = c;
-				}
-				else if (H[r][c] < maxScore - maxDiff) 
-				{
-					// initialize enough of the boxes so we can't wind up using unitialized ones
-					H[r][c] = 0; 
-					if (r > 0 && c < tlen) H[r-1][c+1] = 0;
-					break;
-				}
-			}
-			for (int c = startC - 1; c >= 1 + tStart ; c--)
-			{
-				int r = N - c;
-				if (r > qlen ) break;
-				if ( c > tlen || r <= 0) continue;
-				
-				int thisScore = (mQuery.charAt(r-1) == mTarget.charAt(c-1) ? matchScore : mismatchScore);	
-				if (thisScore == matchScore && mQuery.charAt(r-1) == 'N')
-				{
-					thisScore = nMatchScore;	
-				}
-				
-				int scoreDiag = H[r-1][c-1] + thisScore;
-				int scoreTGap = H[r-1][c] + gapScore;
-				int scoreQGap = H[r][c-1] + gapScore;
-				
-				if (scoreDiag >= scoreTGap && scoreDiag >= scoreQGap)
-				{
-					H[r][c] = scoreDiag;
-					B[r][c] = 'D';
-				}
-				else if (scoreTGap >= scoreDiag && scoreTGap >= scoreQGap)
-				{
-					H[r][c] = scoreTGap;
-					B[r][c] = 'T';
-				}
-				else
-				{
-					H[r][c] = scoreQGap;
-					B[r][c] = 'Q';
-				}
-				H[r][c] = Math.max(0,H[r][c]);
-								
-				if (H[r][c] > maxScore)
-				{
-					maxScore = H[r][c];
-					maxR = r;
-					maxC = c;
-				}
-				else if (H[r][c] < maxScore - maxDiff) 
-				{
-					// initialize enough of the boxes so we can't wind up using unitialized ones
-					H[r][c] = 0; 
-					if (r < qlen && c > 0) H[r+1][c-1] = 0;					
-					break;
-				}
-				
-			}	
-		}
-		*/
 		// Backtrace to get the alignment
 		
 		int r = maxR;

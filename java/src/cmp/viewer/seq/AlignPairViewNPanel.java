@@ -371,7 +371,7 @@ public class AlignPairViewNPanel extends JPanel {
 	private JPanel buttonPanel = null;
 	private JPanel mainPanel = null;
 
-	private JComboBox menuZoom = null;
+	private JComboBox <MenuMapper> menuZoom = null;
 	private JButton btnShowType = null;
 	
 	private JButton btnShowAll = null;

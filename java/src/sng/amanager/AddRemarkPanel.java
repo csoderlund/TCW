@@ -301,6 +301,8 @@ public class AddRemarkPanel extends JPanel {
 				}
 				curRems.put(CID, value);
 			}
+			file.close();
+			
 			Out.PrtSpMsg(1, "Complete reading file");
 			for (int CID : curRems.keySet())
 			{

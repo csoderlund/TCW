@@ -114,7 +114,7 @@ public class ResultsSummaryTab extends Tab
 					btnClearSel.setEnabled(true);
 				else if (e.getClickCount() == 2) {
 					int row = table.getSelectedRow();
-					Tab tab = (Tab)tabs.get(row);
+					Tab tab = tabs.get(row);
 					if (tab != null) {
 						String name = rows.get(row).get(0);
 						getParentFrame().menuTree.setSelectedNode(name);

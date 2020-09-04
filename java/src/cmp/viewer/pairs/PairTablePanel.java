@@ -12,10 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.BufferedReader;
-import java.io.StringReader;
 import java.sql.ResultSet;
-import java.util.Enumeration;
 import java.util.Vector;
 import java.util.HashSet;
 
@@ -26,27 +23,22 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import util.database.DBConn;
 import util.database.Globalx;
 import util.methods.ErrorReport;
-import util.methods.Out;
 import util.methods.Static;
 import util.ui.UserPrompt;
 import cmp.align.SumStats;
@@ -60,7 +52,6 @@ import cmp.viewer.table.*;
 
 public class PairTablePanel extends JPanel {
 	private static final long serialVersionUID = -3827610586702639105L;
-	private static boolean initFirstAppletPOGRun = true;
 	
 	private static final String TABLE = FieldData.PAIR_TABLE;
 	private static final String PAIRID = FieldData.PAIRID;
@@ -286,7 +277,7 @@ public class PairTablePanel extends JPanel {
     	 					Vector <Integer> ids = getSeqQueryAll();
     	 					DBConn mDB = theViewerFrame.getDBConnection();
     	 					String summary = "Pairs: " + strQuerySummary;
-    	 					new SumStats(mDB).fromView(ids, theViewerFrame.isApplet(), summary);
+    	 					new SumStats(mDB).fromView(ids, summary);
     	 					// close in SumStats
     	 				} catch(Exception ee) {ErrorReport.reportError(ee,  "View stats");
     	 				} catch(Error ee) {ErrorReport.reportFatalError(ee, "View stats", theViewerFrame);}
@@ -471,7 +462,7 @@ public class PairTablePanel extends JPanel {
         theTableData = new TableData(this);
         theTableData.setColumnHeaders(theFields.getDisplayFields(), theFields.getDisplayTypes());
         theTableData.addRowsWithProgress(rs, theFields, loadStatus);
-        theTableData.finalize();
+        theTableData.showTable();
 
         int nRow = theTableData.getNumRows();
         String status =  nRow + " of " + totalPairs + " " + Static.perText(nRow, totalPairs);
@@ -490,48 +481,41 @@ public class PairTablePanel extends JPanel {
 		btnCopy.setEnabled(b);
 	}
     private JPanel createFieldSelectPanel() {
-	    	JPanel page = Static.createPagePanel();
-	    	
-	    	String [] sections = FieldData.getPairColumnSections();
-	    	int [] secIdx = FieldData.getPairColumnSectionIdx(methods.length);
-	    	int [] secBreak = FieldData.getPairColumnSectionBreak();
-	    	String [] columns = FieldData.getPairColumns(methods);
-	    	String [] descriptions = FieldData.getPairDescript(methods);
-	    	boolean [] defaults = FieldData.getPairSelections(methods.length);
-	    boolean [] selections = null;
-    		
-    		if(theViewerFrame.isApplet() && initFirstAppletPOGRun) {
-    			initFirstAppletPOGRun = false;
-    			selections = getColumnSelections(columns, defaults, null);
-    		}
-    		else
-    			selections = getColumnSelections(columns, defaults, 
+    	JPanel page = Static.createPagePanel();
+    	
+    	String [] sections = FieldData.getPairColumnSections();
+    	int [] secIdx = FieldData.getPairColumnSectionIdx(methods.length);
+    	int [] secBreak = FieldData.getPairColumnSectionBreak();
+    	String [] columns = FieldData.getPairColumns(methods);
+    	String [] descriptions = FieldData.getPairDescript(methods);
+    	boolean [] defaults = FieldData.getPairSelections(methods.length);
+	    boolean [] selections = getColumnSelections(columns, defaults, 
     					theViewerFrame.getSettings().getPairSettings().getSelectedColumns());    
 	    	
-	    	chkFields = new JCheckBox[columns.length];
+	    chkFields = new JCheckBox[columns.length];
 	
 		int maxWidth=0;	
-	    	for(int x=0; x<columns.length; x++) {
-	    		final String desc = descriptions[x];
-	    		
-	        	chkFields[x] = new JCheckBox(columns[x]);
-	        	chkFields[x].setBackground(Globals.BGCOLOR);
-	        	chkFields[x].addActionListener(colSelectChange);
-	        	chkFields[x].addMouseListener(new MouseAdapter() 
-	        	{
-	        		public void mouseEntered(MouseEvent e) {
-	        			theViewerFrame.setStatus(desc);
-	        		}
-	        		public void mouseExited(MouseEvent e) {
-	        			theViewerFrame.setStatus("");
-	        		}
-	        	});
-	        	chkFields[x].setSelected(selections[x]);
-	        int w = chkFields[x].getPreferredSize().width;
-	        if (w>maxWidth) maxWidth=w;
-	    	}
+    	for(int x=0; x<columns.length; x++) {
+    		final String desc = descriptions[x];
+    		
+        	chkFields[x] = new JCheckBox(columns[x]);
+        	chkFields[x].setBackground(Globals.BGCOLOR);
+        	chkFields[x].addActionListener(colSelectChange);
+        	chkFields[x].addMouseListener(new MouseAdapter() 
+        	{
+        		public void mouseEntered(MouseEvent e) {
+        			theViewerFrame.setStatus(desc);
+        		}
+        		public void mouseExited(MouseEvent e) {
+        			theViewerFrame.setStatus("");
+        		}
+        	});
+        	chkFields[x].setSelected(selections[x]);
+        	int w = chkFields[x].getPreferredSize().width;
+        	if (w>maxWidth) maxWidth=w;
+    	}
 	    	
-	    	JPanel row = Static.createRowPanel();
+	    JPanel row = Static.createRowPanel();
 		page.add(new JLabel(sections[0]));
 		int hIdx = 0, hBreak = 0;
 		
@@ -859,12 +843,13 @@ public class PairTablePanel extends JPanel {
 
       theTable.setTableHeader(new SortHeader(theTable.getColumnModel()));
       
-      //If a header contains a '\n' multiple lines will appear using this renderer
+      /* CAS304 If a header contains a '\n' multiple lines will appear using this renderer
       MultiLineHeaderRenderer renderer = new MultiLineHeaderRenderer();
       Enumeration<TableColumn> en = theTable.getColumnModel().getColumns();
       while (en.hasMoreElements()) {
-        ((TableColumn)en.nextElement()).setHeaderRenderer(renderer);
+        (en.nextElement()).setHeaderRenderer(renderer);
       } 
+      */
   	}
   	
     //Called from a thread
@@ -906,36 +891,6 @@ public class PairTablePanel extends JPanel {
 	    	private boolean [] bColumnAscending = null;
     }
     
-    public class MultiLineHeaderRenderer extends JList implements TableCellRenderer {
-		private static final long serialVersionUID = 3118619652018757230L;
-
-		public MultiLineHeaderRenderer() {
-    	    setOpaque(true);
-    	    setBorder(BorderFactory.createLineBorder(Color.BLACK));
-    	    setBackground(Globals.BGCOLOR);
-    	    ListCellRenderer renderer = getCellRenderer();
-    	    ((JLabel)renderer).setHorizontalAlignment(JLabel.CENTER);
-    	    setCellRenderer(renderer);
-    	  }
-    	 
-    	  public Component getTableCellRendererComponent(JTable table, Object value,
-    	                   boolean isSelected, boolean hasFocus, int row, int column) {
-    	    setFont(table.getFont());
-    	    String str = (value == null) ? "" : value.toString();
-    	    BufferedReader br = new BufferedReader(new StringReader(str));
-    	    String line;
-    	    Vector<String> v = new Vector<String>();
-    	    try {
-    	      while ((line = br.readLine()) != null) {
-    	        v.addElement(line);
-    	      }
-    	      br.close(); 
-    	    } catch (Exception e) {ErrorReport.reportError(e, "Error rendering table cells");}
-    	    
-    	    setListData(v);
-    	    return this;
-    	  }
-    	}
     public int getTranslatedRow(int row) {
 		if (theTable==null) return 0;
 
@@ -954,7 +909,7 @@ public class PairTablePanel extends JPanel {
     private JLabel lblSummary = null;
    
     //Function buttons
-    private JButton btnShow = null, btnCopy = null, btnTable = null, btnHelp = null;
+    private JButton btnCopy = null, btnTable = null, btnHelp = null;
     private JButton btnNextRow = null, btnPrevRow = null;
     private int nParentRow = -1;
     private JButton btnTableSeqs = null;

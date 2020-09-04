@@ -433,7 +433,7 @@ public class AlignBasePanel extends JPanel
 		Iterator<JPanel> iterPanel = codingPanels.iterator();
 		while ( iterPanel.hasNext() )
 		{
-			JPanel curPanel = (JPanel)iterPanel.next();
+			JPanel curPanel = iterPanel.next();
 			g2.setColor( curPanel.getBackground() );
 			g2.fill( curPanel.getBounds() );
 		}		

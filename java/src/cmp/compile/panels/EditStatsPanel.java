@@ -45,7 +45,7 @@ public class EditStatsPanel  extends JPanel  {
 		
 		// PCC
 		row = Static.createRowPanel(); row.add(Box.createHorizontalStrut(5));
-		chkPCC = Static.createCheckBox("PCC of RPKM for all hit pairs", true);
+		chkPCC = Static.createCheckBox("PCC of TPM for all hit pairs", true);
 		row.add(chkPCC);
 		add(row);
 		add(Box.createVerticalStrut(15));
@@ -200,7 +200,7 @@ public class EditStatsPanel  extends JPanel  {
 		DBinfo info = theCompilePanel.getDBInfo();
 		int cntPairs = info.getCntPair();
 		
-		// PCC
+	// PCC
 		int index=0;
 		lblSum[index++].setText(html(cntPairs, "Total Hit Pairs", false));
 		
@@ -216,7 +216,7 @@ public class EditStatsPanel  extends JPanel  {
 		}
 		bPCC = chkPCC.isSelected();
 		
-		// Clusters -- want to score regardless of NT-sTCW or AA-sTCW
+	// Clusters -- want to score regardless of NT-sTCW or AA-sTCW
 		int cntGrp =   info.getCntGrp();
 		int cntMulti = info.getCntMultiScore();
 		lblSum[index++].setText(html(cntGrp,   "Clusters", false));
@@ -228,28 +228,34 @@ public class EditStatsPanel  extends JPanel  {
 		}
 		bMulti= chkMulti.isSelected();
 		
-		// Pairs		
+	// Pairs		
 		int nNT = info.nNTdb(); 
+		int nAA = info.nAAdb();
+		String dbStr;
+		if (nNT==0)      dbStr = "sTCWdb AA: " + nAA;
+		else if (nAA==0) dbStr = "sTCWdb NT: " + nNT;
+		else             dbStr = "sTCWdb NT: " + nNT + " AA: " + nAA;
+		
 		if (nNT<=1) {
-			if (nNT==0) lblSum[index++].setText(html(-1, "No  NT-sTCWdb", false));
-			else        lblSum[index++].setText(html(-1, "One NT-sTCWdb", false));
+			lblSum[index++].setText(html(-1, dbStr, false));
 			bStats=false; bKaKs=false; bRead=false; bWrite=false;
-			return;
+			return; // No stats to be done
 		}
+		
+		boolean bMix = (nNT>0 && nAA>0);
+		
 		int cntPairGrp = info.getCntPairGrp(); // Pairwise.hasGrp=1
 		lblSum[index++].setText(html(cntPairGrp, "Pairs in clusters", false));
-		if (cntPairGrp==0) 
-			return;
-		
-	// Pairs
+		if (cntPairGrp==0) return;
 		 
-		// Stats
+	// Stats
 		int cntStats = info.getCntStats();    // Paiwise.align>0 
 		lblSum[index++].setText(html(cntStats, "with stats", true));
 		
 		chkStats.setEnabled(true);
 		if (cntStats<cntPairGrp) chkStats.setSelected(true); 
-		bStats = chkStats.isSelected();
+		if (cntStats>0 && bMix)  chkStats.setSelected(false); // CAS304, may be done
+  		bStats = chkStats.isSelected();
 		
 		// KaKs
 		int cntKaKs = info.getCntKaKs();     // Pairwise.KaKs>=0 read from file
@@ -260,13 +266,33 @@ public class EditStatsPanel  extends JPanel  {
 		kaksRdButton.setEnabled(true); 
 		
 		// Read/Write files exists?
-		boolean wExists=false, rExists=false;
 		String kaksDir = theCompilePanel.getStatsPanel().getKaKsDir();
 		String file = kaksDir + "/" + Globals.KaKsOutPrefix + "1" + Globals.KaKsOutSuffix;
+		
+		boolean wExists=false, rExists=false;
 		File f = new File(file);
 		wExists = f.exists();
+		if (wExists) {
+			file = kaksDir + "/" + Globals.KaKsInPrefix + "1" + Globals.KaKsInSuffix;
+			f = new File(file);
+			rExists = f.exists();
+		}
 		
-		if (cntStats<cntPairGrp) { // KaKs need to be written for new pairs
+		if (bMix && cntStats>0) { // CAS304
+			if (cntKaKs!=cntStats) {
+				if (rExists)      {
+					chkKaKs.setSelected(true);
+					kaksRdButton.setSelected(true); kaksWrButton.setSelected(false);
+					lblSum[index++].setText(html(-1, "&nbsp;&nbsp;KaKs files exist for Read", true));
+				}
+				else if (wExists) {
+					kaksRdButton.setSelected(false); kaksWrButton.setSelected(true);
+					lblSum[index++].setText(html(-1, "&nbsp;&nbsp;Input files to KaKs exists", true));
+				}
+				else              lblSum[index++].setText(html(-1, "&nbsp;&nbsp;KaKs unknown for mixed sTCWdbs", true));
+			}	
+		}
+		else if (cntStats<cntPairGrp) { // KaKs need to be written for new pairs
 			chkKaKs.setSelected(true);
 			kaksWrButton.setSelected(true);
 			lblSum[index++].setText(html(-1,     "&nbsp;&nbsp;Write files for KaKs input", true));
@@ -274,24 +300,20 @@ public class EditStatsPanel  extends JPanel  {
 				lblSum[index++].setText(html(-1, "&nbsp;&nbsp;***Input to KaKs exists", true));
 		}	
 		else if (cntKaKs<cntPairGrp) { // cntStats all aligned already
-			if (wExists) {
-				file = kaksDir + "/" + Globals.KaKsInPrefix + "1" + Globals.KaKsInSuffix;
-				f = new File(file);
-				rExists = f.exists();
-			}
 			if (rExists) {
 				chkKaKs.setSelected(true);
 				kaksRdButton.setSelected(true); kaksWrButton.setSelected(false);
-				lblSum[index++].setText(html(-1, "KaKs files ready for Read", true));
+				lblSum[index++].setText(html(-1, "&nbsp;&nbsp;KaKs files exist for Read", true));
 			}
 			else if (wExists) {
 				chkKaKs.setSelected(false); 
 				kaksWrButton.setEnabled(false); kaksWrButton.setSelected(false);
 				kaksRdButton.setEnabled(false); kaksRdButton.setSelected(false);
-				lblSum[index++].setText(html(-1, "Files ready for KaKs input", true));
+				lblSum[index++].setText(html(-1, "&nbsp;&nbsp;Files exist for KaKs input", true));
 			}
-			else lblSum[index++].setText(html(-1, "No KaKs files", true));
+			else lblSum[index++].setText(html(-1, "&nbsp;&nbsp;No KaKs files", true));
 		}
+		lblSum[index++].setText(html(-1, dbStr, false));
 		
 		bKaKs = chkKaKs.isSelected();
 		bWrite = kaksWrButton.isSelected();

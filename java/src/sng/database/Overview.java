@@ -74,7 +74,7 @@ public class Overview {
             if (!found) return;
           
             // Sanity check overview
-            if (pga_msg != null && meta_msg != null && pga_msg.startsWith("Project:") && !STCWMain.updateMSG) {
+            if (pga_msg != null && !pga_msg.startsWith("Project: Not") && !STCWMain.updateMSG) {
                 	lines.add(pga_msg);
                 	lines.add(meta_msg);
             }
@@ -213,7 +213,7 @@ public class Overview {
 	        	if (nUniqueGOs>0)  h += "   #GOs: " + dff.format(nUniqueGOs);
 	        	
 	        	h += "   ";
-	        	if (hasRPKM) h += " RPKM ";
+	        	if (hasNorm) h += " " + normType + " ";
 	        	if (hasSeqDE) h += " DE ";
 	        	if (hasGODE) h += " GO-DE ";
 	        	
@@ -897,7 +897,7 @@ public class Overview {
     private boolean expStats(Vector<String> lines) 
     {
 		lines.add( "EXPRESSION" );
-		if (hasRPKM==false) {
+		if (hasNorm==false) {
 			lines.add("   None");
 			lines.add("");
 			return true;
@@ -989,11 +989,11 @@ public class Overview {
             }
             strQ += " FROM contig";
             
-            zPrtMsg(libCol.size(), "RPKM Intervals");
+            zPrtMsg(libCol.size(), normType);
             
-            String [] dfields = {"", "<2", "2-5", "5-10", "10-50", "50-100", "100-1k", "1k-5k", ">=5k"};
-    	    		int[] start=   {0, 2, 5,10, 50,100, 1000, 5000};
-    	    		int[] end=     {2, 5,10,50,100,1000,5000, 10000000};
+            String [] dfields = {"", "<2.0", "2-5", "5-10", "10-50", "50-100", "100-1k", "1k-5k", ">=5k"};
+    	    int[] start=   {0, 2, 5,10, 50,100, 1000, 5000};
+    	    int[] end=     {2, 5,10,50,100,1000,5000, 10000000};
             int [] djust = {1, 0, 0, 0, 0, 0, 0, 0, 0};
     	    		
             int nCol=start.length+1;
@@ -1007,15 +1007,15 @@ public class Overview {
                     double ln = rs.getDouble(libCol.get(i));
                     for (int j=0; j<start.length; j++) {
                         if (ln >= start[j] && ln<end[j]) {
-                        		cnts[i][j]++;
-                        		break;
+                        	cnts[i][j]++;
+                        	break;
                         }
                     }
                 }
             }
             rs.close();
         		
-    		    lines.add("   RPKM: (% of " + dff.format(numSeqs) + ")");
+    		    lines.add("   " +  normType + ": (% of " + dff.format(numSeqs) + ")");
     		    for (int i=0; i<libs.size(); i++) {
     		    	 	int cnt=0;
                  rows[i][0] = libs.get(i);
@@ -1439,7 +1439,14 @@ public class Overview {
   	       			//stmt.executeUpdate("update library set ctglib=1 where libid='" + lib + "'" );
 	   		   }
   	       }
-  	       if (libs.size()>0) hasRPKM=true;
+  	       if (libs.size()>0) {
+  	    	   hasNorm=true;
+  	    	   // CAS304
+  	    	   if (mDB.tableColumnExists("assem_msg", "norm")) 
+  	    		   normType = mDB.executeString("select norm from assem_msg");
+  	    	   else 
+  	    		 normType="RPKM";
+  	       }
   	       
   	       // String prefix = QRFrame.pValColPrefix;
   	       hasSeqDE=hasGODE=false;
@@ -1562,8 +1569,9 @@ public class Overview {
     private boolean hasMatePairs=false, hasBuried=false;
     private boolean hasNoAssembly = false, hasGO;
     private boolean hasDBhitData = false, hasPairwise=false;
-    private boolean isProteinDB = false, hasRPKM=false, hasSeqDE=false, hasGODE=false;
+    private boolean isProteinDB = false, hasNorm=false, hasSeqDE=false, hasGODE=false;
     private Vector <String> libs = new Vector <String> ();
+    private String normType="";
 
 	private DBConn mDB = null;
 	private String [][] rows = null;

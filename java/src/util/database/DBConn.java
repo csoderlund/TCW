@@ -589,7 +589,7 @@ public class DBConn
 			con = DriverManager.getConnection(dbstr, user, pass);
 			Statement s = con.createStatement();
 			s.executeUpdate("drop database " + db);
-			System.err.println("Deleted database " + db);
+			//System.err.println("Deleted database " + db); CAS304 let calling program 
 			return true;
 		} 
 		catch (Exception e)

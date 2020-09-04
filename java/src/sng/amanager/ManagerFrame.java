@@ -57,7 +57,6 @@ import sng.database.Version;
 import util.database.DBConn;
 import util.database.Globalx;
 import util.database.HostsCfg;
-import util.methods.BlastArgs;
 import util.methods.ErrorReport;
 import util.methods.Out;
 import util.methods.Static;
@@ -246,8 +245,10 @@ public class ManagerFrame extends JFrame {
 		
 		chkSkipAssembly = Static.createCheckBox("Skip Assembly", true);
 		chkSkipAssembly.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {					
-				curManData.setSkipAssembly(chkSkipAssembly.isSelected());
+			public void actionPerformed(ActionEvent arg0) {	
+				boolean b = chkSkipAssembly.isSelected();
+				curManData.setSkipAssembly(b);
+				if (b) curManData.setUseTransNames(!b); // CAS304
 				updateUI();
 			}
 		});
@@ -256,7 +257,9 @@ public class ManagerFrame extends JFrame {
 		chkUseTransName.setBackground(Globals.BGCOLOR);
 		chkUseTransName.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				curManData.setUseTransNames(chkUseTransName.isSelected());
+				boolean b = chkUseTransName.isSelected();
+				curManData.setUseTransNames(b);
+				if (b) curManData.setSkipAssembly(!b); // CAS304
 				updateUI();
 			}
 		});
@@ -1068,7 +1071,7 @@ public class ManagerFrame extends JFrame {
 	}
 	private boolean addProject () {
 		try {
-			String result = (String)JOptionPane.showInputDialog(getInstance(), 
+			String result = JOptionPane.showInputDialog(getInstance(), 
 					"Enter name for new project", "", JOptionPane.PLAIN_MESSAGE);
 			if(result != null && isValidID(result)) {
 				if (result.startsWith(STCW)) 
@@ -1448,7 +1451,7 @@ public class ManagerFrame extends JFrame {
 		for(int x=0; x<curManData.getNumSeqLibs() && curManData.getTransLibraryAt(x) != null; x++) {
 			String [] temp = new String[2];
 			temp[0] = curManData.getTransLibraryAt(x).getSeqID();
-			temp[1] = curManData.getTransLibraryAt(x).getTitle();
+			temp[1] = curManData.getTransLibraryAt(x).getAttr().getTitle();
 			
 			if(curManData.getTransLibraryAt(x).getCountFile().length() > 0)
 				transTable.addRow(true, true, temp);
@@ -1466,7 +1469,7 @@ public class ManagerFrame extends JFrame {
 			String [] temp = new String[4]; 
 			temp[0] = curManData.getCountLibAt(x).getSeqID();
 			temp[1] = curManData.getCountLibAt(x).getCondID();
-			temp[2] = curManData.getCountLibAt(x).getTitle(); 
+			temp[2] = curManData.getCountLibAt(x).getAttr().getTitle(); 
 			temp[3] = curManData.getCountLibAt(x).getNumReps() + ""; 
 			countTable.addRow(true, false, temp);
 		}

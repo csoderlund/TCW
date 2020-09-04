@@ -359,7 +359,6 @@ public class MethodPanel extends JPanel {
 		public boolean getLoadedAt(int row) { return theModel.getIsLoadedAt(row); }
 		public String getPrefixAt(int row) { return theModel.getPrefixAt(row); }
 		public String getMethodTypeAt(int row) { return theModel.getMethodTypeAt(row); }
-		public String getCommentAt(int row) { return theModel.getCommentAt(row); }
 		public String getSettingsAt(int row) { return theModel.getSettingsAt(row); }
 		
 		public void addRow(String method, String prefix, String comment, String settings) {
@@ -393,7 +392,6 @@ public class MethodPanel extends JPanel {
 			public boolean getIsLoadedAt(int row) { return rows[row].isLoaded(); }
 			public String getMethodTypeAt(int row) { return rows[row].getMethodType(); }
 			public String getPrefixAt(int row) { return rows[row].getPrefix(); }
-			public String getCommentAt(int row) { return rows[row].getComment(); }
 			public String getSettingsAt(int row) { return rows[row].getSettings(); }
 			
 			public Object getValueAt(int row, int column) {

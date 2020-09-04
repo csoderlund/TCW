@@ -342,26 +342,27 @@ public class DoUniProt
     private void addHitDataForCtgToDB()
     {
 	    try {
-	    		int seqLen = curSeqData.getConsensusBases();
+	    	int seqLen = curSeqData.getConsensusBases();
 				
-	    		PreparedStatement ps = mDB.prepareStatement("INSERT INTO pja_db_unitrans_hits " + 
+	    	PreparedStatement ps = mDB.prepareStatement("INSERT INTO pja_db_unitrans_hits " + 
 			  "(CTGID, AID, DUHID, contigid, uniprot_id, percent_id, alignment_len," +
 			  "mismatches, gap_open, ctg_start, ctg_end, prot_start, prot_end, " +
 			  "bit_score , e_value, dbtype, taxonomy, blast_rank, isProtein, ctg_cov, prot_cov) " +
 			  "VALUES (?,1,0,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?, ?,?)");
 	    		mDB.openTransaction(); 
+	    		
        		for (int i=0; i<curHitDataForSeq.size(); i++) {
        			BlastHitData hitData = curHitDataForSeq.get(i);
        			hitData.setBlastRank ( i+1 );
        			hitData.setDBtaxo(dbTaxo);
     			
        			String type = hitData.getDBtype();
-		    		if (type.equals("")) type = dbType; 
-		    		String b = (hitData.hitIsProtein()) ? "1" : "0";
-		    		int sStart = hitData.getCtgStart(), sEnd=hitData.getCtgEnd();
-		    		int seqCov = Static.percent(Math.abs(sStart-sEnd)+1, seqLen);
-		    		int hStart = hitData.getHitStart(), hEnd=hitData.getHitEnd();
-		    		int hitCov = 0; // do not have hit length until loaded
+	    		if (type.equals("")) type = dbType; 
+	    		String b = (hitData.hitIsProtein()) ? "1" : "0";
+	    		int sStart = hitData.getCtgStart(), sEnd=hitData.getCtgEnd();
+	    		int seqCov = Static.percent(Math.abs(sStart-sEnd)+1, seqLen);
+	    		int hStart = hitData.getHitStart(), hEnd=hitData.getHitEnd();
+	    		int hitCov = 0; // do not have hit length until loaded
 		    		
 			    ps.setInt(1, hitData.getCTGID());
 			    ps.setString(2,hitData.getContigID());
@@ -397,11 +398,10 @@ public class DoUniProt
        		mDB.closeTransaction();
        		
        		nAnnoSeq++;
+       		// XXX CAS304
        		String name = curSeqData.getContigID();
-		    if (!annoSeqMap.containsKey(name)) {
-		    		int id = seqMap.get(name);
-		    		annoSeqMap.put(id, "");
-		    }
+       		int id = seqMap.get(name);
+		    if (!annoSeqMap.containsKey(id)) annoSeqMap.put(id, "");
 	    }
         catch ( Exception err ) {
         		pRC=false;
@@ -461,7 +461,7 @@ public class DoUniProt
 	    	try {
 	    		mDB.renew();
 		    	while (!hitsAddToDB.isEmpty()) {
-		    		String hitID = (String)hitsAddToDB.iterator().next();
+		    		String hitID = hitsAddToDB.iterator().next();
 		    		
 				saveDBhitUnique(DBID, isAAannoDB, dbType, dbTaxo, hitID, "", "", "", "", 0);
 				hitsInDB.add(hitID); // so do not get divide by zero error
@@ -666,7 +666,7 @@ public class DoUniProt
 			mDB.renew();
 
 		/** go through all contigs that have annoDB hits */
-        		for (int CTGid : annoSeqMap.keySet()) { // contigs with DB hits   
+			for (int CTGid : annoSeqMap.keySet()) { // contigs with DB hits   
         			ctgData.CTGid=CTGid;	
         			cntPrt++; cntAll++;
         			if(cntPrt==COMMIT) {

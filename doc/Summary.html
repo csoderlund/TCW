@@ -18,7 +18,7 @@ Select a program name to view the graphical interface of the Demo Project.
 	Note: <code>runSingleTCW</code> can take as input other databases such as Genbank nr, 
 	but these results will not have associated GO annotations.
 	<p>
-	<li><a href=img/runSingleTCW.png><code>runSingleTCW</code></a> -- create single TCW database
+	<li><a href=img/runSingleTCW.png><code>runSingleTCW</code></a> -- builds a single-species TCW database
 	   <ul>
 	   <li> Input: sequences and optional counts, where <i><b>any</b></i> of the following are valid:
 		<ol>
@@ -48,7 +48,7 @@ Select a program name to view the graphical interface of the Demo Project.
 		<li>If UniProt is used and GO entered, the <code>GOseq</code> R program can be used to compute differential GO terms.
 	   </ul>
 	<br>
-	<li><a href=img/viewSingleTCW.png><code>viewSingleTCW</code></a> -- view single TCW database
+	<li><a href=img/viewSingleTCW.png><code>viewSingleTCW</code></a> -- view a single-species TCW database
 	   <ul><li>Query and view the results. There are various filters, for example,
 	   filters are provided specific to taxonomic databases, trimmed GOs, filter by annotation, etc.
 	   The initial view is the <a href=./stcw/tra.html>Overview</a>, which summarizes the results.
@@ -57,8 +57,8 @@ Select a program name to view the graphical interface of the Demo Project.
 	
 	<i>multiTCW contains two major programs</i>:
 	<ol>
-	<li><a href=img/runMultiTCW.png><code>runMultiTCW</code></a> -- build species comparison TCW database
-		<ul><li>Builds a database of singleTCW projects.
+	<li><a href=img/runMultiTCW.png><code>runMultiTCW</code></a> -- builds a multi-species comparison TCW database
+		<ul><li>Builds a database from multiple singleTCW databases (tested with up to 5).
 		<li>Runs <code>DIAMOND</code> or <code>BLAST</code> to compare the sequences from the input TCWs. Add the resulting pairs to the database.
 	 	<li>Clusters the pairs into ortholog groups. They can be clustered with <code>OrthoMCL</code>,
 	 	TCW Closure, TCW BBH (best bi-directional) and/or user-supplied clusters can be uploaded. 
@@ -69,7 +69,7 @@ Select a program name to view the graphical interface of the Demo Project.
 		<li>The clusters MSA are scored with Trident.
 	 	</ul>
 	 <br>
-	 <li><a href=img/viewMultiTCW.png><code>viewMultiTCW</code></a> -- view multi TCW database
+	 <li><a href=img/viewMultiTCW.png><code>viewMultiTCW</code></a> -- view a multi-species TCW database
 	 	<ul><li>Query and view the results. The results can be filtered on various attributes. A cluster
 	 	can be viewed graphically with the results of <code>MAFFT</code> or <code>MUSCLE</code> 
 	 	multiple sequence alignment (MSA) or pairwise alignment

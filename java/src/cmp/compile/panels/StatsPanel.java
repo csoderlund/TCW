@@ -12,6 +12,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import util.methods.ErrorReport;
+import util.methods.FileHelpers;
 import util.methods.Out;
 import util.methods.Static;
 import util.ui.UserPrompt;
@@ -100,11 +101,14 @@ public class StatsPanel extends JPanel {
 				String in = Globals.KaKsOutPrefix + "1" + Globals.KaKsOutSuffix;
 				if ((new File(dirKaKs + "/" + in)).exists() ) {
 					if (!UserPrompt.showContinue("KaKs files exist", 
-							"Overwrite existing KaKs files for input to KaKs_calculator.\n")) {
+							"Replace existing KaKs files for input to KaKs_calculator.\n")) {
 						Out.Print("Terminate Run Stats");
 						return;
 					}
-					else Out.Print("Overwrite existing KaKs files");
+					else {
+						Out.Print("Clear directory " + dirKaKs);
+						FileHelpers.clearDir(dirKaKs);
+					}
 				}
 			}
 			if (doReadKaKs) {
@@ -150,6 +154,7 @@ public class StatsPanel extends JPanel {
 
 	private void editPanelStartup() {
 		theCompilePanel.setMainPanelVisible(false);
+		editPanel.updateDBexists(); // CAS304
 		editPanel.setVisible(true);
 	}
 	public EditStatsPanel getEditPanel() { return editPanel;}

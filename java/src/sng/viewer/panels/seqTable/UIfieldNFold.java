@@ -74,7 +74,7 @@ public class UIfieldNFold extends JPanel {
 		txtNfold = Static.createTextField("2", 3);
 		row.add(txtNfold); row.add(Box.createHorizontalStrut(15));
 		
-		cmbBool = new JComboBox(); cmbBool.setBackground(Color.WHITE);
+		cmbBool = new  JComboBox <String> (); cmbBool.setBackground(Color.WHITE);
 		cmbBool.addItem("EVERY");
 		cmbBool.addItem("ANY");
 		cmbBool.setSelectedIndex(0);
@@ -142,7 +142,7 @@ public class UIfieldNFold extends JPanel {
 		
 		// Regulation
 		JPanel regPanel = Static.createPagePanel();
-		cmbReg = new JComboBox(); cmbReg.setBackground(Color.WHITE);
+		cmbReg = new JComboBox <String> (); cmbReg.setBackground(Color.WHITE);
 		cmbReg.setAlignmentX(Component.LEFT_ALIGNMENT);
 		cmbReg.addItem("Up");
 		cmbReg.addItem("Down");
@@ -384,8 +384,8 @@ public class UIfieldNFold extends JPanel {
 	private boolean bFilter = false;
 	private JCheckBox chkFilter = null;
 	private JTextField txtNfold = null;
-	private JComboBox cmbBool = null;
-	private JComboBox cmbReg = null;
+	private JComboBox <String> cmbBool = null;
+	private JComboBox <String> cmbReg = null;
 	
 	private String [] strLibNames = null;
 	private Vector<String> selectedFolds = null;

@@ -90,7 +90,7 @@ public class MainToolAlignPanel extends JPanel implements ClipboardOwner
 		Iterator<AlignData> i = inAlignmentLists.iterator();
 		while ( i.hasNext() )
 		{
-			AlignData alignData = (AlignData)i.next ();
+			AlignData alignData = i.next ();
 			isAAdb = alignData.isAAdb();
 			String hitID = alignData.getSequence2().getName(); // Only change if hitID is different
 			if (!hitID.equals(lastHit)) {
@@ -104,7 +104,7 @@ public class MainToolAlignPanel extends JPanel implements ClipboardOwner
 		}
 		
 		MainToolAlignPanel panel = new MainToolAlignPanel (isHit, isAAdb,  -1, -1 );
-		panel.createMainPanelFromSubPanels( subPanels, true, true );
+		panel.createMainPanelFromSubPanels(null, subPanels, true, true );
 		
 		panel.add ( panel.createToolPair (isAllFrame ) );
 		panel.add ( Box.createVerticalStrut(5) );
@@ -123,7 +123,7 @@ public class MainToolAlignPanel extends JPanel implements ClipboardOwner
 
 		while ( i.hasNext() )
 		{
-			ContigData curData = (ContigData)i.next ();
+			ContigData curData = i.next ();
 			DrawContigPanel curPanel = new DrawContigPanel (curData, 													
 								nTopGap, nBottomGap, nSideGaps, nSideGaps );
 			subPanels.add( curPanel );	
@@ -131,9 +131,9 @@ public class MainToolAlignPanel extends JPanel implements ClipboardOwner
 			nTotalESTs += curData.getNumSequences();	
 			nTotalBuried += curData.getNumBuried(); 		
 		}
-		MainToolAlignPanel panel = new MainToolAlignPanel (false, false,
-									inRecordNum, parentID);
-		panel.createMainPanelFromSubPanels( subPanels, false, !hasNoAssembly );
+		MainToolAlignPanel panel = new MainToolAlignPanel (false, false, inRecordNum, parentID);
+		
+		panel.createMainPanelFromSubPanels( subPanels, null, false, !hasNoAssembly );
 		
 		if (hasNoAssembly) { 
 			panel.add ( panel.createToolSeq() );
@@ -179,23 +179,33 @@ public class MainToolAlignPanel extends JPanel implements ClipboardOwner
 		setLayout( new BoxLayout ( this, BoxLayout.Y_AXIS ) );
 		super.setBackground(Color.WHITE);
 	}
-	// Could be Vector of SeqAlignPanel or MainPairAlignPanel 
-	private void createMainPanelFromSubPanels ( Vector inPanels, boolean isPair, boolean hasAssembly )
+	// Could be Vector of SeqAlignPanel or MainPairAlignPanel, both of type MainAlignPanel
+	// CAS304 just made separate arguments for -lint
+	private void createMainPanelFromSubPanels (Vector<DrawContigPanel> ctgPanels,
+			Vector <MainPairAlignPanel>  pairPanels, boolean isPair, boolean hasAssembly )
 	{
 		JPanel mainPanel = Static.createPagePanel();
 		mainPanel.setVisible( false );
 		
 		// Add each panel to the parent panel
-		listOfMainAlignPanels = new Vector<MainAlignPanel> ();
-		Iterator iter = inPanels.iterator();
-		while ( iter.hasNext() )
-		{
-			MainAlignPanel curPanel = (MainAlignPanel)iter.next ();
-			mainPanel.add( curPanel );
-			listOfMainAlignPanels.add( curPanel );
-			if ( curPanel instanceof DrawContigPanel ) {
-				DrawContigPanel polyMorpy = (DrawContigPanel)curPanel; 
-				polyMorpy.setClusterPanel ( this );
+		listOfMainAlignPanels = new Vector <MainAlignPanel> ();
+		
+		if (ctgPanels!=null) {
+			Iterator <DrawContigPanel> iter = ctgPanels.iterator();
+			while ( iter.hasNext() )
+			{
+				MainAlignPanel curPanel = (MainAlignPanel) iter.next ();
+				mainPanel.add( curPanel );
+				listOfMainAlignPanels.add( curPanel );
+			}
+		}
+		else {
+			Iterator <MainPairAlignPanel>iter = pairPanels.iterator();
+			while ( iter.hasNext() )
+			{
+				MainAlignPanel curPanel = (MainAlignPanel) iter.next ();
+				mainPanel.add( curPanel );
+				listOfMainAlignPanels.add( curPanel );
 			}
 		}
 
@@ -258,14 +268,14 @@ public class MainToolAlignPanel extends JPanel implements ClipboardOwner
 		btnAlign.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				TreeSet <String> selectedCtg = getSelectedContigIDs();
+				
 				if (selectedCtg==null || selectedCtg.size()==0) {
 					JOptionPane.showMessageDialog( 	null, 
-							"Select a hit in one of the alignments.",
-							"No hit selected",
-							JOptionPane.PLAIN_MESSAGE );
+							"Select a hit in one of the alignments.","No hit selected", JOptionPane.PLAIN_MESSAGE );
 				}
 				else {
-					final AlignType at = new AlignType();
+					final String name = selectedCtg.first();
+					final AlignType at = new AlignType(name);
 					at.setVisible(true);
 					final int mode = at.getSelection();
 					
@@ -369,7 +379,7 @@ public class MainToolAlignPanel extends JPanel implements ClipboardOwner
 			}
 		});	// end view SNPs
 
-		menuShowBuried = new JComboBox ();
+		menuShowBuried = new  JComboBox <String> ();
 		menuShowBuried.addItem("Hide Buried");
 		menuShowBuried.addItem("Show Buried (Location)");
 		menuShowBuried.addItem("Show Buried (Detail)");
@@ -387,7 +397,7 @@ public class MainToolAlignPanel extends JPanel implements ClipboardOwner
 		txtFind.setMaximumSize(txtFind.getPreferredSize());
 
 		// Sort menu
-		menuContigSort = new JComboBox ();
+		menuContigSort = new JComboBox <MenuMapper> ();
 		menuContigSort.addItem( new MenuMapper ( "Sort by Name", ContigData.SORT_BY_NAME ) );
 		menuContigSort.addItem( new MenuMapper ( "Sort by Left Position", ContigData.SORT_BY_LEFT_POS ) );
 		menuContigSort.addItem( new MenuMapper ( "Sort by F/R Pairs", ContigData.SORT_BY_GROUPED_LEFT_POS ) );
@@ -408,7 +418,7 @@ public class MainToolAlignPanel extends JPanel implements ClipboardOwner
 			btnCAP3.setToolTipText("Execute CAP3 on selected ESTs");
 			btnCAP3.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					alignSelectedESTs(/*AppletToServlet.SERVER_COMMAND_CAP*/ "cap3"); 
+					alignSelectedESTs("cap3"); 
 				}
 			});
 		}
@@ -559,10 +569,20 @@ public class MainToolAlignPanel extends JPanel implements ClipboardOwner
 		
 		for (MainAlignPanel curPanel : listOfMainAlignPanels) {	
 			curPanel.getSelectedContigIDs( selection );
+		}		
+		if (selection.size()>0) return selection;
+		else return getFirstContigID(); // CAS304
+	}
+	private TreeSet<String> getFirstContigID() { // CAS304 so do not have to select an alignment
+		TreeSet<String> selection = new TreeSet<String> ();
+		
+		for (MainAlignPanel curPanel : listOfMainAlignPanels) {	
+			Vector <String> ids = curPanel.getContigIDs( );
+			selection.add(ids.get(0));
+			return selection;
 		}			
 		return selection;
 	}
-	
 	public void setSelectedContigs ( TreeSet<String> selectedIDs )
 	{
 		for (MainAlignPanel curPanel : listOfMainAlignPanels) {	
@@ -677,7 +697,7 @@ public class MainToolAlignPanel extends JPanel implements ClipboardOwner
 		while ( iter.hasNext() )
 		{
 			// Get the panel and convert to panel relative coordinates
-			MainAlignPanel curPanel = (MainAlignPanel)iter.next();
+			MainAlignPanel curPanel = iter.next();
 			int nPanelX = viewX - curPanel.getX();
 			int nPanelY = viewY - curPanel.getY();
 			
@@ -814,7 +834,7 @@ public class MainToolAlignPanel extends JPanel implements ClipboardOwner
 		Iterator<MainAlignPanel> iter = listOfMainAlignPanels.iterator();
 		while ( iter.hasNext() )
 		{
-			MainAlignPanel curPanel = (MainAlignPanel)iter.next ();
+			MainAlignPanel curPanel = iter.next ();
 			if (type==0) curPanel.setShowORF(set);
 			else if (type==1) curPanel.setShowHit(set);
 		}
@@ -833,7 +853,7 @@ public class MainToolAlignPanel extends JPanel implements ClipboardOwner
 				}
 			}
 			String aSeq1, aSeq2, aSeqM, method;
-			int nStart1, nEnd1, nStart2, nEnd2, nStart,  nEnd, maxLen, score=-1;
+			int nStart1, nEnd1, nStart2, nEnd2, nStart,  nEnd, score=-1;
 			if (type!=0) { // new alignment with PairAlign. Local. 
 				AlignPairAA aExecObj = new AlignPairAA(gap, extend, 
 						aDataObj.getOrigSeq1(), aDataObj.getOrigSeq2(), type);
@@ -849,7 +869,6 @@ public class MainToolAlignPanel extends JPanel implements ClipboardOwner
 				nStart2=ends[2]+1; 
 				nEnd2=  ends[3];
 				score = aExecObj.getScore();
-				maxLen=aSeq1.length();
 				method = aExecObj.getMethod();
 			}
 			else { // current alignment, already done. Global
@@ -865,7 +884,6 @@ public class MainToolAlignPanel extends JPanel implements ClipboardOwner
 				nStart2=ends[2]; 
 				nEnd2=  ends[3];
 				score = aDataObj.getScore();
-				maxLen = (nEnd-nStart);
 				method = "Original semi-global with affine gap";
 			}
 			// create info for left label
@@ -952,10 +970,10 @@ public class MainToolAlignPanel extends JPanel implements ClipboardOwner
     	    public static final int Align_local_affine= 2;
     	    public static final int Align_cancel= 3;
     	   
-        	public AlignType() {
+        	public AlignType(String name) {
         		setModal(true);
         		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        		setTitle("Align.... ");
+        		setTitle("Align " + name);
         		// globals not used as need to fix ends
         		JRadioButton btnOrig = new JRadioButton("Original semi-global with affine gaps");
         		btnOrig.addActionListener(new ActionListener() {
@@ -1085,8 +1103,8 @@ public class MainToolAlignPanel extends JPanel implements ClipboardOwner
 	// ESTs
 	private JButton btnViewSNPs = null;
 	private JButton btnCAP3 = null;
-	private JComboBox menuShowBuried = null;
-	private JComboBox menuContigSort = null;
+	private JComboBox <String> menuShowBuried = null;
+	private JComboBox <MenuMapper> menuContigSort = null;
 	
 	// Pair/Hit align
 	private JButton btnAlign = null;
@@ -1096,7 +1114,7 @@ public class MainToolAlignPanel extends JPanel implements ClipboardOwner
 	// All (bases vs graphics)
     private JButton btnViewType = null;
     private int nViewType = MainAlignPanel.GRAPHICMODE;
-	private JComboBox menuZoom = null;
+	private JComboBox <MenuMapper> menuZoom = null;
 	
 	private JScrollPane scroller = null;
 	private Vector<MainAlignPanel> listOfMainAlignPanels = null;

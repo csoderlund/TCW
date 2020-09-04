@@ -26,8 +26,6 @@ import cmp.compile.panels.MethodPanel;
 import cmp.database.Globals;
 
 public class MethodBBH {
-	private static boolean debug = runMTCWMain.test;
-
 	 private String groupFile = Globals.Compile.GROUP_FILE_BEST_RECIP;
 	 private String [] covTypes = {"Either", "Both"};
 	 private String [] strType = {"Amino acid", "Nucleotide"};

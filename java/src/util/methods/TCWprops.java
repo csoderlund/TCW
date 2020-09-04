@@ -44,17 +44,13 @@ public class TCWprops
 		switch (mType)
 		{
 		case Lib:
-			mProps.setProperty("PAVE_db", ""); //old
 			mProps.setProperty("STCW_db", ""); 
-			mProps.setProperty("PAVE_host", "");
-			mProps.setProperty("PAVE_user", "");
-			mProps.setProperty("PAVE_password", "");	
 			
 			// Must also add to the list in Library.java!
 			mLibPropsDef = new Properties();
 			mLibPropsDef.setProperty("MIN_SEQ_LEN", "50");
-			mLibPropsDef.setProperty("fiveprimesuf", ".f");
-			mLibPropsDef.setProperty("threeprimesuf", ".r");		
+			mLibPropsDef.setProperty("fiveprimesuf",  Globals.def5p);
+			mLibPropsDef.setProperty("threeprimesuf", Globals.def3p);		
 			mLibPropsDef.setProperty("libid", "");				
 			mLibPropsDef.setProperty("translib", "");				
 			mLibPropsDef.setProperty("ctglib", "0");				
@@ -82,12 +78,7 @@ public class TCWprops
 			// except for TCNN...
 			// these are also used by annotator
 			mProps.setProperty("STCW_db", ""); 	
-			mProps.setProperty("PAVE_db", ""); 	//old
-			mProps.setProperty("PAVE_host", ""); // now in HOSTS.cfg
-			mProps.setProperty("PAVE_user", "");	// now in HOSTS.cfg
-			mProps.setProperty("PAVE_password", "");	// now in HOSTS.cfg
 			mProps.setProperty("SingleID", "");
-			mProps.setProperty("AssemblyID", ""); // old
 			mProps.setProperty("CPUs", "1");
 			mProps.setProperty("DEBUG", "0");
 			
@@ -152,21 +143,13 @@ public class TCWprops
 			// getProperty() 		returns default; 
 			// getAnnoProperty() 	returns user supplied or default
 			// getNotDefault() 		only return value if user supplied.
-			mProps.setProperty("PAVE_db", ""); // old
 			mProps.setProperty("STCW_db", ""); // new
-			mProps.setProperty("DB_host", ""); // now in HOSTS.cfg
-			mProps.setProperty("DB_user", "");
-			mProps.setProperty("DB_password", "");
-			mProps.setProperty("AssemblyID", ""); //old
 			mProps.setProperty("SingleID", ""); 	 //new
 			mProps.setProperty("CPUs", "1");							
 			
 			mProps.setProperty("Anno_flanking_region", "30"); // not documented; used for setFilterOverlap
 			mProps.setProperty("Anno_SwissProt_pref", Globals.pSP_PREF); 
 			
-			mProps.setProperty("Anno_uniprot_blast", "-"); // pre-v2.6
-			mProps.setProperty("Anno_uniprot_fasta", "-"); // pre-v2.6
-			mProps.setProperty("Anno_uniprot_args", "");   // pre-v2.6
 			mProps.setProperty("Anno_uniprot_taxo", "-");     
 			mProps.setProperty("Anno_DBdate", "-");     
 			mProps.setProperty("Anno_min_bitscore", "-1"); 
@@ -321,6 +304,7 @@ public class TCWprops
 			String val = fields[1].trim();
 			String keyFixedCase = fixCase(key);
 			if (key.toLowerCase().startsWith("count_")) continue;
+			
 			if (keyFixedCase.startsWith("TC"))
 			{
 				boolean match = false;

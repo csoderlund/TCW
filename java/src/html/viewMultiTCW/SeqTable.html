@@ -39,24 +39,24 @@ Run MUSCLE to build a multiple alignment
 for all amino acid sequences in the table or for the selected set. This can be very time consuming
 when run on many sequences. The command executed is:
 <pre>
-external/muscle/muscle -in ResultAlign/inSeq.fa -out ResultAlign/outAln.fa
+/Ext/linux/muscle/muscle -in ResultAlign/inSeq.fa -out ResultAlign/outAln.fa
 </pre>
 You can view the results along with the scores in the <tt>ResultAlign</tt> directory.
 The first score is the average of the column sums from the sum-of-pairs. The
 second is the trident method, run as follows (use -g to output global score only):
 <pre>
-external/mstatX/mstatx -s trident -i ResultAlign/outAln.fa -o ResultAlign/score2.txt
+/Ext/linux/mstatX/mstatx -s trident -i ResultAlign/outAln.fa -o ResultAlign/score2.txt
 </pre>
 <li><b>MAFFT-AA</b>: Same as above.
 The command executed is:
 <pre>
-external/mafft/mafft.bat --auto --reorder --thread N ResultAlign/inSeq.fa
+/Ext/linux/mafft/mafft.bat --auto --reorder --thread N ResultAlign/inSeq.fa
 </pre>
 Where N is the number of available threads (processors/CPUs).
 <li><b>MAFFT-NT</b>: Same as above but with the NT sequences
 
 </ul>
-<p><i>On Mac, replace <tt>external</tt> with <tt>external_osx</tt></i>.
+<p><i>On Mac, replace <tt>Ext/linux</tt> with <tt>Ext/mac</tt></i>.
 </ul>
 
 <ul>
@@ -115,7 +115,7 @@ GOterm	#Seqs	Level	Term_type	Description
 
 <h2>Second row of functions at the top</h2>
 <ul>
-<li><u>Details</u> For the selected sequence: show counts, RPKM values, 
+<li><u>Details</u> For the selected sequence: show counts, TPM values, 
 and annotations. 
 <br>&nbsp;
 <li><u>Clusters</u> For the selected sequence: 

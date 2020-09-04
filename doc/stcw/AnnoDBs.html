@@ -22,19 +22,23 @@ If you have any problems, please let me know at <tt>tcw at agcol.arizona.edu</tt
 <ul>
  <li><a href="#over">Overview</a>
   <br>&nbsp;
+  
  <li>Annotation Setup
  <ul>
- <li><a href="#run">Using Java graphical interface -- <code>runAS</code>
- 
+  <li><a href="#run">Using Java graphical interface -- <code>runAS</code>
   <li><a href="#clean">Cleanup</a>
- <li><a href="#mem">Memory and time</a>
+  <li><a href="#mem">Memory and time</a>
  </ul>
-
+ 
+<br>&nbsp;
  <li><a href="#demo">Demo annotation setup</a>
+ 
  <br>&nbsp;
  <li><a href="#tax">Why use taxonomic databases instead of the full UniProt</a>
+ 
   <br>&nbsp;
  <li><a href="#other">Using other databases (e.g. NCBI-nr) for annotation</a>
+ 
   <br>&nbsp;
  <li><a href="#runstcw">Entering this data into <code>runSingleTCW</code></a>
 </ul> 
@@ -54,7 +58,7 @@ use the same set of AnnoDBs and GO database.
 <p><b><i>Requirements</i></b>: 
 
 <p>The setup uses <code>curl</code> for downloading annoDBs and the GO database.
-Note -- if you do not have <code>curl</code>, <code>runAS</code> will still work, though may not be
+Note -- if you do not have <code>curl</code>, <code>runAS</code> will still work, though it may not be
 as reliable.
 
 <p>For mySQL, the command <tt>mysqladmin</tt> is used, so
@@ -73,8 +77,8 @@ you may need to define its path, e.g. on Mac,
 <ol>
 <li>Create the directory for the downloads and generated FASTA files. 
 <br>The default location is the TCW sub-directory <tt>projects/DBfasta</tt>, but it can be put elsewhere.
-<li>Download Taxonomic UniProts ".dat" files and create FASTA files. 
-<li>Download full UniProt, remove entries from taxonomic databases, and create FASTA files.
+<li>Download the selected Taxonomic UniProts ".dat" files and create FASTA files. 
+<li>Download the selected full UniProt, remove entries from taxonomic databases, and create a FASTA file of the remaining sequences.
 <li>Create GO database, which contains mappings from UniProt IDs to GO, KEGG, EC, Pfam and InterPro.
 <ol type='a'>
 <li>Download  <tt>go_&lt;date&gt;-termdb-tables.tar.gz</tt>.
@@ -115,12 +119,12 @@ See the <a href=runAS.log.html class="ext" target="_blank">log file</a> for the 
 <br>&nbsp;
 <li>Select <tt class=c>TCW.anno</tt>, which writes a file <tt>projects/TCW.anno.&lt;date&gt;</tt>.
 <br>&nbsp;
-<li>Run <tt>./runSingleTCW</tt>.
+<li>Run <tt>./runSingleTCW</tt> and select your project.
 <ul>
 <li>Select <tt class=c>Import Anno</tt>, a file chooser will popup, select 
-<tt>projects/TCW.anno.&lt;date&gt;</tt>.
-<li>Select <tt class=c>Options</tt> in the annotation section, and select the GO database.
-<li>Now you are ready to <tt class=c>Exec Annotate Sequences</tt> with the UniProt and GO you 
+<tt>projects/TCW.anno.&lt;date&gt;</tt>. This will enter the names of the UniProts in AnnoDB, and enter
+the name of the GO database (which can be changed with "Options").
+<li>Now you are ready to run <tt class=c>Annotate</tt> with the UniProt and GO you 
 just downloaded.
 </ul>
 </ol>
@@ -251,7 +255,7 @@ using a ~500 Mbsp download connection and 128Gb of RAM.
 <pre>
 	Complete creating GO database go_Aug2019                        32m:36s (10Mb)
 </pre>
-NOTE: It takes much longer if you have many large TrEMBL taxononic databases downloaded, where it may
+NOTE: It takes much longer if you have many large TrEMBL taxonomic databases downloaded, where it may
 take over night.
 
 <!--------------------------------------------->
@@ -259,12 +263,13 @@ take over night.
 <table width='100%'><tr><td align='left' >
 <h2>Demo annotation setup</h2>
 </td><td align='right' valign='top' class='smtxt'><a href=#top >Go to top</a></td></tr></table>
+The TCW package provides subsets of UniProt for annotating the demo. 
 In order to add GO annotations, a local GO mySQL 'demo' database needs to be created.
 
 <table>
 <tr><td valign="top">
 <ol type="A">
-<li>From the TCW_2 directory, execute:
+<li>From the TCW_3 directory, execute:
 <pre class=tt>
 ./runAS -d
 </pre>
@@ -296,8 +301,6 @@ which contains the following:
 </pre>
 Each taxonomic directory has a <tt>.dat</tt> and a <tt>.fasta</tt> file, 
 which are very small subsets of the original UniProt taxonomic <tt>.dat</tt> file. 
-<p>
-See <a href=#over>Overview</a> for more details.
 
 
 <a name=tax></a>
@@ -305,21 +308,14 @@ See <a href=#over>Overview</a> for more details.
 <h2>Why use taxonomic databases instead of the full UniProt</h2>
 </td><td align='right' valign='top' class='smtxt'><a href=#top >Go to top</a></td></tr></table>
 
-<ol>
-<li>TCW refers to the annoDBs by the 'type' and 'taxonomy', e.g. sp_fungi has 
-a type of 'sp' and a taxonomy of 'fungi'. Within TCW, you can query by taxonomy.
+
+TCW refers to the annoDBs by the 'type' and 'taxonomy'. Within TCW, you can query by taxonomy.
 Also, all results will show this information so you can easily see which taxonomic database a hit is from.
-The following shows an example:
-<br><a  href="img/runASview.png"><img src="img/runASview.png" border=1></a>
+The following shows an example of a set of hit proteins:
+<p><a  href="img/runASview.png"><img src="img/runASview.png" border=1></a>
+<p>The "sp" is SwissProt and the "tr" is "Trembl". The "fullSubset" is the full SwissProt database with the plants
+entries removed (since they are in the Plant SwissProt).
 
-<li>You only need annotate against the taxonomies of interest. The bacterial
-TrEMBL is especially large and should be left out if not specifically desired.  
-
-<li>The complete UniProt has everything but bacteria. There is an option to download the complete UniProt, then make
-a subset to search against that has everything but what is in the taxonomic databases. This will be 
-referred to as the "Full" database below. In the above figure, "SPful" refers to the SwissProt full subset
-database and "TRful" refers to the TrEMBL full subset.
-</ol>
 
 <a name=other></a>	
 <table width='100%'><tr><td align='left' >
@@ -411,7 +407,7 @@ what annoDB a hit came from.
 Alternatively, use the "Import AnnoDBs" to add the databases from an existing <tt>sTCW.cfg</tt>
 file or from the <tt>TCW.anno</tt> file created from selecting "TCW.anno" on <code>runAS</code>. Note,
 the full path of the AnnoDBs is not shown in this image. 
-<p>The GO database is defined in the "Options" menu.
+<p>The GO database and GO slim category are defined in the "Options" menu.
 
 
 

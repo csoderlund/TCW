@@ -88,7 +88,7 @@ public class BasicSeqQueryTab extends Tab {
 				} catch (Exception er) {ErrorReport.reportError(er, "Error copying Seq ID");}
 			}
 		}));
-		copypopup.add(new JMenuItem(new AbstractAction("Best Eval HitID") {
+		copypopup.add(new JMenuItem(new AbstractAction("Best HitID") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -99,7 +99,21 @@ public class BasicSeqQueryTab extends Tab {
 						if (seq!=null && seq!="")
 							cb.setContents(new StringSelection(seq), null);
 					}
-				} catch (Exception er) {ErrorReport.reportError(er, "Error copying table"); }
+				} catch (Exception er) {ErrorReport.reportError(er, "Error copying HitID"); }
+			}
+		}));
+		copypopup.add(new JMenuItem(new AbstractAction("Longest") {
+			private static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+					int row = theTablePanel.getSelectedRow();
+					if (row>=0) {
+						String seq = seqObjList.get(row).longestRead;
+						if (seq!=null && seq!="")
+							cb.setContents(new StringSelection(seq), null);
+					}
+				} catch (Exception er) {ErrorReport.reportError(er, "Error copying longest"); }
 			}
 		}));
 	
@@ -233,11 +247,11 @@ public class BasicSeqQueryTab extends Tab {
 			if(!ascOrder) order = -1;
 			
 			switch(column) {
-			case 0: return order * (new Integer(nRowNum)).compareTo(obj.nRowNum);
+			case 0: return order * ((Integer) nRowNum).compareTo((Integer) obj.nRowNum);
 			case 1: return order * strSeqID.compareTo(obj.strSeqID);	
 			case 2: return order * compareStrings(strTCW, obj.strTCW);
 			case 3: return order * compareStrings(strUser, obj.strUser);
-			case 4: return order * (new Integer(nTotalExp)).compareTo(obj.nTotalExp);
+			case 4: return order * ((Integer) nTotalExp).compareTo((Integer) obj.nTotalExp);
 			case 5: return order * compareStrings(longestRead, obj.longestRead);
 			case 6: return order * compareStrings(strBestHit, obj.strBestHit);
 			default: return 0;

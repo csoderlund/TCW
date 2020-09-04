@@ -2,7 +2,6 @@ package sng.assem;
 
 import java.sql.ResultSet;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.HashSet;
 import java.io.BufferedWriter;
 
@@ -11,11 +10,10 @@ import sng.assem.helpers.*;
 import util.database.DBConn;
 
 
-
 // Weighted edge between two contigs, during TC iteration.
 // Note these are Contig objects which can have one or two subcontigs.
 
-public class Edge implements Comparable
+public class Edge implements Comparable <Edge>
 {
 	Contig mC1 = null;
 	Contig mC2 = null;
@@ -83,38 +81,6 @@ public class Edge implements Comparable
 		if (changed)
 		{
 			setAttempted(db,0,"merged","");
-/*
-			if (nullMerge())
-			{
-				setAttempted(db,1, "redundant", "self");
-			}
-			else if (!redundantOnly)
-			{
-				if (mC1.mID > mC2.mID)
-				{
-					Contig foo = mC1;
-					mC1 = mC2;
-					mC2 = foo;
-					foo = null;
-				}
-				
-				// Replace this edge by a new edge in the db.
-				// If the new edge insertion failed, it means the updated edge is
-				// redundant with another and can be discarded. 
-				
-				int oldID = mID;
-				setAttempted(db,1, "", mC1.mID + "+" + mC2.mID);
-				upload(db);
-				if (mID > 0)
-				{
-					db.executeUpdate("update ASM_tc_edge set errstr='merged to " + mID + "' where eid=" + oldID);
-					mAttempted = false; // reset it since it is a new edge
-				}
-				else
-				{
-					db.executeUpdate("update ASM_tc_edge set errstr='made redundant',attempted=1 where eid=" + oldID);
-				}					
-			}*/
 		}
 		return changed;
 	}
@@ -147,13 +113,11 @@ public class Edge implements Comparable
 	static public int getMergedID(int id, ID2Obj<Integer> mergesDone) throws Exception
 	{
 		int newID = id;
-		int count = 0;
 		while (mergesDone.containsKey(newID))
 		{
 			Integer _newID = mergesDone.get(newID);
 			if (_newID == null) break;
 			newID = _newID;
-			count++;
 		}
 		return newID;
 	}	
@@ -198,22 +162,11 @@ public class Edge implements Comparable
 		if (mC1.mSC2 != null || mC2.mSC2 != null) return true;
 		return false;
 	}
-//	// is the edge joining a small to a large contig? 
-//	public boolean small2Big()
-//	{
-//		if (mC1.totalSize() <= 5 || mC2.totalSize() <= 5)
-//		{
-//			if (mC1.totalSize() >= 100 || mC2.totalSize() >= 100)
-//			{
-//				return true;
-//			}
-//		}
-//		return false;
-//	}
-	public int compareTo(Object e)
+
+	public int compareTo(Edge e)
 	{
 		int scorea = mScore;
-		int scoreb = ((Edge)e).mScore;
+		int scoreb = e.mScore; // CAS304 (Edge)e
 		if (scorea > scoreb) return -1;
 		else if (scorea < scoreb) return 1;
 		return 0;	

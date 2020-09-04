@@ -46,7 +46,6 @@ import util.methods.ErrorReport;
 import util.methods.Out;
 import util.methods.Static;
 import util.methods.Stats;
-import util.ui.UIHelpers;
 import util.ui.UserPrompt;
 import util.ui.DisplayFloat;
 
@@ -283,10 +282,6 @@ public class BasicTablePanel extends JPanel {
 		PrintWriter pw = getTextToFile(fileName);
 		if (pw!=null) {
 			theTableModel.exportTableColumns(prefix, pw); 
-			if (UIHelpers.isApplet()) {
-				String [] msg = {"Export to " + fileName + " complete"};
-				UserPrompt.displayInfo("Export", msg);
-			}
 		}
 	}
 	private PrintWriter getTextToFile(String fileName) {
@@ -474,7 +469,7 @@ public class BasicTablePanel extends JPanel {
 			Out.prt(1, "Processing " + rowCnt + " rows and " + colCnt + " columns");
 			
 			int x, y;
-			boolean isApplet = UIHelpers.isApplet();
+			
 			for(y=0; y<colCnt; y++) {
 				if (y>0) line += delim;
 				line += getColumnName(y).replaceAll("\\s", "-"); 
@@ -491,7 +486,7 @@ public class BasicTablePanel extends JPanel {
 				}
 				pw.print(line + "\n");
 				line="";
-				if (!isApplet && x%1000==0) Out.r("Wrote " + x); 
+				if (x%1000==0) Out.r("Wrote " + x); 
 			}
 			pw.close();
 			Out.prt(1, "Finish export of " + getRowCount() + " rows");

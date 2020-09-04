@@ -635,8 +635,8 @@ public class SeqGOPanel extends JPanel {
 						String evid = tok[2];
 						if (evid.endsWith("...")) evid = evid.substring(0,3); // goBrief ends with '...'
 						
-						String eval =  (new DecimalFormat("0E0")).format((Double)seqDetailPanel.getHitEval(hitID));
-	    					int sim  = (int) seqDetailPanel.getHitPercent(hitID);
+						String eval =  (new DecimalFormat("0E0")).format(seqDetailPanel.getHitEval(hitID));
+	    					int sim  =  seqDetailPanel.getHitPercent(hitID);
 	    					int len = seqDetailPanel.getHitAlignLen(hitID);
 	    					int filter = seqDetailPanel.getHitFiltered(hitID);
 	    					String desc1 = seqDetailPanel.getHitDesc(hitID);
@@ -946,21 +946,21 @@ public class SeqGOPanel extends JPanel {
 		public int compareTo(GoListData obj, boolean sortAsc, int colIndex) {
 			int order = 1;
 			if(!sortAsc) order = -1;
-			if(colIndex == 0) return order * (new Integer(nGoNum)).compareTo(new Integer(obj.nGoNum));
+			if(colIndex == 0) return order * ((Integer) nGoNum).compareTo((Integer) obj.nGoNum);
 			if(colIndex == 1) return order * strDescription.compareTo(obj.strDescription);
 			if(colIndex == 2) return order * strType.compareTo(obj.strType);
-			if(colIndex == 3) return order * (new Integer(nLevel)).compareTo(new Integer(obj.nLevel));
+			if(colIndex == 3) return order * ((Integer)nLevel).compareTo((Integer) obj.nLevel);
 			
 			if (displayType==SHOW_ASSIGNED_GO) {
-				if (colIndex==4)    return order * (new Integer(nHit)).compareTo(new Integer(obj.nHit));
+				if (colIndex==4)    return order * ((Integer) nHit).compareTo((Integer) obj.nHit);
 				if (colIndex == 5)  return order * strEvid.compareTo(obj.strEvid);
 				if (colIndex == 6)  return order * hitID.compareTo(obj.hitID);
-				if (colIndex == 7)  return order * (new Double(evalue)).compareTo(new Double(obj.evalue));
+				if (colIndex == 7)  return order * ((Double) evalue).compareTo((Double) obj.evalue);
 			}
 			else if (displayType==SHOW_ALL_GO) {
 				if (colIndex==4)   return order * direct.compareTo(obj.direct);
 				if (colIndex == 5) return order * hitID.compareTo(obj.hitID);
-				if (colIndex == 6) return order * (new Double(evalue)).compareTo(new Double(obj.evalue));	
+				if (colIndex == 6) return order * ((Double) evalue).compareTo((Double) obj.evalue);	
 			}
 			else if (displayType>=SHOW_SEL_GO) {
 				if(colIndex == 4) return order * strEvid.compareTo(obj.strEvid);
