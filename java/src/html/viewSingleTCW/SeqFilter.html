@@ -22,14 +22,15 @@ Example abbreviations used:
 Filter on sequence length, total read count, and whether the sequence has
 a user-added remark. Remarks can be added with the runSingleTCW interface.
 
-<h3>Counts and RPKM</h3>
-Filter based on counts or RPKM of one or more conditions, where RPKM is the default. 
+<h3>Counts and TPM (or RPKM)</h3>
+Filter based on counts or TPM of one or more conditions, where TPM is the default. 
+NOTE: If RPKM was computed instead of TPM, then the Filter page will say RPKM instead of TPM.
 
 <ol>
 <li>Check either "At least N from every/any included condition" and/or "At most N from every/any excluded conditions".
 <li>Select "every" or "any", where "every" required all conditions to pass the filter, "any" requires at least one
 to pass the filter. 
-<li>Enter the number of RPKM requires as the lower limit for the included condition and
+<li>Enter the number of TPM requires as the lower limit for the included condition and
 upper limit for the excluded. 
 </ol>
 For example, say you choose Include=condA,condB and Exclude=condC,condD with the defaults.
@@ -37,10 +38,10 @@ This filter would results in a list of sequence where both condA and condB are >
 and both condC and condD are = 0.0.
 
 <h3>N-fold</h3>
-This applies to the RPKM columns. 
+This applies to the TPM columns. 
 <ol>
 <li>Check to turn filter on.
-<li>Select a RPKM condition from the "Select 1" list and another condition from the "Select 2" list.
+<li>Select a TPM condition from the "Select 1" list and another condition from the "Select 2" list.
 Then click "Add", which will add the pair separated by a "/" in the box on the right.
 <li>Select "Up", "Down" or "Either", where the last shows both up and down N-fold.
 <li>Set the number for N-fold, where the default is "2".

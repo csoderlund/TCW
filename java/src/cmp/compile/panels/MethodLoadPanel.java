@@ -15,6 +15,7 @@ import cmp.database.Globals;
 
 public class MethodLoadPanel extends JPanel {
 	private static final long serialVersionUID = 2272315161653860174L;
+	private final static String xDELIM = Globals.Methods.METHODS_DELIM;
 
 	public MethodLoadPanel(CompilePanel parentPanel) {
 		theParentPanel = parentPanel;
@@ -37,7 +38,7 @@ public class MethodLoadPanel extends JPanel {
 		JLabel req = new JLabel(EditMethodPanel.LBLPREFIX);
 		row.add(req);
 		add(row);
-		add(Box.createVerticalStrut(10));
+		add(Box.createVerticalStrut(20));
 				
 		// file
 		row = Static.createRowPanel();
@@ -49,35 +50,23 @@ public class MethodLoadPanel extends JPanel {
 		row.add(txtFile);
 		add(row);
 		
-		// remark
-		row = Static.createRowPanel();
-		lblRemark = new JLabel("Parameters");
-		row.add(lblRemark);
-		row.add(Box.createHorizontalStrut(width - lblRemark.getPreferredSize().width));
-		
-		txtRemark = Static.createTextField("", 20);
-		row.add(txtRemark);
-		row.add(Box.createHorizontalStrut(5));
-		
-		add(row);
 		add(Box.createVerticalStrut(10));
 		setMaximumSize(getPreferredSize());
 		setMinimumSize(getPreferredSize());
 	}
 	
 	public String getSettings() {
-		return  "x:" + txtFile.getText() + ":x";
+		return   xDELIM + ":" + txtFile.getText() + ":" + xDELIM;
 	}
 	
 	public void setSettings(String settings) {
 		String [] vals = settings.split(":");
-		txtFile.setText(vals[1]);
+		if (vals.length>=2) txtFile.setText(vals[1]);
 	}
 	
 	public void resetSettings() {
 		txtPrefix.setText(Globals.Methods.UserDef.DEFAULT_PREFIX);
 		txtFile.setText("");
-		txtRemark.setText("");
 	}
 	
 	public String getMethodName() { 
@@ -90,18 +79,17 @@ public class MethodLoadPanel extends JPanel {
 	public static String getMethodType() { return Globals.Methods.UserDef.TYPE_NAME; }
 	
 	public String getComment() { 
-		String x = txtRemark.getText();
-		if (x.equals("")) x = "File " + txtFile.getText();
-		return x; 
-		
+		return txtFile.getText();
 	}
-	public void setComment(String comment) { txtRemark.setText(comment); }
-	
+	public boolean hasValidFile() {
+		String f = txtFile.getText().trim();
+		if (f.contentEquals("")) return false;
+		return true;
+	}
 	private CompilePanel theParentPanel = null;
 	private JLabel lblPrefix = null;
 	private JTextField txtPrefix = null;
-	private JLabel lblRemark = null;
-	private JTextField txtRemark = null;
+	
 	private JLabel lblFile = null;
 	private FileSelectTextField txtFile = null;
 

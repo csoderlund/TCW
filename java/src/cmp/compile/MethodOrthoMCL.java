@@ -36,7 +36,7 @@ public class MethodOrthoMCL {
 		 Out.PrtSpMsg(1, "");
 		 
 		// load from file that orthoMCL output
-		 if (! new MethodLoad(cmpDBC).run(idx, groupFile, cmpPanel)) {
+		 if (new MethodLoad(cmpDBC).run(idx, groupFile, cmpPanel)==-1) {
 			 Out.PrtSpMsg(2, "Sometimes orthoMCL fails, but then successed on a rerun -- try 'Add new clusters' again");
 			 return false;
 		 }
@@ -221,7 +221,6 @@ public class MethodOrthoMCL {
 	}
 	private boolean setParams(int idx, DBConn db, CompilePanel panel) {
 		MethodPanel theMethod = panel.getMethodPanel();
-		String comment = theMethod.getCommentAt(idx);
 		String [] settings = theMethod.getSettingsAt(idx).split(":");
 
 		prefix = theMethod.getMethodPrefixAt(idx);		// Groups should be prefixed with this
@@ -232,11 +231,9 @@ public class MethodOrthoMCL {
 		if (blastFile == null) return false;
 		String x = inflation.replace(".", "");
 		if (x.length()==1) x += "0";
-		groupFile = cmpPanel.getCurProjMethodDir() 
-				+ "/" + groupFile + "." + prefix + "-" + x;
+		groupFile = cmpPanel.getCurProjMethodDir() +  groupFile + "." + prefix + "-" + x;
 		
 		Out.PrtSpMsg(1, "Prefix:    " + prefix);
-		Out.PrtSpMsg(1, "Remark:    " + comment);
 		Out.PrtSpMsg(1, "Inflation: " + inflation );
 		Out.PrtSpMsg(1, "Hit File:  " + blastFile);	
 		Out.PrtSpMsg(1, "");

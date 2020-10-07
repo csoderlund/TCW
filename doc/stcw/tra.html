@@ -9,13 +9,17 @@ Project: tra   #Seqs: 211   #Hits: 8,516   #GOs: 5,002    TPM  DE  GO-DE   Pairs
  
 INPUT
    Counts: 
-      SEQID  ID          SIZE  #REPS  
-      tra    Oleaf    474,551      5  
-      tra    Root     955,097      5  
-      tra    Stem   1,865,201      5  
+      SEQID  ID          SIZE  TITLE            SOURCE   #REPS  
+      Tra    Stem   1,865,201  Tissue Stem      54bp SE      5  
+      Tra    Root     955,097  Tissue Root      54bp SE      5  
+      Tra    Oleaf    474,551  Tissue Old leaf  54bp SE      5  
+
+   Sequences: 
+      SEQID  SIZE  TITLE                                         AVG-len  MED-len  
+      Tra     211  Demo of Illumina assembled plant transcripts    1,079      861  
 
 ANNOTATION
-   Annotated with TCW release: 3.0.4   Annotation date: 26-Aug-20
+   Annotated with TCW release: 3.0.5   Annotation date: 05-Oct-20
 
    Annotation Statistics:
       Sequences with hits     209  (99.1%)     Bases covered by hit  179,766  (79.0%)  
@@ -24,13 +28,14 @@ ANNOTATION
                                                                                        
       Sequences with GOs      207  (98.1%)     Best hit with GOs         199  (94.3%)  
       Unique GOs            5,002              Unique hits with GOs    8,088  (95.0%)  
+      Has goslim_plant         94                                                      
 
    annoDBs (Annotation databases): 7   (see Legend below)
       ANNODB            ONLY  EVAL  ANNO  UNIQUE  TOTAL   AVG  HIT-SEQ (#SEQ)  BEST  AVG  COVER  COVER  
                                                          %SIM                  HIT  %SIM   >=50   >=90  
       SP-plants            0     2     2     747  1,248  65.3     193 (91.5%)       69.7  62.2%   3.6%  
-      SP-invertebrates     0     0     0     285    482  50.1     121 (57.3%)       47.3  30.6%   0.8%  
       SP-fungi             0     0     0     566    947  47.3     112 (53.1%)       47.2  28.6%   0.9%  
+      SP-invertebrates     0     0     0     285    482  50.1     121 (57.3%)       47.3  30.6%   0.8%  
       SP-bacteria          0     0     0     532    819  46.6      59 (28.0%)       46.8  28.8%     0%  
       SP-fullSubset        0     0     0     686  1,361  49.7     134 (63.5%)       48.8  33.6%   0.7%  
       TR-plants            9   204   204   4,056  4,723  76.6     209 (99.1%)       81.0  69.9%   8.6%  
@@ -59,30 +64,30 @@ ANNOTATION
       Pos3  16.6%    CpG-O/E   0.88   0.71   0.63    AvgLen   102.3   859.7   117.1  
                                     
    Similar pairs:
-      Total pairs:                30  
-      with Translated selfblast:  30  
+      Total pairs:                18  
+      with Nucleotide selfblast:  18  
 
 EXPRESSION
    TPM: (% of 211)
-                 <2     2-5    5-10    10-50  50-100   100-1k     1k-5k     >=5k  
-      Oleaf  5 (2%)  2 (1%)  1(<1%)  11 (5%)  6 (3%)  40(19%)   96(45%)  50(24%)  
-      Root   1(<1%)  0 (0%)  1(<1%)   1(<1%)  0 (0%)  60(28%)  101(48%)  47(22%)  
+               <2.0     2-5    5-10    10-50  50-100   100-1k     1k-5k     >=5k  
       Stem   3 (1%)  2 (1%)  1(<1%)   6 (3%)  7 (3%)  45(21%)  100(47%)  47(22%)  
+      Root   1(<1%)  0 (0%)  1(<1%)   1(<1%)  0 (0%)  60(28%)  101(48%)  47(22%)  
+      Oleaf  6 (3%)  1(<1%)  1(<1%)  11 (5%)  6 (3%)  40(19%)   96(45%)  50(24%)  
 
    Differential expression: (% of 211)
              <1E-5    <1E-4   <0.001    <0.01     <0.05  
-      OlRo  1(<1%)  16 (8%)  37(18%)  74(35%)  110(52%)  
-      OlSt  0 (0%)   2 (1%)  12 (6%)  65(31%)  101(48%)  
-      RoSt  6 (3%)  17 (8%)  32(15%)  65(31%)   97(46%)  
+      StRo  6 (3%)  17 (8%)  32(15%)  65(31%)   97(46%)  
+      StOl  0 (0%)   2 (1%)  12 (6%)  65(31%)  101(48%)  
+      RoOl  1(<1%)  16 (8%)  37(18%)  74(35%)  110(52%)  
 
    Over-represented GOs: (% of 5,002)
              <1E-5   <1E-4  <0.001    <0.01     <0.05  
-      OlRo  0 (0%)  0 (0%)  1(<1%)  13(<1%)  141 (3%)  
-      OlSt  0 (0%)  0 (0%)  0 (0%)   1(<1%)   26 (1%)  
-      RoSt  0 (0%)  0 (0%)  3(<1%)  39 (1%)  209 (4%)  
+      StRo  0 (0%)  0 (0%)  3(<1%)  39 (1%)  209 (4%)  
+      StOl  0 (0%)  0 (0%)  0 (0%)   1(<1%)   26 (1%)  
+      RoOl  0 (0%)  0 (0%)  1(<1%)  13(<1%)  141 (3%)  
 
 SEQUENCES
-   Build date: 26-Aug-20
+   Build date: 05-Oct-20
    Sequences loaded from external source
 
    Sequence lengths:
@@ -97,16 +102,17 @@ SEQUENCES
 -------------------------------------------------------------------
 PROCESSING INFORMATION:
    AnnoDB Files:
-      Type  Taxo           FILE                                DB DATE    ADD DATE   EXECUTE                  
-      sp    plants         uniprot_sprot_plants.fasta          25-May-20  26-Aug-20  Load tra_SPpla.dmnd.tab  
-      sp    invertebrates  uniprot_sprot_invertebrates.fasta   25-May-20  26-Aug-20  Load tra_SPinv.dmnd.tab  
-      sp    fungi          uniprot_sprot_fungi.fasta           25-May-20  26-Aug-20  Load tra_SPfun.dmnd.tab  
-      sp    bacteria       uniprot_sprot_bacteria.fasta        25-May-20  26-Aug-20  Load tra_SPbac.dmnd.tab  
-      sp    fullSubset     uniprot_sprot_fullSubset.fasta      25-May-20  26-Aug-20  Load tra_SPful.dmnd.tab  
-      tr    plants         uniprot_trembl_plants.fasta         25-May-20  26-Aug-20  Load tra_TRpla.dmnd.tab  
-      tr    invertebrates  uniprot_trembl_invertebrates.fasta  25-May-20  26-Aug-20  Load tra_TRinv.dmnd.tab  
+      Type  Taxo           FILE                                DB DATE    ADD DATE   EXECUTE                                     
+      sp    plants         uniprot_sprot_plants.fasta          20-Aug-18  05-Oct-20  diamond  --masking 0 --max-hsps 1 --top 20  
+      sp    fungi          uniprot_sprot_fungi.fasta           20-Aug-18  05-Oct-20  diamond  --masking 0 --max-hsps 1 --top 20  
+      sp    invertebrates  uniprot_sprot_invertebrates.fasta   20-Aug-18  05-Oct-20  diamond  --masking 0 --max-hsps 1 --top 20  
+      sp    bacteria       uniprot_sprot_bacteria.fasta        20-Aug-18  05-Oct-20  diamond  --masking 0 --max-hsps 1 --top 20  
+      sp    fullSubset     uniprot_sprot_fullSubset.fasta      20-Aug-18  05-Oct-20  diamond  --masking 0 --max-hsps 1 --top 20  
+      tr    plants         uniprot_trembl_plants.fasta         20-Aug-18  05-Oct-20  diamond  --masking 0 --max-hsps 1 --top 20  
+      tr    invertebrates  uniprot_trembl_invertebrates.fasta  20-Aug-18  05-Oct-20  diamond  --masking 0 --max-hsps 1 --top 20  
 
-   Over-represented GOs: go_202005-termdb-tables.tar.gz    [GOs added with sTCW v3.0.4 (25-Aug-20)]
+   Over-represented GOs: go_202005-termdb-tables.tar.gz    [GOs added with sTCW v3.0.5 (6-Oct-20)]
+   GO Slim: goslim_plant
 
    ORF finder:
       Use ATG only for start site
@@ -118,11 +124,11 @@ PROCESSING INFORMATION:
 
    DE (Differential Expression) computation: 
       DE column    Conditions                     Method
-      OlRo         Oleaf : Root                   source(edgeRglm.R)
-      OlSt         Oleaf : Stem                   source(edgeRglm.R)
-      RoSt         Root : Stem                    source(edgeRglm.R)
+      StRo         Stem : Root                    source(edgeRglm.R)
+      StOl         Stem : Oleaf                   source(edgeRglm.R)
+      RoOl         Root : Oleaf                   source(edgeRglm.R)
 
-   GOseq: OlRo:0.05,OlSt:0.05,RoSt:0.05
+   GOseq: RoOl:0.05,StOl:0.05,StRo:0.05
 
 -------------------------------------------------------------------
 LEGEND:

@@ -385,12 +385,12 @@ public class Schema {
 	 */
 	static public boolean addDynamicCountColumns(DBConn mDB, CompilePanel cmpPanel) 
 	{
-		Out.PrtSpMsg(1, "Add RPKM and DE columns");
+		Out.PrtSpMsg(1, "Add TPM and DE columns");
 		HashMap<String,HashSet<String>> asmLibs = new HashMap<String,HashSet<String>>();
 		HashMap<String,HashSet<String>> asmDEs = new HashMap<String,HashSet<String>>();	
 		Vector <String> allLibs = new Vector <String>();
 		Vector <String> allDEs = new Vector <String>();
-		boolean hasDE=true, hasRPKM=true;
+		boolean hasDE=true, hasTPM=true;
 		
 		ResultSet rs;
 		try
@@ -429,7 +429,7 @@ public class Schema {
 						}
 					}
 					if (cntR>0) {
-						String msg = asm + " " + cntR + " RPKM (" + r + ") ";
+						String msg = asm + " " + cntR + " TPM (" + r + ") ";
 						if (cntP>0) msg += + cntP + " DE (" + p + ")";
 						Out.PrtSpMsg(2, msg);
 					}
@@ -439,19 +439,19 @@ public class Schema {
 	    		if (allLibs.size() > 0) {
 	    			Out.PrtSpCntMsg(2,allLibs.size(), "Total unique conditions ");    			
 	    		}
-	    		else hasRPKM = false;
+	    		else hasTPM = false;
 	    		
 	    		if (allDEs.size() > 0) {
 	    			Out.PrtSpCntMsg(2, allDEs.size(), "Total unique DE names");
 	    		}
 	    		else hasDE = false;
 	    		
-	    		if (!hasDE && !hasRPKM) {
-	    			Out.PrtSpMsg(2, "No RPKM or DE columns in any of the databases");
+	    		if (!hasDE && !hasTPM) {
+	    			Out.PrtSpMsg(2, "No TPM or DE columns in any of the databases");
 	    			return true;
 	    		}
 	    		
-	    		// Add RPKM 
+	    		// Add TPM (RPKM for pre-305)
 	    		for (String lib : allLibs)
 	    		{
 	    			mDB.executeUpdate("alter table unitrans add " + Globals.PRE_LIB + lib + " double default " + Globalx.dStrNoVal);

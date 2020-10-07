@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.lang.Character;
 
 import cmp.database.Globals;
 import cmp.database.Schema;
@@ -22,8 +21,10 @@ import cmp.compile.panels.MethodPanel;
 import util.database.DBConn;
 import util.methods.ErrorReport;
 import util.methods.Out;
+import util.methods.BestAnno;
 
-public class MethodLoad {	
+public class MethodLoad {
+	private static int debug=0; // >0 state out many records to output before dieing
 	private static final String uniqueID = Globals.uniqueID;
 	private static final String errorID = "Error";
 	
@@ -40,6 +41,10 @@ public class MethodLoad {
 		cmpPanel = panel;
 		prefix = methodPanel.getMethodPrefixAt(idx);
 		
+		Out.PrtSpMsg(1, "Prefix:  " + prefix);
+		Out.PrtSpMsg(1, "File:    " + groupFile);
+		Out.PrtSpMsg(1, "");
+		
 		if (!processGroupFile(0, idx)) return false;
 
 		return bSuccess;
@@ -48,14 +53,14 @@ public class MethodLoad {
 	/*****************************************************************
 	 * Called by all methods to load the file just generated
 	 */
-	 public boolean run(int idx, String file,  CompilePanel panel) {	
+	 public int run(int idx, String file,  CompilePanel panel) {	// CAS305 return GRPid for MethodHit
 		groupFile = file;
 		cmpPanel = panel;
 		methodPanel = panel.getMethodPanel();
 		prefix = methodPanel.getMethodPrefixAt(idx);
 			
-		if (!processGroupFile(1, idx)) return false;
-		return bSuccess;
+		if (!processGroupFile(1, idx)) return -1;
+		return GRPid;
 	}
 	 /***************************************************
 	  * loadGroupFile
@@ -182,6 +187,7 @@ public class MethodLoad {
 		
 		while ((line = reader.readLine()) != null) 
 		{
+			
 			if ( line.length() == 0 || line.charAt(0) == '#' ) continue;  			
 			String [] members = line.split(" ");
 			if (members == null || members.length < 2) {
@@ -198,6 +204,10 @@ public class MethodLoad {
 			if (cntPrt==1000) {
 				Out.r("Adding cluster #" + group);
 				cntPrt=0;
+			}
+			if (debug>0) {
+				Out.prt(">>> " + PGstr);
+				if (group>debug) Out.die("Debugging MethodLoad");
 			}
 			
     	/** compute # of members per sTCW to be loaded with sTCW information **/				
@@ -243,31 +253,31 @@ public class MethodLoad {
 				else  Out.die("Invalid line: " + line + " member: " + members[i]);
 				
 				int seqID=0;
-			    	if (seqMap.containsKey(seqName)) seqID = seqMap.get(seqName); 
-			    	else {
-			    		if (skip < 5)
-			    			Out.PrtWarn("File contains sequence identifer not in database '" + seqName + "'");
-					else if (skip==10) Out.PrtWarn("Surpressing further such error messages");
-					skip++;
-					if (skip>100 && add==0) {
-						Out.PrtError("Too many bad indentifiers and no good ones -- check file");
-						bSuccess=false;
-						reader.close();
-						return;
-					}
-					continue;
-			    	}
-			    	//"(PGid, PGstr, UTid, UTstr) values
-		    		psMem.setInt(1, PGid);
-		    		psMem.setString(2, PGstr);
-		    		psMem.setInt(3, seqID);
-		    		psMem.setString(4, seqName);
-		    		psMem.execute();
-		    		
-		    		psSeq.setString(1, PGstr);
-		    		psSeq.setString(2, seqName);
-		    		psSeq.execute();
-		    		cntSeqs++;
+		    	if (seqMap.containsKey(seqName)) seqID = seqMap.get(seqName); 
+		    	else {
+		    		if (skip < 5)
+		    			Out.PrtWarn("File contains sequence identifer not in database '" + seqName + "'");
+				else if (skip==10) Out.PrtWarn("Surpressing further such error messages");
+				skip++;
+				if (skip>100 && add==0) {
+					Out.PrtError("Too many bad indentifiers and no good ones -- check file");
+					bSuccess=false;
+					reader.close();
+					return;
+				}
+				continue;
+		    	}
+		    	//"(PGid, PGstr, UTid, UTstr) values
+	    		psMem.setInt(1, PGid);
+	    		psMem.setString(2, PGstr);
+	    		psMem.setInt(3, seqID);
+	    		psMem.setString(4, seqName);
+	    		psMem.execute();
+	    		
+	    		psSeq.setString(1, PGstr);
+	    		psSeq.setString(2, seqName);
+	    		psSeq.execute();
+	    		cntSeqs++;
 		    		
 				memIdVec.add(seqMap.get(seqName));
 				add++;
@@ -301,7 +311,9 @@ public class MethodLoad {
 	}
 	catch (Exception e) {ErrorReport.prtReport(e, "loading POGS"); bSuccess=false;}
 	}
-	/* Create string for adding groups, along with assembly columns that have names "A__<assmid>" */
+	/**
+	 * Create string for adding groups, along with assembly columns that have names "A__<assmid>" 
+	 **/
 	private String step3a_createGroupSQL() {
 	try {
 		String POGsql = "INSERT INTO pog_groups (PGstr, PMid, count ";
@@ -323,7 +335,9 @@ public class MethodLoad {
 	}
 	catch (Exception e) {ErrorReport.die(e, "create Group");  return null;}
 	}
-	
+	/**********************************************************************
+	* Load Group
+	*/
 	private int step3b_loadGroup(String POGsql, String PGstr, int PMid, int count, int [] sTCWcnt) {
 	String strQ="";
 	try {
@@ -363,7 +377,7 @@ public class MethodLoad {
 		}
 		seqList += ")";
 		
-		return new BestHit().compute(grpID, seqIDvec.size(), seqList);
+		return new BestHit().compute(grpID, seqIDvec.size(), seqList); /* COMPUTE */
 	}
 	// called from pairwise for pairs
 	public String [] descriptComputeBest(int grpID, int [] seqIDarr) {
@@ -374,7 +388,7 @@ public class MethodLoad {
 		}
 		seqList += ")";
 		
-		Desc bestDescObj = new BestHit().compute(grpID, seqIDarr.length, seqList);
+		Desc bestDescObj = new BestHit().compute(grpID, seqIDarr.length, seqList); /* COMPUTE */
 		
 		String [] rt = {"0", Globals.noneID};
 		if (bestDescObj.totalCnt>1) {
@@ -393,13 +407,13 @@ public class MethodLoad {
 				this.grpSize = grpSize;
 				boolean rc;
 				
-				int nWords=2;
-				rc = readBestAnno(seqList, nWords); 		if (!rc) return retVal(errorID);
-				if (descHitMap.size()==0) return retVal(uniqueID); 
+				rc = loadBestAnnoFromDB(seqList); 	if (!rc) return retVal(errorID);
+				if (descHitMap.size()==0) 			
+					return retVal(uniqueID); 
 				
-				rc = readCntAllAnno(seqList, nWords);  	if (!rc) return retVal(errorID);
+				rc = loadCntAllAnnoFromDB(seqList); if (!rc) return retVal(errorID);
 				
-				rc = findBest();           				if (!rc) return retVal(errorID);
+				rc = findBest();           			if (!rc) return retVal(errorID);
 				
 				return bestDescObj;
 			}
@@ -407,7 +421,7 @@ public class MethodLoad {
 		}
 		private Desc retVal(String id) {
 			bestDescObj = new Desc();
-			bestDescObj.add(0, id, 0.0, 0, false,  false,  "");
+			bestDescObj.update(0, id, 0.0, 0, false,  false,  "");
 			bestDescObj.totalCnt=grpSize;
 			return bestDescObj;
 		}
@@ -419,6 +433,7 @@ public class MethodLoad {
 					listDesc.add(d);
 				}
 				Collections.sort(listDesc);
+				if (debug>0) for (Desc d : listDesc) d.prt();
 				bestDescObj=listDesc.get(0);
 						
 				return true;
@@ -426,7 +441,7 @@ public class MethodLoad {
 			catch (Exception e) {ErrorReport.die(e, "find best"); return false;}  
 		}
 		
-		private boolean readCntAllAnno(String seqList, int nWords) {
+		private boolean loadCntAllAnnoFromDB(String seqList) {
 			try {
 				// count the ones that have this descript
 				ResultSet rs = mDB.executeQuery(
@@ -445,7 +460,7 @@ public class MethodLoad {
 					}
 					int hitID = rs.getInt(2);
 					String descript = rs.getString(3).trim();
-					String dBrief =   descBrief(descript, nWords);
+					String dBrief =   BestAnno.descBrief(descript);
 					
 					if (descHitMap.containsKey(dBrief)) {
 						Desc x = descHitMap.get(dBrief);
@@ -462,139 +477,83 @@ public class MethodLoad {
 			catch (Exception e) {ErrorReport.die(e, "read best hits"); return false;}  
 		}
 		/*******************************************************************/
-		private boolean readBestAnno(String seqList, int sp) {
+		private boolean loadBestAnnoFromDB(String grpSeqList) {
 			try {
 				ResultSet rs = mDB.executeQuery(
 						"SELECT tr.HITid, tr.HITstr, tr.e_value, uq.description, uq.dbtype, uq.nGO " +
 						"FROM unitrans_hits as tr " +
 						"JOIN unique_hits as uq " +
-						"WHERE " + seqList + " AND tr.HITid = uq.HITid AND " +
-						" (tr.bestAnno=1 OR tr.bestEval=1 OR tr.bestGO=1)");
+						"WHERE " + grpSeqList + " AND tr.HITid = uq.HITid AND " +
+						" (tr.bestAnno=1 OR tr.bestEval=1 OR tr.bestGO=1) " +
+						"order by tr.e_value");				// CAS305 added order by
 				while (rs.next()) {	
 					int hitID = rs.getInt(1);
 					String hitStr = rs.getString(2);
 					double eval = rs.getDouble(3);
-					String descript = rs.getString(4).trim();
-					if (descript.contains("{ECO ")) 
-						descript = descript.substring(0,descript.indexOf("{ECO")); 
+					
+					String desc = rs.getString(4).trim();
+					if (desc.contains("{ECO ")) desc = desc.substring(0,desc.indexOf("{ECO")); 
+					
 					String dbType = rs.getString(5);
 					boolean bIsSP = (dbType.equals("sp")) ? true : false;
+					
 					int nGO = rs.getInt(6);
 					
-					String  dBrief =    descBrief(descript, sp);
-					boolean bGoodAnno = descIsGood(dBrief);
+					String  dBrief =    BestAnno.descBrief(desc);    // CAS305 moved to BestAnno
+					boolean bGoodAnno = BestAnno.descIsGood(dBrief); // CAS305 moved to BestAnno
+					//if (debug>0) Out.prt(String.format("%5b %-20s  %-30s", bGoodAnno, dBrief, desc));
 					
-					// Each sequence will add 3 counts, all 3 could be to the same annoCnt
 					if (!descHitMap.containsKey(dBrief)) {
 						Desc x = new Desc();
-						x.add(hitID, hitStr, eval, nGO, bIsSP, bGoodAnno,  dBrief);
+						x.update(hitID, hitStr, eval, nGO, bIsSP, bGoodAnno,  dBrief);
 						descHitMap.put(dBrief, x);
 					}
 					else {
 						Desc x = descHitMap.get(dBrief);
-						x.add(hitID, hitStr, eval, nGO, bIsSP, bGoodAnno,  dBrief);
+						x.update(hitID, hitStr, eval, nGO, bIsSP, bGoodAnno,  dBrief);
 					}
 				}
 				return true;
 			}
-			catch (Exception e) {ErrorReport.die(e, "read best hits"); return false;}  
-		}
-		// bunch of heuristic to figure out non-informative names
-		// copied from jpave.DoUniProt
-		private boolean descIsGood (String des) {
-			des = des.toLowerCase();  
-			if (des.contains("uncharacterized protein") || 
-		    		des.contains("hypothetical_protein") || 
-		    		des.contains("expressed protein") || 
-		    		des.contains("predicted protein") ||
-		    		des.contains("whole genome shotgun") ||
-		    		des.equals("orf"))
-		    	{
-		    	        return false;
-		    	}
-			String [] words = des.split(" ");
-			if (words.length > 2) return true;
-	
-			// many are just a name or name protein or name (fragment)
-			boolean name = false;
-			int num=0;
-			for (int i=0; i < words[0].length(); i++) {
-				char c = words[0].charAt(i);
-				if (Character.isDigit(c)) num++;
-			}
-			int wl = words[0].length();
-			double x = (num > 0) ? ((double) wl/ (double) num) : 0;
-			if (num > 3 || (wl <= 5 && x > 1)) name = true;
-			
-			if (words.length == 1 && name) return false;
-			if (name &&  des.endsWith("protein")) return false;
-			if (name &&  des.endsWith("(fragment)")) return false;
-			return true;
-		}
-		// another heuristic
-		private String descBrief(String fullDesc, int sp) {
-			String desc = fullDesc.toLowerCase().trim();
-			if (desc.contains("{"))            	desc = desc.substring(0,desc.indexOf("{"));
-			if (desc.startsWith("probable"))   	desc =  desc.substring(9).trim();
-			if (desc.startsWith("putative"))   	desc =  desc.substring(9).trim();
-			if (desc.startsWith("predicted:")) 	desc =  desc.substring(desc.indexOf(":")+1).trim();
-			
-			for (int i=0, j=0; i<desc.length(); i++) {
-				char c1 = desc.charAt(i);
-				if (c1== ' ') j++;
-				if (c1==' ') {
-					if (i>20 || j>=sp) {
-						desc = desc.substring(0, i);
-						break;
-					}
-				}
-			}
-			int j=0;
-			for (int i=desc.length()-1; i>desc.length(); i--) {
-				char c1 = desc.charAt(i);
-				if (Character.isDigit(c1)) j=i;
-				else break;
-			}
-			if (j>0) desc = desc.substring(0,j);
-			return desc.trim();
+			catch (Exception e) {ErrorReport.die(e, "Load best Hits: " + grpSeqList); return false;}  
 		}
 	}
-	// By description. Keep counts for all hitIDs that have this description.
+	// Object for each description. Keep counts for all hitIDs that have this description.
 	private class Desc implements Comparable <Desc> {
-		static final double useGO = 0.80;
+		static final double useSP = 0.90;
 		static final double DLOW = 1E-308; 
 		
-		public void add(int hitID, String name, double eval, int nGO, boolean bsp, boolean bGood, String desc) {
-			
-			boolean bReplace=false;
+		// Find best hitID for the description and add to count of sequences with this anno
+		public void update(int hitID, String name, double eval, int nGO, boolean bsp, boolean bGood, String desc) {
+			boolean bAssign=false;
 			if (annoCnt==0) { // firstTime
 				bIsGood = bGood; 
 				bestDesc=desc;
-				bReplace=true;
+				bAssign=true;
 			}
 			annoCnt++;
 			
-			if (!bReplace) {
+			if (!bAssign) { // if eval is close, but new hit is SP or more GOs, replace
 				boolean bCheck=true;
 				if (bestEval!=eval) {
-	    				double ev = (eval==0.0)     ? DLOW : eval;
-	    				if (ev>cmpEval) bCheck=false; 
+	    			double ev = (eval==0.0) ? DLOW : eval;
+	    			if (ev>cmpEval)         bCheck=false; 
 				}
 				
-				if (bCheck) {
-					if (nGO > cntGO) bReplace=true;
-					else if (bsp && !bIsSP) bReplace=true;
+				if (bCheck) { 
+					if (nGO > cntGO)        bAssign=true;
+					else if (bsp && !bIsSP) bAssign=true;
 				}
 			}
-			if (bReplace) {
-				bestEval=eval;
-				bestID = hitID;
-				bestName = name;
-				bIsSP=bsp;
-				cntGO = nGO;
+			if (bAssign) {
+				bestEval	= eval;
+				bestID 		= hitID;
+				bestName 	= name;
+				bIsSP 		= bsp;
+				cntGO 		= nGO;
 				
 				double thisEv = (bestEval==0.0) ? DLOW : bestEval;
-				cmpEval = Math.exp(Math.log(thisEv) * useGO);
+				cmpEval = Math.exp(Math.log(thisEv) * useSP); 
 			}
 		}
 		public void cnt(int hitID) {
@@ -608,15 +567,20 @@ public class MethodLoad {
 			else if (!bIsGood && cur.bIsGood)	return 1;
 			else if (cntTA    > cur.cntTA) 		return -1;
 			else if (cntTA    < cur.cntTA) 		return 1;
-			else if (cntGO 	  > cur.cntGO)  		return -1;
-			else if (cntGO    < cur.cntGO)  		return 1;
 			else if (bestEval < cur.bestEval) 	return -1;
 			else if (bestEval > cur.bestEval) 	return 1;
-			else if (bIsSP  && !cur.bIsSP)  	    return -1;
-			else if (!bIsSP  && cur.bIsSP)  	    return 1;
+			else if (bIsSP  && !cur.bIsSP)  	return -1;
+			else if (!bIsSP  && cur.bIsSP)  	return 1;
+			else if (cntGO 	  > cur.cntGO)  	return -1; // CAS305 was after cntTA
+			else if (cntGO    < cur.cntGO)  	return 1;
 			return 0;
 		}
-		private int annoCnt=0; 	// #seqs where this is best anno
+		public void prt() {
+			String msg = String.format("Good=%-5b Sp=%-5b best=%-3d total=%-3d GO=%-3d %.0e (%.0e) %-20s %-30s", 
+					bIsGood, bIsSP, annoCnt, totalCnt, cntGO, bestEval, cmpEval, bestName, bestDesc);
+			Out.prt(msg);
+		}
+		private int annoCnt=0; 		// #seqs where this is best anno
 		private int totalCnt=0; 	// #seqs that have a hit with this anno
 		private int cntTA=0;		// annoCnt+totalCnt (totalCnt includes annoCnt -- this give emphasize)
 		
@@ -624,11 +588,12 @@ public class MethodLoad {
 		private int bestID=0, cntGO;
 		private String bestName="", bestDesc=""; // bestDesc used for debugging
 		private boolean bIsSP=false, bIsGood=true; 
-	}
-	 
+	} // End BestHit class
+	
+	 /***********************************************************/
 	 private int cntSeqs=0, nSTCW=0;
 	
-	 private int GRPid;
+	 private int GRPid=-1;
 	 private DBConn mDB;
 	 private CompilePanel cmpPanel;
 	 private MethodPanel methodPanel;

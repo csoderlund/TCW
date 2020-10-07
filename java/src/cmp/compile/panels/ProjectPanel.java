@@ -6,6 +6,7 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.Collections;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -158,7 +159,8 @@ public class ProjectPanel extends JPanel {
 	    		File temp = new File(Globals.PROJECTDIR + "/" + allFiles[x]);
 	    		
 	    		if(temp.isDirectory()) results.add(allFiles[x]);
-	    	}    	
+	    	}    
+	    	Collections.sort(results); // CAS305
 	    	return results.toArray(new String[results.size()]);
 	}
 	private boolean addProject() {

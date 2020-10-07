@@ -7,8 +7,8 @@ import java.text.DecimalFormat;
 // shared by sTCW and mTCW
 // They both have their own database/Globals.java
 public class Globalx {
-	public static final String strRelDate = "(4-Sept-20)"; 
-	public static final String strTCWver = "3.0.4";
+	public static final String strRelDate = "(7-Oct-20)"; 
+	public static final String strTCWver = "3.0.5";
 	public static final String URL = "http://www.agcol.arizona.edu ";
 	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate;
 	public static final String error="***";

@@ -4,26 +4,24 @@
 <title>Cluster Methods</title>
 
 <h2>Clustering Methods</h2>
+ 
 
-This interface allows you to define one or more clustering method. If your mTCW 
-database is created from NT (nucleotide) sTCW databases,
-you should include a BBH cluster as the coding statistics
-are run on the BBH pairs (see 'Pair Statistics').
+<p>From the drop-down menu, choose the clustering method to use. On "Keep", it 
+will be written to the "Cluster Set" table on the main panel. The clusters will
+be computed when the <b>Add New Clusters</b> button is pressed.
 
-<h3>Prefix (required)</h3>
-
+<p><b>Prefix (required)</b> :
 This is the prefix used for the clusters, e.g. if the 
 cluster method is prefixed with "T1" and has three clusters, they will be named T1_1, T1_2, T1_3.
 There can be multiple instances of the same "Method" in the databases, e.g. built with different
 parameters; the prefix allows them to be queries separately in <tt>viewMultiTCW</tt>.
 
-<h3>Method</h3>
-From the drop-down menu, choose the algorithm to use. 
 
-<h4>BBH (Bi-directional Best Hit)</h4>
+<h3>BBH (Bi-directional Best Hit)</h3>
 This methods creates the bi-directional best hit. 
+<p>
 <table>
-<tr><td nowrap valign=top>Blast File Type<td>Either the amino acid blast results or the nucleotide blast results can be
+<tr><td nowrap valign=top>Hit File Type<td>Either the amino acid search results or the nucleotide search results can be
 used, where the nucleotide is only valid if there are at least two nucleotide
 singleTCW in the multiTCW database.
 <tr><td valign=top>%Coverage<td>This is computed as the percentage of align/length.
@@ -31,8 +29,8 @@ The %Coverage must be greater than this number for  'either' or 'both' sequences
 For example, if
 the align length is 100, sequence 1 has length 100, and sequence 2 has length 300, then the
 coverage will be 100% and 33%, respectively; if the cutoff is 90,
-the 'either' option will pass, the 'both' option will fail.
-<tr><td valign=top>%Similarity<td>This is the blast parameter "%Identity", where the %similarity must be 
+the pair will pass for the 'either' option, but not the 'both' option.
+<tr><td valign=top>%Similarity<td>This is column named "%Identity" in the Hit file, where the %similarity must be 
 greater or equal this value.
 </table>
 
@@ -40,29 +38,55 @@ greater or equal this value.
 <p>For an mTCWdb with &gt;2 sTCWdbs as input, this method works in the following ways 
 (examples will assume the input sTCWdbs are Foo, Bar and Fly):
 <ol>
-<li>Specify two sTCWdbs to create BBH clusters with only the associated sequences. It is recommended
+<li>Specify two sTCWdbs to create BBH clusters from the two datasets. It is recommended
 you make separate BBH clusters for Foo/Bar, Foo/Fly and Bar/Fly, where each set will have a different
 prefix and you can query them separately in the resulting mTCW database.
 <li>If you specify more then N (N&gt;2) sTCWdbs, it will create BBH clusters with N members. 
-For example, if you specify Foo, Bar and Fly, there clusters will be of
+For example, if you specify all three sTCWdbs, the clusters will be of
 size 3 where all pairs of members are BBH pairs.
 </ol>
-<h4>Closure</h4>
+<h3>Closure</h3>
 
 The parameters are the same as described for BBH, except that there  is no option to select the
-sTCW databases as all sequences are considered regardless of origin. For a sequence to be added to a Closure cluster,
-it must have a hit and pass the <b>%Similarity</b> and <b>%Coverage</b>
+sTCW databases as all sequences are considered regardless of origin. 
+<p>For a sequence to be added to a Closure cluster,
+it must pass the <b>%Similarity</b> and <b>%Coverage</b>
 with every other sequence in the cluster.
 
-<h4>OrthoMCL</h4>
+<h3>Best Hit</h3>
+Clusters will be created from the best annotation hit description or hitID. If the hit description is used,
+a cluster can contain multiple different hitIDs. To compare descriptions:
+<ol>
+<li>If the description is un-informative (e.g. contains "uncharacterized protein"), then the sequence can only
+be part of a cluster with the same hitID.
+<li>Before comparing the descriptions, each is converted to lower case, and if
+there is text at the end starting with "{", it is removed.
+</ol>
+Clusters are formed as follows:
+<ol>
+<li>All sequences share the same best HitID or best Description.
+<li>Each sequence in the cluster must have &gt;=%Similarity and &gt;=%Coverage to the hit protein. 
+<li>Each sequence in the cluster must be part of at least one pair in the cluster, where the two 
+paired sequences have &gt;=%Similarity and at least one of them have &gt;=%Coverage to it's pair.
+Without this restrictions, it is possible to get clusters that have no sequence overlaps as they
+all hit the protein in different regions.
+</ol>
+
+<h3>OrthoMCL</h3>
 
 OrthoMCL is an ortholog-detection package which has been included 
 with TCW. Its
 clustering is governed by the <b>Inflation</b> parameter; see www.orthomcl.org for more detail.
 Larger inflation values lead to smaller clusters.
 
+<p><b>NOTE</b>: OrthoMCL is an external program run from the /Ext directory. 
+<ul>
+<li>For it to work, Perl and DBD::MySQL must be installed.
+<li>It does not work for 10.4.12-MariaDB (at least, not on my Linux machine); though it does work
+with earlier (e.g. 5.5.64-MariaDB).
+</ul>
 
-<h4>User Defined</h4>
+<h3>User Defined</h3>
 
 Here you load a file defining your own groups. The format is as follows:
 <pre>

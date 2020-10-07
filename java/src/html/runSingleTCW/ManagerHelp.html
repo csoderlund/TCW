@@ -58,11 +58,10 @@ you change any of the variables first.
 
 <tr><td valign="top">Remove</td><td valign="top"> 
 For the current project only, the options to remove are:
-<br>1. existing annotation from the sTCW database
-<br>2. the sTCW database
-<br>3. the hit files from disk
-<br>4. all project files from disk (i.e. the current project
-directory under /project)</td></tr>
+<br>1. Annotation from sTCW database
+<br>2. sTCW database
+<br>3. Hit files from disk (/project/<i>project-name</i>/hitResults)
+<br>4. All files from disk for this sTCW project (i.e. the  /project/<i>project-name</i>)</td></tr>
 
 <tr><td valign="top">Overview<td> Shows the overview page of the selected project. 
 There will only be an overview page if "Build Database" has been executed.
@@ -70,18 +69,18 @@ There will only be an overview page if "Build Database" has been executed.
 </table>
 
 <h3>Step 1. Build Database</h3>
-Add one or more Sequence Datasets with the "Add" button. You can make changes with
-the "Edit" button, but once you have executed "Build Database", you can only change the
-Attribute data (e.g. tissue type).
+Add one or more Sequence Datasets with the "Add" button.  Each of the following brings up a new panel for you to
+enter the information; each has a "Help" button to provide more information.
 <table border=0 cellspacing=5>
-<tr><td valign="top">Add<td>When you select this button, a new panel will appear with a Help to give more
-detail. Briefly, you must enter the name of a sequence file; you may also enter the name of the file of counts
-(for conditions).  
+<tr><td valign="top">Add<td>You must enter the name of a sequence file and optional quality file and/or count file of conditions.  
 The "Keep" will take you back to this main window,
 where the conditions will be shown in the second table, and the Reps column will be initialized to 1.
-<tr><td valign="top" nowrap>Define Replicates<td> This function
+<tr><td>Edit<td>You can make changes with
+the "Edit" button, but once you have executed "Build Database", you can only change the
+Attribute data (e.g. tissue type).
+<tr><td valign="top">Define Replicates<td> This function
 will allows you to group replicates per condition. 
-<tr><td valign="top" nowrap>Edit Attributes<td>After you have defined replicates (if needed), 
+<tr><td valign="top">Edit Attributes<td>After you have defined replicates (if needed), 
 then edit the attributes of the conditions
  with "Edit Attributes". Attributes can be added or edited after the database is created.
 </table>
@@ -89,17 +88,18 @@ then edit the attributes of the conditions
 <h3>Step 2. Instantiation</h3>
 
 <table border=0 cellspacing=5>
-<tr><td valign="top" nowrap>Use Sequence Names from File<td><td>When the input sequence will not be assembled, 
+<tr><td valign="top">Use Sequence Names from File<td>When the input sequence will not be assembled, 
 this option may be checked to use
 the original sequence names, though the names <b>must</b> be composed of characters, digits or "_", and may not
 be greater than 25 characters.
-<tr><td valign="top">Skip Assembly<td>When the input sequences will be assembled, uncheck this box. The Options may be used
+<tr><td valign="top">Skip Assembly<td>When the input sequences will be assembled, uncheck this box. The "Options"
+panel may be used
 to define details of the assembly, though the default parameters are well-tested.
-<tr><td  valign="top">#CPU<td>For assembly, if your machine has more than one CPU (thread/processor),
+<tr><td  valign="top">#CPU<td>For assembly and annotation, if your machine has more than one CPU (thread/processor),
 make sure that the "#CPUs" is set to the number in order to speed up processing.
 </table>
 
-The TPM (Transcripts Per Kilobase Million) is computed.
+The TPM (Transcripts Per Kilobase Million) is computed in this step.
 To compute RPKM (Reads Per Kilobase Million) instead, see 'execAssm -h'.
 
 
@@ -116,7 +116,7 @@ use the interface <b>runAS</b>.
 If you use databases other then UniProt, you need to make sure there that the descriptor line
 for each sequence (i.e. > lines) is formated correctly. Genbank formats are accepted,
 plus a generic format (see the online Annotation Setup).
-<p>You have a choice of using <tt>blast</tt>, <tt>usearch</tt> or <tt>diamond</tt> for searching the database sequences
+<p>You have a choice of using <tt>blast</tt> or <tt>diamond</tt> for searching the database sequences
 against an annoDB. See <tt>HOSTS.cfg</tt> for further information on locations of these programs.
 You can either request
 a particular search program when you add an annoDB, or use the default "TCW Select" to let
@@ -134,7 +134,7 @@ hit files.
 
 <p>Annotation Interface:  a few details.
 <ul>
-<li>Import AnnoDBs: you may select the TCW.anno file created in <tt>runAS</tt>, or a sTCW.cfg
+<li>Import AnnoDBs: you may select the TCW.anno file created in <b>runAS</b>, or a sTCW.cfg
 file of another project; in both cases, the UniProts listed in the file will be used to populate
 the annoDB table.
 <li>Click a line once to selected it, than a second time to check or un-check the box.
@@ -145,7 +145,7 @@ to their importance, where they will be shown in that order in the <tt>viewSingl
 <p>Add to annotation: After the initial annotation, you can add additional annoDBs, as follows:
 <ol>
 <li>Uncheck all annoDBs that have been added (they are in italics). You need to click the
-line twice, once to highlight it and once to uncheck.
+line twice - once to highlight it and once to uncheck.
 <li>Add any additional annoDBs and check them.
 <li>Select in "Options" if you want to add similarity pairs.
 <li>Execute "Step 3: Annotate".
@@ -172,7 +172,7 @@ Execute the ORF finder on all sequences. This must be executed after "Step 2: In
 <h4>GO only</h4>
 If "Annotate Sequences" was already run and you just want to add GO annotation to it, or update previous
 GO annotation, use this function. TCW GO annotation requires a reference mySQL "GO database"
-which must be created before hand using <tt>runAS</tt> or the supplied perl scripts. 
+which must be created before hand using <b>runAS</b> or the supplied perl scripts. 
 Note, this also adds Pfam, KEGG, Interpro and EC for the UniProts hit in your database. 
 
 <h3>Options along the bottom</h3>
@@ -197,7 +197,7 @@ project files.
 but some errors are not found until "Load Data" is executed.
 If that happens, remove the mySQL database, fix the error and restart.
 <li>If something appears wrong and you do not know how to fix it, you can remove
-the /projects/&lt;your project name&gt;/LIB.cfg file and restart. 
+the /projects/<i>project-name</i>/LIB.cfg file and restart. 
 <li>If any process seems to "hang", i.e. no output to terminal for a very long time,
 either close the runSingleTCW window or ctrl-C. Then just restart. NOTE: on Macs,
 pop-up windows get hidden easy and freeze the main singleTCW window until you acknowledge

@@ -97,6 +97,42 @@ public class PairStats {
 	}
 	public ScoreCDS getScoreObj() { return scoreObj;}
 	
+	
+	/***************************************************************
+	 * Writes for file.
+	 * Called from Pairwise.saveStatsAndKaKsWrite
+	 */
+	private void kaksWrite() {
+		try {
+			if (!curPair.goodCDS || !curPair.goodKaKs) return;
+			
+			kaksNoGap();
+			
+			if (!curPair.goodCDS || !curPair.goodKaKs) return; // CAS305 
+			
+			incKaKs++; 
+			if (outKaKs==null || incKaKs==NRECORDs) {
+				incKaKs=0;
+				
+				String in = Globals.KaKsInPrefix + fileCnt + Globals.KaKsInSuffix;
+				String ot = Globals.KaKsOutPrefix + fileCnt + Globals.KaKsOutSuffix;
+				outKsKsCmd.write(kaksEx + " -i " + ot + " -o " + in + " -m YN &\n");
+				outKsKsCmd.flush();
+				fileCnt++;
+				
+				if (outKaKs!=null) outKaKs.close();
+				String file = dirKaKs + "/" + ot;
+				
+				outKaKs = new BufferedWriter(new FileWriter(file)) ;
+			}
+			outKaKs.write(curPair.seqName[0] +  ":" + curPair.seqName[1] + "\n");
+			outKaKs.write(curPair.alignCDSnoGap[0] + "\n");
+			outKaKs.write(curPair.alignCDSnoGap[1] + "\n\n");
+			outKaKs.flush();
+			cntWrite++;
+		}
+		catch(Exception e) {ErrorReport.reportError(e, "Error writing KaKs files");}
+	}
 	/*******************************************************************
 	 * create gapFree for KaKs: go through 3 at time, append codons if no gap in either codon
 	 * so as to preserve the alignment
@@ -124,38 +160,6 @@ public class PairStats {
 			curPair.goodKaKs=curPair.goodCDS=false;
 		}			
 	}
-	/***************************************************************/
-	private void kaksWrite() {
-		try {
-			if (!curPair.goodCDS || !curPair.goodKaKs) return;
-			
-			kaksNoGap();
-			
-			incKaKs++; 
-			if (outKaKs==null || incKaKs==NRECORDs) {
-				incKaKs=0;
-				
-				String in = Globals.KaKsInPrefix + fileCnt + Globals.KaKsInSuffix;
-				String ot = Globals.KaKsOutPrefix + fileCnt + Globals.KaKsOutSuffix;
-				outKsKsCmd.write(kaksEx + " -i " + ot + " -o " + in + " -m YN &\n");
-				outKsKsCmd.flush();
-				fileCnt++;
-				
-				if (outKaKs!=null) outKaKs.close();
-				String file = dirKaKs + "/" + ot;
-				
-				//Out.PrtSpMsg(2, "File " + ot + "; written #" + cntWrite + "; aligned #" + cntAligned );
-				outKaKs = new BufferedWriter(new FileWriter(file)) ;
-			}
-			outKaKs.write(curPair.seqName[0] +  ":" + curPair.seqName[1] + "\n");
-			outKaKs.write(curPair.alignCDSnoGap[0] + "\n");
-			outKaKs.write(curPair.alignCDSnoGap[1] + "\n\n");
-			outKaKs.flush();
-			cntWrite++;
-		}
-		catch(Exception e) {ErrorReport.reportError(e, "Error writing KaKs files");}
-	}
-	
 	/*********************************************************
 	 * Only load pairs that have not already been aligned
 	 * The sequence gets loaded in PairAlignData.

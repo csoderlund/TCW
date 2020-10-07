@@ -43,7 +43,7 @@ public class DoBlast {
 	 * 		If ReUse, only print warnings
 	 */
 	public boolean testFilesAndcreateOutFiles() {
-		Out.Print("\nChecking blast and annoDB fasta files");
+		Out.Print("\nChecking search hit files and annoDB fasta files");
 
 		// check to see if the databases have been processed before
 		if (!testDatabaseTable()) return false;
@@ -164,7 +164,7 @@ public class DoBlast {
 			if (testUseExistingFile(-2, tselfBlastFile))  doTSelfBlast = false;
 		}
 		if (!(doSelfBlast || doTSelfBlast|| doDBblast))  // using existing files
-			Out.PrtSpMsg(0,"No blasts to be executed - complete check files\n");
+			Out.PrtSpMsg(0,"No searches to be executed - complete check files\n");
 		else
 			Out.PrtSpMsg(0,"Complete check files\n");
 		return true;

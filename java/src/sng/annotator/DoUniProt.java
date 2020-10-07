@@ -23,68 +23,20 @@ import util.methods.ErrorReport;
 import util.methods.FileHelpers;
 import util.methods.Out;
 import util.methods.Static;
+import util.methods.BestAnno;
 
 public class DoUniProt 
 {
-	static final boolean debug =  false;
-	static boolean bUseSP = false; // Best Anno only replaces 'uncharcterized'unless true
-	static final int COMMIT = 10000; 
-	static final int maxHitSeq = 32000;
-	static final String badHitFile = BlastHitData.badHits;
-	static final int maxHitsPerAnno = 25;
-	static final double useSP = 0.80;
-	static final double useEV = 0.10;
-	static double DLOW = 1E-308; // 1E-180 for 32-bit - not checked
+	private boolean bUseSP = false; // Best Anno only replaces 'uncharcterized'unless true
+	private boolean bRmECO = true;  // Remove {ECO... string
 	
-	// bunch of heuristic to figure out non-informative names
-	// des is lowercase
-	private boolean goodDescript (String des) {
-		des = des.replace("_", " ");
-		if (des.contains("uncharacterized protein") || 
-	    		des.contains("putative uncharacterized") || 
-	    		des.contains("hypothetical protein") || 
-	    		des.contains("expressed protein") || 
-	    		des.contains("predicted protein") ||
-	    		des.contains("whole genome shotgun") ||
-	    		des.contains("scaffold") || 
-	    		des.equals("unknown") || 
-	    		des.equals("unk") || 
-	    		des.equals("orf"))
-	    	{
-	    	        return false;
-	    	}
-		
-		int ix = des.indexOf("{ec");  
-		if (ix != -1) {
-			String s = des.substring(0,ix).trim();
-			if (s.length() > 3) des = s;
-		}
-		String [] words = des.split(" ");
-		if (words.length > 2) return true; 
-
-		// many are just a 'name' or 'name protein' or 'name (fragment)' or 
-		// If name has lots of numbers, seems to be meaningless
-		// Names like MET_1 will pass, names like GK1599 will not
-		// Rules: if over 3 digits in first word - name
-		//		  if more digits than letters - name
-		boolean isName = false;
-		int cntDigit=0;
-		for (int i=0; i < words[0].length(); i++) {
-			char c = words[0].charAt(i);
-			if (Character.isDigit(c)) cntDigit++;
-		}
-		if (cntDigit>3) isName=true;
-		else {
-			int wl = words[0].length();
-			double x = (cntDigit > 0) ? ((double) wl/ (double) cntDigit) : 0;
-			if (wl <= 5 && x > 1) isName = true;
-		}
-		if (words.length == 1 && isName) return false;
-		if (isName &&  des.endsWith("protein")) return false;
-		if (isName &&  des.endsWith("(fragment)")) return false;
-		if (isName &&  des.endsWith("partial")) return false; 
-		return true;
-	}
+	private final int COMMIT = 10000; 
+	private final int maxHitSeq = 32000;
+	private final String badHitFile = BlastHitData.badHits;
+	private final int maxHitsPerAnno = 25;
+	private final double useSP = 0.80;
+	private final double useEV = 0.10;
+	private final double DLOW = 1E-308; // 1E-180 for 32-bit - not checked
 	
 	public DoUniProt () {}
 
@@ -105,6 +57,11 @@ public class DoUniProt
      **/
 	public boolean processAllDBhitFiles(boolean isAA, TreeMap<String, Integer> seqs) 
 	{
+		if (bUseSP) Out.PrtSpMsg(1, "Best Anno - SwissProt preference");
+		if (bRmECO) Out.PrtSpMsg(1, "Remove {ECO...} from UniProt descripts");
+		else Out.PrtSpMsg(1, "Do NOT remove {ECO...} from UniProt descripts");
+		Out.PrtSpMsg(1,"");
+		
 	 	long totalTime = Out.getTime();
 	 	seqMap  = seqs;
 	 	isAAstcwDB = isAA;
@@ -219,34 +176,34 @@ public class DoUniProt
        	int nHitNum=0, cntUniqueExists=0, noSeq=0;
        	String curSeqName="", curHitName="";
        	nAnnoSeq = nTotalHits = 0;
-	    	long time = Out.getTime();
-				
-	    	String file = hitFile.toString();
-	    	file = file.substring(file.lastIndexOf("/")+1);
-	    	Out.PrtSpMsg(2,"DB#" + dbNum + " hits: " + file);
+    	long time = Out.getTime();
 			
-	    	BufferedReader reader = null;
-	    	String line="";
-	    	try {
-	    		mDB.renew(); // Creates a new database connection -- it was timing out...
-	    		reader = FileHelpers.openGZIP(hitFile);
-	    		if (reader==null) return false;
-	    		
-	    		LineParser lp = new LineParser();
-	    		int cntHits=0, cntPrt=0;
-	    		
-	    		while ((line = reader.readLine()) != null) {
-	    			if ( line.length() == 0 || line.charAt(0) == '#' ) continue;  			
-			    	nHitNum++; cntPrt++;
+    	String file = hitFile.toString();
+    	file = file.substring(file.lastIndexOf("/")+1);
+    	Out.PrtSpMsg(2,"DB#" + dbNum + " hits: " + file);
+		
+    	BufferedReader reader = null;
+    	String line="";
+    	try {
+    		mDB.renew(); // Creates a new database connection -- it was timing out...
+    		reader = FileHelpers.openGZIP(hitFile);
+    		if (reader==null) return false;
+    		
+    		LineParser lp = new LineParser();
+    		int cntHits=0, cntPrt=0;
+    		
+    		while ((line = reader.readLine()) != null) {
+    			if ( line.length() == 0 || line.charAt(0) == '#' ) continue;  			
+		    	nHitNum++; cntPrt++;
 		        if (cntPrt == COMMIT) {     
-		        		cntPrt=0;
+		        	cntPrt=0;
 		          	Out.r("      Annotated sequences " + nAnnoSeq + ", total hits   " + 
 		          		nTotalHits + ", HSPs   " + nHitNum);
 		        }	   
-	    			String[] tokens = line.split("\t");
-	    			if (tokens == null || tokens.length < 11) continue;
-	    			
-		    		String newSeqName = tokens[0];
+    			String[] tokens = line.split("\t");
+    			if (tokens == null || tokens.length < 11) continue;
+    			
+	    		String newSeqName = tokens[0];
 				if (!curSeqName.equals(newSeqName)) { // new sequence
 					
 					if (! curSeqName.equals("")) { // process previous
@@ -267,11 +224,11 @@ public class DoUniProt
 			        curSeqData.clearAnno();
 			        curSeqData = CoreDB.loadContigData(mDB, curSeqName); 
 			        if (curSeqData!=null) { 
-			        		curSeqData.setContigID(curSeqName); 
-			        		curSeqData.setCTGID(seqMap.get(curSeqName));
+			        	curSeqData.setContigID(curSeqName); 
+			        	curSeqData.setCTGID(seqMap.get(curSeqName));
 			        }
 			        else {
-			        		if (noSeq==0) Out.PrtError("No sequence '" + curSeqName + "' in database; no further such error messages will be printed");
+			        	if (noSeq==0) Out.PrtError("No sequence '" + curSeqName + "' in database; no further such error messages will be printed");
 						noSeq++;
 			        }
 			        cntHits=0;
@@ -290,30 +247,31 @@ public class DoUniProt
 				if (cntHits>maxHitsPerAnno) { 
 					continue;
 				}
-			    	// create list of hits for current contig
-			    	hitData = new BlastHitData (isAAannoDB, line);
-			    	
-			    	// if HIT id already in database, then this is being run again
-			    	if (hitsInDB.contains(hitData.getHitID())) {
-			    		cntUniqueExists++;
-			    	}
-			    	// hit is past the 32k limit so no use saving
-			    	else if (hitData.badHitData(maxHitSeq, minBitScore)) {
-			    		nTotalBadHits++;
-			    	}
-			    	else {
-			    		hitData.setCTGID(curSeqData.getCTGID());	   
-			    		curHitDataForSeq.add(hitData);	
-			    	}
-		    	}  // end loop through hit tab file
-	    		//-----------------------------------------------------------//
-	    		if (! curSeqName.equals("")) { // process last contig
+		    	// create list of hits for current contig
+		    	hitData = new BlastHitData (isAAannoDB, line);
+		    	
+		    	// if HIT id already in database, then this is being run again
+		    	if (hitsInDB.contains(hitData.getHitID())) {
+		    		cntUniqueExists++;
+		    	}
+		    	// hit is past the 32k limit so no use saving
+		    	else if (hitData.badHitData(maxHitSeq, minBitScore)) {
+		    		nTotalBadHits++;
+		    	}
+		    	else {
+		    		hitData.setCTGID(curSeqData.getCTGID());	   
+		    		curHitDataForSeq.add(hitData);	
+		    	}
+	    	}  // end loop through hit tab file
+    		
+	    	//-----------------------------------------------------------//
+	    	if (! curSeqName.equals("")) { // process last contig
 	    			if (curHitDataForSeq.size() > 0) {// may have had bad hit
 					addHitDataForCtgToDB(); 
 					curHitDataForSeq.clear();
 				}
-	    		}
-	    		if ( reader != null ) reader.close();
+	    	}
+	    	if ( reader != null ) reader.close();
 		
 			System.err.print("                                                                         \r");
 			if (noSeq>0) // this never occurs - founds and printed elsewhere
@@ -329,9 +287,9 @@ public class DoUniProt
 				if (nTotalHits > 0) 
 					Out.PrtSpMsg(3, nTotalHits + " " + dbLabelType +  "-sequence additional pairs ");
 			}
-	    	}
+	    }
         catch ( Throwable err ) {
-        		pRC=false;
+        	pRC=false;
 			ErrorReport.reportError(err, "Annotator - reading DB hit file\nLine: " + line);
 			return false;
         }       
@@ -480,18 +438,18 @@ public class DoUniProt
     private void Step1c_addUniqueFromFastaFile(int ix)  
     {
         int cnt_add=0, read=0, failParse=0, cntPrt=0;
-        	String hitID="", hitSeq = "", line=null;
-        	LineParser lp = new LineParser();
+        String hitID="", hitSeq = "", line=null;
+        LineParser lp = new LineParser();
        	BufferedReader reader = null;
        	long time = Out.getTime();
        	int total = hitsAddToDB.size();
 		Out.PrtSpMsg(2,"DB#" + dbNum + " descriptions: " + hitObj.getDBfastaNoPath(ix) );
-        	try {
-        		mDB.renew();
-        		boolean addHit = false;
-        	
-        		reader = FileHelpers.openGZIP(hitObj.getDBfastaFile(ix));
-        		if (reader==null) return;
+        try {
+    		mDB.renew();
+    		boolean addHit = false;
+    	
+    		reader = FileHelpers.openGZIP(hitObj.getDBfastaFile(ix));
+    		if (reader==null) return;
         		
 			while((line = reader.readLine()) != null) {	
 				line = line.trim();
@@ -514,17 +472,18 @@ public class DoUniProt
 					
 				// Add previous 
 				if (addHit) {
+					String desc = (bRmECO) ? BestAnno.rmECO(lp.getDescription()) : lp.getDescription();
 					saveDBhitUnique(DBID, isAAannoDB, dbType, dbTaxo, hitID, 
-						lp.getOtherID(), lp.getDescription(), lp.getSpecies(), hitSeq, 0);
+						lp.getOtherID(), desc, lp.getSpecies(), hitSeq, 0);
 					cnt_add++;
 				}
 					
 				// start the next
 				hitSeq = "";	
 				if (!lp.parseFasta(line)) {
-		        		Out.PrtWarn("Cannot parse line: " + line);
-		        		failParse++;
-		        		if (failParse>20) Out.die("Too many parse errors");
+		        	Out.PrtWarn("Cannot parse line: " + line);
+		        	failParse++;
+		        	if (failParse>20) Out.die("Too many parse errors");
 					addHit = false;
 					continue;
 				}
@@ -546,8 +505,9 @@ public class DoUniProt
 			}
 			// add last
 			if (addHit) { 
+				String desc = (bRmECO) ? BestAnno.rmECO(lp.getDescription()) : lp.getDescription(); // CAS305
 				saveDBhitUnique(DBID, isAAannoDB, dbType, dbTaxo, lp.getHitID(), lp.getOtherID(), 
-						lp.getDescription(), lp.getSpecies(), hitSeq, 0);
+					desc, lp.getSpecies(), hitSeq, 0);
 				cnt_add++;
 			}
 			if ( reader != null ) reader.close();
@@ -1092,7 +1052,7 @@ public class DoUniProt
             ResultSet rset = mDB.executeQuery( strQ );
             while( rset.next() )
             {	
-            		HitData hit = new HitData ();
+            	HitData hit = new HitData ();
                 hit.DBid = rset.getInt(1);
                 hit.hitName = rset.getString(2);
                 hit.desc = rset.getString(3).trim().toLowerCase();
@@ -1108,7 +1068,7 @@ public class DoUniProt
 		        hit.rank = rset.getInt(12);
 		        hit.isAAhit = rset.getInt(13);  
 		        
-		        hit.isGood = goodDescript(hit.desc);
+		        hit.isGood = BestAnno.descIsGood(hit.desc); // CAS305 moved to BestAnno
 		        if (hit.isGood && hit.dbtype.equals("nt")) hit.isGood=false; 
 		        /******************************************************
 		         * RCOORDS
@@ -1188,6 +1148,7 @@ public class DoUniProt
     /******************* Instance variables ****************************/
 	public void setFlankingRegion(int f) {flank = f; System.out.println("flanking " + flank);} // default 30
 	public void setSwissProtPref(int b) {if (b==0) bUseSP=false; else bUseSP=true;}
+	public void setRemoveECO(int b) {if (b==0) bRmECO=false; else bRmECO=true;}
 	public void setMinBitScore(int m) {minBitScore = m; } // default 0
 	
 	private class Species {

@@ -25,6 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import util.methods.ErrorReport;
+import util.methods.Out;
 import util.methods.Static;
 import util.ui.MenuMapper;
 import util.ui.UserPrompt;
@@ -38,10 +39,24 @@ public class AlignPairViewNPanel extends JPanel {
 	private static final long serialVersionUID = -2090028995232770402L;
 	private static final String helpHTML = "html/viewMultiTCW/PairAlign.html";
 	
-	public AlignPairViewNPanel(MTCWFrame parentFrame, String [] members, boolean isNT) {
+	public AlignPairViewNPanel(MTCWFrame parentFrame, String [] members, int alignType) {
 		theParentFrame = parentFrame;
 		numSeqs=members.length;
-		this.isNT = isNT;
+		this.isNT = (alignType==PairAlignData.AlignNT) ? true : false;
+		this.alignType = alignType;
+		
+		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+		setBackground(theParentFrame.getSettings().getFrameSettings().getBGColor());
+	
+		buildAlignments(members);
+	}
+	// CAS305 for align consensus hit to all members
+	public AlignPairViewNPanel(MTCWFrame parentFrame, String [] members, int alignType, String hitStr) {
+		theParentFrame = parentFrame;
+		numSeqs=members.length;
+		this.isNT = false;
+		this.alignType = alignType;
+		this.consensusHitID = hitStr;
 		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setBackground(theParentFrame.getSettings().getFrameSettings().getBGColor());
@@ -125,7 +140,7 @@ public class AlignPairViewNPanel extends JPanel {
 		btnShowHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				UserPrompt.displayHTMLResourceHelp(theParentFrame, 
-						"Sequence table", helpHTML);
+						"Pairwise...", helpHTML);
 			}
 		});
 		theRow.add(btnShowHelp);
@@ -160,7 +175,10 @@ public class AlignPairViewNPanel extends JPanel {
 					try {
 						bRunThread = true;
 						
-						boolean rc = loadPairAndAlign(theMembers);
+						boolean rc;
+						if (alignType>=PairAlignData.AlignHIT0_AA)
+							 rc = loadSeqAndAlign(theMembers);
+						else rc = loadPairAndAlign(theMembers);
 						if (rc) {
 							createButtonPanel();
 							createMainPanel();
@@ -193,8 +211,8 @@ public class AlignPairViewNPanel extends JPanel {
 					seqIDs[1] = members[y];
 					cnt++;
 					theParentFrame.setStatus(msg + " aligning " + cnt + " of " + max);
-					int type = (isNT) ? PairAlignData.AlignNT : PairAlignData.AlignAA;
-					align = new PairAlignData(mDB, seqIDs,  type);
+					
+					align = new PairAlignData(mDB, seqIDs,  alignType);
 					if (!align.isGood()) {
 						UserPrompt.showWarn(seqIDs[0] + " and " + seqIDs[1] + " may not be aligned correctly");
 					}
@@ -204,7 +222,7 @@ public class AlignPairViewNPanel extends JPanel {
 			theParentFrame.setStatus(msg + " alignment is done - now generate display.....");
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Aligning pairs for Member table");}
-		//Sort by OLP score %
+		//Sort by 2nd sequence
 		Collections.sort(results);
 		theAlignData = results.toArray(new PairAlignData[results.size()]);
 		
@@ -217,7 +235,42 @@ public class AlignPairViewNPanel extends JPanel {
 		theParentFrame.setStatus("");
 		return true;
 	}
-	
+	private boolean loadSeqAndAlign(String [] members) { // CAS305 added for Seq->Hit
+		Vector<PairAlignData> results = new Vector<PairAlignData> ();
+		String [] seqIDs = new String [2];
+		PairAlignData align;
+		try {
+			int cnt=0, max=members.length;
+			DBConn mDB = theParentFrame.getDBConnection();
+			for(int x=0; x<members.length && bRunThread; x++) {
+				seqIDs[0] = members[x];
+				seqIDs[1] = consensusHitID;
+				cnt++;
+				theParentFrame.setStatus("Seq-Hit aligning " + cnt + " of " + max);
+				
+				align = new PairAlignData(mDB, seqIDs,  alignType);
+				if (!align.isGood()) {
+					UserPrompt.showWarn(seqIDs[0] + " and " + seqIDs[1] + " may not be aligned correctly");
+					return false;
+				}
+				results.add(align);
+			}
+			theParentFrame.setStatus("Seq-Hit alignment is done - now generate display.....");
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "Aligning seq-hits for Member table");}
+		//Sort by 2nd seqName
+		Collections.sort(results);
+		theAlignData = results.toArray(new PairAlignData[results.size()]);
+		
+		theGraphicPanels = new AlignPairNPanel[theAlignData.length];
+		for(int x=0; x<theGraphicPanels.length; x++) {
+			theGraphicPanels[x] = new AlignPairNPanel(theParentFrame, theAlignData[x], 
+					10, 10, 10, 10, isNT);
+			theGraphicPanels[x].setAlignmentY(Component.LEFT_ALIGNMENT);
+		}
+		theParentFrame.setStatus("");
+		return true;
+	}
 	private void unselectAll() {
 		for(int x=0; x<theGraphicPanels.length; x++) {
 			theGraphicPanels[x].selectNone();
@@ -362,6 +415,8 @@ public class AlignPairViewNPanel extends JPanel {
 		setButtonsEnabled();
 	}
 	
+	private String consensusHitID=null;
+	private int alignType=0;
 	private boolean isNT=true;
 	private boolean isShowGraphic=true;
 	

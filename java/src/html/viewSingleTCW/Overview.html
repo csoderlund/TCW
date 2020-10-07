@@ -157,7 +157,7 @@ The only number reproducible is the GC Content, which is the %GC over the entire
 The following sections may not exist if the input had no count files or the DE methods
 were not executed.
 <table border=1>
-<tr><td>RPKM
+<tr><td>TPM*
 	<td>Filter: select Condition under Exclude; set "At Most" to 1.99. 
 	<td>This will continue using 4.99, 9.99, etc, where the previous results are
 subtracted from the current. The results are for intervals &gt;=N to &lt;M.
@@ -169,6 +169,7 @@ subtracted from the current. The results are for intervals &gt;=N to &lt;M.
 	e.g. 0.05.
 	<td>These counts are accumulative.
 </table>
+* If "RPKM" is at the top of the Overview instead of "TPM", then RPKM was computed instead of TPM.
 
 <h2>SEQUENCES</h2>
 If the sequences (e.g. ESTs) have been assembled, there are statistics on buried,

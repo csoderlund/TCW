@@ -22,6 +22,7 @@ import javax.swing.JOptionPane;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -110,6 +111,9 @@ public class AnnoOptionsPanel extends JPanel {
 		if (annoObj.getSPpref().equals("1")) chkSPpref.setSelected(true);
 		else chkSPpref.setSelected(false);
 		
+		if (annoObj.getRmECO().equals("1")) chkRmECO.setSelected(true);
+		else chkRmECO.setSelected(false);
+		
 		// ORF
 		
 		if (annoObj.getORFaltStart().equals("1")) chkAltStart.setSelected(true);
@@ -129,35 +133,39 @@ public class AnnoOptionsPanel extends JPanel {
 			setTrain(false, true, false);
 		}
 		
-		// Similarity
+		// Similarity; file=null not set; file="" runblast; file=xxx use file
 		file = annoObj.getSelfBlast();
 		if(file==null) {
+			chkNTself.setSelected(false);
 			setSim(false, false);
 		}
 		else {
+			chkNTself.setSelected(true);
 			if (file.equals("")) {
 				setSim(true, false);
 				String opt = annoObj.getSelfBlastParams();
-				if (opt!=null && !opt.equals("")) txtSelfBlastArgs.setText(opt);
+				if (opt!=null && !opt.equals("")) txtNTargs.setText(opt);
 			}
 			else {
 				setSim(false, true);
-				txtSelfBlastfile.setText(file);
+				txtNTfile.setText(file);
 			}
 		}
 		file = annoObj.getTSelfBlast();
 		if(file==null) {
+			chkAAself.setSelected(false);
 			setTSim(false, false);
 		}
 		else {
+			chkAAself.setSelected(true);
 			if (file.equals("")) {
 				setTSim(true, false);
 				String opt = annoObj.getTSelfBlastParams();
-				if (!opt.equals("")) txtTSelfBlastArgs.setText(opt);
+				if (!opt.equals("")) txtAAargs.setText(opt);
 			}
 			else {
 				setTSim(false, true);
-				txtTSelfBlastfile.setText(file);
+				txtAAfile.setText(file);
 			}
 		}
 		txtPairsLimit.setText("" + annoObj.getPairsLimit()); 
@@ -180,15 +188,15 @@ public class AnnoOptionsPanel extends JPanel {
 		txtTrainCDSfile.setEnabled(!isProteinDB);
 		
 		// Sim
-		chkDoSelfBlast.setEnabled(!isProteinDB);
-		chkUseSelfBlast.setEnabled(!isProteinDB);
-		txtSelfBlastfile.setEnabled(!isProteinDB);
-		txtSelfBlastArgs.setEnabled(!isProteinDB);
+		chkNTexec.setEnabled(!isProteinDB);
+		chkNTfile.setEnabled(!isProteinDB);
+		txtNTfile.setEnabled(!isProteinDB);
+		txtNTargs.setEnabled(!isProteinDB);
 		
-		chkDoTSelfBlast.setEnabled(!isProteinDB);
-		chkUseTSelfBlast.setEnabled(!isProteinDB);
-		txtTSelfBlastfile.setEnabled(!isProteinDB);
-		txtTSelfBlastArgs.setEnabled(!isProteinDB);
+		chkAAexec.setEnabled(!isProteinDB);
+		chkAAfile.setEnabled(!isProteinDB);
+		txtAAfile.setEnabled(!isProteinDB);
+		txtAAargs.setEnabled(!isProteinDB);
 		txtPairsLimit.setEnabled(!isProteinDB);
 		
 		if (isProteinDB) return; /***************/
@@ -210,11 +218,11 @@ public class AnnoOptionsPanel extends JPanel {
 		txtTrainCDSfile.setText(""); 
 		
 		// Sim
-		setSim(false, false);
-		setTSim(false, false);
+		chkNTself.setSelected(false);  setSim(true, false);
+		chkAAself.setSelected(false); setTSim(true, false);
 		txtPairsLimit.setText(curManData.getAnnoObj().getPairsLimit() + "");
-		txtSelfBlastArgs.setText(BlastArgs.getBlastnOptions());
-		txtTSelfBlastArgs.setText(BlastArgs.getTblastxOptions());
+		txtNTargs.setText(BlastArgs.getBlastnOptions());
+		txtAAargs.setText(BlastArgs.getTblastxOptions());
 	}
 	private boolean keep() {
 		curManData.setGODB("");	
@@ -235,6 +243,10 @@ public class AnnoOptionsPanel extends JPanel {
 		
 		if (chkSPpref.isSelected()) annoObj.setSPpref("1");
 		else annoObj.setSPpref("0");
+		
+		if (chkRmECO.isSelected()) annoObj.setRmECO("1"); 
+		else annoObj.setRmECO("0");
+		
 		
 		if (chkAltStart.isSelected()) annoObj.setORFaltStart("1");
 		else annoObj.setORFaltStart("0");
@@ -263,28 +275,31 @@ public class AnnoOptionsPanel extends JPanel {
 		boolean bSelf=false;
 		annoObj.setSelfBlast(null);
 		annoObj.setSelfBlastParams(null);
-		if(chkDoSelfBlast.isSelected()) {
-			annoObj.setSelfBlast("");
-			annoObj.setSelfBlastParams(txtSelfBlastArgs.getText().replace('\n', ' '));
-			bSelf=true;
+		if (chkNTself.isSelected()) {
+			if(chkNTexec.isSelected()) {
+				annoObj.setSelfBlast("");
+				annoObj.setSelfBlastParams(txtNTargs.getText().replace('\n', ' '));
+				bSelf=true;
+			}
+			else if (chkNTfile.isSelected()) {
+				annoObj.setSelfBlast(txtNTfile.getText());
+				annoObj.setSelfBlastParams("");
+				bSelf=true;
+			}
 		}
-		else if (chkUseSelfBlast.isSelected()) {
-			annoObj.setSelfBlast(txtSelfBlastfile.getText());
-			annoObj.setSelfBlastParams("");
-			bSelf=true;
-		}
-		
 		annoObj.setTSelfBlast(null);
 		annoObj.setTSelfBlastParams(null);
-		if(chkDoTSelfBlast.isSelected()) {
-			annoObj.setTSelfBlast("");
-			annoObj.setTSelfBlastParams(txtTSelfBlastArgs.getText().replace('\n', ' '));
-			bSelf=true;
-		}
-		else if (chkUseTSelfBlast.isSelected()) {
-			annoObj.setTSelfBlast(txtTSelfBlastfile.getText());
-			annoObj.setTSelfBlastParams("");
-			bSelf=true;
+		if (chkAAself.isSelected()) {
+			if(chkAAexec.isSelected()) {
+				annoObj.setTSelfBlast("");
+				annoObj.setTSelfBlastParams(txtAAargs.getText().replace('\n', ' '));
+				bSelf=true;
+			}
+			else if (chkAAfile.isSelected()) {
+				annoObj.setTSelfBlast(txtAAfile.getText());
+				annoObj.setTSelfBlastParams("");
+				bSelf=true;
+			}
 		}
 		if (bSelf) {
 			x = txtPairsLimit.getText();
@@ -510,85 +525,110 @@ public class AnnoOptionsPanel extends JPanel {
 		innerPanel.add(Box.createVerticalStrut(10));
 
 		JPanel row = Static.createRowPanel();
-		row.add(new JLabel("Nucleotide Self Blast (Megablast or blastn)"));
+		chkNTself = Static.createCheckBox("Nucleotide Self Blast (Megablast or blastn)", false);
+		chkNTself.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				setSim(chkNTexec.isSelected(), false);
+			}	
+		});
+		row.add(chkNTself);
 		innerPanel.add(row);
 		innerPanel.add(Box.createVerticalStrut(5));
 		
 		row = Static.createRowPanel();	
-		chkDoSelfBlast = new JRadioButton("Execute");
-		chkDoSelfBlast.setBackground(Globals.BGCOLOR);
-		chkDoSelfBlast.addActionListener(new ActionListener() {
+		row.add(Box.createHorizontalStrut(INDENT_RADIO));
+		chkNTexec = new JRadioButton("Execute", true);
+		chkNTexec.setBackground(Globals.BGCOLOR);
+		chkNTexec.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				setSim(chkDoSelfBlast.isSelected(), false);
+				setSim(chkNTexec.isSelected(), false);
 			}	
 		});
-		row.add(chkDoSelfBlast);
+		row.add(chkNTexec);
 		
-		txtSelfBlastArgs = new JTextArea(1, BLAST_ARGS_TEXTFIELD_WIDTH);
-		txtSelfBlastArgs.setText(BlastArgs.getBlastnOptions());
-		txtSelfBlastArgs.setLineWrap(true);
-		txtSelfBlastArgs.setWrapStyleWord(true);
-		JScrollPane tempPane = new JScrollPane(txtSelfBlastArgs);
+		txtNTargs = new JTextArea(1, BLAST_ARGS_TEXTFIELD_WIDTH);
+		txtNTargs.setText(BlastArgs.getBlastnOptions());
+		txtNTargs.setLineWrap(true);
+		txtNTargs.setWrapStyleWord(true);
+		JScrollPane tempPane = new JScrollPane(txtNTargs);
 		row.add(tempPane);	
 		
 		innerPanel.add(row);
 		innerPanel.add(Box.createVerticalStrut(5));
 		
 		row = Static.createRowPanel();
-		chkUseSelfBlast = new JRadioButton("Or use existing file");
-		chkUseSelfBlast.setBackground(Globals.BGCOLOR);
-		chkUseSelfBlast.addActionListener(new ActionListener() {
+		row.add(Box.createHorizontalStrut(INDENT_RADIO));
+		chkNTfile = new JRadioButton("Or use existing file", false);
+		chkNTfile.setBackground(Globals.BGCOLOR);
+		chkNTfile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				setSim(false, chkUseSelfBlast.isSelected());
+				setSim(false, chkNTfile.isSelected());
 			}	
 		});
-		row.add(chkUseSelfBlast);
+		row.add(chkNTfile);
 		row.add(Box.createHorizontalStrut(5));
-		txtSelfBlastfile = new FileTextField(theParentFrame, FileTextField.PROJ, FileTextField.TAB);
-		txtSelfBlastfile.setMaximumSize(txtSelfBlastfile.getPreferredSize());
-		row.add(txtSelfBlastfile);
+		txtNTfile = new FileTextField(theParentFrame, FileTextField.PROJ, FileTextField.TAB);
+		txtNTfile.setMaximumSize(txtNTfile.getPreferredSize());
+		row.add(txtNTfile);
 		
 		innerPanel.add(row);
 		innerPanel.add(Box.createVerticalStrut(10));
-				
-		///
+			
+		ButtonGroup g1 = new ButtonGroup();
+		g1.add(chkNTexec);
+		g1.add(chkNTfile);
+		
+		/// Tblast
 		row = Static.createRowPanel();
-		row.add(new JLabel("Translated Self Blast (tblastx)"));
+		chkAAself = Static.createCheckBox("Translated Self Blast (tblastx)", false);
+		chkAAself.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				setTSim(chkAAexec.isSelected(), false);
+			}	
+		});
+		row.add(chkAAself);
 		innerPanel.add(row);
 		innerPanel.add(Box.createVerticalStrut(5));
 		
 		row = Static.createRowPanel();	
-		chkDoTSelfBlast = new JRadioButton("Execute");
-		chkDoTSelfBlast.setBackground(Globals.BGCOLOR);
-		chkDoTSelfBlast.addActionListener(new ActionListener() {
+		row.add(Box.createHorizontalStrut(INDENT_RADIO));
+		chkAAexec = new JRadioButton("Execute", true);
+		chkAAexec.setBackground(Globals.BGCOLOR);
+		chkAAexec.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				setTSim(chkDoTSelfBlast.isSelected(), false);
+				setTSim(chkAAexec.isSelected(), false);
 			}	
 		});
-		row.add(chkDoTSelfBlast);
+		row.add(chkAAexec);
 		
-		txtTSelfBlastArgs = new JTextArea(1, BLAST_ARGS_TEXTFIELD_WIDTH);
-		txtTSelfBlastArgs.setText(BlastArgs.getTblastxOptions());
-		txtTSelfBlastArgs.setLineWrap(true);
-		txtTSelfBlastArgs.setWrapStyleWord(true);
-		tempPane = new JScrollPane(txtTSelfBlastArgs);
+		txtAAargs = new JTextArea(1, BLAST_ARGS_TEXTFIELD_WIDTH);
+		txtAAargs.setText(BlastArgs.getTblastxOptions());
+		txtAAargs.setLineWrap(true);
+		txtAAargs.setWrapStyleWord(true);
+		tempPane = new JScrollPane(txtAAargs);
 		row.add(tempPane);	
 		innerPanel.add(row);
 		innerPanel.add(Box.createVerticalStrut(5));
 		
 		row = Static.createRowPanel();
-		chkUseTSelfBlast = new JRadioButton("Or use existing file");
-		chkUseTSelfBlast.setBackground(Globals.BGCOLOR);
-		chkUseTSelfBlast.addActionListener(new ActionListener() {
+		row.add(Box.createHorizontalStrut(INDENT_RADIO));
+		chkAAfile = new JRadioButton("Or use existing file", false);
+		chkAAfile.setBackground(Globals.BGCOLOR);
+		chkAAfile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				setTSim(false, chkUseTSelfBlast.isSelected());
+				setTSim(false, chkAAfile.isSelected());
 			}	
 		});
-		row.add(chkUseTSelfBlast);
+		row.add(chkAAfile);
 		row.add(Box.createHorizontalStrut(5));
-		txtTSelfBlastfile = new FileTextField(theParentFrame, FileTextField.PROJ, FileTextField.TAB);
-		txtTSelfBlastfile.setMaximumSize(txtTSelfBlastfile.getPreferredSize());
-		row.add(txtTSelfBlastfile);
+		txtAAfile = new FileTextField(theParentFrame, FileTextField.PROJ, FileTextField.TAB);
+		txtAAfile.setMaximumSize(txtAAfile.getPreferredSize());
+		row.add(txtAAfile);
+		
+		ButtonGroup g2 = new ButtonGroup();
+		g2.add(chkAAexec);
+		g2.add(chkAAfile);
+		
 		
 		innerPanel.add(row);
 		innerPanel.add(Box.createVerticalStrut(10));
@@ -609,10 +649,13 @@ public class AnnoOptionsPanel extends JPanel {
 	private void createAnnoPanel(JPanel innerPanel) {
 		innerPanel.add(new JLabel("ANNOTATION:"));
 		innerPanel.add(Box.createVerticalStrut(10));
-		JPanel row = Static.createRowPanel();
-				
-		chkSPpref = Static.createCheckBox("Best Anno - SwissProt preference");
+		
+		JPanel row = Static.createRowPanel();	
+		chkSPpref = Static.createCheckBox("Best Anno - SwissProt preference", false);
 		row.add(chkSPpref);
+		row.add(Box.createHorizontalStrut(11));
+		chkRmECO = Static.createCheckBox("Remove {ECO...} from UniProt descripts", true);
+		row.add(chkRmECO); 
 		innerPanel.add(row);
 		innerPanel.add(Box.createVerticalStrut(10));
 		
@@ -759,29 +802,21 @@ public class AnnoOptionsPanel extends JPanel {
 			chkSlimOBOFile.setSelected(false);
 		}
 	}
-	private void setSim(boolean x, boolean y) {
-		chkDoSelfBlast.setSelected(x);
-		txtSelfBlastArgs.setEnabled(x);
+	private void setSim(boolean isArg, boolean isFile) {
+		boolean doS = chkNTself.isSelected();
+		txtNTargs.setEnabled(isArg  && doS);
+		txtNTfile.setEnabled(isFile && doS);
 		
-		chkUseSelfBlast.setSelected(y);
-		txtSelfBlastfile.setEnabled(y);
-		
-		if (x || y) txtPairsLimit.setEnabled(true);
-		else {
-			if (!chkDoTSelfBlast.isSelected() && !chkUseTSelfBlast.isSelected()) txtPairsLimit.setEnabled(false);
-		}
+		if (doS) txtPairsLimit.setEnabled(true);
+		else if (!chkAAself.isSelected()) txtPairsLimit.setEnabled(false);
 	}
-	private void setTSim(boolean x, boolean y) {
-		chkDoTSelfBlast.setSelected(x);
-		txtTSelfBlastArgs.setEnabled(x);
+	private void setTSim(boolean isArg, boolean isFile) {
+		boolean doT = chkAAself.isSelected();
+		txtAAargs.setEnabled(isArg  && doT);
+		txtAAfile.setEnabled(isFile && doT);
 		
-		chkUseTSelfBlast.setSelected(y);
-		txtTSelfBlastfile.setEnabled(y);
-		
-		if (x || y) txtPairsLimit.setEnabled(true);
-		else {
-			if (!chkDoSelfBlast.isSelected() && !chkUseSelfBlast.isSelected()) txtPairsLimit.setEnabled(false);
-		}
+		if (doT) txtPairsLimit.setEnabled(true);
+		else if (!chkNTself.isSelected()) txtPairsLimit.setEnabled(false);
 	}
 	
 	private TCWprops mProps=null;
@@ -795,6 +830,7 @@ public class AnnoOptionsPanel extends JPanel {
 	
 	// Best Anno
 	private JCheckBox chkSPpref = null;
+	private JCheckBox chkRmECO = null; // CAS305
 	
 	// GO
 	private ButtonComboBox cmbGODB = null;
@@ -815,12 +851,14 @@ public class AnnoOptionsPanel extends JPanel {
 	private FileTextField txtTrainCDSfile = null;
 	
 	// Similarity
-	private JRadioButton chkDoSelfBlast = null, chkUseSelfBlast = null;
-	private JTextArea txtSelfBlastArgs = null;
-	private FileTextField txtSelfBlastfile = null;
+	private JCheckBox     chkNTself = null;
+	private JRadioButton  chkNTexec = null, chkNTfile = null;
+	private JTextArea     txtNTargs = null;
+	private FileTextField txtNTfile = null;
 	
-	private JRadioButton chkDoTSelfBlast = null, chkUseTSelfBlast = null;
-	private JTextArea txtTSelfBlastArgs = null; 
-	private FileTextField txtTSelfBlastfile = null;
-	private JTextField txtPairsLimit = null;
+	private JCheckBox     chkAAself=null;
+	private JRadioButton  chkAAexec = null, chkAAfile = null;
+	private JTextArea     txtAAargs = null; 
+	private FileTextField txtAAfile = null;
+	private JTextField    txtPairsLimit = null;
 }

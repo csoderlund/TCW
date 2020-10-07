@@ -5,25 +5,25 @@
 
 <p>Dependencies:
 <ul>
-<li><b>Add Pairs from Hit</b> must be executed before <b>PCC of RPKM</b>.
+<li><b>Add Pairs from Hit</b> must be executed before <b>PCC of TPM</b>.
 <br>&nbsp;
 
-<li><b>Add New Clusters</b> must before the alignments.
+<li><b>Add New Clusters</b> must be executed before the alignments.
 <br>&nbsp;
 
-<li><b>Run Stats</b> must with <b>Write</b> selected must be executed 
+<li><b>Run Stats</b> with <b>Write</b> selected must be executed 
 before <b>Read</b> can be selected. See KaKs below.
 </ul>
 
 <h3>PCC (Pearson Correlation Coefficient) </h3>
-PCC is computed on the RPKM for shared conditions. This can be run at anytime after
+PCC is computed on the TPM for shared conditions. This can be run at anytime after
 the pairs have been added. If there are many pairs and conditions, this can take awhile.
 
 <h3>Alignment of hit pairs in cluster</h3>
 If you execute <b>Run Stats</b> with <b>Compute statistics</b> and <b>KaKs files - Write</b> selected, 
 the following will occur:
 <ol>
-<li>Perform alignments on using dynamic programming on all pairs that (i) have a hit and (ii) are in
+<li>Perform alignments using dynamic programming on all pairs that (i) have a hit and (ii) are in
  a cluster together.
 <li>Compute statistics for each pair and store the results in the database for query by <tt>viewMultiTCW</tt>.
 <li>Compute summary statistics for the <tt>viewMultiTCW</tt> overview page.
@@ -40,13 +40,13 @@ A file called <tt>runKaKs</tt> will also be written into this file. If your comp
 it will split the alignments into N files, which <tt>runKaKs</tt> will run concurrently. 
 <br>&nbsp;
 
-<li>Google <tt>KaKs_Calculator</tt> and download the executable. Put it into the <tt>projcmp</tt>
-directory. If desired, change the method used by editing <tt>runKaKs</tt>. Then:
+<li><tt>runKaKs</tt>: This script runs <tt>KaKs_Calculator</tt>, which is in the <tt>Ext</tt> directory.
+If desired, change the method used by editing <tt>runKaKs</tt>. Then:
 <pre>
 cd projcmp/&lt;project name&gt;/KaKs
 sh runKaKs
 </pre>
-<li>Select <b>Read</b> in <b>Setting</b> and run <b>Run Stats</b> again.
+<li>From <tt>runMultiTCW</tt>: Select <b>Read</b> in <b>Setting</b> and run <b>Run Stats</b> again.
 </ol>
 See KaKs below for more information.
 
@@ -81,8 +81,8 @@ to file, then add other cluster sets if desired.
 
 <h3>Change cluster sets</h3>
 <ul>
-<li>If you remove a cluster set using the <b>Remove</b> button on the main panel after adding statistics,
-the pair statistics will still exist.
+<li>If you remove a cluster set after adding statistics,
+<i>the pair statistics will still exist</i>.
 <li>You can remove all pairs and clusters to start over by using the <b>Remove...</b> option
 at the top and select "Pairs and clusters from database".
 </ul> 

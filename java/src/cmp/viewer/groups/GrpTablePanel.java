@@ -109,15 +109,16 @@ public class GrpTablePanel extends JPanel {
 					String [] strVals = getSeqsQueryList(); // tab, summary, query
 					if (strVals!=null) {
 						int row = theTable.getSelectedRow();
-						int grpID = Static.getInteger(strVals[3]);
+						
 						SeqsTopRowPanel seqPanel = new SeqsTopRowPanel(theViewerFrame, getInstance(), 
-							strVals[0], strVals[1], strVals[2], grpID, row);
+							strVals[0], strVals[1], strVals[2], 
+							Static.getInteger(strVals[3]), strVals[4], row); // CAS305 add [4]
+						
 						theViewerFrame.addResultPanel(getInstance(), seqPanel, seqPanel.getName(), seqPanel.getSummary());
 					}
 				} catch(Exception e) {ErrorReport.reportError(e, "View Selected Sequences");
 				} catch(Error e) {ErrorReport.reportFatalError(e, "View Selected Sequences", theViewerFrame);}
-			}
-		});
+			} });
         	topRow.add(btnShowSeqs);
         	topRow.add(Box.createHorizontalStrut(3));
         	
@@ -268,6 +269,21 @@ public class GrpTablePanel extends JPanel {
 	  			}
 	  		}));
   		}
+  		if (hasCounts) { // CAS305
+  			popup.addSeparator();
+	  		popup.add(new JMenuItem(new AbstractAction("Export cluster counts (" + Globalx.CSV_SUFFIX + ")...") { 
+	  			private static final long serialVersionUID = 4692812516440639008L;
+	  			public void actionPerformed(ActionEvent e) {
+	  				new TableUtil(theViewerFrame).exportGrpCounts(theTableData, strQuerySummary, true);
+	  			}
+	  		}));
+	  		popup.add(new JMenuItem(new AbstractAction("Export cluster TPM (" + Globalx.CSV_SUFFIX + ")...") { 
+	  			private static final long serialVersionUID = 4692812516440639008L;
+	  			public void actionPerformed(ActionEvent e) {
+	  				new TableUtil(theViewerFrame).exportGrpCounts(theTableData, strQuerySummary, false);
+	  			}
+	  		}));
+  		}
   		btnTableExportCopy = Static.createButton("Table...", true);
  		btnTableExportCopy.addMouseListener(new MouseAdapter() {
  	         public void mousePressed(MouseEvent e) {
@@ -279,10 +295,12 @@ public class GrpTablePanel extends JPanel {
 		theViewerFrame = parentFrame;
 		vSettings = parentFrame.getSettings();
 		tabName = tab;
+		
 		totalGrp = theViewerFrame.getInfo().getCntGrp();
 		asmNames = theViewerFrame.getInfo().getASM();
 		hasGOs = (theViewerFrame.getInfo().getCntGO()>0);
 		hasAAdb = (theViewerFrame.getnAAdb()>0);
+		hasCounts = theViewerFrame.getInfo().hasCounts();
 		
 		colSelectChange = new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -619,18 +637,20 @@ public class GrpTablePanel extends JPanel {
 		return retVal;
     }
     private String [] getSeqsQueryList() {
+    	int [] sels = theTable.getSelectedRows();
+		if (sels.length==0) return null;
+		
     		// return the same numbers for IDidx and Nameidx everytime, e.g. 26 and 1
 		int IDidx = theTableData.getColumnHeaderIndex(GRPID);
 		int Nameidx = theTableData.getColumnHeaderIndex(CLUSTERID);
+		int Hitidx = theTableData.getColumnHeaderIndex(HITID);
 		
 		String sourceTable = "pog_members.PGid";
 		String tab = "";
 		String summary = "";
 		String subquery = "";
 		String grpID = "";
-
-		int [] sels = theTable.getSelectedRows();
-		if (sels.length==0) return null;
+		String hitID = null;
 		
 		if(sels.length == 1) {
 			String name = (String)theTableData.getValueAt(sels[0], Nameidx);
@@ -638,9 +658,11 @@ public class GrpTablePanel extends JPanel {
 			int descidx = theTableData.getColumnHeaderIndex(HITDESC);
 			String desc = (String)theTableData.getValueAt(sels[0], descidx);
 			if (desc==null) desc = Globals.uniqueDesc;
+			
 			summary = "Cluster " + name + ";   " + desc;
 			subquery = sourceTable + " = " + ((Integer)theTableData.getValueAt(sels[0], IDidx));
 			grpID = ((Integer)theTableData.getValueAt(sels[0], IDidx)) + "";
+			hitID = (String)theTableData.getValueAt(sels[0], Hitidx); // CAS305
 		}
 		else if(sels.length == 2) {
 			String  name = 	(String)theTableData.getValueAt(sels[0], Nameidx) + "," + (String)theTableData.getValueAt(sels[1], Nameidx);							
@@ -661,12 +683,13 @@ public class GrpTablePanel extends JPanel {
 			}
 			subquery += ")";
 		}
-					
-		String [] retVal = new String[4];
+				
+		String [] retVal = new String[5];
 		retVal[0] = tab;
 		retVal[1] = summary;
 		retVal[2] = subquery;
 		retVal[3] = grpID;
+		retVal[4] = hitID; // CAS305
 
 		return retVal;
     }
@@ -865,5 +888,5 @@ public class GrpTablePanel extends JPanel {
 	private int totalGrp=0;
 	private boolean isList=false;
 	private String [] asmNames;
-	private boolean hasGOs=false, hasAAdb=false;
+	private boolean hasGOs=false, hasAAdb=false, hasCounts;
 }

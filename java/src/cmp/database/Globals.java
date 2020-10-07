@@ -96,6 +96,7 @@ public final class Globals {
 		//Method Classes
 		public static final String GROUP_FILE_BEST_RECIP = "BBH";
 		public static final String GROUP_FILE_CLOSURE = "Closure";
+		public static final String GROUP_FILE_HIT = "BestHit";
 		
 		//Summary
 		public static final String summaryDir = Globalx.HTMLDIR;
@@ -143,17 +144,24 @@ public final class Globals {
 			public static final String COVERAGE_CUTOFF = "40";
 			public static final String SIMILARITY =      "60";
 		}
+		public static class Hit {	
+			public static final String TYPE_NAME = "BestHit";
+			public static final String DEFAULT_PREFIX = "HT";
+			public static final String COVERAGE_CUTOFF = "50"; 
+			public static final String SIMILARITY =      "20"; 
+		}
+		
 		public static class OrthoMCL {	
 			public static final String TYPE_NAME = "OrthoMCL";
 			public static final String DEFAULT_PREFIX = "OM";
 			public static final String INFLATION = "4";
 		}
+		
 		public static class UserDef {			
 			public static final String TYPE_NAME = "User Defined";
 			public static final String DEFAULT_PREFIX = "UD";
 		}
 	}
-	
 	
 	
 	public static class Viewer {

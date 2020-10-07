@@ -82,9 +82,10 @@ hidden window.
 >BiocManager::install("goseq")
 >BiocManager::install("DESeq2")
 </pre>
-<li>Set your $R_HOME (assuming tcsh)
+<li>Set your $R_HOME:
 <pre>
-setenv R_HOME /Library/Frameworks/R.framework/Resources
+setenv R_HOME /Library/Frameworks/R.framework/Resources  # tcsh
+export R_HOME=/Library/Frameworks/R.framework/Resources  # zcsh
 </pre>
 <li>Make sure <code>runDE</code> has the following: 
 <pre>
@@ -94,14 +95,21 @@ setenv R_HOME /Library/Frameworks/R.framework/Resources
 		<h4>
 			Perl-mySQL interface
 		</h4>
-		When I googled Perl-MySQL MacOX 10.15, I saw people are running into difficulties with this.
-		One person wrote:
-		<font color=green><pre>
+	Install Homebrew: See <a href=https://coolestguidesontheplanet.com/installing-homebrew-on-macos-sierra-package-manager-for-unix-apps>Coolest Guide</a>
+	<pre> 
+	# https://metacpan.org/pod/distribution/DBD-mysql/lib/DBD/mysql
+	brew install openssl mysql-connector-c
+	cpan DBD::mysql 
+	# where did I get the following commands from? Think I was trying to make perl5
+	sudo cpan       # to init.
+	sudo cpan install DBD::mysql
+	???
 	"The solution is simple: Don't use the Apple flavors of Perl, build your own from scratch and use that. Then:
 	cpan install DBI
 	cpan install DBD::mysql"
-		</font></pre>
-		<p>I have not tried this yet.
+	</pre>
+	<p>
+
 <p>The following instructions are from an earlier version of this document (for MacOS 10.9.5):
 <pre>
 	added 'set $path=($path /usr/local/perl/bin)' to my .tcshrc

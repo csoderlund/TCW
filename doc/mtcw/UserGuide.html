@@ -28,12 +28,17 @@ projects are created by merging existing sTCW projects.
 	<li><a href="#two">Top three rows</a>
 	<li><a href="#step1">Step 1. single TCW database</a>
 	<li><a href="#step2">Step 2. Compare sequences</a>
-	<li><a href="#step3">Step 3. Cluster Methods</a>
+	<li><a href="#step3">Step 3. Cluster Sets</a>
 		<ul>
-		<li><a href="#bbh">BBH</a>
-		<li><a href="#close">Closure</a>
-		<li><a href="#omcl">OrthoMCL</a>			      
-		<li><a href="#selfclust">User-defined clusters</a>
+		<li><a href="#mt">Methods
+			<ul>
+			<li><a href="#bbh">BBH</a>
+			<li><a href="#close">Closure</a>
+			<li><a href="#ht">BestHit</a>
+			<li><a href="#omcl">OrthoMCL</a>			      
+			<li><a href="#selfclust">User-defined clusters</a>
+			</ul>
+		<li><a href="#best">Representative hit per cluster
 		</ul>
 	<li><a href="#step4">Step 4. Statistics</a>
 		<ul>
@@ -76,7 +81,7 @@ Common abbreviations:
 	<li>Input:
 		<ul>
 			<li>Two or more sTCW databases. The 
-					sequences, their annoDB hits, RPKM and DE p-values are imported to the multiTCW database.  
+					sequences, their annoDB hits, TPM and DE p-values are imported to the multiTCW database.  
 			<li>For NT-sTCW, the mTCWdb will contain for each seqID the nucleotide, CDS, and protein sequences. The protein
 sequence is created from the CDS sequence, which is created from the TCW computed ORF.
 			
@@ -86,7 +91,8 @@ sequence is created from the CDS sequence, which is created from the TCW compute
 	<li>The results are the best if: 
 	<ul><li>The sTCW databases are annotated the same. 
 	<li>The conditions names are exactly the same (when applicable). For example, if two species both
-	have counts for the tissue type 'leaf', the condition name provided in runSingleTCW must be the same for both (e.g. leaf), though the name is case-insensitive.
+	have counts for the tissue type 'leaf', the condition name provided in runSingleTCW must be the same for both (e.g. leaf), 
+	though the name is case-insensitive.
 	<li>The DE column names are exactly the same (when applicable), as in the previous point.
 	</ul>
 	
@@ -166,9 +172,9 @@ Add the <tt>exBar</tt>, <tt>exFoo</tt> and <tt>exFly</tt> databases.
 <li>Select <b>Build Database</b>.
 <li>Select <b>Run Search</b>. 
 <li>Select <b>Add Pairs from Hits</b>.
-<li>Using the <b>Add</b> button beside the "Cluster Methods" table, add one or more methods.
+<li>Using the <b>Add</b> button beside the "Cluster Sets" table, add one or more methods.
 Execute "Add New Clusters";
-the added methods in the table will be italized. You may
+the added methods in the table will be italicized. You may
 add additional methods at any time. 
 <li>Select <b>Run Stats</b>. When it completes, the label will change to "No action selected".
 <li>Exit <code>runMultiTCW</code> in order to run <code>KaKs_calculator</code>.
@@ -182,6 +188,9 @@ add additional methods at any time.
 </ol>
 
 The overview will look similar to this <a href=ex.html class="ext" target="_blank">Overview</a>.
+
+<p>In this example, the <code>orthoMCL</code> method was run on a machine that had DBD::mysql installed, and the output file
+was transferred to a machine without DBD:mysql installed, and added as an "User Defined" method.
 
 <td width=450 valign=top style="padding-left:10px;">
 				<a name="Fig1">
@@ -295,25 +304,19 @@ parameter and re-run the search, remove the hit files using the main panel <b>Re
 </table>
 
 <a name=step3></a>
-<h3>3. Cluster Methods</h3>
+<h3>3. Cluster Sets</h3>
 <table width=100% cellpadding=5>	
 <tr>
 <td width=450 valign=top>	
-	
-<tr>
-<td width=450 valign=top>		
-Click <b>Add</b> in section "<tt>Cluster Methods</tt>"  to add a new clustering method; this brings up the 
+<a name=mt></a>	
+<h4>Methods</h4>
+Click <b>Add</b> in section "<tt>Cluster Sets</tt>"  to add a new clustering method; this brings up the 
 Method panel. The drop-down beside "Method" shows BBH, Closure, OrthoMCL, and User defined. 
 You can add any number of cluster methods. You can add the same method multiple times with different parameters,
 where only the "Prefix" has to be different.
 All methods need a unique prefix, which is used to prefix the cluster names, e.g. 
 a method with prefix "BB8" will have cluster names BB8_00001, BB8_00002, etc. The
 prefix can only be 5 characters, but make it a meaningful 5 characters.	
-
-<p>When the multiTCW database is created from nucleotide sTCW databases, it is
-advantageous to have BBH be at least one of the methods as these pairs are used for the overall
-summary and for the KaKs pairs.
-
 <p>The Help page for clustering provides more detail, but the following is an overview.
 
 <a name=bbh>
@@ -322,63 +325,98 @@ The BBH finds the bi-directional best hit based on hit e-value.
 It uses the hits that were loaded
 into the database with <b>Add Pairs from Hits</b>. The following explains the parameters:
 <table>
-<tr><td>
+<tr><td valign=top>
 <ol>
 <li>Amino acid or nucleotide (for NT-mTCW only). 
+<br><br>
 <li>%Similarity - the hit similarity (Identity).
-<li>%Coverage - the alignment length is divided by the length of the sequence times 100 to get the
-%Coverage for each sequence of the pair (Cov1 and Cov2). You can choose "Either", which requires
-that either Cov1>%Coverage OR Cov2>%Coverage. If you choose "Both", then Cov1>%Coverage AND Cov2>%Coverage.
-For example, for an alignment:
-<pre>
-Seq1    -------------------------------
-Seq2     ----------	
-</pre>
-This will pass the filter %Coverage>=80 if "Either" is selected, but not "Both".
+<br><br>
+<li>%Coverage -  Either or both sequences must have the %coverage. See below for details.
+<br><br>
 <li>The "Select sTCWdbs" will only be present if there are more than two sTCWdbs loaded into the mTCWdb.
 The rules are as follows:
 <ol type='a'>
 <li>Select two sTCWdbs for the standard BBH of one pair per cluster.
 <li>Select N (N&gt;2) sTCWdbs, and clusters of exactly size N will be created, where each pair in the cluster is a BBH pair.
-<li>Do not select any sTCWdbs, and one cluster set will be created from all pairs of sTCWdbs.
 </ol>
 
 </ol>
 <td width=450 valign=top style="padding-left:10px;">
-<a  href="img/method.png"><img width=400 src="img/method.png" border=1></a>
+<a  href="img/methodBB.png"><img width=400 src="img/methodBB.png" border=1></a>
 </td>
 </tr>
 </table>
-
-
+<p>
+<b>%Coverage</b>: 
+<ul><li>This is computed by: <tt>Cov1</tt>= (alignment_length/sequence_length_1)*100, and likewise for <tt>Cov2</tt>;
+this can give a %Coverage&gt;100 if there are many gaps and the alignment is the same length as the sequence.
+<li>You can choose "Either", which requires that either <tt>Cov1</tt>&gt;%Coverage OR <tt>Cov2</tt>&gt;%Coverage. 
+If you choose "Both", then <tt>Cov1</tt>&gt;%Coverage AND <tt>Cov2</tt>&gt;%Coverage. For example, for an alignment:
+<pre>
+Seq1    -------------------------------
+Seq2     ----------	
+</pre>
+This will pass the filter %Coverage>=80 if "Either" is selected, but not "Both".
+</ul>
 <a name=close>
 <h4>Closure</h4>
-<table><tr><td>
-Closure has the following requirements: 
+<table><tr><td valign=top>
+Closure has the same %Coverage and %Similarity parameters as the BBH algorithm, and also uses the hits from the database.
+It creates clusters as follows: 
 <ol>
 <li>All sequences in a cluster must have a hit
 with all other sequences in the cluster. 
-<li>Each sequence must pass the filters with at least
-one other sequence in the cluster, where the filter parameters are exactly as described for BBH. 
+<br><br>
+<li>Each sequence must pass the filters with at least one other sequence in the cluster. 
 </ol>
-The algorithm uses the hits from the database.
+
 <td width=450 valign=top style="padding-left:10px;">
 <a  href="img/methodCL.png"><img width=400 src="img/methodCL.png" border=1></a>
 </td>
 </tr>
 </table>
 		
+<a name=ht></a>
+<h4>BestHit</h4>
+<table>
+<tr><td valign=top>
+Clusters are formed using the best annotation for each sequences, as follows:
+<ol>
+<li>All sequences share the same best HitID or best Description. If the best description is used:
+<ol>
+<li>If it contains such words as "uncharacterized protein", then the hitID is used.
+<li>Otherwise, the description is used minus the "{ECO:...}" portion of the UniProt descriptions.
+</ol>
+<li>The sequence must have &gt;=%Similarity and &gt;=%Coverage to the hit. 
+<li>It must also have
+be part of at least one pair in the cluster, where the two paired sequences have &gt;=%Similarity
+and at least one of the two sequences has &gt;=%Coverage to the other.
+Without these restrictions, it is possible to get clusters that have no sequence overlaps as they
+all hit the protein in different regions.
+</ol>
+The <a href=#best>representation hit</a> for the cluster may be different than the hit that
+created the clusters, as it includes more rules, such as the #GOs.
+
+<td width=450 valign=top style="padding-left:10px;">
+<a  href="img/methodHT.png"><img width=400 src="img/methodHT.png" border=1></a>
+</td>
+</tr>
+</table>
+
 <a name=omcl>
 <h4>OrthMCL</h4>
 <table><tr><td>
 <code>OrthoMCL</code> requires numerous steps to run, and uses a temporary MySQL database; 
-TCW organizes all these details. 
-
+TCW organizes all these details. DBD::mysql must be installed for the Perl-MySQL interface.
 <p><code>OrthoMCL</code> uses the hit file <tt>hitsAA.tab</tt>. It does not guarantee that
 all sequences in a cluster have a hit with each other.
 
 
 <p><code>OrthoMCL</code> occasionally fails -- every time this has happened to me, I rerun and it works.
+<p>NOTE: The last update on GitHub for <code>OrthoMCL</code> is March 2016, so has not been updated
+to work with the latest version of MariaDB (and possibly other MySQL versions). 
+
+
 <td width=450 valign=top style="padding-left:10px;">
 <a  href="img/methodOL.png"><img width=400 src="img/methodOL.png" border=1></a>
 </td>
@@ -405,6 +443,28 @@ sequences in the group, prefixed by the project prefix that you entered when you
 </tr>
 </table>		
 	
+<a name="best">
+<h4>Representative hit per cluster</h4>
+The algorithm inspects all hits for all sequences in the cluster, and selects the best based on
+(listed in order of precedence):
+<ol>
+<table border=0 >
+<tr><td>
+
+<li>Informative, that is, not "uncharacterized protein", etc. The algorithm only uses the first two
+words, or first 20 characters, of the description, as many have slight differences, such as shown
+on the right.
+
+<br>This would be recorded as 100% of the sequences have the hit.
+<td><a  href="img/bestDesc.png"><img width=400 src="img/bestDesc.png" border=1></a>
+</table>
+<li>The hit with the most sequences having the hit.
+<li>Good e-value.
+<li>Is a SwissProt hit.
+<li>Has GOs.
+</ol>
+<p>The %Hit is computed, which is the percentage of sequences with the hit. This hit is not necessary
+the "Best" hit for any of the sequences.
 <a name=step4></a>
 <h3>4. Run Stats</h3>
 <table width=100% cellpadding=5>	
@@ -416,8 +476,10 @@ The statistics are broken into four sections:
 <li>Run on the total hit pairs in the database:
 <ul>
 <li>The PCC (Pearson Correlation Coefficient) is only relevant if there are
-shared conditions, as it is used to determine how similar the RPKM values of the
+shared conditions, as it is used to determine how similar the TPM values of the
 conditions are. It is run on all pairs in the database.
+<li>NOTE: Pre-3.0.4 TCW computed RPKM instead of TPM. The <code>viewSingleTCW</code>
+overview, top line, states which was computed.
 </ul>
 
 <li>Alignment of hit pairs in clusters. 

@@ -1,7 +1,11 @@
-package sng.viewer.panels;
+package cmp.viewer.panels;
 
 /****************************************************
  * Blast tab - runs blast and displays results
+ * This is copied and adapted from sng.viewer.panel.BlastTab
+ * 
+ * Diamond must have a AA database
+ * Blast can have AA or NT
  */
 import java.awt.Color;
 import java.awt.Component;
@@ -10,7 +14,7 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
-
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
@@ -20,7 +24,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -29,11 +32,9 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
-import sng.database.Globals;
-import sng.database.MetaData;
-import sng.dataholders.SequenceData;
-import sng.util.Tab;
-import sng.viewer.STCWFrame;
+import cmp.viewer.MTCWFrame;
+import cmp.database.Globals;
+
 import util.methods.BlastArgs;
 import util.ui.UserPrompt;
 import util.methods.ErrorReport;
@@ -42,10 +43,10 @@ import util.methods.Out;
 import util.database.DBConn;
 import util.database.Globalx;
 
-public class BlastTab extends Tab
+public class BlastTab extends JPanel
 {
 	private static final long serialVersionUID = 653192706293635582L;
-	private static final String helpHTML = "html/viewSingleTCW/BlastTab.html";
+	private static final String helpHTML = "html/viewMultiTCW/BlastTab.html";
 	
 	private final String RESULTS0 = ".results" + Globalx.TEXT_SUFFIX;
 	private final String RESULTS6 = ".results" + Globalx.CSV_SUFFIX;;
@@ -54,21 +55,22 @@ public class BlastTab extends Tab
 	private final int nWIDTH=520;
 	private final int nLEN=350;
 	
-	public BlastTab(STCWFrame parentFrame, MetaData md) 
+	public BlastTab(MTCWFrame parentFrame) 
 	{
-		super(parentFrame, null);
-		setBackground(Color.white);
-		metaData = md;
+		setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+		setBackground(Globals.BGCOLOR);
+		
 		theParentFrame = parentFrame;
-		isSTCWdbPR = metaData.isProteinDB();
+		isAAonly = (theParentFrame.getnNTdb()==0);
 		
 		// blastn default is megablast, so do can use same defaults 
 		int cpu=1;
 		blastDefaults = BlastArgs.getBlastxOptions()  + " -num_threads " + cpu;
 		dmndDefaults =  BlastArgs.getDiamondOpDefaults() + " --threads " + cpu;
 		
-		// added after Blast is performed
-		btnViewContig = Static.createButton("View Selected Sequence", false, Globals.FUNCTIONCOLOR);
+		// added after Blast is performed; not used right now
+		btnViewContig = Static.createButton("Copy Selected Subject", false, Globals.FUNCTIONCOLOR);
 		btnViewContig.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				if (resultTable.getSelectedRowCount() == 1)
@@ -151,24 +153,23 @@ public class BlastTab extends Tab
 		row = Static.createRowPanel();
 		row.add(new JLabel("Target: ")); row.add(Box.createHorizontalStrut(2));	
 		ButtonGroup dbType = new ButtonGroup();
-		String label = (isSTCWdbPR) ? " AA-Seqs" : "NT-Seqs";
-		ntSeqCheck = Static.createRadioButton(label, true);
+		
+		ntSeqCheck = Static.createRadioButton("NT-Seqs", true);
 		ntSeqCheck.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 					setEnableDB(true, false, false);		
 		}});
-		dbType.add(ntSeqCheck);
-		row.add(ntSeqCheck); row.add(Box.createHorizontalStrut(2));	
-	
-		aaSeqCheck = Static.createRadioButton("AA-ORFs", false);
+		if (!isAAonly) {
+			dbType.add(ntSeqCheck);
+			row.add(ntSeqCheck); row.add(Box.createHorizontalStrut(2));	
+		}
+		aaSeqCheck = Static.createRadioButton("AA-Seqs", false);
 		aaSeqCheck.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 					setEnableDB(false, true, false);		
 		}});
-		if (!isSTCWdbPR) {
-			dbType.add(aaSeqCheck);
-			row.add(aaSeqCheck); row.add(Box.createHorizontalStrut(2));	
-		}
+		dbType.add(aaSeqCheck);
+		row.add(aaSeqCheck); row.add(Box.createHorizontalStrut(2));	
 		
 		dbCheck = Static.createRadioButton("AA-DB", false);
 		dbCheck.addActionListener(new ActionListener() {
@@ -203,7 +204,7 @@ public class BlastTab extends Tab
 					setEnableSearch(false, true);		
 		}});
 		
-		if (!isSTCWdbPR) dmndCheck.setEnabled(false);
+		if (!isAAonly) dmndCheck.setEnabled(false);
 		ButtonGroup pgmType = new ButtonGroup();
 		pgmType.add(dmndCheck);
 		pgmType.add(blastCheck);
@@ -317,6 +318,11 @@ public class BlastTab extends Tab
 	}
 	/****************************************************************
 	 * runs the search and displays the results
+	 * NT query -> 
+	 * 		if hasNTdb, NTseqs  blastn
+	 * 		AAseqs, AAdb		diamond or blast
+	 * AA query
+	 * 		AAseqs, AAdb		diamond or blast
 	 */
 	private void runSearch() throws Exception
 	{		
@@ -330,7 +336,7 @@ public class BlastTab extends Tab
 		if(!baseDir.exists()) baseDir.mkdir();
 		
 	// Create database
-		String ID = theParentFrame.getdbID();
+		String ID = theParentFrame.getDBName();
 		createDB(ID);
 		if (dbFileName==null || dbFileName.equals("")) {
 			showErr("Cannot create search database file");
@@ -369,7 +375,7 @@ public class BlastTab extends Tab
 		String queryPath = 	queryFile.getAbsolutePath();
 		String outPath = 	outFile.getAbsolutePath();
 		
-		isTargetPR = (ntSeqCheck.isSelected()) ? isSTCWdbPR : true;
+		isTargetPR = (ntSeqCheck.isSelected()) ? isAAonly : true;
 	
 		String params = txtParams.getText();
 		
@@ -425,17 +431,14 @@ public class BlastTab extends Tab
 		
 		pnlRealMain.revalidate();
 	}
+	/*********************************************************
+	 * createDB
+	 */
 	private boolean createDB(String ID) {
 	try {
 		boolean bHaveDB=false;
 		int cnt=0;
 		
-		if (seqSet.size()==0) { // get all contigIDs for showSeqDetail (need for AAdb)
-			DBConn mDB = theParentFrame.getNewDBC();
-			ResultSet rs = mDB.executeQuery("select contigID from contig");
-			while (rs.next()) seqSet.add(rs.getString(1)); // For View Sequence
-			rs.close(); mDB.close();
-		}
 		if (ntSeqCheck.isSelected()) {
 			isTargetPR=false; 
 			dbFileName = baseDir + "/" + ID + ".ntSeq.fa";
@@ -445,22 +448,20 @@ public class BlastTab extends Tab
 			if (bHaveDB) return true;
 			
 			// Write file of sequences
-			DBConn mDB = theParentFrame.getNewDBC();
-			int nclones = mDB.executeCount("select count(*) from contig");		
+			DBConn mDB = theParentFrame.getDBConnection();
+			int nclones = mDB.executeCount("select count(*) from unitrans");		
 			showStatus("Writing " + nclones + "  sequences to file ....");
 			
 			seqFile.createNewFile();
 			BufferedWriter w = new BufferedWriter(new FileWriter(seqFile));
 			
-			ResultSet rs1 = mDB.executeQuery("select contigid, consensus from contig");
+			ResultSet rs1 = mDB.executeQuery("select UTstr, ntSeq from unitrans");
 			while (rs1.next())
 			{
 				String name = rs1.getString(1);
 				String seq =  rs1.getString(2);
-				w.write(">" + name);
-				w.newLine();
-				w.write(seq);
-				w.newLine();
+				w.write(">" + name + "\n");
+				w.write(seq+ "\n");
 				cnt++;
 			}			
 			w.close(); rs1.close(); mDB.close();
@@ -476,29 +477,20 @@ public class BlastTab extends Tab
 			if (bHaveDB) return true;
 			
 			// Write file of ORF sequences
-			DBConn mDB = theParentFrame.getNewDBC();
-			int nclones = mDB.executeCount("select count(*) from contig");		
-			showStatus("Writing " + nclones + "  translated ORFs to file ....");
+			DBConn mDB = theParentFrame.getDBConnection();
+			int nclones = mDB.executeCount("select count(*) from unitrans");		
+			showStatus("Writing " + nclones + "  AA sequences to file ....");
 			
 			seqFile.createNewFile();
 			BufferedWriter w = new BufferedWriter(new FileWriter(seqFile));
 			
-			ResultSet rs2 = mDB.executeQuery("SELECT contigid, o_frame, o_coding_start, o_coding_end, consensus " +
- 		           " FROM contig where o_frame!=0");
+			ResultSet rs2 = mDB.executeQuery("SELECT UTstr, aaSeq from unitrans");
 
 			while (rs2.next()) {
 				String name = rs2.getString(1);
-				int fr =      rs2.getInt(2);
-			    int start =   rs2.getInt(3);
-			    int end =     rs2.getInt(4);
-			
-			    String strSeq = rs2.getString(5);
-			    String orf = SequenceData.getORFtrans(name, strSeq, fr, start, end);
-			     	
-			    w.write(">" + name + " AAlen=" + orf.length() + " frame=" + fr);
-			    w.newLine();
-			    w.write(orf);
-			    w.newLine(); 
+				String seq =  rs2.getString(2);
+				w.write(">" + name + "\n");
+				w.write(seq + "\n");
 			    cnt++;
 			}
 			w.close(); rs2.close(); mDB.close();
@@ -516,8 +508,7 @@ public class BlastTab extends Tab
 			}
 			File dbFile = new File(dbFileName);
 			bHaveDB = (dbFile.isFile()) ? true : false;
-			if (!bHaveDB)
-			{
+			if (!bHaveDB) {
 				showStatus("Select ... to select the database");
 				return false;
 			}
@@ -740,7 +731,7 @@ public class BlastTab extends Tab
 		txtDBname.setEnabled(db);
 		btnDBfind.setEnabled(db);
 		
-		if (seq && !isSTCWdbPR) {
+		if (seq && !isAAonly) {
 			blastCheck.setSelected(true);
 			dmndCheck.setEnabled(false);	
 		}
@@ -805,6 +796,7 @@ public class BlastTab extends Tab
 		}
 		Out.prt("Delete files: " + cnt + " Existing Result files: " + cntResults );
 	}
+	// For sTCW, this brings up the Detail; for mTCW, its just a copy
 	private void showSeqDetailTab ( )
 	{
 		if (resultTable != null)
@@ -813,16 +805,9 @@ public class BlastTab extends Tab
 			
 			if (nRow < 0)return;
 			
-			String qName = resultTable.getValueAt(nRow, 0).toString();
-			String sName = resultTable.getValueAt(nRow, 1).toString();
-			String strName="";
-			if (seqSet.contains(sName)) strName = sName; // CAS305 switched s and q
-			else if (seqSet.contains(qName)) strName = qName;
-			else {
-				showStatus("Neither query or target is a STCW seqID");
-				return;
-			}
-			theParentFrame.addContigPage(strName, this, nRow);
+			String tName = resultTable.getValueAt(nRow, 1).toString();
+			Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+			cb.setContents(new StringSelection(tName), null);
 		}
 	}
 	private void showErr(String err)
@@ -964,9 +949,7 @@ public class BlastTab extends Tab
 	private static File baseDir = null;
 	
 	private File outFile = null;
-	private MetaData metaData = null;
-	private STCWFrame theParentFrame = null;
+	private MTCWFrame theParentFrame = null;
 	private String blastDefaults="", dmndDefaults="", dbFileName="", dbSelectName="";
-	private boolean isSTCWdbPR=false, isTargetPR=false, isQueryPR=false;
-	private HashSet <String> seqSet = new HashSet <String> ();
+	private boolean isAAonly=false, isTargetPR=false, isQueryPR=false;
 }

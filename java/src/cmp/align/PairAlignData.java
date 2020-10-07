@@ -14,6 +14,8 @@ public class PairAlignData implements Comparable<PairAlignData> {
 	public final static int AlignAA=1;
 	public final static int AlignCDS=2;
 	public final static int AlignCDS_AA=3;
+	public final static int AlignHIT0_AA=4; // leave at end
+	public final static int AlignHIT1_AA=5;
 	
 	private final char    gapCh=Globals.gapCh; 
 	private final String  gapStr=Globals.gapStr;
@@ -65,6 +67,16 @@ public class PairAlignData implements Comparable<PairAlignData> {
 				isNT=true;
 			}
 			removeHangingGap(); // wait until after fit2cds
+			break;
+		case AlignHIT0_AA:
+			isCDS=false; isNT=false;	
+			loadHitAndSeqFromDB(mDB, seqIDs, 0); // CAS305  sequence to best hit
+			align(theSeq1, theSeq2);
+			break;
+		case AlignHIT1_AA:
+			isCDS=false; isNT=false;	
+			loadHitAndSeqFromDB(mDB, seqIDs, 1); // CAS305 sequence to consensus hit
+			align(theSeq1, theSeq2);
 			break;
 		}
 	}
@@ -233,69 +245,114 @@ public class PairAlignData implements Comparable<PairAlignData> {
 	 * Load sequences
 	 */
 	private boolean loadSequencesFromDB(DBConn conn, String [] IDs) {
-	    	ResultSet rs = null;
-	  
-	    	try {
-		    	String seqField = "aaSeq";
-		    	switch (alignType) {
-				case AlignAA:     seqField = "aaSeq"; break;
-				case AlignNT:     seqField = "ntSeq"; break;
-				case AlignCDS:    seqField = "ntSeq"; break;
-				case AlignCDS_AA: seqField = "aaSeq, ntSeq"; break;
-		    	}
-		    	// 1st sequence
-	    		rs = conn.executeQuery("SELECT orf_start, orf_end, " + seqField +
-	    					" FROM unitrans WHERE UTstr= '" + IDs[0] + "'");	
-	    		if (!rs.next()) {
-	    			Out.PrtWarn("Error reading database for sequence " + IDs[0]);
-	    			return false;
-	    		}
-	    		orfStart1 = rs.getInt(1);
-	    		orfEnd1 = rs.getInt(2);
-	    		strORF1 = orfStart1 + ".." +  orfEnd1;
-	    		theSeq1 = rs.getString(3);
-	    		
-	    		if (alignType!=AlignAA) {
-	    			String tmp = (alignType==AlignCDS_AA) ? rs.getString(4) : theSeq1;
-	    			theCDS1 =  tmp.substring(orfStart1-1, orfEnd1);
-	    			the5UTR1 = tmp.substring(0, orfStart1);
-	    			the3UTR1 = tmp.substring(orfEnd1-3);	
-	    			if (the5UTR1.length()<=Share.minAlignLen) the5UTR1="";
-	    			if (the3UTR1.length()<=Share.minAlignLen) the3UTR1="";
-	    		}
-	    		
-	    		// 2nd sequence
-		    	rs = conn.executeQuery("SELECT orf_start, orf_end, " + seqField +
-    					" FROM unitrans WHERE UTstr= '" + IDs[1] + "'");	
-	    		if (!rs.next()) {
-	    			Out.PrtWarn("Error reading database for sequence " + IDs[1]);
-	    			return false;
-	    		}
-	    		orfStart2 = rs.getInt(1);
-	    		orfEnd2 = rs.getInt(2);
-	    		strORF2 = orfStart2 + ".." +  orfEnd2;
-	    		
-	    		theSeq2 = rs.getString(3);
-	    		if (alignType!=AlignAA) {
-	    			String tmp = (alignType==AlignCDS_AA) ? rs.getString(4) : theSeq2;
-	    			theCDS2 =  tmp.substring(orfStart2-1, orfEnd2);
-	    			the5UTR2 = tmp.substring(0, orfStart2);
-	    			the3UTR2 = tmp.substring(orfEnd2-3);	
-	    			if (the5UTR2.length()<=Share.minAlignLen) the5UTR2="";
-	    			if (the3UTR2.length()<=Share.minAlignLen) the3UTR2="";
-	    		}
-	    		
-	    		rs.close();
-		    	return true;
+    	ResultSet rs = null;
+  
+    	try {
+	    	String seqField = "aaSeq";
+	    	switch (alignType) {
+			case AlignAA:     seqField = "aaSeq"; break;
+			case AlignNT:     seqField = "ntSeq"; break;
+			case AlignCDS:    seqField = "ntSeq"; break;
+			case AlignCDS_AA: seqField = "aaSeq, ntSeq"; break;
 	    	}
-	    	catch(Exception e) {
-	    		ErrorReport.reportError(e, "Loading data for alignment");
-	    		return false;
-	    	}
+	    	// 1st sequence
+    		rs = conn.executeQuery("SELECT orf_start, orf_end, " + seqField +
+    					" FROM unitrans WHERE UTstr= '" + IDs[0] + "'");	
+    		if (!rs.next()) {
+    			Out.PrtWarn("Error reading database for sequence " + IDs[0]);
+    			return false;
+    		}
+    		orfStart1 = rs.getInt(1);
+    		orfEnd1 = rs.getInt(2);
+    		strORF1 = orfStart1 + ".." +  orfEnd1;
+    		theSeq1 = rs.getString(3);
+    		
+    		if (alignType!=AlignAA) {
+    			String tmp = (alignType==AlignCDS_AA) ? rs.getString(4) : theSeq1;
+    			theCDS1 =  tmp.substring(orfStart1-1, orfEnd1);
+    			the5UTR1 = tmp.substring(0, orfStart1);
+    			the3UTR1 = tmp.substring(orfEnd1-3);	
+    			if (the5UTR1.length()<=Share.minAlignLen) the5UTR1="";
+    			if (the3UTR1.length()<=Share.minAlignLen) the3UTR1="";
+    		}
+    		
+    		// 2nd sequence
+	    	rs = conn.executeQuery("SELECT orf_start, orf_end, " + seqField +
+					" FROM unitrans WHERE UTstr= '" + IDs[1] + "'");	
+    		if (!rs.next()) {
+    			Out.PrtWarn("Error reading database for sequence " + IDs[1]);
+    			return false;
+    		}
+    		orfStart2 = rs.getInt(1);
+    		orfEnd2 = rs.getInt(2);
+    		strORF2 = orfStart2 + ".." +  orfEnd2;
+    		
+    		theSeq2 = rs.getString(3);
+    		if (alignType!=AlignAA) {
+    			String tmp = (alignType==AlignCDS_AA) ? rs.getString(4) : theSeq2;
+    			theCDS2 =  tmp.substring(orfStart2-1, orfEnd2);
+    			the5UTR2 = tmp.substring(0, orfStart2);
+    			the3UTR2 = tmp.substring(orfEnd2-3);	
+    			if (the5UTR2.length()<=Share.minAlignLen) the5UTR2="";
+    			if (the3UTR2.length()<=Share.minAlignLen) the3UTR2="";
+    		}
+    		
+    		rs.close();
+	    	return true;
+    	}
+    	catch(Exception e) {
+    		ErrorReport.reportError(e, "Loading data for alignment");
+    		return false;
+    	}
 	}
-	
+	private boolean loadHitAndSeqFromDB(DBConn conn, String [] IDs, int type) {
+		try {
+			// 1st sequence
+    		ResultSet rs = conn.executeQuery("SELECT orf_start, orf_end, aaSeq, HITid " +
+    					" FROM unitrans WHERE UTstr= '" + IDs[0] + "'");	
+    		if (!rs.next()) {
+    			rs.close();
+    			Out.PrtWarn("Error reading database for sequence " + IDs[0]);
+    			return false;
+    		}
+    		orfStart1 = rs.getInt(1);
+    		orfEnd1 = rs.getInt(2);
+    		strORF1 = orfStart1 + ".." +  orfEnd1;
+    		theSeq1 = rs.getString(3);
+    		int hitid = rs.getInt(4);
+    		
+    		// 2nd sequence
+    		if (type==0) {
+	    		rs = conn.executeQuery("Select HITstr, sequence from unique_hits where HITid=" + hitid);
+	    		if (!rs.next()) {
+	    			rs.close();
+	    			Out.PrtWarn("Error reading database for hit sequence " + hitid);
+	    			return false;
+	    		}
+	    		strID2 = rs.getString(1);
+	    		theSeq2 = rs.getString(2);
+    		}
+    		else {
+    			rs =  conn.executeQuery("Select sequence from unique_hits where HITstr='" + IDs[1] + "'");
+	    		if (!rs.next()) {
+	    			rs.close();
+	    			Out.PrtWarn("Error reading database for hit sequence " + hitid);
+	    			return false;
+	    		}
+	    		strID2 = IDs[1];
+	    		theSeq2 = rs.getString(1);
+    		}
+    		rs.close();
+			return true;
+		}
+		catch(Exception e) {
+    		ErrorReport.reportError(e, "Loading hit and seq for alignment");
+    		return false;
+    	}
+	}
 	public int compareTo(PairAlignData obj) {
-		return -1 * nOLPscore.compareTo(obj.nOLPscore);
+		return strID2.compareTo(obj.strID2);
+		// return -1 * nOLPscore.compareTo(obj.nOLPscore); CAS305 
 	}
 	public Vector <String> getDescLines() {
 		Vector <String> d = new Vector <String> ();

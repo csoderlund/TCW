@@ -31,11 +31,13 @@ public class CfgAnno {
 	/**********************************************************************/
 	/***
 	 * load sTCW.cfg for annotator, calls TCWprops
+	 * 
 	 * if change parameter, change:
-	 *  1. CoreMain.parameter_exit and cfgTCWload
-	 *  2. TCWprops sets defaults
-	 *  3. MangerData.saveLIBcfg_sTCWcfg and create get/set methods for parameter
-	 *     manager saves any changes before calling CoreMain to then load sTCW.cfg again
+	 *  1. TCWprops sets defaults
+	 *  2. ManagerData.readSTCWkeyVal
+	 *  3. MangerData.saveLIBcfg_sTCWcfg and create get/set methods for parameter.
+	 *     Manager saves any changes before calling runSTCWMain to then load sTCW.cfg again
+	 *  4. This file
 	 */
 	private boolean cfgTCWload(boolean bdoAnno, boolean bdoORF, boolean bdoGO) 
 	{			
@@ -83,11 +85,9 @@ public class CfgAnno {
 	private void cfgNonFileParams() {
 		try {
 			String stcwDB = mProps.getAnnoNotDefault("STCW_db");
-			if (stcwDB==null) stcwDB = mProps.getAnnoNotDefault("PAVE_db");
 			if (stcwDB==null) Out.die("sTCW.ctg does not contain a valid STCW_db (database name)");
 			
 			String stcwID = mProps.getAnnoProperty("SingleID");
-			if (stcwID==null) mProps.getAnnoProperty("AssemblyID");
 			int nCPUs = Integer.parseInt(mProps.getAnnoProperty("CPUs"));	
 			Out.PrtSpMsg(1,"CPUs/Threads = " + nCPUs);
 				
@@ -98,11 +98,11 @@ public class CfgAnno {
 	
 	private void cfgSelfblastParams() {		
 		try {			
-			int pairs = 				Integer.parseInt(mProps.getAnnoProperty("Anno_pairs_limit"));
-			String selfBlastFile =  	mProps.getAnnoProperty("Anno_unitrans_selfblast");
-			String tselfBlastFile =  mProps.getAnnoProperty("Anno_unitrans_tselfblast");
+			int pairs = 			Integer.parseInt(mProps.getAnnoProperty("Anno_pairs_limit"));
+			String selfBlastFile =  mProps.getAnnoProperty("Anno_unitrans_selfblast");
+			String tselfBlastFile = mProps.getAnnoProperty("Anno_unitrans_tselfblast");
 			String selfBlastArgs = 	mProps.getAnnoProperty("Anno_selfblast_args");
-			String tselfBlastArgs = 	mProps.getAnnoProperty("Anno_tselfblast_args");
+			String tselfBlastArgs = mProps.getAnnoProperty("Anno_tselfblast_args");
 			
 			// a '-' or -1 indicates that the keyword was not present
 			annoObj.setMaxDPpairs(pairs);
@@ -180,6 +180,9 @@ public class CfgAnno {
 			
 			int spPref = argInt("Anno_SwissProt_pref", "SwissProt preference");
 			uniObj.setSwissProtPref(spPref);
+			
+			int rmPref = argInt("Anno_Remove_ECO", "Remove {ECO...} string"); // CAS305
+			uniObj.setRemoveECO(rmPref);
 			
 			int bit = Integer.parseInt(mProps.getAnnoProperty("Anno_min_bitscore"));
 			if (bit != -1) {

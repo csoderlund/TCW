@@ -21,13 +21,15 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
 import util.methods.Static;
-
+import util.ui.UserPrompt;
+import cmp.database.Globals;
 import cmp.viewer.MTCWFrame;
 import cmp.viewer.seq.SeqsTablePanel;
 
 public class SeqTopRowPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private Color buttonColor = Color.LIGHT_GRAY; // new Color(230, 230, 255); 
+	private final String helpHTML = "html/viewMultiTCW/Details.html"; // CAS305 add
 	
 	static final public int SHOW_ASSIGNED_GO = 1;
 	static final public int SHOW_ALL_GO = 2;
@@ -98,11 +100,22 @@ public class SeqTopRowPanel extends JPanel {
 	    topRow.add(btnFrame);
 	    topRow.add(Box.createHorizontalStrut(3));
 	    
+	   
 	    createTopGO();
 	    if (hasGOs) {
-	    		topRow.add(btnGO);
-	    		topRow.add(Box.createHorizontalStrut(3));
+	    	topRow.add(btnGO);
+	    	topRow.add(Box.createHorizontalStrut(3));
 	    }
+	    
+	    btnHelp = Static.createButton("Help", true, Globals.HELPCOLOR);
+	    btnHelp.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				UserPrompt.displayHTMLResourceHelp(theViewerFrame,  "Details",  helpHTML);
+			}
+		});
+	    topRow.add(btnHelp);
+	    
+	    
 	    topRow.add(Box.createHorizontalGlue());
 	    
 	    JPanel rowChangePanel = Static.createRowPanel();
@@ -284,7 +297,7 @@ public class SeqTopRowPanel extends JPanel {
 	
 	/**************************************************************/
 	private JPanel upperPanel;
-    private JButton btnDetails = null, btnFrame = null, btnGO = null;
+    private JButton btnDetails = null, btnFrame = null, btnGO = null, btnHelp = null;
     private JButton btnNextRow = null, btnPrevRow = null;
     
     private JPanel lowerPanel;

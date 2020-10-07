@@ -156,7 +156,7 @@ public class Schema
 			"create table library ( " +
 			"	LID integer PRIMARY KEY AUTO_INCREMENT, " +
 			"	libid varchar(30) NOT NULL, " +
-			"   ctglib boolean default 0, " +
+			"   ctglib boolean default 0, " +  // 1 has exp files; 0 is exp or assembled
 			"   parent varchar(30), " +
 			"   reps TEXT," +
 			"	libsize int NOT NULL, " +
@@ -210,6 +210,7 @@ public class Schema
 			"	) ENGINE=MyISAM; ";
 		mDB.executeUpdate(sql);	
 		
+		// map counts to transcripts (ctglib=1)
 		sql = 
 			"create table clone_exp ( " +
 			"	CID bigint NOT NULL , " +
@@ -331,6 +332,7 @@ public class Schema
 			"	) ENGINE=MyISAM; ";
 		mDB.executeUpdate(sql);
 	
+		// assembled only
 		sql = 
 			"create table contig_counts (" +
 			"	contigid varchar(30) NOT NULL, " +

@@ -15,11 +15,18 @@ set and may take wait time to display.
 <table border=1>
 <tr><td>SeqID<td>This is useful to find all sequences with a given prefix, or can
 be used to find a given sequence. 
+<tr><td>Best Hit ID<td>Find all sequences with the given <tt>HitID</tt>, which is its
+best annotation hit.
+<tr><td>Description<td>Find all sequences with the given <tt>Descript</tt>, which is its
+best annotation hit description.  
 <tr><td>Hits to different dataset<td>This lists the sequences that have 
 a hit to a different dataset. 
 <tr><td>Has Annotation<td>Has at least one hitID.
 <tr><td>Has GO<td>Has at least one GO assignment.
 </table>
+<p>Substring queries (<tt>Seq ID</tt>, <tt>Best Hit ID</tt>, <tt>Description</tt>):
+The search is not case-sensitive and will find the substring anywhere in the ID or description.
+
 <h3>+Cluster Sets</h3>
 The names of all computed cluster sets will be listed. 
 If you select "In" for one of the them,

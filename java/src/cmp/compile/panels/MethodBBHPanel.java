@@ -8,15 +8,18 @@ import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 
 import cmp.database.DBinfo;
 import cmp.database.Globals;
+import util.methods.Out;
 import util.methods.Static;
 import util.ui.ButtonComboBox;
 import util.ui.UIHelpers;
@@ -35,40 +38,34 @@ public class MethodBBHPanel extends JPanel {
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setAlignmentX(Component.LEFT_ALIGNMENT);
 		setBackground(Globals.BGCOLOR);
+		add(Box.createVerticalStrut(20));
 		
 		int width = Globals.CompilePanel.WIDTH;
-		add(Box.createVerticalStrut(20));
-		add(new JLabel("Bi-directional Best Hit"));
-		add(Box.createVerticalStrut(10));
 		
 		JPanel row = Static.createRowPanel();
-		JLabel type = new JLabel("Hit File Type");
-		row.add(type);
-		row.add(Box.createHorizontalStrut(width - type.getPreferredSize().width));
-		String labels [] = {"Amino Acid","Nucleotide"}; 
-		seqMode = new ButtonComboBox();
-		seqMode.addItems(labels);
-		
-		boolean doNT = true;
-		if (theCompilePanel.dbIsExist() && theCompilePanel.getNumNTdb()<=1) doNT=false;
-		if (doNT) {
-			row.add(seqMode);
-			add(row);
-			add(Box.createVerticalStrut(10));
-		}
-		
-		// prefix
-		row = Static.createRowPanel();
 		lblPrefix = new JLabel("Prefix");
 		row.add(lblPrefix);
 		row.add(Box.createHorizontalStrut(width - lblPrefix.getPreferredSize().width));
-		
 		txtPrefix = Static.createTextField("", 3);
 		row.add(txtPrefix);
 		row.add(Box.createHorizontalStrut(5));
-		
 		row.add(new JLabel(EditMethodPanel.LBLPREFIX));
 		add(row);
+		add(Box.createVerticalStrut(20));
+				
+		row = Static.createRowPanel();
+		lblHitType = new JLabel("Hit File Type");
+		row.add(lblHitType);
+		row.add(Box.createHorizontalStrut(width - lblHitType.getPreferredSize().width));
+		aaButton = Static.createRadioButton("Amino Acid",true); 
+		row.add(aaButton); row.add(Box.createHorizontalStrut(5));
+		
+		ntButton = Static.createRadioButton("Nucleotide",false); 
+		row.add(ntButton); row.add(Box.createHorizontalStrut(5));
+		
+		ButtonGroup group = new ButtonGroup();
+		group.add(aaButton); group.add(ntButton); 
+		add(row);  
 		add(Box.createVerticalStrut(20));
 		
 		// cutoff
@@ -133,7 +130,7 @@ public class MethodBBHPanel extends JPanel {
 		updateList();
 	}
 	// Called by setSettings
-	public void updateSTCWbutton() {
+	private void updateSTCWbutton() {
 		boolean bDB = theCompilePanel.dbIsExist();
 		if (!bDB) {
 			btnSelect.setEnabled(false);
@@ -154,6 +151,7 @@ public class MethodBBHPanel extends JPanel {
 		}
 		btnSelect.setEnabled(true);
 		updateList();
+		
 		return;
 	}
 	
@@ -169,6 +167,13 @@ public class MethodBBHPanel extends JPanel {
 		}
 		lblSelect.setText("sTCWdb: " + listSTCW);
 	}
+	private void updateHitType() {
+		boolean hasNT=(theCompilePanel.getNumNTdb()>1);
+		aaButton.setEnabled(hasNT);
+		ntButton.setEnabled(hasNT);
+		lblHitType.setEnabled(hasNT);
+	}
+	
 	public void setLoaded(boolean loaded) { // true - method already in database
 		lblPrefix.setEnabled(!loaded);
 		txtPrefix.setEnabled(!loaded);
@@ -177,18 +182,21 @@ public class MethodBBHPanel extends JPanel {
 		lblSimCutoff.setEnabled(!loaded);
 		txtSimCutoff.setEnabled(!loaded);
 		btnSelect.setEnabled(!loaded);
+		
 		if (nSets==2) btnSelect.setEnabled(false);
+		updateHitType();
 	}
 	// Order here is important. Written to mTCW.cfg - sync with setSettings
 	// x:olap:lenMode:sim:seqMode:stcwList:x
 	// Called to write to mTCW and to use by MethodBBH
 	public String getSettings() {
+		int x = (aaButton.isSelected()) ? 0 : 1;
 		return  
 			xDELIM + ":" + 
 				txtCovCutoff.getText() 		+ ":" + 
 				covLenMode.getSelectedIndex() 	+ ":" +
 				txtSimCutoff.getText() 			+ ":" +
-				seqMode.getSelectedIndex() 		+ ":" +
+				x 		+ ":" +
 				listSTCW							+ ":" + 
 			 xDELIM;
 	}
@@ -208,7 +216,8 @@ public class MethodBBHPanel extends JPanel {
 		txtSimCutoff.setText(theSettings[3]);
 		try {
 			int i = Integer.parseInt(theSettings[4]);
-			seqMode.setSelectedIndex(i);
+			if (i==0) aaButton.setSelected(true);
+			else      ntButton.setSelected(true);
 		} catch (Exception e) {}
 		
 		selectSTCW.clear();
@@ -218,6 +227,7 @@ public class MethodBBHPanel extends JPanel {
 				selectSTCW.add(list[i]);
 		}
 		updateSTCWbutton();
+		updateHitType();
 	}
 	// Called on Add
 	public void resetSettings() {
@@ -230,8 +240,12 @@ public class MethodBBHPanel extends JPanel {
 		listSTCW = "";
 		selectSTCW.clear();
 		updateSTCWbutton();
+		updateHitType();
 	}
-	public String getSearchType() {return abbrev[seqMode.getSelectedIndex()];}
+	public String getSearchType() {
+		if (aaButton.isSelected()) return abbrev[0]; 
+		else return abbrev[1];
+	}
 	public static String getMethodType() { return Globals.Methods.BestRecip.TYPE_NAME; }
 	public String getMethodName() { 
 		return Globals.getName(Globals.Methods.BestRecip.TYPE_NAME, txtPrefix.getText()); 
@@ -245,78 +259,77 @@ public class MethodBBHPanel extends JPanel {
 		int cov = Static.getInteger(txtCovCutoff.getText());
 		if (sim!=0 || cov!=0) com += "(" + covTypes[forx] + ")"; 
 		
-		String ab = abbrev[seqMode.getSelectedIndex()] ;
-		if (ab.equals("NT")) com += ";" + ab;
+		if (ntButton.isSelected()) com += ";" + abbrev[1];
 		
 		if (selectSTCW.size()>0 && !listSTCW.equals("")) com += "; " + listSTCW;
 		else if (nSets>2) com += "; All pairs of sTCWs";
 		return com;
 	}
 	
-	public void 	setPrefix(String prefix) { txtPrefix.setText(prefix); }
+	public void setPrefix(String prefix) { txtPrefix.setText(prefix); }
 
 	private class SelectSTCW extends JDialog {
 		private static final long serialVersionUID = 1L;
 		public static final int OK = 1;
-    		public static final int CANCEL = 2;
+    	public static final int CANCEL = 2;
     		
 	 	public SelectSTCW() {
-	    		setModal(true);
-	    		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-	    		setTitle("Select.... ");
-			
-	    		DBinfo info = theCompilePanel.getDBInfo();
-	    		setNames = info.getASM();
-	    		
-	    		JPanel selectPanel = Static.createPagePanel();
-	    		
-	    		selectPanel.add(new JLabel("Select sTCWdb:"));
-	    		asmCheckBox = new JCheckBox [nSets];
-	    		for (int i=0; i<nSets; i++) {
-	    			boolean b = (selectSTCW.contains(setNames[i])) ? true: false;
-	    			asmCheckBox[i] = Static.createCheckBox(setNames[i], b);
-	    			selectPanel.add(asmCheckBox[i]); 
-	    			selectPanel.add(Box.createVerticalStrut(3));
-	    		}
-	    		JPanel buttonPanel = Static.createRowPanel();
-        		btnOK = Static.createButton("OK", true);
-        		btnOK.addActionListener(new ActionListener() {
-    				public void actionPerformed(ActionEvent e) {
-    					nMode = OK;
-    					setVisible(false);
-    				}
-    			});
-        		buttonPanel.add(btnOK);
-        		buttonPanel.add(Box.createHorizontalStrut(20));
-        		
-        		btnCancel = Static.createButton("Cancel", true);
-        		btnCancel.addActionListener(new ActionListener() {
-    				public void actionPerformed(ActionEvent e) {
-    					nMode = CANCEL;
-    					setVisible(false);
-    				}
-    			});
-        		buttonPanel.add(btnCancel);
-        		
-        		btnOK.setPreferredSize(btnCancel.getPreferredSize());
-        		btnOK.setMaximumSize(btnCancel.getPreferredSize());
-        		btnOK.setMinimumSize(btnCancel.getPreferredSize());
-        		buttonPanel.setMaximumSize(buttonPanel.getPreferredSize());
-	    		nMode = CANCEL;
+    		setModal(true);
+    		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+    		setTitle("Select.... ");
+		
+    		DBinfo info = theCompilePanel.getDBInfo();
+    		setNames = info.getASM();
+    		
+    		JPanel selectPanel = Static.createPagePanel();
+    		
+    		selectPanel.add(new JLabel("Select sTCWdb:"));
+    		asmCheckBox = new JCheckBox [nSets];
+    		for (int i=0; i<nSets; i++) {
+    			boolean b = (selectSTCW.contains(setNames[i])) ? true: false;
+    			asmCheckBox[i] = Static.createCheckBox(setNames[i], b);
+    			selectPanel.add(asmCheckBox[i]); 
+    			selectPanel.add(Box.createVerticalStrut(3));
+    		}
+    		JPanel buttonPanel = Static.createRowPanel();
+    		btnOK = Static.createButton("OK", true);
+    		btnOK.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					nMode = OK;
+					setVisible(false);
+				}
+			});
+    		buttonPanel.add(btnOK);
+    		buttonPanel.add(Box.createHorizontalStrut(20));
+    		
+    		btnCancel = Static.createButton("Cancel", true);
+    		btnCancel.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					nMode = CANCEL;
+					setVisible(false);
+				}
+			});
+    		buttonPanel.add(btnCancel);
+    		
+    		btnOK.setPreferredSize(btnCancel.getPreferredSize());
+    		btnOK.setMaximumSize(btnCancel.getPreferredSize());
+    		btnOK.setMinimumSize(btnCancel.getPreferredSize());
+    		buttonPanel.setMaximumSize(buttonPanel.getPreferredSize());
+    		nMode = CANCEL;
 
            	JPanel mainPanel = Static.createPagePanel();
-        		mainPanel.add(selectPanel);
-        		mainPanel.add(Box.createVerticalStrut(15));
-        		mainPanel.add(buttonPanel);
-        		
-        		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        		add(mainPanel);
-        		
-        		pack();
-        		this.setResizable(false);
-        		UIHelpers.centerScreen(this);
+    		mainPanel.add(selectPanel);
+    		mainPanel.add(Box.createVerticalStrut(15));
+    		mainPanel.add(buttonPanel);
+    		
+    		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+    		add(mainPanel);
+    		
+    		pack();
+    		this.setResizable(false);
+    		UIHelpers.centerScreen(this);
 	 	}
-	 	public void doOp() {
+	 	private void doOp() {
 	 		if (nMode==CANCEL) return;
 	 		
 	 		selectSTCW.clear();
@@ -335,10 +348,11 @@ public class MethodBBHPanel extends JPanel {
 		private String [] setNames = null;
 		private JCheckBox [] asmCheckBox = null;
 	}
-
-	private ButtonComboBox seqMode=null;
 	private JLabel     lblPrefix = null;
 	private JTextField txtPrefix = null;
+	
+	private JLabel lblHitType = null;
+	private JRadioButton aaButton, ntButton;	
 	
 	private ButtonComboBox covLenMode = null;
 	private JLabel     lblCovCutoff = null, lblSimCutoff = null;

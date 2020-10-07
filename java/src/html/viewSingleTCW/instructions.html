@@ -6,9 +6,8 @@ Terminology:
 <ul>
 <li><i>Sequence:</i> The input may be TCW-assembled transcripts, transcript sequences, proteins or genes.
 <li><i>Conditions:</i>A condition may be a tissue type, treatment, etc.  
-<li><i>AnnoDB:</i> A database in FASTA format against which the sTCW sequences are searched against
-for annotation. The search is heuristic with a program such as <tt>Blast</tt>, <tt>Diamond</tt>
-or <tt>Usearch</tt>.
+<li><i>AnnoDB:</i> A database in FASTA format against which the sTCW sequences were searched against
+for annotation. The search used  <tt>Blast</tt> or <tt>Diamond</tt>.
 <li><i>DB hit:</i> An alignment of an entry from an annoDB (e.g. UniProt) to an sequence. A given
 sequence can <i>hit</i> an annoDB multiple times (have alignments to multiple entries) and
 it can hit multiple different annoDBs (have alignments in more than one annoDB). 
@@ -22,6 +21,15 @@ description).
 <hr>
 Detailed Help is provided on each page; the following provides an overview
 of what is available.
+
+<h3>General</h3>
+<b>&gt;&gt;Instructions</b> - this page
+<p><b>&gt;&gt;Overview</b> - Summary of everything in database.
+<p><b>&gt;&gt;Decimal Numbers</b> - Specify how to display decimal numbers.
+<p><b>&gt;&gt;Find hits</b> - Search a sequence against the sequences in the database or a user
+selected protein database. This requires the <tt>Blast</tt> and optional <tt>Diamond</tt> paths to 
+be in the HOSTS.cfg file. 
+
 <h3>Sequences</h3>
 
 <b>&gt;&gt;Show All</b> - A table of all sequences in the database. 
@@ -54,8 +62,7 @@ table.
 </ul>
 
 <h3>Basic Queries</h3>
-<b>&gt;&gt;Sequences</b> - Search on Seq ID,
-Remarks or Read Names (for assembled contigs only).  
+<b>&gt;&gt;Sequences</b> - Search on Seq ID, TCW Remarks or User Remarks.  
 <ul>
 <li> 
 This builds a table from the results of the selected filters.
@@ -73,9 +80,6 @@ This builds a table from the results of the selected filters.
 <ul>
 <li>It works like the basic Sequences.
 </ul>
-<b>&gt;&gt;Find hits</b> - Search a sequence against the sequences in the database or a user
-selected protein database. This requires the <tt>Blast</tt> and optional <tt>Diamond</tt> paths to 
-be in the HOSTS.cfg file. 
 
 
 <hr>

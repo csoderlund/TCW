@@ -1,18 +1,26 @@
 <html>
 <body style="padding:20px;width:650px;">
 <title>Pairwise</title>
-<h2>Pairwise</h2>
-The options displayed on the second row vary depending on whether
-"AA align", "NT align" or "AA,NT,CDS" were selected. 
-The "Align" buttons result in a pop-up showing the sequence alignment
-in a multi-row format. The pop-up has the following option:
+<h2>Pairwise...</h2>
+The options displayed on the second row vary depending on the alignment type, and all refer
+to creating a pop-up of the alignment in multi-row format.
+<table border=1 cellspacing=3>
+<tr><th>Type<th>Align Buttons
+<tr><td>AA align</tt><td>Align...
+<tr><td>NT align</tt><td>Align...
+<tr><td>AA,CDS,NT</tt><td>AA..., CDS..., NT...
+<tr><td>5UTR,CDS,3UTR</tt><td>5UTR..., CDS..., 3UTR...
+<tr><td>AA to sequence best hit<td>Align...
+</table>
+<br><br>All pop-ups have the following option:
 <table border=1>
 <tr><td><i>Remove hanging sequence from ends</i><td> If checked, overhangs are removed. If uncheck,
 the full alignment is shown, where is one extends further than the other, the gap character is
 used to show the extension.
+<tr><td>Display<td>The number of characters per row.
 </table>
-<p>Only the "AA,NT,CDS" option has all of the following. The "AA align" and "NT align"
-only have an "Align" button with the respective align pop-up.
+<p>Only the "AA,NT,CDS" and "5TUR,CDS,3UTR" alignment options also have the following. 
+
 <h3>AA (amino acid)</h3>
 <i>Display</i>:  60, 90 or 20 -- is the number of amino acids in a line.
 <br><br>The 20 is equivalent to 60 for CDS. If you compare the two, they do not always correspond
@@ -38,6 +46,7 @@ and 2d can have 2 or 3 alternative bases in the same position.
 <tr><td>CpG<td>Shows the location of CpG dinucleotides with codon (but not CpG dinucleotides
 that span codons).
 </table>		
+
 <h3>NT (nucleotide)</h3>
 
 <i>Display</i>:  60 or 90 -- is the number of bases in a line.           

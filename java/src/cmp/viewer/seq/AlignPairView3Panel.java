@@ -33,7 +33,7 @@ import cmp.viewer.MTCWFrame;
 
 public class AlignPairView3Panel extends JPanel {
 	private static final long serialVersionUID = -2090028995232770402L;
-	private static final String helpHTML = "PairAlign.html";
+	private static final String helpHTML = "html/viewMultiTCW/PairAlign.html";
 	private int viewType=1; // 0=AA,CDS,NT  1=5'UTR,CDS, 3'UTR
 	
 	public AlignPairView3Panel(MTCWFrame parentFrame, String [] members, int [] lens, int type) { 
@@ -133,7 +133,7 @@ public class AlignPairView3Panel extends JPanel {
 		btnShowHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				UserPrompt.displayHTMLResourceHelp(theParentFrame, 
-						"Pair Align", "html/viewMultiTCW/" + helpHTML);
+						"Pairwise...",  helpHTML);
 			}
 		});
 		theRow.add(btnShowHelp);

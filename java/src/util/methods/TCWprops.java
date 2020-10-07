@@ -149,6 +149,7 @@ public class TCWprops
 			
 			mProps.setProperty("Anno_flanking_region", "30"); // not documented; used for setFilterOverlap
 			mProps.setProperty("Anno_SwissProt_pref", Globals.pSP_PREF); 
+			mProps.setProperty("Anno_Remove_ECO", Globals.pRM_ECO); // CAS305
 			
 			mProps.setProperty("Anno_uniprot_taxo", "-");     
 			mProps.setProperty("Anno_DBdate", "-");     

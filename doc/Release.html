@@ -9,6 +9,55 @@
 <font color="#000000" face="Verdana, Arial, Helvetica, sans-serif" size="2"> 
 <p><b><big><u>TCW Version 3.0</u></b></big>
 
+<p><b>v3.0.5 7-Oct-20</b>
+<ol>
+<li><code>runMultiTCW</code>:
+<ul>
+<li><font color=blue>New</font> BestHit: Create Clusters based on Best Annotation Hit shared by HitID or Description.
+<li>Small changes: (1) Slight change in assigning the best hit per cluster.
+(2) Slight change in Closure algorithm to round %Similarity and %Coverage (BBH was already doing that).
+<li>Updated multiTCW Help pages and on-line documentation.
+</ul>
+
+<li><code>viewMultiTCW</code>:
+<ul>
+<li><font color=blue>New</font> Find Hits: This works like the <code>viewSingleTCW</code> "Find Hits:", i.e. search
+against sequences in database or a protein database.
+<li>Sequence table: <font color=blue>New</font> alignment types for "Pairwise...":
+<ul>
+<li>AA to sequence best hit: The best hit for each sequence will be aligned to it.
+<li>AA to cluster best hit: (Clusters only) The assigned cluster best hit is aligned to each sequence.
+</ul>
+<li>Cluster Table: 
+<font color=blue>New</font> <tt>Table...</tt> options to export counts or TPM values for each sequence in each cluster.
+<li>Sequence Filter: <font color=blue>New</font> HitID and Description search.
+<li>Sequence Table: The "Copy..." to clipboard of database sequences includes the sequence name.
+<li>Sequence Detail: In the Hit Table, changed "Start" and "End" to "aaCov" and "hitCov", where aaCov=(alignLen/aaLen)%
+and hitCov=(alignLen/hitLen)%. Added a Help page.
+<li>Moved the Sample tabs on the left to the bottom.
+<li>Export: (1) Sort GOs by domain, level, GOnum. (2) Bug fix: Export Table was replacing '3' with '-'.
+</ul>
+
+</ul>
+<li><code>runSingleTCW</code>:
+<ul>
+<li>The Annotation "Option" panel:
+<ul>
+<li><font color=blue>New</font> parameter that when set, will remove the {ECO...} part
+of the description. For example, description <tt>Coatomer subunit zeta-2 {ECO:0000313|EMBL:OAY72132.1}</tt> would
+be changed to <tt>Coatomer subunit zeta-2</tt>.
+<li>The "Similarity Search" sub-panel  is more intuitive (there are check-boxes to indicate preforming search).
+</ul>
+<li>Small bug: "Remove Annotation" did not remove the computed ORFs, so were shown in viewSingleTCW.
+</ul>
+<li><code>viewSingleTCW</code>:
+<ul>
+<li>When there are no count files loaded, the queries for them have been removed (they were meaningless). 
+<li>Find Hit: This has been moved to under the "General" heading. 
+<br>Also, "View Selected Sequence" for Find Hit was using the Query, and has been changed to the Subject seqName.
+</ul>
+
+</ol>
 <p><b>v3.0.4 4-Sept-20</b>
 <br>This release is  mainly some clean-up, along with the computation of TPM replacing RPKM.
 <ol>
@@ -36,10 +85,11 @@ Also, the <tt class=c>Basic Sequence</tt> panel allows the longest sequence name
 </ol>
 <p><b>v3.0.3 16-June-20</b>
 <ol>
-<li>MySQL:
+<li>Update for MySQL v8:
 <ul>
 <li>The code has been updated to work with MySQL v8. 
 <li>The MySQL schema has a slight change, which TCW applies the first time a sTCW database.
+<li>It was added to open the database with characterEncoding=utf8
 <li><tt>./runSingleTCW -v</tt> to check important MySQL variables
 </ul>
 <li>External programs:

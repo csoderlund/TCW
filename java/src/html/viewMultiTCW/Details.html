@@ -1,0 +1,28 @@
+<html>
+<body style="padding:20px;width:650px;">
+<title>Sequence Details</title>
+<h2>Sequence Details</h2>
+
+This is viewed from the Sequence table and provides information about the sequence.
+It contains two sortable tables.
+
+<h2>Pairs</h2>
+This lists all seqIDs that have a hit with the sequence, along with any  shared clusters.
+<h3>Hits</h3>
+The top first hits from each type are loaded into the database when it is built, and listed here.
+The only columns that need explanation are the following: 
+<pre>
+aaCov =  (Align/length of AA sequence)*100.0
+hitCov = (Align/length of hit sequence)*100.0
+</pre> 
+The values can be &gt;100 when there are gaps in the alignment.
+<br><br>
+The <tt>Best</tt> column has:
+<pre>
+EV  = best e-value hit
+AN  = best annotation hit
+WG  = best hit with GOs
+ALL = EV+AN+WG
+</pre> 
+</html>
+

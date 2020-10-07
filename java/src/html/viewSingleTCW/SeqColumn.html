@@ -23,14 +23,14 @@ will have the column'#buried'.
 runSingleTCW. The "TCW Remark" is information added by TCW during annotation.
 
 
-<h3>Counts and RPKM</h3>
-The raw count and normalized RPKM is available for each "Condition",
+<h3>Counts and TPM (or RPKM)</h3>
+The raw count and normalized TPM is available for each "Condition",
 i.e. the combined replicates of the experimental conditions (tissue, treatment, etc).
-
+NOTE: If RPKM was computed instead of TPM, then the Column page will say RPKM instead of TPM.
 
 <h3>N Fold and R Statistic</h3>
 N Fold - Select pairs of conditions to show their fold-change difference as a column. 
-The fold change is calculated using RPKM values as follows: 
+The fold change is calculated using TPM values as follows: 
 the larger value is divided by the smaller value, where zero in the denominator 
 is replaced by 0.1.
 If the condition selected for 'Select 1' is smaller than the condition selected for

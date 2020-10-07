@@ -57,7 +57,8 @@ this opens a new window which has further Help.
 <p>
 Press <b>Run Search</b> to run the search. If this button is disabled, it means
 the file exists. 
-If you want to run the search again, you must removed or rename the file "hitsAA" or "hitsNT"
+If you want to run the search again, you must removed, which can be done with the 
+<b>Remove</b> button. Alternatively, you may rename the file "hitsAA" or "hitsNT"
 under the directory "projcmp/&lt;project-name&gt;/hitResults".
 <p>
 After running the search, select <b>Add Pairs</b>, which adds all pairs from the
@@ -86,7 +87,7 @@ After you add Cluster, execute this function to do the following:
 all conditions that are shared between the two sequences of a pair. 
 
 
-<tr><td colspan=2><i>2. Alignment of hit pairs in clusters</i><sup>+</sup>
+<tr><td colspan=2><i>2. Alignment of hit pairs in clusters (NT pairs only)</i>
 <tr><td nowrap>Alignment Statistics
 <td>Computes coding and nucleotide statistics for each pair.
 <br>Compute summary statistics.
@@ -95,18 +96,17 @@ all conditions that are shared between the two sequences of a pair.
 <br>Use the command 'sh runKaKs' in the project's KaKs directory to
 run the <tt>KaKs_calculator</tt>, which must be in the 'projcmp' directory.
 
-<tr><td colspan=2><i>3. After running <tt>KaKs_Calculator</tt></i>
+<tr><td colspan=2><i>After running <tt>KaKs_Calculator</tt></i>
 <tr><td nowrap>KaKs read
 <td>After running the <tt>KaKs_calculator</tt>, read the results into the database.
 
-<tr><td colspan=2><i>4. Multiple alignment of cluster</tt></i>
+<tr><td colspan=2><i>3. Multiple alignment of cluster</tt></i>
 <tr><td nowrap>Statistics
 <td>The <tt>MAFFT</tt> program is run on each cluster and the resulting alignment is score for
 sum-of-pairs and Trident, where Trident is computed by executing the
 <tt>MstatX</tt> program.
 
-</table>
-<sup>+</sup>It is important to read the "Settings Help".
+</table> 
 <br><br>
 <hr>
 <h2>Remove</h2>
@@ -114,7 +114,7 @@ If you only want to remove one set of clusters from the database, select it from
 the 'Cluster Methods' table followed by 'Remove'. 
 The following explains options of the "Remove..." button.
 <table border=1>
-<tr><td nowrap>1. Pairs and methods from database<td>
+<tr><td nowrap>1. Pairs and clusters from database<td>
 This removes all pairs and clusters from the database, which allows you to start
 over at the 'Add Pairs from Hits' step.
 You probably want to remove pairs and methods from disk also (#3).
@@ -122,7 +122,7 @@ You probably want to remove pairs and methods from disk also (#3).
 <tr><td nowrap>2. mTCW database<td>
 Removes the database. If you are done with the project, then select #5 also.
 If you are rebuilding, you may want to select #3 and/or #4 also.
-<tr><td nowrap>3. Pair and method from disk <br>(KaKs, Stats, Methods)<td>
+<tr><td nowrap>3. Pair and method files from disk <br>(KaKs, Stats, Methods)<td>
 If you are starting over adding methods, it is best to clean up 
 the past work so mTCW does not inadvertently read a file from the previous
 methods.
@@ -130,7 +130,7 @@ methods.
 If you remove the database in order to recreate it with datasets that
 have any differences from the previous datasets, you must remove the hit files
 and redo the search.
-<tr><td nowrap>5. This mTCW project from disk<td>
+<tr><td nowrap>5. All files from disk for this mTCW project<td>
 Remove the project directory found under <tt>/projcmp</tt>.
 </table>
 </html>

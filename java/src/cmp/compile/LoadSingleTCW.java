@@ -82,21 +82,21 @@ public class LoadSingleTCW {
 				sqlAsm += "annoDBdate=" + quote(rs.getString("dbDate")) + ",";
 			
 			rs = stcwDBC.executeQuery("SELECT COUNT(*) FROM pja_databases");
-    			if (rs.next()) sqlAsm += "nAnnoDB=" + rs.getInt(1);
-    			else sqlAsm += "nAnnoDB=0";
-    			
-    			if (stcwDBC.tableColumnExists("assem_msg", "peptide")) {
-    				sqlAsm += ", isPep=1";
-    				hasAAonly=true;
-    			}
-    			try {
-    				mDB.executeUpdate("INSERT INTO assembly SET " + sqlAsm);
-    			}
-    			catch (Exception e) { 
-    				Out.Print("Lost connection, trying again...");
-    				mDB = cmpPanel.getDBconn();
-    				mDB.executeUpdate("INSERT INTO assembly SET " + sqlAsm);
-    			}
+			if (rs.next()) sqlAsm += "nAnnoDB=" + rs.getInt(1);
+			else sqlAsm += "nAnnoDB=0";
+			
+			if (stcwDBC.tableColumnExists("assem_msg", "peptide")) 
+				sqlAsm += ", isPep=1";
+			else nNT++; // CAS305
+			
+			try {
+				mDB.executeUpdate("INSERT INTO assembly SET " + sqlAsm);
+			}
+			catch (Exception e) { 
+				Out.Print("Lost connection, trying again...");
+				mDB = cmpPanel.getDBconn();
+				mDB.executeUpdate("INSERT INTO assembly SET " + sqlAsm);
+			}
 			Schema.addDynamicSTCW(mDB, cmpPanel.getSpeciesSTCWid(x));
 		}
 		return true;
@@ -224,7 +224,7 @@ public class LoadSingleTCW {
 	   			String orfs = stcwDBC.executeString("select orf_msg from assem_msg");
 	   			boolean noOrf = (orfs==null || orfs=="" || orfs.length()<10);
 	   			if (noOrf) { // CAS304
-	   				int cnt = stcwDBC.executeCount("select count(*) from contigs where o_len>0");
+	   				int cnt = stcwDBC.executeCount("select count(*) from contig where o_len>0"); // CAS305 was contigs
 	   				noOrf = (cnt==0);
 	   			}
 				if (noOrf) {
@@ -572,7 +572,7 @@ public class LoadSingleTCW {
 	 */
 	private boolean step6_computeInfo() {
 		try {
-			if (hasAAonly) return true;
+			if (nNT==0) return true;
 			
 			Out.PrtSpMsg(1,"Compute CpG [O/E] per sequence and overall");
 			
@@ -590,7 +590,7 @@ public class LoadSingleTCW {
 			rs = mDB.executeQuery("select UTid, ASMid, orf_start, orf_end, ntSeq from unitrans");
 			while (rs.next()) {
 				int asmid = rs.getInt(2);
-				if (asmMap.get(asmid).isPep) continue;
+				if (asmMap.get(asmid).isPep) continue; 
 				
 				Info in = new Info();
 				int seqid = rs.getInt(1);
@@ -797,5 +797,5 @@ public class LoadSingleTCW {
 	private CompilePanel cmpPanel;
 	private SpeciesPanel theSpeciesPanel;
 	private DBConn mDB;
-	private boolean hasAAonly=false;
+	private int nNT=0;
 }

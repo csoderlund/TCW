@@ -28,23 +28,23 @@ Cluster ID, Hit ID or Hit Description.
 compute the statistics, their results will not be as precise.
 <br>&nbsp;
 
-<li><b>Copy Table</b>: Copies the table to the clipboard either the entire table. 
+<li><b>Copy Table</b>: Copies the entire table to the clipboard. 
 <br>&nbsp;
 
-<li><b>Export Table</b>: Exports the table to file in tab delimited file. 
+<li><b>Export Table</b>: Exports the table to a tab delimited file. 
 <br>&nbsp;
 
-<li><b>Export all cluster AA sequences</b>: Exports the AA sequences from all clusters in the table to a fasta formated file. 
+<li><b>Export all cluster AA sequences</b>: Exports the AA sequences from all clusters in the table to a fasta formatted file. 
 The description line for each sequence provides the sequence and cluster name. 
 <br>&nbsp;
 
 <li><b>Export all cluster NT sequences</b>: Same as above but output NT sequences.
 <br>&nbsp;
 
-<li><b>Export Cluster GOs:</b> list GOs associated with the cluster sequences in the table. 
+<li><b>Export Cluster GOs:</b> List GOs associated with the cluster sequences in the table. 
 If any
-sequence in a cluster has a hit with a GO the passes the below filters, the cluster is
-counted as having the GO. NOTE: it does NOT use the Cluster "Best Anno Hit". The first three are filters::
+sequence in a cluster has a hit with a GO that passes the below filters, the cluster is
+counted as having the GO. NOTE: it does NOT use the Cluster "Best Anno Hit". The first three are filters:
 <ol>
 <li><i>GO Level</i>: 
 <ol type='a'>
@@ -68,12 +68,19 @@ at least one sequence in the cluster must have a seq-hit E-value&le; this value.
 GOterm	#Cluster	Level	Term_type	Description
 </tt>
 <li>Count only: only outputs the <tt>GOterm</tt> and <tt>#Cluster</tt>. 
-<br>This can be used as input to input to REVIGO (http://revigo.irb.hr)
+<br>This can be used as input to REVIGO (http://revigo.irb.hr)
 </ol>
+</ol>
+<br>
+<li><b>Export cluster counts (.tvf)</b>: For all sequences in all clusters, output the clusterID, seqID and counts.
+<br>&nbsp;
+<li><b>Export cluster TPM (.tvf)</b>:  For all sequences in all clusters, output the clusterID, seqID and TPM values.
+(See TPM NOTE at end).
 </ul>
-</ul>
+<br>
+The <b>Export</b> options will only be visible if the associated data in the database.
 
-<h3>Columns</h3>
+<h2>Columns</h2>
 <ul> 
 <li>Columns can be added/removed using the <b>Select Columns</b> button below the table. 
 <li>Columns can
@@ -83,7 +90,7 @@ in the lower left corner.
 <li>One or more cluster rows can be selected using mouse click, shift-click, or ctrl-click.
 </ul>
 <p> The following describes the columns that need more explanation then is provided by
-the mouse over and shown in the lower left corner.
+the mouse over that is shown in the lower left corner.
 
 
 
@@ -119,12 +126,12 @@ GOs directly assigned to the HitID.
 <br>
 For each pair that has a hit, 
 the Pearson's Correlation Coefficient is computed from the
-RPKM values of the conditions shared between the two sequences, where conditions are 'shared' if
+TPM values of the conditions shared between the two sequences, where conditions are 'shared' if
 they have the same name. The column perPCC is the percent of pairs that have PCC>=0.8. 
 For example, if a cluster has 4 sequences,
 it has (4*3)/2 = 6 pairs. If two of them have PCC>=0.8, then the perPCC will be 33%. A perPCC of
 100% means that their expression profiles on their shared conditions are highly correlated. 
 Select "Pairs" for a cluster to see the actual PCC values and "Sequences" to view the TPM values.
-<p>NOTE: pre-v3.0.4 release, RPKM was computed.
+<p>TPM NOTE: For pre-v3.0.4 releases, RPKM was computed instead of TPM.
 
 

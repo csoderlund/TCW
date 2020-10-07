@@ -47,7 +47,7 @@ public class MethodBBH {
 		Out.PrtSpMsg(1, "");
 		 
 		if (bSuccess) 
-			if (! new MethodLoad(mDB).run(idx, groupFile, cmpPanel)) 
+			if (new MethodLoad(mDB).run(idx, groupFile, cmpPanel)==-1) 
 				bSuccess=false;
 		
 		Out.PrtDateMsgTime("Finish execution of BBH", allTime);
@@ -331,7 +331,6 @@ public class MethodBBH {
 	/*******************************************************************/
 	private boolean setParams(int idx, DBConn db, CompilePanel panel) {
 		MethodPanel theMethod = panel.getMethodPanel();
-		String comment = theMethod.getCommentAt(idx);
 		String [] settings = theMethod.getSettingsAt(idx).split(":");
 		if (settings.length<5) {
 			Out.PrtError("Incorrect parameters: " + theMethod.getSettingsAt(idx));
@@ -373,7 +372,7 @@ public class MethodBBH {
 		mDB = db;
 		cmpPanel = panel;
 		
-		String root  = cmpPanel.getCurProjMethodDir() + "/" + groupFile + 
+		String root  = cmpPanel.getCurProjMethodDir() +  groupFile + 
 				"." + prefix + "_" + covCutoff + "-" + simCutoff;
 		groupFile = root;
 		
@@ -381,7 +380,6 @@ public class MethodBBH {
 		Out.PrtSpMsg(1, "Coverage:   " + (int) covCutoff + " (" + covTypes[covMode] + ")");
 		Out.PrtSpMsg(1, "Similarity: " + (int) simCutoff);
 		Out.PrtSpMsg(1, "STCWdb:     " + dbs);
-		Out.PrtSpMsg(1, "Remark:     " + comment);
 		Out.PrtSpMsg(1, "");
 		
 		if (type == 1 && panel.getNumNTdb()<=1) {

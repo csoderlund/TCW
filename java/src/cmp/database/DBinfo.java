@@ -46,6 +46,8 @@ public class DBinfo {
 				allsTCW[x] = col.get(x);
 			}
 			col.clear(); 
+			
+			hasCounts = (mDB.executeCount("select count(*) from unitrans where totExp>0")>0); // CAS305
 		}
 		catch (Exception e){ErrorReport.prtReport(e, "Error getting datasets");}	
 	}
@@ -435,6 +437,7 @@ public class DBinfo {
 		return cntPair;
 	} 
 	// setASM
+	public boolean hasCounts() { return hasCounts;}
 	public int nAAdb() {return cntAAdb;}
 	public int nNTdb() {return cntNTdb;}
 	public String [] getASM() { return allsTCW;}
@@ -617,7 +620,7 @@ public class DBinfo {
 	private String [] methodName=null, methodPrefix=null;
 	private String [] allTaxa=null;
 	
-	private boolean hasDBalign=false, hasNTblast=false, isNTonly=false;
+	private boolean hasDBalign=false, hasNTblast=false, isNTonly=false, hasCounts=true;
 	
 	private int cntAAdb=0, cntNTdb=0;
 	private int cntSeq=-1, cntGrp=-1, cntPair=-1, cntGO=-1;

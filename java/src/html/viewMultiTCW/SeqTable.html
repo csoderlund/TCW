@@ -3,27 +3,36 @@
 <title>Sequence Table</title>
 <h2>Sequence Table</h2>
 
-This table can be viewed from Sample List "Sequences", Filter "Sequence", or selecting
-a row in the cluster or pairs table.
+This table can be viewed from (1) Sample List "Sequences", (2) Filter "Sequence", or 
+(3) selecting a row in the cluster or pairs table.
 
 <h2>First row of functions at the top</h2>
 The bottom panel can be switch between <b>Table</b> and any of the "Align:" buttons.
 Align button will be disabled or not appear if the option is not valid.
-
+If a set of sequences is selected, they will be aligned; otherwise, all sequences
+in the table will be.
+<p><b>Aligned (selected):</b> If none are selected, the alignment will be applied to all rows.
 <ul>
 <li><u>Pairwise...</u>
 
 <ul>
-<li><b>AA align</b>: Perform pairwise 
+<li><b>AA for each pair</b>: Perform pairwise 
 alignment for all pairs of amino acid sequences from the selected sequences (20 seqs max). 
-<li><b>NT align</b> (NT-mTCW only) Perform pairwise 
+<li><b>NT for each pair</b> (NT-mTCW only) Perform pairwise 
 alignment for all pairs of nucleotide sequences from the selected sequences (20 seqs max). 
-<li><b>AA,NT,CDS</b>: (NT-MTCW only) 
+<li><b>AA,NT,CDS for one pair</b>: (NT-MTCW only) 
 Align the selected pair using the amino acid sequence,
 CDS sequence, and nucleotide sequences. The resulting panel will have these 3 alignments.
+<li><b>5UTR, CDS, 3UTR for one pair</b>: (NT-MTCW only) 
+Align these three regions separately for the pair.
+The resulting panel will have these 3 alignments.
+<li><b>AA to sequence best hit</b>: 
+The best hit for each sequence will be aligned to it.
+<li><b>AA to cluster best hit</b>: (for Cluster only)
+The assigned cluster best hit is aligned to each sequence in the cluster.
 </ul>
-If 20 sequences are selected for the AA or NT option,
-this is 190 alignments so will take some time;  watch progress in lower left corner of viewMultiTCW.
+<br>The Pairwise options can result in many alignments,  e.g. if 20 sequences are selected,
+190 alignments will be computed;  watch progress in lower left corner of viewMultiTCW.
 <br>&nbsp;
 
 <li><u>MSAdb</u> (Cluster set of sequences only) 
@@ -32,7 +41,7 @@ without running the program. However, this option does not produce the alignment
 or score files, where the MSA... option does.
 <br>&nbsp;
 
-<li><u>MSA...</u> (Not available from Applet).
+<li><u>MSA...</u> 
 <ul>
 <li><b>MUSCLE-AA</b>: 
 Run MUSCLE to build a multiple alignment 

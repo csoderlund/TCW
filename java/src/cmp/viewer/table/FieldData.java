@@ -30,11 +30,11 @@ public class FieldData {
 	public static final String KaKs = "KaKs";
 	
 	//Main table for the different query modes - MYSQL and column table names.
-	public static final String GRP_TABLE = "pog_groups";
+	public static final String GRP_TABLE =    "pog_groups";
 	public static final String MEMBER_TABLE = "pog_members";
-	public static final String SEQ_TABLE = "unitrans";
-	public static final String PAIR_TABLE = "pairwise";
-	public static final String HIT_TABLE = "unique_hits";
+	public static final String SEQ_TABLE =    "unitrans";
+	public static final String PAIR_TABLE =   "pairwise";
+	public static final String HIT_TABLE =    "unique_hits";
 		
 	public static final String SEQ_SQLID = "UTID";  
 	public static final String GRP_SQLID = "POGID"; 	
@@ -486,15 +486,15 @@ public class FieldData {
 			addSeq(c++,  "3UTR CpG", Double.class,  SEQ_TABLE, "utr3Ratio", "3'UTR CpG O/E  ((#CpG / #G*#C)*Len)",false);
 			mkSection.add(c);
 		}
-		addSeq(c++, "E-value", Double.class, SEQ_TABLE, "e_value",  "Best anno hit e-value",false);
-		addSeq(c++, HITID, String.class, HIT_TABLE, "HITstr",       "Best anno hit name", false);
-		addSeq(c++, HITDESC, String.class, HIT_TABLE, "description","Best anno hit description",false);
-		addSeq(c++, "Species", String.class, HIT_TABLE, "species",  "Best anno hit species", false);
-		addSeq(c++, "Type", String.class, HIT_TABLE, "dbtype",      "Best anno hit type",false);
-		addSeq(c++, "Tax", String.class, HIT_TABLE, "taxonomy",     "Best anno hit taxonomy",false);
-		addSeq(c++, "Len", Integer.class, HIT_TABLE, "length",      "Best anno hit length"	, false);
+		addSeq(c++, "E-value", Double.class,  SEQ_TABLE,  "e_value",    "E-value to best anno hit",false);
+		addSeq(c++, HITID,     String.class,  HIT_TABLE,  "HITstr",     "Name of best anno hit", false);
+		addSeq(c++, HITDESC,   String.class,  HIT_TABLE,  "description","Description of best anno hit",false);
+		addSeq(c++, "Species", String.class,  HIT_TABLE,  "species",    "Species of best anno hit", false);
+		addSeq(c++, "Type",    String.class,  HIT_TABLE,  "dbtype",     "DB Type for best anno hit",false);
+		addSeq(c++, "Tax",     String.class,  HIT_TABLE,  "taxonomy",   "Taxonomy for best anno hit",false);
+		addSeq(c++, "Len",     Integer.class, HIT_TABLE, "length",     "Length of hit for best anno hit"	, false);
 		if (hasGO)
-			addSeq(c++, "nGO", Integer.class, HIT_TABLE, "nGO","Number GOs assigned to Best hit",false);
+			addSeq(c++, "nGO", Integer.class, HIT_TABLE, "nGO","Number of GOs for best anno hit",false);
 		mkSection.add(c);
 	
 		SEQ_SECTION_IDX = new int [mkSection.size()];

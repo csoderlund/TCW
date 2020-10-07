@@ -75,4 +75,5 @@ public class Globals {
 	static public final String pDIFF_LEN = "0.5";
 	static public final String pTRAIN_MIN = "50";
 	static public final String pSP_PREF = "0";
+	static public final String pRM_ECO = "1";
 }

@@ -49,6 +49,7 @@ public class SeqDetailsPanel extends JPanel {
 	private  final int MAX_COL = 180; // maximum size of column, e.g. description and species
 	private  final String HIT_TABLE = FieldData.HIT_TABLE;
 	private  final String PAIR_TABLE = FieldData.PAIR_TABLE;
+	
 		
 	public SeqDetailsPanel(MTCWFrame parentFrame, String name, int seqid) {
 		theParentFrame = parentFrame;
@@ -88,7 +89,8 @@ public class SeqDetailsPanel extends JPanel {
 			String counts = rs.getString(3);
 			String ntlen = rs.getString(4);
 			if (ntlen.equals("0")) bAAonly=true; 
-			String aalen = rs.getString(5);
+			aaLen = rs.getInt(5);
+		
 			int frame = rs.getInt(6);
 			int start = rs.getInt(7);
 			int end = rs.getInt(8);
@@ -114,7 +116,7 @@ public class SeqDetailsPanel extends JPanel {
 				if (tok.length==2)
 					normStr += String.format("%9s ", tok[1]);	
 			}
-			textArea = " " + seqName + "   AA Len: " + aalen;
+			textArea = " " + seqName + "   AA Len: " + aaLen;
 			if (!bAAonly)
 				textArea += "   NT Len: " + ntlen + "  Best ORF: RF" + frame + " " + start +".." + end ;
 			textArea += "\n\n";
@@ -174,6 +176,7 @@ public class SeqDetailsPanel extends JPanel {
 	}
 	/********************************************************
 	 * Compute Hit table 
+	 * CAS305 changed tr.start, tr.end to aaCov and hitCov
 	 */
 	private int loadHitTable() {	
 	try {
@@ -184,30 +187,31 @@ public class SeqDetailsPanel extends JPanel {
 		showGOhit[0]=null;
 		int cnt=0;
 		String sql = 
-		  "SELECT tr.HITid, tr.HITstr,  tr.percent_id, tr.alignment_len, " +
-				" tr.seq_start, tr.seq_end,  tr.e_value, tr.type, tr.bestEval, tr.bestAnno, tr.bestGO, " +
-				" uq.description, uq.species, uq.nGO " + 
+		  "SELECT tr.HITstr,  tr.percent_id, tr.alignment_len, " +
+				" tr.e_value, tr.type, tr.bestEval, tr.bestAnno, tr.bestGO, " +
+				" uq.description, uq.species, uq.nGO, uq.length " + 
 				" FROM unitrans_hits as tr " +
 				" JOIN " + HIT_TABLE + " as uq on tr.HITid=uq.HITid " + 
 				" WHERE tr.UTid=" + seqIndex + " order by tr.e_value ASC";
 		ResultSet rs = mDB.executeQuery(sql);
-		if (rs == null) ErrorReport.die("null result on database query in computeTheHitTable");
+		if (rs == null) ErrorReport.die("null result on database query in SeqDetails loadHitTable");
 		
 		while (rs.next()) {	
-			String hitName = rs.getString(2);
-			int pid = rs.getInt(3);
-			int len = rs.getInt(4);
-			int start = rs.getInt(5);
-			int end = rs.getInt(6);		
-			double eval = rs.getDouble(7);
-			String type = rs.getString(8);
-			boolean bestEval = rs.getBoolean(9);
-			boolean bestAnno = rs.getBoolean(10);
-			boolean bestGO = rs.getBoolean(11);
+			int i=1;
+			String hitName = rs.getString(i++);
+			int pid = rs.getInt(i++);
+			int alignlen = rs.getInt(i++);
 			
-			String desc = rs.getString(12);
-			String spec = rs.getString(13);
-			int nGO = rs.getInt(14);
+			double eval = rs.getDouble(i++);
+			String type = rs.getString(i++);
+			boolean bestEval = rs.getBoolean(i++);
+			boolean bestAnno = rs.getBoolean(i++);
+			boolean bestGO = rs.getBoolean(i++);
+			
+			String desc = rs.getString(i++);
+			String spec = rs.getString(i++);
+			int nGO = rs.getInt(i++);
+			int hitLen = rs.getInt(i++);
 			
 			if (nGO>0) {
 				if (bestEval || bestAnno || showGOhit[0]==null) {
@@ -216,7 +220,12 @@ public class SeqDetailsPanel extends JPanel {
 					showGOhit[2]=eval+"";
 				}
 			}
-			HitListData hd = new HitListData(hitName, pid, len, start, end,eval, type, desc, spec, 
+			double aaCov= ((double) alignlen/(double) aaLen) * 100;
+			int aCov = (int)((aaCov)+0.5);
+			double hhCov= ((double) alignlen/(double) hitLen) * 100;
+			int hCov = (int)((hhCov)+0.5);
+			
+			HitListData hd = new HitListData(hitName, pid, alignlen, aCov, hCov,eval, type, desc, spec, 
 					nGO, bestEval, bestAnno, bestGO);
 			theHitData.add(hd);
 			hitMap.put(hitName, hd);
@@ -519,7 +528,7 @@ public class SeqDetailsPanel extends JPanel {
 	 */
 	private String [] hitColumnHeadings() { 
 		String [] x = {"Hit ID", "Type", "Shared Description", "Species", "#GO", "Best", "E-value",
-				       "%Sim", "Align", "Start", "End"};
+				       "%Sim", "Align", "%aaCov", "%hitCov"}; // CAS305 was start and end
 		return x;
 	}
 	private class HitListData {
@@ -531,6 +540,7 @@ public class SeqDetailsPanel extends JPanel {
 		public static final int SORT_BY_BEST = 5;
 		public static final int SORT_BY_EVAL = 6; 
 		public static final int SORT_BY_PERCENT = 7; 
+		
 		public static final int SORT_BY_ALIGNLEN = 8;
 		public static final int SORT_BY_START = 9; 
 		public static final int SORT_BY_END = 10; 
@@ -553,7 +563,7 @@ public class SeqDetailsPanel extends JPanel {
 			else {
 				if (bestEval) 	best="EV";
 				if (bestAnno) 	best=Static.strMerge(best, "AN");
-				if (bG) 			best=Static.strMerge(best, "WG");
+				if (bG) 		best=Static.strMerge(best, "WG");
 			}
 		}
 		
@@ -565,7 +575,9 @@ public class SeqDetailsPanel extends JPanel {
 			case 3: return species;
 			case 4: return nGO;
 			case 5: return best;
-			case 6: return Out.formatDouble(dEVal); 
+			case 6: 
+				if (dEVal==0.0) return "0.0"; 
+				else return String.format("%.0E", dEVal); // CAS305 Out.formatDouble(dEVal); 
 			case 7: return nPercent;
 			case 8: return nAlignLen;
 			case 9: return nStart;
@@ -754,6 +766,7 @@ public class SeqDetailsPanel extends JPanel {
 	private DBConn mDB = null;
 	
 	private String [] showGOhit = new String [3];
+	private int aaLen=0;
 	
 	// for tag on left panel
 	private String seqName="";

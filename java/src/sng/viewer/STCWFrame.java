@@ -203,6 +203,10 @@ public class STCWFrame extends JFrame {
 			decimalTab = new DecimalNumbersTab(this);
 			tabbedPane.addTab(DecimalNumbers, decimalTab);
 			
+			blastTab = new BlastTab(this,metaData);
+			tabbedPane.addTab(Blast, blastTab);
+			MenuTreeNode blastNode = new MenuTreeNode(Blast,blastTab); // CAS305 move here
+			
 			// Contig (Sequence) query (Filter) window
 			filterContigTab = new QueryContigTab(this, new RunQuery(RunQuery.QUERY_CONTIGS));
 			tabbedPane.addTab(ContigsFilters, filterContigTab); 
@@ -236,9 +240,6 @@ public class STCWFrame extends JFrame {
 				basicGOQueryNode = new MenuTreeNode(BasicGOQuery, basicGOQueryTab);
 			}
 
-			blastTab = new BlastTab(this,metaData);
-			tabbedPane.addTab(Blast, blastTab);
-			MenuTreeNode blastNode = new MenuTreeNode(Blast,blastTab);
 			
 			//Columns for displaying query criteria on the "Sequence Results" 
 			String [] colNames = new String [] {"Result", "Filter"}; 
@@ -256,6 +257,7 @@ public class STCWFrame extends JFrame {
 			general.addChild(new MenuTreeNode(Instructions, instructionsTab));
 			general.addChild(new MenuTreeNode(Overview, overviewTab));
 			general.addChild(new MenuTreeNode(DecimalNumbers, decimalTab));
+			general.addChild(blastNode);
 			root.addChild(general);
 
 			MenuTreeNode contigHeader = new MenuTreeNode(SequenceSection);
@@ -271,7 +273,7 @@ public class STCWFrame extends JFrame {
 				basicHeader.addChild(basicHitQueryNode);
 			if (basicGOQueryNode!=null)
 				basicHeader.addChild(basicGOQueryNode);
-			basicHeader.addChild(blastNode);
+			
 			root.addChild(basicHeader);
 			
 			MenuTreeNode pairHeader = new MenuTreeNode(PairsSection);

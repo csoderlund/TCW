@@ -1,5 +1,7 @@
 package util.align;
 
+import util.methods.Out;
+
 /**
  * viewSingleTCW: align hits to sequence. align two paired sequences
  * viewMultiTCW: align two sequences. 
@@ -302,7 +304,7 @@ public class AlignPairOrig
                 i -= (nCols + 1);
                 break;
             default:
-                System.err.println ( "Error aligning sequences, may have run out of memory..." );
+                Out.die ( "Error aligning sequences, may have run out of memory..." );
             }  
         }      
     }

@@ -26,6 +26,7 @@ import cmp.compile.panels.MethodPanel;
 import cmp.compile.panels.MethodBBHPanel;
 import cmp.compile.panels.MethodOrthoMCLPanel;
 import cmp.compile.panels.MethodClosurePanel;
+import cmp.compile.panels.MethodHitPanel;
 import cmp.compile.panels.MethodLoadPanel;
 import cmp.compile.panels.CompileFrame;
 import cmp.database.Globals;
@@ -191,36 +192,31 @@ public class runMTCWMain {
 					Out.PrtError(msg);
 					continue;
 				}
+				
 				if(!methodPanel.isMethodLoadedAt(x)) {		
-					if(POGtype.equals(MethodBBHPanel.getMethodType())) {
+					if(POGtype.equals(MethodBBHPanel.getMethodType())) { 		// BBH
 						rc = new MethodBBH().run(x, mDB, theCompilePanel);
-						if (rc) cnt++; 
-						else {fail++; failed += methodPanel.getMethodPrefixAt(x) + " ";}
 					}					
-					else if(POGtype.equals(MethodOrthoMCLPanel.getMethodType())) {
-						rc = new MethodOrthoMCL().run(x, mDB, theCompilePanel);
-						if (rc) cnt++; 
-						else {fail++; failed += methodPanel.getMethodPrefixAt(x) + " ";}
-					}
-					else if(POGtype.equals(MethodClosurePanel.getMethodType())) {
+					else if(POGtype.equals(MethodClosurePanel.getMethodType())) { // Closure
 						if (bWithPivot || bWoPivot) 
 							 rc = new MethodClique().run(x, mDB, theCompilePanel, bWithPivot);
-						else rc = new MethodClosure().run(x, mDB, theCompilePanel);
-					
-						if (rc) cnt++; else fail++;
+						else rc = new MethodClosure().run(x, mDB, theCompilePanel);	
 					}
-					else if(POGtype.equals(MethodBBHPanel.getMethodType())){
-						rc = new MethodBBH().run(x, mDB, theCompilePanel);
-						if (rc) cnt++; 
-						else {fail++; failed += methodPanel.getMethodPrefixAt(x) + " ";}
+					else if(POGtype.equals(MethodHitPanel.getMethodType())) { 		// Hit CAS305
+						rc = new MethodHit().run(x, mDB, theCompilePanel);
 					}
-					else if(POGtype.equals(MethodLoadPanel.getMethodType())){
+					else if(POGtype.equals(MethodOrthoMCLPanel.getMethodType())) { // OrthoMCL
+						rc = new MethodOrthoMCL().run(x, mDB, theCompilePanel);
+					}
+					else if(POGtype.equals(MethodLoadPanel.getMethodType())){		// User Defined (Load)
 						rc = new MethodLoad(mDB).run(x, theCompilePanel);
-						if (rc) cnt++; 
-						else {fail++; failed += methodPanel.getMethodPrefixAt(x) + " ";}
 					}
 					else {
 						System.err.println("Error: cannot load unidentified type '" + POGtype + "'");
+					}
+					if (rc) cnt++; 
+					else {
+						fail++; failed += methodPanel.getMethodPrefixAt(x) + " ";
 					}
 				}
 			}
@@ -408,7 +404,6 @@ public class runMTCWMain {
 	/**************************************************************
 	 *  private
 	 ************************************************************/
-	
 	private CompileFrame theFrame = null;
 	private CompilePanel theCompilePanel = null;
 	public static HostsCfg hosts;

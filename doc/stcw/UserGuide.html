@@ -44,9 +44,9 @@ and the acronym PAVE is still found in some places as it was the original name f
 <br>&nbsp;
 			<li><a href="#anno">Annotate Sequences</a>
 			<ul>
-				<li><a href="#orf">ORF finder options</a>
 				<li><a href="#dbs">AnnoDBs and UniProt</a>
 				<li><a href="#go">GO annotation (also InterPro, EC, Pfam, KEGG) </a>
+				<li><a href="#orf">ORF finder options</a>
 				<li><a href="#sim">Similar sequences</a>
 				<li><a href="#add">Adding to annotation</a>
 				<li><a href="#loc">Adding remarks and locations</a>
@@ -478,15 +478,7 @@ from UniProt, add the associated GO annotations.
 		</ol>
 	
 <!--------------------------------------------------------------------->		
-	<a name="orf"></a>
-<h3>ORF finder options</h3>
-GC content and ORF finding is always performed when <tt class=s>Annotate</tt> is performed.
-The ORF finder uses the annoDB hits to aid in determining the best open reading frame. 
-See the <a href=ORF.html class="ext" target="_blank">ORF</a> document on the ORF finding options and
-details on how it works. If after annotation is complete, you just want to run the ORF finder, use
-the  <tt class=s>ORF only</tt> option.
 
-	<p>
     	<a name=dbs></a>
 <h3>AnnoDBs and UniProt</h3>
 The term "AnnoDB" refers to a fasta file of nucleotide or protein sequences, 
@@ -532,44 +524,55 @@ To change the default parameters, you must select a specific search program.
 You must still provide the annoDB fasta file as
 it extracts the description and species from it.
 
-
+<!-----------------------------------------------------!>
+<h3>Options</h3>
+<p>The <tt class=c>Options</tt> button below the AnnoDBs table provides additional options for:
+ <ul>
+ <li>ANNOTATION  
+  <li>ORF FINDER
+ <li>SIMILAR SEQUENCES
+ </ul>
+ The second two options are not available for TCW database created from protein sequences. 
 <table cellspacing=3>
-<tr><td valign="top">
-The <tt class=c>Options</tt> button below the AnnoDBs table provides additional options for:
-		 <ul>
-		 <li>ANNOTATION (described below). 
-		  <li>ORF FINDER (described in <a href=ORF.html class="ext" target="_blank">ORF</a>).
-		 <li>SIMILAR SEQUENCES (described below).
-		 </ul>
-		 The second two options are not available for TCW database created from protein sequences.
-		<p>
+<tr><td valign="top"> 
 
-    		<p>
+<tr><td valign="top">
 		<a name="go"></a>
-<h3>GO Database (GO, KEGG, EC, InterPro, Pfam annotations)</h3>	
+		
+<h4>GO Database (GO, KEGG, EC, InterPro, Pfam annotations)</h4>	
     	<p>
 See <a href=AnnoDBs.html class="ext" target="_blank">Annotation Setup</a> for creating the GO database.
 Once the GO database is created, it can be selected, as shown on the right. Once selected, it will display
 the available GO Slim categories in the drop-down below it; alternatively, a OBO formated file may be entered.  
     		<p>
     		
-    		
+<a name="orf"></a>
+<h4>ORF finder options</h4>
+GC content and ORF finding is always performed when <tt class=s>Annotate</tt> is performed.
+The ORF finder uses the annoDB hits to aid in determining the best open reading frame. 
+See the <a href=ORF.html class="ext" target="_blank">ORF</a> document on the ORF finding options and
+details on how it works. If after annotation is complete, you just want to run the ORF finder, use
+the  <tt class=s>ORF only</tt> option.
+
+	<p>    		
 <a name="sim"></a>		
-<h3>Similar Sequences</h3>
+<h4>Similar Sequences</h4>
 			The annotator can compare all sequences and determine the top N pairs, 
 			where their alignments can be viewed in <code>viewSingleTCW</code>. 
 			This can be helpful for assessing the stringency of an assembly by 
 			viewing how similar sequences are. 
-	
-		<p>
+
+<p>More information on all the above is provided on the <tt class=c>Annotation Options</tt> panel Help page.
+
+<td><a href="img/annoDBoptions.png"><img src="img/annoDBoptions.png" width=500 border=1>
+</table>
+<p>
+
 <a name=add></a>		
 <h3>Adding to annotation</h3>
 Additional annotation can be added at a later time; see <a href=AnnoGuide.html#update class="ext" target="_blank">Update and Redo annotation</a> 
 		in the Annotation Guide.
 
-<td><a href="img/annoDBoptions.png"><img src="img/annoDBoptions.png" width=500 border=1>
-</table>
-<p>
 
 
 	

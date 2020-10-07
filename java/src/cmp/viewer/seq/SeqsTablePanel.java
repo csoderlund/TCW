@@ -279,7 +279,7 @@ public class SeqsTablePanel extends JPanel {
 		tabName = tab;
 		
 		if (querySummary!=null) strQuerySummary = querySummary;
-		if (subQuery!=null)     strSubQuery = subQuery;
+		if (subQuery!=null)     sqlWhere = subQuery;
 
 		colSelectChange = new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -393,17 +393,17 @@ public class SeqsTablePanel extends JPanel {
 				theViewerFrame.getSeqDEList(), theViewerFrame.getMethodPrefixes());
        
         	String from, strQuery;
-        	if (strSubQuery==null || strSubQuery.equals("")) strSubQuery= " 1 ";
+        	if (sqlWhere==null || sqlWhere.equals("")) sqlWhere= " 1 ";
         	if (viewType==bGRP) { 
         		from = 	" FROM " + TABLE + " " + theFields.getJoins() + 
         				" LEFT JOIN pog_members ON pog_members.UTid = unitrans.UTid" +
-        				" WHERE " + strSubQuery;
+        				" WHERE " + sqlWhere;
         		strQuery = "SELECT " + theFields.getDBFieldQueryList() +  from +
         				" order by unitrans.UTstr"; // CAS303 group  -> order
         	}
         	else {  // join on unitrans.HITid=unique_hits.HITid
         	    from = 	" FROM " + TABLE + " " + theFields.getJoins() + 
-        				" WHERE " + strSubQuery;
+        				" WHERE " + sqlWhere;
         	    strQuery = "SELECT " + theFields.getDBFieldQueryList() + from;
         	}
         	int cnt  = mdb.executeCount("select count(*) " + from);
@@ -489,6 +489,14 @@ public class SeqsTablePanel extends JPanel {
      	String seqID =  ((String)theTableData.getValueAt(sels[0], colIndex));
      	return seqID;
     }
+	 public String getSelectedColumn2(String column) { // CAS305 for displaying if two rows selected
+	     	if(theTable.getSelectedRowCount() <= 1) return null;
+	     	
+	     	int colIndex =	theTableData.getColumnHeaderIndex(column);
+	     	int [] sels = theTable.getSelectedRows();
+	     	String seqID =  ((String)theTableData.getValueAt(sels[1], colIndex));
+	     	return seqID;
+	    }
     public String getSelectedAASeq() {
     	if(theTable.getSelectedRowCount() == 0) return null;
      	
@@ -720,7 +728,7 @@ public class SeqsTablePanel extends JPanel {
 	private JButton clearColumn = null;
 	private Thread buildThread = null;
 	    
-	private String strSubQuery = "";
+	private String sqlWhere = "";
     private String strQuerySummary = null;
 	private String tabName = "";
 	private boolean isList=false;

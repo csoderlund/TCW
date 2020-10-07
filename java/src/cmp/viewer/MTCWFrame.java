@@ -36,6 +36,7 @@ import cmp.viewer.pairs.PairTablePanel;
 import cmp.viewer.panels.DatabaseSelectPanel;
 import cmp.viewer.panels.MenuPanel;
 import cmp.viewer.panels.ResultPanel;
+import cmp.viewer.panels.BlastTab;
 import cmp.viewer.panels.TextPanel;
 import cmp.viewer.seq.SeqsQueryPanel;
 import cmp.viewer.seq.SeqsTopRowPanel;
@@ -70,15 +71,18 @@ public class MTCWFrame extends JFrame {
 	public static final String SEQ_DETAIL = "Details";
 	public static final String PAIR_TABLE = "Pairs";
 	
-	public static final String [] MAIN_SECTIONS = {"General", "Samples", "Filters", "Results"};
+	// CAS305 moved Sampled to last section; add Find Hit
+	public static final String [] MAIN_SECTIONS = {"General",  "Filters",  "Samples"};
 	private static final String [] MAIN_MENU = { 
-		">Instructions", ">Overview", ">Clusters", ">Pairs", ">Sequences", 
-		 ">Cluster", ">Pair", ">Sequence", ">List" };
+		">Instructions", ">Overview", ">Find Hits",
+		 ">Cluster", ">Pair", ">Sequence", ">List Results", 
+		 ">Clusters", ">Pairs", ">Sequences"}; // s is added to not duplicate the above set
 	private static final String [] MENU_DESCRIP = { 
-		"Basic instructions for using multiTCW", "Information about the database", 
-		"Sample set of clusters", "Sample set of pairs", "Sample set of sequences", 
-		 "Filter clusters", "Filter Pairs", "Filter sequences", "List all results" };
-
+		"Basic instructions for using multiTCW", "Information about the database",  "Run Blast or Diamond",
+		 "Filter clusters", "Filter Pairs", "Filter sequences", "List all result panels" ,
+		 "Sample set of clusters", "Sample set of pairs", "Sample set of sequences"
+		 };
+	private final int SAMP_INDEX=7;
 	private final String instructionHelp = "html/viewMultiTCW/Instructions.html";
 	private final String overviewHelp = "html/viewMultiTCW/summary.html";
 	
@@ -278,7 +282,7 @@ public class MTCWFrame extends JFrame {
 					
 					removePanel(remPanel);
 					
-					if(curPanel == remPanel)menuPanel.setSelected(resultPanel);					
+					if (curPanel == remPanel)menuPanel.setSelected(resultPanel);					
 				}
 			}
 		};
@@ -288,34 +292,34 @@ public class MTCWFrame extends JFrame {
 		overviewPanel = new TextPanel(getOverviewText(), false, overviewHelp);
 		
 		FieldData.setState(theInfo);
-		grpTablePanel = new GrpTablePanel(this, MAIN_MENU[2]);
-		pairTablePanel = new PairTablePanel(this, MAIN_MENU[3]);
-		seqTablePanel = new SeqsTopRowPanel(this, MAIN_MENU[4]);
+		grpTablePanel = new GrpTablePanel(this,   MAIN_MENU[SAMP_INDEX]); // have to go before the query panels
+		pairTablePanel = new PairTablePanel(this, MAIN_MENU[SAMP_INDEX+1]);
+		seqTablePanel = new SeqsTopRowPanel(this, MAIN_MENU[SAMP_INDEX+2]);
 		grpQueryPanel = new GrpQueryPanel(this);
 		pairQueryPanel = new PairQueryPanel(this);
 		seqQueryPanel = new SeqsQueryPanel(this);
 		resultPanel = new ResultPanel(this);
+		blastPanel = new BlastTab(this);
 
+		int i=0, s=0;
 		JPanel general = Static.createRowPanel();
-		menuPanel.addTopItem(general, MAIN_SECTIONS[0], "General: Select a > item");
-		menuPanel.addMenuItem(general, instructionsPanel, MAIN_MENU[0], MENU_DESCRIP[0]);
-		menuPanel.addMenuItem(general, overviewPanel, MAIN_MENU[1], MENU_DESCRIP[1]);
-		
-		JPanel list = Static.createRowPanel();
-		menuPanel.addTopItem(list, MAIN_SECTIONS[1], "Sample: Select a > item");
-		menuPanel.addMenuItem(list, grpTablePanel, MAIN_MENU[2], MENU_DESCRIP[2]);
-		menuPanel.addMenuItem(list, pairTablePanel, MAIN_MENU[3], MENU_DESCRIP[3]);
-		menuPanel.addMenuItem(list, seqTablePanel, MAIN_MENU[4], MENU_DESCRIP[4]);
+		menuPanel.addTopItem(general, MAIN_SECTIONS[s++], "General: Select a > item");
+		menuPanel.addMenuItem(general, instructionsPanel, MAIN_MENU[i], MENU_DESCRIP[i++]);
+		menuPanel.addMenuItem(general, overviewPanel,     MAIN_MENU[i], MENU_DESCRIP[i++]);
+		menuPanel.addMenuItem(general, blastPanel,  MAIN_MENU[i], MENU_DESCRIP[i++]);
 		
 		JPanel filter = Static.createRowPanel();
-		menuPanel.addTopItem(filter, MAIN_SECTIONS[2], "Filter: Select a > item");
-		menuPanel.addMenuItem(filter, grpQueryPanel, MAIN_MENU[5], MENU_DESCRIP[5]);
-		menuPanel.addMenuItem(filter, pairQueryPanel, MAIN_MENU[6], MENU_DESCRIP[6]);
-		menuPanel.addMenuItem(filter, seqQueryPanel, MAIN_MENU[7], MENU_DESCRIP[7]);
+		menuPanel.addTopItem(filter, MAIN_SECTIONS[s++], "Filter: Select a > item");
+		menuPanel.addMenuItem(filter, grpQueryPanel,  MAIN_MENU[i], MENU_DESCRIP[i++]);
+		menuPanel.addMenuItem(filter, pairQueryPanel, MAIN_MENU[i], MENU_DESCRIP[i++]);
+		menuPanel.addMenuItem(filter, seqQueryPanel,  MAIN_MENU[i], MENU_DESCRIP[i++]);
+		menuPanel.addMenuItem(filter, resultPanel, MAIN_MENU[i], MENU_DESCRIP[i++]);
 		
-		JPanel result = Static.createRowPanel();
-		menuPanel.addTopItem(result, MAIN_SECTIONS[3], "Result: Select a > item");
-		menuPanel.addMenuItem(result, resultPanel, MAIN_MENU[8], MENU_DESCRIP[8]);
+		JPanel list = Static.createRowPanel();
+		menuPanel.addTopItem(list, MAIN_SECTIONS[s++], "Sample: Select a > item");
+		menuPanel.addMenuItem(list, grpTablePanel,  MAIN_MENU[i], MENU_DESCRIP[i++]);
+		menuPanel.addMenuItem(list, pairTablePanel, MAIN_MENU[i], MENU_DESCRIP[i++]);
+		menuPanel.addMenuItem(list, seqTablePanel,  MAIN_MENU[i], MENU_DESCRIP[i++]);
 		
 		//Add all panels to the main
 		mainPanel.add(instructionsPanel);
@@ -327,6 +331,7 @@ public class MTCWFrame extends JFrame {
 		mainPanel.add(pairQueryPanel);
 		mainPanel.add(seqQueryPanel);
 		mainPanel.add(resultPanel);
+		mainPanel.add(blastPanel);
 		menuPanel.setSelected(overviewPanel);
 		
 		sPane = new JScrollPane(menuPanel);
@@ -579,4 +584,5 @@ public class MTCWFrame extends JFrame {
 	private SeqsQueryPanel seqQueryPanel = null;
 	private PairQueryPanel pairQueryPanel = null;
 	private ResultPanel resultPanel = null;
+	private BlastTab blastPanel = null;
 }

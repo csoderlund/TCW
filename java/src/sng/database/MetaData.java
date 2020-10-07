@@ -132,10 +132,18 @@ public class MetaData {
 		 			seqLibTitles[i++] = rs.getString(2);
 		 		}
 		 	}
-		 	// Count Sets
-		 	cnt = mDB.executeCount("select count(*) from library where ctglib=0");
+		 	/***********************************************
+		 	 * 					assmOnly	seqOnly		assm+exp	exp
+		 	 * ctglib=1			0			0			1			1		has count file
+		 	 * clone_exp		0			0			1			1		counts to trans
+		 	 * contig_counts	1			0			1			0		assembled counts
+		 	 * Can only have DE if there are count files with conditions
+		 	 */ 
+		 	cnt = mDB.executeCount("select count(*) from library where ctglib=1"); // CAS305 was ctglib=0, always true
 		 	if (cnt>0) {
 		 		bHasExpLevels = true;
+		 		
+		 		cnt = mDB.executeCount("select count(*) from library where ctglib=0");
 		 		expLibNames = new String [cnt];
 		 		expLibTitles = new String [cnt];
 		 		rs = mDB.executeQuery("select libid, title from library where ctglib=0");

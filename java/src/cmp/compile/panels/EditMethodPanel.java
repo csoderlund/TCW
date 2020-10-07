@@ -23,12 +23,16 @@ import cmp.database.Globals;
 
 public class EditMethodPanel extends JPanel {
 	public static String LBLPREFIX = "Required (unique, 5 char max)";
+	private String helpHTML =  "html/runMultiTCW/EditMethodPanel.html";
 	private int maxPrefix = 5;
 	
 	private static final long serialVersionUID = -3057836165213279944L;
-	private final short OM = 2;
-	private final short TR = 1;
+	
 	private final short BB = 0;
+	private final short TR = 1;
+	private final short HT = 2;
+	private final short OM = 3;
+	private final short UD = 4;
 
 	public EditMethodPanel(CompilePanel parentPanel) {
 		theCompilePanel = parentPanel;
@@ -42,8 +46,13 @@ public class EditMethodPanel extends JPanel {
 		row1.add(Box.createHorizontalStrut(5));
 		
 		// Dropdown of methods: order must match numbers assigned to OR, TR, BB
-		String [] labels = {MethodBBHPanel.getMethodType(),MethodClosurePanel.getMethodType(),
-				MethodOrthoMCLPanel.getMethodType(),MethodLoadPanel.getMethodType()};
+		String [] labels = {
+				MethodBBHPanel.getMethodType(),
+				MethodClosurePanel.getMethodType(),
+				MethodHitPanel.getMethodType(),
+				MethodOrthoMCLPanel.getMethodType(),
+				MethodLoadPanel.getMethodType()};
+		
 		cmbMode =  new ButtonComboBox();
 		cmbMode.addItems(labels);
 		cmbMode.addActionListener(new ActionListener() {
@@ -60,15 +69,18 @@ public class EditMethodPanel extends JPanel {
 		
 		// One of these is listed here.
 		// The Prefix, Name, Remark and parameters are created in the following 4 classes
-		pnlOrtho = new MethodOrthoMCLPanel(theCompilePanel);
-		pnlTrans = new MethodClosurePanel(theCompilePanel);
+		
 		pnlBBH =   new MethodBBHPanel(theCompilePanel);
-		pnlCust  = new MethodLoadPanel(theCompilePanel);
+		pnlTrans = new MethodClosurePanel(theCompilePanel);
+		pnlHit = new MethodHitPanel(theCompilePanel);
+		pnlOrtho = new MethodOrthoMCLPanel(theCompilePanel);
+		pnlLoad  = new MethodLoadPanel(theCompilePanel);
 
-		add(pnlOrtho);
-		add(pnlTrans);
 		add(pnlBBH);
-		add(pnlCust);
+		add(pnlTrans);
+		add(pnlHit);
+		add(pnlOrtho);
+		add(pnlLoad);
 		
 		// button row of buttons
 		JPanel buttonPanel = Static.createRowPanel();
@@ -97,7 +109,7 @@ public class EditMethodPanel extends JPanel {
 		btnHelp.setBackground(Globals.HELPCOLOR);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(theCompilePanel.getParentFrame(), "Edit method", "html/runMultiTCW/EditMethodPanel.html");
+				UserPrompt.displayHTMLResourceHelp(theCompilePanel.getParentFrame(), "Edit method",helpHTML);
 			}
 		});
 		buttonPanel.add(btnHelp);
@@ -118,11 +130,12 @@ public class EditMethodPanel extends JPanel {
 	private void keep() {
 		boolean isValid = true;
 		String prefix = getPrefix();
-		String cmt = getComment();
+		String comment = getComment();
+		int nMethod = cmbMode.getSelectedIndex();
 		
 		isValid = checkBBH();
 		
-	// Prefix
+	// Prefix  - for all
 		if(prefix.length() > maxPrefix) {
 			String msg = "Prefix too long. Must be less than " + maxPrefix + " characters";
 			JOptionPane.showMessageDialog(theCompilePanel, msg,
@@ -161,10 +174,9 @@ public class EditMethodPanel extends JPanel {
 				}
 			}
 			if(isValid) {
-				theCompilePanel.getMethodPanel().setRow(row, getMethodType(), prefix, cmt, getSettings());
-				if(bLoadedInDB) {
-					theCompilePanel.dbAddMethodRemark(prefix, cmt);
-				}
+				theCompilePanel.getMethodPanel().setRow(row, getMethodType(), prefix, comment, getSettings());
+				if(bLoadedInDB) 
+					theCompilePanel.dbAddMethodRemark(prefix, comment);
 			}
 		}
 		else {
@@ -179,7 +191,7 @@ public class EditMethodPanel extends JPanel {
 			}
 		}
 	// Comment
-		if (cmt.contains("'") || cmt.contains("\"") || cmt.contains("="))
+		if (comment.contains("'") || comment.contains("\"") || comment.contains("="))
 		{
 			String msg = "Remark cannot contain quotes or the '=' sign.";
 			JOptionPane.showMessageDialog(theCompilePanel, msg,
@@ -192,20 +204,20 @@ public class EditMethodPanel extends JPanel {
 		String type = getSearchType();
 		if (theCompilePanel.dbIsExist() && type.equals("NT")) {
 			int n = theCompilePanel.getNumNTdb();
-			int t = cmbMode.getSelectedIndex();
-			if (n<2 &&  t==BB) {
+			
+			if (n<2 &&  nMethod==BB) {
 				JOptionPane.showMessageDialog(theCompilePanel, 
 						"Must have at least two nucleotide singleTCW databases", 
 						"Nucleotide BBH", JOptionPane.PLAIN_MESSAGE);
 				isValid = false;
 			}
-			if (n==0 &&  t==TR) {
+			if (n==0 &&  nMethod==TR) {
 				JOptionPane.showMessageDialog(theCompilePanel, 
 						"No nucleotide singleTCW databases loaded -- must have at one", 
 						"Nucleotide TR", JOptionPane.PLAIN_MESSAGE);
 				isValid = false;
 			}
-			if (n<2 &&  t==TR) {
+			if (n<2 &&  nMethod==TR) {
 				if(JOptionPane.showConfirmDialog(theCompilePanel, 
 						"Only one Nucleotide singleTCW loaded.\nContinue?", 
 						"Nucleotide TR", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE) 
@@ -213,11 +225,20 @@ public class EditMethodPanel extends JPanel {
 				isValid = false;
 			}
 		}
+		
+	// User defined
+		if (nMethod==UD) {
+			if (!pnlLoad.hasValidFile()) {
+				JOptionPane.showMessageDialog(theCompilePanel, "Must enter an existing file name",
+						"Invalid file", JOptionPane.PLAIN_MESSAGE);
+				isValid = false;
+			}
+		}
 		if(isValid) {
 			if(!bEditMode) {
 				MethodPanel mPnl = theCompilePanel.getMethodPanel();
 				String method =  cmbMode.getSelectedItem();
-				mPnl.addRow(method, prefix, cmt, getSettings());
+				mPnl.addRow(method, prefix, comment, getSettings());
 			}
 			theCompilePanel.getMethodPanel().updateTable();
 			theCompilePanel.mTCWcfgSave();
@@ -236,24 +257,27 @@ public class EditMethodPanel extends JPanel {
 		cmbMode.setEnabled(!loaded);
 		int sel = cmbMode.getSelectedIndex();
 		
-		if(sel == OM) pnlOrtho.setLoaded(bLoadedInDB);
-		else if(sel == TR) pnlTrans.setLoaded(bLoadedInDB);
+		if(sel == TR) pnlTrans.setLoaded(bLoadedInDB);
 		else if(sel == BB) pnlBBH.setLoaded(bLoadedInDB);
-		else pnlCust.setLoaded(bLoadedInDB);
+		else if(sel == HT) pnlHit.setLoaded(bLoadedInDB);
+		else if(sel == OM) pnlOrtho.setLoaded(bLoadedInDB);
+		else pnlLoad.setLoaded(bLoadedInDB);
 	}
 
 	private void updateMode() {
-		pnlOrtho.setVisible(false);
-		pnlTrans.setVisible(false);
 		pnlBBH.setVisible(false);
-		pnlCust.setVisible(false);
+		pnlTrans.setVisible(false);
+		pnlHit.setVisible(false);
+		pnlOrtho.setVisible(false);
+		pnlLoad.setVisible(false);
 		
 		int sel = cmbMode.getSelectedIndex();
 		
-		if (sel == OM)      pnlOrtho.setVisible(true);
+		if (sel == BB)      pnlBBH.setVisible(true);
 		else if (sel == TR) pnlTrans.setVisible(true);
-		else if (sel == BB) pnlBBH.setVisible(true);
-		else                pnlCust.setVisible(true);
+		else if (sel == HT) pnlHit.setVisible(true);
+		else if (sel == OM) pnlOrtho.setVisible(true);
+		else                pnlLoad.setVisible(true);
 	}
 	
 	public String getMethodType() { return  cmbMode.getSelectedItem(); }
@@ -285,37 +309,42 @@ public class EditMethodPanel extends JPanel {
 	private String getPrefix() { 
 		int sel = cmbMode.getSelectedIndex();
 		
-		if (sel == OM) return pnlOrtho.getPrefix();
 		if (sel == TR) return pnlTrans.getPrefix();
 		if (sel == BB) return pnlBBH.getPrefix();
-		return pnlCust.getPrefix();
+		if (sel == HT) return pnlHit.getPrefix();
+		if (sel == OM) return pnlOrtho.getPrefix();
+		return pnlLoad.getPrefix();
 	}
 	
 	public void setPrefix(String prefix) { 
 		int sel = cmbMode.getSelectedIndex();
 		
-		if (sel == OM) pnlOrtho.setPrefix(prefix);
+		if (sel == HT) pnlHit.setPrefix(prefix);
 		else if (sel == TR) pnlTrans.setPrefix(prefix);
 		else if (sel == BB) pnlBBH.setPrefix(prefix);
-		else pnlCust.setPrefix(prefix);
+		else if (sel == OM) pnlOrtho.setPrefix(prefix);
+		else pnlLoad.setPrefix(prefix);
 	}
 	
 	private String getComment() {
 		int sel = cmbMode.getSelectedIndex();
 		
-		if (sel == OM) return pnlOrtho.getComment();
 		if (sel == TR) return pnlTrans.getComment();
 		if (sel == BB) return pnlBBH.getComment();
-		return pnlCust.getComment();
+		if (sel == HT) return pnlHit.getComment();
+		if (sel == OM) return pnlOrtho.getComment();
+		return pnlLoad.getComment();
 	}
 
 	private String getSettings() {
 		int sel = cmbMode.getSelectedIndex();
 		
-		if(sel == OM) return pnlOrtho.getSettings();
 		if(sel == TR) return pnlTrans.getSettings();
 		if(sel == BB) return pnlBBH.getSettings();
-		return pnlCust.getSettings();
+		if(sel == HT) return pnlHit.getSettings();
+		if(sel == OM) return pnlOrtho.getSettings();
+		
+		return pnlLoad.getSettings();
 	}
 	
 	public void setSettings(String settings) {
@@ -324,14 +353,16 @@ public class EditMethodPanel extends JPanel {
 		if(sel == OM) pnlOrtho.setSettings(settings);
 		else if(sel == TR) pnlTrans.setSettings(settings);
 		else if(sel == BB) pnlBBH.setSettings(settings);
-		else pnlCust.setSettings(settings);
+		else if (sel == HT) pnlHit.setSettings(settings);
+		else pnlLoad.setSettings(settings);
 	}
 	
 	public void resetSettings() {
 		pnlOrtho.resetSettings();
 		pnlTrans.resetSettings();
 		pnlBBH.resetSettings();
-		pnlCust.resetSettings();
+		pnlLoad.resetSettings();
+		pnlHit.resetSettings();
 	}
 	
 	private CompilePanel theCompilePanel = null;
@@ -340,7 +371,8 @@ public class EditMethodPanel extends JPanel {
 	private MethodBBHPanel pnlBBH = null;
 	private MethodOrthoMCLPanel pnlOrtho = null;
 	private MethodClosurePanel pnlTrans = null;
-	private MethodLoadPanel pnlCust = null;
+	private MethodHitPanel pnlHit = null;
+	private MethodLoadPanel pnlLoad = null;
 	private JButton btnKeep = null;
 	private JButton btnDiscard = null;
 	private JButton btnHelp = null;

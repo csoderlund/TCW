@@ -42,7 +42,7 @@ public class MethodClosure {
 		Out.PrtSpMsg(1, "");
 		 
 		if (bSuccess) 
-			if (! new MethodLoad(cmpDBC).run(idx, groupFile, cmpPanel)) // loads the file just written
+			if (new MethodLoad(cmpDBC).run(idx, groupFile, cmpPanel)==-1) // loads the file just written
 				bSuccess=false;
 				
 		Out.PrtDateMsgTime("Finish execution of " + Globals.Methods.Closure.TYPE_NAME, allTime);
@@ -50,8 +50,10 @@ public class MethodClosure {
 	}
 	
 	private boolean setParams(int idx, DBConn db, CompilePanel panel) {
+		cmpDBC = db;
+		cmpPanel = panel;
+		
 		MethodPanel theMethod = panel.getMethodPanel();
-		String comment = theMethod.getCommentAt(idx);
 		String [] settings = theMethod.getSettingsAt(idx).split(":");
 
 		prefix = theMethod.getMethodPrefixAt(idx);						// Groups should be prefixed with this
@@ -70,17 +72,13 @@ public class MethodClosure {
 			Out.PrtError("Bad type " + x + " must be 0 or 1");
 			return false;
 		}
-		cmpDBC = db;
-		cmpPanel = panel;
 		
-		String root = cmpPanel.getCurProjMethodDir() + "/" + groupFile + 
-				"." + prefix + "_" + covCutoff + "-" + simCutoff;
+		String root = cmpPanel.getCurProjMethodDir() + groupFile + "." + prefix + "_" + covCutoff + "-" + simCutoff;
 		groupFile = root;
 		
 		Out.PrtSpMsg(1, "Prefix:     " + prefix);
 		Out.PrtSpMsg(1, "Coverage:   " + covCutoff + " (" + covTypes[covMode] + ")");
 		Out.PrtSpMsg(1, "Similarity: " + simCutoff);
-		Out.PrtSpMsg(1, "Remark:     " + comment);
 		Out.PrtSpMsg(1, "");
 		
 		if (type == 1 && panel.getNumNTdb()<=0) {
@@ -116,9 +114,9 @@ public class MethodClosure {
 			String seq1=rs.getString(1);
 			String seq2=rs.getString(2);
 			double eval = rs.getDouble(3);
-			int sim = rs.getInt(4);
-			int olap1 = rs.getInt(5);
-			int olap2 = rs.getInt(6);
+			int sim =   (int) (rs.getDouble(4)+0.5); // CAS305 was not rounding
+			int olap1 = (int) (rs.getDouble(5)+0.5); // CAS305 was not rounding
+			int olap2 = (int) (rs.getDouble(6)+0.5); // CAS305 was not rounding
 			int bit   = rs.getInt(7);
 			int aaBest = (type==0) ? rs.getInt(8) : 0;
 			
@@ -157,7 +155,7 @@ public class MethodClosure {
 		while (rs.next()) asmMap.put(rs.getInt(1), rs.getString(2));
 		rs.close();
 	}
-	catch (Exception e) {ErrorReport.die(e, "readLengths"); bSuccess=false;}
+	catch (Exception e) {ErrorReport.die(e, "load data from DB"); bSuccess=false;}
 	}
 	
 	/***********************************************************

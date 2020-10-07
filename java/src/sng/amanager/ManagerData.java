@@ -727,6 +727,10 @@ public class ManagerData {
 		// Assign best anno
 		public void setSPpref(String b) {strSPpref=b;}
 		public String getSPpref() { return strSPpref;}
+		
+		public void setRmECO(String b) {strRmECO=b;} // CAS305
+		public String getRmECO() { return strRmECO;}
+
 
 		// similarity
 		public void setTSelfBlast(String filename) { strTSelfBlast = filename; }
@@ -786,6 +790,7 @@ public class ManagerData {
 		private String strORFtrainCDSfile="";
 		
 		private String strSPpref=Globals.pSP_PREF; // 0/1
+		private String strRmECO=Globals.pRM_ECO; // 0/1
 	}
 	public class AsmData {
 		public void setClique(String clique) { strClique = clique; }
@@ -1091,6 +1096,7 @@ public class ManagerData {
 				theProps = new TCWprops(TCWprops.PropType.Annotate);
 				out.write("# Annotation\n");
 				if (annoObj.strSPpref.equals("1")) out.write("Anno_SwissProt_pref = 1\n"); 
+				if (annoObj.strRmECO.equals("0"))  out.write("Anno_Remove_ECO = 0\n"); 
 				
 				if (annoObj.strORFaltStart.equals("1")) out.write("Anno_ORF_alt_start = 1\n");
 				
@@ -1217,11 +1223,8 @@ public class ManagerData {
 		
 		private boolean readSTCWkeyVal(String key, String value, AnnodbData [] annoArray) {
 			boolean isSel=true, isAnnoDB=false;
-			if (key.startsWith("JPAVE")) key = key.replace("JPAVE", "Anno");
 			
-			if(key.equalsIgnoreCase("AssemblyID"))	strAssemblyID = value;
-			else if(key.equalsIgnoreCase("SingleID"))strAssemblyID = value;
-			else if(key.equalsIgnoreCase("PAVE_db"))	strTCWdb = value;
+			if(key.equalsIgnoreCase("SingleID"))strAssemblyID = value;
 			else if(key.equalsIgnoreCase("STCW_db"))	strTCWdb = value;
 			else if(key.equalsIgnoreCase("CPUs"))	nCPUs = Integer.parseInt(value);
 			
@@ -1230,17 +1233,17 @@ public class ManagerData {
 				if(value.equals("1"))	bSkipAssembly = true;
 				else	 bSkipAssembly = false;
 			}
-			else if(key.equalsIgnoreCase("USE_TRANS_NAME")) 		bUseTransNames = value.equals("1");
+			else if(key.equalsIgnoreCase("USE_TRANS_NAME")) 	bUseTransNames = value.equals("1");
 			else if(key.equalsIgnoreCase("CLIQUE"))				asmObj.strClique = value;
 			else if(key.equalsIgnoreCase("CLIQUE_BLAST_EVAL"))	asmObj.strCliqueBlastEval = value;
-			else if(key.equalsIgnoreCase("CLIQUE_BLAST_PARAMS"))	asmObj.strCliqueBlastParam = value;
+			else if(key.equalsIgnoreCase("CLIQUE_BLAST_PARAMS"))asmObj.strCliqueBlastParam = value;
 			else if(key.equalsIgnoreCase("SELF_JOIN"))			asmObj.strSelfJoin = value;
-			else if(key.equalsIgnoreCase("BURY_BLAST_EVAL"))		asmObj.strBuryBlastEval = value;
-			else if(key.equalsIgnoreCase("BURY_BLAST_IDENTITY"))	asmObj.strBuryBlastEval = value;
+			else if(key.equalsIgnoreCase("BURY_BLAST_EVAL"))	asmObj.strBuryBlastEval = value;
+			else if(key.equalsIgnoreCase("BURY_BLAST_IDENTITY"))asmObj.strBuryBlastEval = value;
 			else if(key.equalsIgnoreCase("BURY_BLAST_PARAMS"))	asmObj.strBuryBlastEval = value;
 			else if(key.equalsIgnoreCase("CAP_ARGS"))			asmObj.strCAPArgs = value;
 			else if(key.equalsIgnoreCase("TC_BLAST_EVAL"))		asmObj.strTCBlastEval = value;
-			else if(key.equalsIgnoreCase("TC_BLAST_PARAMS"))		asmObj.strTCBlastParams = value;
+			else if(key.equalsIgnoreCase("TC_BLAST_PARAMS"))	asmObj.strTCBlastParams = value;
 			else if(key.equalsIgnoreCase("User_EST_selfblast"))	asmObj.strUserESTSelfBlast = value;
 			else if(key.matches("TC[0-9]+")) 					asmObj.tcList.add(value);
 			
@@ -1249,6 +1252,14 @@ public class ManagerData {
 				if (value.equals("1") || value.equals("0")) annoObj.strSPpref = value;
 				else {
 					Out.PrtWarn("Anno_SwissProt_pref must be 0 or 1 - ignore line");
+					cntErrors++;
+				}
+			}
+			// Remove {ECO.....
+			else if(key.equalsIgnoreCase("Anno_Remove_ECO")) { 
+				if (value.equals("1") || value.equals("0")) annoObj.strRmECO = value;
+				else {
+					Out.PrtWarn("Anno_Remove_ECO must be 0 or 1 - ignore line");
 					cntErrors++;
 				}
 			}
@@ -1303,7 +1314,6 @@ public class ManagerData {
 				isSel = false;
 				key = key.substring(1);
 			}
-			if (key.startsWith("JPAVE")) key = key.replace("JPAVE", "Anno"); 
 			
 			Pattern fasta =  Pattern.compile("Anno_(\\w+)_(\\d+)"); 
 			Matcher x = fasta.matcher(key);
@@ -1399,15 +1409,14 @@ public class ManagerData {
 					if(lineVal.length < 2)  continue;
 					
 					key = lineVal[0].trim();
-					if (key.startsWith("JPAVE")) key = key.replace("JPAVE", "Anno");
 					value = lineVal[1].trim();
 						
 					if(key.startsWith("Anno_DBtaxo_") || key.startsWith("Anno_DBfasta_") || 
 					   key.startsWith("Anno_unitrans_DBblast_") ||
 					   key.startsWith("Anno_DBargs_") || 
 					   key.startsWith("Anno_DBdate_") || key.startsWith("Anno_DBsearch_pgm_") ||
-					   key.startsWith("Anno_GO_DB") || key.startsWith("Anno_SwissProt")
-					   )	{
+					   key.startsWith("Anno_GO_DB") || key.startsWith("Anno_SwissProt"))
+					{
 						readSTCWkeyVal(key, value, tempAnnos);	
 					}
 				}

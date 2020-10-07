@@ -128,7 +128,7 @@ public class StatsPanel extends JPanel {
 			
 			if (doAlign) 	pairObj.saveStatsAndKaKsWrite(doWriteKaKs);
 			
-			if (doReadKaKs) 	pairObj.saveKaKsRead();
+			if (doReadKaKs) 	pairObj.loadKaKsRead();
 			
 			if (doMulti) new MultiStats(theCompilePanel.getDBconn()).scoreAll();
 			

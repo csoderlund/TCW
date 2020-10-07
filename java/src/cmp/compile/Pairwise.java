@@ -77,7 +77,7 @@ public class Pairwise {
 	 * The files were written with seqName1:seqName2, where seqName1<seqName2; 
 	 * KaKs_calculator writes them the same way.
 	 */
-	public void saveKaKsRead() {
+	public void loadKaKsRead() {
 		String line="";
 		try {
 			String dirKaKs = theCompilePanel.getCurProjRelDir() + Globals.KaKsDIR;
@@ -107,11 +107,13 @@ public class Pairwise {
 		 		Out.PrtSpMsg(1, "Read " + file + "           ");
 		 		BufferedReader reader = new BufferedReader ( new FileReader ( path ) );
 		 		
+		 		int cntLine=0;
 		 		line = reader.readLine(); // header
 				while ((line = reader.readLine()) != null) 
 				{
 					if (line.trim().equals("")) continue;
 					
+					cntLine++;
 					String [] tok = line.split("\\s+");
 					if (tok.length<9) {
 						Out.PrtWarn("Cannot parse line #" + cnt + " : " + line);
@@ -124,6 +126,10 @@ public class Pairwise {
 						continue;
 					}
 					String [] name = tok[0].split(":");
+					if (name.length<2) { // CAS305
+						Out.PrtError(cntLine + ". Missing names:  " + tok[0] + " (" + line + ")");
+						continue;
+					}
 					String UTstr1=name[0], UTstr2=name[1];
 					if (UTstr1.compareToIgnoreCase(UTstr2)>0) {
 						Out.PrtError("seqID1 must be less than seqID2: " + tok[0]);
@@ -207,8 +213,6 @@ public class Pairwise {
 			DBConn mDB = theCompilePanel.getDBconn();
 			Out.PrtSpMsg(1, "Add pairs to database from " + hitFile);
 		
-			boolean hasNT = theCompilePanel.getDBInfo().nNTdb()>0;
-			
 			HashMap <String, Seq> seqNameMap = new HashMap <String, Seq> (); //  sequence hit info
 			HashMap <String, Boolean> pairMap = new HashMap <String, Boolean> (); // name1|name2
 			int nAsm = mDB.executeCount("select max(ASMid) from assembly");
@@ -225,11 +229,11 @@ public class Pairwise {
 				int len = (isAA) ?  rs.getInt(5) :  rs.getInt(4);
 				
 				int nPairs=rs.getInt(6);
+				int s = rs.getInt(7);
+				int e = rs.getInt(8);
 				
-				int cdsLen = len;  
-				if (hasNT) {
-					cdsLen = Math.abs(rs.getInt(7)-rs.getInt(8))+1;
-				}
+				int cdsLen = (e>0) ? Math.abs(s-e)+1 : 0;  // CAS305 if NT and AA, the AA cdsLen was 1
+				
 				Seq seq = new Seq(seqName, seqID, asmID, len, nPairs, cdsLen, nAsm);
 				seqNameMap.put(seqName, seq);
 			}
@@ -340,7 +344,7 @@ public class Pairwise {
 				Seq seq2 =  seqNameMap.get(name2);
 				
 				double dsim = 	Double.parseDouble(tokens[2]);
-				int align = 		Integer.parseInt(tokens[3]);
+				int align = 	Integer.parseInt(tokens[3]);
 				int gap = 		Integer.parseInt(tokens[5]);
 				double eval = 	Double.parseDouble(tokens[10]);
 				int bit = (int) (Double.parseDouble(tokens[11])+0.5);
@@ -639,7 +643,7 @@ public class Pairwise {
 								 prefix + "=? where UTid1=? and UTid2=? ");
 			mDB.openTransaction(); 
 			
-			int cntUp=0, cntAdd=0, cntAllPairs=0;
+			int cntUp=0, cntNotPair=0, cntAllPairs=0;
 			for (int gid : grpMap.keySet()) {
 				Grp grp = grpMap.get(gid);
 				int [] seqID = new int [grp.cnt];
@@ -676,13 +680,12 @@ public class Pairwise {
 								ps.execute();
 								cntUp++; 
 							}
-							else cntAdd++;
+							else {
+								cntNotPair++;
+							}
 						}
 						cntAllPairs++; 
-						if (cntAllPairs%100==0) {
-							if (cntAdd>0) Out.r("processed " + cntAllPairs + " (" + cntUp + "," + cntAdd + ")");
-							else Out.r("processed " + cntAllPairs);
-						}
+						if (cntAllPairs%10000==0) Out.r("processed " + cntAllPairs);
 					}
 				}
 			}
@@ -697,7 +700,7 @@ public class Pairwise {
 				return;
 			}
 			Out.PrtSpCntMsg(2, cntUp, " updated pairs with method");
-			if (cntAdd>0) Out.PrtSpCntMsg(2, cntAdd, " not in hit file -- not added");
+			Out.PrtSpCntMsgZero(2, cntNotPair, " pairs in clusters together, but not a hit pair");
 			
 			if (theCompilePanel.getDBInfo().hasPCC())
 				new PCC().addPCCforNewMethod(PMid); // if PCC computed, not added to new Methods

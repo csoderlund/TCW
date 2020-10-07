@@ -71,7 +71,7 @@ public class SeqsQueryPanel extends JPanel {
 		btnSearch.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				hasError=false;
-				setSubQuery();
+				seqSQLwhere();
 				if (!hasError) {
 					SeqsTopRowPanel newPanel = new SeqsTopRowPanel(theViewerFrame, 
 						tag + theViewerFrame.getNextLabelNum(tag));
@@ -133,9 +133,23 @@ public class SeqsQueryPanel extends JPanel {
 		JPanel page = Static.createPagePanel();
 	
 		JPanel row = Static.createRowPanel();
-		txtSeqID = new Substring("Seq ID (substring)", "Seq ID", 	"unitrans.UTstr", 
+		txtSeqID = new Substring("Seq ID", "Seq ID", 	"unitrans.UTstr", 
 				"Show all sequences with the substring in their seqIDs");
 		row.add(txtSeqID);
+		page.add(row);
+		page.add(Box.createVerticalStrut(5));
+		
+		row = Static.createRowPanel();
+		txtHitID = new Substring("Best Hit ID", "Hit ID", 	"unitrans.HITstr", 
+				"Show all sequences with the substring in their best HitID");
+		row.add(txtHitID);
+		page.add(row);
+		page.add(Box.createVerticalStrut(5));
+		
+		row = Static.createRowPanel();
+		txtDesc = new Substring("Description", "Descript", 	"unique_hits.description", 
+				"Show all sequences with the substring in their best description");
+		row.add(txtDesc);
 		page.add(row);
 		page.add(Box.createVerticalStrut(5));
 		
@@ -335,37 +349,42 @@ public class SeqsQueryPanel extends JPanel {
 		radDcAnno.setSelected(true);
 		radDcAA.setSelected(true);
 		radDcGO.setSelected(true);
-		txtSeqID.clear();
+		txtSeqID.clear(); txtHitID.clear(); txtDesc.clear();
 		for (int i=0; i<nMethods; i++) radDcGrp[i].setSelected(true);
 		radAndPKM.setSelected(true);
 		for (int i=0; i<rgPKM.length; i++) rgPKM[i].clear();
 	}
 	
-	//Called by main frame to query the database
-	public void setSubQuery() {
-		query = "";
+	/*****************************************
+	 * SeqTablePanel.buildQueryStr adds join on unitrans.HITid=unique_hits.HITid
+	 */
+	private void seqSQLwhere() {
+		sqlWhere = "";
 		
 		// Basic
-		query = Static.combineBool(query, txtSeqID.getSQL());
+		sqlWhere = Static.combineBool(sqlWhere, txtSeqID.getSQL());
+		sqlWhere = Static.combineBool(sqlWhere, txtHitID.getSQL());
+		sqlWhere = Static.combineBool(sqlWhere, txtDesc.getSQL());
+		
 		if (radYesAA.isSelected()) {
-			query = Static.combineBool(query, "unitrans.nPairs>0");
+			sqlWhere = Static.combineBool(sqlWhere, "unitrans.nPairs>0");
 		}
 		else if (radNoAA.isSelected()) {
-			query = Static.combineBool(query, "unitrans.nPairs=0");
+			sqlWhere = Static.combineBool(sqlWhere, "unitrans.nPairs=0");
 		}
 		
 		if (radYesAnno.isSelected()) {
-			query = Static.combineBool(query, "unitrans.hitID>0");
+			sqlWhere = Static.combineBool(sqlWhere, "unitrans.hitID>0");
 		}
 		else if (radNoAnno.isSelected()) {
-			query = Static.combineBool(query, "unitrans.hitID=0");
+			sqlWhere = Static.combineBool(sqlWhere, "unitrans.hitID=0");
 		}
 		
 		if (radYesGO.isSelected()) {
-			query = Static.combineBool(query, "unique_hits.nGO>0");
+			sqlWhere = Static.combineBool(sqlWhere, "unique_hits.nGO>0");
 		}
 		else if (radNoGO.isSelected()) {
-			query = Static.combineBool(query, "unique_hits.nGO=0");
+			sqlWhere = Static.combineBool(sqlWhere, "unique_hits.nGO=0");
 		}
 		// Dataset
 		if (!radDS[0].isSelected()) {
@@ -381,7 +400,7 @@ public class SeqsQueryPanel extends JPanel {
 			int idx = theViewerFrame.getInfo().getAsmIdx(seqID);
 			
 			String tmp = "unitrans.ASMid=" + idx;
-			query = Static.combineBool(query, tmp, true);
+			sqlWhere = Static.combineBool(sqlWhere, tmp, true);
 		}
 		// Method
 		boolean isAnd = (radAnd.isSelected());
@@ -394,7 +413,7 @@ public class SeqsQueryPanel extends JPanel {
 		}
 		if (subquery!="") {
 			subquery = "(" + subquery + ")";
-			query = Static.combineBool(query, subquery);
+			sqlWhere = Static.combineBool(sqlWhere, subquery);
 		}
 		// PKM
 		String tmp="";
@@ -403,9 +422,9 @@ public class SeqsQueryPanel extends JPanel {
 			tmp = Static.combineBool(tmp, rgPKM[i].getSQL(), isAnd);
 		}
 		if (!tmp.equals(""))
-			query = Static.combineBool(query, "(" + tmp + ")");	
+			sqlWhere = Static.combineBool(sqlWhere, "(" + tmp + ")");	
 		
-		if (query==null || query.equals("")) {
+		if (sqlWhere==null || sqlWhere.equals("")) {
 			if (theViewerFrame.getInfo().getCntSeq()>100000) {
 				if (UserPrompt.showContinue("Slow query", 
 						"There is more than 100,000 sequences.\nThis will be slow.")) {
@@ -413,18 +432,20 @@ public class SeqsQueryPanel extends JPanel {
 				}
 				else hasError=true;
 			}
-			query = " 1 ";
+			sqlWhere = " 1 ";
 		}
-		if (hasError) query="";
+		if (hasError) sqlWhere="";
 		else setSummary();
 	}
-	public String getSubQuery() { return query;}
+	public String getSQLwhere() { return sqlWhere;}
 	public String getQuerySummary() { return summary;}
 	private void setSummary() {
 		summary = "";
 		
 		//Basic
 		summary = Static.combineSummary(summary, txtSeqID.getSum());
+		summary = Static.combineSummary(summary, txtHitID.getSum());
+		summary = Static.combineSummary(summary, txtDesc.getSum());
 		
 		if (radYesAA.isSelected()) {
 			summary = Static.combineBool(summary, "Has Hit Pairs to different set");
@@ -489,13 +510,14 @@ public class SeqsQueryPanel extends JPanel {
 	private class Substring extends JPanel {
 		private static final long serialVersionUID = 1L;
 		public Substring(String lab, String sum, String field, String descript) {
-			label = lab; sumLabel=sum; 
+			label = lab; 
+			sumLabel=sum; 
 			sqlField= field;
 			
 			setLayout(new BoxLayout ( this, BoxLayout.LINE_AXIS ));
 			super.setBackground(Color.WHITE);
 			
-			checkOn = Static.createCheckBox(label,false);
+			checkOn = Static.createCheckBox(label + " (substring)",false);
 			checkOn.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					boolean b = checkOn.isSelected();	
@@ -505,12 +527,8 @@ public class SeqsQueryPanel extends JPanel {
 			final String desc = descript;
 			checkOn.addMouseListener(new MouseAdapter() 
 			{
-				public void mouseEntered(MouseEvent e) {
-				    theViewerFrame.setStatus(desc);
-				}
-				public void mouseExited(MouseEvent e) {
-				    theViewerFrame.setStatus("");
-				}
+				public void mouseEntered(MouseEvent e) {theViewerFrame.setStatus(desc);}
+				public void mouseExited(MouseEvent e) {theViewerFrame.setStatus("");}
 			});
 			txtVal = Static.createTextField("", 15, false);
 			
@@ -543,7 +561,7 @@ public class SeqsQueryPanel extends JPanel {
 		private JCheckBox checkOn = null;
 		private JTextField txtVal;
 		private String sumLabel, sqlField, label;
-		private int width=150;
+		private int width=200;
 	}
 	/************************************************************************/
 	private class Range extends JPanel {
@@ -671,7 +689,7 @@ public class SeqsQueryPanel extends JPanel {
 	private CollapsiblePanel [] theSections = null;
 	
 	// General
-	private Substring txtSeqID = null;
+	private Substring txtSeqID = null, txtHitID = null, txtDesc = null;
 	private JRadioButton radYesAA, radNoAA, radDcAA;
 	private JRadioButton radYesAnno, radNoAnno, radDcAnno;
 	private JRadioButton radYesGO, radNoGO, radDcGO;
@@ -689,7 +707,7 @@ public class SeqsQueryPanel extends JPanel {
 	private JRadioButton [] radInGrp, radNotGrp, radDcGrp;
 	private JRadioButton radAnd, radOr;
 	
-	private String summary="", query="";
+	private String summary="", sqlWhere="";
 	private boolean hasError=false, hasRPKM=false;
 	private int nSec=0;
 }

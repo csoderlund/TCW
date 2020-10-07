@@ -3,8 +3,10 @@ package cmp.compile.panels;
 import java.awt.Component;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 import util.methods.Static;
@@ -14,47 +16,47 @@ import cmp.database.Globals;
 
 public class MethodClosurePanel extends JPanel {
 	private static final long serialVersionUID = 109004697047687473L;	
-	private String [] abbrev = {"AA", "NT"}; // also in MethodTransitive.java
+	private final static String xDELIM = Globals.Methods.METHODS_DELIM;
+	private String [] abbrev = {"AA", "NT"}; // also in MethodClosure.java and BBH 
 	private String [] covTypes = {"Either", "Both"};
 	
 	public MethodClosurePanel(CompilePanel parentPanel) {
+		theCompilePanel = parentPanel;
+		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setAlignmentX(Component.LEFT_ALIGNMENT);
 		setBackground(Globals.BGCOLOR);
+		add(Box.createVerticalStrut(20));
+		
 		int width = Globals.CompilePanel.WIDTH;
-		add(Box.createVerticalStrut(10));
 		
 		JPanel row = Static.createRowPanel();
-		JLabel type = new JLabel("Hit File Type");
-		row.add(type);
-		row.add(Box.createHorizontalStrut(width - type.getPreferredSize().width));
-		seqMode = new ButtonComboBox();
-		seqMode.addItem("Amino Acid");
-		seqMode.addItem("Nucleotide");
-		seqMode.finish();
-		
-		boolean doNT = true;
-		if (parentPanel.dbIsExist() && parentPanel.getNumNTdb()<=0) doNT=false;
-		if (doNT) {
-			row.add(seqMode);
-			add(row);
-			add(Box.createVerticalStrut(10));
-		}
-		// prefix
-		row = Static.createRowPanel();
 		lblPrefix = new JLabel("Prefix");
 		row.add(lblPrefix);
 		row.add(Box.createHorizontalStrut(width - lblPrefix.getPreferredSize().width));
-		
 		txtPrefix = Static.createTextField("", 3);
 		row.add(txtPrefix);
 		row.add(Box.createHorizontalStrut(5));
-		
 		JLabel req = new JLabel(EditMethodPanel.LBLPREFIX);
 		row.add(req);
 		add(row);
-		add(Box.createVerticalStrut(10));
-					
+		add(Box.createVerticalStrut(20));
+				
+		row = Static.createRowPanel();
+		lblHitType = new JLabel("Hit File Type");
+		row.add(lblHitType);
+		row.add(Box.createHorizontalStrut(width - lblHitType.getPreferredSize().width));
+		aaButton = Static.createRadioButton("Amino Acid",true); 
+		row.add(aaButton); row.add(Box.createHorizontalStrut(5));
+		
+		ntButton = Static.createRadioButton("Nucleotide",false); 
+		row.add(ntButton); row.add(Box.createHorizontalStrut(5));
+		
+		ButtonGroup group = new ButtonGroup();
+		group.add(aaButton); group.add(ntButton); 
+		add(row);
+		add(Box.createVerticalStrut(20));
+		
 		// cutoff
 		row = Static.createRowPanel();
 		lblCovCutoff = new JLabel("%Coverage");
@@ -91,10 +93,11 @@ public class MethodClosurePanel extends JPanel {
 	}
 	
 	public String getSettings() {
-		return  "x:" + 
+		int x = (aaButton.isSelected()) ? 0 : 1;
+		return  xDELIM + ":" + 
 				txtCovCutoff.getText() + ":" + covLenMode.getSelectedIndex() + ":" +
 				txtSimCutoff.getText() +":"
-				+ seqMode.getSelectedIndex() + ":x";
+				+ x + ":" + xDELIM;
 	}
 	
 	public void setSettings(String settings) {
@@ -110,8 +113,11 @@ public class MethodClosurePanel extends JPanel {
 		txtSimCutoff.setText(theSettings[3]);
 		try {
 			int i = Integer.parseInt(theSettings[4]);
-			seqMode.setSelectedIndex(i);
+			if (i==0) aaButton.setSelected(true);
+			else ntButton.setSelected(true);
 		} catch (Exception e) {}
+		
+		updateHitType();
 	}
 	
 	public void resetSettings() {
@@ -119,12 +125,13 @@ public class MethodClosurePanel extends JPanel {
 		txtPrefix.setText(Globals.Methods.Closure.DEFAULT_PREFIX);
 		txtCovCutoff.setText(Globals.Methods.Closure.COVERAGE_CUTOFF);
 		txtSimCutoff.setText(Globals.Methods.Closure.SIMILARITY);
+		updateHitType();
 	}
 	public String getMethodName() { 
 		return Globals.getName(Globals.Methods.Closure.TYPE_NAME, txtPrefix.getText()); 
 	}
 	public static String getMethodType() { return Globals.Methods.Closure.TYPE_NAME; }
-	public String getSearchType() {return abbrev[seqMode.getSelectedIndex()];}
+	public String getSearchType() {if (aaButton.isSelected()) return abbrev[0]; else return abbrev[1];}
 	
 	public String getPrefix() { return txtPrefix.getText(); }
 	public void setPrefix(String prefix) { txtPrefix.setText(prefix); }
@@ -137,8 +144,8 @@ public class MethodClosurePanel extends JPanel {
 		int cov = Static.getInteger(txtCovCutoff.getText());
 		if (sim!=0 || cov!=0) com += "(" + covTypes[forx] +")";
 		
-		String ab = abbrev[seqMode.getSelectedIndex()] ;
-		if (ab.equals("NT")) com += ";" + ab;
+		if (ntButton.isSelected()) com += ";" + abbrev[1];
+		
 		return com;
 	}
 	
@@ -149,11 +156,19 @@ public class MethodClosurePanel extends JPanel {
 		txtCovCutoff.setEnabled(!bLoaded);
 		lblSimCutoff.setEnabled(!bLoaded);
 		txtSimCutoff.setEnabled(!bLoaded);
+		updateHitType();
 	}
-	private ButtonComboBox seqMode = null;
-	
+	private void updateHitType() {
+		boolean hasNT=(theCompilePanel.getNumNTdb()>1);
+		aaButton.setEnabled(hasNT);
+		ntButton.setEnabled(hasNT);
+		lblHitType.setEnabled(hasNT);
+	}
 	private JLabel lblPrefix = null;
 	private JTextField txtPrefix = null;
+	
+	private JLabel lblHitType = null;
+	private JRadioButton aaButton, ntButton;
 	
 	private ButtonComboBox covLenMode = null;
 	private JLabel lblCovCutoff = null;
@@ -161,4 +176,6 @@ public class MethodClosurePanel extends JPanel {
 	
 	private JLabel lblSimCutoff = null;
 	private JTextField txtSimCutoff = null;
+	
+	private CompilePanel theCompilePanel = null;
 }

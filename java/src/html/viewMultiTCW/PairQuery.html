@@ -3,9 +3,9 @@
 <title>Filter Pairs</title>
 <h2>Filter Pairs</h2>
 There is a pair for two sequences if they have a hit, where the hits are computed when
-the database is created by searching a file of all sequences
+the database is created. This was accomplished by searching a file of all sequences
 in the database against itself using a heuristic search program
-such as <tt>Diamond</tt>, <tt>Blast</tt> or <tt>Usearch</tt>. 
+such as <tt>Diamond</tt> or <tt>Blast</tt>. 
 
 <p>
 A pair must pass ALL filters. The filters selected will be shown at the top
@@ -45,9 +45,9 @@ them; if <tt>Not</tt> is selected, show all pairs that do NOT have the substring
 <tr><td><tt>E-value</tt><td> Select the radio button and enter the hit e-value to search on.
 <tr><td><tt>%Similarity</tt><td> Select the radio button and enter the hit %Similarity to search on.
 </table>
-The same three filters are available for the nucleotide search.
+<br><br>The same three filters are available for the nucleotide search.
 
-<h3>+Statistics - only available if all datasets have nucleotide sequences</h3>
+<h3>+Statistics - only available if at least two nucleotide datasets are in the mTCW database.</h3>
 Selecting <tt>Has Stats</tt> or
 <tt>Has KaKs</tt> displays the pairs with the corresponding statistics. It depends on
 how the database was built as to whether a pair has Stats or has KaKs. 

@@ -66,32 +66,32 @@ public class CoreDB {
 	        String strQ = "SELECT AID, username, projectpath, assemblydate, annotationdate " +
 	    			"FROM assembly WHERE assemblyid='" + strAssemblyID + "'";
 	  
-		    	rs = mDB.executeQuery ( strQ );
-		    	if ( !rs.next() ) { 
-		    		String stcw = strAssemblyID;    	
-		    		strQ = "SELECT AID, username, projectpath, assemblydate, annotationdate, assemblyid FROM assembly";
-		    		rs = mDB.executeQuery ( strQ );
-			    	if ( !rs.next() ) Out.die("Has Instantiate been executed?");
-			    	strAssemblyID = rs.getString("assemblyid");
-			    	Out.PrtWarn("singleTCW ID=" + stcw + " internal ID=" + strAssemblyID);
-		    	}
-		   
-		    	username = rs.getString("username");
-		    	projectpath = rs.getString("projectpath");
-		    	assemblydate = rs.getString("assemblydate");
-		    	try {
-		    		annotationdate = rs.getString("annotationdate");
-		    	}
-		    	catch(Exception e) {
-		    		annotationdate = "";
-		    	} 
-		   
-		    	if (annotationdate==null && existsAnno()) { 
-		    		System.out.println("Annotation date is missing but annotation exists - may be incomplete");
-		    		setAnnotationDate();
-		    		annotationdate="unknown";
-		    	}
-		    	String anno = "Annotation:   " + annotationdate;
+	    	rs = mDB.executeQuery ( strQ );
+	    	if ( !rs.next() ) { 
+	    		String stcw = strAssemblyID;    	
+	    		strQ = "SELECT AID, username, projectpath, assemblydate, annotationdate, assemblyid FROM assembly";
+	    		rs = mDB.executeQuery ( strQ );
+		    	if ( !rs.next() ) Out.die("Has Instantiate been executed?");
+		    	strAssemblyID = rs.getString("assemblyid");
+		    	Out.PrtWarn("singleTCW ID=" + stcw + " internal ID=" + strAssemblyID);
+	    	}
+	   
+	    	username = rs.getString("username");
+	    	projectpath = rs.getString("projectpath");
+	    	assemblydate = rs.getString("assemblydate");
+	    	try {
+	    		annotationdate = rs.getString("annotationdate");
+	    	}
+	    	catch(Exception e) {
+	    		annotationdate = "";
+	    	} 
+	   
+	    	if (annotationdate==null && existsAnno()) { 
+	    		System.out.println("Annotation date is missing but annotation exists - may be incomplete");
+	    		setAnnotationDate();
+	    		annotationdate="unknown";
+	    	}
+	    	String anno = "Annotation:   " + annotationdate;
 			if (annotationdate == null || annotationdate.equals("") || annotationdate.equals("2000-11-09")) {
 				anno = "Database has no annotation.";
 				bAnnoExists = false;
@@ -100,10 +100,10 @@ public class CoreDB {
 				bAnnoExists=true;
 				anno = "Previous annotation was completed on " + annotationdate + ".";
 			
-		    		if (!existsAnno()) {
-		    			bAnnoExists=false;
-		    			anno = "Previous annotation started but did not finish.";
-		    		}
+	    		if (!existsAnno()) {
+	    			bAnnoExists=false;
+	    			anno = "Previous annotation started but did not finish.";
+	    		}
 			}
 			if (mDB.tableColumnExists("schemver", "annoVer")) {
 				rs = mDB.executeQuery("Select annoVer, annoDate from schemver");
@@ -112,32 +112,32 @@ public class CoreDB {
 					annoDate = rs.getString(2);
 				}		
 			}
-		    	Out.PrtSpMsg(1, "sTCW ID:      " + strAssemblyID);
-		    	Out.PrtSpMsg(1, "Create:       " + assemblydate);
-		    	Out.PrtSpMsg(1, "User Name:    " + username);
-		    	Out.PrtSpMsg(1, "Project Path: " + projectpath);
-		    	isAAtcw = mDB.tableColumnExists("assem_msg", "peptide");
-		    	if (isAAtcw) Out.PrtSpMsg(1,"Protein sequence sTCW database");
-		    	Out.PrtSpMsg(1,anno);
-		    
-		    	if (doAnno && bAnnoExists) { 
-		    		Out.PrtSpMsg(1,"");
-		    		String [] x = new String [3]; 
-		    		x[0]="a"; x[1]="d"; x[2]="e";
-		    		String ans = 
-		    		  runSTCWMain.promptQuestion("Annotation exists in database. Enter [a/d/e]\n" +
-		    		  "  Add to existing annotation [a], Delete annotation [d], Exit [e]: ", x, 0);
-		    		if (ans.equals("e")) Out.die(" User request");
-		    		else if (ans.equals("d")) {
-		    			Out.PrtSpMsg(1, "Will delete existing annotation");
-		    			runSTCWMain.bDelAnno = true; // deletes after all checks
-		    			bAnnoExists = false;
-		    		}
-		    		else System.err.println("Add to existing annotation");
-		    	}	
-		    	bGOtree = mDB.tableExists("pja_gotree");
-		    	
-		    	if (rs!=null) rs.close();  
+	    	Out.PrtSpMsg(1, "sTCW ID:      " + strAssemblyID);
+	    	Out.PrtSpMsg(1, "Create:       " + assemblydate);
+	    	Out.PrtSpMsg(1, "User Name:    " + username);
+	    	Out.PrtSpMsg(1, "Project Path: " + projectpath);
+	    	isAAtcw = mDB.tableColumnExists("assem_msg", "peptide");
+	    	if (isAAtcw) Out.PrtSpMsg(1,"Protein sequence sTCW database");
+	    	Out.PrtSpMsg(1,anno);
+	    
+	    	if (doAnno && bAnnoExists) { 
+	    		Out.PrtSpMsg(1,"");
+	    		String [] x = new String [3]; 
+	    		x[0]="a"; x[1]="d"; x[2]="e";
+	    		String ans = 
+	    		  runSTCWMain.promptQuestion("Annotation exists in database. Enter [a/d/e]\n" +
+	    		  "  Add to existing annotation [a], Delete annotation [d], Exit [e]: ", x, 0);
+	    		if (ans.equals("e")) Out.die(" User request");
+	    		else if (ans.equals("d")) {
+	    			Out.PrtSpMsg(1, "Will delete existing annotation");
+	    			runSTCWMain.bDelAnno = true; // deletes after all checks
+	    			bAnnoExists = false;
+	    		}
+	    		else System.err.println("Add to existing annotation");
+	    	}	
+	    	bGOtree = mDB.tableExists("pja_gotree");
+	    	
+	    	if (rs!=null) rs.close();  
 	    }
 		catch (Exception e){ErrorReport.die(e, "Unable to query " 	+ tcwDB);}
 	}
@@ -196,6 +196,8 @@ public class CoreDB {
        	   mDB.tableDelete("pja_db_unique_hits");
        	   mDB.tableDelete("pja_databases");
        	   mDB.tableDelete("pja_db_species");
+       	   mDB.tableDelete("tuple_orfs"); // CAS305
+       	   mDB.tableDelete("tuple_usage");// CAS305
          
        	   Out.PrtSpMsg(1, "Remove GO tables...");
        	   mDB.tableDrop("go_info");
@@ -535,7 +537,7 @@ public class CoreDB {
    }
 	public boolean setLongestSeq() { 
 		try {
-			// Only place this is computed. Used in Basic Sequence
+			// Needed for Assembled sequences. Used in Basic Sequence
 			ResultSet rs = mDB.executeQuery( "select count(*) from contig " +
 					" where longest_clone is not NULL" );
 			rs.next ();
@@ -575,13 +577,8 @@ public class CoreDB {
 	public boolean isAAtcw() { return isAAtcw;}
 	public void setIsAAtcw() {
 	    try {
-	        if (mDB.tableColumnExists("assem_msg", "peptide")) {
-	            isAAtcw=true;
-	            System.err.println("Protein sequence sTCW database");
-	        }
-	        else {
-	            isAAtcw=false;
-	        }
+	        if (mDB.tableColumnExists("assem_msg", "peptide")) isAAtcw=true;
+	        else isAAtcw=false;
 	    }
 	    catch (Exception e) {ErrorReport.reportError(e, "Checking to see if proteing database");}
 	}

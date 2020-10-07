@@ -59,7 +59,8 @@ import util.ui.UserPrompt;
 
 public class TableUtil {
 	private final String delim=Globalx.CSV_DELIM;
-	private final String fileSuf = Globals.CSV_SUFFIX;
+	private final String tabSuf = Globals.CSV_SUFFIX;
+	private final String faSuf = Globals.FASTA_SUFFIX;
 	
 	private static final String BLASTDIR = Globalx.HITDIR; 
 	private static final String ID_SQL = FieldData.SEQ_SQLID; 
@@ -163,8 +164,8 @@ public class TableUtil {
 		else if (typeTable==Globals.bPAIR) prefix = PairPrefix;
 		if (typeTable==Globals.bSEQ) prefix = SeqPrefix;
 		
-		BufferedWriter out = getWriter(prefix + fileSuf);
-		if (out==null) return; // user cancels
+		BufferedWriter outFH = getWriter(prefix + tabSuf);
+		if (outFH==null) return; // user cancels
 		
 		// print header line
 		String val = "";
@@ -173,29 +174,29 @@ public class TableUtil {
 			val = theTable.getColumnName(x);
 			if (val.equals(FieldData.ROWNUM)) rowNumColIndex = x;
 			val = val.replaceAll("\\s", "");
-			out.write(val + delim);
+			outFH.write(val + delim);
 		}
 		val = theTable.getColumnName(theTable.getColumnCount()-1).replaceAll("\\s", "");
-		out.write(val + "\n");
-		out.flush();
+		outFH.write(val + "\n");
+		outFH.flush();
 		
 		// print table
 		for(int x=0; x<theTable.getRowCount(); x++) {
 			for(int y=0; y<theTable.getColumnCount()-1; y++) {
-				if (y == rowNumColIndex) out.write((x+1) + delim);
+				if (y == rowNumColIndex) outFH.write((x+1) + delim);
 				else {
 					Object obj = theTable.getValueAt(x, y);
-	                val = (obj == null) ? Globalx.dStrNoDE : convert(obj.toString()); 
-					out.write(val + delim);
+	                val = (obj == null) ? Globalx.sNoVal : obj.toString(); // CAS305 convert(obj.toString()); 
+					outFH.write(val + delim);
 				}
 			}
 			Object obj = theTable.getValueAt(x, theTable.getColumnCount()-1);
-            val = (obj == null ? Globalx.dStrNoDE  : convert(obj.toString()));
-			out.write(val + "\n");
-			out.flush();
+            val = (obj == null ? Globalx.sNoVal  : obj.toString());
+			outFH.write(val + "\n");
+			outFH.flush();
 		}
 		System.err.println("Complete writing  - " + theTable.getRowCount() + " lines");
-		out.close();
+		outFH.close();
 	} catch(Exception e) {ErrorReport.reportError(e, "Error saving file");
 	} catch(Error e) {ErrorReport.reportFatalError(e, "Fatal error saving file", theViewerFrame);}
 	}
@@ -205,7 +206,7 @@ public class TableUtil {
 	 public void exportGrpSeqFa(TableData theTableData, String column) {
 		try { 
 			int n = theTableData.getNumRows();
-			String name = column + n + "Clusters.fa";
+			String name = column + n + "Clusters" + faSuf;
 			BufferedWriter out = getWriter(name);
 			if (out==null) return;
 			
@@ -302,7 +303,7 @@ public class TableUtil {
 	 public void exportSeqFa(int [] seqID, String column, boolean isCDS) {
 		try { 
 			String fname = (isCDS) ? "cdsSeq" : column;
-			BufferedWriter out = getWriter(fname + ".fa");
+			BufferedWriter out = getWriter(fname + faSuf);
 			if (out==null) return;
 			
 			DBConn dbc = theViewerFrame.getDBConnection();	
@@ -328,6 +329,59 @@ public class TableUtil {
 			
 		} catch(Exception e) {ErrorReport.reportError(e, "Error saving file");}
 	 }
+	 /******************************************************************
+	  * Export counts or TPM per cluster
+	  * CAS305
+	  */
+	 public void exportGrpCounts(TableData theTableData, String summary, boolean bdoCnt) {
+		try { 
+			String fname = (bdoCnt) ? "ClusSeqCounts" : "ClusSeqTPM";
+			BufferedWriter out = getWriter(fname + tabSuf);
+			if (out==null) return;
+			
+			int nRows = theTableData.getNumRows();
+			int idx1 = theTableData.getColumnHeaderIndex(GRP_SQL);
+			int idx2 = theTableData.getColumnHeaderIndex(GRP_ID);
+			String column = (bdoCnt) ? "expList" : "expListN";
+			DBConn dbc = theViewerFrame.getDBConnection();	
+			
+			String list = dbc.executeString("select allSeqLib from info");
+			String line = "GrpName\tSeqName";
+			String [] tok = list.split(" ");
+			for (String x : tok) line += "\t" + x;
+			out.write(line + "\n");
+			out.flush();
+			
+			int cnt=0;
+			for (int i=0; i<nRows; i++) {
+				int id = (Integer) theTableData.getValueAt(i, idx1);
+				String grpName = (String) theTableData.getValueAt(i, idx2);
+				ResultSet rs = dbc.executeQuery("SELECT unitrans.UTstr, " + column +  " from unitrans, pog_members "
+						+ " where pog_members.UTid=unitrans.UTid and pog_members.PGid= " + id);
+				while (rs.next()) {
+					String name = rs.getString(1);
+					line = grpName + "\t" + name;
+					
+					list = rs.getString(2);
+					tok = list.split(" ");
+					for (String x : tok) {
+						String y = x.split("=")[1];
+						line += "\t" + y;
+					}
+					out.write(line + "\n");
+					out.flush();
+					cnt++;
+				}
+				if ((cnt%100)==0)
+					System.err.print("   Wrote " + cnt + " sequences...\r");
+				rs.close();
+			}
+			out.close();
+			dbc.close();
+			System.out.println("   Complete  " + cnt + " lines");
+			
+		} catch(Exception e) {ErrorReport.reportError(e, "Error saving file");}
+	 }
 	 /*****************************************************
 	 * XXX Export GOs - Export all cluster GOs 
 	 * Get all sequences for the Cluster
@@ -340,7 +394,7 @@ public class TableUtil {
 		Vector <Integer> seqID = new Vector <Integer> ();
 		
 		DBConn dbc = theViewerFrame.getDBConnection();	
-		ResultSet rs=null;  
+		ResultSet rs=null;
 		
 		for(int i=0; i<n; i++) {
 			int id = (Integer) theTableData.getValueAt(i, idx1);
@@ -350,7 +404,7 @@ public class TableUtil {
 				seqID.add(rs.getInt(1));
 			}
 		}
-		rs.close(); dbc.close();
+		if (rs!=null) rs.close(); dbc.close();
 		exportGO(grpID, seqID, n, "Cluster", summary, GrpPrefix); 
 	}
 	catch (Exception e) {ErrorReport.reportError(e, "Export GO for clusters");}
@@ -775,7 +829,7 @@ public class TableUtil {
 		 public int compareTo(GOdata b) {
 			 if (!domain.equals(b.domain)) return domain.compareTo(b.domain);
 			 if (lev!=b.lev) return lev-b.lev;
-			 return desc.compareTo(b.domain);
+			 return goStr.compareTo(b.goStr);  // CAS305 was domain
 		 }
 	 }
 	/*********************************************************************
@@ -803,7 +857,7 @@ public class TableUtil {
 				}
 				else { 
 					Object obj = theTable.getValueAt(x, y);
-	                String val = (obj == null) ? "-" : convert(obj.toString()); 
+	                String val = (obj == null) ? "-" : obj.toString(); // CAS305 changes all 3 to '-' convert(obj.toString()); 
 					retVal.append(val);
 				}
 				if (y != nCol-1) retVal.append(delim);
@@ -866,25 +920,7 @@ public class TableUtil {
  		return null;
 	 }
 	 /*********************************************************************/
-	 private String convert(String s) {
- 		s = s.trim();
- 		if (s==null || s=="") return Globalx.dStrNoDE ;
- 		try {
- 			int n = Integer.parseInt(s);
- 			if (n==Globalx.dNoDE) return Globalx.sNoVal ;
- 			else if (n==Globalx.dNoVal) return Globalx.sNoVal ;
- 			else if (n==Globalx.dNullVal) return Globalx.sNullVal;
- 			else return s;
- 		}
- 		catch (Exception e) {}
- 		try {
- 			double n = Double.parseDouble(s);
- 			if (n==-2.0) return Globalx.dStrNoDE;
- 			else return s;
- 		}
- 		catch (Exception e) {}
- 		return s;
-	 }
+	
 	 
 	 public void runBlast(String name, String seq, boolean tabular) {
  		try {

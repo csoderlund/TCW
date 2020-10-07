@@ -12,6 +12,7 @@ import util.methods.Static;
 
 public class MethodOrthoMCLPanel extends JPanel {
 	private static final long serialVersionUID = -721309318079790889L;
+	private final static String xDELIM = Globals.Methods.METHODS_DELIM;
 
 	public MethodOrthoMCLPanel(CompilePanel parentPanel) {
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -35,7 +36,7 @@ public class MethodOrthoMCLPanel extends JPanel {
 		JLabel req = new JLabel(EditMethodPanel.LBLPREFIX);
 		row.add(req);
 		add(row);
-		add(Box.createVerticalStrut(10));
+		add(Box.createVerticalStrut(20));
 		
 		
 		// parameters
@@ -47,6 +48,9 @@ public class MethodOrthoMCLPanel extends JPanel {
 		txtInflation = Static.createTextField(Globals.Methods.OrthoMCL.INFLATION, 4);	
 		row.add(txtInflation);
 		add(row);
+		add(Box.createVerticalStrut(30));
+		
+		add(new JLabel("This may not work on your system - see Help"));
 		add(Box.createVerticalStrut(10));
 	
 		setMaximumSize(getPreferredSize());
@@ -54,13 +58,12 @@ public class MethodOrthoMCLPanel extends JPanel {
 	}
 		
 	public String getSettings() {
-		return  "x:" + txtInflation.getText() + ":x";
+		return  xDELIM + ":" + txtInflation.getText() + ":" + xDELIM;
 	}
 		
 	public void setSettings(String settings) {
 		String [] vals = settings.split(":");
-		
-		txtInflation.setText(vals[1]);
+		if (vals.length>=2) txtInflation.setText(vals[1]);
 	}
 	
 	public void resetSettings() {

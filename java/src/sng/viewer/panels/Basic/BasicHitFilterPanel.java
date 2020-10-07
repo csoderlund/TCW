@@ -374,7 +374,8 @@ public class BasicHitFilterPanel extends JPanel {
 					btnCount.setEnabled(check);
 	    			}
 	    		});  
-			btnCount = new JButton("Exp");
+			String label = metaData.getNorm(); // CAS305
+			btnCount = new JButton(label);
 			btnCount.setBackground(Globals.MENUCOLOR);
 			btnCount.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
@@ -386,7 +387,8 @@ public class BasicHitFilterPanel extends JPanel {
 				}});
 			btnCount.setEnabled(isActive);
 			
-			if (libColNames!=null && libColNames.length>0) {
+			if (metaData.hasExpLevels()) {
+			// if (libColNames!=null && libColNames.length>0) { CAS305
 				rowFilter1.add(chkCount);
 				rowFilter1.add(btnCount);
 				rowFilter1.add(Box.createHorizontalStrut(6));
@@ -1880,7 +1882,9 @@ public class BasicHitFilterPanel extends JPanel {
 	 */
 	private class CountPanel extends JPanel {
 		private static final long serialVersionUID = -1413393170982001945L;
-		public CountPanel() {			
+		public CountPanel() {	
+			if (!metaData.hasExpLevels()) return; // CAS305
+			
 			setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 			setBackground(Color.white);
 			setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -2834,8 +2838,8 @@ public class BasicHitFilterPanel extends JPanel {
             String strQuery = "SELECT " + fields + whereBegin + queryPanel.getWhere(bSecond);
            
             if (queryPanel.useFilter()) { 
-            		strQuery += queryPanel.getWhere();
-            		if (queryPanel.chkCount.isSelected())   strQuery += countPanel.getWhere();
+            	strQuery += queryPanel.getWhere();
+            	if (queryPanel.chkCount.isSelected())   strQuery += countPanel.getWhere();
 	            if (queryPanel.chkAnnoDBs.isSelected()) strQuery += annoDBPanel.getWhere();
 	            if (queryPanel.chkSpecies.isSelected()) strQuery += speciesPanel.getWhere();
 	            if (queryPanel.chkGOetc.isSelected())   strQuery += goPanel.getWhere();

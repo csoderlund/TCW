@@ -47,7 +47,7 @@ public class MethodClique {
 		if (bSuccess) new Clique().computeGroups();
 		if (bSuccess) writeGroups();
 		if (bSuccess) 
-			if (! new MethodLoad(cmpDBC).run(idx, groupFile, cmpPanel)) // loads the file just written
+			if (new MethodLoad(cmpDBC).run(idx, groupFile, cmpPanel)==-1) // loads the file just written
 				bSuccess=false;
 						
 		Out.PrtDateMsgTime("Finish execution of " + Globals.Methods.Closure.TYPE_NAME, startTime);
@@ -78,7 +78,7 @@ public class MethodClique {
 		cmpDBC = db;
 		cmpPanel = panel;
 		
-		String root = cmpPanel.getCurProjMethodDir() + "/" + groupFile + 
+		String root = cmpPanel.getCurProjMethodDir() + groupFile + 
 				"." + prefix + "_" + covCutoff + "-" + simCutoff;
 		groupFile = root;
 		
