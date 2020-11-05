@@ -168,21 +168,21 @@ public class GrpQueryPanel extends JPanel {
 		page.add(Box.createVerticalStrut(10));
 		
 		row = Static.createRowPanel();
-		txtHitID = new Substring("Best Hit ID", GRP_TABLE + ".HITstr", 
+		txtHitID = new Substring("Majority Hit ID", GRP_TABLE + ".HITstr", 
 				"All clusters with the substring in the identifier of majority hit", true);
 		row.add(txtHitID);
 		page.add(row);	
 		page.add(Box.createVerticalStrut(10));
 		
 		row = Static.createRowPanel();
-		txtDesc = new Substring("Description", UNIQUE_HITS + ".description", 
+		txtDesc = new Substring("Majority Descript", UNIQUE_HITS + ".description", 
 				"All clusters with the substring in the description of majority hit", true);
 		row.add(txtDesc);
 		page.add(row);	
 		page.add(Box.createVerticalStrut(10));
 		
 		row = Static.createRowPanel();
-		rgPerAnno = new Range("%shared description", "100", "", GRP_TABLE + ".perAnno", 
+		rgPerAnno = new Range("%Hit", "100", "", GRP_TABLE + ".perAnno", 
 				"Percent of the sequences in the cluster with the majority hit");
 		row.add(rgPerAnno);
 		page.add(row);
@@ -512,7 +512,7 @@ public class GrpQueryPanel extends JPanel {
 		private JTextField txtVal;
 		private String sqlField, label;
 		private JRadioButton yesButton= null, noButton= null;
-		private int width=200;
+		private int width=220;
 	}
 	/************************************************************************/
 	private class Range extends JPanel {
@@ -560,23 +560,31 @@ public class GrpQueryPanel extends JPanel {
 			if (!checkOn.isSelected()) return "";
 			String min = txtMin.getText().trim(); // check if proper value
 			String max = txtMax.getText().trim();
-			if ((min.equals("") || min.equals("0")) && max.equals("")) {
-				checkOn.setSelected(false);
-				return "";
-			}
 			
-			if (min.equals("")) return sqlField + "<"  + max;
-			if (max.equals("")) return sqlField + ">=" + min;
+			if (min.equals("")) { // CAS301
+				if (max.contentEquals("")) {
+					checkOn.setSelected(false);
+					return "";
+				}
+				return sqlField + "<"  + max;
+			}
+			if (max.equals("")) {
+				if (min.contentEquals("")) {
+					min="0";
+					txtMin.setText(min);
+				}
+				return sqlField + ">=" + min;
+			}
 			return "(" + sqlField + ">=" + min + " and " + sqlField + "<" + max + ")";
 		}
 		public String getSum() {
 			if (!checkOn.isSelected()) return "";
 			String min = txtMin.getText().trim(); // check if proper value
 			String max = txtMax.getText().trim();
-			boolean nomin = (min.equals("") || min.equals("0") || min.equals("0.0"));
-			if (nomin && max.equals("")) return "";
-			if (nomin) return label + "<"  + max;
+			
+			if (min.equals("")) return label + "<"  + max;
 			if (max.equals("")) return label + ">=" + min;
+			
 			return "(" + label + ">=" + min + " and " + label + "<" + max + ")";
 		}
 		private void checkValues() {

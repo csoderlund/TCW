@@ -9,6 +9,7 @@ import java.util.Vector;
 
 import util.database.Globalx;
 import util.methods.ErrorReport;
+import util.methods.Out;
 import cmp.database.DBinfo;
 import cmp.database.Globals;
 
@@ -36,12 +37,14 @@ public class FieldData {
 	public static final String PAIR_TABLE =   "pairwise";
 	public static final String HIT_TABLE =    "unique_hits";
 		
+	// These are not the actual databases IDs, but the hidden column name to access them
 	public static final String SEQ_SQLID = "UTID";  
 	public static final String GRP_SQLID = "POGID"; 	
 	public static final String ID1_SQLID = "UTid1"; 	
 	public static final String ID2_SQLID = "UTid2"; 	
 	public static final String AASEQ_SQL = "aaSeq"; // not used in this file, but since all MySQL is here...
 	public static final String NTSEQ_SQL = "ntSeq"; // not used in this file, but since all MySQL is here...
+	public static final String HIT_SQLID = "HITidx";
 	
 	private static DBinfo theInfo;
 	public static boolean hasNTdb=false, hasGO=false, hasPCC=false, hasKaKs=false, hasStats=false, hasNTblast=false, hasMultiScore=false;
@@ -49,7 +52,7 @@ public class FieldData {
 		theInfo = info;
 		hasNTdb=theInfo.nNTdb()>1;
 		hasGO=theInfo.hasGOs(); // this will be zero if 'Add GOs' has not been run from runMulti
-		hasPCC=theInfo.getCntPCC()>0;
+		hasPCC=theInfo.hasPCC();
 		hasStats = theInfo.hasStats();
 		hasNTblast = theInfo.hasNTblast();
 		hasMultiScore = theInfo.hasMultiScore();
@@ -67,10 +70,20 @@ public class FieldData {
 	private static int [] GRP_SECTION_IDX, GRP_SECTION_BREAK;
 	
 	private static void buildGrp() {
-		GRP_SECTIONS = new String [3];
-		GRP_SECTIONS[0] = "General";
-		GRP_SECTIONS[1] = "Majority Best Anno Hit";
-		GRP_SECTIONS[2] = "Dataset counts";
+		int sec = (hasMultiScore) ? 4 : 3;
+		
+		GRP_SECTIONS = new String [sec];
+		if (hasMultiScore) {
+			GRP_SECTIONS[0] = "General";
+			GRP_SECTIONS[1] = "Multi-align"; // CAS310
+			GRP_SECTIONS[2] = "Majority Best Anno Hit";
+			GRP_SECTIONS[3] = "Dataset counts";
+		}
+		else {
+			GRP_SECTIONS[0] = "General";
+			GRP_SECTIONS[1] = "Majority Best Anno Hit";
+			GRP_SECTIONS[2] = "Dataset counts";
+		}
 		
 		Vector <Integer> mkBreak = new Vector <Integer> ();
 		Vector <Integer> mkSection = new Vector <Integer> ();
@@ -98,7 +111,7 @@ public class FieldData {
 		   addGrp(c++, "minPCC", Integer.class,     GRP_TABLE,  "minPCC" , "The minimal PCC for any pair of the cluster ", false);
 		}
 		if (hasMultiScore) {
-			 mkBreak.add(c);
+			 mkSection.add(c);
 			 addGrp(c++, "conLen", Integer.class,       GRP_TABLE,  "conLen" , 
 					 "Length of the consenus sequence for the amino acid alignment.",  false);
 			 addGrp(c++, "sdLen", Double.class,       GRP_TABLE,  "sdLen" , 
@@ -112,20 +125,21 @@ public class FieldData {
 		}
 		mkSection.add(c);
 		
-		addGrp(c++, "%Hit", Integer.class,   GRP_TABLE, "perAnno" , "Percent of the sequences in the cluster with the majority hit", false);
-		addGrp(c++, "E-value", Double.class, GRP_TABLE, 	"e_value" , "Best Blast E-value for the majority best anno hit", false);
+		
 		addGrp(c++, HITID, String.class,     GRP_TABLE,  "HITstr" , "Identifier of majority best anno hit", false);
 		addGrp(c++, HITDESC, String.class,   HIT_TABLE, "description", "Description of majority best anno hit", false);
 		addGrp(c++, "Species", String.class, HIT_TABLE, "species" , "Species of majority best anno hit", false);
-		addGrp(c++, "HitLen", Integer.class,  HIT_TABLE, "length" , "Length of the majority best anno hit", false);
-		mkBreak.add(c);
-		
 		addGrp(c++, "Type", String.class,    HIT_TABLE, "dbtype" , "Type of majority best anno hit", false);
 		addGrp(c++, "Tax", String.class,     HIT_TABLE, "taxonomy" , "Taxonomy of majority best anno hit", false);
+		addGrp(c++, "HitLen", Integer.class,  HIT_TABLE, "length" , "Length of the majority best anno hit", false);
+		
+		mkBreak.add(c);
 		if (hasGO) {
 			addGrp(c++, "nGOs", Integer.class, HIT_TABLE, "nGO", "Number of GO terms assigned to the majority best anno hit", false);
 			addGrp(c++, "GOs", String.class,   HIT_TABLE, "goList" , "List of GOs assigned to the majority best anno hit", false);
 		}
+		addGrp(c++, "%Hit", Integer.class,   GRP_TABLE, "perAnno" , "Percent of the sequences in the cluster with the majority hit", false);
+		addGrp(c++, "E-value", Double.class, GRP_TABLE, 	"e_value" , "Best Blast E-value for the majority best anno hit", false);
 		mkSection.add(c);
 		
 		if (c!=nCol) // only happens when change columns
@@ -226,30 +240,32 @@ public class FieldData {
 	private static int [] PAIR_SECTION_IDX, PAIR_SECTION_BREAK;
 	
 	public static void buildPairs() {
-		int nCol=18, nNT=7, nStat=21, nKa=4; 
+		int nCol=19, nNT=7, nStat=21, nKa=4; 
 		if (hasPCC) nCol++;
 		if (hasGO)  nCol++;
 		if (hasNTblast) nCol += nNT;
 		
 		if (!hasStats) {
-			PAIR_SECTIONS =	new String [3];		
+			PAIR_SECTIONS =	new String [4];		
 			PAIR_SECTIONS[0] = "General";
-			PAIR_SECTIONS[1] = "Hit";
-			PAIR_SECTIONS[2] = "Cluster Sets";
+			PAIR_SECTIONS[1] = "Shared Hit"; // CAS310
+			PAIR_SECTIONS[2] = "Pair Hit";
+			PAIR_SECTIONS[3] = "Cluster Sets";
 		}
 		else {
 			nCol += nStat;
 			if (hasKaKs) nCol += nKa;
 			
-			PAIR_SECTIONS =	new String [5];	
+			PAIR_SECTIONS =	new String [6];	
 			PAIR_SECTIONS[0] = "General";
-			PAIR_SECTIONS[1] = "Hit";
-			PAIR_SECTIONS[2] = "Coding sequence";
+			PAIR_SECTIONS[1] = "Shared Hit";
+			PAIR_SECTIONS[2] = "Pair Hit";
+			PAIR_SECTIONS[3] = "Coding sequence";
 			if (hasKaKs) {
-				PAIR_SECTIONS[3] = "KaKs";
-				PAIR_SECTIONS[4] = "Cluster Sets";
+				PAIR_SECTIONS[4] = "KaKs";
+				PAIR_SECTIONS[5] = "Cluster Sets";
 			}
-			else PAIR_SECTIONS[3] = "Cluster Sets";
+			else PAIR_SECTIONS[4] = "Cluster Sets";
 		}
 		
 		Vector <Integer> mkBreak = new Vector <Integer> ();
@@ -270,16 +286,17 @@ public class FieldData {
 		String seqType = (hasNTdb) ? "CDS" : "AA";
 		addPair(c++, seqType+"len1", Integer.class, PAIR_TABLE, "CDSlen1", "Length of CDS in bases for SeqID1", false);
 		addPair(c++, seqType+"len2", Integer.class, PAIR_TABLE,"CDSlen2",  "Length of CDS in bases for SeqID2", false);
-		
 		if (hasPCC)
 		   addPair(c++, "PCC",  Float.class, PAIR_TABLE,"PCC", "Pearson Correlation Coefficient of RPKM values",false);
-		mkBreak.add(c);
+		
+		mkSection.add(c);
 		
 		// Using Hit_Table.HITID instead of PAIR_TABLE.HITid because it has 'NoShare'
 		addPair(c++, HITID,  String.class, PAIR_TABLE,"HITstr", "HitID of best shared hit", false);
 		addPair(c++, HITDESC, String.class, HIT_TABLE, "description", "Description of best shared hit",false);
 		addPair(c++, "Type", String.class,  HIT_TABLE,"dbtype", "Type of best shared hit",  false);
 		addPair(c++, "Tax",  String.class,  HIT_TABLE,"taxonomy","Taxonomy of best shared hit", false);
+		addPair(c++, "HitLen",     Integer.class, HIT_TABLE, "length",     "Length of hit for shared anno hit"	, false); // CAS310 added for consistency
 		if (hasGO)
 			addPair(c++, "nGOs", Integer.class, HIT_TABLE, "nGO", "Number GOs of best shared hit", false);
 
@@ -404,7 +421,9 @@ public class FieldData {
 		for(int x=0; x<methods.length; x++) retVal[x + offset] = methods[x];	
 		return retVal; 
 	}
-	
+	public static int getPairMethodStart() {
+		return PAIR_COLUMNS.length;
+	}
 	public static String [] getPairDescript(String [] methods) {
 		int offset = PAIR_DESCRIP.length;
 		String [] retVal = new String[PAIR_DESCRIP.length+methods.length];
@@ -486,15 +505,16 @@ public class FieldData {
 			addSeq(c++,  "3UTR CpG", Double.class,  SEQ_TABLE, "utr3Ratio", "3'UTR CpG O/E  ((#CpG / #G*#C)*Len)",false);
 			mkSection.add(c);
 		}
-		addSeq(c++, "E-value", Double.class,  SEQ_TABLE,  "e_value",    "E-value to best anno hit",false);
+	
 		addSeq(c++, HITID,     String.class,  HIT_TABLE,  "HITstr",     "Name of best anno hit", false);
 		addSeq(c++, HITDESC,   String.class,  HIT_TABLE,  "description","Description of best anno hit",false);
 		addSeq(c++, "Species", String.class,  HIT_TABLE,  "species",    "Species of best anno hit", false);
 		addSeq(c++, "Type",    String.class,  HIT_TABLE,  "dbtype",     "DB Type for best anno hit",false);
 		addSeq(c++, "Tax",     String.class,  HIT_TABLE,  "taxonomy",   "Taxonomy for best anno hit",false);
-		addSeq(c++, "Len",     Integer.class, HIT_TABLE, "length",     "Length of hit for best anno hit"	, false);
+		addSeq(c++, "HitLen",     Integer.class, HIT_TABLE, "length",     "Length of hit for best anno hit"	, false);
 		if (hasGO)
 			addSeq(c++, "nGO", Integer.class, HIT_TABLE, "nGO","Number of GOs for best anno hit",false);
+		addSeq(c++, "E-value", Double.class,  SEQ_TABLE,  "e_value",    "E-value to best anno hit",false);
 		mkSection.add(c);
 	
 		SEQ_SECTION_IDX = new int [mkSection.size()];
@@ -603,7 +623,126 @@ public class FieldData {
 		for(int x=0; x<nDE; x++) retVal[x + offset] = true;
 		return retVal; 
 	}
-			                   
+	
+	/**********************************************
+	 * XXX Hit columns CAS310
+	 **********************************************/
+	
+	private static String [] HIT_SECTION;
+	private static  String [] HIT_COLUMNS, HIT_SQLCOL, HIT_SQLTAB, HIT_DESCRIP ; 
+	public static  boolean [] HIT_DEFAULTS;
+	private static  Class<?>  [] HIT_TYPE;
+	private static int [] HIT_SECTION_IDX, HIT_SECTION_BREAK;
+	
+	private static void buildHit() {
+		int nCol=10;
+		if (hasGO) nCol++;
+		
+		HIT_SECTION =	new String [2];		
+		HIT_SECTION[0] = "General";
+		HIT_SECTION[1] = "Hit Info";
+		
+		Vector <Integer> mkBreak = new Vector <Integer> ();
+		Vector <Integer> mkSection = new Vector <Integer> ();
+		
+		HIT_COLUMNS = new String [nCol];
+		HIT_SQLCOL = new String [nCol];
+		HIT_SQLTAB = new String [nCol];
+		HIT_DESCRIP = new String [nCol];
+		HIT_TYPE = new Class<?> [nCol];
+		HIT_DEFAULTS = new boolean [nCol];
+		
+		int c=0;
+		addHit(c++, ROWNUM, Integer.class, null, null, "Row number", false);
+		addHit(c++,  "nSeq", Integer.class, HIT_TABLE, "nSeq", "Number of sequences with hits", true);
+		addHit(c++,  "nBest", Integer.class, HIT_TABLE, "nBest", "Number of best hits", true);
+		addHit(c++, "E-value", Double.class,  HIT_TABLE,  "e_value",    "Best E-value",false);
+		mkSection.add(c);
+		
+		addHit(c++, HITID,     String.class,  HIT_TABLE,  "HITstr",     "Hit name", true);
+		addHit(c++, HITDESC,   String.class,  HIT_TABLE,  "description","Hit Description",true);
+		addHit(c++, "Species", String.class,  HIT_TABLE,  "species",    "Hit Species", true);
+		addHit(c++, "Type", String.class,  HIT_TABLE, "dbtype", "DB Type", false);
+		addHit(c++,  "Tax", String.class, HIT_TABLE, "taxonomy", "Taxonomy", false);
+		addHit(c++, "HitLen",     Integer.class, HIT_TABLE, "length",     "Length of hit"	, false);
+		if (hasGO)
+			addHit(c++, "nGO", Integer.class, HIT_TABLE, "nGO","Number of GOs for hit",false);
+		mkSection.add(c);
+		
+		if (c!=nCol) Out.PrtWarn("Hit table: " + c + " " + nCol);
+	
+		HIT_SECTION_IDX = new int [mkSection.size()];
+		int i=0;
+		for (int j : mkSection) HIT_SECTION_IDX[i++]=j;
+		
+		HIT_SECTION_BREAK = new int [mkBreak.size()];
+		i=0;
+		for (int j : mkBreak) HIT_SECTION_BREAK[i++]=j;
+	}
+	private static void addHit(int c, String name,  Class <?> type, String sqlTab, String sqlCol, 
+			String desc, boolean def) {
+		if (c>=HIT_COLUMNS.length) // only happens when change columns
+			ErrorReport.die("addHit: Wrong columns " + c + " declared " + HIT_COLUMNS.length);
+		
+		HIT_COLUMNS[c] = name;
+		HIT_SQLCOL[c] = sqlCol;
+		HIT_SQLTAB[c] = sqlTab;
+		HIT_TYPE[c] = type;
+		HIT_DESCRIP[c] = desc;
+		HIT_DEFAULTS[c] = def;
+	}
+	public static FieldData getHitFields() {
+		if (HIT_COLUMNS==null) {
+			buildHit();
+		}
+		
+		FieldData fd = new FieldData();
+		fd.addField(HIT_COLUMNS[0], HIT_TYPE[0], HIT_SQLTAB[0], HIT_SQLCOL[0],  "ROWNUM");
+		
+		for (int i=1; i<HIT_COLUMNS.length; i++)
+			fd.addField(HIT_COLUMNS[i], HIT_TYPE[i], HIT_SQLTAB[i], HIT_SQLCOL[i],  "X"+i);
+
+		fd.addField(HIT_SQLID, String.class, HIT_TABLE, "HITid", "HITID");
+		
+		return fd;
+	}
+	public static String [] getHitColumnSections() { return HIT_SECTION; }
+	
+	public static int [] getHitColumnSectionIdx() {
+		int nSection = HIT_SECTION_IDX.length;
+		
+		int [] retVal = new int[nSection];
+		
+		for(int x=0; x<nSection; x++) retVal[x] = HIT_SECTION_IDX[x];
+		
+		return retVal; 
+	}
+	public static int [] getHitColumnSectionBreak() {
+		int [] retVal = new int[HIT_SECTION_BREAK.length];
+		for(int x=0; x<HIT_SECTION_BREAK.length; x++) retVal[x] = HIT_SECTION_BREAK[x];
+		return retVal; 
+	}
+	public static String [] getHitColumns() { 
+		int offset = HIT_COLUMNS.length;
+		String [] retVal = new String[offset];
+		for(int x=0; x<offset; x++) retVal[x] = HIT_COLUMNS[x];
+		
+		return retVal; 
+	}
+	
+	public static String [] getHitDescript() { 
+		int offset = HIT_DESCRIP.length;
+		String [] retVal = new String[offset];
+		for(int x=0; x<offset; x++) retVal[x] = HIT_DESCRIP[x];
+		return retVal; 
+	}
+	
+	public static boolean [] getHitSelections() {
+		int offset = HIT_DEFAULTS.length;
+		boolean [] retVal = new boolean[offset];
+		for(int x=0; x<offset; x++) retVal[x] = HIT_DEFAULTS[x];
+		return retVal; 
+	}                   
 	//****************************************************************************
 	//* XXX Methods for FieldData
 	//****************************************************************************
@@ -627,10 +766,10 @@ public class FieldData {
 		
 		return retVal;
 	}
-	private void addField(	String fieldName, Class<?> type, 
-			String dbTable, String dbField, String dbSymbol) {
-		FieldItem fd = new FieldItem(fieldName, type);
-		fd.setQuery(dbTable, dbField, dbSymbol);
+
+	private void addField(	String tabCol, Class<?> type, String dbTable, String dbCol, String dbSymbol) {
+		FieldItem fd = new FieldItem(tabCol, type);
+		fd.setQuery(dbTable, dbCol, dbSymbol);
 		theViewFields.add(fd);
 	}
 	//****************************************************************************

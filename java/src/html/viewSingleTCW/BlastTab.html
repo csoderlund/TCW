@@ -2,7 +2,7 @@
 <title>Search</title>
 <body style="padding:20px;width:650px;font-family:Times">
 <h2>Searching</h2>
-Search sequence(s) against TCW NT-sequences, TCW AA-ORFs, or a selected database
+Search sequence(s) against sTCW NT-sequences, sTCW AA-ORFs, or a selected database
 of protein sequences. 
 <ol>
 <li><i>Query:</i> Input one or more sequence in FASTA format into the entry box. 
@@ -43,10 +43,10 @@ to a file in the "/hitResults" directory.
 select a row followed by <b>View Selected Sequence</b>, which displays the detail view of the sequence. 
 
 <p>
-<li><b>Delete Files</b>: Files written by the TCW search command will go into the "/blast"
+<li><b>Delete Files</b>: Files written by the TCW search command will go into the "/ResultHits"
 directory. These files will end with ".fa" or be formated files. These files will be
 deleted when you execute this command. Result files will not be deleted. If you select a protein database that is
-not in the "/blast" directory, the formatted files are not deleted. 
+not in the "/ResultHits" directory, the formatted files are not deleted. 
 </ol>
  
 
@@ -56,6 +56,7 @@ If you do not get the results you expect:
 <li>Remember that the original annotation is typically 1000's of sTCW sequences compared with
 1000's of annotation sequences, whereas this compares just a few sequences against 1000's, which
 causes the e-values to be different.
+<br><br>
 <li>Select <b>Trace</b> and <b>RUN SEARCH</b> again. The command is written to 
 the terminal; copy it and run it from the terminal. If there was
 any error (e.g. in the parameters), it will tell you the error. 

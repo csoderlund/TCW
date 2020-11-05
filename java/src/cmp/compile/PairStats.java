@@ -8,6 +8,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.File;
 import java.sql.ResultSet;
+import java.util.Vector;
 import java.util.HashSet;
 
 import cmp.compile.panels.CompilePanel;
@@ -42,41 +43,54 @@ public class PairStats {
 				return cntAlreadyAligned; // no pairs, all aligned - force computation of summary
 			}
 		
-			if (!initialize()) return -1; 
+			if (!initKaKs()) return -1; 
+			scoreObj = new ScoreCDS();
 			
-			for (Pair grp : pairSet) {
-				curPair = grp;		
+			SumStats sumObj = new SumStats(mDB); // CAS310 was creating new obj each time through loop
+			PairAlignData cdsAlnObj = new PairAlignData();
+			PairAlignData utr5AlnObj = new PairAlignData();
+			PairAlignData utr3AlnObj = new PairAlignData();
+			
+			for (Pair p : pairSet) {
+				curPair = p;		
 				
 				// Aligns AA and fits to CDS
-				cdsObj = new PairAlignData(mDB, curPair.seqName, PairAlignData.AlignCDS_AA); 
-				if (!cdsObj.isGood()) {
+				cdsAlnObj.run(mDB, curPair.seqName, PairAlignData.AlignCDS_AA); 
+				if (!cdsAlnObj.isGood()) {
 					Out.PrtError("aligning " + curPair.seqName[0] + " " + curPair.seqName[1]);
 					cntBadAlign++;
 					continue;
 				}
-				curPair.alignCDS[0] = cdsObj.getAlignCropSeq1();
-				curPair.alignCDS[1] = cdsObj.getAlignCropSeq2();
+				curPair.alignCDS[0] = cdsAlnObj.getAlignCropSeq1();
+				curPair.alignCDS[1] = cdsAlnObj.getAlignCropSeq2();
+				
 				scoreObj.scoreCDS(curPair.cdsLen, curPair.alignCDS);
 				
 				// Aligns NT
-				utr5Obj = new PairAlignData(cdsObj.get5UTR1(), cdsObj.get5UTR2(), PairAlignData.AlignNT);
-				utr3Obj = new PairAlignData(cdsObj.get3UTR1(), cdsObj.get3UTR2(), PairAlignData.AlignNT);
+				utr5AlnObj.utrAlign(cdsAlnObj.get5UTR1(), cdsAlnObj.get5UTR2(), PairAlignData.AlignNT);
+				utr3AlnObj.utrAlign(cdsAlnObj.get3UTR1(), cdsAlnObj.get3UTR2(), PairAlignData.AlignNT);
 				
-				new SumStats(mDB).saveAlignToDB(curPair.pairID, cdsObj, utr5Obj, utr3Obj);
+				sumObj.saveAlignToDB(curPair.pairID, cdsAlnObj, utr5AlnObj, utr3AlnObj);
 				
-				scoreObj.diffScoreAll(curPair.seqName, cdsObj, utr5Obj, utr3Obj);	
+				scoreObj.diffScoreAll(curPair.seqName, cdsAlnObj, utr5AlnObj, utr3AlnObj);	
 				
 				scoreObj.saveStatsToDB(mDB, curPair.seqIndex[0], curPair.seqIndex[1]);
-				scoreObj.sumScore(); 
+				
+				scoreObj.sumScore(); // clears current scores after summing
 				
 				if (isKaKs) kaksWrite(); 
 				
-				curPair.clear();
+				curPair.done(); p=null;
+				cdsAlnObj.clear(); utr5AlnObj.clear(); utr3AlnObj.clear();
+				
 				cntAligned++;
-				if (cntAligned%10==0) Out.r("aligned " + cntAligned);
+				if (cntAligned%1000==0) {
+					 Out.r("aligned " + cntAligned);
+					 Thread.sleep(1000);
+				}
 			}
 			if (outKsKsCmd!=null) outKsKsCmd.close();  
-			if (outKaKs!=null) outKaKs.close();
+			if (outKaKs!=null)    outKaKs.close();
 			
 			if (cntWrite>0)  {
 				Out.PrtSpCntMsg(2, cntWrite,  "KaKs alignments written to files");
@@ -88,7 +102,7 @@ public class PairStats {
 					Out.PrtSpCntMsgNz(3, cntShortCDS, "CDS Alignment less than " + MIN_ALIGN);
 				}
 			}		
-			Out.PrtSpMsgTime(0, "Complete computing " + pairSet.size() + " pairs", startTime);
+			Out.PrtSpMsgTimeMem(0, "Complete computing " + pairSet.size() + " pairs", startTime);
 			mDB.close(); 
 			return cntAlreadyAligned;
 		}
@@ -203,9 +217,8 @@ public class PairStats {
 			pairSet.add(grp);
 		}
 		rs.close();
-		
-		Out.PrtSpCntMsg(2, pairSet.size(), "Pairs to align");
-		Out.PrtSpCntMsgNz(2, cntAlreadyAligned, "Previously aligned");
+		Out.PrtSpCntMsgNz(1, cntAlreadyAligned, "Previously aligned");
+		Out.PrtSpCntMsg(1, pairSet.size(), "Pairs to align");
 	}
 	catch(Exception e) {ErrorReport.reportError(e, "Error loadBBHpairs"); }
 	}
@@ -213,7 +226,7 @@ public class PairStats {
 	/*************************************************************
 	 * Flags: run stats, run KaKs.
 	 */
-	private boolean initialize() {
+	private boolean initKaKs() {
 		try {
 			if (isKaKs) {
 				dirKaKs = theCompilePanel.getCurProjRelDir() + Globals.KaKsDIR;
@@ -227,8 +240,6 @@ public class PairStats {
 						"(" + Globals.KaKsOutPrefix + "n" + Globals.KaKsOutSuffix + ")");
 				outKsKsCmd = new BufferedWriter(new FileWriter(dirKaKs + "/" + Globals.KaKsCmd)) ;
 			}
-			scoreObj = new ScoreCDS();
-				
 			return true;
 		}
 		catch (Exception e) {ErrorReport.prtReport(e,  "Opening files for stats"); return false;}
@@ -247,14 +258,13 @@ public class PairStats {
 		boolean goodCDS=true, goodKaKs=true;
 		int pairID=0;
 		
-		private void clear() {
-			seqIndex[1]=seqIndex[0]=0;
-			seqName[1]=seqName[0]="";
-			alignCDS[1]=alignCDS[0]="";  
-			alignCDSnoGap[1]=alignCDSnoGap[0]="";		
+		private void done() {
+			seqIndex=null;
+			seqName=null;
+			alignCDS=null;  
+			alignCDSnoGap=null;		
 			
-			asmID[1]=asmID[0]=0;
-			goodCDS=goodKaKs=true;
+			asmID=null;
 		}
 	}
 	
@@ -266,12 +276,11 @@ public class PairStats {
 	
 	// list
 	private int cntDoAlg=0;
-	private HashSet <Pair> pairSet = new HashSet <Pair>();
+	private Vector <Pair> pairSet = new Vector <Pair>();
 	
 	// for current
 	private Pair curPair;
 	private ScoreCDS scoreObj;
-	private PairAlignData cdsObj, utr5Obj, utr3Obj;
 	
 	private DBConn mDB = null;
 	private boolean isKaKs=false;

@@ -26,7 +26,7 @@ public class LoadSingleTCW {
 	private static final int COMMIT=10000;
 	private static final long MAX_RANK = 5; // load top N hits transferred from sTCW to mTCW
 	private int idx5=0, idxC=1, idx3=2;
-	
+
 	// The nucleotide sequence is reverse complemented if frame<0; the start and end are changed, but frame stays neg
 	public LoadSingleTCW(DBConn dbc, CompilePanel panel) {
 		mDB = dbc;
@@ -37,13 +37,13 @@ public class LoadSingleTCW {
 		long startTime = Out.getTime();
 		Out.PrtDateMsg("\nLoading SingleTCWs with top " + MAX_RANK + " hits");
 		
-    		if (!step1_datasetTable()) return false;
-    		if (!Schema.addDynamicCountColumns(mDB, cmpPanel)) return false;
+    	if (!step1_datasetTable()) return false;
+    	if (!Schema.addDynamicCountColumns(mDB, cmpPanel)) return false;
      	if (!step3_uniqueHitsTable()) return false; // create hitMap  	
-		if (!step4_seqTable()) return false;			// create seqMap and expMap    
+		if (!step4_seqTable()) return false;		// create seqMap and expMap    
 		if (!step5_seqHitsTable()) return false;
-		if (!removeExtra()) return false;  // major kludge - need to rewrite so do not do step3
-		if (!step6_computeInfo()) return false;
+		if (!step6_updateUniqueHits() ) return false;  
+		if (!step7_computeInfo()) return false;
 		Out.PrtSpMsgTime(0, "Finish loading from database", startTime);
 		return true;
 	}
@@ -186,8 +186,9 @@ public class LoadSingleTCW {
 		rs.close();
 		
 		Out.PrtSpMsg(2, "Total");
-		Out.PrtSpCntMsg(3, hitMap.size(), "Unique hits ", startTime);
-		Out.PrtSpCntMsg(3, dup, "Duplicates ");
+		Out.PrtSpCntMsgZero(3, dup, "Duplicates ");
+		Out.PrtSpCntMsgTimeMem(3, hitMap.size(), "Unique hits ", startTime);
+		
 		return true;
 	} catch(Exception e) {
 		ErrorReport.reportError(e);return false;
@@ -310,101 +311,101 @@ public class LoadSingleTCW {
 				int start = rs.getInt(9); // o_coding_start
 				int end = rs.getInt(10);     // o_coding_end
 				
-	    			nAlign += (long) numAlign;
-	        		nExp   += (long) totalExp;  		
-	        		
-	        		if (seqMap.containsKey(seqName)) {
-	        			UserPrompt.showError("Abort build\nDuplicate sequence ID'" + seqName + "'");
-	        			Out.PrtError("Duplicate sequence ID'" + seqName + "'");
-	        			return false;
-	        		}
-	        		seqCnt++;
-	        		seqMap.put(seqName, seqCnt);  
-	        				
-	        		String aaSeq="", ntSeq="";
-	        		if (isProteinDB) {
-	        			aaSeq = seqTmp.toUpperCase();
-	        		}
-	        		else {
-	        			ntSeq = seqTmp.toLowerCase();
-	        			ntSeq = ntSeq.replace("*", "n"); // TCW assembly can leave '*' in string
-	        			if (frame<0)  ntSeq = getRevCompl(ntSeq);
-	        			// create AA seq
-	        			int cntStop=0;
-	        			char c=' ';
-	        			for (int i = start-1; i <end && (i+2)<ntSeq.length(); i+=3) {
-	        				c = AAStatistics.getAminoAcidFor(
-	        						ntSeq.charAt(i), ntSeq.charAt(i+1),ntSeq.charAt(i+2));
-	        				aaSeq += c;
-	        				if (c=='*') cntStop++;
-	        			}
-	        			if (c=='*') cntStop--; // stop codon
-	        			if (cntStop>0) Out.PrtWarn(seqName + " has stop " + nSeq + " codons in translation");
-	        		}
-	        		ps2.setInt(1, seqCnt);
-	        		ps2.setString(2, seqName);
-	        		ps2.setInt(3, ASMid);
-	        		ps2.setInt(4, numAlign);
-	        		ps2.setInt(5, totalExp);
-	        		ps2.setInt(6, totalExpN);
-	        		ps2.setInt(7, frame);
-	        		ps2.setInt(8, start);
-	        		ps2.setInt(9, end);
-	        		ps2.setString(10, ntSeq);
-	        		ps2.setInt(11, ntSeq.length());
-	        		ps2.setString(12, aaSeq);
-	        		ps2.setInt(13, aaSeq.length());
-	        		
-		        	// add HITid, HITstr - this is best annotation (PIDov)
-	        		 int HITid=0; // sTCW has the default HITid=null; mTCW uses HITid=0
-	        		 if (HITstr != null) {
-	        		 	nAnnoUT++;
-	        		 	if (hitMap.containsKey(HITstr)) 
-	        			{
-	        				HITid = hitMap.get(HITstr);
-	        				ps2.setInt(14, HITid);
-	        				ps2.setString(15, HITstr);
-	        				ps2.setDouble(16, rs.getDouble(2)); // e_value
-	        		 	}
-	        		 	else {
-	        		 		Out.PrtError("No unique hit for dataset ID " + ASMid + " hit " + HITstr);
-	        		 		return false;
-	        		 	}
-	        		 }
-	        		 else {
-	        			ps2.setInt(14, 0);
-	        			ps2.setString(15, null);
-	        			ps2.setDouble(16, Globalx.dNoVal); // was setting to null
-	        		 }
+    			nAlign += (long) numAlign;
+        		nExp   += (long) totalExp;  		
+        		
+        		if (seqMap.containsKey(seqName)) {
+        			UserPrompt.showError("Abort build\nDuplicate sequence ID'" + seqName + "'");
+        			Out.PrtError("Duplicate sequence ID'" + seqName + "'");
+        			return false;
+        		}
+        		seqCnt++;
+        		seqMap.put(seqName, seqCnt);  
+        				
+        		String aaSeq="", ntSeq="";
+        		if (isProteinDB) {
+        			aaSeq = seqTmp.toUpperCase();
+        		}
+        		else {
+        			ntSeq = seqTmp.toLowerCase();
+        			ntSeq = ntSeq.replace("*", "n"); // TCW assembly can leave '*' in string
+        			if (frame<0)  ntSeq = getRevCompl(ntSeq);
+        			// create AA seq
+        			int cntStop=0;
+        			char c=' ';
+        			for (int i = start-1; i <end && (i+2)<ntSeq.length(); i+=3) {
+        				c = AAStatistics.getAminoAcidFor(
+        						ntSeq.charAt(i), ntSeq.charAt(i+1),ntSeq.charAt(i+2));
+        				aaSeq += c;
+        				if (c=='*') cntStop++;
+        			}
+        			if (c=='*') cntStop--; // stop codon
+        			if (cntStop>0) Out.PrtWarn(seqName + " has stop " + nSeq + " codons in translation");
+        		}
+        		ps2.setInt(1, seqCnt);
+        		ps2.setString(2, seqName);
+        		ps2.setInt(3, ASMid);
+        		ps2.setInt(4, numAlign);
+        		ps2.setInt(5, totalExp);
+        		ps2.setInt(6, totalExpN);
+        		ps2.setInt(7, frame);
+        		ps2.setInt(8, start);
+        		ps2.setInt(9, end);
+        		ps2.setString(10, ntSeq);
+        		ps2.setInt(11, ntSeq.length());
+        		ps2.setString(12, aaSeq);
+        		ps2.setInt(13, aaSeq.length());
+        		
+	        	// add HITid, HITstr - this is best annotation (PIDov)
+        		 int HITid=0; // sTCW has the default HITid=null; mTCW uses HITid=0
+        		 if (HITstr != null) {
+        		 	nAnnoUT++;
+        		 	if (hitMap.containsKey(HITstr)) 
+        			{
+        				HITid = hitMap.get(HITstr);
+        				ps2.setInt(14, HITid);
+        				ps2.setString(15, HITstr);
+        				ps2.setDouble(16, rs.getDouble(2)); // e_value
+        		 	}
+        		 	else {
+        		 		Out.PrtError("No unique hit for dataset ID " + ASMid + " hit " + HITstr);
+        		 		return false;
+        		 	}
+        		 }
+        		 else {
+        			ps2.setInt(14, 0);
+        			ps2.setString(15, null);
+        			ps2.setDouble(16, Globalx.dNoVal); // was setting to null
+        		 }
 
-	        		 int k=17;
-		        	// add expList, expListN plus the actual LN values
-	        		 String expList="", expListN="";
-	        		 for (int i=0; i<libList.size(); i++) {
-    		 			String lib = libList.get(i);
-    		 			int expCnt = rs.getInt(Globals.PRE_S_CNT + lib);
-    		 			double expRPKM = rs.getDouble(Globals.PRE_S_RPKM + lib);
-    		 	
-    		 			if(!expMap.containsKey(cmpPanel.getSpeciesSTCWid(x))) {
-    		 				expMap.put(cmpPanel.getSpeciesSTCWid(x), lib);
-    		 				uniqueLibs.add(lib);
-    		 			}
-    		 			else {
-    		 				if(!uniqueLibs.contains(lib)) {
-    		 					uniqueLibs.add(lib);
-    		 					expMap.put(cmpPanel.getSpeciesSTCWid(x), expMap.get(cmpPanel.getSpeciesSTCWid(x)) + " " + lib);
-    		 				}
-    		 			}
-    		 			expList +=  String.format("%s=%d ", lib, expCnt);
-    		 			expListN += String.format("%s=%s ", lib, Converters.roundBoth(expRPKM, 3, 2));
-    		 			ps2.setDouble(k++, expRPKM);
-    		 		}
-	        		 		// add the DE values
-    		 		for (String de : deList) {
-    		 			double p = rs.getDouble(Globals.PRE_S_DE + de);
-    		 			ps2.setDouble(k++, p);
-    		 		}
-    		 		ps2.setString(k++, expList);
+        		 int k=17;
+	        	// add expList, expListN plus the actual LN values
+        		 String expList="", expListN="";
+        		 for (int i=0; i<libList.size(); i++) {
+		 			String lib = libList.get(i);
+		 			int expCnt = rs.getInt(Globals.PRE_S_CNT + lib);
+		 			double expRPKM = rs.getDouble(Globals.PRE_S_RPKM + lib);
+		 	
+		 			if(!expMap.containsKey(cmpPanel.getSpeciesSTCWid(x))) {
+		 				expMap.put(cmpPanel.getSpeciesSTCWid(x), lib);
+		 				uniqueLibs.add(lib);
+		 			}
+		 			else {
+		 				if(!uniqueLibs.contains(lib)) {
+		 					uniqueLibs.add(lib);
+		 					expMap.put(cmpPanel.getSpeciesSTCWid(x), expMap.get(cmpPanel.getSpeciesSTCWid(x)) + " " + lib);
+		 				}
+		 			}
+		 			expList +=  String.format("%s=%d ", lib, expCnt);
+		 			expListN += String.format("%s=%s ", lib, Converters.roundBoth(expRPKM, 3, 2));
+		 			ps2.setDouble(k++, expRPKM);
+		 		}
+        		 		// add the DE values
+		 		for (String de : deList) {
+		 			double p = rs.getDouble(Globals.PRE_S_DE + de);
+		 			ps2.setDouble(k++, p);
+		 		}
+		 		ps2.setString(k++, expList);
      		 	ps2.setString(k++, expListN);
     	        			
      		 	ps2.addBatch();			
@@ -416,7 +417,7 @@ public class LoadSingleTCW {
 				}		
         		} // end while through this dataset
         		if (cntSave>0) ps2.executeBatch();
-   			rs.close();	ps2.close();
+        		rs.close();	ps2.close();
         		stcwDBC.close(); 
         		
         		System.err.print("                                                   \r");
@@ -433,7 +434,7 @@ public class LoadSingleTCW {
      	} // end loop through databases
  		
  		Out.PrtSpMsg(2, "Total");
- 		Out.PrtSpCntMsg(3, seqMap.size(), "Sequences ", startTime);
+ 		Out.PrtSpCntMsgTimeMem(3, seqMap.size(), "Sequences ", startTime);
      	return true;
 	}catch (Exception e) {ErrorReport.prtReport(e, "Creating sequence table");return false;
 	} catch (OutOfMemoryError error) {
@@ -495,29 +496,29 @@ public class LoadSingleTCW {
 				String type = 	tp.toUpperCase() + tx;
 				
 				ps3.setInt(1, HITid);
-        			ps3.setString(2, HITstr);
-        			ps3.setInt(3, CTGid);
-        			ps3.setString(4, CTGstr);
-        			ps3.setInt(5, rs.getInt(3));// percent_id
-        			ps3.setInt(6, rs.getInt(4));// alignment len
-        			ps3.setInt(7, rs.getInt(5));// seq_start	
-        			ps3.setInt(8, rs.getInt(6));// seq_end	
-        			ps3.setInt(9, rs.getInt(7));// hit_start	
-        			ps3.setInt(10, rs.getInt(8));// hit_end	
-        			ps3.setDouble(11, rs.getDouble(9));// e_value		
-        			ps3.setFloat(12, rs.getFloat(10));// bit_score	
-        			ps3.setString(13, type);	
-        			ps3.setInt(14, rs.getInt(13));// filter_best
-        			ps3.setInt(15, rs.getInt(14));// filter_ovbest
-        			ps3.setInt(16, rs.getInt(15));// filter_gobest	
-					
-        			ps3.addBatch();			
-    				nHit++; cntSave++; 
-    				if(cntSave==COMMIT)  {
-    					Out.r("hits " + nHit);
-    					cntSave=0;
-    					ps3.executeBatch();
-    				}		
+    			ps3.setString(2, HITstr);
+    			ps3.setInt(3, CTGid);
+    			ps3.setString(4, CTGstr);
+    			ps3.setInt(5, rs.getInt(3));// percent_id
+    			ps3.setInt(6, rs.getInt(4));// alignment len
+    			ps3.setInt(7, rs.getInt(5));// seq_start	
+    			ps3.setInt(8, rs.getInt(6));// seq_end	
+    			ps3.setInt(9, rs.getInt(7));// hit_start	
+    			ps3.setInt(10, rs.getInt(8));// hit_end	
+    			ps3.setDouble(11, rs.getDouble(9));// e_value		
+    			ps3.setFloat(12, rs.getFloat(10));// bit_score	
+    			ps3.setString(13, type);	
+    			ps3.setInt(14, rs.getInt(13));// filter_best
+    			ps3.setInt(15, rs.getInt(14));// filter_ovbest
+    			ps3.setInt(16, rs.getInt(15));// filter_gobest	
+				
+    			ps3.addBatch();			
+				nHit++; cntSave++; 
+				if(cntSave==COMMIT)  {
+					Out.r("hits " + nHit);
+					cntSave=0;
+					ps3.executeBatch();
+				}		
 			} // end while 
 			if (cntSave>0) ps3.executeBatch();
    			rs.close();
@@ -525,40 +526,93 @@ public class LoadSingleTCW {
    			mDB.closeTransaction(); 
    			
         		countAll+=nHit;
-			Out.PrtSpCntMsg(3, nHit, "Sequence hits                                 ");
+			Out.PrtSpCntMsg(3, nHit, "Sequence hits                           ");
 		} // end loop through databases
 		ps3.close();
 		
 		Out.PrtSpMsg(2, "Total");
-   		Out.PrtSpCntMsg(3, countAll, "Sequence hits ", startTime);
+   		Out.PrtSpCntMsgTimeMem(3, countAll, "Sequence hits ", startTime);
    		return true;
 	} catch(Exception e) {ErrorReport.reportError(e);return false;
 	} catch (OutOfMemoryError error) {
 		ErrorReport.prtReport(error, "Out of memory -- increase memory in runMultiTCW and re-run"); return false;
 	}
 	}
-	private boolean removeExtra() {
+	/*********************************************************
+	 * Add counts to unique_hit table 
+	 * CAS310 db62 this did just remove extras. 
+	 */
+	public boolean step6_updateUniqueHits() {
 		try {
-			Out.PrtSpMsg(2, "Remove extras");
-			int nRow = mDB.executeCount("select count(*) from unique_hits");
-			HashSet <Integer> keep = new HashSet<Integer> ();
-			ResultSet rs = mDB.executeQuery("select unique_hits.HITid from unique_hits " +
-					"join unitrans_hits on unitrans_hits.HITid = unique_hits.HITid");
-			while (rs.next()) keep.add(rs.getInt(1));
-			
-			int rm=nRow-keep.size();
-			Out.PrtCntMsg(rm, "To be removed");
-			mDB.openTransaction(); 
-			int cnt=0;
-			for (int i=0; i<nRow; i++) {
-				if (!keep.contains(i)) {
-					mDB.executeUpdate("delete from unique_hits where HITid=" + i);
-					cnt++;
-					if (cnt%1000==0) Out.rp("Remove ", cnt, rm);
-				}
+			long startTime = Out.getTime();
+			Out.PrtSpMsg(2, "Add counts to unique hit table");
+			class Hit {
+				int nBest=0;
+				int nSeq=0;
+				double evalue = 100000.00;
 			}
-			Out.PrtCntMsg(cnt, "Complete removal ");
+			HashMap <Integer, Hit> hitMap = new HashMap <Integer, Hit> ();
+			ResultSet rs;
+			
+			rs = mDB.executeQuery("select HITid from unique_hits");
+			while (rs.next()) {
+				hitMap.put(rs.getInt(1), new Hit());
+			}
+			
+			
+			int cntBest=0;
+			rs = mDB.executeQuery("select HITid, bestAnno, e_value from unitrans_hits");
+			while (rs.next()) {
+				int hitid = rs.getInt(1);
+				boolean best = rs.getBoolean(2);
+				double evalue = rs.getDouble(3);
+				Hit hObj = hitMap.get(hitid);
+				hObj.nSeq++;
+				if (best) {
+					if (hObj.nBest==0) cntBest++;
+					hObj.nBest++;
+				}
+				if (evalue<hObj.evalue) hObj.evalue=evalue;
+			}
+			
+			rs.close();
+			
+			Out.PrtSpMsg(3, "Update unique hit table");
+			HashSet <Integer> remove = new HashSet<Integer> ();
+			PreparedStatement ps = mDB.prepareStatement("update unique_hits set " +
+					"nSeq=?, nBest=?, e_value=? where HITid=?");
+			int cnt=0, cntSave=0;		
+			for (int hitid : hitMap.keySet()) {
+				cnt++; 
+				Hit hObj = hitMap.get(hitid);
+				if (hObj.nSeq==0) {
+					remove.add(hitid);
+					continue;
+				}
+				ps.setInt(1, hObj.nSeq);
+				ps.setInt(2, hObj.nBest);
+				ps.setDouble(3, hObj.evalue);
+				ps.setInt(4, hitid);
+				ps.addBatch();
+				cntSave++;
+				
+				if(cntSave==COMMIT)  {
+					Out.r("process " + cnt);
+					cntSave=0;
+					ps.executeBatch();
+				}	
+			}
+			if (cntSave>0) ps.executeBatch();
+			
+		
+			Out.PrtSpCntMsg(3, remove.size(), "Remove extras");
+			mDB.openTransaction(); 
+			for (int hitid : remove) 
+				mDB.executeUpdate("delete from unique_hits where HITid=" + hitid);
 			mDB.closeTransaction();
+			
+			Out.PrtSpCntMsg(2, cntBest, "Best anno for at least one sequence");
+			Out.PrtSpCntMsgTimeMem(2, hitMap.size(), "Unique hits", startTime);
 			
 			return true;
 		}
@@ -570,10 +624,11 @@ public class LoadSingleTCW {
 	 * For each sequence: compute CpG[o/e], GC, lengths for UTRs and CDS
 	 * For overview: compute avg length of UTRs, CDS, GC and CpG -- SE for GC and CpG
 	 */
-	private boolean step6_computeInfo() {
+	private boolean step7_computeInfo() {
 		try {
 			if (nNT==0) return true;
 			
+			long time = Out.getTime();
 			Out.PrtSpMsg(1,"Compute CpG [O/E] per sequence and overall");
 			
 		// Initialize dataset and sequence information
@@ -685,7 +740,7 @@ public class LoadSingleTCW {
 			// OVERVIEW-INFO
 			// Average Length   %GC    			CpG-O/E
 			// 5UTR CDS 3UTR5	5UTR CDS 3UTR	5UTR CDS 3UTR
-			Out.PrtSpMsg(1, "Compute overview info for datasets");
+			Out.PrtSpMsg(2, "Compute overview info for datasets");
 			String [] ch1 = {"", "Average", "Lengths", "", "", "%GC ", "", "", "", "CpG O/E", "", ""};
 			String [] ch2 = {"", "5UTR", "CDS", "3UTR", "  ", "5UTR", "CDS", "3UTR", "  ", "5UTR", "CDS", "3UTR"};
 			int [] justify = {0,0,0,0, 0,0,0,0, 0,0,0,0};
@@ -730,9 +785,11 @@ public class LoadSingleTCW {
 				r++;
 			}
 			String dbInfoMsg = Out.makeTable(nCol, nRow, justify, rows);
-			Out.PrtSpMsg(1, "Complete update");
+			
 			System.out.println(dbInfoMsg);
 			mDB.executeUpdate("update info set seqInfo='"+ dbInfoMsg + "'");
+			
+			Out.PrtSpMsgTimeMem(2, "Complete CpG", time);
 			return true;
 		}
 		catch (Exception e) {ErrorReport.die(e, "Error computing summary info"); return false;}
@@ -790,6 +847,10 @@ public class LoadSingleTCW {
 		System.err.println("Remove database, correct error, and then run again");
 		return false;
 	}
+	public LoadSingleTCW(DBConn dbc) { // CAS319 added for updating schema to db62
+		mDB = dbc;
+	}
+	
 	private HashMap <String, Integer> seqMap = new HashMap <String, Integer> ();  // seqName, UTid (multi)
 	private HashMap <String, Integer> hitMap = new HashMap <String, Integer> (); //  hitName, HITid (multi)
 	private HashMap <String, String>  expMap = new HashMap <String, String> ();

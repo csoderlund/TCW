@@ -22,7 +22,6 @@ public class LoadSingleGO {
 		cmpPanel = panel;
 	}
 	public boolean run() {
-		long startTime = Out.getTime();
 		Out.PrtDateMsg("\nLoading GOs from SingleTCWs");
 		trunTable();
 		if (!loadSeqsIdx()) return false;
@@ -33,10 +32,8 @@ public class LoadSingleGO {
 		if (!saveSeqGOtables()) return false;
 		if (!saveGOinfo()) return false;
 		
-		cmpPanel.getDBInfo().resetGO();
-		new Summary(mDB).removeSummary();
+		cmpPanel.getDBInfo().resetGO(mDB);
 		
-		Out.PrtSpMsgTime(0, "Finish loading GOs", startTime);
 		return true;
 	}
 	private boolean trunTable() {
@@ -64,6 +61,7 @@ public class LoadSingleGO {
 	}
 	private boolean loadHitsWithDirectGOs() {
 		try {
+			long time = Out.getTime();
 			Out.PrtSpMsg(1, "Loading hit info");
 			int cntNoGO=0;
 			
@@ -94,6 +92,7 @@ public class LoadSingleGO {
 			Out.PrtSpCntMsg(2,cntNoGO, 		"hits without GOs");
 			Out.PrtSpCntMsg(2,hitMap.size(), "hits with GOs");
 			Out.PrtSpCntMsg(2,goMap.size(), 	"assigned GOs");
+			Out.PrtSpMsgTimeMem(1, "Finish load hit", time);
 			return true;
 		}
 		catch(Exception e) {	ErrorReport.prtReport(e, "Cannot build GO tables");}
@@ -102,6 +101,7 @@ public class LoadSingleGO {
 	// transfer all assigned and inherited GOs from the singleTCW go_graph_path
 	private boolean transferGOgraph() {
 		try {
+			long time = Out.getTime();
 			Out.PrtSpMsg(1, "Transferring GO ancestors from singleTCWs");
 			ResultSet rs=null;
 			int cntAddGO=0;
@@ -170,6 +170,7 @@ public class LoadSingleGO {
 	// transfer all assigned and inherited GOs from the singleTCW go_graph_path
 	private boolean transferGOinfo() {
 		try {
+			long time = Out.getTime();
 			Out.PrtSpMsg(1, "Transferring GO information from singleTCWs");
 			ResultSet rs=null;
 			int cntAddGO=0;
@@ -211,9 +212,8 @@ public class LoadSingleGO {
 				
 				String msg = (x==0) ? "add GO-info from " : "additional  from ";
 				Out.PrtSpCntMsg(2, cnt, msg + cmpPanel.getSpeciesSTCWid(x));
-				if (cntAddGO>=goMap.size()) break;
 			}
-			
+			Out.PrtSpCntMsgTimeMem(2, cntAddGO, "total added GO", time);
 			return true;
 		} catch(Exception e) {	
 			ErrorReport.prtReport(e, "Cannot build GO graph table");
@@ -225,6 +225,7 @@ public class LoadSingleGO {
 	// Add to each hit all inherited GOs
 	private boolean addHitAncestors() {
 		try {
+			long time = Out.getTime();
 			Out.PrtSpMsg(1, "Assign inherited GOs to hits");
 			ResultSet rs=null;
 			int cnt=0;
@@ -249,7 +250,7 @@ public class LoadSingleGO {
 				}
 			}
 			if (rs!=null) rs.close();
-			Out.PrtSpCntMsg(2, cnt, "inherited hit-GOs associations");
+			Out.PrtSpCntMsgTimeMem(2, cnt, "inherited hit-GOs associations", time);
 			
 			return true;
 		} catch(Exception e) {	
@@ -262,6 +263,7 @@ public class LoadSingleGO {
 	// save each assigned and inherited seq-GO pair
 	private boolean saveSeqGOtables() {
 		try {
+			long time = Out.getTime();
 			Out.PrtSpMsg(1, "Save GOs per sequence");
 			PreparedStatement ps = mDB.prepareStatement("INSERT INTO go_seq " +
 					"(UTid, gonum, bestHITstr, bestEval, bestEV, bestAN, EC, direct) " +
@@ -331,8 +333,7 @@ public class LoadSingleGO {
 				mDB.closeTransaction();
 			} // end loop through sequences
 			ps.close();
-			Out.PrtSpCntMsg(2, cntAllSeq, "GO-seq pairs                                          ");
-		
+			
 			if (runMTCWMain.test) { //  one occurrence on mTCW_rhi (NnR/OlR/Os)
 				int cnt=0;
 				for (Hit2GO hg : hitMap.values()) {
@@ -343,6 +344,9 @@ public class LoadSingleGO {
 				}
 				Out.PrtSpCntMsgZero(2, cnt, "Hits not attached to sequences");
 			}
+			
+			Out.PrtSpCntMsgTimeMem(2, cntAllSeq, "GO-seq pairs", time);
+			
 	   		return true;
 		} catch(Exception e) {	
 			ErrorReport.prtReport(e, "Cannot build GO tables");
@@ -355,6 +359,7 @@ public class LoadSingleGO {
 	// wait until end because count sequences with GO and bestEval, even though not using right now
 	private boolean saveGOinfo() {
 		try {
+			long time = Out.getTime();
 			Out.PrtSpMsg(1, "Save go term information for " + goMap.size() + " GOs");
 			mDB.openTransaction();
 			int cnt=0, cntSave=0, cntBadType=0;
@@ -397,8 +402,10 @@ public class LoadSingleGO {
 			if (cntSave>0)ps2.executeBatch();
 			ps2.close();
 			mDB.closeTransaction();
+			
 			Out.PrtSpCntMsgZero(2, cntBadType, "Incorrect term type");
-			Out.PrtSpCntMsg(2, cnt, "Add GO info");
+			Out.PrtSpCntMsgTimeMem(2, cnt, "Add GO info", time);
+			
 			return true;
 		} catch(Exception e) {	
 			ErrorReport.prtReport(e, "Cannot build go_info table");

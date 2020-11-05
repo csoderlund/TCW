@@ -35,7 +35,7 @@ public class DoBlast {
 			
 			boolean rc = BlastRun.run(n, pgm, "blastp", blastParams, true, combinedFile, true, combinedFile, tabFile);
 			
-			Out.PrtDateMsgTime("Complete " + pgm, startTime);
+			Out.PrtMsgTime("Complete " + pgm, startTime);
 			if (!rc) pgm=null;
 			return pgm + " " + blastParams;
 		}
@@ -64,7 +64,7 @@ public class DoBlast {
 			
 			boolean rc = BlastRun.run(n, "blast", "blastn", blastParams, false, combinedFile, false, combinedFile, tabFile);
 			
-			Out.PrtDateMsgTime("\nComplete blastn", startTime);
+			Out.PrtMsgTime("\nComplete blastn", startTime);
 			
 			String pgm = (rc) ? "blastn " + blastParams: null;
 			return pgm;

@@ -326,6 +326,7 @@ public class SeqGOPanel extends JPanel {
 		theGoTable.setBackground(Color.WHITE);
 		scrollTablePane = new JScrollPane(theGoTable);
 		scrollTablePane.setBackground(Color.WHITE); 
+		scrollTablePane.getViewport().setBackground(Color.WHITE); // CAS310 will this fix linux problem of gray background?
 		
 		theGoTable.setColumnSelectionAllowed( false );
 		theGoTable.setCellSelectionEnabled( false );

@@ -18,6 +18,7 @@ import java.awt.event.ComponentEvent;
 import java.io.File;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
+import java.util.HashSet;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -144,8 +145,14 @@ public class CompilePanel extends JPanel {
 		try {
 			DBConn conn = new DBConn(hosts.host(), dbName, hosts.user(), hosts.pass());
 			if (conn!=null) {
-				theInfo = new DBinfo(conn); 
+				boolean b = new Version().run(conn); // CAS310 moved this from mTCWcfgRead to here
+				if (b) theInfo = new DBinfo(conn); 
 				conn.close();
+				if (!b) { // CAS310 added this; pretends it does not exist if not updated
+					dbExists=false;
+					theInfo = null;
+					return false;
+				}
 			}
 		} 
 		catch (Exception err) {ErrorReport.die(err, "Error accessing database on " + dbName); }
@@ -298,11 +305,10 @@ public class CompilePanel extends JPanel {
 			
 			mTCWcfgReadFile(props);
 			
-			updateAll();
+			updateAll(); 
 			
 			if(dbIsExist()) { 
 				Out.Print("Database " + getDBName() + " exists ");
-				new Version(hosts.getDBConn(getDBName()), false);
 				pnlSpecies.updateSTCWtype(getDBconn(), theCompileMain);
 			}
 			else {
@@ -589,6 +595,25 @@ public class CompilePanel extends JPanel {
 		return "./error";
 	}
 	public HostsCfg getHosts() {return hosts;}
+	
+	// CAS310 moved this method from DBinfo to here
+	// This uses mysql databases, so do not need a current one.
+	public boolean isReservedWords(String w) { 
+		try {
+			DBConn mDB = new DBConn(hosts.host(), hosts.user(), hosts.pass());
+			String ww = w.toLowerCase();
+			HashSet <String> words = new HashSet <String> ();
+			ResultSet rs = mDB.executeQuery("SELECT name FROM mysql.help_keyword");
+			while (rs.next()) words.add(rs.getString(1).toLowerCase());
+			if (words.size()==0) {
+				Out.PrtError("Cannot read mysql.help_keyword");
+				return false;
+			}
+			return words.contains(ww);
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "Getting reserved words");}
+		return false;
+	}
 	
 	/*******************************************************/
 	private JScrollPane mainPane = null;

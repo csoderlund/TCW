@@ -21,11 +21,15 @@ public class PairAlignData implements Comparable<PairAlignData> {
 	private final String  gapStr=Globals.gapStr;
 	private final String  indel = gapStr+gapStr+gapStr;
 	
+	public PairAlignData () {}
 	/*********************************************************
 	 * aa or nt sequence: 
-	 * viewMulti.PairViewPanel to display nt and aa
+	 * viewMulti and runMulti
 	 */
-	public PairAlignData(DBConn mDB, String [] seqIDs, int type) {
+	public PairAlignData(DBConn mDB, String [] seqIDs, int type) { 
+		run(mDB, seqIDs, type);
+	}
+	public void run(DBConn mDB, String [] seqIDs, int type) { // CAS310 can be called with new params
 		strID1=seqIDs[0];
 		strID2=seqIDs[1];
 		alignType = type;
@@ -81,7 +85,7 @@ public class PairAlignData implements Comparable<PairAlignData> {
 		}
 	}
 	// Align 5' and 3' for PairStats of runMulti
-	public PairAlignData(String utr1, String utr2, int type) {
+	public void utrAlign(String utr1, String utr2, int type) {
 		align(utr1, utr2);
 		orfStart1=1;
 		orfStart2=1;
@@ -125,55 +129,11 @@ public class PairAlignData implements Comparable<PairAlignData> {
 		this.isUTR5=isUTR5;
 		this.isUTR3=!isUTR5;
 	}
-	// Not used. tried aligning from end of ORF, but ORF not always correct; need to try both and take best
-	public PairAlignData(PairAlignData nt, boolean isUTR5) {
-		this.strID1 = nt.getSeqID1();
-		this.strID2 = nt.getSeqID2();
-		
-		String aNT1 = nt.getAlignFullSeq1();
-		String aNT2 = nt.getAlignFullSeq2();
-		int [] orfs = nt.getORFs();
-		int addGap=0, cntNT=0, aLen=aNT1.length();
-		
-		if (isUTR5) {
-			this.theSeq1 = nt.get5UTR1(); // needs to access this in alignPairView3
-			this.theSeq2 = nt.get5UTR2();
-			addGap = orfs[0];
-			
-			for (int i=0; i<aLen && cntNT<orfs[0]; i++) {
-	    			if (aNT1.charAt(i)==gapCh) addGap++;
-	    			else cntNT++;
-	    		}
-			alignFullSeq1=aNT1.substring(0,addGap-1);
-			alignFullSeq2=aNT2.substring(0,addGap-1);
-		}
-		else {
-			this.theSeq1 = nt.get3UTR1(); 
-			this.theSeq2 = nt.get3UTR2();
-			int 	e1x = (nt.getSeq1().length()-orfs[1])+3;
-			addGap = e1x;
-			
-		    	for (int i=aLen-1; i>0 && cntNT<e1x; i--) {
-		    		if (aNT1.charAt(i)==gapCh) addGap++;
-		    		else cntNT++;
-		    	}
-		    	addGap = aLen-addGap;
-		    alignFullSeq1=aNT1.substring(addGap);
-		    	alignFullSeq2=aNT2.substring(addGap); 
-		}
-		orfStart1=1;
-		orfStart2=1;
-		orfEnd1=alignFullSeq1.length();
-		orfEnd2=alignFullSeq2.length();
-		
-		this.isUTR5=isUTR5;
-		this.isUTR3=!isUTR5;
-	}
 	
 	/****************************************
 	 * runMulti.SumStats - crop realigned sequences
 	 */
-	public PairAlignData () {}
+	
 	public void crop(String seq1, String seq2) {
 		alignFullSeq1= seq1;
 		alignFullSeq2= seq2;
@@ -181,17 +141,16 @@ public class PairAlignData implements Comparable<PairAlignData> {
 	}
 	/************************************************************/
 	private void align(String seq1, String seq2) {
-		aligner = new AlignPairOrig();
 		int minLen=Share.minAlignLen;
 		
 		if (seq1.length()>minLen && seq2.length()>minLen) {
 		
-			aligner.DPalign(seq1, seq2, isNT);
+			alignObj.DPalign(seq1, seq2, isNT);
 		
-			alignFullSeq1 = aligner.getHorzResult(gapCh);
-			alignFullSeq2 = aligner.getVertResult(gapCh);
-		
-			nOLPscore = aligner.getOLPmatch();
+			alignFullSeq1 = alignObj.getHorzResult(gapCh);
+			alignFullSeq2 = alignObj.getVertResult(gapCh);
+			nOLPscore     = alignObj.getOLPmatch();
+			
 			if (alignType!=AlignCDS_AA) removeHangingGap();
 		}
 		else {// Either seq1 or seq2 all overhang, which should not be scored
@@ -320,29 +279,38 @@ public class PairAlignData implements Comparable<PairAlignData> {
     		strORF1 = orfStart1 + ".." +  orfEnd1;
     		theSeq1 = rs.getString(3);
     		int hitid = rs.getInt(4);
+    		rs.close();
     		
+    		boolean isAA=false;
     		// 2nd sequence
-    		if (type==0) {
-	    		rs = conn.executeQuery("Select HITstr, sequence from unique_hits where HITid=" + hitid);
-	    		if (!rs.next()) {
-	    			rs.close();
+    		if (type==0) { // Best hit for sequence
+	    		ResultSet rs1 = conn.executeQuery("Select HITstr, sequence, isProtein from unique_hits where HITid=" + hitid);
+	    		if (!rs1.next()) {
+	    			rs1.close();
 	    			Out.PrtWarn("Error reading database for hit sequence " + hitid);
 	    			return false;
 	    		}
-	    		strID2 = rs.getString(1);
-	    		theSeq2 = rs.getString(2);
+	    		strID2 = rs1.getString(1);
+	    		theSeq2 = rs1.getString(2);
+	    		isAA = rs1.getBoolean(3);
+	    		rs1.close();
     		}
-    		else {
-    			rs =  conn.executeQuery("Select sequence from unique_hits where HITstr='" + IDs[1] + "'");
-	    		if (!rs.next()) {
-	    			rs.close();
+    		else {   // Majority hit
+    			ResultSet rs2 =  conn.executeQuery("Select sequence, isProtein from unique_hits where HITstr='" + IDs[1] + "'");
+	    		if (!rs2.next()) {
+	    			rs2.close();
 	    			Out.PrtWarn("Error reading database for hit sequence " + hitid);
 	    			return false;
 	    		}
 	    		strID2 = IDs[1];
-	    		theSeq2 = rs.getString(1);
+	    		theSeq2 = rs2.getString(1);
+	    		isAA = rs2.getBoolean(2);
+	    		rs2.close();
     		}
-    		rs.close();
+    		if (!isAA) { // CAS310 - when best hit is NT
+    			Out.prt("Translating NT best hit to AA (assuming ORF)");
+	    		theSeq2 = new ScoreAA().nt2aa(theSeq2);
+    		}
 			return true;
 		}
 		catch(Exception e) {
@@ -376,7 +344,7 @@ public class PairAlignData implements Comparable<PairAlignData> {
 	public boolean isGood() {
 		if (alignFullSeq1==null || alignFullSeq1.length()<3) return false;
 		if (alignFullSeq2==null || alignFullSeq2.length()<3) return false;
-		return aligner.isGood();
+		return alignObj.isGood();
 	}
 	public boolean isNT() { return isNT;}
 	public String getSeqID1() {return strID1;}
@@ -477,7 +445,7 @@ public class PairAlignData implements Comparable<PairAlignData> {
 		    
 		    int index=0;
 		    while (index<=seqLen-3) {
-		    		seq1c1 = alignCropSeq1.substring(index, index+3);
+		    	seq1c1 = alignCropSeq1.substring(index, index+3);
 				seq2c1 = alignCropSeq2.substring(index, index+3);
 				
 				// find codon1 with gaps
@@ -523,6 +491,7 @@ public class PairAlignData implements Comparable<PairAlignData> {
 		    }
 			alignCropSeq1 = seq1.toString();
 			alignCropSeq2 = seq2.toString();
+			seq1=seq2=null;
 			return swap;
 		}
 		private void swap1() {
@@ -573,7 +542,14 @@ public class PairAlignData implements Comparable<PairAlignData> {
 		alignCropSeq1 = alignCropSeq2="";
 		alignFullSeq1 = alignFullSeq2="";
 		orfStart1=orfStart2=orfEnd1=orfEnd2=0;
+		isNT=true; isCDS=false; isUTR5=false; isUTR3=false;
+		strID1 =  strID2 = "";
+		strORF1 = strORF2 = ""; 
+		theCDS1 = theCDS2 = ""; 
+		the5UTR1 = the5UTR2 = ""; 
+		the3UTR1 = the3UTR2 = "";
 	}
+	
 	private int alignType=0;
 	private boolean isNT=true, isCDS=false, isUTR5=false, isUTR3=false;
 	private String strID1 = "", strID2 = "";
@@ -583,7 +559,8 @@ public class PairAlignData implements Comparable<PairAlignData> {
 	private String the3UTR1 = "", the3UTR2 = ""; 
 	private int    orfStart1=0, orfStart2=0, orfEnd1=0, orfEnd2=0;
 	
-	private AlignPairOrig aligner;
+	private AlignPairOrig alignObj =  new AlignPairOrig(); // CAS310 reuse
+	
 	// these three apply to whatever was aligned last
 	private String theSeq1 = "", theSeq2 = ""; // the aligned seq
 	private String alignCropSeq1 = "", alignCropSeq2=""; // no Hang

@@ -17,24 +17,25 @@ set and may take wait time to display.
 be used to find a given sequence. 
 <tr><td>Best Hit ID<td>Find all sequences with the given <tt>HitID</tt>, which is its
 best annotation hit.
-<tr><td>Description<td>Find all sequences with the given <tt>Descript</tt>, which is its
+<tr><td>Best Descript<td>Find all sequences with the given <tt>Descript</tt>, which is its
 best annotation hit description.  
 <tr><td>Hits to different dataset<td>This lists the sequences that have 
-a hit to a different dataset. 
-<tr><td>Has Annotation<td>Has at least one hitID.
+a hit to a different dataset. Note: the "Best Hit" refers to the annotation hit, whereas
+this refers to the sequence pair hits.
+<tr><td>Has Annotation<td>Has at least one annotation hit.
 <tr><td>Has GO<td>Has at least one GO assignment.
 </table>
-<p>Substring queries (<tt>Seq ID</tt>, <tt>Best Hit ID</tt>, <tt>Description</tt>):
+<p>Substring queries (<tt>Seq ID</tt>, <tt>Best Hit ID</tt>, <tt>Best Descript</tt>):
 The search is not case-sensitive and will find the substring anywhere in the ID or description.
 
 <h3>+Cluster Sets</h3>
 The names of all computed cluster sets will be listed. 
-If you select "In" for one of the them,
+If you select <tt>In</tt> for one of the them,
 all sequences that are in a corresponding cluster of that method type will be listed.
-If you select "Not in", then all sequences that are not in a cluster of that
-method type is listed. You can select multiple "In", or "Not in" or a combination.
+If you select <tt>Not in</tt>, then all sequences that are not in a cluster of that
+method type is listed. You can select multiple <tt>In</tt>, or <tt>Not in</tt>, or a combination.
 <br><br>For example: if you have cluster types OM1 (created with inflation 1.5) and
-OM5 (created with inflation 5), then selecting "In" OM1 and "Not in" OM5, this will list
+OM5 (created with inflation 5), then selecting <tt>In</tt> OM1 and <tt>Not in</tt> OM5, this will list
 all sequences that are in OM1 but not in OM5 clusters.
 <h3>TPM</h3>
 If the input datasets had read counts, then their normalized values will be in the database.

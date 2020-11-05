@@ -54,11 +54,11 @@ public class AlignPairOrig
      * Shared Routines for affine and non-affine dynamic programming
      */
     private float cmp(char x, char y) {
-    		if (isDNA) {
-    			if (x==y) return matchScore;
-    			else return mismatchScore;
-    		}
-    		return (float) getBlosum(x,y);
+		if (isDNA) {
+			if (x==y) return matchScore;
+			else return mismatchScore;
+		}
+		return (float) getBlosum(x,y);
     }
  
     /*************************************************************
@@ -348,15 +348,15 @@ public class AlignPairOrig
     // For doHomology, the arrays get reused.
     private boolean checkAllocation ( )
     {
-    		if (nCells > maxCells) {
-       		System.err.println("Not enough memory to align sequences - need " + nCells + "kb");
-       		isGood=false;
-    			return false;
-    		}
-    	    fLastBest = -Float.MAX_VALUE;
-    	    chLastBest = DIRECTION_DIAGONAL;
-    	    
-    		try {
+		if (nCells > maxCells) {
+	   		System.err.println("Not enough memory to align sequences - need " + nCells + "kb");
+	   		isGood=false;
+			return false;
+		}
+	    fLastBest = -Float.MAX_VALUE;
+	    chLastBest = DIRECTION_DIAGONAL;
+	    
+		try {
 	        if ( matchDir == null || matchDir.length < nCells )
 	        {
 	            matchDir = new char [nCells];
@@ -367,10 +367,10 @@ public class AlignPairOrig
 	            }
 	        }
 	        else {
-	        		for (int i=0; i< matchDir.length; i++) matchDir[i] = ' ';
-	        		 if ( bUseAffineGap )
-	        			 for (int i=0; i< matchDir.length; i++) 
-	        				 gapHorzDir[i] =  gapVertDir[i] = ' ';
+        		for (int i=0; i< matchDir.length; i++) matchDir[i] = ' ';
+        		 if ( bUseAffineGap )
+        			 for (int i=0; i< matchDir.length; i++) 
+        				 gapHorzDir[i] =  gapVertDir[i] = ' ';
 	        }
 	        int max = (nRows > nCols ) ? nRows : nCols;
 	        
@@ -387,34 +387,39 @@ public class AlignPairOrig
 	            }
 	        }
 	        else {
-        			for (int i=0; i< matchRow.length; i++) matchRow[i] = 0.0f;
-        			if ( bUseAffineGap )
-        				for (int i=0; i< matchRow.length; i++) 
-        					gapHorzRow[i] =  gapVertRow[i] = 
-        						gapHorzLastRow[i] =  gapVertLastRow[i] = 0.0f;
-	        	}
-    		}
-    		catch (OutOfMemoryError E) {
-    			matchDir = null;
-    			maxCells = nCells;
-    			System.err.println("Not enough memory to align sequences");
-    			System.err.println("Increase in executable script (e.g. execAnno, viewSingleTCW");
-    			isGood=false;
-    			return false;
-    		}
+    			for (int i=0; i< matchRow.length; i++) matchRow[i] = 0.0f;
+    			if ( bUseAffineGap )
+    				for (int i=0; i< matchRow.length; i++) 
+    					gapHorzRow[i] =  gapVertRow[i] = 
+    						gapHorzLastRow[i] =  gapVertLastRow[i] = 0.0f;
+        	}
+		}
+		catch (OutOfMemoryError E) {
+			matchDir = null;
+			maxCells = nCells;
+			System.err.println("Not enough memory to align sequences");
+			System.err.println("Increase in executable script (e.g. execAnno, viewSingleTCW");
+			isGood=false;
+			return false;
+		}
         return true;
     }
     
     public void clear() {
-	    	matchLastRow = null;
-	    	matchRow = null;
-	    	matchDir = null;
-	    	gapHorzRow = null;
-	    	gapHorzLastRow = null;
-	    	gapHorzDir = null;
-	    	gapVertRow = null;
-	    	gapVertLastRow = null;
-	    	gapVertDir = null;
+    	matchLastRow = null;
+    	matchRow = null;
+    	matchDir = null;
+    	gapHorzRow = null;
+    	gapHorzLastRow = null;
+    	gapHorzDir = null;
+    	gapVertRow = null;
+    	gapVertLastRow = null;
+    	gapVertDir = null;
+    	
+    	strInHorz = null; // CAS301 add these 4
+        strInVert = null;
+        strGapHorz = null; 
+        strGapVert = null; 
     }
    
     //Score the alignment; sets all values that can later be obtained with gets
@@ -429,41 +434,41 @@ public class AlignPairOrig
         // find start of overlap
         for (i = 0; i< lenStr; i++) {
           	if (strGapHorz.charAt(i) != chGap && strGapVert.charAt(i) != chGap) {
-	        		allS = i;
-	        		break;
-	        	}
+        		allS = i;
+        		break;
+        	}
         }       
         // find end of overlap
         for (j = lenStr-1; j> 0; j--) {
           	if (strGapHorz.charAt(j) != chGap && strGapVert.charAt(j) != chGap) {
-	        		allE = j;
-	        		break;
-	        	}
+        		allE = j;
+        		break;
+        	}
         }
         OLPlen = allE - allS + 1; 
         if (allE>=strGapHorz.length() || allE>=strGapVert.length()) return;
         
         for (i = allS; i <= allE; i++) 
         {	    		
-	    		if (strGapHorz.charAt(i) == chGap || strGapVert.charAt(i) == chGap) {	 
-	    			OLPgap++;
-	        		if (isOpen && bUseAffineGap) OLPscore -= gapExtend;
-	        		else OLPscore -= gapOpen;
-	        		isOpen = true;
-	        		if (strGapHorz.charAt(i) == '*' || strGapVert.charAt(i) == '*') OLPstops++;
-	        	}
-	        	else {
-	        		isOpen = false;
-	        		if (strGapHorz.charAt(i) == '*' || strGapVert.charAt(i) == '*') {
-	        			OLPstops++;
-	        			OLPscore -= 4;
-	        		}
-	        		else {
-	        			double s = cmp(strGapHorz.charAt(i), strGapVert.charAt(i));
-	        			if (s>0) OLPmatch++;
-	        			OLPscore +=  s;
-	        		}
-	        	}  
+    		if (strGapHorz.charAt(i) == chGap || strGapVert.charAt(i) == chGap) {	 
+    			OLPgap++;
+        		if (isOpen && bUseAffineGap) OLPscore -= gapExtend;
+        		else OLPscore -= gapOpen;
+        		isOpen = true;
+        		if (strGapHorz.charAt(i) == '*' || strGapVert.charAt(i) == '*') OLPstops++;
+        	}
+        	else {
+        		isOpen = false;
+        		if (strGapHorz.charAt(i) == '*' || strGapVert.charAt(i) == '*') {
+        			OLPstops++;
+        			OLPscore -= 4;
+        		}
+        		else {
+        			double s = cmp(strGapHorz.charAt(i), strGapVert.charAt(i));
+        			if (s>0) OLPmatch++;
+        			OLPscore +=  s;
+        		}
+        	}  
         } 
         if (OLPmatch>OLPlen) OLPmatch=OLPlen; // just to make sure
     }

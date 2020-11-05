@@ -38,12 +38,18 @@ public class MultiStats {
 			int nMax = mDB.executeCount("select max(PGid) from pog_groups");
 			Out.PrtDateMsg("Multi-align " + nCnt + " clusters");
 			
-			PreparedStatement ps1 = mDB.prepareStatement("update pog_groups " +
-					"set conLen=0, sdLen=0, " + "score1=" + Globalx.dNoScore +    ", score2=" + Globalx.dNoVal + " where PGid=?");
-			PreparedStatement ps2 = mDB.prepareStatement("update pog_groups set " +
-					"conLen=?, sdLen=?, score1=?, score2=?, conSeq=? where PGid=?");
-			PreparedStatement ps3 = mDB.prepareStatement("update pog_members set " +
+			// alignment failed
+			PreparedStatement psF = mDB.prepareStatement("update pog_groups set " +
+				"conLen=0, sdLen=0, " + "score1=" + Globalx.dNoScore +    ", score2=" + Globalx.dNoVal + " where PGid=?");
+			
+			// alignment for group
+			PreparedStatement psG = mDB.prepareStatement("update pog_groups set " +
+				"conLen=?, sdLen=?, score1=?, score2=?, conSeq=? where PGid=?");
+			
+			// alignment for member
+			PreparedStatement psM = mDB.prepareStatement("update pog_members set " +
 					" alignMap=? where UTstr=? and PGid=?");
+			
 			int cnt=0, cntErr=0;
 			mDB.openTransaction(); 
 			for (int grpID=nMin; grpID<=nMax; grpID++) {
@@ -76,13 +82,15 @@ public class MultiStats {
 					cntErr++;
 					
 					for (int s=0; s<nSeqs; s++)  algObj2.addSequence(name[s], seqs[s]);
+					
 					int rc2 = algObj2.runAlignPgm(false, false, true);
+					
 					if (rc2!=0) {
 						Out.prt("*** MUSCLE failed for cluster " + cl);
 						if (rc < -1) Out.die("Fatal Error on alignments"); 
 						
-						ps1.setInt(1, grpID);
-						ps1.execute();
+						psF.setInt(1, grpID);
+						psF.execute();
 						cntErr++;
 						continue;
 					}
@@ -103,28 +111,29 @@ public class MultiStats {
 				int    conLen = alignedSeqs[0].length();
 				double sdLen = Stats.stdDev(sumLen/(double) nSeqs, len);
 				
-				ps2.setInt(1, conLen);
-				ps2.setDouble(2, sdLen);
-				ps2.setDouble(3,score1);
-				ps2.setDouble(4,score2);
-				ps2.setString(5, alignedSeqs[0]);
-				ps2.setInt(6, grpID);
-				ps2.execute();
+				psG.setInt(1, conLen);
+				psG.setDouble(2, sdLen);
+				psG.setDouble(3,score1);
+				psG.setDouble(4,score2);
+				psG.setString(5, alignedSeqs[0]);
+				psG.setInt(6, grpID);
+				psG.execute();
 				
 				for (int pos=1; pos<alignedSeqs.length; pos++) {
 					String map = pos + Share.DELIM + Share.compress(alignedSeqs[pos]);
-					ps3.setString(1, map);
-					ps3.setString(2, alignedNames[pos]);
-					ps3.setInt(3, grpID);
-					ps3.execute();
+					psM.setString(1, map);
+					psM.setString(2, alignedNames[pos]);
+					psM.setInt(3, grpID);
+					psM.execute();
 				}
 			}
 			mDB.closeTransaction(); 
 			
+			mDB.executeUpdate("update info set hasMA=1"); // CAS310 add
 			Out.r("                                                ");
 			String sum = new Summary(mDB).getMethodScoreTable();
 			Out.prt(sum);
-			Out.PrtDateMsgTime("Complete multi-align of " + cnt + " clusters", startTime);
+			Out.PrtMsgTimeMem("Complete multi-align of " + cnt + " clusters", startTime);
 		}
 		catch(Exception e) {ErrorReport.reportError(e, "score all");}
 	}

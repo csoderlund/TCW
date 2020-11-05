@@ -11,6 +11,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import util.database.DBConn;
 import util.methods.ErrorReport;
 import util.methods.FileHelpers;
 import util.methods.Out;
@@ -19,8 +20,10 @@ import util.ui.UserPrompt;
 
 import cmp.compile.MultiStats;
 import cmp.compile.Pairwise;
+import cmp.compile.Summary;
 import cmp.database.DBinfo;
 import cmp.database.Globals;
+import cmp.database.Schema;
 
 public class StatsPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
@@ -48,7 +51,7 @@ public class StatsPanel extends JPanel {
 		row.add(btnRunStats);
 		row.add(Box.createHorizontalStrut(5));
 		
-		btnStatsSettings = Static.createButton("Settings", true, Globals.MENUCOLOR);
+		btnStatsSettings = Static.createButton("Settings", false, Globals.MENUCOLOR); // CAS310 can't see until exists
 		btnStatsSettings.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				editPanelStartup();
@@ -74,6 +77,7 @@ public class StatsPanel extends JPanel {
 		if (!editPanel.isFunction()) return;
 		
 		try {
+			long time = Out.getTime();
 			Out.createLogFile(theCompilePanel.getCurProjAbsDir(), Globals.statsFile);
 	
 			DBinfo info = theCompilePanel.getDBInfo();
@@ -93,7 +97,7 @@ public class StatsPanel extends JPanel {
 			}
 					
 			String msg="";
-			if (doPCC && info.getCntPCC()>0) 
+			if (doPCC && info.hasPCC()) 
 				msg = "PCC has been run - will be rerun\n";
 			
 			if (doWriteKaKs) {
@@ -124,15 +128,31 @@ public class StatsPanel extends JPanel {
 					return;
 				}
 			
-			if (doPCC) 		pairObj.computeAndSavePCC();
+			if (doPCC) 		{
+				pairObj.computeAndSavePCC();
+				Out.Print("");
+			}
+			if (doAlign) 	{
+				pairObj.saveStatsAndKaKsWrite(doWriteKaKs);
+			}
+			if (doReadKaKs) 	{
+				pairObj.loadKaKsRead();
+				Out.Print("");
+			}
+			if (doMulti) {
+				new MultiStats(theCompilePanel.getDBconn()).scoreAll();
+				Out.Print("");
+			}
 			
-			if (doAlign) 	pairObj.saveStatsAndKaKsWrite(doWriteKaKs);
-			
-			if (doReadKaKs) 	pairObj.loadKaKsRead();
-			
-			if (doMulti) new MultiStats(theCompilePanel.getDBconn()).scoreAll();
+			Out.PrtSpMsg(0,"Finishing...");
+			DBConn mDB = theCompilePanel.getDBconn(); // CAS310
+			info.setPairsEdit(mDB);
+			Schema.updateVersion(mDB);
+			new Summary(mDB).removeSummary(); // CAS310 
+			mDB.close();
 			
 			theCompilePanel.updateAll();
+			Out.PrtSpMsgTime(0, "All done", time);
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Running stats");}
 		Out.close();
@@ -169,13 +189,12 @@ public class StatsPanel extends JPanel {
 			DBinfo info = theCompilePanel.getDBInfo();
 			boolean hasPairs = (info!=null && info.getCntPair()>0) ? true : false;
 			btnRunStats.setEnabled(hasPairs);
-			editPanel.updateDBexists();
+			editPanel.updateDBexists();	
 		}
 		else {
 			editPanel.updateDBnone();
 		}
-		btnStatsSettings.setEnabled(true);
-		
+		btnStatsSettings.setEnabled(dbExists); // CAS310 queries database
 		setStatsSummary();
 	}
 	

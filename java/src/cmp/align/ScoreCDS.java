@@ -73,20 +73,20 @@ public class ScoreCDS
 	final private String bNeg = Globalx.blosumNeg;
 		
 	public ScoreCDS () {
-		score = new int[nCounts];
+		curScore = new int[nCounts];
 		sumAllPairs = new long[nCounts];
 		for (int i=0; i<nCounts; i++) {
-			sumAllPairs[i]=score[i]=0;
+			sumAllPairs[i]=curScore[i]=0;
 		}
 	}
 	public void sumScore() {
-		ySumJI(sumJI_CG,   score[IDX_GC_B],   score[IDX_GC_E]);
-		ySumJI(sumJI_CpG,  score[IDX_CpGn_B], score[IDX_CpGn_E]);
-		ySumJI(sumJI_CpGc, score[IDX_CpGc_B], score[IDX_CpGc_E]);
+		ySumJI(sumJI_CG,   curScore[IDX_GC_B],   curScore[IDX_GC_E]);
+		ySumJI(sumJI_CpG,  curScore[IDX_CpGn_B], curScore[IDX_CpGn_E]);
+		ySumJI(sumJI_CpGc, curScore[IDX_CpGc_B], curScore[IDX_CpGc_E]);
 		
 		for (int i=0; i<nCounts; i++) {
-			if (score[i]!=Globalx.iNoVal) sumAllPairs[i]+=score[i]; 
-			score[i]=0;
+			if (curScore[i]!=Globalx.iNoVal) sumAllPairs[i]+=curScore[i]; 
+			curScore[i]=0;
 		}
 	}
 	/**************************************************
@@ -98,9 +98,12 @@ public class ScoreCDS
 		this.cdsLen2=cdsLen[1];
 		scoreCDS(cds[0], cds[1]);
 	}
+	/*********************************************************
+	 * Scores the current cds pair. 
+	 */
 	public void scoreCDS(String cds1, String cds2) { // cropped alignments, no overhang
 		cntCDS++;
-		for (int i=0; i<nCounts; i++) score[i]=0;
+		for (int i=0; i<nCounts; i++) curScore[i]=0;
 		
 		// by nucleotide
 		boolean extendGap=false;
@@ -109,27 +112,27 @@ public class ScoreCDS
 			char c1 = cds1.charAt(i), c2 = cds2.charAt(i);
 
 			if (c1==Share.gapCh || c2==Share.gapCh) {
-				score[IDX_gap]++;	
+				curScore[IDX_gap]++;	
 				if (!extendGap) {
-					score[IDX_open]++;
+					curScore[IDX_open]++;
 					extendGap=true;
 				}
 			}
 			else {
 				extendGap=false;
-				if (c1!=c2) score[IDX_nSNPs]++; 
+				if (c1!=c2) curScore[IDX_nSNPs]++; 
 			}
 			
 			// GC and CpG-NT
 			boolean gc1 =  (c1=='c' || c1=='g');
 			boolean gc2 =  (c2=='c' || c2=='g');
-			if (gc1  || gc2)  score[IDX_GC_E]++;
-			if (gc1  && gc2)  score[IDX_GC_B]++;
+			if (gc1  || gc2)  curScore[IDX_GC_E]++;
+			if (gc1  && gc2)  curScore[IDX_GC_B]++;
 			
 			boolean cpg1 = (lastc1=='c' && c1=='g');
 			boolean cpg2 = (lastc2=='c' && c2=='g');	
-			if (cpg1 && cpg2) score[IDX_CpGn_B]++;
-			if (cpg1 || cpg2) score[IDX_CpGn_E]++;
+			if (cpg1 && cpg2) curScore[IDX_CpGn_B]++;
+			if (cpg1 || cpg2) curScore[IDX_CpGn_E]++;
 			lastc1 = c1; lastc2=c2;
 		}
 		
@@ -143,20 +146,20 @@ public class ScoreCDS
 			if (codon1.contains(Share.gapStr) || codon2.contains(Share.gapStr)) {
 				continue;
 			}
-			score[IDX_nCodonsNoIndel]++;	// aligned codons without indels
+			curScore[IDX_nCodonsNoIndel]++;	// aligned codons without indels
 			
 			char a1 = convert.codonToAA(codon1);
 			char a2 = convert.codonToAA(codon2);
 			
 			// aa scores
-			if (a1==a2)	             			score[IDX_aaExact]++;
-			else if (convert.isHighSub(a1, a2))    score[IDX_aaPos]++;
-			else                         		score[IDX_aaNeg]++;
+			if (a1==a2)	             			curScore[IDX_aaExact]++;
+			else if (convert.isHighSub(a1, a2)) curScore[IDX_aaPos]++;
+			else                         		curScore[IDX_aaNeg]++;
 			
 			// codon scores
-			if  (codon1.equals(codon2))  score[IDX_cExact]++;
-			else if (a1==a2) 			 score[IDX_cSyn]++;
-			else        					 score[IDX_cNonSyn]++;
+			if  (codon1.equals(codon2))  curScore[IDX_cExact]++;
+			else if (a1==a2) 			 curScore[IDX_cSyn]++;
+			else        				 curScore[IDX_cNonSyn]++;
 			
 			// degenerate codons
 			if (a1==a2 && !codon1.equals(codon2)) {
@@ -164,10 +167,10 @@ public class ScoreCDS
 				String d2 = foldN(a2, codon2);
 					
 				if (d1.equals(d2)) {
-					if (d1.equals(Share.N2D)) score[IDX_2d]++;
-					else if (d1.equals(Share.N4D)) score[IDX_4d]++;	
+					if (d1.equals(Share.N2D)) 		curScore[IDX_2d]++;
+					else if (d1.equals(Share.N4D)) 	curScore[IDX_4d]++;	
 				}
-				else score[IDX_xd]++; 
+				else 								curScore[IDX_xd]++; 
 			}
 		}
 	}
@@ -180,24 +183,24 @@ public class ScoreCDS
 			
 			boolean cpg1 = (lastc1=='c' && c1=='g');
 			boolean cpg2 = (lastc2=='c' && c2=='g');
-			if (cpg1 && cpg2) score[IDX_CpGc_B]++;
-			if (cpg1 || cpg2) score[IDX_CpGc_E]++;
+			if (cpg1 && cpg2) curScore[IDX_CpGc_B]++;
+			if (cpg1 || cpg2) curScore[IDX_CpGc_E]++;
 			lastc1 = c1; lastc2=c2;
 			
 			if (c1==c2 || c1==Share.gapCh || c2==Share.gapCh) continue;
 			
 			boolean isTS = isTS(c1, c2);
 			if (j==0) {
-				if (isTS) score[IDX_ts1]++;
-				else      score[IDX_tv1]++;
+				if (isTS) curScore[IDX_ts1]++;
+				else      curScore[IDX_tv1]++;
 			}
 			else if (j==1) {
-				if (isTS) score[IDX_ts2]++;
-				else      score[IDX_tv2]++;
+				if (isTS) curScore[IDX_ts2]++;
+				else      curScore[IDX_tv2]++;
 			}
 			else if (j==2) {
-				if (isTS) score[IDX_ts3]++;
-				else      score[IDX_tv3]++;
+				if (isTS) curScore[IDX_ts3]++;
+				else      curScore[IDX_tv3]++;
 			}
 		}
 	}
@@ -247,35 +250,35 @@ public class ScoreCDS
 					"pDiffCDS=?, pDiffUTR5=?, pDiffUTR3=?, GC=?, CpGn=?, CpGc=?, tstv=? " +
 					"where UTid1=? and UTid2=?");
 			
-			int alignBases =  score[IDX_nCDSlenNoHang];  // bases with gap
-			int alignCodons = score[IDX_nCodonsNoIndel]; // codons no gap
+			int alignBases =  curScore[IDX_nCDSlenNoHang];  // bases with gap
+			int alignCodons = curScore[IDX_nCodonsNoIndel]; // codons no gap
 			
 			int i=1;
 			ps1.setInt(i++, alignBases);
 			ps1.setDouble(i++, xPctCol(alignBases, cdsLen1)); // if use alignWithGaps, can be longer than len
 			ps1.setDouble(i++, xPctCol(alignBases, cdsLen2));
-			ps1.setInt(i++, score[IDX_nSNPs]);
-			ps1.setInt(i++, score[IDX_gap]); 
-			ps1.setInt(i++, score[IDX_open]); 
+			ps1.setInt(i++, curScore[IDX_nSNPs]);
+			ps1.setInt(i++, curScore[IDX_gap]); 
+			ps1.setInt(i++, curScore[IDX_open]); 
 			
 			ps1.setDouble(i++, alignCodons);
-			ps1.setDouble(i++, xPctCol(score[IDX_cExact], 	alignCodons));
-			ps1.setDouble(i++, xPctCol(score[IDX_cSyn],		alignCodons));
-			ps1.setDouble(i++, xPctCol(score[IDX_4d],		alignCodons));
-			ps1.setDouble(i++, xPctCol(score[IDX_2d],		alignCodons));
-			ps1.setDouble(i++, xPctCol(score[IDX_cNonSyn],	alignCodons));
+			ps1.setDouble(i++, xPctCol(curScore[IDX_cExact], 	alignCodons));
+			ps1.setDouble(i++, xPctCol(curScore[IDX_cSyn],		alignCodons));
+			ps1.setDouble(i++, xPctCol(curScore[IDX_4d],		alignCodons));
+			ps1.setDouble(i++, xPctCol(curScore[IDX_2d],		alignCodons));
+			ps1.setDouble(i++, xPctCol(curScore[IDX_cNonSyn],	alignCodons));
 			
-			ps1.setDouble(i++, xPctCol(score[IDX_aaExact],	alignCodons));
-			ps1.setDouble(i++, xPctCol(score[IDX_aaPos],		alignCodons));
-			ps1.setDouble(i++, xPctCol(score[IDX_aaNeg],		alignCodons));
+			ps1.setDouble(i++, xPctCol(curScore[IDX_aaExact],	alignCodons));
+			ps1.setDouble(i++, xPctCol(curScore[IDX_aaPos],		alignCodons));
+			ps1.setDouble(i++, xPctCol(curScore[IDX_aaNeg],		alignCodons));
 			
-			ps1.setDouble(i++, xPctCol(score[IDX_nCDSdiffNoHang],  score[IDX_nCDSlenNoHang]));
-			ps1.setDouble(i++, xPctCol(score[IDX_n5UTRdiffNoHang], score[IDX_n5UTRlenNoHang]));
-			ps1.setDouble(i++, xPctCol(score[IDX_n3UTRdiffNoHang], score[IDX_n3UTRlenNoHang]));
+			ps1.setDouble(i++, xPctCol(curScore[IDX_nCDSdiffNoHang],  curScore[IDX_nCDSlenNoHang]));
+			ps1.setDouble(i++, xPctCol(curScore[IDX_n5UTRdiffNoHang], curScore[IDX_n5UTRlenNoHang]));
+			ps1.setDouble(i++, xPctCol(curScore[IDX_n3UTRdiffNoHang], curScore[IDX_n3UTRlenNoHang]));
 			
-			ps1.setDouble(i++, xJI(score[IDX_GC_B],   score[IDX_GC_E]));
-			ps1.setDouble(i++, xJI(score[IDX_CpGn_B], score[IDX_CpGn_E]));
-			ps1.setDouble(i++, xJI(score[IDX_CpGc_B], score[IDX_CpGc_E]));
+			ps1.setDouble(i++, xJI(curScore[IDX_GC_B],   curScore[IDX_GC_E]));
+			ps1.setDouble(i++, xJI(curScore[IDX_CpGn_B], curScore[IDX_CpGn_E]));
+			ps1.setDouble(i++, xJI(curScore[IDX_CpGc_B], curScore[IDX_CpGc_E]));
 			
 			ps1.setDouble(i++, xTsTv());
 			
@@ -299,7 +302,7 @@ public class ScoreCDS
 		    long nNoHang = sumAllPairs[IDX_nCDSlenNoHang];
 			
 			String sum = String.format(
-				"%s Aligned: %s   CDS: %sb   5UTR: %sb   3UTR: %sb",  Summary.padTitle, 
+				"%sAligned: %s   CDS: %sb   5UTR: %sb   3UTR: %sb",  Summary.padTitle, 
 				Out.mText(cntCDS), Out.kMText(sumAllPairs[IDX_nCDSlenNoHang]),  
 				Out.kMText(sumAllPairs[IDX_n5UTRlenNoHang]),
 				Out.kMText(sumAllPairs[IDX_n3UTRlenNoHang]));
@@ -426,12 +429,12 @@ public class ScoreCDS
 	public void addHeader(int cdsMode, String alignSeq1, String alignSeq2, Vector <String> lines, String [] hangCol) {
 		scoreCDS(alignSeq1, alignSeq2);
 		
-		score[IDX_nCDSlenNoHang] = alignSeq1.length();
+		curScore[IDX_nCDSlenNoHang] = alignSeq1.length();
 		int diff=0;
 		char [] c1 = alignSeq1.toCharArray();
 		char [] c2 = alignSeq2.toCharArray();
 		for (int i=0; i<c1.length; i++) if (c1[i]!=c2[i]) diff++;
-		score[IDX_nCDSdiffNoHang] = diff;
+		curScore[IDX_nCDSdiffNoHang] = diff;
 		
 		if (cdsMode==Share.CDS_MATCH)   headerCDS(lines, hangCol, true);
 		else if (cdsMode==Share.CDS_AA) headerCDS(lines, hangCol, false);
@@ -444,34 +447,34 @@ public class ScoreCDS
 		String r2c1 = String.format("%s %3s",  hangCol[1],"");
 		String r3c1 = String.format("%s %3s",  hangCol[2],"");
 		 
-		int c=score[IDX_nCodonsNoIndel];
+		int c=curScore[IDX_nCodonsNoIndel];
 		String r1c2 = String.format("%-8s %5d %4s","Calign:", c, "");		
-		String r2c2 = String.format("%-8s %5d %4s","GapOpen:",score[IDX_open],"");
-		String r3c2 = String.format("%-8s %5d %4s","Gaps:",  score[IDX_gap], "");
+		String r2c2 = String.format("%-8s %5d %4s","GapOpen:",curScore[IDX_open],"");
+		String r3c2 = String.format("%-8s %5d %4s","Gaps:",  curScore[IDX_gap], "");
 		
-		String r1c3 = String.format("%-14s %4d %3s", "Codon exact:", score[IDX_cExact],""); 
-		String r2c3 = String.format("%-14s %4d %3s", "Synonymous:", score[IDX_cSyn],""); 
-		String r3c3 = String.format("%-14s %4d %3s", "Nonsynonymous:", score[IDX_cNonSyn],""); 
+		String r1c3 = String.format("%-14s %4d %3s", "Codon exact:", curScore[IDX_cExact],""); 
+		String r2c3 = String.format("%-14s %4d %3s", "Synonymous:", curScore[IDX_cSyn],""); 
+		String r3c3 = String.format("%-14s %4d %3s", "Nonsynonymous:", curScore[IDX_cNonSyn],""); 
 		
-		String r1c4 = String.format("%-17s %3d %4s", "Amino exact:",   score[IDX_aaExact],""); 
-		String r2c4 = String.format("%-17s %3d %4s", Globalx.blosumPos + ":",score[IDX_aaPos],"");
-		String r3c4 = String.format("%-17s %3d %4s", Globalx.blosumNeg + ":", score[IDX_aaNeg],"");
+		String r1c4 = String.format("%-17s %3d %4s", "Amino exact:",   curScore[IDX_aaExact],""); 
+		String r2c4 = String.format("%-17s %3d %4s", Globalx.blosumPos + ":",curScore[IDX_aaPos],"");
+		String r3c4 = String.format("%-17s %3d %4s", Globalx.blosumNeg + ":", curScore[IDX_aaNeg],"");
 	
 		if (isCDS) {
-			r1c3 = String.format("%-14s %4d %6s %3s", "Codon exact:", score[IDX_cExact],
-					Out.perFtxtP(score[IDX_cExact], c), "");
-			r2c3 = String.format("%-14s %4d %6s %3s", "Synonymous:", score[IDX_cSyn],
-					Out.perFtxtP(score[IDX_cSyn], c), ""); 
-			r3c3 = String.format("%-14s %4d %6s %3s", "Nonsynonymous:", score[IDX_cNonSyn],
-					Out.perFtxtP(score[IDX_cNonSyn], c), ""); 
+			r1c3 = String.format("%-14s %4d %6s %3s", "Codon exact:", curScore[IDX_cExact],
+					Out.perFtxtP(curScore[IDX_cExact], c), "");
+			r2c3 = String.format("%-14s %4d %6s %3s", "Synonymous:", curScore[IDX_cSyn],
+					Out.perFtxtP(curScore[IDX_cSyn], c), ""); 
+			r3c3 = String.format("%-14s %4d %6s %3s", "Nonsynonymous:", curScore[IDX_cNonSyn],
+					Out.perFtxtP(curScore[IDX_cNonSyn], c), ""); 
 		}
 		else {
-			r1c4 = String.format("%-17s %3d %6s %4s", "Amino exact:",   score[IDX_aaExact],
-					Out.perFtxtP(score[IDX_aaExact], c), "");
-			r2c4 = String.format("%-17s %3d %6s %4s", Globalx.blosumPos + ":",score[IDX_aaPos],
-					Out.perFtxtP(score[IDX_aaPos], c), "");
-			r3c4 = String.format("%-17s %3d %6s %4s", Globalx.blosumNeg + ":", score[IDX_aaNeg],
-					Out.perFtxtP(score[IDX_aaNeg], c), "");
+			r1c4 = String.format("%-17s %3d %6s %4s", "Amino exact:",   curScore[IDX_aaExact],
+					Out.perFtxtP(curScore[IDX_aaExact], c), "");
+			r2c4 = String.format("%-17s %3d %6s %4s", Globalx.blosumPos + ":",curScore[IDX_aaPos],
+					Out.perFtxtP(curScore[IDX_aaPos], c), "");
+			r3c4 = String.format("%-17s %3d %6s %4s", Globalx.blosumNeg + ":", curScore[IDX_aaNeg],
+					Out.perFtxtP(curScore[IDX_aaNeg], c), "");
 		}
 		lines.add(r1c1+r1c2+r1c3+r1c4);
 		lines.add(r2c1+r2c2+r2c3+r2c4);
@@ -482,24 +485,24 @@ public class ScoreCDS
 		String r2c1 = String.format("%s %3s",  hangCol[1],"");
 		String r3c1 = String.format("%s %3s",  hangCol[2],"");	
 		
-		int d=score[IDX_nCodonsNoIndel];
+		int d=curScore[IDX_nCodonsNoIndel];
 		String r1c2 = String.format("%-8s %5d %4s","Calign:", d, "");		
-		String r2c2 = String.format("%-8s %5d %4s","GapOpen:",score[IDX_open],"");
-		String r3c2 = String.format("%-8s %5d %4s","Gaps:",  score[IDX_gap], "");
+		String r2c2 = String.format("%-8s %5d %4s","GapOpen:",curScore[IDX_open],"");
+		String r3c2 = String.format("%-8s %5d %4s","Gaps:",  curScore[IDX_gap], "");
 		
 		String r1c3 = String.format("%-14s %4d %6s %3s", 
-				"Exact:", score[IDX_cExact], Out.perFtxtP(score[IDX_cExact], d), "");
+				"Exact:", curScore[IDX_cExact], Out.perFtxtP(curScore[IDX_cExact], d), "");
 		String r2c3 = String.format("%-14s %4d %6s %3s", 
-				"Nonsynonymous:", score[IDX_cNonSyn], Out.perFtxtP(score[IDX_cNonSyn],d), "");
+				"Nonsynonymous:", curScore[IDX_cNonSyn], Out.perFtxtP(curScore[IDX_cNonSyn],d), "");
 		String r3c3 = String.format("%-14s %4d %6s %3s", 
-				"Synonymous:", score[IDX_cSyn], Out.perFtxtP(score[IDX_cSyn],d), "");
+				"Synonymous:", curScore[IDX_cSyn], Out.perFtxtP(curScore[IDX_cSyn],d), "");
 		
 		String r1c4 = String.format("%-3s %4d %6s %3s", "4d:", 
-				score[IDX_4d], Out.perFtxtP(score[IDX_4d],d),"");
+				curScore[IDX_4d], Out.perFtxtP(curScore[IDX_4d],d),"");
 		String r2c4 = String.format("%-3s %4d %6s %3s", "2d:", 
-				score[IDX_2d], Out.perFtxtP(score[IDX_2d],d), "");
+				curScore[IDX_2d], Out.perFtxtP(curScore[IDX_2d],d), "");
 		String r3c4 = String.format("%-3s %4d %6s %3s", "xd:", 
-				score[IDX_xd], Out.perFtxtP(score[IDX_xd],d),"");
+				curScore[IDX_xd], Out.perFtxtP(curScore[IDX_xd],d),"");
 		
 		lines.add(r1c1+r1c2+r1c3+r1c4);
 		lines.add(r2c1+r2c2+r2c3+r2c4);
@@ -510,25 +513,25 @@ public class ScoreCDS
 		String r2c1 = String.format("%s %3s",  hangCol[1],"");
 		String r3c1 = String.format("%s %3s",  hangCol[2],"");
 		
-		int ts = score[IDX_ts1] + score[IDX_ts2] + score[IDX_ts3];
-		int tv = score[IDX_tv1] + score[IDX_tv2] + score[IDX_tv3];
+		int ts = curScore[IDX_ts1] + curScore[IDX_ts2] + curScore[IDX_ts3];
+		int tv = curScore[IDX_tv1] + curScore[IDX_tv2] + curScore[IDX_tv3];
 		double tstv = (double)ts/ (double)tv;
 		
-		String r1c2 = String.format("%-8s %5d %4s", "NT Diff:", score[IDX_nCDSdiffNoHang], ""); // includes gaps
-		String r2c2 = String.format("%-8s %5s %4s", "%diff:", Out.perFtxt(score[IDX_nCDSdiffNoHang], score[IDX_nCDSlenNoHang]), "");
+		String r1c2 = String.format("%-8s %5d %4s", "NT Diff:", curScore[IDX_nCDSdiffNoHang], ""); // includes gaps
+		String r2c2 = String.format("%-8s %5s %4s", "%diff:", Out.perFtxt(curScore[IDX_nCDSdiffNoHang], curScore[IDX_nCDSlenNoHang]), "");
 		String r3c2 = String.format("%-8s %5s %4s", "", "", "");
 		
-		String r1c3 = String.format("%-8s %4d %4s","SNPs:",  score[IDX_nSNPs],"");
-		String r2c3 = String.format("%-8s %4d %4s","GapOpen:", score[IDX_open], "");
-		String r3c3 = String.format("%-8s %4d %4s","Gaps:",  score[IDX_gap], "");
+		String r1c3 = String.format("%-8s %4d %4s","SNPs:",  curScore[IDX_nSNPs],"");
+		String r2c3 = String.format("%-8s %4d %4s","GapOpen:", curScore[IDX_open], "");
+		String r3c3 = String.format("%-8s %4d %4s","Gaps:",  curScore[IDX_gap], "");
 		
 		String r1c4 = String.format("%-6s %4.2f %3s",  "ts/tv:", tstv, "");
 		String r2c4 = String.format("%-6s %4d %3s",    "ts:", ts, "");
 		String r3c4 = String.format("%-6s %4d %3s",    "tv:", tv, "");
 		
 		String r1c5 = String.format("%4s %4s %4s", "pos1", "pos2", "pos3");
-		String r2c5 = String.format("%4d %4d %4d   ", score[IDX_ts1], score[IDX_ts2], score[IDX_ts3]);
-		String r3c5 = String.format("%4d %4d %4d   ", score[IDX_tv1], score[IDX_tv2], score[IDX_tv3]);
+		String r2c5 = String.format("%4d %4d %4d   ", curScore[IDX_ts1], curScore[IDX_ts2], curScore[IDX_ts3]);
+		String r3c5 = String.format("%4d %4d %4d   ", curScore[IDX_tv1], curScore[IDX_tv2], curScore[IDX_tv3]);
 		
 		lines.add(r1c1+r1c2+r1c3+r1c4+r1c5);
 		lines.add(r2c1+r2c2+r2c3+r2c4+r2c5);
@@ -542,19 +545,19 @@ public class ScoreCDS
 		String r3c1 = String.format("%20s %3s",  hangCol[2],"");
 		
 		String r0c2 = String.format("%-11s %5s %4s",   "",           "",             "");
-		String r1c2 = String.format("%-11s %5d %4s",   "GC Both:   ",   score[IDX_GC_B], "");
-		String r2c2 = String.format("%-11s %5d %4s",   "GC Either: ", score[IDX_GC_E], "");
-		String r3c2 = String.format("%-11s %5.3f %4s", "GC Jaccard:",    xJI(score[IDX_GC_B], score[IDX_GC_E]), "");
+		String r1c2 = String.format("%-11s %5d %4s",   "GC Both:   ",   curScore[IDX_GC_B], "");
+		String r2c2 = String.format("%-11s %5d %4s",   "GC Either: ", curScore[IDX_GC_E], "");
+		String r3c2 = String.format("%-11s %5.3f %4s", "GC Jaccard:",    xJI(curScore[IDX_GC_B], curScore[IDX_GC_E]), "");
 		
 		String r0c3 = String.format("%-12s %5s %4s",   "All CpG","", "");
-		String r1c3 = String.format("%-12s %5d %4s",   "CpG Both:   ",    score[IDX_CpGn_B], "");
-		String r2c3 = String.format("%-12s %5d %4s",   "CpG Either: ",  score[IDX_CpGn_E],"");
-		String r3c3 = String.format("%-12s %5.3f %4s", "CpG Jaccard:",     xJI(score[IDX_CpGn_B], score[IDX_CpGn_E]), "");
+		String r1c3 = String.format("%-12s %5d %4s",   "CpG Both:   ",    curScore[IDX_CpGn_B], "");
+		String r2c3 = String.format("%-12s %5d %4s",   "CpG Either: ",  curScore[IDX_CpGn_E],"");
+		String r3c3 = String.format("%-12s %5.3f %4s", "CpG Jaccard:",     xJI(curScore[IDX_CpGn_B], curScore[IDX_CpGn_E]), "");
 		
 		String r0c4 = String.format("%-12s %5s %4s",   "By Codon",     "",  "");
-		String r1c4 = String.format("%-12s %5d %4s",   "CpG Both:   ",     score[IDX_CpGc_B], "");
-		String r2c4 = String.format("%-12s %5d %4s",   "CpG Either: ",   score[IDX_CpGc_E], "");
-		String r3c4 = String.format("%-12s %5.3f %4s", "CpG Jaccard:",      xJI(score[IDX_CpGc_B], score[IDX_CpGc_E]), "");
+		String r1c4 = String.format("%-12s %5d %4s",   "CpG Both:   ",     curScore[IDX_CpGc_B], "");
+		String r2c4 = String.format("%-12s %5d %4s",   "CpG Either: ",   curScore[IDX_CpGc_E], "");
+		String r3c4 = String.format("%-12s %5.3f %4s", "CpG Jaccard:",      xJI(curScore[IDX_CpGc_B], curScore[IDX_CpGc_E]), "");
 		
 		lines.add(r0c1+r0c2+r0c3+r0c4);
 		lines.add(r1c1+r1c2+r1c3+r1c4);
@@ -699,8 +702,8 @@ public class ScoreCDS
 		return (((double) x/ (double)y));
 	}
 	private double xTsTv() {
-		double ts = score[IDX_ts1]+score[IDX_ts2]+score[IDX_ts3];
-		double tv = score[IDX_tv1]+score[IDX_tv2]+score[IDX_tv3];
+		double ts = curScore[IDX_ts1]+curScore[IDX_ts2]+curScore[IDX_ts3];
+		double tv = curScore[IDX_tv1]+curScore[IDX_tv2]+curScore[IDX_tv3];
 		return (ts>0 && tv>0) ? ts/tv : 0.0;
 	}	
 	
@@ -713,49 +716,52 @@ public class ScoreCDS
 		ji += p;
 	}
 
-	// runMulti: PairStats to compute diff scores
+	/*********************************************
+	 * runMulti: PairStats to compute diff scores
+	 */
 	public void diffScoreAll(String [] name, PairAlignData cdsObj, PairAlignData utr5Obj, PairAlignData utr3Obj) {
 		String [] crop = new String [2];
 		int minLen = Share.minAlignLen;
 		
-		score[IDX_nCDSlenWithHang] =  cdsObj.getAlignFullSeq1().length();
-		score[IDX_nCDSdiffWithHang] = diffScore(cdsObj.getAlignFullSeq1(), cdsObj.getAlignFullSeq2());
+		curScore[IDX_nCDSlenWithHang] =  cdsObj.getAlignFullSeq1().length();
+		curScore[IDX_nCDSdiffWithHang] = diffScore(cdsObj.getAlignFullSeq1(), cdsObj.getAlignFullSeq2());
 		crop[0]=cdsObj.getAlignCropSeq1();
 		crop[1]=cdsObj.getAlignCropSeq2();
 		
 		if (crop[0].length()>minLen && crop[1].length()>minLen) { 
-			score[IDX_nCDSdiffNoHang] = diffScore(crop[0], crop[1]);
-			score[IDX_nCDSlenNoHang] =  crop[0].length();	
+			curScore[IDX_nCDSdiffNoHang] = diffScore(crop[0], crop[1]);
+			curScore[IDX_nCDSlenNoHang] =  crop[0].length();	
 		}
 		else {
-			score[IDX_nCDSdiffNoHang] = score[IDX_nCDSlenNoHang] = Globalx.iNoVal;	
+			curScore[IDX_nCDSdiffNoHang] = curScore[IDX_nCDSlenNoHang] = Globalx.iNoVal;	
 		}
 		
-		score[IDX_n5UTRlenWithHang]  = utr5Obj.getAlignFullSeq1().length();
-		score[IDX_n5UTRdiffWithHang] = diffScore(utr5Obj.getAlignFullSeq1(), utr5Obj.getAlignFullSeq2());
+		curScore[IDX_n5UTRlenWithHang]  = utr5Obj.getAlignFullSeq1().length();
+		curScore[IDX_n5UTRdiffWithHang] = diffScore(utr5Obj.getAlignFullSeq1(), utr5Obj.getAlignFullSeq2());
 		crop[0]=utr5Obj.getAlignCropSeq1();
 		crop[1]=utr5Obj.getAlignCropSeq2();
 		
 		if (crop[0].length()>minLen && crop[1].length()>minLen) { 
-			score[IDX_n5UTRdiffNoHang] = diffScore(crop[0],crop[1]);
-			score[IDX_n5UTRlenNoHang] =  crop[0].length();	
+			curScore[IDX_n5UTRdiffNoHang] = diffScore(crop[0],crop[1]);
+			curScore[IDX_n5UTRlenNoHang] =  crop[0].length();	
 		}
 		else { 
-			score[IDX_n5UTRdiffNoHang] = score[IDX_n5UTRlenNoHang] = Globalx.iNoVal;
+			curScore[IDX_n5UTRdiffNoHang] = curScore[IDX_n5UTRlenNoHang] = Globalx.iNoVal;
 		}
 		
-		score[IDX_n3UTRlenWithHang] = utr3Obj.getAlignFullSeq1().length();
-		score[IDX_n3UTRdiffWithHang] = diffScore(utr3Obj.getAlignFullSeq1(), utr3Obj.getAlignFullSeq2());
+		curScore[IDX_n3UTRlenWithHang] = utr3Obj.getAlignFullSeq1().length();
+		curScore[IDX_n3UTRdiffWithHang] = diffScore(utr3Obj.getAlignFullSeq1(), utr3Obj.getAlignFullSeq2());
 		
 		crop[0]=utr3Obj.getAlignCropSeq1();
 		crop[1]=utr3Obj.getAlignCropSeq2();
 		if (crop[0].length()>minLen && crop[1].length()>minLen) { 	
-			score[IDX_n3UTRdiffNoHang] = diffScore(crop[0], crop[1]);
-			score[IDX_n3UTRlenNoHang] = crop[0].length();
+			curScore[IDX_n3UTRdiffNoHang] = diffScore(crop[0], crop[1]);
+			curScore[IDX_n3UTRlenNoHang] = crop[0].length();
 		}
 		else {
-			score[IDX_n3UTRdiffNoHang] = score[IDX_n3UTRlenNoHang] = Globalx.iNoVal;
+			curScore[IDX_n3UTRdiffNoHang] = curScore[IDX_n3UTRlenNoHang] = Globalx.iNoVal;
 		}
+		crop=null;
 	}
 	private int diffScore(String seq1, String seq2) {
 		try {
@@ -781,7 +787,7 @@ public class ScoreCDS
 	PairAlignData cropObj = new PairAlignData ();
 			
 	 // for saveStatsToDB for a pair
-	private int [] score=null;     
+	private int [] curScore=null;     
 	private int cdsLen1=0, cdsLen2=0; // actual lengths
 	
 	// for summary

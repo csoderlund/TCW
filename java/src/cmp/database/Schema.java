@@ -57,7 +57,11 @@ public class Schema {
 					+ quote("START") + ")");
 		} catch (Exception e) {ErrorReport.die(e, "entering schema version");}
 	}
-
+	public static void updateVersion (DBConn mDB) { // CAS301
+		try {
+			mDB.executeUpdate("update info set lastDate=NOW(), lastVer='" + Globalx.strTCWver + "'");
+		} catch (Exception e) {ErrorReport.die(e, "update version");}
+	}
 	public void loadSchema() {
 		try {
 			String sqlU;
@@ -65,24 +69,29 @@ public class Schema {
 			// Information added during runMulti
 			sqlU = "CREATE TABLE info ( " +
 					"schemver 	tinytext, " +
-					"version  	tinytext, " +
-					"annoState 	tinytext, " +
+					"version  	tinytext, " +	// build
 					"compiledate date, " +
+					"lastVer    tinytext, " +   // CAS310 db62 update
+					"lastDate 	date, " +			// CAS310 db62
+					"annoState 	tinytext, " +
 					"username 	tinytext, " +
 					"path 		text, " + 
 					"summary 	text," +  // for viewer
-					"seqInfo		text, " + // loadSingleTCW
+					"seqInfo	text, " + // loadSingleTCW
 					"pairInfo   text, " + // PairStats
 					"kaksInfo   text, " + // Pairwise
 					"aaPgm		tinytext, " + // BlastPanel
 					"ntPgm		tinytext, " + // BlastPanel - always the same, but in case that changes
 					"aaInfo		tinytext, " + // Pairwise 
 					"ntInfo		tinytext, " + // Pairwise 
-					"hasLib 		tinyint default 0," +
+					"hasLib 	tinyint default 0," +
 					"hasDE 		tinyint default 0," +
+					"hasPCC 	tinyint default 0," + // CAS310 db62
+					"hasMA 		tinyint default 0," + // CAS310 db62
 					"grpSQL  text, " +		// DBinfo for sample table
 					"pairSQL  text, " +
 					"seqSQL  text, " +
+					"hitSQL  text, " +	// CAS310 db62
 					// dynamic columns
 					"allSeqLib 	text," +
 					"allSeqDE 	text," +
@@ -187,7 +196,10 @@ public class Schema {
 		   			"length 		int, " +
 		   			"sequence 	mediumtext, " +
 		   			"goList 	mediumtext, " +
-		   			"nGO			int default 0, " + 
+		   			"nGO			int default 0, " + 	 // CAS310 db62
+		   			"nSeq			int default 0, " +   // CAS310 db62
+		   			"nBest			int default 0, " +   // CAS310 db62
+		   			"e_value		double default 0, "	+// CAS310 db62
 		   			"unique (HITstr), " +	
 		   			"index idx1 (HITstr) " +
 		   			") ENGINE=MyISAM;";

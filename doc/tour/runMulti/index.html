@@ -26,33 +26,39 @@ See <a href="../../mtcw/UserGuide.html" class="ext" target="_blank">mTCW UserGui
 <table cellpadding=5>
 <tr><td valign=top>	
 	
-<tt><b>1. Build database</tt></b>. Define the input sTCW databases
+<tt><b>1. sTCWdbs</tt></b>. 
+
+<p><tt>Add/Edit</tt>: Define the input sTCW databases
 (see <a href=#add>panel #1</a>), which can created from
 nucleotide sequences (NT-sTCW) and/or protein sequences (AA-sTCW). 
-For NT-sTCW, translated ORFs must be provided; the translated ORFs from <code>runSingleTCW</code>
-may be used.
-Then press <tt>Build database</tt>, which builds a database of all sequences, RPKM, DE, annotations and GOs.
+For NT-sTCW, the nucleotide sequences and translated ORFs will be loaded.
+<p><tt>Build database</tt>: Builds a database of all sequences, TPM, DE, annotations and GOs.
 
 
 <p>
-<tt><b>2. Compare sequences</tt></b>. This creates a file of all sequences and performs a heuristic search <sup>1</sup> against itself
+<tt><b>2. Compare sequences</tt></b>
+
+<p><tt>Run Search</tt>: This creates a file of all sequences and performs a heuristic search<sup>1</sup> against itself
 to determine similar sequences. The search program and parameters can be changed (see <a href=#add>panel #2</a>).
 <p>
-<tt>Add Pair from Hits</tt>. All pairs from the Hit file are entered into the database.
+<tt>Add Pair from Hits</tt>: All pairs from the Hit file are entered into the database.
 
 
 <p>
-<tt><b>3. Add new clusters</tt></b>. Add clusters (see <a href=#add>panel #3</a>), where the methods are:
+<tt><b>3. Cluster Sets</tt></b>. 
+
+<p><tt>Add/Edit</tt>: Add a cluster type to be computed (see <a href=#add>panel #3</a>), where the methods are:
 <ol>
-<li>BBH - Bi-directional Best Hit TCW algorithm between N sTCWdbs, where each resulting cluster has N sequences and all pairs are BBH.
+<li>BBH - TCW algorithm  for Bi-directional Best Hit between N sTCWdbs, where each resulting cluster has N sequences and all pairs are BBH.
 <li>Closure - TCW algorithm for determining clusters, where each sequence in a cluster has
 a hit, good similarity and good overlap with all other sequences in the cluster.
+<li>Best Hit - TCW algorithm for clustering on Hit ID or Hit Descriptions.
 <li>OrthoMCL<sup>3</sup> - <code>runMultiTCW</code> executes the 
 <code>orthoMCL</code> scripts and then loads the results into the mTCW database.
 <li>User Defined - load a file of clusters where the file format is the orthoMCL format.
 </ol>
-One or more clusters can be added with each execution of <tt>Add New Cluster</tt>, and any cluster 
-can be removed with <tt>Remove</tt>.  			
+
+<p><tt>Add New Cluster</tt>: The clusters defined in the table will be computed and added to the database.		
 </td>
 
 <td>
@@ -62,21 +68,29 @@ can be removed with <tt>Remove</tt>.
 </table>
 
 <p>
-<tt><b>4. Add Stats</tt></b>. 	Add statistics (see <a href=#add>panel #4</a>), as follows.
+<tt><b>4. Statistics</tt></b> 	
+<p><tt>Add Stats</tt>: Add statistics (see <a href=#add>panel #4</a>), as follows.
 <ol>
 <li>PCC (Pearson Correlation Coefficient): This is only relevant if there are shared conditions, 
-as it is used to determine how similar the RPKM values of the conditions are. 
+as it is used to determine how similar the TPM values of the conditions are. 
 It is run on all pairs in the database.
-<li>The following two are only relevant for mTCW databases that are built with
-only NT-sTCW databases, as they use the nucleotide coding regions.
-<ol>
-<li>Summary statistics and KaKs files: This uses all pairs from BBH clusters for pair-wise alignments. The KaKs files are written for input to
+<br><br>
+<li>The following is only relevant for mTCW databases that are built with
+only NT-sTCW databases, as it is based on the aligned nucleotide coding regions.
+<ol type='a'>
+<li>Each pair that has a hit and is in a cluster is pair-wise aligned. 
+<ol type='i'>
+<li>Statistics are computed from the alignment, such as synonymous and nonsynonymous codons, TS/TV, etc
+ (see <a href=#stat>e.g. summary</a>).
+<li>The KaKs files are written from the alignments for input to
 the <code>KaKs_calculator</code><sup>4</sup> along with a script to run from the terminal.
-<li>Coding region statistics: Run on all pairs that exist in any cluster. The statistics 
-are those that are shown in the summary statistics  (see <a href=#stat>e.g. summary</a>).
 </ol>
 <li>Read KaKs files: This is only relevant if the <code>KaKs_calculator</code> has been
 executed on the KaKs files.  It reads the results into the database.
+</ol>
+<br>
+<li>Compute the MSA for all clusters and score them. The MAFFT<sup>4</sup> program is used; it occasionally
+fails on a cluster, in which case MUSCLE<sup>5</sup>  is used.
 </ol>
 		
 <a name=add>
@@ -92,20 +106,21 @@ executed on the KaKs files.  It reads the results into the database.
 </td>
 
 <td valign=top>
-3. Add a cluster method
-<br><a  href="img/method.png">
-<img width=400 src="img/method.png" border=1></a>
+2. Run Search
+<a  href="img/hitSettings.png">
+<br><br><img width=400 src="img/hitSettings.png" border=1></a>
 </td>
 
 <tr>
 <td valign=top>
-2. Run Search
-<a  href="img/hitSettings.png">
-<br><img width=400 src="img/hitSettings.png" border=1></a>
+3. Add a cluster method
+
+<br><a  href="img/method.png">
+<img width=400 src="img/method.png" border=1></a>
 </td>
 
 <td valign=top>
-4. Add statistics (before adding statistics)
+4. Add statistics. The counts on the bottom are updated after <tt>Run Stats</tt> is executed.
 <a  href="img/stats.png">
 <br><img width=300 src="img/stats.png" border=1></a>
 </td>
@@ -116,50 +131,62 @@ executed on the KaKs files.  It reads the results into the database.
 <h3>Example summary statistics</h3>
 </td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
 <pre>
-CLUSTER SETS: 3
-      Prefix  Method    Remark                            
-      BB      BBH       Sim 40; Olap 80(Eit); All pairs of sTCWs  
-      CL      Closure   Sim 40; Olap 80(Eit)                      
-      OM      OrthoMCL  Inflation 1.5                             
+Project: ex  Cluster: 868  Pairs: 997  Seqs: 707  Hits: 2.1k   PCC Stats KaKs Multi
 
-   Sizes:
-      Prefix   =2   =3  4-5  6-10  11-15  16-20  21-25  >25  Total  #Seqs  
-      BB      606    0    0     0      0      0      0    0    606  1,212  
-      CL       70  166    2     3      0      0      0    0    241    665  
-      OM       40  179    4     9      0      0      0    0    232    696  
+Created: 24-Oct-20 v3.1.0     Last Update: 26-Oct-20 v3.1.0
 
-   Average and Stddev:
-      Prefix  conLen          sdLen          SofP        Trident         
-      BB      575.51  342.60  79.49  134.28  3.41  1.68    0.736  0.215  
-      CL      599.27  365.42  87.16  130.15  8.54  6.04    0.700  0.209  
-      OM      609.76  377.05  96.95  128.15  8.66  7.26    0.657  0.227  
- 
-PAIRS: 869
+DATASETS: 3
+           Type  #Seq  #annotated  #annoDB  Created    Remark  
+      bar  NT     250         244        2  05-Oct-20  exBar   
+      foo  NT     250         245        2  05-Oct-20  exFoo   
+      fly  NT     207         205        2  18-Oct-20  exFly   
+                           
+CLUSTER SETS: 4
+      Prefix  Method        Parameters                         
+      BB      BBH           Sim 60; Cov 40(Both); bar,fly,foo  
+      HT      BestHit       Description; Sim 20; Cov 50        
+      CL      Closure       Sim 60; Cov 40(Both)               
+      OM      User Defined  ./projcmp/ex/orthoMCL.OM-40  
+            
+   Sizes
+      Prefix  =2   =3  4-5  6-10  11-15  16-20  21-25  &gt;25  Total  #Seqs  
+      BB       0  155    0     0      0      0      0    0    155  65.8%  
+      HT      74  147    4     0      0      0      0    0    225  86.0%  
+      CL      90  153    1     1      0      0      0    0    245  91.9%  
+      OM      51  186    3     3      0      0      0    0    243  98.3%  
+
+   Statistics
+      Prefix  conLen  sdLen     Score  SD    Trident  SD    
+      BB      535.55  56.94     11.04  3.44     0.75  0.17  
+      HT      599.68  80.10      8.08  5.24     0.71  0.22  
+      CL      569.77  57.45      8.48  5.36     0.74  0.18  
+      OM      596.01  84.14      8.80  6.69     0.68  0.22  
+
+PAIRS: 997
    Hits
-      AA   Dataset: Diff 789     Same 69       Similarity 76.0%   Overlap 83.4%
-      NT   Dataset: Diff 661     Same 2        Similarity 86.9%   Overlap 63.9%
+      AA   Diff 860     Same 110      Similarity 69.5%   Coverage 82.8%
+      NT   Diff 661     Same 2        Similarity 86.9%   Coverage 64.0%
 
-   Aligned CDS: 784 (1.1Mb)   5-UTR: 510 (169.9kb)   3-UTR: 527 (310.3kb)
-      Codons                   Amino Acids                 Nucleotides         
-      Exact          56.2%     Exact             84.0%     CDS  gap     13.6%  
-      Synonymous     27.8%     Substitution  >0  10.6%     CDS  diff    27.0%  
-        Fourfold     14.3%     Substitution <=0   5.4%     5UTR diff    63.1%  
-        Twofold      10.8%                                 3UTR diff    71.6%  
-      Nonsynonymous  16.0%                                                     
+   Aligned: 706   CDS: 1.0Mb   5UTR: 80.3kb   3UTR: 111.0kb        
+      Codons         306.6k     Amino Acids                Nucleotides         
+      Exact           58.6%     Exact            87.8%     CDS  Diff    25.4%  
+      Synonymous      29.2%     Substitution &gt;0   5.8%          Gaps     9.3%  
+        Fourfold      15.2%     Substitution&lt;=0   6.4%          SNPs    16.1%  
+        Twofold       11.4%                                5UTR Diff    34.4%  
+      Nonsynonymous   12.2%                                3UTR Diff    36.7%  
 
-      CDS base substitutions: 208.1kb              Content: By Nucleotide  By Codon
-                    Pos1  Pos2  Pos3  Total                    GC    CpG    CpG  
-      Transition     9.4   4.9  36.4   50.7         Both    40.4%   2.0%   1.1%  
-      Transversion  11.3   7.7  28.6   47.6         Either  55.1%   5.6%   2.9%  
-      ts/tv         0.73  0.61  1.11   1.07         B/E     0.746  0.407  0.444  
+                     Pos1   Pos2   Pos3  Total                   GC  CpG-Nt  CpG-Cd  
+      Transition     9.1%   4.6%  36.9%  50.5%       Both     37.7%    3.9%    2.2%  
+      Transversion  11.3%   7.2%  30.9%  49.5%       Either   54.3%   11.3%    5.8%  
+      ts/tv          0.80   0.64   1.19   1.02       Jaccard   0.69    0.35    0.38  
 
-   KaKs method: YN    Pairs: 765
+   KaKs method: YN    Pairs: 706
 
-      Ka/Ks          Quartiles             P-value       
-      0-0.5  743     Q1(Lower)   0.019     <1e-100  452  
-      0.5-1   17     Q2(Median)  0.044     <1e-10   140  
-      1-1.5    3     Q3(Upper)   0.117     <0.001    55  
-      >=1.5    2                           Other    118  
+      Average            Ka/Ks          Quartiles               P-value       
+      Ka       0.085     Zero    51     Q1(Lower)   0.01670     &lt;1E-100  428  
+      Ks       2.527     Ka=Ks    0     Q2(Median)  0.03763     &lt;1E-10    88  
+      P-value  0.023     Ka&lt;Ks  650     Q3(Upper)   0.09073     &lt;0.001    57  
+                         Ka&gt;Ks    5                             Other    133  
 
 </pre>
 <a name=refs>
@@ -179,8 +206,10 @@ using DIAMOND, Nature Methods, 12, 59-60 doi:10.1038/nmeth.3176.
 </ul>
 
 <li>Li L, Stoeckert CJ, Jr., Roos DS (2003) OrthoMCL: identification of ortholog groups for eukaryotic genomes. Genome Res 13: 2178-2189.
-
+ 
 <li>Zhang Z, Li J, Xiao-Qian Z, Wang J, Wong, G, Yu J (2006) KaKs_Calculator: Calculating Ka and Ks through model selection and model averaging. Geno. Prot. Bioinfo. Vol 4 No 4. 259-263.
+<li>Katoh K, Standley DM (2013) MAFFT Multiple Sequence Alignment Software Version 7: Improvements in Performance and Usability. Molecular Biology and Evolution Vol 30, Issue 4 772:780 
+<li>Edgar RC (2004) MUSCLE: multiple sequence alignment with high accuracy and high throughput. Nucleic Acids Res 32: 1792-1797. 
 </ol>
 
 <!--#include virtual="../../ssi/end.html" -->

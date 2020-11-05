@@ -41,7 +41,7 @@ public class MethodOrthoMCL {
 			 return false;
 		 }
 		
-		 Out.PrtDateMsgTime("Finish execution of orthoMCL", allTime);
+		 Out.PrtMsgTimeMem("Finish execution of orthoMCL", allTime);
 		 return true;
 	}
 	

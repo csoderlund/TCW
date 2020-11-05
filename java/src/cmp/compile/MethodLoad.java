@@ -35,6 +35,9 @@ public class MethodLoad {
 	 * Called by CompileMain to add a file of orthologs
 	 */
 	 public boolean run(int idx,  CompilePanel panel) {
+		long allTime = Out.getTime();
+		Out.PrtDateMsg("\nStart execution of " + Globals.Methods.UserDef.TYPE_NAME);
+		
 		methodPanel = panel.getMethodPanel();
 		String [] settings = methodPanel.getSettingsAt(idx).split(":");	
 		groupFile = settings[1];
@@ -45,7 +48,9 @@ public class MethodLoad {
 		Out.PrtSpMsg(1, "File:    " + groupFile);
 		Out.PrtSpMsg(1, "");
 		
-		if (!processGroupFile(0, idx)) return false;
+		if (!processGroupFile(idx)) return false;
+		
+		 Out.PrtMsgTimeMem("Finish execution of User Defined", allTime);
 
 		return bSuccess;
 	}
@@ -59,24 +64,19 @@ public class MethodLoad {
 		methodPanel = panel.getMethodPanel();
 		prefix = methodPanel.getMethodPrefixAt(idx);
 			
-		if (!processGroupFile(1, idx)) return -1;
+		if (!processGroupFile(idx)) return -1;
 		return GRPid;
 	}
 	 /***************************************************
 	  * loadGroupFile
 	  */
-	 private boolean processGroupFile(int from, int idx) {
-		long startTime = Out.getTime();
+	 private boolean processGroupFile(int idx) {
 		String methodType = methodPanel.getMethodTypeAt(idx);
 		String comment =    methodPanel.getCommentAt(idx);
 		String settings =   methodPanel.getSettingsAt(idx);
 		methodName = Globals.getName(methodType, prefix);
 	 
-		if (from==0) {
-			Out.PrtSpMsg(0, "Start load of  " +  methodName + " from " + groupFile);		
-			Out.PrtSpMsg(1, "Cluster prefix " +  prefix);
-		}
-		else Out.PrtSpMsg(1, "Loading cluster file: " + groupFile);
+		Out.PrtSpMsg(1, "Loading cluster file: " + groupFile);
 		
 		File f = new File(groupFile);
 		if (!f.exists()) {
@@ -95,7 +95,6 @@ public class MethodLoad {
 		if (bSuccess) step3_readFileofClusters();
 		if (bSuccess) new Pairwise(cmpPanel).saveMethodPairwise(mDB, GRPid, prefix);
 		
-		if (from==0) Out.PrtSpMsgTime(0, "Finish load of " + methodName + " clusters", startTime);
 		return bSuccess;
 	 }
 	 /**************************************************************

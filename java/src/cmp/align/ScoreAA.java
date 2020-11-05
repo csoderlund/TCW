@@ -71,6 +71,15 @@ public class ScoreAA {
 		lines.add("        " + Share.AA_POS +  " = " + Globalx.blosumPosLegend);
 		lines.add("        " + Share.AA_NEG +  " = " + Globalx.blosumNeg);
 	}
+	// CAS310 used in PairAlignData when Hit is NT (rare, assuming it is an ORF)
+	public String nt2aa(String cdsSeq) {
+		String aaSeq="";
+		for (int i=0; i<cdsSeq.length()-2; i+=3) {
+			String codon = cdsSeq.substring(i, i+3).toLowerCase();
+			aaSeq += codonToAA(codon);
+		}
+		return aaSeq;
+	}
 	/*******************************************************
 	 * Conversion routines
 	 * Much of this is also in util.align.AAstatistics
@@ -159,7 +168,7 @@ public class ScoreAA {
 	
 		int idx1 = residues.indexOf(a1);
 		int idx2 = residues.indexOf(a2);
-		if (idx1==-1 || idx2==-1) {
+		if (idx1==-1 || idx2==-1) { 
 			if (idx1==-1) System.out.println("Warning: AA not recognized a1 " + a1 + " ");
 			if (idx2==-1) System.out.println("Warning: AA not recognized a2 " + a2 + " ");
 			return false;

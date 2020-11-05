@@ -342,214 +342,215 @@ public class ProjectPanel extends JPanel {
 	        // Files 
 	        boolean b1=true, b2=true;
 	        try {
-	        		String projDir = theCompilePanel.getCurProjRelDir();
-	        		
-	        		b1 = (FileHelpers.existDir(projDir + blastDir)) ? true : false;
-	        		
-	        		b2 = (FileHelpers.existDir(projDir + methodDir)) ? true : false;
-	        		if (!b2) {
-	        			b2 = (FileHelpers.existDir(projDir + statsDir)) ? true : false;
-	        			if (!b2)
-	        				b2 = (FileHelpers.existDir(projDir + kaksDir)) ? true : false;
-	        		}
+        		String projDir = theCompilePanel.getCurProjRelDir();
+        		
+        		b1 = (FileHelpers.existDir(projDir + blastDir)) ? true : false;
+        		
+        		b2 = (FileHelpers.existDir(projDir + methodDir)) ? true : false;
+        		if (!b2) {
+        			b2 = (FileHelpers.existDir(projDir + statsDir)) ? true : false;
+        			if (!b2)
+        				b2 = (FileHelpers.existDir(projDir + kaksDir)) ? true : false;
+        		}
 	        }
 	        catch (Exception e) {ErrorReport.reportError(e, "Project: could not determine if project directories exist");}
 	        
-        		btnPairDir = Static.createCheckBox("Pair and method files from disk (KaKs, Stats, Methods)", false, b2);
-        		selectPanel.add(btnPairDir);
-    	        selectPanel.add(Box.createVerticalStrut(5));
-    	               
-    	        btnBlast = Static.createCheckBox("Hit files from disk (" + blastDir + ")", false, b1);
+    		btnPairDir = Static.createCheckBox("Pair and method files from disk (KaKs, Stats, Methods)", false, b2);
+    		selectPanel.add(btnPairDir);
+	        selectPanel.add(Box.createVerticalStrut(5));
+	               
+	        btnBlast = Static.createCheckBox("Hit files from disk (" + blastDir + ")", false, b1);
             selectPanel.add(btnBlast);
-    	        selectPanel.add(Box.createVerticalStrut(5));
+    	    selectPanel.add(Box.createVerticalStrut(5));
             	
-        		btnAll = Static.createCheckBox("All files from disk for this mTCW project", false, true);
-        		selectPanel.add(btnAll);		
+        	btnAll = Static.createCheckBox("All files from disk for this mTCW project", false, true);
+        	selectPanel.add(btnAll);		
          	selectPanel.add(Box.createVerticalStrut(5));
                     		
          	JPanel buttonPanel = Static.createRowPanel();
-        		btnOK = Static.createButton("OK", true);
-        		btnOK.addActionListener(new ActionListener() {
-    				public void actionPerformed(ActionEvent e) {
-    					nMode = OK;
-    					setVisible(false);
-    				}
-    			});
-        		buttonPanel.add(btnOK);
-        		buttonPanel.add(Box.createHorizontalStrut(20));
-        		
-        		btnCancel = Static.createButton("Cancel", true);
-        		btnCancel.addActionListener(new ActionListener() {
-    				public void actionPerformed(ActionEvent e) {
-    					nMode = CANCEL;
-    					setVisible(false);
-    				}
-    			});
-        		buttonPanel.add(btnCancel);
-        		
-        		btnOK.setPreferredSize(btnCancel.getPreferredSize());
-        		btnOK.setMaximumSize(btnCancel.getPreferredSize());
-        		btnOK.setMinimumSize(btnCancel.getPreferredSize());
-        		buttonPanel.setMaximumSize(buttonPanel.getPreferredSize());
-	    		nMode = CANCEL;
+    		btnOK = Static.createButton("OK", true);
+    		btnOK.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					nMode = OK;
+					setVisible(false);
+				}
+			});
+    		buttonPanel.add(btnOK);
+    		buttonPanel.add(Box.createHorizontalStrut(20));
+    		
+    		btnCancel = Static.createButton("Cancel", true);
+    		btnCancel.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					nMode = CANCEL;
+					setVisible(false);
+				}
+			});
+    		buttonPanel.add(btnCancel);
+    		
+    		btnOK.setPreferredSize(btnCancel.getPreferredSize());
+    		btnOK.setMaximumSize(btnCancel.getPreferredSize());
+    		btnOK.setMinimumSize(btnCancel.getPreferredSize());
+    		buttonPanel.setMaximumSize(buttonPanel.getPreferredSize());
+    		nMode = CANCEL;
 
            	JPanel mainPanel = Static.createPagePanel();
-        		mainPanel.add(selectPanel);
-        		mainPanel.add(Box.createVerticalStrut(15));
-        		mainPanel.add(buttonPanel);
-        		
-        		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        		add(mainPanel);
-        		
-        		pack();
-        		this.setResizable(false);
-        		UIHelpers.centerScreen(this);
-        	} 
-        	/*********************************************************/
-        	private void removeDB() {
-        		try
-        		{
-        			boolean valid = runMTCWMain.hosts.checkDBConnect(getDBName());
-        			if (!valid) {
-        				Out.PrtWarn("Database '" + getDBName() + "' does not exist on " + runMTCWMain.hosts.host());
-        				return;
-        			}
-        			boolean ret = UserPrompt.showConfirm("Remove...", 
-        					"Remove mTCW database '" + getDBName() + "'");
-        			if (!ret) return;
-        			
-        			DBConn conn = runMTCWMain.hosts.getDBConn(getDBName());
-        			conn.executeUpdate("drop database " + getDBName());
-        			conn.close();
-        			
-        			Out.PrtSpMsg(2, "Successfully removed " + getDBName());
-        			theCompilePanel.updateAll(); 
-        		} 
-        		catch (Exception e){ErrorReport.reportError(e, "Cannot delete database " + getDBName());}
-        	}
+    		mainPanel.add(selectPanel);
+    		mainPanel.add(Box.createVerticalStrut(15));
+    		mainPanel.add(buttonPanel);
+    		
+    		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+    		add(mainPanel);
+    		
+    		pack();
+    		this.setResizable(false);
+    		UIHelpers.centerScreen(this);
+    	} 
+    	/*********************************************************/
+    	private void removeDB() {
+    		try
+    		{
+    			boolean valid = runMTCWMain.hosts.checkDBConnect(getDBName());
+    			if (!valid) {
+    				Out.PrtWarn("Database '" + getDBName() + "' does not exist on " + runMTCWMain.hosts.host());
+    				return;
+    			}
+    			boolean ret = UserPrompt.showConfirm("Remove...", 
+    					"Remove mTCW database '" + getDBName() + "'");
+    			if (!ret) return;
+    			
+    			DBConn conn = runMTCWMain.hosts.getDBConn(getDBName());
+    			conn.executeUpdate("drop database " + getDBName());
+    			conn.close();
+    			
+    			Out.PrtSpMsg(2, "Successfully removed " + getDBName());
+    			theCompilePanel.updateAll(); 
+    		} 
+    		catch (Exception e){ErrorReport.reportError(e, "Cannot delete database " + getDBName());}
+    	}
       
-        	public void removePairsAndMethods() {
-        		try {
-        			DBinfo info = theCompilePanel.getDBInfo();
-        			if (info==null) {
-        				Out.PrtWarn("Database does not exist");
-        				return;
-        			}
-        			boolean ret = UserPrompt.showConfirm("Remove...", 
-        					"Remove pairs and methods from database");
-        			if (!ret) return;
-        			
-        			Out.PrtSpMsg(0,"Remove pairs and cluster from database ");
-        			DBConn mDB = runMTCWMain.hosts.getDBConn(getDBName());
-        			String [] prefixes = info.getMethodPrefix(); // get prefixes before truncate pog_method
-        			
-        			Out.PrtSpMsg(1, "Remove clusters and pairs....");
-        			// clusters
-        			mDB.executeUpdate("TRUNCATE TABLE pog_method");
-        			mDB.executeUpdate("TRUNCATE TABLE pog_groups");
-        			mDB.executeUpdate("TRUNCATE TABLE pog_members");
-        			// Pairs
-        			mDB.executeUpdate("TRUNCATE TABLE pairwise"); 
-        			mDB.executeUpdate("TRUNCATE TABLE pairMap");
-        			
-        			Out.PrtSpMsg(1, "Remove columns....");
-        			for (String methodPrefix: prefixes) { // truncate pairwise before remove prefix
-        				mDB.tableCheckDropColumn("pairwise", methodPrefix);
-        				mDB.tableCheckDropColumn("unitrans", methodPrefix);
-        			}
-        			Out.PrtSpMsg(1, "Remove from sequence table ....");
-        			mDB.executeUpdate("update unitrans set nPairs=0");  
-        			
-        			new Summary(mDB).removeSummary();      
-        			mDB.executeUpdate("update info set kaksInfo='', pairInfo='', aaInfo='', ntInfo=''");
-        			Out.PrtSpMsg(0, "Finish pairs and method removal");
-        			theCompilePanel.updateAll(); 
-        		}
-        		catch(Exception e) {ErrorReport.prtReport(e, "Error removing pairs and methods from database");}
-        	}
-        	private void removePairDir() {
-        		try {
-        			boolean ret = UserPrompt.showConfirm("Remove...", 
-        					"Remove project directories Methods, Stats and KaKs");
-        			if (!ret) return;
-        			
-        			Out.PrtSpMsg(0,"Remove pairs and clusters from disk");
-        			String pdir = theCompilePanel.getCurProjAbsDir() +  "/";
-        			
-        			Out.PrtSpMsg(1,"Remove directory " + pdir + Globals.Methods.METHODDIR);
-        			FileHelpers.deleteDir(new File(pdir + Globals.Methods.METHODDIR ));
-        			
-        			Out.PrtSpMsg(1,"Remove directory " + pdir + Globals.StatsDIR );
-        			FileHelpers.deleteDir(new File(pdir + Globals.StatsDIR ));
-        			
-        			Out.PrtSpMsg(1,"Remove directory " + pdir + Globals.KaKsDIR);
-        			FileHelpers.deleteDir(new File(pdir + Globals.KaKsDIR));
-        			
-        			Out.PrtSpMsg(0,"Finish removal from disk");
-        			theCompilePanel.updateAll(); 
-        		}
-        		catch(Exception e) {ErrorReport.prtReport(e, "Error removing directories");}
-        	}
-        	private void removeBlast() {
-        		try
-        		{
-        			boolean ret = UserPrompt.showConfirm("Remove...", 
-        					"Remove hit files\n");
-        			if (!ret) return;
-        			
-        			String blastDir = theCompilePanel.getCurProjAbsDir() +  "/" + Globals.CompilePanel.BLASTDIR; 
-        			Out.PrtSpMsg(0, "Remove directory " +  blastDir);		
-        			FileHelpers.deleteDir(new File(blastDir));
-    				theCompilePanel.updateDeleteBlastDir(blastDir);
-        		} 
-        		catch (Exception e){ErrorReport.reportError(e, "Cannot delete hit directory ");}
-        	}
-        	private void removeProject() {
-        		try {
-        			boolean ret = UserPrompt.showConfirm("Remove...", 
-        					"Remove mTCW project '" + getDBName() + "' from disk");
-        			if (!ret) return;
-        			
-        			File fLib = new File(theCompilePanel.getCurProjAbsDir());
-        			
-        			Out.PrtSpMsg(0, "Delete directory " +  theCompilePanel.getCurProjRelDir());
-        			FileHelpers.deleteDirTrace(fLib);
-        			Out.PrtSpMsg(0, "Complete delete");
-        			updateProjectList(null);
-        			theCompilePanel.updateClearInterface(); 
-        			updateUI();
-        		}
-        		catch(Exception e) {ErrorReport.prtReport(e, "Error removing project");}
-        	}
-        	
-        	public boolean isCancel() {
-        		if (nMode==CANCEL) return true; 
-        		else return false;
-        	}
-        	public void doOp() {
-        		if (btnDB.isSelected()) {
-        			removeDB();
-        			btnPair.setSelected(false);
-        		}
-        		if (btnAll.isSelected()) {
-        			removeProject();
-        			btnPairDir.setEnabled(false);
-        			btnBlast.setEnabled(false);
-        		}
-        		if (btnPair.isSelected()) {
-        			removePairsAndMethods();
-        		}
-        		if (btnPairDir.isSelected()) {
-        			removePairDir();
-        		}
-        		if (btnBlast.isSelected()) {
-        			removeBlast();
-        		}		
-        	}
-        	JCheckBox btnPair = null, btnPairDir = null;
-        	JCheckBox btnDB = null, btnBlast = null, btnAll = null;
-        	JButton btnOK = null, btnCancel = null;
-        	int nMode = -1;
+    	public void removePairsAndMethods() {
+    		try {
+    			DBinfo info = theCompilePanel.getDBInfo();
+    			if (info==null) {
+    				Out.PrtWarn("Database does not exist");
+    				return;
+    			}
+    			boolean ret = UserPrompt.showConfirm("Remove...", 
+    					"Remove pairs and methods from database");
+    			if (!ret) return;
+    			
+    			Out.PrtSpMsg(0,"Remove pairs and cluster from database ");
+    			DBConn mDB = runMTCWMain.hosts.getDBConn(getDBName());
+    			String [] prefixes = info.getMethodPrefix(); // get prefixes before truncate pog_method
+    			
+    			Out.PrtSpMsg(1, "Remove clusters and pairs....");
+    			// clusters
+    			mDB.executeUpdate("TRUNCATE TABLE pog_method");
+    			mDB.executeUpdate("TRUNCATE TABLE pog_groups");
+    			mDB.executeUpdate("TRUNCATE TABLE pog_members");
+    			// Pairs
+    			mDB.executeUpdate("TRUNCATE TABLE pairwise"); 
+    			mDB.executeUpdate("TRUNCATE TABLE pairMap");
+    			
+    			Out.PrtSpMsg(1, "Remove columns....");
+    			for (String methodPrefix: prefixes) { // truncate pairwise before remove prefix
+    				mDB.tableCheckDropColumn("pairwise", methodPrefix);
+    				mDB.tableCheckDropColumn("unitrans", methodPrefix);
+    			}
+    			Out.PrtSpMsg(1, "Remove from sequence table ....");
+    			mDB.executeUpdate("update unitrans set nPairs=0");  
+    			
+    			new Summary(mDB).removeSummary();      
+    			mDB.executeUpdate("update info set kaksInfo='', pairInfo='', aaInfo='', ntInfo='', "
+    					+ "hasMA=0, hasPCC=0"); // CAS310 add these two
+    			Out.PrtSpMsg(0, "Finish pairs and method removal");
+    			theCompilePanel.updateAll(); 
+    		}
+    		catch(Exception e) {ErrorReport.prtReport(e, "Error removing pairs and methods from database");}
+    	}
+    	private void removePairDir() {
+    		try {
+    			boolean ret = UserPrompt.showConfirm("Remove...", 
+    					"Remove project directories Methods, Stats and KaKs");
+    			if (!ret) return;
+    			
+    			Out.PrtSpMsg(0,"Remove pairs and clusters from disk");
+    			String pdir = theCompilePanel.getCurProjAbsDir() +  "/";
+    			
+    			Out.PrtSpMsg(1,"Remove directory " + pdir + Globals.Methods.METHODDIR);
+    			FileHelpers.deleteDir(new File(pdir + Globals.Methods.METHODDIR ));
+    			
+    			Out.PrtSpMsg(1,"Remove directory " + pdir + Globals.StatsDIR );
+    			FileHelpers.deleteDir(new File(pdir + Globals.StatsDIR ));
+    			
+    			Out.PrtSpMsg(1,"Remove directory " + pdir + Globals.KaKsDIR);
+    			FileHelpers.deleteDir(new File(pdir + Globals.KaKsDIR));
+    			
+    			Out.PrtSpMsg(0,"Finish removal from disk");
+    			theCompilePanel.updateAll(); 
+    		}
+    		catch(Exception e) {ErrorReport.prtReport(e, "Error removing directories");}
+    	}
+    	private void removeBlast() {
+    		try
+    		{
+    			boolean ret = UserPrompt.showConfirm("Remove...", 
+    					"Remove hit files\n");
+    			if (!ret) return;
+    			
+    			String blastDir = theCompilePanel.getCurProjAbsDir() +  "/" + Globals.CompilePanel.BLASTDIR; 
+    			Out.PrtSpMsg(0, "Remove directory " +  blastDir);		
+    			FileHelpers.deleteDir(new File(blastDir));
+				theCompilePanel.updateDeleteBlastDir(blastDir);
+    		} 
+    		catch (Exception e){ErrorReport.reportError(e, "Cannot delete hit directory ");}
+    	}
+    	private void removeProject() {
+    		try {
+    			boolean ret = UserPrompt.showConfirm("Remove...", 
+    					"Remove mTCW project '" + getDBName() + "' from disk");
+    			if (!ret) return;
+    			
+    			File fLib = new File(theCompilePanel.getCurProjAbsDir());
+    			
+    			Out.PrtSpMsg(0, "Delete directory " +  theCompilePanel.getCurProjRelDir());
+    			FileHelpers.deleteDirTrace(fLib);
+    			Out.PrtSpMsg(0, "Complete delete");
+    			updateProjectList(null);
+    			theCompilePanel.updateClearInterface(); 
+    			updateUI();
+    		}
+    		catch(Exception e) {ErrorReport.prtReport(e, "Error removing project");}
+    	}
+    	
+    	public boolean isCancel() {
+    		if (nMode==CANCEL) return true; 
+    		else return false;
+    	}
+    	public void doOp() {
+    		if (btnDB.isSelected()) {
+    			removeDB();
+    			btnPair.setSelected(false);
+    		}
+    		if (btnAll.isSelected()) {
+    			removeProject();
+    			btnPairDir.setEnabled(false);
+    			btnBlast.setEnabled(false);
+    		}
+    		if (btnPair.isSelected()) {
+    			removePairsAndMethods();
+    		}
+    		if (btnPairDir.isSelected()) {
+    			removePairDir();
+    		}
+    		if (btnBlast.isSelected()) {
+    			removeBlast();
+    		}		
+    	}
+    	JCheckBox btnPair = null, btnPairDir = null;
+    	JCheckBox btnDB = null, btnBlast = null, btnAll = null;
+    	JButton btnOK = null, btnCancel = null;
+    	int nMode = -1;
     } // end RemoveType
 	    
 	private CompilePanel theCompilePanel = null;

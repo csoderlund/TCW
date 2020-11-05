@@ -48,6 +48,7 @@ public class SeqsTablePanel extends JPanel {
 	private static final int bSEQ=Globals.bSEQ;
 	private static final int bPAIR=Globals.bPAIR;
 	private static final int bGRP=Globals.bGRP;
+	private static final int bHIT=Globals.bHIT;
 	
 	private static final String TABLE = FieldData.SEQ_TABLE;
 	private static final String AALEN = FieldData.AALEN;
@@ -387,6 +388,7 @@ public class SeqsTablePanel extends JPanel {
 	    	for(int x=0; x<columns.length; x++) retVal[x] = sels.contains(columns[x]);
 	    	return retVal;
 	}
+	// XXX
 	private String buildQueryStr(DBConn mdb) {
         try {
     		FieldData theFields = FieldData.getSeqFields(theViewerFrame.getSeqLibList(), 
@@ -474,6 +476,10 @@ public class SeqsTablePanel extends JPanel {
 			ids[i] = (Integer)theTableData.getValueAt(i, idx);
 		return ids;
 	}
+	public int getTableSQLid(int row) {
+		int idx = theTableData.getColumnHeaderIndex(SEQINDEX);
+		return (Integer)theTableData.getValueAt(row, idx);
+	}
 	private void clearColumns() {
 		chkFields[0].setSelected(false);
 		chkFields[1].setSelected(true);  // GrpID
@@ -489,12 +495,12 @@ public class SeqsTablePanel extends JPanel {
      	String seqID =  ((String)theTableData.getValueAt(sels[0], colIndex));
      	return seqID;
     }
-	 public String getSelectedColumn2(String column) { // CAS305 for displaying if two rows selected
+	 public String getSelectedColumn(String column, int rowIdx) { // CAS305 for displaying if multiple rows selected
 	     	if(theTable.getSelectedRowCount() <= 1) return null;
 	     	
 	     	int colIndex =	theTableData.getColumnHeaderIndex(column);
 	     	int [] sels = theTable.getSelectedRows();
-	     	String seqID =  ((String)theTableData.getValueAt(sels[1], colIndex));
+	     	String seqID =  ((String)theTableData.getValueAt(sels[rowIdx], colIndex));
 	     	return seqID;
 	    }
     public String getSelectedAASeq() {
@@ -522,27 +528,7 @@ public class SeqsTablePanel extends JPanel {
 	public int getSelectedRowCount() {return theTable.getSelectedRowCount();}
 	public int getSelectedRow() { return theTable.getSelectedRows()[0];}
 	public int [] getSelectedRows() { return theTable.getSelectedRows();}
-	public String getGroupQueryList(Integer [] UTids) {
-		String sourceTable = "pog_groups.PGid";
-		
-		String subquery = "";
-
-		if(UTids.length == 1) {
-			subquery = sourceTable + " = " + UTids[0];
-		}
-		else if(UTids.length == 2) {
-			subquery = sourceTable + " = " + UTids[0];
-			subquery += " OR " + sourceTable + " = " + UTids[1];
-		}
-		else {
-			subquery = sourceTable + " IN (" + UTids[0];
-			for(int x=1; x<UTids.length; x++) {
-				subquery += ", " + UTids[x];
-			}
-			subquery += ")";
-		}
-		return subquery;    	
-	}
+	
 	 /* SeqTopRowPanel next and prev */
     public int getTranslatedRow(int row) {
   		if (theTable==null) return 0;
@@ -655,8 +641,9 @@ public class SeqsTablePanel extends JPanel {
 	    	temp.setMaximumSize(temp.getPreferredSize());
 	    	add(temp);
 	    	if(theTable != null) {
-	    		 if (viewType==bGRP) tableType.setText("Sequence View for Cluster");
-	    		 else if (viewType==bPAIR) tableType.setText("Sequence View for Pair");
+	    		 if (viewType==bGRP) tableType.setText("Sequence View for Clusters");
+	    		 else if (viewType==bPAIR) tableType.setText("Sequence View for Pairs");
+	    		 else if (viewType==bHIT) tableType.setText("Sequence View for Hits");
 	    		 else if (viewType==bSEQ) tableType.setText("Sequence View");
 	    		 else tableType.setText("Sequence ???");
 	    		 

@@ -2,6 +2,7 @@
 JAVA_PATH=/usr
 #JAVA_PATH=/Library/Java/JavaVirtualMachines/jdk-14.0.1.jdk/Contents/Home
 
+
 JAVA_FILES=	./src/sng/runDE/*.java \
 			./src/sng/runAS/*.java \
 			./src/sng/annotator/*.java \
@@ -28,6 +29,7 @@ JAVA_FILES=	./src/sng/runDE/*.java \
            	./src/cmp/viewer/seq/*.java \
            	./src/cmp/viewer/groups/*.java \
            	./src/cmp/viewer/pairs/*.java \
+           	./src/cmp/viewer/hits/*.java \
            	./src/cmp/viewer/table/*.java	\
            	./src/util/align/*.java \
            	./src/util/database/*.java \
@@ -41,7 +43,7 @@ CLASSES_MTCW  = -C ./classes cmp -C ./classes util -C ./src html -C ./src images
 all : clean build jars clean_classes  
 
 build:
-	$(JAVA_PATH)/bin/javac  -classpath ./classes_ext -sourcepath ./src/cmp:./src/sng:./src/util -d ./classes $(JAVA_FILES)
+	$(JAVA_PATH)/bin/javac -Xlint -classpath ./classes_ext -sourcepath ./src/cmp:./src/sng:./src/util -d ./classes $(JAVA_FILES)
 
 jars: build stcw_jar mtcw_jar
 

@@ -243,7 +243,7 @@ public class MainToolAlignPanel extends JPanel implements ClipboardOwner
 	 */
 	private JPanel createToolPair (boolean isAllFrames)
 	{
-		btnViewType = new JButton ("View Bases");
+		btnViewType = new JButton ("View Sequence"); // CAS310 changed from View Bases.
 		btnViewType.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				toggleViewType();
@@ -424,7 +424,7 @@ public class MainToolAlignPanel extends JPanel implements ClipboardOwner
 		}
 
         // Button panel
-		btnViewType = new JButton ("View Bases");
+		btnViewType = new JButton ("View Sequence");
 		btnViewType.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				toggleViewType();
@@ -512,7 +512,7 @@ public class MainToolAlignPanel extends JPanel implements ClipboardOwner
 	private JPanel createToolSeq ( )
 	{	
         // Button panel
-		btnViewType = new JButton ("View Bases");
+		btnViewType = new JButton ("View Sequence");
 		btnViewType.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				toggleViewType();
@@ -762,7 +762,7 @@ public class MainToolAlignPanel extends JPanel implements ClipboardOwner
 
 		if ( nViewType == MainAlignPanel.GRAPHICMODE )
 		{
-			btnViewType.setText( "View Bases" );
+			btnViewType.setText( "View Sequence" );
 			menuZoom.setVisible ( true );
 			while ( iter.hasNext() )
 			{

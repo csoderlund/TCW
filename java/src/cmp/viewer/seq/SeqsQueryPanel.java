@@ -30,7 +30,7 @@ import cmp.viewer.panels.CollapsiblePanel;
 public class SeqsQueryPanel extends JPanel {
 	private static final long serialVersionUID = 3740105753786330459L;
 	public static final String tag = MTCWFrame.SEQ_PREFIX;
-	public static final String helpHTML = "SeqQuery.html";
+	public static final String helpHTML = Globals.helpDir + "SeqQuery.html";
 	
 	private static final String [] SECTIONS = { "Basic", "Datasets", "Cluster Sets", "TPM" };
 	private static final String [] SECTIONS_DESC = 	{ "","", "","" }; // description doesn't look good on applet
@@ -71,7 +71,7 @@ public class SeqsQueryPanel extends JPanel {
 		btnSearch.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				hasError=false;
-				seqSQLwhere();
+				setSQLwhere();
 				if (!hasError) {
 					SeqsTopRowPanel newPanel = new SeqsTopRowPanel(theViewerFrame, 
 						tag + theViewerFrame.getNextLabelNum(tag));
@@ -109,7 +109,7 @@ public class SeqsQueryPanel extends JPanel {
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(theViewerFrame, 
-						"Sequence Filter Help", "html/viewMultiTCW/SeqQuery.html");
+						"Sequence Filter Help", helpHTML);
 			}
 		});
 		
@@ -147,7 +147,7 @@ public class SeqsQueryPanel extends JPanel {
 		page.add(Box.createVerticalStrut(5));
 		
 		row = Static.createRowPanel();
-		txtDesc = new Substring("Description", "Descript", 	"unique_hits.description", 
+		txtDesc = new Substring("Best Descript", "Descript", 	"unique_hits.description", 
 				"Show all sequences with the substring in their best description");
 		row.add(txtDesc);
 		page.add(row);
@@ -358,7 +358,7 @@ public class SeqsQueryPanel extends JPanel {
 	/*****************************************
 	 * SeqTablePanel.buildQueryStr adds join on unitrans.HITid=unique_hits.HITid
 	 */
-	private void seqSQLwhere() {
+	private void setSQLwhere() {
 		sqlWhere = "";
 		
 		// Basic
@@ -609,22 +609,29 @@ public class SeqsQueryPanel extends JPanel {
 			if (!checkOn.isSelected()) return "";
 			String min = txtMin.getText().trim(); // check if proper value
 			String max = txtMax.getText().trim();
-			if ((min.equals("") || min.equals("0")) && max.equals("")) {
-				checkOn.setSelected(false);
-				return "";
-			}
 			
-			if (min.equals("")) return sqlField + "<"  + max;
-			if (max.equals("")) return sqlField + ">=" + min;
+			if (min.equals("")) { // CAS301
+				if (max.contentEquals("")) {
+					checkOn.setSelected(false);
+					return "";
+				}
+				return sqlField + "<"  + max;
+			}
+			if (max.equals("")) {
+				if (min.contentEquals("")) {
+					min="0";
+					txtMin.setText(min);
+				}
+				return sqlField + ">=" + min;
+			}
 			return "(" + sqlField + ">=" + min + " and " + sqlField + "<" + max + ")";
 		}
-		public String getSum() {
+		public String getSum() { // CAS310 called after getSQL
 			if (!checkOn.isSelected()) return "";
 			String min = txtMin.getText().trim(); // check if proper value
 			String max = txtMax.getText().trim();
-			boolean nomin = (min.equals("") || min.equals("0") || min.equals("0.0"));
-			if (nomin && max.equals("")) return "";
-			if (nomin) return label + "<"  + max;
+			
+			if (min.equals("")) return label + "<"  + max;
 			if (max.equals("")) return label + ">=" + min;
 			return "(" + label + ">=" + min + " and " + label + "<" + max + ")";
 		}

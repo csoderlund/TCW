@@ -113,7 +113,7 @@ public class MethodHitPanel  extends JPanel {
 	public String getComment() {  
 		int x = (descButton.isSelected()) ? 1 : 0;
 		String com = "Sim " + txtSimCutoff.getText() + "; Cov " + txtCovCutoff.getText(); 
-		return hitTypes[x] + "; " + com;
+		return  com + "; " + hitTypes[x];
 	}
 	public String getSettings() {
 		int x = (descButton.isSelected()) ? 1 : 0;

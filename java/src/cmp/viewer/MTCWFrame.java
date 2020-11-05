@@ -31,6 +31,8 @@ import cmp.database.DBinfo;
 import cmp.database.Globals;
 import cmp.viewer.groups.GrpQueryPanel;
 import cmp.viewer.groups.GrpTablePanel;
+import cmp.viewer.hits.HitQueryPanel;
+import cmp.viewer.hits.HitTablePanel;
 import cmp.viewer.pairs.PairQueryPanel;
 import cmp.viewer.pairs.PairTablePanel;
 import cmp.viewer.panels.DatabaseSelectPanel;
@@ -63,6 +65,7 @@ public class MTCWFrame extends JFrame {
 	public static final String SEQ_PREFIX = "Seq";
 	public static final String GRP_PREFIX = "Clus";
 	public static final String PAIR_PREFIX = "Pair";
+	public static final String HIT_PREFIX = "Hit";
 	public static final String FILTER = "Filter: ";   // On each table with summary of filter
 	   
 	// buttons at top to other pages
@@ -72,19 +75,20 @@ public class MTCWFrame extends JFrame {
 	public static final String PAIR_TABLE = "Pairs";
 	
 	// CAS305 moved Sampled to last section; add Find Hit
+	// CAS310 moved List Results and added Hit stuff
 	public static final String [] MAIN_SECTIONS = {"General",  "Filters",  "Samples"};
 	private static final String [] MAIN_MENU = { 
-		">Instructions", ">Overview", ">Find Hits",
-		 ">Cluster", ">Pair", ">Sequence", ">List Results", 
-		 ">Clusters", ">Pairs", ">Sequences"}; // s is added to not duplicate the above set
+		">Instructions", ">Overview", ">Find Hits", ">List Results", 
+		 ">Cluster", ">Pair", ">Sequence", ">Hit",
+		 ">Clusters", ">Pairs", ">Sequences", ">Hits"}; // s is added to not duplicate the above set
 	private static final String [] MENU_DESCRIP = { 
-		"Basic instructions for using multiTCW", "Information about the database",  "Run Blast or Diamond",
-		 "Filter clusters", "Filter Pairs", "Filter sequences", "List all result panels" ,
-		 "Sample set of clusters", "Sample set of pairs", "Sample set of sequences"
+		"Basic instructions for using multiTCW", "Information about the database",  "Run Blast or Diamond", "List all result panels" ,
+		 "Filter clusters", "Filter Pairs", "Filter sequences", "Filter hits",
+		 "Sample set of clusters", "Sample set of pairs", "Sample set of sequences", "Sample set of hits"
 		 };
-	private final int SAMP_INDEX=7;
-	private final String instructionHelp = "html/viewMultiTCW/Instructions.html";
-	private final String overviewHelp = "html/viewMultiTCW/summary.html";
+	private final int SAMP_INDEX=8;
+	private final String instructionHelp = Globals.helpDir + "Instructions.html";
+	private final String overviewHelp =  Globals.helpDir + "summary.html";
 	
 	private static Vector<MTCWFrame> openFrames = null;
 	
@@ -171,7 +175,11 @@ public class MTCWFrame extends JFrame {
 				System.err.println("Fatal error: Could not open database");
 				return;
 			}
-			new Version(db, false);
+			boolean b = new Version().run(getDBConnection());
+			if (!b) {
+				System.out.println("Problem with the version, cannot continue. ");
+				System.exit(-1);
+			}
 			
 			if (args.length>1 && args[1].equals("-o")) {
 				new Summary(db).removeSummary();
@@ -209,7 +217,12 @@ public class MTCWFrame extends JFrame {
 		strDBUser = dbUser;
 		strDBPass = dbPass;
 		
-		new Version(getDBConnection(), false);
+		boolean b = new Version().run(getDBConnection());
+		if (!b) {
+			System.out.println("Problem with the version, cannot continue. ");
+			System.out.println(host + " " + dbName + " " + dbUser);
+			System.exit(-1);
+		}
 		
 		//Loads the profile, if none selected creates a default profile
 		theSettings = new ViewerSettings(this);
@@ -234,7 +247,9 @@ public class MTCWFrame extends JFrame {
 					theSettings.getFrameSettings().getFrameHeight()));
 		
 			Out.PrtSpMsg(1, "Get metadata from database");
-			theInfo = new DBinfo(getDBConnection()); 
+			DBConn mDB = getDBConnection();
+			theInfo = new DBinfo(mDB); 
+			mDB.close();
 			
 			Out.PrtSpMsg(1, "Build interface");
 			createViewerFrame();
@@ -295,9 +310,13 @@ public class MTCWFrame extends JFrame {
 		grpTablePanel = new GrpTablePanel(this,   MAIN_MENU[SAMP_INDEX]); // have to go before the query panels
 		pairTablePanel = new PairTablePanel(this, MAIN_MENU[SAMP_INDEX+1]);
 		seqTablePanel = new SeqsTopRowPanel(this, MAIN_MENU[SAMP_INDEX+2]);
+		hitTablePanel = new HitTablePanel(this,   MAIN_MENU[SAMP_INDEX+3]);
+		
 		grpQueryPanel = new GrpQueryPanel(this);
 		pairQueryPanel = new PairQueryPanel(this);
 		seqQueryPanel = new SeqsQueryPanel(this);
+		hitQueryPanel = new HitQueryPanel(this);
+		
 		resultPanel = new ResultPanel(this);
 		blastPanel = new BlastTab(this);
 
@@ -307,19 +326,21 @@ public class MTCWFrame extends JFrame {
 		menuPanel.addMenuItem(general, instructionsPanel, MAIN_MENU[i], MENU_DESCRIP[i++]);
 		menuPanel.addMenuItem(general, overviewPanel,     MAIN_MENU[i], MENU_DESCRIP[i++]);
 		menuPanel.addMenuItem(general, blastPanel,  MAIN_MENU[i], MENU_DESCRIP[i++]);
+		menuPanel.addMenuItem(general, resultPanel, MAIN_MENU[i], MENU_DESCRIP[i++]); // CAS310 moved from Filter to Genral
 		
 		JPanel filter = Static.createRowPanel();
 		menuPanel.addTopItem(filter, MAIN_SECTIONS[s++], "Filter: Select a > item");
 		menuPanel.addMenuItem(filter, grpQueryPanel,  MAIN_MENU[i], MENU_DESCRIP[i++]);
 		menuPanel.addMenuItem(filter, pairQueryPanel, MAIN_MENU[i], MENU_DESCRIP[i++]);
 		menuPanel.addMenuItem(filter, seqQueryPanel,  MAIN_MENU[i], MENU_DESCRIP[i++]);
-		menuPanel.addMenuItem(filter, resultPanel, MAIN_MENU[i], MENU_DESCRIP[i++]);
+		menuPanel.addMenuItem(filter, hitQueryPanel,  MAIN_MENU[i], MENU_DESCRIP[i++]);
 		
 		JPanel list = Static.createRowPanel();
 		menuPanel.addTopItem(list, MAIN_SECTIONS[s++], "Sample: Select a > item");
 		menuPanel.addMenuItem(list, grpTablePanel,  MAIN_MENU[i], MENU_DESCRIP[i++]);
 		menuPanel.addMenuItem(list, pairTablePanel, MAIN_MENU[i], MENU_DESCRIP[i++]);
 		menuPanel.addMenuItem(list, seqTablePanel,  MAIN_MENU[i], MENU_DESCRIP[i++]);
+		menuPanel.addMenuItem(list, hitTablePanel,  MAIN_MENU[i], MENU_DESCRIP[i++]);
 		
 		//Add all panels to the main
 		mainPanel.add(instructionsPanel);
@@ -327,9 +348,11 @@ public class MTCWFrame extends JFrame {
 		mainPanel.add(grpTablePanel);
 		mainPanel.add(pairTablePanel);
 		mainPanel.add(seqTablePanel);
+		mainPanel.add(hitTablePanel);
 		mainPanel.add(grpQueryPanel);
 		mainPanel.add(pairQueryPanel);
 		mainPanel.add(seqQueryPanel);
+		mainPanel.add(hitQueryPanel);
 		mainPanel.add(resultPanel);
 		mainPanel.add(blastPanel);
 		menuPanel.setSelected(overviewPanel);
@@ -378,6 +401,7 @@ public class MTCWFrame extends JFrame {
 	public GrpQueryPanel getGrpQueryPanel() {return grpQueryPanel;}
 	public PairQueryPanel getPairQueryPanel() {return pairQueryPanel;}
 	public SeqsQueryPanel getSeqsQueryPanel() {return seqQueryPanel;}
+	public HitQueryPanel getHitQueryPanel() {return hitQueryPanel;}
 	
 	public String [] getMethodPrefixes() { return theInfo.getMethodPrefix(); }
 	public int getMethodIDForName(String name) { return theInfo.getMethodID(name);}
@@ -385,7 +409,6 @@ public class MTCWFrame extends JFrame {
 	public String [] getTaxaList() { return theInfo.getTaxa(); }
 	public String [] getSeqLibList() { return theInfo.getSeqLib(); }
 	public String [] getSeqDEList() { return theInfo.getSeqDE(); }
-	public boolean 	hasNegDE() {return theInfo.hasNegDE();}
 	public int 		getnAAdb() {return theInfo.nAAdb();}
 	public int 		getnNTdb() {return theInfo.nNTdb();}
 	public DBinfo getInfo() {
@@ -414,6 +437,7 @@ public class MTCWFrame extends JFrame {
 		if (type.equals(GRP_PREFIX)) parent = grpQueryPanel;
 		else if (type.equals(PAIR_PREFIX)) parent = pairQueryPanel;
 		else if (type.equals(SEQ_PREFIX)) parent = seqQueryPanel;
+		else if (type.equals(HIT_PREFIX)) parent = hitQueryPanel;
 		mainPanel.add(newPanel);
 		menuPanel.addChildItem(parent, newPanel, name, summary);
 		resultPanel.addResult(null, newPanel, name, summary);
@@ -577,12 +601,17 @@ public class MTCWFrame extends JFrame {
 	//Individual content panels
 	private StyleTextPanel instructionsPanel = null;
 	private TextPanel overviewPanel = null;
+	private ResultPanel resultPanel = null;
+	private BlastTab blastPanel = null;
+	
 	private GrpTablePanel grpTablePanel = null;
 	private PairTablePanel pairTablePanel = null;
 	private SeqsTopRowPanel seqTablePanel = null;
+	private HitTablePanel hitTablePanel = null;
+	
 	private GrpQueryPanel grpQueryPanel = null;
 	private SeqsQueryPanel seqQueryPanel = null;
 	private PairQueryPanel pairQueryPanel = null;
-	private ResultPanel resultPanel = null;
-	private BlastTab blastPanel = null;
+	private HitQueryPanel hitQueryPanel = null;
+	
 }

@@ -15,6 +15,7 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.text.DecimalFormat;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -25,6 +26,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
+import util.database.DBConn;
 import util.methods.Static;
 import util.ui.UserPrompt;
 import cmp.database.DBinfo;
@@ -32,6 +34,7 @@ import cmp.database.Globals;
 
 public class EditStatsPanel  extends JPanel  {
 	private static final long serialVersionUID = 1L;
+	private static final DecimalFormat df = new DecimalFormat("#,###,###");
 	
 	public EditStatsPanel(CompilePanel parentPanel) {
 		theCompilePanel = parentPanel;
@@ -198,29 +201,35 @@ public class EditStatsPanel  extends JPanel  {
 		updateDBnone(); // everything setSelected(false) setEnabled(false)
 		
 		DBinfo info = theCompilePanel.getDBInfo();
+		
+		if (!info.isPairsSet()) {
+			DBConn mDB = theCompilePanel.getDBconn();
+			info.setPairsEdit(mDB);   //  CAS310 these take awhile to compute, so only done for this panel
+			mDB.close();
+		}
 		int cntPairs = info.getCntPair();
 		
 	// PCC
 		int index=0;
-		lblSum[index++].setText(html(cntPairs, "Total Hit Pairs", false));
+		lblSum[index++].setText(html(cntPairs, "Total Hit Pairs", 0));
 		
 		int cntPCC = info.getCntPCC();
 		int cntLib = info.getSeqLib().length;
 		if (cntLib==0) { 			// PCC for RPKM
-			lblSum[index++].setText(html(-1, "No expression levels", true));
+			lblSum[index++].setText(html(-1, "No expression levels", 1));
 		}
 		else { 						
 			if (cntPairs>0 && cntPCC==0) chkPCC.setSelected(true);
 			chkPCC.setEnabled(true);
-			lblSum[index++].setText(html(cntPCC, "Pairs with PCC", true));
+			lblSum[index++].setText(html(cntPCC, "Pairs with PCC", 1));
 		}
 		bPCC = chkPCC.isSelected();
 		
 	// Clusters -- want to score regardless of NT-sTCW or AA-sTCW
 		int cntGrp =   info.getCntGrp();
 		int cntMulti = info.getCntMultiScore();
-		lblSum[index++].setText(html(cntGrp,   "Clusters", false));
-		lblSum[index++].setText(html(cntMulti, "with scores", true));
+		lblSum[index++].setText(html(cntGrp,   "Clusters", 0));
+		lblSum[index++].setText(html(cntMulti, "with scores", 1));
 		
 		if (cntGrp>0) {
 			chkMulti.setEnabled(true);
@@ -237,7 +246,7 @@ public class EditStatsPanel  extends JPanel  {
 		else             dbStr = "sTCWdb NT: " + nNT + " AA: " + nAA;
 		
 		if (nNT<=1) {
-			lblSum[index++].setText(html(-1, dbStr, false));
+			lblSum[index++].setText(html(-1, dbStr, 0));
 			bStats=false; bKaKs=false; bRead=false; bWrite=false;
 			return; // No stats to be done
 		}
@@ -245,12 +254,12 @@ public class EditStatsPanel  extends JPanel  {
 		boolean bMix = (nNT>0 && nAA>0);
 		
 		int cntPairGrp = info.getCntPairGrp(); // Pairwise.hasGrp=1
-		lblSum[index++].setText(html(cntPairGrp, "Pairs in clusters", false));
+		lblSum[index++].setText(html(cntPairGrp, "Pairs in clusters", 0));
 		if (cntPairGrp==0) return;
 		 
 	// Stats
 		int cntStats = info.getCntStats();    // Paiwise.align>0 
-		lblSum[index++].setText(html(cntStats, "with stats", true));
+		lblSum[index++].setText(html(cntStats, "with stats", 1));
 		
 		chkStats.setEnabled(true);
 		if (cntStats<cntPairGrp) chkStats.setSelected(true); 
@@ -259,7 +268,7 @@ public class EditStatsPanel  extends JPanel  {
 		
 		// KaKs
 		int cntKaKs = info.getCntKaKs();     // Pairwise.KaKs>=0 read from file
-		lblSum[index++].setText(html(cntKaKs, "with KaKs ", true));
+		lblSum[index++].setText(html(cntKaKs, "with KaKs ", 1));
 		
 		chkKaKs.setEnabled(true);
 		kaksWrButton.setEnabled(true); 
@@ -283,48 +292,52 @@ public class EditStatsPanel  extends JPanel  {
 				if (rExists)      {
 					chkKaKs.setSelected(true);
 					kaksRdButton.setSelected(true); kaksWrButton.setSelected(false);
-					lblSum[index++].setText(html(-1, "&nbsp;&nbsp;KaKs files exist for Read", true));
+					lblSum[index++].setText(html(-1, "KaKs files exist for Read", 2));
 				}
 				else if (wExists) {
 					kaksRdButton.setSelected(false); kaksWrButton.setSelected(true);
-					lblSum[index++].setText(html(-1, "&nbsp;&nbsp;Input files to KaKs exists", true));
+					lblSum[index++].setText(html(-1, "Input files to KaKs exists", 2));
 				}
-				else              lblSum[index++].setText(html(-1, "&nbsp;&nbsp;KaKs unknown for mixed sTCWdbs", true));
+				else   lblSum[index++].setText(html(-1, "KaKs unknown for mixed sTCWdbs", 2));
 			}	
 		}
 		else if (cntStats<cntPairGrp) { // KaKs need to be written for new pairs
 			chkKaKs.setSelected(true);
 			kaksWrButton.setSelected(true);
-			lblSum[index++].setText(html(-1,     "&nbsp;&nbsp;Write files for KaKs input", true));
+			lblSum[index++].setText(html(-1,     "Write files for KaKs input", 2));
 			if (wExists)
-				lblSum[index++].setText(html(-1, "&nbsp;&nbsp;***Input to KaKs exists", true));
+				lblSum[index++].setText(html(-1, "***Input to KaKs exists", 2));
 		}	
 		else if (cntKaKs<cntPairGrp) { // cntStats all aligned already
 			if (rExists) {
 				chkKaKs.setSelected(true);
 				kaksRdButton.setSelected(true); kaksWrButton.setSelected(false);
-				lblSum[index++].setText(html(-1, "&nbsp;&nbsp;KaKs files exist for Read", true));
+				lblSum[index++].setText(html(-1, "KaKs files exist for Read", 2));
 			}
 			else if (wExists) {
 				chkKaKs.setSelected(false); 
 				kaksWrButton.setEnabled(false); kaksWrButton.setSelected(false);
 				kaksRdButton.setEnabled(false); kaksRdButton.setSelected(false);
-				lblSum[index++].setText(html(-1, "&nbsp;&nbsp;Files exist for KaKs input", true));
+				lblSum[index++].setText(html(-1, "Files exist for KaKs input", 2));
 			}
-			else lblSum[index++].setText(html(-1, "&nbsp;&nbsp;No KaKs files", true));
+			else lblSum[index++].setText(html(-1, "No KaKs files", 2));
 		}
-		lblSum[index++].setText(html(-1, dbStr, false));
+		lblSum[index++].setText(html(-1, dbStr, 0));
 		
 		bKaKs = chkKaKs.isSelected();
 		bWrite = kaksWrButton.isSelected();
 		bRead = kaksRdButton.isSelected();
 	}
 	
-	private String html(int n, String msg, boolean indent) {
+	private String html(int n, String msg, int indent) {
 		String x = "<html><tt><small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-		if (indent) x += "&nbsp;&nbsp;&nbsp;&nbsp;";
+		
+		if (indent>0) x += "&nbsp;&nbsp;&nbsp;&nbsp;";
+		if (indent>1) x += "&nbsp;&nbsp;";
+		
 		if (n==-1) return x + msg +"</tt></small><html>";
-		return x + msg + ": " + n + "</tt></small><html>";
+		
+		return x + msg + ": " + df.format(n) + "</tt></small><html>"; // CAS310 format
 	}
 	public void updateDBnone() {
 		chkStats.setSelected(false);

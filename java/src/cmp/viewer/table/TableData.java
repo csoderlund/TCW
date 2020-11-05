@@ -17,6 +17,7 @@ import javax.swing.JTextField;
 
 import util.methods.ErrorReport;
 import cmp.viewer.groups.GrpTablePanel;
+import cmp.viewer.hits.HitTablePanel;
 import cmp.viewer.seq.SeqsTablePanel;
 import cmp.viewer.pairs.PairTablePanel;
 
@@ -40,6 +41,11 @@ public class TableData implements Serializable {
 	    	vHeaders = new Vector<TableDataHeader>();
 	    	theSeqTable = parent;
 	 }
+	 public TableData(HitTablePanel parent) { // CAS310 add HitTable
+	    	vData = new Vector<Vector<Object>>();
+	    	vHeaders = new Vector<TableDataHeader>();
+	    	theHitTable = parent;
+	 }
 	 
 	 public static TableData createModel(String [] columns, TableData source, GrpTablePanel parent) {
 		TableData retVal = new TableData(parent);
@@ -58,6 +64,12 @@ public class TableData implements Serializable {
 			return retVal;
 	}
 	
+	 public static TableData createModel(String [] columns, TableData source, HitTablePanel parent) {
+			TableData retVal = new TableData(parent);
+			createModel(columns, source, retVal);
+			return retVal;
+	}
+	 
 	private static void createModel(String [] columns, TableData source, TableData retVal) {
 		retVal.arrData = new Object[source.arrData.length][columns.length];
 		retVal.arrHeaders = new TableDataHeader[columns.length];
@@ -102,6 +114,7 @@ public class TableData implements Serializable {
     		if (theGrpTable!=null) theGrpTable.sortMasterColumn(columnName, ascending);
     		else if (thePairTable!=null) thePairTable.sortMasterColumn(columnName, ascending);
     		else if (theSeqTable!=null) theSeqTable.sortMasterColumn(columnName, ascending);
+    		else if (theHitTable!=null) theHitTable.sortMasterColumn(columnName, ascending);
     }
 
     public void setColumnHeaders(String [] columnNames, Class<?> [] columnTypes) {
@@ -302,9 +315,9 @@ public class TableData implements Serializable {
     }
 	
     private class ColumnComparator implements Comparator<Object []> {
-	    	public ColumnComparator(int column) {
-	    		nColumn = column;
-	    	}
+    	public ColumnComparator(int column) {
+    		nColumn = column;
+    	}
 		public int compare(Object [] o1, Object [] o2) {
 			int retval = 0;
 			boolean bInAscending = arrHeaders[nColumn].isAscending();
@@ -372,5 +385,5 @@ public class TableData implements Serializable {
     private GrpTablePanel theGrpTable = null;
     private PairTablePanel thePairTable = null;
     private SeqsTablePanel theSeqTable = null;
-
+    private HitTablePanel theHitTable = null;
 }

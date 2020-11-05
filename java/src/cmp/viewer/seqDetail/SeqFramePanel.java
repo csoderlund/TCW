@@ -110,7 +110,7 @@ public class SeqFramePanel extends JPanel {
 			int len = oEnd-oStart+1;
 			header = " Length: " + seqLen + "   ORF: Frame " + oFrame + " Len " + len + " (" + oStart + ".." + oEnd + ") "; 
 			if (hitEnd!=0) {
-				String e = String.format("%.1e", eval);
+				String e = String.format("%.1E", eval);
 				header +=  "  Hit: (" + hitStart + ".." + hitEnd + ") " + e;
 			}
 		}

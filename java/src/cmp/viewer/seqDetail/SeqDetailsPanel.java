@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -22,6 +21,7 @@ import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
@@ -50,7 +50,6 @@ public class SeqDetailsPanel extends JPanel {
 	private  final String HIT_TABLE = FieldData.HIT_TABLE;
 	private  final String PAIR_TABLE = FieldData.PAIR_TABLE;
 	
-		
 	public SeqDetailsPanel(MTCWFrame parentFrame, String name, int seqid) {
 		theParentFrame = parentFrame;
 		seqIndex = seqid;
@@ -184,7 +183,7 @@ public class SeqDetailsPanel extends JPanel {
 		theHitData = new ArrayList<HitListData> ();
 		hitMap = new HashMap <String, HitListData> ();
 		
-		showGOhit[0]=null;
+		bestHitGO[0]=null;
 		int cnt=0;
 		String sql = 
 		  "SELECT tr.HITstr,  tr.percent_id, tr.alignment_len, " +
@@ -214,10 +213,10 @@ public class SeqDetailsPanel extends JPanel {
 			int hitLen = rs.getInt(i++);
 			
 			if (nGO>0) {
-				if (bestEval || bestAnno || showGOhit[0]==null) {
-					showGOhit[0]=hitName;
-					showGOhit[1]=desc;
-					showGOhit[2]=eval+"";
+				if (bestEval || bestAnno || bestHitGO[0]==null) {
+					bestHitGO[0]=hitName;
+					bestHitGO[1]=desc;
+					bestHitGO[2]=eval+"";
 				}
 			}
 			double aaCov= ((double) alignlen/(double) aaLen) * 100;
@@ -289,6 +288,7 @@ public class SeqDetailsPanel extends JPanel {
 		theHitTable.setColumnSelectionAllowed( false );
 		theHitTable.setCellSelectionEnabled( false );
 		theHitTable.setRowSelectionAllowed( true );
+		theHitTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); // CAS310
 		theHitTable.setShowHorizontalLines( false );
 		theHitTable.setShowVerticalLines( false );	
 		theHitTable.setIntercellSpacing ( new Dimension ( 1, 0 ) );
@@ -407,6 +407,7 @@ public class SeqDetailsPanel extends JPanel {
 		thePairTable.setColumnSelectionAllowed( false );
 		thePairTable.setCellSelectionEnabled( false );
 		thePairTable.setRowSelectionAllowed( true );
+		thePairTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); // CAS310
 		thePairTable.setShowHorizontalLines( false );
 		thePairTable.setShowVerticalLines( false );	
 		thePairTable.setIntercellSpacing ( new Dimension ( 1, 0 ) );
@@ -527,7 +528,7 @@ public class SeqDetailsPanel extends JPanel {
 	 * XXX HitListData class for Hit table
 	 */
 	private String [] hitColumnHeadings() { 
-		String [] x = {"Hit ID", "Type", "Shared Description", "Species", "#GO", "Best", "E-value",
+		String [] x = {"HitID", "Type", "Description", "Species", "#GO", "Best", "E-value",
 				       "%Sim", "Align", "%aaCov", "%hitCov"}; // CAS305 was start and end
 		return x;
 	}
@@ -624,7 +625,7 @@ public class SeqDetailsPanel extends JPanel {
 	 * XXX PairListData class for Pair table
 	 */
 	private String [] pairColumnHeadings() { 
-		String [] x = {"PairID", "Seq ID", "NT E-val","AA E-val", "PCC", "Pair Description", "Shared Clusters"};
+		String [] x = {"PairID", "SeqID", "NT E-val","AA E-val", "PCC", "Pair Description", "Shared Clusters"};
 		return x;
 	}
 	private class PairListData {
@@ -692,35 +693,45 @@ public class SeqDetailsPanel extends JPanel {
 		private String methods = "";
 	} 
 	public boolean isAAonly() { return bAAonly;}
-	public String [] getShowGOs() { 
-		return showGOhit;
+	
+	public String getSelectedSeqID() {
+		int [] selections = thePairTable.getSelectedRows();
+		if (selections.length==0) return thePairData.get(0).seqID;
+		
+		return thePairData.get(selections[0]).seqID;
+	}
+	public void clearSelection() {
+		theHitTable.clearSelection();
+		thePairTable.clearSelection();
+	}
+	public String getSelectedHitID() {
+		int [] selections = theHitTable.getSelectedRows();
+		if (selections.length==0) return bestHitGO[0];
+		
+		return theHitData.get(selections[0]).hitName;
+	}
+	public String getSelectedHitDesc() {
+		int [] selections = theHitTable.getSelectedRows();
+		if (selections.length==0) return bestHitGO[1];
+		
+		return theHitData.get(selections[0]).desc;
 	}
 	public String [] getHitInfo() {
-		if (cntSelectedHits()==0) return showGOhit;
+		if (cntSelectedHits()==0) return bestHitGO;
 		
-		String hit = getSelectedHits()[0];
+		String hit = getSelectedHitID();
 		String [] info = new String [3];
 		info[0] = hit;
 		info[1] = hitMap.get(hit).desc;
 		info[2] = String.format("%.0E", hitMap.get(hit).dEVal);
 		return info;
 	}
-	public int cntSelectedHits() {
-		if(theHitTable == null) return 0;
+	private int cntSelectedHits() {
+		if (theHitTable == null) return 0;
 		int [] selections = theHitTable.getSelectedRows();
 		return selections.length;
 	}
-	public String [] getSelectedHits() {
-		int [] selections = theHitTable.getSelectedRows();
-
-		Vector<String> retVal = new Vector<String> ();
-		for(int x=0; x<selections.length; x++) {
-			String hitID = theHitData.get(selections[x]).hitName;
 	
-			if(!retVal.contains(hitID)) retVal.add(hitID);
-		}	
-		return retVal.toArray(new String[0]);
-	}
 	public HashSet <String> getHitNameGO() { 
 		if (hitMap==null || hitMap.size()==0) return null;
 		HashSet <String> hits = new HashSet <String> ();
@@ -765,7 +776,7 @@ public class SeqDetailsPanel extends JPanel {
 	private int seqIndex = -1;
 	private DBConn mDB = null;
 	
-	private String [] showGOhit = new String [3];
+	private String [] bestHitGO = new String [3];
 	private int aaLen=0;
 	
 	// for tag on left panel

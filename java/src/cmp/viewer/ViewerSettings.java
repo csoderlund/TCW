@@ -60,7 +60,7 @@ public class ViewerSettings {
 			FrameSettings fs = new FrameSettings();
 			fs.setBGColor(Globals.BGCOLOR);
 			fs.setDefaultFont(new Font("Monospaced", Font.PLAIN, 11)); // changing this make no difference
-			fs.setFrameHeight(600);
+			fs.setFrameHeight(650); // CAS310 change from 600
 			fs.setFrameWidth(1000);
 		}
 		catch(Exception e) {ErrorReport.reportError(e, "Error setting defaults");}
@@ -101,6 +101,7 @@ public class ViewerSettings {
 	public PairSettings getPairSettings() { return new PairSettings(); } 
 	public MemberSettings getMemberSettings() { return new MemberSettings(); }
 	public SeqSettings getSeqSettings() { return new SeqSettings(); } 
+	public HitSettings getHitSettings() { return new HitSettings(); } 
 	
 	//Used when a new profile is loaded
 	public void setProfileName(String name) { strProfileName = name; }
@@ -163,7 +164,19 @@ public class ViewerSettings {
 			}
 		}
 	}
-	
+	public class HitSettings {
+		public String [] getSelectedColumns() { 
+			return getString("HITCOLUMNS").split(","); 
+		}
+		
+		public void setSelectedColumns(String [] columns) {
+			if (columns.length>0) {
+				String storeVal = columns[0];
+				for(int x=1; x<columns.length; x++) storeVal += "," + columns[x];
+				putString("HITCOLUMNS", storeVal);
+			}
+		}
+	}
 	private String getString(String label) {
 		try {
 			return thePrefs.get(strProfileName + "." + label, "");

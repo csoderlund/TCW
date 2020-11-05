@@ -95,20 +95,7 @@ export R_HOME=/Library/Frameworks/R.framework/Resources  # zcsh
 		<h4>
 			Perl-mySQL interface
 		</h4>
-	Install Homebrew: See <a href=https://coolestguidesontheplanet.com/installing-homebrew-on-macos-sierra-package-manager-for-unix-apps>Coolest Guide</a>
-	<pre> 
-	# https://metacpan.org/pod/distribution/DBD-mysql/lib/DBD/mysql
-	brew install openssl mysql-connector-c
-	cpan DBD::mysql 
-	# where did I get the following commands from? Think I was trying to make perl5
-	sudo cpan       # to init.
-	sudo cpan install DBD::mysql
-	???
-	"The solution is simple: Don't use the Apple flavors of Perl, build your own from scratch and use that. Then:
-	cpan install DBI
-	cpan install DBD::mysql"
-	</pre>
-	<p>
+	<font color=red>I could not get this working on Catalina.</font>
 
 <p>The following instructions are from an earlier version of this document (for MacOS 10.9.5):
 <pre>
@@ -129,8 +116,8 @@ export R_HOME=/Library/Frameworks/R.framework/Resources  # zcsh
 <h3>
 	Running /Ext/mac external programs
 </h3>
-MacOS 10.15 has made it difficult to run programs downloaded from the web unless its been
-authenticated by Apple. Running through TCW,
+<font color=red>MacOS 10.15 has made it difficult to run programs downloaded from the web unless its been
+authenticated by Apple.</font> Running external programs from TCW,
 you will either get popup that states "xxx cannot be opened because developer cannot be verified", or
 the program will just fail. Do the following:
 <ol>
@@ -143,7 +130,7 @@ All were straight-forward except for <code>mafft</code>; I had to authenticate a
 directory: 
 <pre>
 bin/
-	mafft
+mafft
 libexec/
 	version
 	countlen

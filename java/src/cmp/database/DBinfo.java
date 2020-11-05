@@ -3,7 +3,6 @@ package cmp.database;
 import java.sql.ResultSet;
 import java.util.Vector;
 import java.util.HashMap;
-import java.util.HashSet;
 
 import util.database.DBConn;
 import util.database.Globalx;
@@ -12,15 +11,23 @@ import util.methods.Out;
 import util.methods.Static;
 /****************************************************
  * Load basic information so the queries do not have to be repeated.
+ * CAS310 was loading some info on demand, but that assume mDB stays active. Now, all loaded at once.
+ * 	Speedup this up by changing setPairs and adding setPairsEdit
  */
 public class DBinfo {
 	
-	// this gets called after every major step in runMulti. on startup of viewMulti and on compute summary
+	// this gets called after every major step in runMulti, on startup of viewMulti, and on compute summary
+	// the calling routine closes dbc
 	public DBinfo(DBConn dbc) {
 		mDB = dbc;
 		
 		setASM();    // need to read assembly table for species and which are protein
 		setMethod(); // need to read method table for Name and Prefix
+		setCounts();
+		setPairs();
+		setSeqLibDE();
+		setTaxa();
+		setFromInfoTable();
 	}
 	
 	private void setASM() {
@@ -84,6 +91,8 @@ public class DBinfo {
 			cntSeq = mDB.executeCount("select count(*) from unitrans");
 			cntPair = mDB.executeCount("select count(*) from pairwise");
 			cntGrp = mDB.executeCount("select count(*) from pog_groups");
+			cntHit = mDB.executeCount("select count(*) from unique_hits");
+			cntGO = mDB.executeCount("select count(*) from go_info");
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "loading counts");}
 	}
@@ -155,31 +164,49 @@ public class DBinfo {
 		catch(Exception e) {ErrorReport.prtReport(e, "Error loading taxa");}
 	}
 	
-	
-	private void setIfPairs() {
+	public boolean isPairsSet() {
+		return (cntPairGrp>0);
+	}
+	public void setPairsEdit(DBConn mDB) {
 		try {
-			if (cntPair==-1) setCounts();
-			if (cntPair>0) {
-				cntStats =      mDB.executeCount("select count(*) from pairwise where nAlign>0");
-				cntKaKs =       mDB.executeCount("select count(*) from pairwise where kaks>=" + Globalx.dNullVal); 
-				cntPCC =        mDB.executeCount("select count(*) from pairwise where PCC!=" + Globalx.dNoVal); 
-				cntPairGrp =    mDB.executeCount("select count(*) from pairwise where hasGrp>0");
-				cntMultiScore = mDB.executeCount("select count(*) from pog_groups where conLen>0");
-				
-				int cnt = mDB.executeCount("select count(*) from pairwise " +
-						" where ntSim>0 limit 1");
-				if (cnt>0) hasNTblast=true;
-				int cntDBalign = mDB.executeCount("select count(*) from pog_groups " +
-						" where conSeq is not null limit 1");
-				if (cntDBalign>0) hasDBalign=true;
-			}
-			else {
-				cntStats=cntPCC=cntKaKs=cntPairGrp=cntMultiScore=0;
-			}
+			cntStats=cntPCC=cntKaKs=cntPairGrp=cntMulti=0;
+			if (cntPair==0 || cntGrp==0) return;
+			
+			setPairs(); // checks are fast; counts can be long if have to check the entire table
+			
+			cntPairGrp = mDB.executeCount("select count(*) from pairwise where hasGrp>0");
+			if (hasStats) 	cntStats =   mDB.executeCount("select count(*) from pairwise where nAlign>0");
+			if (hasKaKs) 	cntKaKs =    mDB.executeCount("select count(*) from pairwise where kaks>=" + Globalx.dNullVal); 
+			if (hasPCC) 	cntPCC =     mDB.executeCount("select count(*) from pairwise where PCC!=" + Globalx.dNoVal);              
+			if (hasMulti) 	cntMulti =   mDB.executeCount("select count(*) from pog_groups where conLen>0");
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "loading counts");}
 	}
+	
+	// CAS310 this method was counting from pairwise, which took very long
+	private void setPairs() { 
+		try {
+			if (cntPair>0) { 
+				hasPCC =        mDB.executeBoolean("select hasPCC from info"); 
 		
+				hasStats =      hasVal("select pairInfo from info");   
+				hasKaKs =       hasVal("select kaksInfo from info"); 
+				hasNTblast =    hasVal("select ntInfo from info"); 
+				
+				hasMulti = mDB.executeBoolean("select hasMA from info");
+				hasDBalign =    hasMulti;
+			}
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "setting pair info");}
+	}
+	private boolean hasVal(String sql) {
+		try {
+			String x = mDB.executeString(sql);
+			if (x==null || x.trim().contentEquals("")) return false;
+			return true;
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "setting pair info"); return false;}
+	}
 	/*******************************************************
 	 * XXX Updates from runMultiTCW
 	 */
@@ -231,13 +258,16 @@ public class DBinfo {
 	 * 2. >N (100,95,90,85) %shared description
 	 * 3. All or limit
 	 */
-	public String getSampleGrp() {
+	public String getSampleGrp(DBConn mDB) { // CAS310 pass in mDB
 		try {
-			if (cntGrp==-1) setCounts();
-			
 			String x = mDB.executeString("select grpSQL from info");
 			if (x!=null && x!="" && x.contains(":")) return x;
 			if (cntGrp==0) return "Show all : 1"; 
+			
+			if (cntGrp==-1) {
+				Out.PrtWarn("Info not loaded before creating sample cluster");
+				setCounts();
+			}
 			
 			Out.PrtSpMsg(1, "Creating sample cluster filter");
 			String strQuery=null, strSum="";
@@ -294,13 +324,16 @@ public class DBinfo {
 	 * 2. has stats
 	 * 3. All or limit
 	 */
-	public String getSamplePair() {
+	public String getSamplePair(DBConn mDB) {
 		try { 
-			if (cntPair==-1) setCounts();
-			
 			String x = mDB.executeString("select pairSQL from info");
 			if (x!=null && x.contains(":")) return x;
 			if (cntPair==0) return "Show all : 1";
+			
+			if (cntPair==-1) {
+				Out.PrtWarn("Info not loaded before creating sample pair");
+				setCounts();
+			}
 			
 			Out.PrtSpMsg(1, "Creating sample pair filter");
 			String strQuery=null, strSum="";
@@ -348,11 +381,15 @@ public class DBinfo {
 	 * 2. in any cluster (add limit)
 	 * 3. with annotation (add limit)
 	 */
-	public String getSampleSeq() {
+	public String getSampleSeq(DBConn mDB) {
 		try {
-			if (cntSeq==-1) setCounts();
 			String x = mDB.executeString("select seqSQL from info");
 			if (x!=null && x.contains(":")) return x;
+			
+			if (cntSeq==-1) {
+				Out.PrtWarn("Info not loaded before creating sample seq");
+				setCounts();
+			}
 			
 			Out.PrtSpMsg(1, "Creating sample sequence filter");
 			String strSum=null, strQuery=null;
@@ -419,23 +456,61 @@ public class DBinfo {
 		catch (Exception e){ErrorReport.prtReport(e, "Creating seq query");}
 		return "Show all: 1";
 	}
+	
+	public String getSampleHit(DBConn mDB) { // CAS310 add
+		try {
+			String x = mDB.executeString("select hitSQL from info");
+			if (x!=null && x.contains(":")) return x;
+			
+			if (cntHit==-1) {
+				Out.PrtWarn("Info not loaded before creating sample hit");
+				setCounts();
+			}
+			
+			Out.PrtSpMsg(1, "Creating sample hit filter");
+			String strSum=null, strQuery=null;
+			
+			int min=30, n=40, cnt=0;
+			while (n>1) {
+				cnt = mDB.executeCount("select count(*) from unique_hits where nBest>" + n);
+				if (cnt>min) {
+					strQuery = "nBest>" + n;
+					strSum = "nBest>" + n;
+					n=0;
+				}
+				else n-=4;
+			}
+			if (strSum==null) {
+				n=40; 
+				while (n>1) {
+					cnt = mDB.executeCount("select count(*) from unique_hits where nSeq>" + n);
+					if (cnt>min) {
+						strQuery = "nSeq>" + n;
+						strSum = "nSeq>" + n;
+						n=0;
+					}
+					else n-=4;
+				}
+			}
+			if (strSum==null) {
+				strQuery = "1";
+				strSum = "Show all";
+			}
+			
+			String sql=strSum + ":" + strQuery;
+			mDB.executeUpdate("update info set hitSQL='" + sql + "'");
+			return sql;
+		}
+		catch (Exception e){ErrorReport.prtReport(e, "Creating hit query");}
+		return "Show all: 1";
+	}
 	/*******************************************************
 	 * XXX Gets
 	 */
-	/** Called at startup **/
-	// setCounts
-	public int getCntSeq()  {
-		if (cntSeq==-1) setCounts();
-		return cntSeq;
-	}
-	public int getCntGrp()  {
-		if (cntGrp==-1) setCounts();
-		return cntGrp;
-	} 
-	public int getCntPair() {
-		if (cntPair==-1) setCounts();
-		return cntPair;
-	} 
+	public int getCntSeq()  {return cntSeq;}
+	public int getCntGrp()  {return cntGrp;} 
+	public int getCntPair() {return cntPair;} 
+	public int getCntHit()  {return cntHit;} 
 	// setASM
 	public boolean hasCounts() { return hasCounts;}
 	public int nAAdb() {return cntAAdb;}
@@ -449,7 +524,7 @@ public class DBinfo {
 	public boolean isNTonly() {return isNTonly;}
 	
 	// setMethod
-	public int getMethodID(String name) { // 2
+	public int getMethodID(String name) { 
 		for (int i=0; i<nMethods; i++) {
 			if (methodPrefix[i].equals(name)) return methodID[i];
 		}
@@ -459,22 +534,10 @@ public class DBinfo {
 	public String [] getMethodPrefix() { return methodPrefix;}
 	public String getStrMethodPrefix() { return allPrefix;}
 	
-	/*** Set on demand ***/
-	// Info table
-	public String [] getTaxa() { 
-		if (allTaxa==null) setFromInfoTable();
-		return allTaxa; 
-	}
-	public String [] getSeqDE() { 
-		if (allSeqLib==null) setFromInfoTable();
-		return allSeqDE; 
-	}
-	public String [] getSeqLib() { 
-		if (allSeqLib==null) setFromInfoTable();
-		return allSeqLib; 
-	}
+	public String [] getTaxa() {return allTaxa; }
+	public String [] getSeqDE() { return allSeqDE; }
+	public String [] getSeqLib() { return allSeqLib; }
 	public String getSeqDESQL() { 
-		if (allSeqDE==null) setFromInfoTable();
 		if (allSeqDE.length==0) return "";
 		
 		String sql = Globals.PRE_DE + allSeqDE[0];
@@ -482,7 +545,6 @@ public class DBinfo {
 		return sql;
 	}
 	public String getSeqLibSQL() { 
-		if (allSeqLib==null) setFromInfoTable();
 		if (allSeqLib.length==0) return "";
 		
 		String sql = Globals.PRE_LIB + allSeqLib[0];
@@ -490,129 +552,40 @@ public class DBinfo {
 		return sql;
 	}
 	public boolean hasRPKM() { 
-		if (allSeqLib==null) setFromInfoTable();
 		return (allSeqLib.length>0);
 	}
 	
-	// setIfPairs (all cnts set to zero on setIfPairs if no Pairs)
-	public int getCntPCC() {
-		if (cntPCC==-1) setIfPairs();
-		return cntPCC;
-	}  
-	public int getCntKaKs() {  
-		if (cntKaKs==-1) setIfPairs();
-		return cntKaKs;
-	}
-	public int getCntMultiScore() {
-		if (cntMultiScore==-1) setIfPairs();
-		return cntMultiScore;
-	}
-	public int getCntStats() {
-		if (cntStats==-1) setIfPairs();
-		return cntStats;
-	} 
-	public int getCntPairGrp() { 
-		if (cntPairGrp==-1) setIfPairs();
-		return cntPairGrp;
-	} 
-	public boolean hasPCC() { 
-		if (cntPCC==-1) setIfPairs();
-		return (cntPCC>0);
-	}
-	public boolean hasStats() {
-		if (cntStats==-1) setIfPairs();
-		return (cntStats>0);
-	}
-	public boolean hasMultiScore() { 
-		if (cntMultiScore==-1) setIfPairs();
-		return (cntMultiScore>0);
-	}
-	public boolean hasKaKs() { 
-		if (cntKaKs==-1) setIfPairs();
-		return (cntKaKs>0);
-	}
-	public boolean hasNTblast() { 
-		if (cntStats==-1) setIfPairs();
-		return hasNTblast;
-	}
-	public boolean hasDBalign() { 
-		if (cntStats==-1) setIfPairs();
-		return hasDBalign;
+	// XXX - EditStatsPanel only
+	public int getCntPCC() {return cntPCC;}  
+	public int getCntKaKs() { return cntKaKs;}
+	public int getCntMultiScore() {return cntMulti;}
+	public int getCntStats() {return cntStats;} 
+	public int getCntPairGrp() {return cntPairGrp;} 
+	
+	
+	public boolean hasPCC() 	{ return hasPCC;}
+	public boolean hasStats() 	{return hasStats;}
+	public boolean hasMultiScore() { return hasMulti;}
+	public boolean hasKaKs() { return hasKaKs;}
+	
+	public boolean hasNTblast() { return hasNTblast;}
+	public boolean hasDBalign() {return hasDBalign;}
+	
+	public boolean hasGOs() {return (cntGO>0);}
+	public int getCntGO() { return cntGO;};
+	public void resetGO(DBConn dbc) { //executed after LoadSingleGO
+		try {
+			cntGO = dbc.executeCount("select count(*) from go_info");
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "Reseting GO count");}
 	}
 	
-	// set in getCntGO
-	public boolean hasGOs() { 
-		if (cntGO == -1) getCntGO();
-		return (cntGO>0);
-	}
-	public void resetGO() { //executed after LoadSingleGO
-		cntGO=-1;
-		getCntGO();
-	}
-	public int getCntGO() {  
-		if (cntGO ==-1) {
-			try {
-				cntGO = mDB.executeCount("select count(*) from go_info");
-			}
-			catch (Exception e) {ErrorReport.prtReport(e, "Could not get GO cnt"); return -1;}
-		}
-		return cntGO;
-	};
-
-	public String [] getTermTypes() { // not called
-		if (termTypes!=null) return termTypes;
-		try {
-			ResultSet rs = mDB.executeQuery("SHOW COLUMNS FROM go_info LIKE 'term_type'");
-			if(rs.next()) {
-				String val = rs.getString(2);
-				val = val.substring(val.indexOf('(') + 1, val.length() - 1);
-				String [] valArr = val.split(",");
-				termTypes = new String[valArr.length];
-				for(int x=0; x<valArr.length; x++) {
-					termTypes[x] = valArr[x].substring(1, valArr[x].length()-1);
-				}
-			}
-			rs.close();
-		}
-		catch (Exception e) {ErrorReport.prtReport(e, "Could not get termType"); return null;}
-		return termTypes;
-	}
-	
-	public boolean hasNegDE() { // not called
-		if (cntNegDE!=1) return (cntNegDE>0);
-		
-		try {
-			ResultSet rs=null;
-			for (int i=0; i< allSeqDE.length && cntNegDE==-1; i++) {
-				String col = Globals.PRE_DE + allSeqDE[i];
-				rs = mDB.executeQuery("select UTstr from unitrans where " + 
-						 col + " < 0  limit 1"); 
-				if (rs.first()) cntNegDE=1;
-			}
-			if (cntNegDE==-1) cntNegDE=0;
-			return (cntNegDE>0);
-		}
-		catch (Exception e) {ErrorReport.prtReport(e, "Could not get GO cnt"); return false;}
-	}
-	public boolean isReservedWords(String w) { 
-		try {
-			String ww = w.toLowerCase();
-			HashSet <String> words = new HashSet <String> ();
-			ResultSet rs = mDB.executeQuery("SELECT name FROM mysql.help_keyword");
-			while (rs.next()) words.add(rs.getString(1).toLowerCase());
-			return words.contains(ww);
-		}
-		catch (Exception e) {ErrorReport.prtReport(e, "Getting reserved words");}
-		return false;
-	}
 	/**********************************************************/
 	private String [] allsTCW=null;
 	private HashMap <String, Integer> asmIdxMap = new HashMap <String, Integer> ();
 	private HashMap <String, Boolean> asmIsPrMap = new  HashMap <String, Boolean> ();
 	
 	private String [] allSeqDE=null, allSeqLib=null;
-	
-	private String [] termTypes = null;
 	
 	private int nMethods=-1;
 	private String allPrefix="";
@@ -621,11 +594,12 @@ public class DBinfo {
 	private String [] allTaxa=null;
 	
 	private boolean hasDBalign=false, hasNTblast=false, isNTonly=false, hasCounts=true;
+	private boolean hasPCC=false, hasStats=false, hasKaKs=false, hasMulti=false;
 	
 	private int cntAAdb=0, cntNTdb=0;
 	private int cntSeq=-1, cntGrp=-1, cntPair=-1, cntGO=-1;
-	private int cntStats=-1, cntKaKs=-1, cntPairGrp=-1, cntPCC=-1, cntMultiScore=-1;
-	private int cntNegDE=-1; // not used right now
+	private int cntStats=-1, cntKaKs=-1, cntPairGrp=-1, cntPCC=-1, cntMulti=-1;
+	private int cntHit=-1; // CAS310
 	
 	private DBConn mDB=null;
 }

@@ -7,8 +7,8 @@ import java.text.DecimalFormat;
 // shared by sTCW and mTCW
 // They both have their own database/Globals.java
 public class Globalx {
-	public static final String strRelDate = "(7-Oct-20)"; 
-	public static final String strTCWver = "3.0.5";
+	public static final String strRelDate = "(5-Nov-20)"; 
+	public static final String strTCWver = "3.1.0"; // mTCW db6.2
 	public static final String URL = "http://www.agcol.arizona.edu ";
 	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate;
 	public static final String error="***";
@@ -104,6 +104,7 @@ public class Globalx {
 	public static final Color HELPCOLOR = new Color(245, 213, 234);	// rose
 	public static final Color PROMPTCOLOR = new Color(243, 235, 227);	// light beige
 	public static final Color LAUNCHCOLOR = new Color(200, 200, 240); // light purple
+	public static final Color BUTTONCOLOR = Color.LIGHT_GRAY; // CAS310
 	
 	public static final Color altRowColor = new Color(0xEEF2FF);
 	public static final Color selectColor = new Color(0xB0C4DE);

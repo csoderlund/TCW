@@ -41,9 +41,10 @@ public final class Globals {
 	public static final String STCW = "sTCW";
 	public static final String TypeAA = "AA (Protein)";
 	public static final String TypeNT = "NT (DNA)";
+	public static final String helpDir = "html/viewMultiTCW/";
 	
 	public static final int AA=0, NT=1, CDS=2;
-	public static final int bSEQ=0, bPAIR=1, bGRP=2;
+	public static final int bSEQ=0, bPAIR=1, bGRP=2, bHIT=3;
 	
 	// Unique description and No shared description. The specialID makes them sort to bottom
 	public static final String specialID = "*";
@@ -60,6 +61,7 @@ public final class Globals {
 	public static final Color HELPCOLOR = Globalx.HELPCOLOR;	// rose
 	public static final Color PROMPTCOLOR = Globalx.PROMPTCOLOR;	// light beige
 	public static final Color LAUNCHCOLOR = Globalx.LAUNCHCOLOR; // light purple
+	public static final Color BUTTONCOLOR = Globalx.BUTTONCOLOR; // light gray CAS310
 	
 	// Compile
 	public static final String PRE_ASM = "A__";  // mTCW asmID

@@ -208,12 +208,12 @@ public class DBConn
 	public boolean executeBoolean(String sql) throws Exception
     {
         try {
-           int cnt = executeCount(sql + " limit 1");
+           int cnt = executeCount(sql); // CAS310 was (sql + "limit 1")
            if (cnt==0) return false;
            else return true;
         }
         catch (Exception e) {
-    			ErrorReport.prtReport(e, "Getting boolean");
+    		ErrorReport.prtReport(e, "Getting boolean");
             return false;
         }
 	}

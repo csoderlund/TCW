@@ -1,74 +1,86 @@
-<html><pre>
-Project: ex  multiTCW 2.7  Cluster: 630  Pairs: 920  Sequences: 707  GOs: 10,988
+<html>
+<title>mTCW_ex overview</title>
+<body>
+<center>
+<h2>mTCW overview for ex </h2>
+<table border=1><tr><td>
+<pre>
+Project: ex  Cluster: 625  Pairs: 997  Seqs: 707  Hits: 2.1k   PCC Stats KaKs Multi
 
-DATASETS: 3  Created 08-Aug-18
+Created: 04-Nov-20 v3.1.0
+
+DATASETS: 3
            Type  #Seq  #annotated  #annoDB  Created    Remark  
-      Bar  NT     250         229        2  20-Feb-18  exBar   
-      Foo  NT     250         230        2  20-Feb-18  exFoo   
-      Fly  NT     207         189        2  08-Aug-18  exFly   
+      bar  NT     250         244        2  05-Oct-20  exBar   
+      fly  NT     207         205        2  18-Oct-20  exFly   
+      foo  NT     250         245        2  05-Oct-20  exFoo   
                            
+CLUSTER SETS: 3
+      Prefix  Method   Parameters                         
+      BB      BBH      Sim 60; Cov 40(Both); bar,fly,foo  
+      HT      BestHit  Sim 20; Cov 50; Description        
+      CL      Closure  Sim 60; Cov 40(Both)               
 
-           Average  Lengths                   %GC          %CpG         
-              5UTR      CDS     3UTR          Avg     SE    Avg     SE  
-      Bar    254.9   1516.9    240.9        47.82   7.64   3.99   2.08  
-      Foo    249.4   1478.2    342.1        44.55   5.68   3.54   1.85  
-      Fly    297.6   1358.6    313.5        44.06   5.38   3.31   1.66  
+   Sizes
+      Prefix  =2   =3  4-5  6-10  11-15  16-20  21-25  >25  Total  #Seqs  
+      BB       0  155    0     0      0      0      0    0    155  65.8%  
+      HT      74  147    4     0      0      0      0    0    225  86.0%  
+      CL      90  153    1     1      0      0      0    0    245  91.9%  
+
+   Statistics
+      Prefix  conLen  sdLen     Score  SD    Trident  SD    
+      BB      535.55  56.94     11.04  3.44     0.75  0.17  
+      HT      599.68  80.10      8.08  5.24     0.71  0.22  
+      CL      569.77  57.45      8.48  5.36     0.74  0.18  
+
+PAIRS: 997
+   Hits
+      AA   Diff 860     Same 110      Similarity 72.3% (69.5%)  Coverage 81.2% (82.8%)
+      NT   Diff 661     Same 2        Similarity 86.4% (86.9%)  Coverage 59.7% (64.0%)
+
+   Aligned: 650   CDS: 928.1kb   5UTR: 75.6kb   3UTR: 98.7kb                                                                               
+      Codons         284.9k     Amino Acids                Nucleotides         
+      Exact           60.4%     Exact            89.9%     CDS  Diff    23.1%  
+      Synonymous      29.5%     Substitution >0   5.0%          Gaps     7.9%  
+        Fourfold      15.3%     Substitution<=0   5.1%          SNPs    15.2%  
+        Twofold       11.5%                                5UTR Diff    33.7%  
+      Nonsynonymous   10.1%                                3UTR Diff    36.4%  
+
+                     Pos1   Pos2   Pos3  Total                   GC  CpG-Nt  CpG-Cd  
+      Transition     8.8%   4.2%  39.2%  52.1%       Both     38.6%    4.1%    2.3%  
+      Transversion  10.3%   6.2%  31.5%  47.9%       Either   54.0%   11.2%    5.7%  
+      ts/tv          0.85   0.68   1.25   1.09       Jaccard   0.71    0.36    0.40  
+
+   KaKs method: YN    Pairs: 650
+
+      Average            Ka/Ks          Quartiles               P-value       
+      Ka       0.067     Zero    49     Q1(Lower)   0.01610     <1E-100  398  
+      Ks       2.467     Ka=Ks    0     Q2(Median)  0.03429     <1E-10    72  
+      P-value  0.024     Ka<Ks  596     Q3(Upper)   0.08057     <0.001    52  
+                         Ka>Ks    5                             Other    128  
+
+SEQUENCES: 707
+           Average  Lengths              %GC                     CpG O/E                
+              5UTR      CDS   3UTR       5UTR    CDS   3UTR         5UTR    CDS   3UTR  
+      bar    184.8   1589.1  238.8      39.0%  51.1%  38.5%        0.757  0.693  0.742  
+      fly    172.0   1480.4  317.4      38.7%  46.7%  35.6%        0.706  0.696  0.664  
+      foo    187.7   1537.7  344.4      39.6%  47.2%  36.7%        0.768  0.704  0.731  
 
    Counts  
-                  Ww       Xx       Yy         Zz  
-      Bar    812,745  665,939  853,758    963,211  
-      Foo  1,009,851  706,578  537,403  1,014,952  
-      Fly    736,627  605,318  772,927    877,650  
+                  C1       C2       C3  
+      bar    812,745  665,939  853,758  
+      fly    736,627  605,318  772,927  
+      foo  1,009,851  706,578  537,403  
 
-   Differential Expression (p-value < 0.05): 
-           WwXx  WwYy  WwZz  XxYy  XxZz  YyZz  
-      Bar     1    21    24    31    23     4  
-      Foo    16    23    33    38    41     7  
-      Fly     0    19    20    26    20     1  
+   Differential Expression (p-value < 0.001) 
+           C1C2  C1C3  C2C3  
+      bar     0    17    17  
+      fly     0    16    14  
+      foo     6    16    18  
+----------------------------------------------------
+PROCESSING:
+AA diamond --masking 0 --max-hsps 1 --sensitive --query-cover 25 --subject-cover 25
+NT blastn -evalue 1e-20 -max_hsps 1
 
-CLUSTER SETS: 3
-      Prefix  Method    Remark                             
-      BB      BBH       Sim 40; Olap 80(Eit); Bar,Fly,Foo  
-      CL      Closure   Sim 40; Olap 80(Eit)               
-      OM      OrthoMCL  Inflation 4                        
-
-   Sizes:
-      Prefix  =2   =3  4-5  6-10  11-15  16-20  21-25  >25  Total  #Seqs  
-      BB       0  161    0     0      0      0      0    0    161    483  
-      CL      71  156    2     3      0      0      0    0    232    637  
-      OM      44  187    3     3      0      0      0    0    237    685  
-
-   Taxa categories: 
-      Prefix  2x1  3x1  1xN  2xN  3xN  
-      BB        0  161    0    0    0  
-      CL       71  156    0    1    4  
-      OM       44  187    0    0    6  
- 
-PAIRS: 920
-     AA   Dataset: Diff    820, Same     85   Similarity 74.3%   Overlap 79.7%   diamond
-     NT   Dataset: Diff    663, Same      3   Similarity 87.0%   Overlap 63.6%   blastn
-
-    Aligned pairs   CDS: 701 (941k)   5-UTR: 502 (228k)   3-UTR: 458 (263k)
-                                                                               
-      Codons                   Amino Acids                 Nucleotides         
-      Exact          60.2%     Exact             88.2%     CDS  gap      9.4%  
-      Synonymous     28.0%     Substitution  >0   5.6%     CDS  diff    22.7%  
-        Fourfold     14.4%     Substitution <=0   6.2%     5UTR diff    62.5%  
-        Twofold      11.0%                                 3UTR diff    70.0%  
-      Nonsynonymous  11.8%                                                     
-
-      CDS base substitutions: 154.8k               Content: By Nucleotide  By Codon
-                    Pos1  Pos2  Pos3  Total                    GC    CpG    CpG  
-      Transition     9.0   4.4  38.5   52.0         Both    41.3%   2.2%   1.2%  
-      Transversion  10.3   6.8  28.6   45.8         Either  54.1%   5.5%   2.9%  
-      ts/tv         0.80  0.63  1.20   1.13         B/E     0.774  0.442  0.478  
-
-   KaKs method: YN    Pairs: 679
-
-      Ka/Ks          Quartiles             P-value       
-      0-0.5  660     Q1(Lower)   0.016     <1e-100  415  
-      0.5-1   13     Q2(Median)  0.036     <1e-10    95  
-      1-1.5    3     Q3(Upper)   0.089     <0.001    51  
-      >=1.5    3                           Other    118  
-
-</pre></html>
+</pre>
+</table></body></html>

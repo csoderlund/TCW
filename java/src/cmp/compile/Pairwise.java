@@ -53,18 +53,15 @@ public class Pairwise {
 			if (cntPreviouslyAligned>0) { // redo stats from scratch
 				Out.PrtSpMsg(0, "Compute summary on all pairs");
 			    summary = new SumStats(mDB).allCodingStats();
-			    Out.PrtSpMsg(0, "Complete summary");
+			    Out.prt("                                                        ");
 			}
 			else { // have everything necessary in ScoreCDS object
 				String hangSum = statsObj.getScoreObj().createOverhang(); // only written when all are done
 				Out.Print("\n"+hangSum);
 				summary = statsObj.getScoreObj().createSummary(); 
 			}
-			new Summary(mDB).removeSummary();
 			mDB.executeUpdate("update info set pairInfo='" + summary + "'");
 			mDB.close();
-			
-			Out.Print(summary);
 		}
 		catch  (Exception e) {
 			ErrorReport.prtReport(e, "Cannot add Cluster from main");
@@ -207,6 +204,7 @@ public class Pairwise {
 	 */
 	public boolean savePairsFromHitFile(String hitFile, boolean isAA) {
 		try {
+			long time = Out.getTime();
 			String delim = "|";
 			String delimPat = "\\|";
 			
@@ -246,8 +244,7 @@ public class Pairwise {
 			}
 			Out.PrtSpCntMsgZero(3, pairMap.size(), "existing pairs in database");
 			
-			double avgSim=0.0, avgOlap=0.0;
-			int cntSame=0, cntDiff=0;
+			
 			
 	// Create sql 
 			String pre = (isAA) ? "aa" : "nt";
@@ -277,10 +274,12 @@ public class Pairwise {
 		/** Main Loop -- read file and save **/
 			BufferedReader br = new BufferedReader(new InputStreamReader(new DataInputStream(new FileInputStream(hitFile))));
 			String curLine = "";
-			int cntRead=0;
-			int cntAddPair=0, cntUpdate=0, cntTotal=0, cntMiss=0, cntAAbest2=0;
-			int cntBatchI=0, cntBatchU=0,  cntNoShare=0, cntUnique=0;
-			int cntPrt=0;
+			int cntRead=0, cntAddPair=0, cntUpdate=0,  cntMiss=0, cntAAbest2=0;
+			int cntBatchI=0, cntBatchU=0,  cntNoShare=0, cntUnique=0, cntPrt=0;
+			
+			double avgSim=0.0, avgOlap=0.0, sumID=0, sumAlign=0, sumLen=0;
+			int cntSame=0, cntDiff=0, cntTotal=0;
+			
 			mDB.openTransaction(); 
 			
 			// combinedFile has dataset|seqname, so blast file should be like this
@@ -415,9 +414,17 @@ public class Pairwise {
 				}
 				if (seq1.asmID!=seq2.asmID) cntDiff++;
 				else cntSame++;
+				
+				// CAS310 compute %sim over all aligned and average sim; same for olap
+				sumLen += (seq1.seqLen + seq2.seqLen);
+				double id = align*(dsim/100.0);
+				sumID += (int) (id+0.5);
+				sumAlign += align;
+				
 				avgOlap += (olap1+olap2);
 				avgSim += dsim;
 				cntTotal++; cntPrt++;
+				
 				if (cntPrt==1000) {
 					Out.r("pairs " + cntTotal + " read " + cntRead);
 					cntPrt=0;
@@ -445,8 +452,12 @@ public class Pairwise {
 			if (cntMiss>0 && (cntAddPair+cntUpdate)==0)
 				ErrorReport.die("Abort -- hit file has the wrong seqIDs");
 	
+			Out.PrtSpCntMsgTimeMem(3, (cntAddPair+cntUpdate), "total " + pre.toUpperCase() + " pairs", time);
+			
 	/** find non-bidirectional  **/
 			if (isAA) { // actually, marking one-sided bi-directional, but that is a confusing message
+				time = Out.getTime();
+				
 				Out.PrtSpMsg(2, "Processing bi-directional AA pairs");
 				mDB.openTransaction();
 				psU = mDB.prepareStatement("update pairwise set aaBest=1 " +
@@ -483,11 +494,12 @@ public class Pairwise {
 				x = Out.perFtxtP(cntAAbest2, cntTotal);
 				Out.PrtSpCntMsg(3, cntAAbest2, "candidate bi-directional AA best hit " + x);
 				x = Out.perFtxtP(cntUpdate, cntTotal);
-				Out.PrtSpCntMsg(3, cntUpdate, "one-sided-directional AA best hit " + x);
+				Out.PrtSpCntMsgTimeMem(3, cntUpdate, "one-sided-directional AA best hit " + x, time);
 			}
 		
 		/*********** Update unitrans ******************/
 			Out.PrtSpMsg(2, "Add pair count to sequence table");
+			time = Out.getTime();
 			
 			mDB.openTransaction();
 			psU = mDB.prepareStatement("update unitrans set nPairs=? where UTid=?"); 
@@ -510,7 +522,7 @@ public class Pairwise {
 			psU.close();
 			mDB.closeTransaction();
 			System.err.print("                                                        \r");
-			Out.PrtSpCntMsg(3, Out.avg(cntPairs, cntUpdate), "average number pairs per sequence");
+			Out.PrtSpMsgTimeMem(3, Out.avg(cntPairs, cntUpdate) + " average number pairs per sequence", time);
 		
 			/*************************************** 
 			* OVERVIEW-INFO
@@ -518,11 +530,16 @@ public class Pairwise {
 			if (isAA) Out.PrtSpMsg(2, "AA overview info for Hit Pairs");
 			else      Out.PrtSpMsg(2, "NT overview info for Hit Pairs");
 			new Summary(mDB).removeSummary();
-			avgSim /= cntTotal;
+			
+			avgSim  /= cntTotal;
 			avgOlap /= (cntTotal+cntTotal);
 			
-			sql = String.format("Diff %-7s Same %-7s  Similarity %3.1f%s   Coverage %3.1f%s", 
-					Out.kMText(cntDiff), Out.kMText(cntSame), avgSim, "%",avgOlap, "%");
+			// CAS310 
+			double sumOlap = ((sumAlign*2.0)/sumLen)*100.0;
+			double sumSim =  (sumID  / sumAlign)    *100.0;
+			
+			sql = String.format("Diff %-7s Same %-7s  Similarity %3.1f%s (%3.1f%s)  Coverage %3.1f%s (%3.1f%s)", 
+					Out.kMText(cntDiff), Out.kMText(cntSame), sumSim, "%", avgSim, "%", sumOlap, "%", avgOlap, "%");
 			
 			if (isAA) mDB.executeUpdate("update info set aaInfo='" + "AA   " + sql + "'");
 			else      mDB.executeUpdate("update info set ntInfo='" + "NT   " + sql + "'");
@@ -802,9 +819,11 @@ public class Pairwise {
 				seqLibMap.clear();
 			
 				computePCCforGrps(mDB, 0); // Compute the Cluster PCC scores using pairPccMap
+				
+				mDB.executeUpdate("update info set hasPCC=1"); // CAS301 add
 				mDB.close();
 		
-				Out.PrtSpMsgTime(0, "Finish computing PCC", time);
+				Out.PrtMsgTimeMem("Finish computing PCC", time);
 			}
 			catch (Exception e) {ErrorReport.die(e, "Error add PCC to Method");}
 		}

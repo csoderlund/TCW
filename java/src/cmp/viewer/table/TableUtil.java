@@ -74,6 +74,7 @@ public class TableUtil {
 	private static final String GrpPrefix = "ClusTable";
 	private static final String PairPrefix = "PairTable";
 	private static final String SeqPrefix = "SeqTable";
+	private static final String HitPrefix = "HitTable";
 	
 	public TableUtil() {}
 	
@@ -159,10 +160,11 @@ public class TableUtil {
 	// works for all three tables
 	public void exportTableTab(SortTable theTable, int typeTable) {
 	try {
-		String prefix="";
+		String prefix="UNK";
 		if (typeTable==Globals.bGRP) prefix = GrpPrefix;
 		else if (typeTable==Globals.bPAIR) prefix = PairPrefix;
-		if (typeTable==Globals.bSEQ) prefix = SeqPrefix;
+		else if (typeTable==Globals.bSEQ) prefix = SeqPrefix;
+		else if (typeTable==Globals.bHIT) prefix = HitPrefix;
 		
 		BufferedWriter outFH = getWriter(prefix + tabSuf);
 		if (outFH==null) return; // user cancels

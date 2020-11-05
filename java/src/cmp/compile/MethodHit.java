@@ -59,7 +59,7 @@ public class MethodHit {
 		if (bSuccess)
 			overWriteDesc();
 			
-		Out.PrtDateMsgTime("Finish execution of " + hitName, allTime);
+		Out.PrtMsgTimeMem("Finish execution of " + hitName, allTime);
 		return bSuccess; 
 	}
 	

@@ -136,7 +136,7 @@ public class BlastPanel extends JPanel {
 			}
 			else Out.PrtSpMsg(2, "No NT (nucleotide) results file to load");
 				
-			Out.PrtSpMsgTime(0, "Complete creating pairs", time);
+			Out.PrtMsgTimeMem("Complete creating pairs", time);
 			theCompilePanel.updateAll(); // updates DBinfo, then calls the blast updatedDBexist
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "adding pairs");}

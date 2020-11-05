@@ -6,6 +6,9 @@ package cmp.viewer.seqDetail;
  */
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -19,17 +22,23 @@ import javax.swing.JButton;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JLabel;
 
 import util.methods.Static;
 import util.ui.UserPrompt;
 import cmp.database.Globals;
+import cmp.database.Load;
 import cmp.viewer.MTCWFrame;
 import cmp.viewer.seq.SeqsTablePanel;
+import cmp.viewer.table.FieldData;
 
 public class SeqTopRowPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
-	private Color buttonColor = Color.LIGHT_GRAY; // new Color(230, 230, 255); 
-	private final String helpHTML = "html/viewMultiTCW/Details.html"; // CAS305 add
+	private Color buttonColor = Globals.BUTTONCOLOR;
+	private final String helpHTML = Globals.helpDir + "Details.html"; // CAS305 add
+	
+	private static final String SEQID = FieldData.SEQID;
+	private static final String HITID = FieldData.HITID;
 	
 	static final public int SHOW_ASSIGNED_GO = 1;
 	static final public int SHOW_ALL_GO = 2;
@@ -70,43 +79,55 @@ public class SeqTopRowPanel extends JPanel {
 	    add(lowerPanel);
 	}
 	private JPanel createTopRow() {
+		int sp=10, sp1=1;
+		
 	 	JPanel topRow = Static.createRowPanel();
 	 	btnDetails = Static.createButton("Details", true);
 	    btnDetails.addActionListener(new ActionListener() {
-	    	   	public void actionPerformed(ActionEvent arg0) {
-	    	   		setInActive();
-	    	   		btnDetails.setBackground(buttonColor);
-	    	   		btnDetails.setSelected(true);
-	    	   		opDetails();
-	    	   	}
+    	   	public void actionPerformed(ActionEvent arg0) {
+    	   		setInActive();
+    	   		btnDetails.setBackground(buttonColor);
+    	   		btnDetails.setSelected(true);
+    	   		opDetails();
+    	   	}
 	    });
-	    topRow.add(btnDetails);
 	    btnDetails.setBackground(buttonColor);
-   		btnDetails.setSelected(true);
-	    topRow.add(Box.createHorizontalStrut(3));
+	    topRow.add(btnDetails);	 topRow.add(Box.createHorizontalStrut(sp));
+	    
+	    lblSelect = new JLabel("Selected:");
+	    topRow.add(lblSelect);  topRow.add(Box.createHorizontalStrut(sp1));
+	    
+	    createBtnCopy(); // CAS310 add
+	    topRow.add(btnCopy); 	topRow.add(Box.createHorizontalStrut(sp1));
+	    btnClear  = Static.createButton("Clear", true);
+	    btnClear.addActionListener(new ActionListener() {
+    	   	public void actionPerformed(ActionEvent arg0) {
+    	   		detailPanel.clearSelection();
+    	   	}
+	    });
+	    topRow.add(btnClear);	topRow.add(Box.createHorizontalStrut(sp));
 	    
 	    btnFrame = Static.createButton("Frame", true);
 	    btnFrame.addActionListener(new ActionListener() {
-	    	   	public void actionPerformed(ActionEvent arg0) {
-	    	   		if (detailPanel.isAAonly()) btnFrame.setEnabled(false); 
-	    	   		else {
-		    	   		setInActive();
-		    	   		btnFrame.setBackground(buttonColor);
-		    	   		btnFrame.setSelected(true);
-		    	   		opFrame();
-	    	   		}
-	    	   	}
+    	   	public void actionPerformed(ActionEvent arg0) {
+    	   		if (detailPanel.isAAonly()) btnFrame.setEnabled(false); 
+    	   		else {
+	    	   		setInActive();
+	    	   		btnFrame.setBackground(buttonColor);
+	    	   		btnFrame.setSelected(true);
+	    	   		opFrame();
+    	   		}
+    	   	}
 	    });
 	    topRow.add(btnFrame);
-	    topRow.add(Box.createHorizontalStrut(3));
 	    
-	   
-	    createTopGO();
+	    createBtnGO();
 	    if (hasGOs) {
+	    	topRow.add(Box.createHorizontalStrut(sp1));
 	    	topRow.add(btnGO);
-	    	topRow.add(Box.createHorizontalStrut(3));
 	    }
 	    
+	    topRow.add(Box.createHorizontalStrut(sp));
 	    btnHelp = Static.createButton("Help", true, Globals.HELPCOLOR);
 	    btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -114,7 +135,6 @@ public class SeqTopRowPanel extends JPanel {
 			}
 		});
 	    topRow.add(btnHelp);
-	    
 	    
 	    topRow.add(Box.createHorizontalGlue());
 	    
@@ -128,7 +148,8 @@ public class SeqTopRowPanel extends JPanel {
  			   loadNewRow(nParentRow);
  		   }
  	   });
- 	   
+	   rowChangePanel.add(btnPrevRow); topRow.add(Box.createHorizontalStrut(sp1));
+	    
  	   btnNextRow = Static.createButton("Next >>", true);
  	   btnNextRow.addActionListener(new ActionListener() {
  		   public void actionPerformed(ActionEvent arg0) {
@@ -136,15 +157,12 @@ public class SeqTopRowPanel extends JPanel {
  			   loadNewRow(nParentRow);
  		   }
  	   });
- 	   
- 	   rowChangePanel.add(btnPrevRow);
- 	   rowChangePanel.add(Box.createHorizontalStrut(1));
  	   rowChangePanel.add(btnNextRow);
  	   
  	   topRow.add(rowChangePanel);
-	 	return topRow;
+ 	   return topRow;
 	}
-	private void createTopGO() {
+	private void createBtnGO() {
 		 final JPopupMenu popup = new JPopupMenu();	
 	    popup.setBackground(Color.WHITE);
 	    
@@ -228,7 +246,7 @@ public class SeqTopRowPanel extends JPanel {
 		lowerPanel.setLayout(new BoxLayout(lowerPanel, BoxLayout.Y_AXIS));
 		
 		final int displayType = dType;
-		final String [] hitInfo=detailPanel.getHitInfo();
+		final String [] hitInfo=detailPanel.getHitInfo(); // returns best Hit GO if none selected
 	
 		if (lastDisplay!=dType) theGOPanel = null;
 		
@@ -263,6 +281,95 @@ public class SeqTopRowPanel extends JPanel {
 			thread.start();
 		}
 	}
+	private void createBtnCopy() {
+		btnCopy = Static.createButton("Copy...", true);
+	    final JPopupMenu copyPop = new JPopupMenu();
+	    copyPop.setBackground(Color.WHITE);
+	    
+ 		copyPop.add(new JMenuItem(new AbstractAction(SEQID) {
+ 			private static final long serialVersionUID = 4692812516440639008L;
+ 			public void actionPerformed(ActionEvent e) {
+ 				String seqid = detailPanel.getSelectedSeqID();
+ 				Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+ 				cb.setContents(new StringSelection(seqid), null);
+ 			}
+ 		}));
+		
+		copyPop.add(new JMenuItem(new AbstractAction("AA  Sequence") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				String seqid = detailPanel.getSelectedSeqID();
+				Load lObj = new Load(theViewerFrame);
+				String id = lObj.loadSeq(seqid);
+				if (id!=null) {
+					Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+					cb.setContents(new StringSelection(">" + id + "\n" + lObj.getAAseq()), null);
+				}
+			}
+		}));
+		copyPop.add(new JMenuItem(new AbstractAction("CDS Sequence") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				String seqid = detailPanel.getSelectedSeqID();
+				Load lObj = new Load(theViewerFrame);
+				String id = lObj.loadSeq(seqid);
+				if (id!=null) {
+					Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+					cb.setContents(new StringSelection(">" + id + "\n" + lObj.getCDSseq()), null);
+				}
+			}
+		}));
+		copyPop.add(new JMenuItem(new AbstractAction("NT  Sequence") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				String seqid = detailPanel.getSelectedSeqID();
+				Load lObj = new Load(theViewerFrame);
+				String id = lObj.loadSeq(seqid);
+				if (id!=null) {
+					Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+					cb.setContents(new StringSelection(">" + id + "\n" + lObj.getNTseq()), null);
+				}
+			}
+		}));
+		
+		copyPop.add(new JMenuItem(new AbstractAction("Hit ID") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				String hitid = detailPanel.getSelectedHitID();
+				Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+				cb.setContents(new StringSelection(hitid), null);
+			}
+		}));
+	
+		copyPop.add(new JMenuItem(new AbstractAction("Hit Description") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				String desc = detailPanel.getSelectedHitDesc();
+				Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+				cb.setContents(new StringSelection(desc), null);
+			}
+		}));
+		
+		copyPop.add(new JMenuItem(new AbstractAction("Hit Sequence") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				String hitid = detailPanel.getSelectedHitID();
+				Load lObj = new Load(theViewerFrame);
+				String id = lObj.loadHit(hitid);
+				if (id!=null) {
+					Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+					cb.setContents(new StringSelection(">" + id + "\n" + lObj.getHitseq()), null);
+				}
+			}
+		}));
+		
+		btnCopy.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				copyPop.show(e.getComponent(), e.getX(), e.getY());
+			}
+	    });
+	}
+	
 	private void loadNewRow(int rowNum) {
 		int index;
 		String name;
@@ -281,6 +388,7 @@ public class SeqTopRowPanel extends JPanel {
          
 		setVisible(true);
 	}
+	// changes background color 
 	private void setInActive() {
 		// this works on mac but not linux
 		btnDetails.setSelected(false);
@@ -298,7 +406,9 @@ public class SeqTopRowPanel extends JPanel {
 	/**************************************************************/
 	private JPanel upperPanel;
     private JButton btnDetails = null, btnFrame = null, btnGO = null, btnHelp = null;
+    private JButton btnCopy = null,  btnClear = null;
     private JButton btnNextRow = null, btnPrevRow = null;
+    private JLabel lblSelect = null;
     
     private JPanel lowerPanel;
     private SeqDetailsPanel detailPanel = null; // created as startup

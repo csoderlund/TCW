@@ -50,7 +50,7 @@ public class MethodBBH {
 			if (new MethodLoad(mDB).run(idx, groupFile, cmpPanel)==-1) 
 				bSuccess=false;
 		
-		Out.PrtDateMsgTime("Finish execution of BBH", allTime);
+		Out.PrtMsgTimeMem("Finish execution of BBH", allTime);
 		return bSuccess;
 	}
 	
@@ -404,7 +404,7 @@ public class MethodBBH {
 			}
 		}
 		outFH.close();
-		Out.PrtSpMsg(3, "Wrote " + (group-1) + " groups");
+		Out.PrtSpMsg(3, "Wrote " + (group-1) + " clusters");
 		bbhSet.clear();
 	}
 	catch (Exception e) {ErrorReport.prtReport(e, "write clusters to file"); bSuccess=false;}

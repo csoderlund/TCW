@@ -4,23 +4,29 @@ import java.sql.ResultSet;
 import java.util.HashSet;
 
 import util.database.DBConn;
+import util.database.Globalx;
 import util.methods.ErrorReport;
 import util.methods.Out;
 import util.ui.UserPrompt;
+import cmp.compile.LoadSingleTCW; // db62 only
 
 /***************************************************
  * If columns are being added for a version, add them here and to schema
  */
 public class Version {
-	public static final String DBver = "6.1"; 
-	private final double nVer=6.1;
+	public static final String DBver = "6.2"; 
+	private final double nVer=6.2;
 	
-	public Version (DBConn mDB, boolean force) { 
+	/************************************************
+	 * CAS310 added this with return value as nothing works if not updated
+	 */
+	public Version () {}
+	public boolean run(DBConn mDB) {
 		try {
-			if (mDB==null) return; 
-	
+			if (mDB==null) return false; 
+			
 			String ver = mDB.executeString("select schemver from info");
-			if (ver.equals(DBver)) return;
+			if (ver.equals(DBver)) return true;
 			
 			Out.prt("mTCW database version db" + ver);
 			tooOldDie(mDB);
@@ -29,10 +35,10 @@ public class Version {
 			if (d>nVer) {
 				Out.PrtError("The mTCW database was created with a newer version of TCW.");
 				Out.prt("   This version of the software uses database mdb" + DBver);
-				return;
+				return false;
 			}
 			if (!UserPrompt.showContinue("Database update", "The database needs a few small changes.")) 
-				return;
+				return false;
 			
 			if (d < 5.5) addv55(mDB);
 			if (d < 5.6) addv56(mDB);
@@ -41,9 +47,39 @@ public class Version {
 			if (d < 5.9) addv59(mDB);
 			if (d < 6.0) addv60(mDB);
 			if (d < 6.1) addv61(mDB);
+			if (d < 6.2) addv62(mDB);
+			
 			Out.prt("Complete update for mdb" + DBver);
+			return true;
 		}
-		catch (Exception e) {ErrorReport.die(e, "Error checking schema");}
+		catch (Exception e) {ErrorReport.die(e, "Error checking schema"); return false;}
+	}
+	private void addv62(DBConn mDB) { // v3.1.0 Oct/2020
+		try {
+			Out.PrtSpMsg(1, "Updating for mdb6.2 - add new hit columns");
+			mDB.tableCheckAddColumn("unique_hits", "nBest", "int default 0", null);
+			mDB.tableCheckAddColumn("unique_hits", "nSeq", "int default 0", null); 
+			mDB.tableCheckAddColumn("unique_hits", "e_value", "double default 0", null); 
+			mDB.tableCheckAddColumn("unique_hits", "e_value", "double default 0", null); 
+			
+			mDB.tableCheckAddColumn("info", "hitSQL", "text", "seqSQL");
+			
+			int cnt = mDB.executeCount("select count(*) from pairwise where PCC!=" + Globalx.dNoVal + " limit 1");
+			if (cnt>0) mDB.tableCheckAddColumn("info", "hasPCC", "tinyint default 1", "hasDE");
+			else       mDB.tableCheckAddColumn("info", "hasPCC", "tinyint default 0", "hasDE");
+			
+			cnt = mDB.executeCount("select count(*) from pog_groups where conLen>0 limit 1");
+			if (cnt>0) mDB.tableCheckAddColumn("info", "hasMA", "tinyint default 1", "hasPCC");
+			else       mDB.tableCheckAddColumn("info", "hasMA", "tinyint default 0", "hasPCC");
+			
+			mDB.tableCheckAddColumn("info", "lastVer", "tinytext", "compiledate");
+			mDB.tableCheckAddColumn("info", "lastDate", "date", "lastVer");
+			
+			new LoadSingleTCW(mDB).step6_updateUniqueHits();
+			
+			mDB.executeUpdate("update info set schemver='6.2'");
+		}
+		catch (Exception e) {ErrorReport.die(e, "Updating for mdb6.2");}
 	}
 	private void addv61(DBConn mDB) { // v2.15 5/15/19
 		try {
@@ -53,7 +89,7 @@ public class Version {
 			mDB.tableCheckAddColumn("pairwise", "cAlign", "int default -2", "aaBest"); 
 			mDB.executeUpdate("update info set schemver='6.1'");
 		}
-		catch (Exception e) {ErrorReport.die(e, "Updating for mdb6.0");}
+		catch (Exception e) {ErrorReport.die(e, "Updating for mdb6.1");}
 	}
 	private void addv60(DBConn mDB) { // 2/20/19
 		try {

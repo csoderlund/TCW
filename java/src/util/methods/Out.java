@@ -109,6 +109,9 @@ public class Out {
 	static public void PrtSpCntMsg(int sp, int cnt, String msg) {
 		PrtSpMsg(sp, String.format("%7s %s", df.format(cnt), msg));
 	}
+	static public void PrtSpCntMsgTimeMem(int sp, int cnt, String msg, long time) {
+		PrtSpMsgTimeMem(sp, String.format("%7s %s", df.format(cnt), msg), time);
+	}
 	static public void PrtSpCntMsg(int sp, String cntStr, String msg) {
 		PrtSpMsg(sp, String.format("%7s %s", cntStr, msg));
 	}
@@ -201,19 +204,16 @@ public class Out {
     // msg can have newline at beginning
     static public void PrtMsgTimeMem (String msg, long t)
     {
-    		String sp = "";
-    		
-    		msg = sp + msg;
+    	String sp = "";	
+    	msg = sp + msg;
        	String x = String.format("%-70s  %s  (%s)", msg, 
-       			TimeHelpers.getElapsedNanoTime(t),
-       			TimeHelpers.getMemoryUsedMb());
+       			TimeHelpers.getElapsedNanoTime(t), TimeHelpers.getMemoryUsedMb());
         Print(x);
     } 
     // For AssemMain and LoadLibMain since they use different logging
     static public String getMsgTimeMem(String msg, long t) {
 		String x = String.format("%-70s  %s  (%s)", msg, 
-				TimeHelpers.getElapsedNanoTime(t),
-				TimeHelpers.getMemoryUsedMb());
+				TimeHelpers.getElapsedNanoTime(t), TimeHelpers.getMemoryUsedMb());
 		return x;
     }
     // Only message - used by most of the above to add sp
@@ -264,6 +264,9 @@ public class Out {
 	}
 	static public void r(String msg) {
 		System.err.print("  " + msg + "...\r");
+	}
+	static public void mem(String msg) {
+		System.err.print("  " + msg + "   " + TimeHelpers.getMemoryUsedMb() + "...\n");
 	}
 	static public void rp(String msg, int cnt, int tot) {
 		int per = (int) (  ((double)cnt/(double)tot)  * 100.0);

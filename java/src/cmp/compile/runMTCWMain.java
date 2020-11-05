@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.sql.ResultSet;
+
 import javax.swing.JOptionPane;
 
 import util.database.DBConn;
@@ -126,10 +127,10 @@ public class runMTCWMain {
 			String text = sumObj.updateSummary();
 			System.out.println(text);
 			
-    			mDB.executeUpdate("update info set annoState = " + quote("FINISHED"));
+    		mDB.executeUpdate("update info set annoState = " + quote("FINISHED"));
 	   		mDB.close();
     			
-	   		Out.PrtDateMsgTime("Complete build of " + theCompilePanel.getDBName(), startTime);
+	   		Out.PrtMsgTimeMem("Complete build of " + theCompilePanel.getDBName(), startTime);
 	   		Out.close();
 	   		return true;
 		}
@@ -152,9 +153,13 @@ public class runMTCWMain {
 		 	if (mDB==null) return false;
 		 	
 	   		if (!new LoadSingleGO(mDB, theCompilePanel).run()) return false;
+	   		
+	   		Schema.updateVersion(mDB);
+	   		new Summary(mDB).removeSummary();
+			
 	   		mDB.close();
 			
-	   		Out.PrtDateMsgTime("Complete adding GOs " + theCompilePanel.getDBName(), startTime);
+	   		Out.PrtMsgTimeMem("Complete adding GOs " + theCompilePanel.getDBName(), startTime);
 	   		Out.close();
 	   		return true;
 		}
@@ -185,7 +190,7 @@ public class runMTCWMain {
 				String POGtype = methodPanel.getMethodTypeAt(x);
 				
 				String prefix = methodPanel.getMethodPrefixAt(x);
-				if (theCompilePanel.getDBInfo().isReservedWords(prefix)) {
+				if (theCompilePanel.isReservedWords(prefix)) {
 					String msg = "Prefix '" + prefix + "' is a MySQL resevered word. Please select a different prefix.";
 					JOptionPane.showMessageDialog(theCompilePanel, msg,
 							"Invalid prefix", JOptionPane.PLAIN_MESSAGE);
@@ -226,9 +231,10 @@ public class runMTCWMain {
 				String text = sumObj.getMethodSizeTable();
 				System.out.println("\nSummary\n" + text);
 			}
+			Schema.updateVersion(mDB);
 			mDB.close();
 			if (fail > 0) Out.PrtWarn(fail + " failed methods (" + failed + ")");
-			Out.PrtDateMsgTime("Complete adding " + cnt + " methods for " + theCompilePanel.getDBName() + " at ", startTime);
+			Out.PrtMsgTimeMem("Complete adding " + cnt + " methods for " + theCompilePanel.getDBName() + " at ", startTime);
 			Out.close();
 		}
 		catch (Exception e) {
@@ -238,7 +244,7 @@ public class runMTCWMain {
 		}
 	}
 	
-	/***************************************************************
+ 	/***************************************************************
 	 * Database routines
 	 ***************************************************************/
 	private boolean validateMTCWdb() {		

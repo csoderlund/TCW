@@ -7,8 +7,66 @@
 
 <p>
 <font color="#000000" face="Verdana, Arial, Helvetica, sans-serif" size="2"> 
-<p><b><big><u>TCW Version 3.0</u></b></big>
+<p><b><big><u>TCW Version 3.1</u></b></big>
+<p><b>v3.1.0  5-Nov-20</b>
 
+<ul>
+<li>mTCW schema update to version 62 for the new Hit Table.
+<ul>
+<li>Current mTCW databases will be updated the first time they are viewed.
+</ul>
+<li><code>viewMultiTCW</code>:
+<ul>
+<li>Made all tabs on the left and their tables summaries consistent for Sequences, Pairs and Clusters.
+Also made their column naming and layout more consistent.
+
+<li>Overview: 
+<ul><li>The "Explain" button, which explains what the numbers in the Overview mean,
+has been improved (albeit, still a bit confusing). There are now two AAsim percents,
+one is the percent of equal AA chars from all aligned AA chars, and second is the average
+of the %similarities for each pair alignment. The same two numbers exist for NTsim, AAcov, and NTcov.</ul>
+
+<li>Hit Table and Filter:
+<ul>
+<li>This is a new table and filter. It only links to the Sequence Table.
+</ul>
+
+<li>Sequence Details: 
+<ul>
+<li>Add "Copy...", which copies to the clipboard information for the
+selected seqID in Pairs table or hitID in Hit Table.
+</ul>
+<li>Sequence Table: 
+<ul>
+<li>Add to the "Copy..." option "Hit Sequence"
+<li>Hit Align: 	(1) Allow only one sequence to be selected, 
+(2) If Best Hit is NT, translate to AA before aligning to AA sequence.	
+</ul>
+<li>Pairs Table: 
+<ul>
+<li>Add "Cluster" button to show all clusters from the selected set of pairs
+</ul>
+<li>Cluster Table: 
+<ul>
+<li>Add "Next/Prev" when viewing Pairs or Sequence selection.
+</ul>
+<li>Pair and Sequence Filters: 
+<ul><li>If a minimum of "0" was entered, "All" was returned; now it correctly remains "0". </ul>
+<li>Updated the online Help.
+</ul>
+<li><code>runMultiTCW</code>:
+<ul>
+<li>Add 'Last Update' to the Overview.
+<li>Reduced the memory a little on 'Pair Stats'.
+</ul>
+<li><code>runSingleTCW</code>:
+<ul>
+<li>ORF finder: If all Best Hits are nucleotide, the Best Hit and Markov options do not work;
+			this information has been added to the Help.
+</ul>
+<li>Updated the Tour for <code>runMulti</code>.
+</ul>
+<p><b><big><u>TCW Version 3.0</u></b></big>
 <p><b>v3.0.5 7-Oct-20</b>
 <ol>
 <li><code>runMultiTCW</code>:

@@ -45,7 +45,6 @@ public class SumStats {
 			kObj.createSummary(method);
 			Out.prt("\n" + kObj.infoStr);
 			
-		    new Summary(mDB).removeSummary();
 		 	mDB.executeUpdate("update info set kaksInfo='" + kObj.infoStr +"'");
 		}
 		catch(Exception e) {ErrorReport.reportError(e, "write kaks summary"); }
@@ -334,11 +333,11 @@ public class SumStats {
 			orfEnd =   rs.getInt(3);
 			name[1] = rs.getString(4);
 			String cds_2seq  = seq.substring(orfStart-1, orfEnd);
-    			String utr5_2seq = seq.substring(0, orfStart);
-    			String utr3_2seq = seq.substring(orfEnd-3);
+    		String utr5_2seq = seq.substring(0, orfStart);
+    		String utr3_2seq = seq.substring(orfEnd-3);
     			
-    			rs = mDB.executeQuery("select cds, utr5, utr3 from pairMap where PAIRid=" + pairid);
-    			if (!rs.next()) return false;
+    		rs = mDB.executeQuery("select cds, utr5, utr3 from pairMap where PAIRid=" + pairid);
+    		if (!rs.next()) return false;
 					
 			String cdsPair = rs.getString(1);
 			String utr5Pair = rs.getString(2);
@@ -359,17 +358,22 @@ public class SumStats {
 			cdsObj.crop(full1, full2);
 				
 			if (utr5Pair.contains("###")) {
-    				String [] gapUTR5 = utr5Pair.split("###");
-    				full1 = Share.uncompress(gapUTR5[0], utr5_1seq);
-    				full2 = Share.uncompress(gapUTR5[1], utr5_2seq);
-    				
-    				if (full1.length() != full2.length()) {
-    					Out.debug(String.format("%s  pair #%d   ids %d,%d    lens %d,%d  gap %s,%s",
-    							"TCW error on uncompress for 5UTR", pairid,
-    							seqid1, seqid2, full1.length(), full2.length(),gapUTR5[0],gapUTR5[1]));
-    					utr5Obj.clear();
-    				}
-    				else utr5Obj.crop(full1, full2);
+				String [] gapUTR5 = utr5Pair.split("###");
+				if (gapUTR5.length<2) {
+					Out.debug(String.format("%s pair #%d   ids %d,%d    %s","TCW error on uncompress for 5UTR", 
+							pairid, seqid1, seqid2, utr5Pair));
+					Out.die("Cannot go on");
+				}
+				full1 = Share.uncompress(gapUTR5[0], utr5_1seq);
+				full2 = Share.uncompress(gapUTR5[1], utr5_2seq);
+				
+				if (full1.length() != full2.length()) {
+					Out.debug(String.format("%s  pair #%d   ids %d,%d    lens %d,%d  gap %s,%s",
+							"TCW error on uncompress for 5UTR", pairid,
+							seqid1, seqid2, full1.length(), full2.length(),gapUTR5[0],gapUTR5[1]));
+					utr5Obj.clear();
+				}
+				else utr5Obj.crop(full1, full2);
 			}
 			else utr5Obj.clear();
 		

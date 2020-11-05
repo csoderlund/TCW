@@ -24,14 +24,13 @@ Click the check box and enter the search value.
 one pair being displayed.
 <tr><td><tt>Seq ID</tt><td>If the SeqID of either sequence in the pair contains the given substring, the
 resulting pair will be displayed. 
-<tr><td><tt>Best Hit ID</tt><td>If the assigned Best Hit ID of  pair contains the given substring, the
+<tr><td><tt>Shared Hit ID</tt><td>If the assigned Best Hit ID of  pair contains the given substring, the
 resulting pair will be displayed. 
-<tr><td><tt>Description</tt><td>Displays all pairs that have the substring in the  description column.
+<tr><td><tt>Shared Descript</tt><td>Displays all pairs that have the substring in the  description column.
 <tr><td><tt>PCC</tt><td> This is only relevant if there are TPM values in the database. The Pearson
-Correlation Coefficient (PCC) is computed for all pairs to determine the correlation of the
-TPM values. 
+Correlation Coefficient (PCC) is computed for all pairs to determine their correlation. 
 </table>
-<p>Substring queries (<tt>Seq ID</tt>, <tt>Best Hit ID</tt>, <tt>Description</tt>):
+<p>Substring queries (<tt>Seq ID</tt>, <tt>Shared Hit ID</tt>, <tt>Shared Descript</tt>):
 <ul>
 <li>The search is not case-sensitive and will find the substring anywhere in the ID or description.
 <li>The second two options have a <tt>Has</tt> and <tt>Not</tt> choice beside
@@ -45,7 +44,7 @@ them; if <tt>Not</tt> is selected, show all pairs that do NOT have the substring
 <tr><td><tt>E-value</tt><td> Select the radio button and enter the hit e-value to search on.
 <tr><td><tt>%Similarity</tt><td> Select the radio button and enter the hit %Similarity to search on.
 </table>
-<br><br>The same three filters are available for the nucleotide search.
+<br>The same three filters are available for the nucleotide (NT) search.
 
 <h3>+Statistics - only available if at least two nucleotide datasets are in the mTCW database.</h3>
 Selecting <tt>Has Stats</tt> or
@@ -60,7 +59,7 @@ is selected.
 to the column "%Cexact", where putting the mouse over the column name (in the column panel)
 defines it in the lower left hand corner as "Percent of codons that have an exact match".
 
-<br><br><tt>Has KaKs</tt>: This is the synonymous substitution rate (Ka) divided by the nonsynonymous
+<br><br><tt>KaKs</tt>: This is the synonymous substitution rate (Ka) divided by the nonsynonymous
 substitution rate (Ks). KaKs&lt;1 is considered purifying selection and KaKs&gt;1
 is considered positive selection. The KaKs value is given a p-value, which can also
 be queried on. If Ka='-' then KaKs is ~0.0; if Ks='-', then KaKs is undefined; both of these
@@ -69,9 +68,9 @@ are shown for the Zero query.
 <h3>+Datasets</h3>
 Select <tt>Different sets</tt> to only show pairs that are from different dataset,
 and <tt>Same sets</tt> to only show pairs from same sets.
-<p><tt>Pairs with</tt>: If the mTCW database contains more than two datasets, then the dataset names
-will be listed. If one or more datasets are selected, then it will only search for pairs
-that contain sequences from the selected dataset(s). 
+<p><tt>Pairs</tt>: If the mTCW database contains more than two datasets, then all pairs
+of datasets are shown. If a pair is selected, then it will only search for pairs
+that contain sequences from the two dataset. 
 
 <h3>+Clusters</h3>
 One or more clusters sets will be in the database. They will all be listed here

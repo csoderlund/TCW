@@ -98,14 +98,14 @@ public class PairQueryPanel extends JPanel {
 		page.add(Box.createVerticalStrut(5));
 		
 		row = Static.createRowPanel();
-		txtHitID = new Substring("Best Hit ID", PAIR_TABLE + ".HITstr", null,
+		txtHitID = new Substring("Shared Hit ID", PAIR_TABLE + ".HITstr", null,
 				"All pairs with the substring in the identifier of shared hit", true);
 		row.add(txtHitID);
 		page.add(row);	
 		page.add(Box.createVerticalStrut(5));
 		
 		row = Static.createRowPanel();	
-		txtDesc = new Substring("Description", UNIQUE_HITS + ".description", null, 
+		txtDesc = new Substring("Shared Descript", UNIQUE_HITS + ".description", null, 
 				"All pairs with the substring in the shared description of the pair", true);
 		row.add(txtDesc);
 		
@@ -280,7 +280,7 @@ public class PairQueryPanel extends JPanel {
 		rgStatOlap2 = new Range("%Cov2", "0.0", "", "pOlap2", "Percent coverage of alignment for the 2nd CDS (Calign/CDSlen2)%");
 		row.add(rgStatOlap2);
 		page.add(row);
-		page.add(Box.createVerticalStrut(10));
+		page.add(Box.createVerticalStrut(rsep));
 		
 		row = Static.createRowPanel();
 		rgStatGap = new Range("Gap", "0", "", "nGap", "Number of gaps in the alignment");
@@ -292,46 +292,16 @@ public class PairQueryPanel extends JPanel {
 		page.add(row);
 		page.add(Box.createVerticalStrut(rsep));	
 		
-		// Has KaKs Yes No Either
-		
-		
-		row = Static.createRowPanel();
-		row.add(Box.createHorizontalStrut(15));
-		hasKaKsButton = Static.createRadioButton("Has value",false);
-		row.add(hasKaKsButton); row.add(Box.createHorizontalStrut(5));
-		
-		kaZeroButton = Static.createRadioButton("Zero",false);
-		row.add(kaZeroButton); row.add(Box.createHorizontalStrut(5));
-		
-		kaEQksButton = Static.createRadioButton("KaKs=1",false);
-		row.add(kaEQksButton); row.add(Box.createHorizontalStrut(5));
-		
-		kaLTksButton = Static.createRadioButton("KaKs<1",false);
-		row.add(kaLTksButton); row.add(Box.createHorizontalStrut(5));
-		
-		kaGTksButton = Static.createRadioButton("KaKs>1",false);
-		row.add(kaGTksButton); row.add(Box.createHorizontalStrut(5));
-		
-		ignKaKsButton = Static.createRadioButton("Ignore",true);
-		row.add(ignKaKsButton); row.add(Box.createHorizontalStrut(5));
-		
-		group = new ButtonGroup();
-		group.add(kaZeroButton); group.add(kaEQksButton); group.add(kaLTksButton);
-		group.add(kaGTksButton);  group.add(hasKaKsButton);  group.add(ignKaKsButton);	
 		
 		row = Static.createRowPanel();
 		rgKaKs = new Range("KaKs", "0.0", "", "kaks", "Selective strength");
 		row.add(rgKaKs);row.add(Box.createHorizontalStrut(5));
 		rgPval = new Range("p-value", "0.0", "0.05",  "pVal", "Fisher exact test of KaKs value");
+		row.add(rgPval);
 		
 		if ((theViewerFrame.getInfo().hasKaKs())) {
 			page.add(new JLabel("  KaKs"));
 			page.add(Box.createVerticalStrut(rsep));
-			
-			page.add(row);
-			page.add(Box.createVerticalStrut(5));
-		
-			row.add(rgPval);
 			page.add(row);
 		}
 		return page;
@@ -530,7 +500,6 @@ public class PairQueryPanel extends JPanel {
 		
 		if (hasStats) {
 			statIgnButton.setSelected(true);
-			ignKaKsButton.setSelected(true);
 			rgKaKs.clear(); rgPval.clear();
 			
 			rgStatAlign.clear();
@@ -583,26 +552,6 @@ public class PairQueryPanel extends JPanel {
 			query = Static.combineBool(query, rgStatTsTv.getSQL());
 			query = Static.combineBool(query, rgStatOlap1.getSQL());
 			query = Static.combineBool(query, rgStatOlap2.getSQL());
-			
-			// XXX kaks
-			if (!ignKaKsButton.isSelected()) {
-				
-				if (hasKaKsButton.isSelected()) query = Static.combineBool(query, 
-						"pairwise.kaks > " + Globalx.dNoVal, true);
-				
-				else if (kaZeroButton.isSelected()) query = Static.combineBool(query, 
-					"(pairwise.ka=" + Globalx.dNullVal + " || pairwise.ks=" + Globalx.dNullVal + ")");
-				
-				else if (kaEQksButton.isSelected()) query = Static.combineBool(query, 
-						"(pairwise.kaks=1.0)");
-				
-				else if (kaLTksButton.isSelected()) query = Static.combineBool(query,  
-						"(pairwise.ka!=" +  Globalx.dNullVal + 
-						 " && pairwise.kaks > 0.0 && pairwise.kaks < 1.0)");
-				
-				else if (kaGTksButton.isSelected()) query = Static.combineBool(query, 
-						"(pairwise.kaks > 1)");
-			}
 			query = Static.combineBool(query, rgKaKs.getSQL());
 			query = Static.combineBool(query, rgPval.getSQL());
 		}
@@ -700,13 +649,6 @@ public class PairQueryPanel extends JPanel {
 			summary = Static.combineSummary(summary, rgStatOlap1.getSum());
 			summary = Static.combineSummary(summary, rgStatOlap2.getSum());
 		
-			if (!ignKaKsButton.isSelected()) {
-				if (hasKaKsButton.isSelected()) summary = Static.combineSummary(summary, "Has KaKs Stats");
-				else if (kaZeroButton.isSelected()) summary = Static.combineSummary(summary, "Zero");
-				else if (kaEQksButton.isSelected()) summary = Static.combineSummary(summary, "KaKs=1");
-				else if (kaLTksButton.isSelected()) summary = Static.combineSummary(summary, "KaKs<1");
-				else if (kaGTksButton.isSelected()) summary = Static.combineSummary(summary, "KaKs>1");
-			}
 			summary = Static.combineSummary(summary, rgKaKs.getSum());
 			summary = Static.combineSummary(summary, rgPval.getSum());
 		}
@@ -797,27 +739,35 @@ public class PairQueryPanel extends JPanel {
 		public String getSQL() {
 			checkValues();
 			if (!checkOn.isSelected()) return "";
+			
 			String min = txtMin.getText(); // check if proper value
 			String max = txtMax.getText();
-			if ((min.equals("") || min.equals("0")) && max.equals("")) {
-				checkOn.setSelected(false);
-				return "";
+			
+			if (min.equals("")) { // CAS301
+				if (max.contentEquals("")) {
+					checkOn.setSelected(false);
+					return "";
+				}
+				return sqlField + "<"  + max;
+			}
+			if (max.equals("")) {
+				if (min.contentEquals("")) {
+					min="0";
+					txtMin.setText(min);
+				}
+				return sqlField + ">=" + min;
 			}
 			
-			if (min.equals("")) { // have to query on >0.0 or get -2s
-				txtMin.setText("0.0");
-				min="0.0";
-			}
 			if (max.equals("")) return sqlField + ">=" + min;
 			return "(" + sqlField + ">=" + min + " and " + sqlField + "<" + max + ")";
 		}
+		// CAS310 had weird test that would not display >=0.0, even though query would work
 		public String getSum() {
 			if (!checkOn.isSelected()) return "";
 			String min = txtMin.getText(); // check if proper value
 			String max = txtMax.getText();
-			boolean nomin = (min.equals("") || min.equals("0") || min.equals("0.0"));
-			if (nomin && max.equals("")) return "";
-			if (nomin) return label + "<"  + max;
+			
+			if (min.equals("")) return label + "<"  + max;
 			if (max.equals("")) return label + ">=" + min;
 			return "(" + label + ">=" + min + " and " + label + "<" + max + ")";
 		}
@@ -1003,7 +953,7 @@ public class PairQueryPanel extends JPanel {
 		private JCheckBox checkOn = null;
 		private JTextField txtVal;
 		private String sqlField, sqlField2="", label;
-		private int width=200;
+		private int width=210;
 		private JRadioButton yesButton= null, noButton= null;
 	}
 	private JRadioButton toolTipRadioButton(String label, String descript, boolean enable) {
@@ -1068,9 +1018,7 @@ public class PairQueryPanel extends JPanel {
 	private Range rgStatGap, rgStatTsTv, rgStatAlign, rgStatCdiff, rgStat5diff, rgStat3diff, rgStatOlap1, rgStatOlap2;
 	private Range rgStatCexact, rgStatCsyn, rgStatC4d, rgStatCnonsyn, rgStatAexact, rgStatApos, rgStatAneg;
 	
-	private JRadioButton kaZeroButton, kaEQksButton, kaLTksButton, kaGTksButton, hasKaKsButton, ignKaKsButton;
-	private Range rgKaKs;
-	private Range rgPval; 
+	private Range rgKaKs, rgPval; // CAS310 had unused KaKs 
 	
 	// dataset
 	private JRadioButton radDiffDS, radSameDS, radIgnoreDS;

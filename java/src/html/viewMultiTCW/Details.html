@@ -3,12 +3,14 @@
 <title>Sequence Details</title>
 <h2>Sequence Details</h2>
 
-This is viewed from the Sequence table and provides information about the sequence.
-It contains two sortable tables.
+<h3>Details Panel</h3>
 
-<h2>Pairs</h2>
+This is viewed from the Sequence table and provides information about the sequence.
+It contains following two sortable tables:
+
+<p><i>Pairs</i>:
 This lists all seqIDs that have a hit with the sequence, along with any  shared clusters.
-<h3>Hits</h3>
+<p><i>Hits</i>:
 The top first hits from each type are loaded into the database when it is built, and listed here.
 The only columns that need explanation are the following: 
 <pre>
@@ -24,5 +26,30 @@ AN  = best annotation hit
 WG  = best hit with GOs
 ALL = EV+AN+WG
 </pre> 
+
+<h4>Selected: Copy...</h4>
+<i>Pairs:</i> The first four options apply to the selection in the Pairs Table; if no
+row is selected, the first row will be used.
+<p><i>Hits:</i> The remaining options apply to the selection in the Hits Table; if no
+row is selected, the Best Hit will be used.
+
+<p><i>Clear</i>: Clear all selected rows.
+
+<h3>Frame Panel</h3>
+This replaces the current sequence panel with a display of the sequence; if it is 
+a nucleotide sequence, then it shows information about the frame and best hit in relation
+to the sequence.
+
+<h3>GO Panel</h3>
+This will only be available if GOs were added to the database when it was built with <tt>runMultiTCW</tt>.
+<p>There are four options, where selecting one will replace the current sequence panel with a GO panel.
+<table border=1 cellspacing=3>
+<tr><td>Assigned GOs for hits<td>GOs that have been directly assigned to at least one of the hits.
+<tr><td>All GOs for hits<td>Both assigned and inherited GOs for all hits.
+<tr><td>Assigned GOs for the selected hit (or best)<td>All assigned GOs for the selected hit are shown.
+If no row in the Hits table is selected, then the best hit is used.
+<tr><td>All GOs for the selected hit (or best)<td>All assigned and inherited GOs for the selected hit are shown.
+If no row in the Hits table is selected, then the best hit is used.
+</table>
 </html>
 

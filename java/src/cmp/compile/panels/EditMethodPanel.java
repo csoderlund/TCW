@@ -23,7 +23,7 @@ import cmp.database.Globals;
 
 public class EditMethodPanel extends JPanel {
 	public static String LBLPREFIX = "Required (unique, 5 char max)";
-	private String helpHTML =  "html/runMultiTCW/EditMethodPanel.html";
+	private String helpHTML =  Globals.helpDir + "EditMethodPanel.html";
 	private int maxPrefix = 5;
 	
 	private static final long serialVersionUID = -3057836165213279944L;
@@ -152,7 +152,7 @@ public class EditMethodPanel extends JPanel {
 			isValid = false;
 		}
 		
-		if (theCompilePanel.getDBInfo()!=null && theCompilePanel.getDBInfo().isReservedWords(prefix)) {
+		if (theCompilePanel.isReservedWords(prefix)) { // CAS310 moved from DBinfo to CompilePanel
 			String msg = "Prefix '" + prefix + "' is a MySQL resevered word. Please select a different prefix.";
 			JOptionPane.showMessageDialog(theCompilePanel, msg,
 					"Invalid prefix", JOptionPane.PLAIN_MESSAGE);

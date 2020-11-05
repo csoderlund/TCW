@@ -45,7 +45,7 @@ public class MethodClosure {
 			if (new MethodLoad(cmpDBC).run(idx, groupFile, cmpPanel)==-1) // loads the file just written
 				bSuccess=false;
 				
-		Out.PrtDateMsgTime("Finish execution of " + Globals.Methods.Closure.TYPE_NAME, allTime);
+		Out.PrtMsgTimeMem("Finish execution of " + Globals.Methods.Closure.TYPE_NAME, allTime);
 		return bSuccess; 
 	}
 	
@@ -192,7 +192,7 @@ public class MethodClosure {
 	private class BestHitGroups {
 		private void computeGroups() {
 			try {
-				Out.PrtSpMsg(2, "Compute groups");
+				Out.PrtSpMsg(2, "Compute cluster");
 				Collections.sort(pairList); // BBH are first
 				
 				int grpMax=1, cnt=0, cntNoJoin=0;
@@ -232,13 +232,13 @@ public class MethodClosure {
 				}
 				System.err.print("                                                             \r");
 				
-				Out.PrtCntMsg(grpMap.size(), "Total groups");
+				Out.PrtCntMsg(grpMap.size(), "Total clusters");
 				if (cntNoJoin>0) Out.PrtCntMsg(cntNoJoin, "Good pairs not joined in cluster");
 				if (grpMap.size()==0) bSuccess=false;
 			}
 			catch (Exception e) {
 				writeGroups();
-				ErrorReport.prtReport(e, "compute groups");
+				ErrorReport.prtReport(e, "compute clusters");
 				bSuccess=false;
 			}
 		}

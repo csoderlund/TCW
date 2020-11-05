@@ -1,159 +1,192 @@
 <html>
-<title>NnR overview</title>
-<body>
+<title>sTCW overview</title>
 <center>
-<h2>TCW overview for NnR </h2>
-<table width=700 border=1><tr><td>
-<pre>
-Project: NnR   #Seqs: 26,685   #Hits: 232,686   #GOs: 22,078    RPKM  DE  GO-DE 
+<table width=800 border=0>
+<tr><td>
+<h2>Reproduce sTCW overview</h2>
+
+This describes how to obtain the table of results corresponding to statistics
+in the overview. The following short-hand is used:
+<ul>
+<li>The "Column:x" indicates that x should be selected for viewing in the table.
+<li>#Seqs is the number of sequences, which is listed at the top of the overview.
+<li>"Stats" is the "Show Column Stats" on the "Table..." drop-down.
+</ul>
+
+<h3>INPUT</h3>
+Most of the input section is data supplied by the user with runSingleTCW. The following
+two are computed:
+<table border=1>
+<tr><td>Counts: SIZE<td>Show all<td>Column:Counts for all conditions: Stats, column:Sum
+<tr><td>AVG-len<td>Show All<td>Column:Length; Stats, column:Average
+<tr><td>MED-len<td>Show All<td>Column:Length; Stats, column:Median
+<br>The median in the two cases will be slightly different 
+because they are computed differently.
+</table>
  
-INPUT
-   Counts: 
-      SEQID  ID            SIZE  #REPS  
-      NnR    Tip    299,383,735      1  
-      NnR    Zone   301,658,446      1  
-      NnR    Rhiz   153,385,980      5  
-      NnR    Root   146,652,269      5  
-      NnR    Stem   146,995,438      5  
-      NnR    OLeaf  140,444,093      5  
+<h3>ANNOTATION</h3>
+<h3>Annotation Statistics:</h3>
 
-   Sequences: 
-      SEQID    SIZE  TITLE  AVG-len  MED-len  
-      NnR    26,685  NnR      1,467    1,229  
+<table border=1>
+<tr><th>Column<th>Search<th>Obtain number
+<tr><td>Sequences with hits
+	<td>Filters: Annotated
+	<td>Number of rows
+<tr><td>Unique hits
+	<td>AnnoDB Hits: Seq:None(slow)<sup>*</sup>
+	<td>Hits number at top of table
+<tr><td>Total sequence hits
+	<td>AnnoDB Hits: Seq:None(slow)<sup>*</sup>
+	<td>Pairs number at top of table
+<tr><td>Bases covered by hit
+	<td>AnnoDB Hits: Seq:Best Eval
+	<td>Unselect Group by Hit ID; column:Align; 
+	<br>Stats, column:Sum; for NT, multiply by 3
+<tr><td>Total bases 
+	<br>(residues for AA seqs)
+	<td>Show All 
+	<td>Column:Length; Stats, column:Sum
+<tr><td>Sequences with GOs
+	<td>Filters: Best Hit: Annotated, Best with GO
+	<td>Number of rows
+<tr><td>Unique GOs
+	<td>GO Annotation: no filters<sup>*</sup>
+	<td>Results number
+<tr><td>Best hit with GOs
+	<td>AnnoDB Hits: Seq:Best Eval; GO,etc:Has GO
+	<td>Seqs number at top of table
+<tr><td>Unique hits with GOs
+	<td>AnnoDB Hits: Seqs:None; GO,etc:Has GO
+	<td>Hits number at top of table
+</table>
+<sup>*</sup> Use Clear All
 
-ANNOTATION
-   Annotated with TCW release: 3.0.3   Annotation date: 21-May-20
+<h3>AnnoDBs:</h3>
 
-   Annotation Statistics:
-      Sequences with hits   26,038  (97.6%)     Bases covered by hit  29,151,735  (74.4%)  
-      Unique hits          232,686              Total bases           39,167,358           
-      Total sequence hits  428,251                                                         
-                                                                                           
-      Sequences with GOs    23,368  (87.6%)     Best hit with GOs         19,407  (72.7%)  
-      Unique GOs            22,078              Unique hits with GOs     193,298  (83.1%)  
+<table border=1>
+<tr><th>Column<th>Search<th>Obtain number
+<tr><td>ONLY
+	<td>Filters: Annotated, Best Eval, 
+	<br>Enter DBtype and Taxonomy 
+	<br>&nbsp;&nbsp;&nbsp; values for AnnoDB,
+	<br>General &lt;=1 annoDB
+ 	<td>Number of rows
+<tr><td colspan=3><i>The following all use AnnoDB Hits, 
+and select the correct ANNODB from the AnnoDBs panel.</i>	
+<tr><td>EVAL<td>Seq:Best Eval<td>Seqs number above the table
+<tr><td>ANNO<td>Seq:Best Anno<td>Seqs number above the table
 
-   annoDBs (Annotation databases): 3   (see Legend below)
-      ANNODB          ONLY    EVAL    ANNO  UNIQUE   TOTAL   AVG  HIT-SEQ (#SEQ)  BEST  AVG  COVER  COVER  
-                                                            %SIM                  HIT  %SIM   >=50   >=90  
-      SP-fullSubset      1       3     150  43,031  113.7k  44.8  12,443 (46.6%)       41.0  15.3%   0.3%  
-      SP-plants         18     407     980  22,709  87,537  58.9  19,845 (74.4%)       60.0  56.2%   1.8%  
-      TR-plants      4,962  25,628  24,908  166.9k  227.0k  80.3  26,019 (97.5%)       92.4  80.2%  55.2%  
+<tr><td>UNIQUE<td>Seq:None(slow)
+	<td>Hits number above the table
+<tr><td>TOTAL<td>Seq:None(slow)
+	<td>Pairs number above the table
 
-   Top 15 species from total: 3,424
-      SPECIES (25 char)       EVAL    ANNO   TOTAL     SPECIES                 EVAL   ANNO   TOTAL  
-      Nelumbo nucifera      24,460  23,045  45,436     Cinnamomum micranthum     43    113   3,554  
-      Arabidopsis thaliana     204     679  51,974     Aquilegia coerulea        41     41   4,390  
-      Macleaya cordata         123     280   6,576     Malus baccata             25     35   1,177  
-      Vitis vinifera            96     144  11,209     Fagus sylvatica           24     19   2,526  
-      Davidia involucrata       64     116  10,359     Citrus unshiu             22     12   1,960  
-      Oryza sativa              52     109  13,724     Theobroma cacao           21     56   4,005  
-      Malus domestica           50      35   1,694     Prunus dulcis             19     70   2,864  
-      Nyssa sinensis            49      48   5,908     Other                    745  1,236  260.9k  
+<tr><td>AVG-SIM<td>Seq:None(slow)
+	<td>Unselect Group by Hit ID; column:%Sim; Stats, column:Average
 
-   Total ORFs: 26,685 (100.0%)
-      Has Hit            25,980 (97.4%)    ORF>=300         23,938 (89.7%)    MultiFrame     424  (1.6%)  
-      Is Longest ORF     25,586 (95.9%)    Has Start&Stop   21,641 (81.1%)    >=9 Ns in ORF    2   (<1%)  
-      Markov Best Score  25,826 (96.8%)    Has Start|Stop   25,558 (95.8%)    Stops in Hit   675  (2.5%)  
-      All of the above   24,692 (92.5%)    Average ORF len           1104         
+<tr><td>HIT-SEQ<td>Seq:Rank=1
+	<td>Seqs number, the percentage is of the #Seqs
 
-   GC Content: 44.78%
-      Pos1  17.1%              5UTR    CDS   3UTR              5UTR      CDS    3UTR  
-      Pos2  13.6%    %GC      43.15  45.35  37.61    Length  4,210k  29,461k  5,496k  
-      Pos3  14.6%    CpG-O/E   0.70   0.52   0.43    AvgLen   157.8   1104.0   206.0  
-                                    
-EXPRESSION
-   RPKM: (% of 26,685)
-                      <2         2-5        5-10       10-50      50-100      100-1k    1k-5k     >=5k  
-      Tip     8,364(31%)  3,130(12%)  3,388(13%)  8,908(33%)  1,782 (7%)  1,087 (4%)  26(<1%)   0 (0%)  
-      Zone    8,128(30%)  3,171(12%)  3,465(13%)  9,018(34%)  1,769 (7%)  1,108 (4%)  26(<1%)   0 (0%)  
-      Rhiz   11,478(43%)  3,114(12%)  2,966(11%)  6,397(24%)  1,449 (5%)  1,201 (5%)  75(<1%)   5(<1%)  
-      Root    9,092(34%)  3,335(12%)  3,424(13%)  7,700(29%)  1,684 (6%)  1,399 (5%)  49(<1%)   2(<1%)  
-      Stem   12,044(45%)  3,501(13%)  2,964(11%)  5,498(21%)  1,291 (5%)  1,277 (5%)  96(<1%)  14(<1%)  
-      OLeaf  12,283(46%)  3,703(14%)  2,981(11%)  5,405(20%)  1,113 (4%)  1,093 (4%)  91(<1%)  16(<1%)  
+<tr><td>AVG-SIM<td>Seq:Rank=1 
+    <td>Column:%Sim; Stats, column:Average
 
-   Differential expression: (% of 26,685)
-                 <1E-5       <1E-4       <0.001        <0.01        <0.05  
-      RzRo  4,443(17%)  6,495(24%)   8,938(33%)  11,797(44%)  14,032(53%)  
-      RzSt  3,363(13%)  6,181(23%)   9,269(35%)  12,155(46%)  14,192(53%)  
-      RzOL  1,859 (7%)  4,023(15%)   7,545(28%)  11,392(43%)  13,934(52%)  
-      RoSt  7,006(26%)  9,793(37%)  12,446(47%)  14,876(56%)  16,492(62%)  
-      RoOL  3,467(13%)  5,754(22%)   8,642(32%)  11,939(45%)  14,380(54%)  
-      StOL    330 (1%)  1,188 (4%)   3,124(12%)   6,107(23%)   9,192(34%)  
+<tr><td>Cover &gt;=N<td>Seq:Rank=1,%Sim&gt;=N,%Hcov&gt;=N
+	<td>Seqs number, the percentage is of the HIT-SEQ number
+</table>
+Halign is short for HitAlign, which is the difference between the hit stop and start coordinates
+divided by the length of the protein.
 
-   Over-represented GOs: (% of 22,078)
-               <1E-5     <1E-4    <0.001       <0.01       <0.05  
-      RzRo    6(<1%)   23(<1%)  113 (1%)    521 (2%)  1,550 (7%)  
-      RzSt  271 (1%)  342 (2%)  549 (2%)  1,065 (5%)  2,003 (9%)  
-      RzOL  102(<1%)  138 (1%)  278 (1%)    650 (3%)  1,499 (7%)  
-      RoSt  106(<1%)  166 (1%)  318 (1%)    747 (3%)  1,796 (8%)  
-      RoOL   80(<1%)  127 (1%)  206 (1%)    532 (2%)  1,381 (6%)  
-      StOL  168 (1%)  192 (1%)  274 (1%)    572 (3%)  1,301 (6%)  
+<h3>Top 15 species from total: N</h3>
+The N is the number of unique species based on the first two words of the
+species name: 
+<ul>
+<li>AnnoDB Hits, select Species, select Two words 
+<li>The number listed beside "Species" is the same as N, and
+the species are listed in the table.
+</ul>
 
-SEQUENCES
-   Build date: 21-May-20
-   Sequences loaded from external source
+<table border=1>
+<tr><th>Column<th>Search<th>Obtain number
+<tr><td colspan=3><i>For the following, use AnnoDB Hits and select the Species.</i>
+<tr><td>EVAL<td>Seq:Best Eval<td>Seqs number
+<tr><td>ANNO<td>Seq:Best Anno<td>Seqs number
+<tr><td>TOTAL<td>Seq:None(slow)<td>Pairs number
+</table>
 
-   Sequence lengths:
-       <=100     101-500    501-1000   1001-2000   2001-3000  3001-4000  4001-5000    >5000  
-      1(<1%)  4,584(17%)  6,214(23%)  9,452(35%)  4,222(16%)  1,388(5%)    507(2%)  317(1%)  
+<h3>Total ORFs:</h3>
+<table border=1>
+<tr><th>Column<th>Search<th>Obtain number
+<tr><td colspan=3><i>The following use the Basic Sequence. Select "TCW" and enter
+the Substring indicated.</i>
+<tr><td>Is Longest ORF<td>!LG<td>#Seqs minus Result number
+<tr><td>Markov Best Score<td>mk!b<td>#Seqs minus Result number
+<tr><td>MultiFrame<td>Multi-frame<td>Result number
+<tr><td>&gt;=9 Ns in ORF<td>9N<td>Result number. View in Sequence Frame to see n's in ORF (CDS). 
+Others may have n's, but not in the CDS.
+<tr><td>Stops in Hit (Best Eval)<td>Stops<td>Result number
 
-   ORF lengths:
-        <=100     101-500    501-1000   1001-2000  2001-3000  3001-4000  4001-5000     >5000  
-      74(<1%)  6,881(26%)  7,865(29%)  8,635(32%)  2,263(8%)    658(2%)    179(1%)  130(<1%)  
+<tr><td colspan=3><i>The following use the Filters, SNPs and ORFs.</i>
+<tr><td>Has Hit<td>Protein confirmation<td>Number of rows
 
-   Quality:
-      Sequences with #n>0:   1,328  ( 5.0%)  
-      Sequences with #n>10:     11  (<0.1%)  
+<tr><td>All of the above<td>Protein confirmation<td>
+Use the Basic Sequence (as above), search !LG, then add to that mk!b; 
+select all sequences and show in Sequence table with the 'Is PR Frame'
+column; take the number that have use the protein frame and subtract
+from the total number from 'Protein confirmation'.
 
+<tr><td>ORF>=300<td>Has ORF >= 300<td>Number of rows
+<tr><td>Has Start&Stop<td>Has Start and Stop<td>Number of rows
+<tr><td>Has Start|Stop<td>No filter<td> Columns:HasStart, HasStop;
+<br>Sort both columns so 'Yes' rise to the top,
+find where the rows start with 'No','No'.
+</table>
+<h3>GC Content:</h3>
+The only number reproducible is the GC Content, which is the %GC over the entire sequence..
+<table border=1>
+<tr><td>GC Content<td>Show All<td>Column:%GC; Stats, column:Average
+<br>Note, there will be some slight difference in the number due to round-off error.
+</table>
+<ul>
+<li>The "Pos i" column is the percent of G or C in the ith positon of the CDS codons.
+<li>The %GC is the percent of G's and C's over the sequence length.
+<li>The CpG-O/E is ratio observed/expected [(#CpG/(#G*#C))*length].
+<li>The UTRs can be viewed in the Sequence Detail alignments, but there is no column for it.
+</ul>
 
--------------------------------------------------------------------
-PROCESSING INFORMATION:
-   AnnoDB Files:
-      Type  Taxo        FILE                            DB DATE    ADD DATE   EXECUTE                                     
-      sp    fullSubset  uniprot_sprot_fullSubset.fasta  21-May-20  21-May-20  diamond  --masking 0 --max-hsps 1 --top 20  
-      sp    plants      uniprot_sprot_plants.fasta      21-May-20  21-May-20  diamond  --masking 0 --max-hsps 1 --top 20  
-      tr    plants      uniprot_trembl_plants.fasta     21-May-20  21-May-20  diamond  --masking 0 --max-hsps 1 --top 20  
+<h2>EXPRESSION</h2>
+The following sections may not exist if the input had no count files or the DE methods
+were not executed.
+<table border=1>
+<tr><td>TPM*
+	<td>Filter: select Condition under Exclude; set "At Most" to 1.99. 
+	<td>This will continue using 4.99, 9.99, etc, where the previous results are
+subtracted from the current. The results are for intervals &gt;=N to &lt;M.
+<tr><td>Differential Expression
+	<td>Filter: select the condition pair, then enter the number, e.g. 1E-5.
+	<td>These counts are accumulative.
+<tr><td>Over-represented GOs:
+	<td>GO Annotation; select the condition pair using the DE panel; enter the threshold,
+	e.g. 0.05.
+	<td>These counts are accumulative.
+</table>
+* If "RPKM" is at the top of the Overview instead of "TPM", then RPKM was computed instead of TPM.
 
-   Over-represented GOs: go_202005-termdb-tables.tar.gz    [GOs added with sTCW v3.0.3 (18-May-20)]
-
-   ORF finder:
-      Use ATG only for start site
-      Rule 1: Use Good hit: E-value <=1E-05 or Sim >= 90%
-      Rule 2: Use longest ORF if Log Len Ratio > 0.5
-      Rule 3: Use best Markov score
-              Train using best hits
-      Good coverage: Hit overlap >= 95% with Sim 60% (internal params)
-
-   DE (Differential Expression) computation: 
-      DE column    Conditions                     Method
-      RzRo         Rhiz : Root                    source(edgeRglm.R)
-      RzSt         Rhiz : Stem                    source(edgeRglm.R)
-      RzOL         Rhiz : OLeaf                   source(edgeRglm.R)
-      RoSt         Root : Stem                    source(edgeRglm.R)
-      RoOL         Root : OLeaf                   source(edgeRglm.R)
-      StOL         Stem : OLeaf                   source(edgeRglm.R)
-
-   GOseq: RoOL:0.05,RoSt:0.05,RzOL:0.05,RzRo:0.05,RzSt:0.05,StOL:0.05
-
--------------------------------------------------------------------
-LEGEND:
-   annoDB:
-      ANNODB    is DBTYPE-TAXO, which is the DBtype and taxonomy
-      ONLY      #Seqs that hit the annoDB and no others
-      EVAL      #Seqs with the best E-value from the annoDB
-      ANNO      #Seqs with the best annotation from the annoDB 
-      UNIQUE    #Unique hits to the annoDB
-      TOTAL     #Total seq-hit pairs for the annoDB
-      AVG %SIM  Average percent similarity of the total seq-hit pairs
-      HIT-SEQ   Percent of #Seqs that have at least one hit from the annoDB
-      BEST HIT  The following columns refer to the best hit (Rank=1):
-         AVG %SIM  Average percent similarity of the best hit seq-hit pairs
-         Cover>=N  Percent of HIT-SEQ where the best hit has similarity>=N% and hit coverage>=N%
-
-   #Seqs is listed at top of overview
-   Best Annotation:
-      Descriptions may not contain words such as 'uncharacterized protein'
-
-</pre>
-</body>
+<h2>SEQUENCES</h2>
+If the sequences (e.g. ESTs) have been assembled, there are statistics on buried,
+mate-pairs, etc. Most of them are columns, so select the column, then use the 
+"Show column stats" to view the sum. The following will only cover the three sections
+that are found in un-assembled sequences.
+<table border=1>
+<tr><td>Sequence lengths
+	<td>Filters: General: change &gt;= to &lt;=, 
+	  enter upper limit into Length
+	<td>The counts of the intervals to the left need to be subtracted from the number of rows.
+<tr><td>ORF lengths
+	<td>Filter: SNPs and ORFs; enter lower limit into ORF len
+	<td>Work from right to left, the counts of the intervals to the right need to be subtracted from the number of rows.
+<tr><td>Quality
+	<td>Filters: General: Has Ns: Yes; Column: Ns
+	<td>The resulting rows are the #n&gt;0; sort the rows in descending order and scroll down
+	to the row number that start having #n&gt;10.
+</table>
 </html>

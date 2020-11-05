@@ -30,14 +30,15 @@ regions, e.g. Ka/Ks from the KaKs_calculator<sup>1</sup>.
 <h3>1. Overview</h3> 
 <table border=0>
 <tr><td>
-Scrolling down in the overview shows the <a href=ex.html>statistics summary</a>, and the <a href=explain.html>Explain</a>
-button explains how each value was computed.
-<p>There are three types of tables: clusters, pairs, and sequences.
-The tables can be very big, so the top three tabs on the left provide <b>Sample</b> tables
-of just a few 1000's. All three table types have <b>Filters</b>, which limits the number of rows that
+Scrolling down in the overview shows the <a href=ex.html class="ext" target="_blank">Overview</a>, 
+and the <a href=summary.html class="ext" target="_blank">Explain</a>
+button explains how to compute/confirm the values using the <code>viewMulti</code> interface.
+<p>There are four types of tables: clusters, pairs, sequences and hits.
+The tables can be very big, so the bottom four tabs on the left provide <b>Sample</b> tables
+of just a few 1000's. All table types have <b>Filters</b>, which limits the number of rows that
 are displayed. 
 <p>The types of clusters in a table depends on how the database was built 
-(see <a href=../runMulti>runMulti</a>) for detail. This mTCW database has 6 different types of clusters,
+(see <a href=../runMulti class="ext" target="_blank">runMulti</a>) for detail. This mTCW database has 4 different types of clusters,
 as described in the Overview on the right.
 
 
@@ -57,13 +58,13 @@ The table on the right was created with the filter to show the clusters of metho
 sequence for each dataset.
 
 <p>Select a row followed by:
-<ol>
+<ul>
 <li><b>Sequences</b>: the table of sequences for the cluster will
-be shown (see lower left image). The columns Ww, Xx, Yy, Zz are the RPKM values.
+be shown (see lower left image). The columns C1,C2,C3 are the TPM values.
+<br><br>
 <li><b>Pairs</b>: the table of pairs for the cluster will
-be shown (see lower right image). Only pairs that share a blast hit will be in the database. 
-Only two of these pairs has a PCC>0.8, which is the correlation between the RPKM values in the sequence table.
-</ol>
+be shown (see lower right image). 
+</ul>
 <td>
 <a  href="img/clusterTable.png">
 <img width=650 src="img/clusterTable.png" border=1></a>
@@ -81,7 +82,7 @@ Only two of these pairs has a PCC>0.8, which is the correlation between the RPKM
 <img  width=450 src="img/clusterPairs.png" border=1></a>
 </table>
 
-
+<br>
 <!----------------------------- pairs ---------------------------->
 <a name=pairTable>
 <table width='100%'><tr><td align='left' >
@@ -89,7 +90,7 @@ Only two of these pairs has a PCC>0.8, which is the correlation between the RPKM
 </td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
 
 <table border=0>
-<tr><td>
+<tr><td valign="top">
 Selecting a row followed by <b>Sequences</b> creates a table of two sequences; from the sequence
 table, you can see how they align.
 
@@ -98,7 +99,7 @@ table, you can see how they align.
 <img width=700 src="img/pairTable.png" border=1></a>
 
 <tr><td>
-<p>The figure on the right shows the columns for pairs. All 3 types of table work as follows:
+<p>The figure on the right shows the columns for pairs. All 4 types of table work as follows:
 <ol>
 <li>The <b>Select Column</b> panel displays all possible columns. 
 <li>Mousing over a column describes it in the lower left.
@@ -130,8 +131,8 @@ Align:
 <li><b>Pairwise...</b>: The first two options perform AA or NT alignment for all selected sequences will
 using dynamic programming. The third option aligns a pair of sequences on their AA, CDS and NT sequences using
 dynamic programming.
-<li><b>multiDB</b>: displays the multi-alignment for a cluster stored in the database.
-<li><b>Multi...</b>: (not available with Applet) either the cluster or selected sequences will be aligned
+<li><b>MSAdb</b>: displays the multi-alignment for a cluster stored in the database.
+<li><b>MSA...</b>: either the cluster or selected sequences will be aligned
 using MUSCLE<sup>3</sup> or MAFFT<sup>4</sup>. Their alignments and scores are written to file.
 </ol>
 <td>

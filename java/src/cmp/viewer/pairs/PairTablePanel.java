@@ -24,6 +24,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -39,6 +40,7 @@ import javax.swing.table.TableColumnModel;
 import util.database.DBConn;
 import util.database.Globalx;
 import util.methods.ErrorReport;
+import util.methods.Out;
 import util.methods.Static;
 import util.ui.UserPrompt;
 import cmp.align.SumStats;
@@ -55,18 +57,19 @@ public class PairTablePanel extends JPanel {
 	
 	private static final String TABLE = FieldData.PAIR_TABLE;
 	private static final String PAIRID = FieldData.PAIRID;
-	private static final String SEQ_ID = FieldData.SEQ_TABLE + "." + FieldData.SEQ_SQLID;
+	private static final String SEQ_ID = FieldData.SEQ_SQLID; // CAS310 FieldData.SEQ_TABLE + "." + FieldData.SEQ_SQLID;
 	private static final String SEQ_ID1 = FieldData.SEQID1; 
 	private static final String SEQ_ID2 = FieldData.SEQID2; 
 	private static final String ID1_SQL = FieldData.ID1_SQLID; 
 	private static final String ID2_SQL = FieldData.ID2_SQLID; 	
 	private static final String HITID = FieldData.HITID;
 	private static final String HITDESC = FieldData.HITDESC;
-	private static final String helpHTML = "PairTable.html";
+	private static final String helpHTML = Globals.helpDir + "PairTable.html";
 	
 	// List pairs or Filter pairs
 	public PairTablePanel(MTCWFrame parentFrame, String tab) {
 		if (tab.startsWith(MTCWFrame.MENU_PREFIX)) isList=true;
+		
 		initData(parentFrame, tab);	
 		
 		PairQueryPanel theQueryPanel = theViewerFrame.getPairQueryPanel();
@@ -78,84 +81,62 @@ public class PairTablePanel extends JPanel {
 		
 		buildQueryThread(); 
 	}
-	// From groups table
-	public PairTablePanel(MTCWFrame parentFrame, GrpTablePanel parentList,
-			String tab,  String sum, int grp, String name, int row) {
-		if (tab.startsWith(MTCWFrame.MENU_PREFIX)) isList=true;
-		theGrpTable = parentList;
-		nParentRow = row;
-		initData(parentFrame, tab);	
-		
-		pairsForGrpID = grp;
-		grpName = name; // name.substring(0, name.indexOf("_")) + " like '" +  name + "'"; // column name like cluster name 
-		strQuerySummary = sum;
-		
-		buildQueryThread(); 
-	}
+	
 	// from seq table
-	public PairTablePanel(MTCWFrame parentFrame, SeqsTopRowPanel parentList,
-			String tab,  String sum, String list, int row) {
+	public PairTablePanel(MTCWFrame parentFrame, SeqsTopRowPanel parentList, String tab,  String sum, String list, int row) {
 		if (tab.startsWith(MTCWFrame.MENU_PREFIX)) isList=true;
+		
 		theSeqTable = parentList;
 		nParentRow = row;
-		initData(parentFrame, tab);	
-		
 		seqList = list;
 		strQuerySummary = sum;
 		
+		initData(parentFrame, tab);	
+		
 		buildQueryThread(); 
 	}
-	private void loadNewGrpRow(int inc) {
-		if (inc<0) nParentRow = theGrpTable.getTranslatedRow(nParentRow - 1);
-		else nParentRow = theGrpTable.getTranslatedRow(nParentRow + 1);
+	
+	// From groups table
+	public PairTablePanel(MTCWFrame parentFrame, GrpTablePanel parentList, String where, String tab,  String sum,  int row) {
+		if (tab.startsWith(MTCWFrame.MENU_PREFIX)) isList=true;
 		
-		String [] strVals = theGrpTable.getPairsQueryNext(nParentRow);
-		pairsForGrpID = Integer.parseInt(strVals[0]);
-		grpName = strVals[1];
-		tabName = strVals[2];
-		strQuerySummary = strVals[3];
+		theGrpTable = parentList;
+		nParentRow = row;
+		grpWhere = where;
+		strQuerySummary = sum;
 		
-		buildQueryThread();
+		initData(parentFrame, tab);	
+		
+		buildQueryThread(); 
 	}
-	private void loadNewPairRow(int inc) {
-		int nextRow = (inc<0) ? nParentRow - 1 : nParentRow + 1;
-		
-		String [] strVals = theSeqTable.getPairsQueryNext(nextRow);
-		seqList = strVals[0];
-		tabName = strVals[1];
-		strQuerySummary = strVals[2];
-		nParentRow = Integer.parseInt(strVals[3]);
-		
-		buildQueryThread();
-	}
+	
 	/** XXX Buttons for Pair table */
     private JPanel createTableButton() {
-    		JPanel buttonPanel = Static.createPagePanel();
+    	JPanel buttonPanel = Static.createPagePanel();
 	    	
-    		JPanel topRow = Static.createRowPanel();
+    	JPanel topRow = Static.createRowPanel();
 	    topRow.add(new JLabel("Selected:"));
     	   	
-        	 btnTableSeqs = Static.createButton("Sequences", false, Globals.FUNCTIONCOLOR);
+         btnTableSeqs = Static.createButton("Sequences", false, Globals.FUNCTIONCOLOR);
          btnTableSeqs.addActionListener(new ActionListener() {
  			public void actionPerformed(ActionEvent arg0) {
- 				try{						
- 					String [] strVals = getSeqQueryList();//tab, summary, Where
- 					
- 					int row = -1;
- 					if (theTable.getSelectedRowCount() == 1) row = theTable.getSelectedRow();
- 					SeqsTopRowPanel newPanel = new SeqsTopRowPanel(theViewerFrame, getInstance(), 
- 							strVals[0], strVals[1], strVals[2], row);
- 					theViewerFrame.addResultPanel(getInstance(), newPanel, newPanel.getName(), 
- 							strVals[1]);
- 				
- 				} catch(Exception e) {ErrorReport.reportError(e,  "View Selected Sequence");
- 				} catch(Error e) {ErrorReport.reportFatalError(e, "View Selected Sequence", theViewerFrame);}
+ 				viewSequences();
  			}
  		});
         topRow.add(btnTableSeqs);
-        topRow.add(Box.createHorizontalStrut(3));   
+        topRow.add(Box.createHorizontalStrut(3));  
+        
+        // CAS310 add
+        btnTableGrps = Static.createButton("Clusters", false, Globals.FUNCTIONCOLOR);
+        btnTableGrps.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				viewClusters();
+			}
+		});
+       topRow.add(btnTableGrps);
+       topRow.add(Box.createHorizontalStrut(3)); 
          	
-        	createBtnCopy();
+        createBtnCopy();
  		topRow.add(btnCopy);
         topRow.add(Box.createHorizontalStrut(50));  
 		
@@ -166,8 +147,7 @@ public class PairTablePanel extends JPanel {
         btnHelp = Static.createButton("Help", true, Globals.HELPCOLOR);
         btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				UserPrompt.displayHTMLResourceHelp(theViewerFrame, 
-						"Pair table", "html/viewMultiTCW/" + helpHTML);
+				UserPrompt.displayHTMLResourceHelp(theViewerFrame, "Pair table",  helpHTML);
 			}
 		});
         topRow.add(btnHelp);
@@ -179,16 +159,16 @@ public class PairTablePanel extends JPanel {
  	 	   btnPrevRow = Static.createButton("<< Prev", true);
  	 	   btnPrevRow.addActionListener(new ActionListener() {
  	 		   public void actionPerformed(ActionEvent arg0) {
- 	 			   if (seqList!=null) loadNewPairRow(-1);
- 	 			   else loadNewGrpRow(-1);
+ 	 			   if (seqList!=null) getNextSeqRow(-1);
+ 	 			   else getNextGrpRow(nParentRow - 1);
  	 		   }
  	 	   });
  	 	  
  	 	   btnNextRow = Static.createButton("Next >>", true);
  	 	   btnNextRow.addActionListener(new ActionListener() {
  	 		   public void actionPerformed(ActionEvent arg0) {
- 	 			   if (seqList!=null) loadNewPairRow(1);
-	 			   else  loadNewGrpRow(1);
+ 	 			   if (seqList!=null) getNextSeqRow(1);
+	 			   else  getNextGrpRow(nParentRow + 1);
  	 		   }
  	 	   });
  	 	   
@@ -208,11 +188,11 @@ public class PairTablePanel extends JPanel {
     
     
     private void createBtnCopy() {
-    	 	btnCopy = Static.createButton("Copy...", false);
+    	btnCopy = Static.createButton("Copy...", false);
  	    final JPopupMenu copyPop = new JPopupMenu();
- 	   copyPop.setBackground(Color.WHITE); 
+ 	    copyPop.setBackground(Color.WHITE); 
  	    
- 	   copyPop.add(new JMenuItem(new AbstractAction("SeqID1") {
+ 	    copyPop.add(new JMenuItem(new AbstractAction("SeqID1") {
  			private static final long serialVersionUID = 4692812516440639008L;
  			public void actionPerformed(ActionEvent e) {
  				int row = theTable.getSelectedRow();
@@ -259,33 +239,33 @@ public class PairTablePanel extends JPanel {
  	    });
     }
     private void createBtnTable() {
-    		final JPopupMenu popup = new JPopupMenu();
-    		popup.setBackground(Color.WHITE);
-    		
-    		popup.add(new JMenuItem(new AbstractAction("Show Column Stats") {
-    	 		   private static final long serialVersionUID = 1L;
-    	 		   public void actionPerformed(ActionEvent e) {
-    					new TableUtil().statsPopUp("Pairs: " + strQuerySummary, theTable);
-    					
-    	 		   }
-    	 	}));
-    		if (!hasAAdb) {
-    	 	    popup.add(new JMenuItem(new AbstractAction("Show Table Stats (Slow)") {
-    				private static final long serialVersionUID = 1L;
-    					public void actionPerformed(ActionEvent e) {
-    	 	    			try{			
-    	 					Vector <Integer> ids = getSeqQueryAll();
-    	 					DBConn mDB = theViewerFrame.getDBConnection();
-    	 					String summary = "Pairs: " + strQuerySummary;
-    	 					new SumStats(mDB).fromView(ids, summary);
-    	 					// close in SumStats
-    	 				} catch(Exception ee) {ErrorReport.reportError(ee,  "View stats");
-    	 				} catch(Error ee) {ErrorReport.reportFatalError(ee, "View stats", theViewerFrame);}
-    	 	    		}
-    	 	   }));
-    		}
+		final JPopupMenu popup = new JPopupMenu();
+		popup.setBackground(Color.WHITE);
+		
+		popup.add(new JMenuItem(new AbstractAction("Show Column Stats") {
+	 		   private static final long serialVersionUID = 1L;
+	 		   public void actionPerformed(ActionEvent e) {
+					new TableUtil().statsPopUp("Pairs: " + strQuerySummary, theTable);
+					
+	 		   }
+	 	}));
+		if (!hasAAdb) {
+	 	    popup.add(new JMenuItem(new AbstractAction("Show Table Stats (Slow)") {
+				private static final long serialVersionUID = 1L;
+					public void actionPerformed(ActionEvent e) {
+	 	    			try{			
+	 					Vector <Integer> ids = getSeqQueryAll();
+	 					DBConn mDB = theViewerFrame.getDBConnection();
+	 					String summary = "Pairs: " + strQuerySummary;
+	 					new SumStats(mDB).fromView(ids, summary);
+	 					// close in SumStats
+	 				} catch(Exception ee) {ErrorReport.reportError(ee,  "View stats");
+	 				} catch(Error ee) {Out.prt("Error");ErrorReport.reportFatalError(ee, "View stats", theViewerFrame);}
+	 	    	}
+	 	   }));
+		}
  	   
- 	  popup.addSeparator();      
+		popup.addSeparator();      
         popup.add(new JMenuItem(new AbstractAction("Copy Table") { 
  			private static final long serialVersionUID = 4692812516440639008L;
  			public void actionPerformed(ActionEvent e) {
@@ -353,12 +333,14 @@ public class PairTablePanel extends JPanel {
     }
 	private void initData(MTCWFrame parentFrame, String resultName) {
 		theViewerFrame = parentFrame;
+		tabName = resultName;
+		
 		hasAAdb = (theViewerFrame.getnAAdb()>0);
 		vSettings = parentFrame.getSettings();
-		tabName = resultName;
+		
 		totalPairs = theViewerFrame.getInfo().getCntPair();
-		methods = theViewerFrame.getInfo().getMethodPrefix();
-		hasGOs = (theViewerFrame.getInfo().getCntGO()>0);
+		methods =    theViewerFrame.getInfo().getMethodPrefix();
+		hasGOs =    (theViewerFrame.getInfo().getCntGO()>0);
 
 		colSelectChange = new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -411,7 +393,7 @@ public class PairTablePanel extends JPanel {
 	private void buildTable(ResultSet rs) {
         FieldData theFields = FieldData.getPairFields(methods);
     
-        	tableButtonPanel = createTableButton();    
+        tableButtonPanel = createTableButton();    
 		tableStatusPanel = createTableStatusPanel();	
 		tableSummaryPanel = createTableSummaryPanel();
 		fieldSelectPanel = createFieldSelectPanel();
@@ -478,6 +460,7 @@ public class PairTablePanel extends JPanel {
 		boolean b = (selCount == 1 || rowCount==1) ? true : false;
 		
 		btnTableSeqs.setEnabled(selCount>0); 
+		btnTableGrps.setEnabled(selCount>0); 
 		btnCopy.setEnabled(b);
 	}
     private JPanel createFieldSelectPanel() {
@@ -520,62 +503,62 @@ public class PairTablePanel extends JPanel {
 		int hIdx = 0, hBreak = 0;
 		
 	    for(int x=0; x<columns.length; x++) {   	
-	        	if (hBreak < secBreak.length && secBreak[hBreak] == x) {
-	        		page.add(row);
-	        		row = Static.createRowPanel();
-	        		hBreak++;
-	        	}
-	        	else if (hIdx < secIdx.length && secIdx[hIdx] == x) {
-        			page.add(row);
-	        		row = Static.createRowPanel();
-	        		
-        			if(sections[hIdx+1].length() > 0) {
-        				page.add(Box.createVerticalStrut(10));
-        				page.add(new JLabel(sections[hIdx+1]));
-        			}
-        			hIdx++;
-	        	}
-	        	
-	    		row.add(chkFields[x]);
-	    	 	int colwidth = maxWidth - chkFields[x].getPreferredSize().width;
-	    	 	int space=2; 
-	        	if(colwidth > 0) space += colwidth;
-	    		row.add(Box.createHorizontalStrut(space));
-	    	}
-	    	
-	    	if(row.getComponentCount() > 0) page.add(row);
-		
-	    	page.setBorder(BorderFactory.createTitledBorder("Columns"));
-	    	page.setMaximumSize(page.getPreferredSize());
+        	if (hBreak < secBreak.length && secBreak[hBreak] == x) {
+        		page.add(row);
+        		row = Static.createRowPanel();
+        		hBreak++;
+        	}
+        	else if (hIdx < secIdx.length && secIdx[hIdx] == x) {
+    			page.add(row);
+        		row = Static.createRowPanel();
+        		
+    			if(sections[hIdx+1].length() > 0) {
+    				page.add(Box.createVerticalStrut(10));
+    				page.add(new JLabel(sections[hIdx+1]));
+    			}
+    			hIdx++;
+        	}
+        	
+    		row.add(chkFields[x]);
+    	 	int colwidth = maxWidth - chkFields[x].getPreferredSize().width;
+    	 	int space=2; 
+        	if(colwidth > 0) space += colwidth;
+    		row.add(Box.createHorizontalStrut(space));
+    	}
+    	
+    	if(row.getComponentCount() > 0) page.add(row);
 	
-	    	return page;
+    	page.setBorder(BorderFactory.createTitledBorder("Columns"));
+    	page.setMaximumSize(page.getPreferredSize());
+
+    	return page;
 	}
     private JPanel createTableStatusPanel() {
-	    	JPanel thePanel = Static.createRowPanel();
-	    	tableType = Static.createTextFieldNoEdit(20);
-	    	Font f = tableType.getFont();
-	    	tableType.setFont(new Font(f.getFontName(),Font.BOLD, f.getSize()));
-	    	tableType.setMaximumSize(tableType.getPreferredSize());
-	    	tableType.setAlignmentX(LEFT_ALIGNMENT);
-	
-	    	tableHeader =  Static.createTextFieldNoEdit(30);
-	    	thePanel.add(tableType);
-	    	thePanel.add(tableHeader);
-	    	thePanel.setMaximumSize(thePanel.getPreferredSize());
-	    	
-	    	return thePanel;
+    	JPanel thePanel = Static.createRowPanel();
+    	tableType = Static.createTextFieldNoEdit(20);
+    	Font f = tableType.getFont();
+    	tableType.setFont(new Font(f.getFontName(),Font.BOLD, f.getSize()));
+    	tableType.setMaximumSize(tableType.getPreferredSize());
+    	tableType.setAlignmentX(LEFT_ALIGNMENT);
+
+    	tableHeader =  Static.createTextFieldNoEdit(30);
+    	thePanel.add(tableType);
+    	thePanel.add(tableHeader);
+    	thePanel.setMaximumSize(thePanel.getPreferredSize());
+    	
+    	return thePanel;
 	}
     private JPanel createTableSummaryPanel() {
-	    	JPanel thePanel = Static.createRowPanel();
-	    
-	    	JLabel header = Static.createLabel(MTCWFrame.FILTER, true);
-	    	thePanel.add(header);
-	    	
-	    	lblSummary = Static.createLabel(strQuerySummary, true);
-	    	lblSummary.setFont(getFont());
-	    	thePanel.add(lblSummary);
-	    	
-	    	return thePanel;
+    	JPanel thePanel = Static.createRowPanel();
+    
+    	JLabel header = Static.createLabel(MTCWFrame.FILTER, true);
+    	thePanel.add(header);
+    	
+    	lblSummary = Static.createLabel(strQuerySummary, true);
+    	lblSummary.setFont(getFont());
+    	thePanel.add(lblSummary);
+    	
+    	return thePanel;
 	}
 	
 	public String getSummary() { return strQuerySummary; }
@@ -583,47 +566,51 @@ public class PairTablePanel extends JPanel {
 	
 	private String buildQueryStr(DBConn mdb) {
         try {
-        		FieldData theFields = FieldData.getPairFields(methods);
-	        	
-        		String strQuery = "SELECT " + theFields.getDBFieldQueryList() + " FROM " + TABLE + " ";
-	        	
-	        	strQuery += theFields.getJoins();
-	        	
-	        	String cntSQL=null;
-	      
-	        	if (pairsForGrpID>0) {// list pairs in cluster; called from group table e.g. CL like CL_00001
-	        		String grp = grpName.substring(0, grpName.indexOf("_")) + " like '" +  grpName + "'"; 
-	        		strQuery += " WHERE " + grp;
-	        		cntSQL = "select count(*) from " + TABLE + " where " + grp;
-	        	}
-	        	else if (seqList!=null) { // seqList example "(1,2,3)"
-	        		String clause = "UTid1 IN " + seqList + " or UTid2 IN " + seqList;
-	        		strQuery += " WHERE " + clause;
-	        		cntSQL = "select count(*) from " + TABLE + " where " + clause;
-	        	}
-	        	else {
-	        		strQuery += " WHERE " + strSubQuery;
-	        		cntSQL = "select count(*) from " + TABLE + " where " + strSubQuery;
-	        	}
-	        	if (cntSQL.contains("unique_hits") || (strSubQuery==null || strSubQuery.equals(""))) {
-	        		loadStatus.setText("Getting filtered pairs from database");
-	        	}
-	        	else {
-	        		int cnt = mdb.executeCount("select count(*) from " + TABLE + " where " + strSubQuery);
-	        		String per = Static.perText(cnt, theViewerFrame.getInfo().getCntPair());
-		        	loadStatus.setText("Getting " + cnt + " " + per + " filtered pairs from database");
-	        	}
-	        	
-        		return strQuery;
+    		FieldData theFields = FieldData.getPairFields(methods);
+        	
+    		String strQuery = "SELECT " + theFields.getDBFieldQueryList() + " FROM " + TABLE + " ";
+        	
+        	strQuery += theFields.getJoins();
+        	
+        	String cntSQL=null;
+      
+        	if (grpWhere!=null) {// list pairs in cluster; called from group table e.g. CL like CL_00001
+        		strQuery += " WHERE " + grpWhere;
+        		cntSQL = "select count(*) from " + TABLE + " WHERE " + grpWhere;
+        	}
+        	else if (seqList!=null) { // seqList example "(1,2,3)"
+        		String clause = "UTid1 IN " + seqList + " or UTid2 IN " + seqList;
+        		strQuery += " WHERE " + clause;
+        		cntSQL = "select count(*) from " + TABLE + " WHERE " + clause;
+        	}
+        	else {
+        		strQuery += " WHERE " + strSubQuery;
+        		cntSQL = "select count(*) from " + TABLE + " where " + strSubQuery;
+        	}
+        	if (cntSQL.contains("unique_hits") || (strSubQuery==null || strSubQuery.equals(""))) {
+        		loadStatus.setText("Getting filtered pairs from database");
+        	}
+        	else {
+        		int cnt = mdb.executeCount("select count(*) from " + TABLE + " where " + strSubQuery);
+        		String per = Static.perText(cnt, theViewerFrame.getInfo().getCntPair());
+	        	loadStatus.setText("Getting " + cnt + " " + per + " filtered pairs from database");
+        	}
+        	
+    		return strQuery;
         } catch(Exception e) {ErrorReport.reportError(e, "Error processing query");return null;}
 	}
 	private void buildShortList() {
-		DBinfo info = theViewerFrame.getInfo();
-		String x = info.getSamplePair();
-		if (x==null || x=="") return;
-		String [] y = x.split(":");
-		strSubQuery = y[1];
-		strQuerySummary = y[0];
+		try {
+			DBConn mDB = theViewerFrame.getDBConnection(); // CAS310
+			DBinfo info = theViewerFrame.getInfo();
+			String x = info.getSamplePair(mDB);
+			mDB.close();
+			
+			if (x==null || x=="") return;
+			String [] y = x.split(":");
+			strSubQuery = y[1];
+			strQuerySummary = y[0];
+		} catch(Exception e) {ErrorReport.reportError(e, "Error processing sample for Pairs");}
 	}
 	private void clearColumns() {
 		chkFields[0].setSelected(false);
@@ -635,65 +622,77 @@ public class PairTablePanel extends JPanel {
 		}
 	}
     private String [] getSelectedColumns() {
-	    	String [] retVal = null;
-	    	
-	    	int selectedCount = 0;
-	    	for(int x=0; x<chkFields.length; x++) 
-	    		if(chkFields[x].isSelected())
-	    			selectedCount++;
-	    	
-	    	if(selectedCount == 0) {
-    			for(int x=0; x<FieldData.PAIR_DEFAULT.length; x++) {
-    				chkFields[x].setSelected(FieldData.PAIR_DEFAULT[x]);
-    				if(chkFields[x].isSelected())
-    					selectedCount++;
-    			}
-	    	}
-	    	retVal = new String[selectedCount];
-	    	int targetIndex = 0;
-	    	for(int x=0; x<chkFields.length; x++) 
-	    		if(chkFields[x].isSelected()) {
-	    			retVal[targetIndex] = chkFields[x].getText();
-	    			targetIndex++;
-	    		}
-	    	
-	    	return retVal;
+    	String [] retVal = null;
+    	
+    	int selectedCount = 0;
+    	for(int x=0; x<chkFields.length; x++) 
+    		if(chkFields[x].isSelected())
+    			selectedCount++;
+    	
+    	if(selectedCount == 0) {
+			for(int x=0; x<FieldData.PAIR_DEFAULT.length; x++) {
+				chkFields[x].setSelected(FieldData.PAIR_DEFAULT[x]);
+				if(chkFields[x].isSelected())
+					selectedCount++;
+			}
+    	}
+    	retVal = new String[selectedCount];
+    	int targetIndex = 0;
+    	for(int x=0; x<chkFields.length; x++) 
+    		if(chkFields[x].isSelected()) {
+    			retVal[targetIndex] = chkFields[x].getText();
+    			targetIndex++;
+    		}
+    	
+    	return retVal;
     }
     private boolean [] getColumnSelections(String [] columns, 
-			boolean [] defaultSelections, String [] selections) {
-	
-	    	if(selections == null || selections.length == 0)
-	    		return defaultSelections;
-	    	Vector<String> sels = new Vector<String> ();
-	    	boolean [] retVal = new boolean[columns.length];
-	    	for(int x=0; x<selections.length; x++)
-	    		sels.add(selections[x]);
-	    	for(int x=0; x<columns.length; x++) {
-	    		retVal[x] = sels.contains(columns[x]);
-	    	}
-	    	return retVal;
+		boolean [] defaultSelections, String [] selections) {
+
+    	if(selections == null || selections.length == 0)
+    		return defaultSelections;
+    	Vector<String> sels = new Vector<String> ();
+    	boolean [] retVal = new boolean[columns.length];
+    	for(int x=0; x<selections.length; x++)
+    		sels.add(selections[x]);
+    	for(int x=0; x<columns.length; x++) {
+    		retVal[x] = sels.contains(columns[x]);
+    	}
+    	return retVal;
     }
     
  // selection of multiple pairs
     private Vector <Integer> getSeqQueryAll() {
-    		Vector <Integer> pairids = new Vector <Integer> ();
-    		int IDidx = theTableData.getColumnHeaderIndex(PAIRID);
-    		for (int row=0; row<theTableData.getNumRows(); row++) {
-    			int pairid = ((Integer)theTableData.getValueAt(row, IDidx));	
-    			pairids.add(pairid);
-    		}
-    		return pairids;
+		Vector <Integer> pairids = new Vector <Integer> ();
+		int IDidx = theTableData.getColumnHeaderIndex(PAIRID);
+		for (int row=0; row<theTableData.getNumRows(); row++) {
+			int pairid = ((Integer)theTableData.getValueAt(row, IDidx));	
+			pairids.add(pairid);
+		}
+		return pairids;
     }
-    
- // selection of multiple pairs
-    private String [] getSeqQueryList() {
-    		int [] sels = theTable.getSelectedRows();
-    		if (sels==null || sels.length==0) return getSeqQueryNext(0);
-    		if (sels.length==1) return getSeqQueryNext(sels[0]);
-    		else return getSeqQueryList(sels);
+    /***********************************************************************
+     * Sequences for selected pairs -- build list of seqIdx from table
+     ***********************************************************/
+    private void viewSequences() {
+    	try {						
+			String [] strVals; // [0] tab, [1] summary, [2] where
+			int [] sels = theTable.getSelectedRows();
+			
+			if (sels==null || sels.length==0) strVals = getPairQueryForSeq(0);
+			else if (sels.length==1)          strVals = getPairQueryForSeq(sels[0]);
+			else                              strVals = getPairQueryForSeq(sels);
+			
+			int row = (sels.length == 1) ? row = theTable.getSelectedRow() : -1;
+			SeqsTopRowPanel newPanel = new SeqsTopRowPanel(theViewerFrame, getInstance(), 
+					strVals[0], strVals[1], strVals[2], row);
+			theViewerFrame.addResultPanel(getInstance(), newPanel, newPanel.getName(), strVals[1]);
+    	}
+    	catch (Exception e) {ErrorReport.prtReport(e, "View Pair Clusters");}
     }
-    // This is used for Next/Prev and for currect selected
-    public String [] getSeqQueryNext(int row) {
+  
+    // This is used for Next/Prev from Pair and Cluster sequence tables; and used for viewSequences
+    public String [] getPairQueryForSeq(int row) {
 		int IDidx = theTableData.getColumnHeaderIndex(PAIRID);
 		int IDidx1 = theTableData.getColumnHeaderIndex(ID1_SQL); // index
 		int IDidx2 = theTableData.getColumnHeaderIndex(ID2_SQL);
@@ -702,24 +701,23 @@ public class PairTablePanel extends JPanel {
 		int pairid = ((Integer)theTableData.getValueAt(row, IDidx));			
 		
 		String [] retVal = new String[3];
-		retVal[0] = MTCWFrame.SEQ_PREFIX + ": Pair#" + pairid; 	// tab on left
-		retVal[1] = "Pair#" + pairid;							// display as query on table
+		retVal[0] = MTCWFrame.SEQ_PREFIX + ": pair #" + pairid; 	                   // tab on left
+		retVal[1] = "Pair #" + pairid;							       					// summary on table
 		retVal[2] = " (" + SEQ_ID + " = " + id1 + " or " + SEQ_ID + " = " + id2 + ")"; // Where
 
 		return retVal;
     }
-    // select multiple pairs select UTstr from unitrans where UTid in (1,2,3)
-    public String [] getSeqQueryList(int [] row) {
-    		String [] retVal = new String[3];
+    private String [] getPairQueryForSeq(int [] row) {
+    	String [] retVal = new String[3];
     		
-    		retVal[0]="Seq: " + row.length + " pairs";
-    		retVal[1]="Pair ";
-    		retVal[2]= " UTid in (";
-    		HashSet <Integer> added = new HashSet <Integer> ();
+    	retVal[0]= MTCWFrame.SEQ_PREFIX  + ": pairs " + row.length; // tab on left
+    	retVal[1]= "Pairs ";										// summary
+    	retVal[2]= " UTid in (";								     // where
+    	HashSet <Integer> added = new HashSet <Integer> ();
     		
-    		for (int i=0; i<row.length; i++) {
-    			int IDidx = theTableData.getColumnHeaderIndex(PAIRID);
-    			int pairid = ((Integer)theTableData.getValueAt(row[i], IDidx));
+    	for (int i=0; i<row.length; i++) {
+    		int IDidx = theTableData.getColumnHeaderIndex(PAIRID);
+    		int pairid = ((Integer)theTableData.getValueAt(row[i], IDidx));
 			int IDidx1 = theTableData.getColumnHeaderIndex(ID1_SQL);
 			int IDidx2 = theTableData.getColumnHeaderIndex(ID2_SQL);
 			int id1 = (Integer)theTableData.getValueAt(row[i], IDidx1);
@@ -732,7 +730,7 @@ public class PairTablePanel extends JPanel {
 				added.add(id2);
 			}
 			else {
-				retVal[1] += ", #" + pairid;
+				if (i<11) retVal[1] += ", #" + pairid;
 				if (!added.contains(id1)) {
 					retVal[2] += "," + id1;	
 					added.add(id1);
@@ -742,12 +740,135 @@ public class PairTablePanel extends JPanel {
 					added.add(id2);
 				}
 			}
-    		}
-    		retVal[2] += ")";
+    	}
+    	if (row.length>11) retVal[1] += "...(" + row.length + " total)";
+    	retVal[2] += ")";
 		return retVal;
     }
-    
-   
+    // Called from Seq Table for next pair row
+    public String [] getNextPairRowForSeq(int nextRow) {
+    	int row = getTranslatedRow(nextRow);
+    	return getPairQueryForSeq(row);
+    }
+    // Pair Table Next/Prev  through Seq table
+    private void getNextSeqRow(int inc) {
+		int nextRow = (inc<0) ? nParentRow - 1 : nParentRow + 1;
+		
+		String [] strVals = theSeqTable.getNextSeqRowForPair(nextRow);
+		seqList = strVals[0];
+		tabName = strVals[1];
+		strQuerySummary = strVals[2];
+		nParentRow = Integer.parseInt(strVals[3]);
+		
+		buildQueryThread();
+	}
+    /******************************************************
+     * CAS310 Clusters for selected pairs -- need to query database for GrpIDs
+     */
+    private void viewClusters() {
+    	try {
+    		int [] sels = theTable.getSelectedRows();
+        	if (sels==null || sels.length==0) return;
+    			
+    	// grpId for where (build Where string in GrpTablePanel)
+			Vector <Integer> grpIDs = getPairQueryForGrp(sels, true);
+			if (grpIDs==null) return;
+			String sql = GrpTablePanel.makeSQLfromGRPid(grpIDs.toArray(new Integer[0]));
+			
+		// summary
+			int num = sels.length;
+	    	int IDidx = theTableData.getColumnHeaderIndex(PAIRID);
+	    	String sum = "#" + ((Integer)theTableData.getValueAt(sels[0], IDidx));
+	    	
+	    	for (int i=1; i<num && i<11; i++) {
+	    		sum += ", #" + ((Integer)theTableData.getValueAt(sels[i], IDidx));
+	    	}
+	    	if (num>11) sum += "... (" + sels.length + " total)";
+	    	String summary = (num==1) ? "Pair " : "Pairs ";
+	    	summary += sum;
+	    	
+	    // tab
+			String tab = MTCWFrame.GRP_PREFIX +  ": ";
+			if (num==1) tab += "pair " + sum;
+			else        tab += "pairs " + num;
+			
+			int row = (sels.length == 1) ? row = theTable.getSelectedRow() : -1;
+			
+			GrpTablePanel grpPanel = new GrpTablePanel(theViewerFrame, getInstance(), tab, summary, sql, row); 
+			theViewerFrame.addResultPanel(getInstance(), grpPanel, grpPanel.getName(), grpPanel.getSummary());
+    	}
+    	catch (Exception e) {ErrorReport.prtReport(e, "View Pair Clusters");}
+    }
+    private Vector <Integer> getPairQueryForGrp(int [] sels, boolean pMsg) {
+		try{	
+			// For each selected line, get the column methods
+			int methodStart = FieldData.getPairMethodStart();
+			
+			Vector <String> grpNames = new Vector <String> ();
+			for (int row : sels) {
+				for (int col=0; col<methods.length; col++) {
+					String name = (String)theTableData.getValueAt(row, col+methodStart);
+					if (name!=null && !grpNames.contains(name)) {
+						grpNames.add(name);
+					}
+				}
+			}
+			
+			DBConn mDB = theViewerFrame.getDBConnection();
+			Vector<Integer> ids = new Vector<Integer> ();
+			ResultSet rset = null;
+			for (String name : grpNames) {
+				rset = mDB.executeQuery("SELECT PGid FROM pog_groups WHERE PGstr='" + name + "'");
+				if(rset.next()) {
+					int grpid = rset.getInt(1);
+					if (!ids.contains(grpid)) ids.add(grpid);
+				}
+			}
+			if (rset!=null) rset.close(); 
+			mDB.close();
+			
+			if (ids.size()==0 && pMsg) {
+				JOptionPane.showMessageDialog(null, 
+						"No Clusters for selected pairs ", "Warning", JOptionPane.PLAIN_MESSAGE); 
+				return null;
+			}
+	    	
+			return ids;
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "Loading Cluster IDs"); return null;}
+    }
+    // Pairs table Next/Prev through Cluster table
+    private void getNextGrpRow(int nextRow) {
+		String [] strVals = theGrpTable.getNextGrpRowForPair(nextRow);
+		grpWhere = strVals[0];
+		tabName = strVals[1];
+		strQuerySummary = strVals[2];
+		nParentRow = Integer.parseInt(strVals[3]);
+		
+		buildQueryThread();
+	}
+    // Cluster Table needs next row
+    public String [] getNextPairRowForGrp(int nextRow) {
+    	int row = getTranslatedRow(nextRow);
+    	int [] sels = new int [1];
+    	sels[0]=row;
+    	Vector <Integer> grpIDs = getPairQueryForGrp(sels, false);
+	
+    	String [] strVals = new String [4];
+    	strVals[0] = GrpTablePanel.makeSQLfromGRPid(grpIDs.toArray(new Integer[0]));
+    	
+    	int IDidx = theTableData.getColumnHeaderIndex(PAIRID);
+    	String pairNum = "Pair #" + ((Integer)theTableData.getValueAt(sels[0], IDidx));
+    	
+    	strVals[1] = pairNum;
+    	
+    	strVals[2] =  MTCWFrame.GRP_PREFIX +  ": " +  pairNum;
+    	
+    	strVals[3] = row+"";
+    	
+    	return strVals;
+    }
+    /**********************************************************************************/
   //When the view table gets sorted, sort the master table to match (Called by TableData)
     public void sortMasterColumn(String columnName, boolean ascending) {
 	    	int index = theTableData.getColumnHeaderIndex(columnName);
@@ -815,7 +936,9 @@ public class PairTablePanel extends JPanel {
 	    	temp.setMaximumSize(temp.getPreferredSize());
 	    	add(temp);
 	    	if(theTable != null) {
-	    	 	tableType.setText("Pair View");
+	    	 	if (grpWhere!=null) tableType.setText("Pair View for Cluster");
+	    	 	else if (seqList!=null) tableType.setText("Pair View for Sequence");
+	    	 	else tableType.setText("Pair View");
 	    	 	setTopEnabled();
 	    	}
 	    	invalidate();
@@ -891,7 +1014,7 @@ public class PairTablePanel extends JPanel {
 	    	private boolean [] bColumnAscending = null;
     }
     
-    public int getTranslatedRow(int row) {
+    private int getTranslatedRow(int row) {
 		if (theTable==null) return 0;
 
     		if (row == theTable.getRowCount()) return 0;
@@ -912,7 +1035,7 @@ public class PairTablePanel extends JPanel {
     private JButton btnCopy = null, btnTable = null, btnHelp = null;
     private JButton btnNextRow = null, btnPrevRow = null;
     private int nParentRow = -1;
-    private JButton btnTableSeqs = null;
+    private JButton btnTableSeqs = null, btnTableGrps = null;
     
     private ActionListener dblClick = null;
     private ActionListener sngClick = null;
@@ -936,8 +1059,7 @@ public class PairTablePanel extends JPanel {
 	private MTCWFrame theViewerFrame = null;
 	
 	private GrpTablePanel theGrpTable = null;
-	private int pairsForGrpID=0;
-	private String grpName="";
+	private String grpWhere = null;
 	
 	private SeqsTopRowPanel theSeqTable = null;
 	private String seqList=null;

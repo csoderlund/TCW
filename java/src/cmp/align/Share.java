@@ -52,7 +52,7 @@ public class Share {
 
 	public static String compress(String aSeq) {
 		try {
-			if (aSeq=="") return "";
+			if (aSeq==null || aSeq=="") return ""; // CAS310 add null check
 			if (aSeq.endsWith(stopStr)) aSeq = aSeq.substring(0, aSeq.length()-1);
 			
 			String gapMap="";
