@@ -44,22 +44,26 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 	public static final short DB_UNITRANS = 1;
 	public static final short DB_PAIRWISE = 2;
 	private static int parseWarnings = 0;
+	private static int prtWarn=0;
+	private static String prtHead=null;
 
-	static public void startHitWarnings(String msg) { // to start the file over
-		try{
-			FileWriter fstream = new FileWriter(badHits,false);
-			BufferedWriter out = new BufferedWriter(fstream);
-			out.write(msg + "\n");
-			out.close();
-		}
-		catch (Exception e){ErrorReport.prtReport(e, "Print warning about blast hit");}
+	static public void startHitWarnings(String msg) { // CAS311 only start file if a warning is ever printed
+		prtHead=msg;
+		prtWarn=0;
 	}
 	static public void printWarning(String msg) {
 		try{
-			  FileWriter fstream = new FileWriter(badHits,true);
-			  BufferedWriter out = new BufferedWriter(fstream);
-			  out.write(msg + "\n");
-			  out.close();
+			BufferedWriter out=null;
+			
+			if (prtWarn==0) {
+				out = new BufferedWriter(new FileWriter(badHits,false));
+				out.write(prtHead + "\n");
+			}
+			else out = new BufferedWriter(new FileWriter(badHits,true));
+			
+			out.write(msg + "\n");
+			out.close();
+			prtWarn++;
 		}
 		catch (Exception e){ErrorReport.prtReport(e, "Print warning about blast hit");}
 	}
@@ -163,7 +167,7 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 			nFrame1 = Integer.parseInt(tokens[9]);
 			nFrame2 = Integer.parseInt(tokens[10]);
 	
-			sharedHit = tokens[11];
+			//sharedHit = tokens[11];
 			int b = Integer.parseInt(tokens[12]);
 			int x = Integer.parseInt(tokens[13]);
 			if (b==1) isSelf=true;
@@ -233,7 +237,7 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 	}
 	
 	// annotator.DoUniProt
-    public void setPID ( int p ) { PID = p; }  
+    public void setPID ( int p ) {  /*PID = p;*/ }  // never used
     public void setCTGID (int p) {CTGID = p;}
    
     // Blast
@@ -351,11 +355,9 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 	private int rank=0;
 	private int ctg_orient = 1;
 	private boolean hitIsProtein = false;
-	private String sharedHit = "";
 	private String descForAlign="";
 	
 	// specific for DB hits
-	private int PID;
 	private String dbType = ""; 		// blast file or sequence type
 	private String dbTaxo = ""; 		// from PAVE parameter	
 	private int filtered=0;			// computed in DoUniProt

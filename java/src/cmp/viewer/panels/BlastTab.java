@@ -93,7 +93,7 @@ public class BlastTab extends JPanel
         JButton btnHelp = Static.createButton("Help", true, Globals.HELPCOLOR);
         btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				UserPrompt.displayHTMLResourceHelp(theParentFrame, "Search Help", helpHTML);
+				UserPrompt.displayHTMLResourceHelp(theParentFrame, "Find Hits", helpHTML);
 			}
 		});	
 		row.add(btnHelp);

@@ -1,0 +1,96 @@
+
+<html>
+<!--#set var=TITLE value="Tour: viewMulti Alignment" -->
+<!--#include virtual="../../ssi/head.html" -->
+<body bgcolor="#FFFFFF" text="#000000" onLoad="init('align')">
+<!--#include virtual="../ssi/start2t.html" -->
+
+<a name=start>
+<!--#include virtual="./ssi/view_mtcw.html" -->
+
+<center><code>Alignment</code>
+<table  border="0" cellspacing="0" cellpadding="2" height="18">
+<tr><td align="left" bgcolor="#666666" class="white" style="padding-bottom:4px;">
+<a href="#table" class="white">Sequence Table</a> |
+<a href="#pair" class="white">Pairwise</a> |
+<a href="#msadb" class="white">MSAdb</a> |
+<a href="#msa" class="white">MSA...</a>
+</td></tr>
+</table>
+</center>	
+
+<a name=table>
+<table width='100%'><tr><td align='left' >
+<h3>Sequence Table</h3> 
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+Alignments are only available from the sequence table. However, every table leads to the sequence table:
+<table border=0>
+<tr><td valign="top"><small>Sequence view</small>
+<br><a  href="img/seqTableTop.png"><img width=450 src="img/seqTableTop.png" border=1></a>
+<td valign="top"><small>Sequence view for clusters</small>
+<br><a  href="img/clusterSeqs.png"><img width=450 src="img/clusterSeqs.png" border=1></a>
+<tr><td valign="top"><small>Sequence view for pairs</small><br>
+<a  href="img/pairSeqs.png"><img width=450 src="img/pairSeqs.png" border=1></a>
+<td valign="top"><small>Sequence view for hits</small><br>
+<a  href="img/hitSeqs.png"><img width=450 src="img/hitSeqs.png" border=1></a>
+</table>
+If there are only protein (AA) sequences in the database, only the AA options described below will be available.
+<p>
+<a name=pair>
+<table width='100%'><tr><td align='left' >
+<h3>Pairwise</h3> 
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+This drop-down has the following options, where all options use dynamic programming for the selected sequence(s):
+<ol>
+<li>AA for each pair
+<li>NT for each pair
+<li>AA, CDS and NT alignments for one pair
+<li>5UTR, CDS and 3UTR alignments for one pair
+<li>AA, CDS and NT alignments for one pair
+<li>AA to sequence best hit
+<li>AA to cluster best hit (Clusters only) 
+</ol>
+
+<br>AA, CDS and NT alignments of a pair. The text alignment can be viewed by clicking the AA, CDS or NT buttons.
+<br><a  href="img/pairAlign.png"><img width=700 src="img/pairAlign.png" border=1></a>
+<br><br>
+
+<table border=0>
+<tr><td>
+Menu for the CDS text alignment: 
+<a  href="img/alignMenu.png">
+<img width=300 src="img/alignMenu.png" border=1></a>
+<td>
+
+Text alignment of the CDS showing matches. The '|' are mutations in synonymous codons, the '*' in nonsynonymous codons.
+<a  href="img/alignText.png"><img width=600 src="img/alignText.png" border=1></a>
+</table>
+
+<p>
+<a name=msadb>
+<table width='100%'><tr><td align='left' >
+<h3>MSAdb</h3> 
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+This option is only available for <small>Sequence view for clusters</small>, as the multiple sequence alignment (MSA)
+is computed when the database is built.
+<br>
+<a  href="img/MSAdb.png"><img width=700 src="img/MSAdb.png" border=1></a>
+
+<p>
+<a name=msa>
+<table width='100%'><tr><td align='left' >
+<h3>MSA...</h3> 
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+This drop-down has the following options, where all options execute the MSA program for the set of selected sequences:
+<ul>
+<li>MUSCLE-AA: Align the AA sequences.
+<li>MAFFTA-AA: Align the AA sequences.
+<li>MAFFTA-CDS: Align the CDS sequences.
+<li>MAFFTA-NT: Align the NT sequences (i.e. full transcript).
+</ul>
+The display is the same as shown above for MSAdb.
+
+<!--#include virtual="../../ssi/end.html" -->
+

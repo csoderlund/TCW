@@ -55,14 +55,14 @@ public class BasicTablePanel extends JPanel {
 	private final Color altRowColor = Globalx.altRowColor;
 	private final Color selectColor = Globalx.selectColor;
 	
-	public BasicTablePanel (STCWFrame mf, BasicHitQueryTab t, String [] col, boolean [] b) {
+	public BasicTablePanel (STCWFrame mf, BasicHitTab t, String [] col, boolean [] b) {
 		theMainFrame = mf;
 		hitTab = t;
 		setColumns(col, b);
 		
 		createBasicTable();
 	}
-	public BasicTablePanel (STCWFrame mf, BasicSeqQueryTab t, String [] col, boolean [] b) {
+	public BasicTablePanel (STCWFrame mf, BasicSeqTab t, String [] col, boolean [] b) {
 		theMainFrame = mf;
 		seqTab = t;
 		setColumns(col, b);
@@ -648,6 +648,6 @@ public class BasicTablePanel extends JPanel {
 	private JTextField txtStatus = null;
 	
 	private STCWFrame theMainFrame=null;
-	private BasicHitQueryTab hitTab=null;
-	private BasicSeqQueryTab seqTab=null;
+	private BasicHitTab hitTab=null;
+	private BasicSeqTab seqTab=null;
 }

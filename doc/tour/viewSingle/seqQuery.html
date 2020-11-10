@@ -1,0 +1,34 @@
+<html>
+<!--#set var=TITLE value="Tour: viewSingle Sequence Query" -->
+<!--#include virtual="../../ssi/head.html" -->
+<body bgcolor="#FFFFFF" text="#000000" onLoad="init('seqB')">
+<!--#include virtual="../ssi/start2t.html" -->
+
+<a name=start>
+<!--#include virtual="./ssi/view_stcw.html" -->
+
+<center><code>Sequence Query</code></center>
+
+The sequence can be queried by sequence ID or remark, where the <tt>User</tt>
+remarks are added through the <code>runSingleTCW</code> interface, and the <tt>TCW</tt> remarks are added by TCW during ORF
+computation; one such remark ("Multi-frame") indicates that the sequence has aligned hits in
+multiple frames. 
+
+
+<p><a  href="img/seqQuery.png"><img width=850 src="img/seqQuery.png" border=1></a>
+
+<p>Sometimes it is easier if TCW assigns names to the sequences (option in <code>runSingleTCW</code>), in
+which case, the original name (<tt>Orig ID</tt>) can still be viewed and queried on. Another <code>runSingleTCW</code> option
+is to assemble the sequences, in which case the <tt>Orig ID</tt> will be replaced with the <tt>Longest</tt> read of the contig.
+
+<p>One or more sequence can be selected followed by <tt>View Sequences</tt> and they will be shown in the main <tt>Sequence table</tt>. 
+
+<p>This <tt>Query</tt> interface could be merged with the sequence <tt>Filter</tt> interface, but it has the
+added ability of being able to modify the table; the following options are at the bottom of the table:
+
+<p><a  href="img/seqButtons.png"><img width=650 src="img/seqButtons.png" border=1></a>
+
+<table width='100%'><tr><td align='left' >
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+<!--#include virtual="../../ssi/end.html" -->

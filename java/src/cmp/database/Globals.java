@@ -83,7 +83,7 @@ public final class Globals {
 		public final static int MUSCLE = 0;
 		public final static int MAFFT = 1;
 		// This can be changed to one of the other MstatX functions, however,
-		// it would need to be changed in the summary.html and GrpTable.html documentation.
+		// it would need to be changed in the explain.html and GrpTable.html documentation.
 		public final static String score2="Trident";
 		
 		public final static String mstatxExe = "/mstatX/mstatx";

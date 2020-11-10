@@ -66,12 +66,12 @@ public class LoadFromDB {
         try
         {          
             String strQuery = "SELECT " +
-            			"CTGID, contigid, consensus, consensus_bases, " +
-            			"notes,   gc_ratio, cnt_pairwise,  " +
-            			"o_frame, o_coding_start, o_coding_end, o_coding_has_begin, o_coding_has_end, " +
-                 	"bestmatchid, cnt_swiss, cnt_trembl, cnt_nt, cnt_gi," +
-                 	"cnt_gene, cnt_species,  cnt_overlap, cnt_annodb, user_notes  " +                                                      
-                 		"FROM contig " +
+            	"CTGID, contigid, consensus, consensus_bases, " +
+            	"notes,   gc_ratio, cnt_pairwise,  " +
+            	"o_frame, o_coding_start, o_coding_end, o_coding_has_begin, o_coding_has_end, " +
+                "bestmatchid, cnt_swiss, cnt_trembl, cnt_nt, cnt_gi," +
+                "cnt_gene, cnt_species,  cnt_overlap, cnt_annodb, user_notes, longest_clone  " +     // CAS311 longest                                                  
+                 "FROM contig " +
                  		"WHERE contig.contigid = '" + strContigID + "' ";
 
             ResultSet rset = mDB.executeQuery( strQuery );
@@ -111,6 +111,7 @@ public class LoadFromDB {
             curContig.setGeneCntEtc(rset.getInt(18),
               	rset.getInt(19), rset.getInt(20), rset.getInt(21));
             curContig.setUserNotes( rset.getString(22));
+            curContig.setLongest( rset.getString(23)); // CAS311
             
             boolean hasGO=false;
          	if (mDB.tableExist("go_info") && mDB.tableExist("pja_gotree"))
@@ -295,7 +296,7 @@ public class LoadFromDB {
             			"snp_count, indel_count, gc_ratio, cnt_pairwise," +
             			"o_frame, o_coding_start, o_coding_end, o_coding_has_begin, o_coding_has_end,  " +
             			"bestmatchid,  cnt_swiss, cnt_trembl, cnt_nt, cnt_gi," +
-            			"cnt_gene, cnt_species,  cnt_overlap, cnt_annodb, user_notes  " +                                                      
+            			"cnt_gene, cnt_species,  cnt_overlap, cnt_annodb, user_notes, longest_clone  " +                                                      
                  		"FROM contig " +
                  		"WHERE contig.contigid = '" + strContigID + "' ";
 
@@ -346,6 +347,7 @@ public class LoadFromDB {
             curContig.setGeneCntEtc(rset.getInt(27),
               			rset.getInt(28), rset.getInt(29), rset.getInt(30));
             curContig.setUserNotes( rset.getString(31));
+            curContig.setLongest( rset.getString(32));
                    
             rset.close();
             

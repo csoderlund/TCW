@@ -1,0 +1,55 @@
+<html>
+<!--#set var=TITLE value="Tour: viewSingle GO Query" -->
+<!--#include virtual="../../ssi/head.html" -->
+<body bgcolor="#FFFFFF" text="#000000" onLoad="init('go')">
+<!--#include virtual="../ssi/start2t.html" -->
+
+<a name=start>
+<!--#include virtual="./ssi/view_stcw.html" -->
+<center><code>GO Annotation Query</code></center>
+<p>
+The contents of this panel will depend on how the database was built with <code>runSingleTCW</code>:
+<ul>
+<li>This panel will exist only if UniProt databases were used in annotation. 
+<li>The <tt>Slim</tt> option will exist
+only if a GO_slim set was selected (not available in this sTCWdb). 
+<li>The DE row of options will exist only if <tt>GOseq</tt> 
+has been been run (see <a class=code href=../runDE/index.shtml>runDE</a>). 
+<li>The <tt>DE-trim</tt> option
+will exist only if there are DE values; the trimming algorithm
+removes redundancy, as described in Soderlund et al. (2014) PLoS ONE.
+</ul>
+<p>In the following image, the GOs that are up-regulated for Root compared to Stem and Leaf are shown. The #Seqs are the counts
+for up-regulated sequences for the respective GO.
+<br><a  href="img/goQuery.png">
+<img width=850 src="img/goQuery.png" border=1></a>
+
+<p>GO Terms may be assigned to a hit ID, or it may inherit a hit ID;
+see <a href=GO.html>GO explanation</a> for details. 
+
+<h3>Show...</h3>
+<table width=800>
+<tr><td valign="top">
+<tt>Show...</tt> has multiple options as shown on the right.
+Below are some examples.
+<td valign="top">
+<a  href="img/goShow.png"><img width=250 src="img/goShow.png" border=1></a>
+</table>
+
+<p>
+<table>
+<tr>
+<td valign="top"><a  href="img/goAncOrdered.png"><img width=450 src="img/goAncOrdered.png" border=1></a>
+<td valign="top"><a  href="img/goAncPaths.png"><img width=450 src="img/goAncPaths.png" border=1></a>
+<tr>
+<td valign="top"><a  href="img/goNeighbors.png"><img width=450 src="img/goNeighbors.png" border=1></a>
+<td valign="top"><a  href="img/goAssignedHits.png"><img width=450 src="img/goAssignedHits.png" border=1></a>
+</table>
+
+
+<table width='100%'><tr><td align='left' >
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+</table>
+
+<!--#include virtual="../../ssi/end.html" -->
+

@@ -105,7 +105,7 @@ public class BasicHitFilterPanel extends JPanel {
 	/**********************************************
 	* The top queries, and 4 selection panels 
 	*/
-	public BasicHitFilterPanel(STCWFrame frame, BasicHitQueryTab parentTab) {
+	public BasicHitFilterPanel(STCWFrame frame, BasicHitTab parentTab) {
 		theParentTab = parentTab;
 		theMainFrame = frame;
 		metaData = frame.getMetaData();
@@ -2978,7 +2978,7 @@ public class BasicHitFilterPanel extends JPanel {
 	private GOetcPanel goPanel = null;
 	private CountPanel countPanel = null;
 
-	private BasicHitQueryTab theParentTab = null;
+	private BasicHitTab theParentTab = null;
 	private STCWFrame theMainFrame = null;
 	private MetaData metaData = null;
 	private boolean hasGO=false;

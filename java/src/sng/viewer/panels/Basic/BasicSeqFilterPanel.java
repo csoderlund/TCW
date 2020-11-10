@@ -48,7 +48,8 @@ public class BasicSeqFilterPanel extends JPanel {
 	// Any change here will work in this file, but needs to be changed in BasicSeqQueryTab.SeqData class!!!
 	// These are columns from database and do not include row#
 	private static final String rowCol = "Row#";
-	private static final String [] STATIC_COLUMNS   = { "Seq ID", "TCW Remark", "User Remark", "Counts", "Longest", "Best HitID"};
+	private static int idxLong = 4;
+	private static String [] STATIC_COLUMNS   = { "Seq ID", "TCW Remark", "User Remark", "Counts", "Longest", "Best HitID"};
 	private static final Class<?> [] COLUMN_TYPES =   { String.class, String.class, String.class, Integer.class, String.class , String.class}; 
 	private static final String [] MYSQL_COLUMNS = {
 		"contig.contigid", "contig.notes", "contig.user_notes", 
@@ -61,9 +62,13 @@ public class BasicSeqFilterPanel extends JPanel {
 	/**********************************************
 	* The top queries, and 4 selection panels 
 	*/
-	public BasicSeqFilterPanel(STCWFrame frame, BasicSeqQueryTab parentTab) {
+	public BasicSeqFilterPanel(STCWFrame frame, BasicSeqTab parentTab) {
 		theParentTab = parentTab;
 		theMainFrame = frame;
+		
+		bUseOrigName = theMainFrame.getMetaData().bUseOrigName(); // CAS311
+		longLabel = theMainFrame.getMetaData().getLongLabel(); // CAS311
+		STATIC_COLUMNS[idxLong] = longLabel;
 		
 		initColumns();
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -109,7 +114,7 @@ public class BasicSeqFilterPanel extends JPanel {
 	private class QueryPanel extends JPanel {
 		private static final long serialVersionUID = -5987399873828589062L;
 		private static final int DEFAULT_PROMPT_SIZE = 20;
-		private static final int MAIN_PANEL_LABEL_WIDTH = 75; // labels on left
+		private static final int MAIN_PANEL_LABEL_WIDTH = 70; // labels on left
 
 		public QueryPanel() {
 			setBackground(BGCOLOR);
@@ -125,6 +130,10 @@ public class BasicSeqFilterPanel extends JPanel {
 			radSeqID = Static.createRadioButton("Seq ID", true); 
 			row1.add(radSeqID); row1.add(Box.createHorizontalStrut(2));
 			
+			if (!bUseOrigName) {
+				radLong = Static.createRadioButton(longLabel, true); // CAS311 add
+				row1.add(radLong); row1.add(Box.createHorizontalStrut(2));
+			}
 			radTCW = Static.createRadioButton("TCW", false);
 			row1.add(radTCW);	row1.add(Box.createHorizontalStrut(2));
 			
@@ -133,6 +142,7 @@ public class BasicSeqFilterPanel extends JPanel {
 			
 			ButtonGroup allbg = new ButtonGroup();
 			allbg.add(radSeqID); 
+			allbg.add(radLong);
 			allbg.add(radTCW); 
 			allbg.add(radUser); 
 			
@@ -246,6 +256,7 @@ public class BasicSeqFilterPanel extends JPanel {
 		
 		public String getSearchCol() {
 			if (radSeqID.isSelected()) return "contig.contigid";
+			else if (radLong.isSelected()) return "contig.longest_clone";
 			else if (radTCW.isSelected()) return "contig.notes";
 			else return "contig.user_notes";
 		}
@@ -260,7 +271,9 @@ public class BasicSeqFilterPanel extends JPanel {
 		}
 		public String getStatusCol() {
 			if (radSeqID.isSelected()) return "Seq ID";
-			else return "Remark";
+			else if (radLong.isSelected()) return longLabel;
+			else if (radTCW.isSelected()) return "TCW Remark";
+			else return "User Remark";
 		}
 		public String getStatusStr() { 
 			String x = txtField.getText().trim(); 
@@ -270,7 +283,7 @@ public class BasicSeqFilterPanel extends JPanel {
 		
 		public void enableAddToTable(boolean b) {btnBuildTable.setEnabled(b);}
 		// Search:
-		public JRadioButton radSeqID = null;
+		public JRadioButton radSeqID = null, radLong=null;
 		public JRadioButton radTCW = null, radUser = null;
 		public JTextField txtField = null;
 		public Vector <String> loadList = null;
@@ -280,7 +293,8 @@ public class BasicSeqFilterPanel extends JPanel {
 		private JButton btnAddTable = null;
 		private JButton btnSetColumns = null;
 	} // end QueryPanel
-	/// XXX Column Select Panel
+	
+	
 	/*************************************************
 	 * Column Select Panel
 	 */
@@ -578,7 +592,10 @@ public class BasicSeqFilterPanel extends JPanel {
 	// sub panels
 	private ColumnPanel columnPanel = null;
 
-	private BasicSeqQueryTab theParentTab = null;
+	private BasicSeqTab theParentTab = null;
 	private STCWFrame theMainFrame = null;
 	private JButton btnFindFile = null;
+	
+	private String longLabel = "";
+	private boolean bUseOrigName=false;
 }

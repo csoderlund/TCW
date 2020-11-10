@@ -25,7 +25,7 @@ public class BasicGOLoadFromDB  {
 	public static final int BUILD=1;
 	public static final int TRIM=2;
 	
-	public BasicGOLoadFromDB(STCWFrame f, BasicGOQueryTab g, BasicGOTablePanel t) {
+	public BasicGOLoadFromDB(STCWFrame f, BasicGOFilterTab g, BasicGOTablePanel t) {
 		theMainFrame=f;
 		goQueryPanel=g;
 		goTablePanel=t;
@@ -293,6 +293,6 @@ public class BasicGOLoadFromDB  {
 		return ret;
 	}
 	private STCWFrame theMainFrame;
-	private BasicGOQueryTab goQueryPanel; // the parent panel
+	private BasicGOFilterTab goQueryPanel; // the parent panel
 	private BasicGOTablePanel goTablePanel;
 }

@@ -1,0 +1,71 @@
+
+<html>
+<!--#set var=TITLE value="Tour: viewMulti Cluster" -->
+<!--#include virtual="../../ssi/head.html" -->
+<body bgcolor="#FFFFFF" text="#000000" onLoad="init('grp')">
+<!--#include virtual="../ssi/start2t.html" -->
+
+<a name=start>
+<!--#include virtual="./ssi/view_mtcw.html" -->
+
+<center><code>Clusters</code>
+<table  border="0" cellspacing="0" cellpadding="2" height="18">
+<tr><td align="left" bgcolor="#666666" class="white" style="padding-bottom:4px;">
+<a href="#clusterTable" class="white">Table</a> |
+<a href="#filter" class="white">Filters</a> |
+<a href="#col" class="white">Columns</a>
+</td></tr>
+</table>
+</center>	
+
+<!----------------------------- cluster ---------------------------->
+<a name=clusterTable>
+<table width='100%'><tr><td align='left' >
+<h3>Cluster Table</h3> 
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
+<table border=0>
+<tr><td valign="top">
+The table on the right was created with the filter to show the clusters of method 'CL-Closure' with at least one
+sequence for each dataset.
+
+<p>Select a row followed by:
+<ul>
+<li><code>Sequences</code>: the table of sequences for the cluster will
+be shown (see lower left image). 
+<br><br>
+<li><code>Pairs</code>: the table of pairs for the cluster will be shown (see lower right image). 
+</ul>
+<td>
+<a  href="img/clusterTable.png"><img width=650 src="img/clusterTable.png" border=1></a>
+</table>
+<p>
+<table border=0>
+<tr><td valign="top">
+<small>Sequences in selected cluster</small>
+<a  href="img/clusterSeqs.png"><img width=450 src="img/clusterSeqs.png" border=1></a>
+<td >
+<small>Pairs in selected cluster</small>
+<br><a  href="img/clusterPairs.png"><img  width=450 src="img/clusterPairs.png" border=1></a>
+</table>
+
+<!---------------------------------------------------------------------------->
+<a name=filter>
+<table width='100%'><tr><td align='left' >
+<h3>Cluster Filters</h3> 
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+The following filters were selected for the above Cluster table.
+<br><a  href="img/clusterFilter.png"><img width=450 src="img/clusterFilter.png" border=1></a>
+<p>
+<!---------------------------------------------------------------------------->
+<a name=col>
+<table width='100%'><tr><td align='left' >
+<h3>Cluster Columns</h3> 
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+The following columns were selected for the above Cluster table. The rules for columns are listed in
+<a href=index.html#col>Start</a>.
+<br><a  href="img/clusterColumn.png"><img width=450 src="img/clusterColumn.png" border=1></a>
+
+
+<!--#include virtual="../../ssi/end.html" -->
+

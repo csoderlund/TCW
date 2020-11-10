@@ -24,14 +24,14 @@ See <a href="../../stcw/UserGuide.html" class="ext" target="_blank">sTCW UserGui
 
 <table>
 <tr><td>
-			<p>1. <b>Load Data</b>
+			<p>1. <b>Build Database</b>
 <ol type="a"><li>The input may be transcripts with optional read counts, proteins with optional 
 spectral counts, 
 or sequences to be assembled such as  Sanger ESTs, 454 reads, and/or transcript libraries. 
 
-<li>The <tt>Add</tt> window allows you to define a dataset along with its conditions (e.g. tissue, treatment, etc). 
-<br>It allows you to define the count file(s) for transcript or protein libraries,  where the 
-information will be listed under <tt>Associated Counts</tt> on the main window. 
+<li>The <tt>Add</tt> window allows you to specify the sequence dataset (fasta file) 
+along with its conditions (e.g. tissue, treatment, etc),
+which will be listed under <tt>Associated Counts</tt> on the main window. 
 <ul>
 <li>If there are replicates, you may define
 them with the <tt>Define Replicates</tt> window.
@@ -45,9 +45,9 @@ them with the <tt>Define Replicates</tt> window.
 transcripts that have read counts, the EST dataset 'counts' for the contig will be the number
 of ESTs in the given contig, and the transcripts will retain their counts from the input.
 </ol>
-				<p>3. <b>Annotate Sequences</b> 
+				<p>3. <b>Annotate</b> 
 <ol type="a">
-<li>Use <a href=../runAS/index.shtml class=ext target="_blank">runAS</a> to download and format UniProts and the GO databases; these
+<li>Use <a href=../runAS>runAS</a> to download and format UniProts and the GO databases; these
 are input to (b) and (c).
 <li>Add one or more databases to search against, which can be protein or nucleotide.
 <li>In the <tt>Options</tt> window, define the GO database 
@@ -73,44 +73,49 @@ are input to (b) and (c).
 
 <table cellspacing="10">
 <tr>
-<td valign=top><b>Load Data -  Add/Edit</b> Selecting <tt>Add</tt> shows this window. Selecting <tt>Edit</tt> shows
+
+<td valign=top>
+<b>Sequence Datasets</b>
+<p><b>Add/Edit</b>:  Selecting <tt>Add</tt> shows this window. Selecting <tt>Edit</tt> shows
 a similar window, but only the Attribute values can be changed after the database has been created. 
 The counts can be in one file or generated with the <tt>Build combined count file</tt> option. 
 On <tt>Save</tt>, the condition names will be written in the <tt>Associated Counts</tt> table on the 
 main window.
-<br>
-<a  href="img/runSingleLib.png">
-			<img width=450 src="img/runSingleLib.png" border=1></a>
-
-<td>
-<p><b>Build count file</b> -  <tt>Generate File</tt> will generate a file called Combined_read_count.csv file
+<p><b>Build combined count file file</b>:  (window not shown) If the counts are in multiple files, this button opens up a 
+window in which a directory of count files, or individual count files, can be entered. 
+It will generate a file called Combined_read_count.csv 
 where the columns are conditions with their respective counts.
 
-<br><a  href="img/runSingleSample.png">
-			<img width=450 src="img/runSingleSample.png" border=1></a>			
+<td>
+<a  href="img/runSingleLib.png"> <img width=450 src="img/runSingleLib.png" border=1></a>
 
-<p><b>Define Replicates (Main window)</b> If the <tt>Associated Counts</tt> table has replicates, 
+<tr>
+<td valign="top">
+<b>Associated Counts</b>
+<p><b>Define Replicates</b>: If the <tt>Associated Counts</tt> table has replicates, 
 they can be defined in this window, which will update the table as shown above in the Main window.
-<br><a  href="img/runSingleRep.png">
-	<img width=450 src="img/runSingleRep.png" border=1></a>
+<p><b>Edit Attributes</b>: (window not shown) This window has the same attributes fields as the
+<tt>Add or Edit a Sequence Dataset</tt>, but will be applied to the selected condition. These can
+be edited after the database has been created.
+
+<td><a  href="img/runSingleRep.png"><img width=450 src="img/runSingleRep.png" border=1></a>
 
 <tr><td>&nbsp;
-<tr><td colspan=2>
-<b>Annotate Sequences - Add/Edit</b> Databases to search against are referred to as "annoDBs". 
+<tr><td valign="top">
+<b>Annotate</b>
+<p><b>Add/Edit</b>: Databases to search against are referred to as "annoDBs". 
 Any FASTA file can be used an annoDB, though TCW gives special support to using UniProt taxonomic
 databases; besides allowing taxonomic specific querying in viewSingleTCW, 
-the UniProt .dat file is used to extract GO, KEGG, EC and PFam information. 
-(A script is provide to download and format the UniProt databases).
+the UniProt .dat file is used to extract GO, KEGG, EC and PFam information. The <a href=../runAS>runAS</a>
+program provides this functionality.
 <p>
 As the UniProt Trembl databases increase in size, it has
 become impractical to search these with BLAST<sup>1</sup>. Fortunately, the 
 <a href=http://ab.inf.uni-tuebingen.de/software/diamond class="ext" target="_blank">diamond</a><sup>2</sup>
 programs provide supper fast results.
 
-<br><center>
-<a  href="img/runSingleAnno.png">
-			<img width=500 src="img/runSingleAnno.png" border=1></a>
-</center>
+<td>
+<a  href="img/runSingleAnno.png"><img width=450 src="img/runSingleAnno.png" border=1></a>
 </table>
 <p>
 

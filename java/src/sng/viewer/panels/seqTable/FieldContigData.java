@@ -278,16 +278,12 @@ public class FieldContigData implements Serializable
 	        		GROUP_NAME_CONTIG, GROUP_DESC_CONTIG, 
 	        		"Number of 3' ESTs in the contig." );
         }
-        if (metaData.hasAssembly()) {
-	        mapper.addStringField( LONGEST_EST_FIELD, "Longest", "contig", "longest_clone", 
-	        		GROUP_NAME_CONTIG, GROUP_DESC_CONTIG, 
-	        		"Identifier for the longest sequence in the contig." );
-        }
-        else {
-        	mapper.addStringField( LONGEST_EST_FIELD, "Longest", "contig", "longest_clone", 
-	        		GROUP_NAME_CONTIG, GROUP_DESC_CONTIG, 
-	        		"Original sequence name." );
-        }
+        String longLabel = metaData.getLongLabel(); // CAS311
+        String desc = metaData.hasAssembly() ? "Identifier for the longest sequence in the contig."  
+        		: "Original sequence name.";
+	    mapper.addStringField( LONGEST_EST_FIELD, longLabel, "contig", "longest_clone", 
+	        	GROUP_NAME_CONTIG, GROUP_DESC_CONTIG, desc );
+        
         if (metaData.hasORFs()) {
 	        mapper.addPercentField( GC_RATIO_FIELD, "%GC", "contig", "gc_ratio", 
 	        		GROUP_NAME_CONTIG, GROUP_DESC_CONTIG, 

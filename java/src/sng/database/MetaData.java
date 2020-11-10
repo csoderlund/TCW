@@ -4,6 +4,7 @@ package sng.database;
  * Read in all metadata, e.g. number of sequences, etc for all methods to call
  */
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.TreeMap;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,6 +61,10 @@ public class MetaData {
 				
 				cnt = mDB.executeCount("SELECT COUNT(*) FROM buryclone LIMIT 1");	
 				if (cnt > 0) bHasBuried = true;
+			}
+			else { // CAS311
+				String b = mDB.executeString("SELECT pvalue FROM ASM_params  WHERE pname=\"USE_TRANS_NAME\"");
+				if (b.contentEquals("1")) bUseOrigName=true;
 			}
 			bIsProteinDB = mDB.tableColumnExists("assem_msg", "peptide") ;
 			bHasLoc = mDB.tableColumnExists("assem_msg", "hasLoc");
@@ -418,6 +423,8 @@ public class MetaData {
       		
       		"Inferred from Electronic Annotation",
       		"Unknown"};
+	
+	
 	/**********************************************************************/
 	
 	 public String getNorm() {return strNorm;}
@@ -426,6 +433,8 @@ public class MetaData {
 	 public boolean hasContigSets() { return bHasSeqSets; }
 	 public boolean hasNs() { return bHasNs; }
 
+	 public String getLongLabel() {if (bHasAssembly) return "Longest"; else return "Orig ID";} // CAS311
+	 public boolean bUseOrigName() {return bUseOrigName;} // CAS311
 	 public boolean hasAssembly() { return bHasAssembly; }
 	 public boolean hasNoAssembly() { return !bHasAssembly;}
 	 public boolean hasBuried() {return bHasBuried; }
@@ -467,6 +476,7 @@ public class MetaData {
 	/*******************************************************************/
 	 private int nSeqs = 0;
 	 private boolean bHasAssembly = false;
+	 private boolean bUseOrigName = false; // CAS311
 	 private boolean bHasSeqSets = false;
 	 private String [] seqLibNames = null;
 	 private String [] seqLibTitles = null;

@@ -8,6 +8,39 @@
 <p>
 <font color="#000000" face="Verdana, Arial, Helvetica, sans-serif" size="2"> 
 <p><b><big><u>TCW Version 3.1</u></b></big>
+
+<p><b>v3.1.1  10-Nov-20</b>
+<br>It is often easier to use the TCW generated sequence names (e.g. Os_00001) than the sequence names supplied
+in the file (e.g. NM_001048268.2), but it is important to be able to access the original names, hence, the 
+following changes.
+<ul>
+<li><code>runSingleTCW</code>
+<ul>
+<li>Bug fix: When <tt>Use Sequence Names from File</tt> was selected, it forced <tt>Skip Assembly</tt>
+to be unselected, whereas it was suppose to force it to be selected.
+<li>Annotate: It will no longer create the <tt>HitWarnings.log</tt> file unless it is written to. This
+file has warning such as the "Description" being longer than allowed.
+</ul>
+<li><code>viewSingleTCW</code>
+<table border=1>
+<tr><th>Name<th>Use Sequence Names from File<th>Skip Assembly
+<tr><td><tt>Orig ID</tt><td>No<td>Yes
+<tr><td><tt>Longest</tt><td>No<td>No
+<tr><td><tt>Orig ID</tt> or none<td>Yes<td>Yes
+</table>
+<br>
+<ul>
+<li>Basic Query Sequence: Allow query on <tt>Orig ID</tt> or <tt>Longest</tt> unless the <tt>Seq ID</tt> &#8800 
+<tt>Orig ID</tt>. 
+Make the column heading <tt>Orig ID</tt> or <tt>Longest</tt> according to the table above.
+<li>Sequence Detail: Show <tt>Orig ID</tt> or <tt>Longest</tt> in the top text area according to the table above,
+and add it to the <tt>Copy...</tt> drop-down.
+<li>Sequence Table: Make the column heading <tt>Orig ID</tt> or <tt>Longest</tt> according to the table above.
+</ul>
+<li>Update all of Tour.
+</ul>
+
+
 <p><b>v3.1.0  5-Nov-20</b>
 
 <ul>

@@ -97,15 +97,8 @@ public class ContigData implements Comparable<ContigData>, Serializable {
 	
 	public ArrayList <SequenceData> seqDataHitList() {return seqDataHitList;}
 	
-	// Set in JPaveDBWrapper. 
-	public int getCntGOTree() { return nGOTree;}
-	public void setCntGOTree(int n) {nGOTree=n;}; 
 	public int getCntGO() { return nGO;}
 	public void setCntGO(int n) {nGO=n;}; 
-	public int getCntAssignGO() {return nAssignGO;}
-	public void setCntAssignGO(int n) {nAssignGO = n;}
-	public String getGOstr() { return strGO;}
-	public void setGOstr(String s) {strGO = s;}
 	
 	////////////////////////////////////////////////
 	public String toString() {return strContigID;}
@@ -136,7 +129,9 @@ public class ContigData implements Comparable<ContigData>, Serializable {
 	public boolean getRecap() {return bRecap;}
 	public void setRecap(boolean b) {bRecap = b;}
 	
-	public String getLongestClone() {return strLongestClone;}
+	public void setLongest(String id) {strLongest=id;} // CAS311
+	public String getLongest() {return strLongest;}
+	
 	public void setHasNs(boolean b) {bHasNs = b;};
 	
 	public BlastHitData getBestEval() { // contig.PID
@@ -1229,10 +1224,12 @@ public class ContigData implements Comparable<ContigData>, Serializable {
 
 			if (!curSeq.isBuried()) ++nonBuried;
 
+			/* CAS311 computed in assembly
 			if (curSeq.getLength() > nLongest) {
 				nLongest = curSeq.getLength();
-				strLongestClone = curSeq.getName();
+				strLongest = curSeq.getName();
 			}
+			*/
 		}
 		// if the buried have not been shown, they are not in the list
 		nBuried = nCount - nonBuried;
@@ -1311,7 +1308,7 @@ public class ContigData implements Comparable<ContigData>, Serializable {
 
 	private int nGCCount = 0;
 	private float GCratio = 0;
-	private String strLongestClone = "";
+	private String strLongest = "";
 	private boolean bRecap = false;
 	private boolean SNPsGrouped = true;
 

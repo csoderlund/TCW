@@ -1,0 +1,165 @@
+<html>
+<title>Nn overview</title>
+<body>
+<center>
+<h2>TCW overview for Nn </h2>
+<table width=700 border=1><tr><td>
+<pre>
+Project: Nn   #Seqs: 26,685   #Hits: 246,867   #GOs: 22,170    TPM  DE  GO-DE   Pairs
+ 
+INPUT
+   Counts: 
+      SEQID  ID            SIZE  #REPS  
+      NnR    Tip    299,383,735      1  
+      NnR    Zone   301,658,446      1  
+      NnR    Rhiz   153,385,980      5  
+      NnR    Root   146,652,269      5  
+      NnR    Stem   146,995,438      5  
+      NnR    OLeaf  140,444,093      5  
+
+   Sequences: 
+      SEQID    SIZE  TITLE         SPECIES           SOURCE  AVG-len  MED-len  
+      NnR    26,685  Sacred lotus  Nelumbo nucifera  NCBI      1,467    1,229  
+
+ANNOTATION
+   Annotated with TCW release: 3.1.0   Annotation date: 06-Nov-20
+
+   Annotation Statistics:
+      Sequences with hits   26,044  (97.6%)     Bases covered by hit  29,187,078  (74.5%)  
+      Unique hits          246,867              Total bases           39,167,358           
+      Total sequence hits  465,369                                                         
+                                                                                           
+      Sequences with GOs    23,640  (88.6%)     Best hit with GOs         19,679  (73.7%)  
+      Unique GOs            22,170              Unique hits with GOs     200,085  (81.0%)  
+
+   annoDBs (Annotation databases): 4   (see Legend below)
+      ANNODB          ONLY    EVAL    ANNO  UNIQUE   TOTAL   AVG  HIT-SEQ (#SEQ)  BEST  AVG  COVER  COVER  
+                                                            %SIM                  HIT  %SIM   >=50   >=90  
+      SP-fullSubset      1       3     101  43,091  113.9k  44.8  12,452 (46.7%)       41.0  15.3%   0.3%  
+      SP-plants         19     386     885  22,848  87,888  59.0  19,909 (74.6%)       60.0  56.2%   1.8%  
+      TR-plants      3,849  24,139  22,874  170.1k  229.2k  80.3  26,018 (97.5%)       92.4  80.2%  55.1%  
+      TF-TF              5   1,516   2,184  10,836  34,432  51.7  13,280 (49.8%)       55.8  21.4%  11.1%  
+
+   Top 15 species from total: 3,479
+      SPECIES (25 char)       EVAL    ANNO   TOTAL     SPECIES                 EVAL   ANNO   TOTAL  
+      Nelumbo nucifera      24,459  22,676  47,714     Cinnamomum micranthum     39    101   3,345  
+      Arabidopsis thaliana     187     590  51,932     Aquilegia coerulea        37     41   4,490  
+      Macleaya cordata         115     239   6,400     Malus baccata             24     32     997  
+      Vitis vinifera            95     138  10,958     Hevea brasiliensis        21     11   2,071  
+      Davidia involucrata       58     102   9,921     Citrus unshiu             20     13   1,773  
+      Malus domestica           50     104   3,313     Salix viminalis           20      2   1,100  
+      Oryza sativa              48     101  13,926     Camellia sinensis         19     16   2,156  
+      Nyssa sinensis            45      45   5,574     Other                    807  1,833  299.7k  
+
+   Total ORFs: 26,685 (100.0%)
+      Has Hit            26,043 (97.6%)    ORF>=300         23,917 (89.6%)    MultiFrame     571  (2.1%)  
+      Is Longest ORF     25,547 (95.7%)    Has Start&Stop   21,613 (81.0%)    >=9 Ns in ORF    2   (<1%)  
+      Markov Best Score  25,787 (96.6%)    Has Start|Stop   25,545 (95.7%)    Stops in Hit   678  (2.5%)  
+      All of the above   24,693 (92.5%)    Average ORF len           1105         
+
+   GC Content: 44.78%
+      Pos1  17.1%              5UTR    CDS   3UTR              5UTR      CDS    3UTR  
+      Pos2  13.7%    %GC      43.14  45.35  37.60    Length  4,192k  29,492k  5,484k  
+      Pos3  14.6%    CpG-O/E   0.71   0.52   0.43    AvgLen   157.1   1105.2   205.5  
+                                    
+   Similar pairs:
+      Total pairs:                1,000  
+      with Translated selfblast:  1,000  
+
+EXPRESSION
+   TPM: (% of 26,685)
+                    <2.0         2-5        5-10       10-50      50-100      100-1k     1k-5k     >=5k  
+      Tip     7,269(27%)  2,777(10%)  2,765(10%)  9,192(34%)  2,724(10%)  1,895 (7%)   61(<1%)   2(<1%)  
+      Zone    6,976(26%)  2,883(11%)  2,815(11%)  9,371(35%)  2,669(10%)  1,918 (7%)   51(<1%)   2(<1%)  
+      Rhiz   10,649(40%)  2,895(11%)  2,792(10%)  6,865(26%)  1,743 (7%)  1,633 (6%)  102(<1%)   6(<1%)  
+      Root    8,276(31%)  3,038(11%)  3,045(11%)  8,205(31%)  2,144 (8%)  1,899 (7%)   74(<1%)   4(<1%)  
+      Stem   11,705(44%)  3,378(13%)  3,002(11%)  5,639(21%)  1,444 (5%)  1,392 (5%)  111(<1%)  14(<1%)  
+      OLeaf  11,876(45%)  3,574(13%)  3,035(11%)  5,616(21%)  1,228 (5%)  1,238 (5%)   98(<1%)  20(<1%)  
+
+   Differential expression: (% of 26,685)
+                 <1E-5       <1E-4       <0.001        <0.01        <0.05  
+      RhRo  4,443(17%)  6,495(24%)   8,938(33%)  11,797(44%)  14,032(53%)  
+      RhSt  3,363(13%)  6,181(23%)   9,269(35%)  12,155(46%)  14,192(53%)  
+      RhOL  1,859 (7%)  4,023(15%)   7,545(28%)  11,392(43%)  13,934(52%)  
+      RoSt  7,006(26%)  9,793(37%)  12,446(47%)  14,876(56%)  16,492(62%)  
+      RoOL  3,467(13%)  5,754(22%)   8,642(32%)  11,939(45%)  14,380(54%)  
+      StOL    330 (1%)  1,188 (4%)   3,124(12%)   6,107(23%)   9,192(34%)  
+
+   Over-represented GOs: (% of 22,170)
+               <1E-5     <1E-4    <0.001       <0.01       <0.05  
+      RhRo    3(<1%)   23(<1%)  112 (1%)    516 (2%)  1,541 (7%)  
+      RhSt  268 (1%)  348 (2%)  534 (2%)  1,053 (5%)  1,959 (9%)  
+      RhOL  109(<1%)  142 (1%)  272 (1%)    647 (3%)  1,500 (7%)  
+      RoSt  108(<1%)  172 (1%)  303 (1%)    750 (3%)  1,836 (8%)  
+      RoOL   78(<1%)  126 (1%)  195 (1%)    517 (2%)  1,358 (6%)  
+      StOL  164 (1%)  187 (1%)  275 (1%)    563 (3%)  1,314 (6%)  
+
+SEQUENCES
+   Build date: 06-Nov-20
+   Sequences loaded from external source
+
+   Sequence lengths:
+       <=100     101-500    501-1000   1001-2000   2001-3000  3001-4000  4001-5000    >5000  
+      1(<1%)  4,584(17%)  6,214(23%)  9,452(35%)  4,222(16%)  1,388(5%)    507(2%)  317(1%)  
+
+   ORF lengths:
+        <=100     101-500    501-1000   1001-2000  2001-3000  3001-4000  4001-5000     >5000  
+      86(<1%)  6,860(26%)  7,842(29%)  8,656(32%)  2,271(9%)    660(2%)    180(1%)  130(<1%)  
+
+   Quality:
+      Sequences with #n>0:   1,328  ( 5.0%)  
+      Sequences with #n>10:     11  (<0.1%)  
+
+
+-------------------------------------------------------------------
+PROCESSING INFORMATION:
+   AnnoDB Files:
+      Type  Taxo        FILE                            DB DATE    ADD DATE   EXECUTE                                     
+      sp    fullSubset  uniprot_sprot_fullSubset.fasta  23-Oct-20  06-Nov-20  diamond  --masking 0 --max-hsps 1 --top 20  
+      sp    plants      uniprot_sprot_plants.fasta      23-Oct-20  06-Nov-20  diamond  --masking 0 --max-hsps 1 --top 20  
+      tr    plants      uniprot_trembl_plants.fasta     23-Oct-20  06-Nov-20  diamond  --masking 0 --max-hsps 1 --top 20  
+      tf    TF          PlantTFDB_pep.fas               27-Aug-20  06-Nov-20  diamond  --masking 0 --max-hsps 1 --top 20  
+
+   Over-represented GOs: go_202010-termdb-tables.tar.gz    [GOs added with sTCW v3.1.0 (5-Nov-20)]
+
+   ORF finder:
+      Use ATG only for start site
+      Rule 1: Use Good hit: E-value <=1E-10 or Sim >= 20%
+      Rule 2: Use longest ORF if Log Len Ratio > 0.5
+      Rule 3: Use best Markov score
+              Train using best hits
+      Good coverage: Hit overlap >= 95% with Sim 60% (internal params)
+
+   DE (Differential Expression) computation: 
+      DE column    Conditions                     Method
+      RhRo         Rhiz : Root                    source(edgeRglm.R)
+      RhSt         Rhiz : Stem                    source(edgeRglm.R)
+      RhOL         Rhiz : OLeaf                   source(edgeRglm.R)
+      RoSt         Root : Stem                    source(edgeRglm.R)
+      RoOL         Root : OLeaf                   source(edgeRglm.R)
+      StOL         Stem : OLeaf                   source(edgeRglm.R)
+
+   GOseq: RhOL:0.05,RhRo:0.05,RhSt:0.05,RoOL:0.05,RoSt:0.05,StOL:0.05
+
+-------------------------------------------------------------------
+LEGEND:
+   annoDB:
+      ANNODB    is DBTYPE-TAXO, which is the DBtype and taxonomy
+      ONLY      #Seqs that hit the annoDB and no others
+      EVAL      #Seqs with the best E-value from the annoDB
+      ANNO      #Seqs with the best annotation from the annoDB 
+      UNIQUE    #Unique hits to the annoDB
+      TOTAL     #Total seq-hit pairs for the annoDB
+      AVG %SIM  Average percent similarity of the total seq-hit pairs
+      HIT-SEQ   Percent of #Seqs that have at least one hit from the annoDB
+      BEST HIT  The following columns refer to the best hit (Rank=1):
+         AVG %SIM  Average percent similarity of the best hit seq-hit pairs
+         Cover>=N  Percent of HIT-SEQ where the best hit has similarity>=N% and hit coverage>=N%
+
+   #Seqs is listed at top of overview
+   Best Annotation:
+      Descriptions may not contain words such as 'uncharacterized protein'
+
+</pre>
+</body>
+</html>

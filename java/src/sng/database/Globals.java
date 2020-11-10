@@ -20,6 +20,8 @@ public class Globals {
 	public static final String LIBCFG = 	"LIB.cfg";
 	public static final String STCW = 	Globalx.STCW; // database prefix
 	
+	public static final String helpDir = "html/viewSingleTCW/";
+	
 	public static final String 	gapStr = Globalx.gapStr;
 	public static final char 	gapCh = Globalx.gapCh;
 	

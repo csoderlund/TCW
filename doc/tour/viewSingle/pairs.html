@@ -1,25 +1,33 @@
 <html>
-<!--#set var=TITLE value="Tour: Pairs" -->
+<!--#set var=TITLE value="Tour: viewSingle Pairs" -->
 <!--#include virtual="../../ssi/head.html" -->
 <body bgcolor="#FFFFFF" text="#000000" onLoad="init('pairs')">
 <!--#include virtual="../ssi/start2t.html" -->
 
 <a name=start>
 <!--#include virtual="./ssi/view_stcw.html" -->
-<center>Pairs -- similar sequences</center>
+<center><code>Pairs -- similar sequences</code></center>
 In <code>runSingleTCW</code>, there is an annotation option to compare all sequences. 
 This is especially useful when analyzing an assembly. 
 If this has been run, then there will be a <tt>Similar Sequence Pairs</tt> section.
-<p>
 
-<br><a  href="img/pairTable.png">
-<img width=800 src="img/pairTable.png" border=1></a>
+<p><a  href="img/pairTable.png"><img width=800 src="img/pairTable.png" border=1></a>
 
+<p>The <tt>Bt E-value</tt> is the blast E-value, the rest of the numeric columns are from dynamic programming
+alignment of the pair.
+
+<p>&nbsp;
 <p>Select a row followed by <tt>Align Selected Pair</tt> to view the nucleotide and amino acid alignment using
 the best frame.
 
 <br><a  href="img/pairAlign.png">
 <img width=800 src="img/pairAlign.png" border=1></a>
+
+<p>&nbsp;
+<p>Select a row followed by <tt>View Sequence</tt> and the sequences will be shown in the main <tt>Sequence Table</tt>.
+
+<br><a  href="img/pairSeq.png">
+<img width=800 src="img/pairSeq.png" border=1></a>
 
 <table width='100%'><tr><td align='left' >
 </td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>

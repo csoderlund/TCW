@@ -45,7 +45,7 @@ import util.database.Globalx;
 public class BlastTab extends Tab
 {
 	private static final long serialVersionUID = 653192706293635582L;
-	private static final String helpHTML = "html/viewSingleTCW/BlastTab.html";
+	private static final String helpHTML = Globals.helpDir + "BlastTab.html";
 	
 	private final String RESULTS0 = ".results" + Globalx.TEXT_SUFFIX;
 	private final String RESULTS6 = ".results" + Globalx.CSV_SUFFIX;;
@@ -91,7 +91,7 @@ public class BlastTab extends Tab
         JButton btnHelp = Static.createButton("Help", true, Globals.HELPCOLOR);
         btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				UserPrompt.displayHTMLResourceHelp(theParentFrame, "Search Help", helpHTML);
+				UserPrompt.displayHTMLResourceHelp(theParentFrame, "Find Hits", helpHTML);
 			}
 		});	
 		row.add(btnHelp);

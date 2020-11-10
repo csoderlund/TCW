@@ -112,7 +112,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 	}	
 
 	private void createPanel() {
-		String textArea = makeTextArea();
+		String textArea = createTextArea();
 		if (nHits>0) {
 			makeHitTable();
 			createTablePanel();
@@ -213,7 +213,54 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		);	
 		/////////////////////////////
 		final JPopupMenu copypopup = new JPopupMenu();
+		
+		copypopup.add(new JMenuItem(new AbstractAction("Seq ID") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				saveTextToClipboard(ctgData.getContigID());
+			}
+		}));
+		
+		if (!metaData.bUseOrigName()) {// CAS311
+			copypopup.add(new JMenuItem(new AbstractAction(metaData.getLongLabel()) {
+				private static final long serialVersionUID = 4692812516440639008L;
+				public void actionPerformed(ActionEvent e) {
+					saveTextToClipboard(ctgData.getLongest());
+				}
+			}));
+		}
+		copypopup.add(new JMenuItem(new AbstractAction("Sequence") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				saveTextToClipboard(getUnitransString());
+			}
+		}));
+		
+		if (!isAAtcw) {
+ 			copypopup.add(new JMenuItem(new AbstractAction("Reverse complement") {
+				private static final long serialVersionUID = 4692812516440639008L;
+				public void actionPerformed(ActionEvent e) {
+					saveTextToClipboard(getRevCompString());
+				}
+			}));
+	
+ 			if (metaData.hasORFs()) { // CAS304
+				copypopup.add(new JMenuItem(new AbstractAction("Translated ORF (best frame)") {
+					private static final long serialVersionUID = 4692812516440639008L;
+					public void actionPerformed(ActionEvent e) {
+						String x = getORFtransString();
+						if (x!=null) saveTextToClipboard(x);
+						else {
+							JOptionPane.showMessageDialog(theMainFrame, 
+									"No frame for sequence. Cannot translate.", 
+									"Translated", JOptionPane.PLAIN_MESSAGE);
+						}
+					}
+				}));
+ 			}
+		}
 		if (nHits>0) { 
+			copypopup.addSeparator();
 			copypopup.add(new JMenuItem(new AbstractAction("Selected hit - Hit ID") {
 				private static final long serialVersionUID = 4692812516440639008L;
 				public void actionPerformed(ActionEvent e) {
@@ -242,43 +289,6 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 				}
 			}));
 		}	
-		copypopup.add(new JMenuItem(new AbstractAction("Sequence - Seq ID") {
-			private static final long serialVersionUID = 4692812516440639008L;
-			public void actionPerformed(ActionEvent e) {
-				saveTextToClipboard(ctgData.getContigID());
-			}
-		}));
-		
-		copypopup.add(new JMenuItem(new AbstractAction("Sequence - sequence") {
-			private static final long serialVersionUID = 4692812516440639008L;
-			public void actionPerformed(ActionEvent e) {
-				saveTextToClipboard(getUnitransString());
-			}
-		}));
-		
-		if (!isAAtcw) {
- 			copypopup.add(new JMenuItem(new AbstractAction("Sequence - reverse complement") {
-				private static final long serialVersionUID = 4692812516440639008L;
-				public void actionPerformed(ActionEvent e) {
-					saveTextToClipboard(getRevCompString());
-				}
-			}));
-	
- 			if (metaData.hasORFs()) { // CAS304
-				copypopup.add(new JMenuItem(new AbstractAction("Sequence - translated ORF (best frame)") {
-					private static final long serialVersionUID = 4692812516440639008L;
-					public void actionPerformed(ActionEvent e) {
-						String x = getORFtransString();
-						if (x!=null) saveTextToClipboard(x);
-						else {
-							JOptionPane.showMessageDialog(theMainFrame, 
-									"No frame for sequence. Cannot translate.", 
-									"Translated", JOptionPane.PLAIN_MESSAGE);
-						}
-					}
-				}));
- 			}
-		}
 		JButton jbCopy = Static.createButton("Copy...", true);
 		jbCopy.addMouseListener(new MouseAdapter() {
 	            public void mousePressed(MouseEvent e) {
@@ -348,7 +358,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 	/***********************************************
 	 * Make the textArea
 	 */
-	private String makeTextArea() {
+	private String createTextArea() {
 		boolean isProteinDB = metaData.isProteinDB();
 		boolean isOneSeq = metaData.hasNoAssembly();
 		int     nContigSets = metaData.nContigSets();
@@ -356,7 +366,13 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		int NUM_COLS = 7; // number of columns of lib/de data
 	
 		String textArea;
-		textArea = " Seq ID: " + ctgData.getContigID() + "   " + ctgData.getUserNotes() + "\n\n";
+		String id = ctgData.getContigID() + "   ";
+		String orig="";
+		if (isCAP) orig = " Select Contig";
+		else if (!metaData.bUseOrigName()) {
+			orig = metaData.getLongLabel() + ": " + ctgData.getLongest() + "   ";
+		}
+		textArea = " Seq ID: " + id + orig +  ctgData.getUserNotes() + "\n\n";
 		// showing CAPed results. The info in ctgData is not complete
 		if (isCAP) return textArea;
 		
@@ -1180,47 +1196,47 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		  HashSet <String> annodbs = new HashSet <String> (); 
 		  Vector <String> order = new Vector <String> (); // to keep ordered by e-value
           ResultSet rs = dbc.executeQuery( strQ );
-	    	  while( rs.next() )
-	    	  {	
-	    		  int i=1;
-	    		  int hitID = rs.getInt(i++);
-	    		  String desc = rs.getString(i++);
-	    		  String seq = rs.getString(i++);
-	    		  String species = rs.getString(i++);
-	    		  String type = rs.getString(i++);
-	    		  String tax = rs.getString(i++);
-	    		  String goBrief = rs.getString(i++);	
-	    		  String interpro = rs.getString(i++);
-	    		  String kegg = rs.getString(i++);
-	    		  String pfam = rs.getString(i++);
-	    		  String ec = rs.getString(i++);
-	    		  
-	    		  String hitName = rs.getString(i++);
-	    		  int percent = rs.getInt(i++); 
-	    		  int len = rs.getInt(i++);
-	    		  int start = rs.getInt(i++);
-	    		  int end = rs.getInt(i++);
-	    		  double eval = rs.getDouble(i++);
-	    		  int blast = rs.getInt(i++);
-	    		  int filter = rs.getInt(i++);
-	    		  int rank = rs.getInt(i++);
-	    		  int nGo = rs.getInt(i++);
-	    		  
-	    		  String typeTax="";
-	    		  String capType = type.toUpperCase();
-	    		  if (tax.length() < 4) typeTax= capType + tax;
-	    		  else typeTax = capType + tax.substring(0, 3);
-	    		  int pHitCov = rs.getInt(i++);
-	    		  int pSeqCov = rs.getInt(i++);
-	    		  double dbit = rs.getDouble(i++);
-	    		  
-	    		  if (!annodbs.contains(typeTax)) annodbs.add(typeTax);
-	    		  
-	    		  HitListData hd = new HitListData( hitID, hitName, eval, typeTax, desc, species, goBrief,
-	    				  percent, len, start, end,  seq, blast, rank, filter,
-	    				  interpro, kegg, pfam, ec, nGo, pHitCov, pSeqCov, dbit);
-	    		  hitMap.put(hitName, hd);
-	    		  order.add(hitName);
+    	  while( rs.next() )
+    	  {	
+    		  int i=1;
+    		  int hitID = rs.getInt(i++);
+    		  String desc = rs.getString(i++);
+    		  String seq = rs.getString(i++);
+    		  String species = rs.getString(i++);
+    		  String type = rs.getString(i++);
+    		  String tax = rs.getString(i++);
+    		  String goBrief = rs.getString(i++);	
+    		  String interpro = rs.getString(i++);
+    		  String kegg = rs.getString(i++);
+    		  String pfam = rs.getString(i++);
+    		  String ec = rs.getString(i++);
+    		  
+    		  String hitName = rs.getString(i++);
+    		  int percent = rs.getInt(i++); 
+    		  int len = rs.getInt(i++);
+    		  int start = rs.getInt(i++);
+    		  int end = rs.getInt(i++);
+    		  double eval = rs.getDouble(i++);
+    		  int blast = rs.getInt(i++);
+    		  int filter = rs.getInt(i++);
+    		  int rank = rs.getInt(i++);
+    		  int nGo = rs.getInt(i++);
+    		  
+    		  String typeTax="";
+    		  String capType = type.toUpperCase();
+    		  if (tax.length() < 4) typeTax= capType + tax;
+    		  else typeTax = capType + tax.substring(0, 3);
+    		  int pHitCov = rs.getInt(i++);
+    		  int pSeqCov = rs.getInt(i++);
+    		  double dbit = rs.getDouble(i++);
+    		  
+    		  if (!annodbs.contains(typeTax)) annodbs.add(typeTax);
+    		  
+    		  HitListData hd = new HitListData( hitID, hitName, eval, typeTax, desc, species, goBrief,
+    				  percent, len, start, end,  seq, blast, rank, filter,
+    				  interpro, kegg, pfam, ec, nGo, pHitCov, pSeqCov, dbit);
+    		  hitMap.put(hitName, hd);
+    		  order.add(hitName);
 		}
 		nHits= hitMap.size();
 	
@@ -1250,49 +1266,49 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
  				libCounts = new int[libNames.length];
  				libRPKM = new double[libNames.length];  
  			}
-    			if (seqNames!=null) 
-    				seqCounts = new int[seqNames.length]; 
-    			if (deNames!=null) 
-    				libDE = new double[deNames.length];
+			if (seqNames!=null) 
+				seqCounts = new int[seqNames.length]; 
+			if (deNames!=null) 
+				libDE = new double[deNames.length];
     			
-    			String fields=metaData.getDeLibColList();
-    			rs = dbc.executeQuery("SELECT " + fields + " FROM contig WHERE CTGID=" + ctgID);
-    			while(rs.next()) {
-    				if (libNames!=null) {
-	    				for(int x=0; x<libNames.length; x++) {
-	    					if (libNames[x]!=null) {
-	    						libCounts[x] = rs.getInt(L + libNames[x]);
-	    						libRPKM[x] =   rs.getDouble(LN + libNames[x]); 
-	    					}
-	    				}
+			String fields=metaData.getDeLibColList();
+			rs = dbc.executeQuery("SELECT " + fields + " FROM contig WHERE CTGID=" + ctgID);
+			while(rs.next()) {
+				if (libNames!=null) {
+    				for(int x=0; x<libNames.length; x++) {
+    					if (libNames[x]!=null) {
+    						libCounts[x] = rs.getInt(L + libNames[x]);
+    						libRPKM[x] =   rs.getDouble(LN + libNames[x]); 
+    					}
     				}
-    				if (seqNames!=null) {
-	    				for(int x=0; x<seqNames.length; x++) {
-	    					if (seqNames[x] !=null)
-	    						seqCounts[x] = rs.getInt(L + seqNames[x]);
-	    				}
+				}
+				if (seqNames!=null) {
+    				for(int x=0; x<seqNames.length; x++) {
+    					if (seqNames[x] !=null)
+    						seqCounts[x] = rs.getInt(L + seqNames[x]);
     				}
-    				if (deNames!=null) {
-    					for(int x=0; x<deNames.length; x++) 
-    						libDE[x] = rs.getDouble(P + deNames[x]);
-    				}
-    			}
-    			// get replicas
-    			libRepCntStr = new String[libNames.length];
+				}
+				if (deNames!=null) {
+					for(int x=0; x<deNames.length; x++) 
+						libDE[x] = rs.getDouble(P + deNames[x]);
+				}
+			}
+			// get replicas
+			libRepCntStr = new String[libNames.length];
      		for (int i=0; i<libNames.length; i++) libRepCntStr[i]=null;
       			
             rs = dbc.executeQuery("SELECT LID, count, rep FROM clone_exp where CID=" + ctgID);
             while (rs.next()) {
-            		int rep = rs.getInt(3);
-            		if (rep !=0) {
-            			int id = rs.getInt(1);
-            			int cnt = rs.getInt(2);	
-            			if (libRepCntStr[id]==null) libRepCntStr[id] = " " + cnt;
-            			else libRepCntStr[id] += ", " + cnt;
-            		}
+        		int rep = rs.getInt(3);
+        		if (rep !=0) {
+        			int id = rs.getInt(1);
+        			int cnt = rs.getInt(2);	
+        			if (libRepCntStr[id]==null) libRepCntStr[id] = " " + cnt;
+        			else libRepCntStr[id] += ", " + cnt;
+        		}
             }       
-    			rs.close();    		
-    			dbc.close();
+    		rs.close();    		
+    		dbc.close();
 		}
 		catch ( Exception err ) {ErrorReport.reportError(err, "Error: reading database for getLibs");}
 	}

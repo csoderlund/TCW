@@ -88,7 +88,7 @@ public class MTCWFrame extends JFrame {
 		 };
 	private final int SAMP_INDEX=8;
 	private final String instructionHelp = Globals.helpDir + "Instructions.html";
-	private final String overviewHelp =  Globals.helpDir + "summary.html";
+	private final String overviewHelp =  Globals.helpDir + "explain.html";
 	
 	private static Vector<MTCWFrame> openFrames = null;
 	

@@ -43,9 +43,9 @@ import sng.util.TextTab;
 import sng.util.MenuTreeNode.MenuTreeNodeEvent;
 import sng.util.MenuTreeNode.MenuTreeNodeListener;
 import sng.viewer.panels.*;
-import sng.viewer.panels.Basic.BasicGOQueryTab;
-import sng.viewer.panels.Basic.BasicHitQueryTab;
-import sng.viewer.panels.Basic.BasicSeqQueryTab;
+import sng.viewer.panels.Basic.BasicGOFilterTab;
+import sng.viewer.panels.Basic.BasicHitTab;
+import sng.viewer.panels.Basic.BasicSeqTab;
 import sng.viewer.panels.pairsTable.FieldPairsTab;
 import sng.viewer.panels.pairsTable.PairListTab;
 import sng.viewer.panels.pairsTable.PairTopRowTab;
@@ -79,7 +79,7 @@ public class STCWFrame extends JFrame {
 	private static final Color bgColor = Color.white; 
 	private static final Color bgColorLeft = Color.white; 
 	private static final String title = "viewSingleTCW";
-	private static final String overviewHelp = "html/viewSingleTCW/Overview.html";
+	private static final String overviewHelp = "html/viewSingleTCW/reproduce.html";
 	
 	// Always uses the same preference file. So if in conflict with earlier versions, change name.
 	String prefRootName = "viewSingleTCW"; 
@@ -223,19 +223,19 @@ public class STCWFrame extends JFrame {
 			tabbedPane.addTab(PairsColumns, fieldPairsTab);
 			
 			// Basic windows
-			basicSeqQueryTab = new BasicSeqQueryTab(this);
+			basicSeqQueryTab = new BasicSeqTab(this);
 			tabbedPane.addTab(BasicSeqQuery, basicSeqQueryTab);
 			MenuTreeNode basicContigQueryNode = new MenuTreeNode(BasicSeqQuery, basicSeqQueryTab);
 			
 			MenuTreeNode basicHitQueryNode = null;
 			if (metaData.hasHits()) { // CAS304
-				basicHitQueryTab = new BasicHitQueryTab(this);
+				basicHitQueryTab = new BasicHitTab(this);
 				tabbedPane.addTab(BasicHitQuery, basicHitQueryTab);
 				basicHitQueryNode = new MenuTreeNode(BasicHitQuery, basicHitQueryTab);
 			}
 			MenuTreeNode basicGOQueryNode = null;
 			if(metaData.hasGOs()) {
-				basicGOQueryTab = new BasicGOQueryTab(this);
+				basicGOQueryTab = new BasicGOFilterTab(this);
 				tabbedPane.addTab(BasicGOQuery, basicGOQueryTab);
 				basicGOQueryNode = new MenuTreeNode(BasicGOQuery, basicGOQueryTab);
 			}
@@ -1003,9 +1003,9 @@ public class STCWFrame extends JFrame {
 	private QueryPairsTab  filterPairsTab = null;
 	private FieldPairsTab  fieldPairsTab = null;
 	
-	private BasicSeqQueryTab basicSeqQueryTab = null;
-	private BasicHitQueryTab basicHitQueryTab = null;
-	private BasicGOQueryTab basicGOQueryTab = null;
+	private BasicSeqTab basicSeqQueryTab = null;
+	private BasicHitTab basicHitQueryTab = null;
+	private BasicGOFilterTab basicGOQueryTab = null;
 	
 	private ResultsSummaryTab resultsContigTab = null;
 	private ResultsSummaryTab resultsPairTab = null;

@@ -246,9 +246,9 @@ public class ManagerFrame extends JFrame {
 		chkSkipAssembly = Static.createCheckBox("Skip Assembly", true);
 		chkSkipAssembly.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {	
-				boolean b = chkSkipAssembly.isSelected();
-				curManData.setSkipAssembly(b);
-				if (b) curManData.setUseTransNames(!b); // CAS304
+				boolean bSkip = chkSkipAssembly.isSelected(); 
+				curManData.setSkipAssembly(bSkip);				// and added !
+				if (!bSkip) curManData.setUseTransNames(false); // CAS304 CAS311 was (b) BUG
 				updateUI();
 			}
 		});
@@ -257,9 +257,9 @@ public class ManagerFrame extends JFrame {
 		chkUseTransName.setBackground(Globals.BGCOLOR);
 		chkUseTransName.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				boolean b = chkUseTransName.isSelected();
-				curManData.setUseTransNames(b);
-				if (b) curManData.setSkipAssembly(!b); // CAS304
+				boolean bUse = chkUseTransName.isSelected();
+				curManData.setUseTransNames(bUse);
+				if (bUse) curManData.setSkipAssembly(true); // CAS304 
 				updateUI();
 			}
 		});

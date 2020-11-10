@@ -11,15 +11,17 @@ Exported, or view the individual sequences with "View Selected Sequence".
 <hr>
 <h2>Search:</h2>
 
-<ul>
 <p>
-Choose one of three search modes and enter a string to search on.  
+Choose one of four search modes and enter a string to search on.  
 <ul>
 <li><b>Seq ID:</b> Sequence name 
+<li><b>Orig ID or Longest or None:</b> (1) Original name if Seq ID &#8800 Orig ID  (2) Longest read of contig
+if assembled, (3) no query if neither of the previous. 
 <li><b>TCW:</b> TCW Remarks are entered when the database is built; they provide information
 on the ORFs, and if the sequence has hits in multiple frames.
 <li><b>User:</b> User Remarks may be associated with each sequence (entered with <tt>runSingleTCW</tt>).
 </ul>
+
 <i>Search rules:</i> 
 <ul>
 <li>It first tries to find an exact match. If found, the results are listed.
@@ -39,12 +41,11 @@ rearranged by dragging and sorted.
 
 <hr>
 <h2>Columns</h2>
-<table border=0 cellspacing=5>
+<table border=0 cellspacing=3 cellpadding=3>
 <tr><td valign=top nowrap>TCW Remark<td>Assigned by TCW during ORF computation
 <tr><td valign=top nowrap>User Remark<td>Uploaded by User.
 <tr><td valign=top nowrap>Count<td>Total count from all conditions/libraries. 
-<tr><td valign=top nowrap>Longest<td>If not assembled, this is the input sequence name. If assembled, this is the
-longest sequence (EST, Read) in the contig.
+<tr><td valign=top>Orig ID or Longest<td>See Search above.
 <tr><td valign=top nowrap>Best HitID<td>The HitID of the hit with the best e-value.
 </table>
 

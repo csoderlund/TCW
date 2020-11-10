@@ -1,5 +1,8 @@
 package sng.viewer.panels.Basic;
 
+/*************************************************************
+ * Creates the Table and 
+ */
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
@@ -90,7 +93,7 @@ public class BasicGOTablePanel {
 	private Vector<Object []> theResults = null;    // results in order COL+ecCol+deCol names
 	private HashMap<Integer,Integer> rowMap = null; // If Show DEtrim, not all rows shown	
 	
-	public BasicGOTablePanel(STCWFrame f, BasicGOQueryTab g) {
+	public BasicGOTablePanel(STCWFrame f, BasicGOFilterTab g) {
 		theMainFrame=f;
 		theGOQuery=g;
 		
@@ -1586,7 +1589,7 @@ public class BasicGOTablePanel {
 	private GoTableModel theTableModel = null;
 	
 	private STCWFrame theMainFrame;
-	private BasicGOQueryTab theGOQuery;
+	private BasicGOFilterTab theGOQuery;
 	
 	// DEtrim only
 	private HashSet<Integer> currentIDs;
