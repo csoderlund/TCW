@@ -158,7 +158,7 @@ public class SortTable extends JTable implements ListSelectionListener {
         			 
         			boolean isPerc = colName.startsWith("%");  
         			
-        			if (colName.startsWith(Globalx.scoreField)) {
+        			if (colName.equals(FieldData.SCORE1)) {
         				if (val <= Globalx.dNoScore) showVal = false;
         			}
         			else if (val <= Globalx.dNullVal) {

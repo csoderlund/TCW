@@ -38,40 +38,114 @@ import cmp.database.Schema;
  */
 public class runMTCWMain {
 	static public runMTCWMain cmpMain;
-	public static String strGODB = "";
-	public static boolean test=false, bWithPivot=false, bWoPivot=false;
+
+	static public boolean test=false, bWithPivot=false, bWoPivot=false, bRmMSA=false;
+	
+	static public int MS = Globals.MSA.MSTATX_SCORE;
+	static public int BI = Globals.MSA.BUILTIN_SCORE;
+	static public int     msaScore1=BI,              msaScore2=BI; // defaults repeated in MultiAlignData
+	static public String  strScore1=Globals.MSA.SoP, strScore2=Globals.MSA.Wep;
 	
 	public static void main(String[] args) {
 		try {
 			System.out.println("runMultiTCW v" + Globalx.strTCWver + " " + Globalx.strRelDate);
-			if (args.length>0 && (args[0].equals("-h") || args[0].contains("help"))) {
-				System.out.println("runMultiTCW is typically run with no arguments.");
-				System.out.println("However, the 'Closure' seeding with BBH algorithm can be replaced with:");
-				System.out.println("  runMultiTCW -BHwop   #Use Bron_Kerbosch Without Pivot");
-				System.out.println("  runMultiTCW -BHwp    #Use Bron_Kerbosch With Pivot");
-				System.exit(0);
-			}
-			if (args.length>0) {
-				if (args[0].equals("-test")) {
-					test=true;
-					System.out.println("In test mode");
-				}
-				if (args[0].equals("-BHwop")) {
-					bWoPivot=true;
-					System.out.println("Bron_Kerbosch without pivot");
-				}
-				else if (args[0].equals("-BHwp")) {
-					bWithPivot=true;
-					System.out.println("Bron_Kerbosch with pivot");
-				}
-			}
+			
+			printHelp(args);
+			
+			setArgs(args);
+			
 			ErrorReport.setErrorReportFileName(Globals.CmpErrorLog);
+			
 			runMTCWMain.run(args); // creates CompilePanel, which is the main panel
-		} catch(Exception e) {
-			ErrorReport.reportError(e);
+			
+		} catch(Exception e) {ErrorReport.reportError(e);}
+	}
+	static void printHelp(String [] args) {
+		if (args.length>0 && (args[0].equals("-h") || args[0].contains("help"))) {
+			System.out.println("runMultiTCW is typically run with no arguments, however:");
+			
+			System.out.println("  The 'Closure' seeding with BBH algorithm can be replaced with:");
+			System.out.println("  	-BHwop  #Use Bron_Kerbosch Without Pivot");
+			System.out.println("  	-BHwp   #Use Bron_Kerbosch With Pivot");
+			
+			System.out.println("  The MSA score1 of built-in Sum-of-Pairs can be replaced with:"); // CAS312 add
+			System.out.println("  	-M1 <string>, where <string> is a valid MstatX method.");
+			System.out.println("  The MSA score2 of built-in Wentropy can be replaced with:"); // CAS312 add
+			System.out.println("  	-M2 <string>, where <string> is a valid MstatX method.");
+			System.out.println("  MstatX methods: trident, wentropy, mvector, jensen, kabat, gap");
+			System.out.println("    See agcol.arizona.edu/software/TCW/doc/mtcw/UserGuide.html for more info");
+			
+			System.out.println("  -x (developer only probably)");
+			System.out.println("     Run Stats with 'Compute MSA and Score' - remove MSA and scores first");
+			System.exit(0);
 		}
 	}
-	
+	static void setArgs(String [] args) {
+		if (args.length==0) return;
+		
+		if (hasArg(args, "-test")) {
+			test=true;
+			System.out.println("In test mode");
+		}
+/* Closure */
+		if (hasArg(args, "-BHwop")) {
+			bWoPivot=true;
+			System.out.println("Bron_Kerbosch without pivot");
+		}
+		else if (hasArg(args, "-BHwp")) {
+			bWithPivot=true;
+			System.out.println("Bron_Kerbosch with pivot");
+		}
+/* CAS312 score1 */			
+		if (hasArg(args,"-M1")) {
+			msaScore1=MS;
+			String m = hasArgVal(args, "-M1");
+			strScore1 =  (m!=null) ? m : "Trident";
+			System.out.println("MSA score1 with mStatx " + strScore1);
+			isMstatX(strScore1);
+		}
+/*  CAS312 score2 */		
+		if (hasArg(args, "-M2")) {
+			msaScore2=MS;
+			String m = hasArgVal(args, "-M2");
+			strScore2 =  (m!=null) ? m : "Trident";
+			System.out.println("MSA score2 with mStatx " + strScore2);
+			isMstatX(strScore2);
+		}
+/*  CAS312  developer */		
+		if (hasArg(args, "-x")) {
+			bRmMSA=true;
+			System.out.println("Remove MSA if 'Compute MSA' when MSA exist ");
+		}
+	}
+	static boolean hasArg(String [] args, String arg) {
+		for (int i=0; i<args.length; i++)
+			if (args[i].equals(arg)) return true;
+		return false;
+	}
+	static String hasArgVal(String [] args, String arg) {
+		for (int i=0; i<args.length; i++)
+			if (args[i].equals(arg)) {
+				if (i<args.length-1) 
+					if (!args[i+1].startsWith("-")) return args[i+1];
+			}
+		return null;
+	}
+	static void isMstatX(String m) {
+		if (m.equalsIgnoreCase("trident")) return;
+		if (m.equalsIgnoreCase("wentropy")) {
+			System.err.println("NOTE: The Built-in Wentropy has 1 conserved, whereas MstatX Wentropy has 0 conserved");
+			return;
+		}
+		if (m.equalsIgnoreCase("mvector")) return;
+		if (m.equalsIgnoreCase("jensen")) return;
+		if (m.equalsIgnoreCase("kabat")) return;
+		if (m.equalsIgnoreCase("gap")) return;
+		System.err.println("Warning: not a valid MstatX method '" + m + "'");
+		System.err.println("The valid methods are: trident, wentropy, mvector, jensen, kabat, gap");
+		if (Out.yesNo("Continue?")) return;
+		else Out.die("User terminated");
+	}
 	/**************************************************
 	 * Select sTCW databases from interface
 	 */
@@ -347,11 +421,11 @@ public class runMTCWMain {
 	public static boolean generateFastaFromDB(CompilePanel cmpPanel) {
 		try {
 			Out.Print("\nCreate combined files");
-			String blastDir = cmpPanel.getCurProjAbsDir() + "/" + Globals.CompilePanel.BLASTDIR;
-			String aaFastaFile = blastDir + "/" + Globals.CompilePanel.ALL_AA_FASTA;  		
+			String blastDir = cmpPanel.getCurProjAbsDir() + "/" + Globals.Search.BLASTDIR;
+			String aaFastaFile = blastDir + "/" + Globals.Search.ALL_AA_FASTA;  		
 			Out.PrtSpMsg(1, "Create " + aaFastaFile);
 			
-			String ntFastaFile = blastDir + "/" + Globals.CompilePanel.ALL_NT_FASTA;  		
+			String ntFastaFile = blastDir + "/" + Globals.Search.ALL_NT_FASTA;  		
 			Out.PrtSpMsg(1,"Create " + ntFastaFile);
 			
 			File testDir = new File(blastDir);

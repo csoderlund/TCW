@@ -82,7 +82,7 @@ public class ErrorReport {
 		nNumErrors++;
 
 		if(debugInfo != null) {
-			pWriter.println(debugInfo + "\n");
+			pWriter.println("Error: " + debugInfo);
 			System.err.println("Error: " + debugInfo);
 			System.err.println("See " + strFileName);
 		}

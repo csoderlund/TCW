@@ -14,14 +14,14 @@ may only exist for certain cluster sets).
 <u>Sequences</u> Select a pair followed by this function to view the two sequences
 in the sequence table, where the alignment can be viewed.
 <p>
-
+<u>Clusters</u> Select a pair followed by this function to view the clusters for the two sequences.
+<p>
 <u>Copy...</u> For the selected pair, copy to clipboard a column (SeqID1, SeqID2, HitID or Hit Description).
 <p>
 
 <u>Table...</u>
 <ul>
-<li><b>Show Columns Stats:</b> Popup a table of statistics for the numeric columns in the table. Note: if you Export the table and 
-compute the statistics, their results will not be as precise.
+<li><b>Show Columns Stats:</b> Popup a table of statistics for the numeric columns in the table. 
 <br>&nbsp;
 <li><b>Show Table Stats:</b> (NT-mTCW only) Popup a table of the coding and KaKs statistics for the pairs in the
 table. <i>This only works for pairs that have coding sequence statistics.</i>
@@ -30,9 +30,9 @@ table. <i>This only works for pairs that have coding sequence statistics.</i>
 <br>&nbsp;
 <li><b>Export Table</b>: Exports the table to file. 
 <br>&nbsp;
-<li><b>Export both AA/NT sequences</b>:Exports both AA (amino acid) or NT (nucleotide) sequences for all pairs in the table.
+<li><b>Export both AA/NT sequences</b>: Exports both AA (amino acid) or NT (nucleotide) sequences for all pairs in the table.
 <br>&nbsp;
-<li><b>Export 1st AA/NT sequences</b>:Exports the 1st AA or NT sequence of the pair for all pairs in the table.
+<li><b>Export 1st AA/NT sequences</b>: Exports the 1st AA or NT sequence of the pair for all pairs in the table.
 <br>&nbsp;
 
 <li><b>Export Pair GOs:</b> list GOs associated with the pair sequences in the table. 
@@ -91,11 +91,13 @@ except the following:
 <tr><td valign="top">&nbsp;&nbsp;HitID<td>The best shared hit from the pair. If neither sequence of the pair
 has a hit, the HitID will be "*Unique". If there is no shared description between the
 two sequences of the pair, the HitID will be "*NoShare". 
-<tr><td valign="top">&nbsp;&nbsp;PCC<td>Pearson Correlation Coefficient of the RPKM values.
+
+<tr><td valign="top">&nbsp;&nbsp;PCC<td>Pearson Correlation Coefficient of the TPM values.
 This only has values>0 if the datasets have matching condition names.
 
 <tr><td valign="top"><b>Hit</b><td>Results from protein and DNA sequence self-blast (if available). All
 columns are directly from <tt>Blast</tt> or <tt>Diamond</tt> output except the 'cov' columns. 
+
 <tr><td valign="top" nowrap>&nbsp;&nbsp;Cov1, Cov2<td>The percent coverage, which is computed from the
 'align' divided by sequence length. <i>The Cov (percent coverage) can be &gt;1;</i> this happens when
 the alignment covers the whole sequence with gaps.

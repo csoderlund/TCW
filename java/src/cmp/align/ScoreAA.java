@@ -8,6 +8,7 @@ import util.methods.Out;
 public class ScoreAA {
 	private final char noAACh = Share.noAACh;	
 	private final String noNTStr = Share.noNTStr;
+	private final static char gapCh = Globalx.gapCh;
 	
 	public String aaMatch(String alignSeq1, String alignSeq2) {
 		alignLen = alignSeq1.length();
@@ -17,7 +18,7 @@ public class ScoreAA {
    		boolean inGap=false;
 		
 		for (int i=0; i<alignLen; i++) {
-			if (s1[i]==Share.gapCh || s2[i]==Share.gapCh) {
+			if (s1[i]==gapCh || s2[i]==gapCh) {
 				if (!inGap) {
 					cntOpen++; 
 					inGap=true;
@@ -156,21 +157,21 @@ public class ScoreAA {
 	 */
 	public static String getSubChar(char a1, char a2) {
 		if (a1==a2) return a1+"";
-		if (a1==Globalx.gapCh || a2==Globalx.gapCh) return " ";
+		if (a1==gapCh || a2==gapCh) return " ";
 		
 		int score = getBlosum(a1, a2);
 		if (score>0) return "+";
 		else return " ";
 	}
 	public boolean isHighSub(char a1, char a2) {
-		if (a1==Share.gapCh) return false;
-		if (a2==Share.gapCh) return false;
+		if (a1==gapCh || a1==' ') return false;
+		if (a2==gapCh || a2==' ') return false; // CAS312 add ' ' 
 	
 		int idx1 = residues.indexOf(a1);
 		int idx2 = residues.indexOf(a2);
 		if (idx1==-1 || idx2==-1) { 
-			if (idx1==-1) System.out.println("Warning: AA not recognized a1 " + a1 + " ");
-			if (idx2==-1) System.out.println("Warning: AA not recognized a2 " + a2 + " ");
+			if (idx1==-1) Out.PrtWarn("AA not recognized a1 '" + a1 + "' " + a2);
+			if (idx2==-1) Out.PrtWarn("AA not recognized a2 '" + a2 + "' " + a1);
 			return false;
 		}
 		if (blosum[idx1][idx2]>0) return true; // as blast does
@@ -181,8 +182,8 @@ public class ScoreAA {
 		int idx1 = residues.indexOf(a1);
 		int idx2 = residues.indexOf(a2);
 		if (idx1==-1 || idx2==-1) {
-			if (idx1==-1) System.out.println("Warning: AA not recognized a1 " + a1 + " ");
-			if (idx2==-1) System.out.println("Warning: AA not recognized a2 " + a2 + " ");
+			if (idx1==-1) Out.PrtWarn("AA not recognized a1 '" + a1 + "' ");
+			if (idx2==-1) Out.PrtWarn("AA not recognized a2 '" + a2 + "' ");
 			return -10;
 		}
 		return blosum[idx1][idx2];

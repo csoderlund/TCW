@@ -16,7 +16,6 @@ cluster method is prefixed with "T1" and has three clusters, they will be named 
 There can be multiple instances of the same "Method" in the databases, e.g. built with different
 parameters; the prefix allows them to be queries separately in <tt>viewMultiTCW</tt>.
 
-
 <h3>BBH (Bi-directional Best Hit)</h3>
 This methods creates the bi-directional best hit. 
 <p>
@@ -35,23 +34,22 @@ greater or equal this value.
 </table>
 
 <p><i>If your mTCWdb only has two sTCWdbs as input, then ignore the rest of this section.</i>
-<p>For an mTCWdb with &gt;2 sTCWdbs as input, this method works in the following ways 
-(examples will assume the input sTCWdbs are Foo, Bar and Fly):
+<p>For an mTCWdb with &gt;2 sTCWdbs as input, this method works in the following ways:
 <ol>
-<li>Specify two sTCWdbs to create BBH clusters from the two datasets. It is recommended
-you make separate BBH clusters for Foo/Bar, Foo/Fly and Bar/Fly, where each set will have a different
-prefix and you can query them separately in the resulting mTCW database.
-<li>If you specify more then N (N&gt;2) sTCWdbs, it will create BBH clusters with N members. 
-For example, if you specify all three sTCWdbs, the clusters will be of
-size 3 where all pairs of members are BBH pairs.
+<li>Specify two sTCWdbs to create BBH clusters from the two datasets, which uses the
+traditional BBH algorithm. 
+<li>If you specify more then N (N&gt;2) sTCWdbs, it will create BBH clusters with N members 
+where each pair of a cluster must be a BBH pair. 
+
 </ol>
 <h3>Closure</h3>
 
 The parameters are the same as described for BBH, except that there  is no option to select the
 sTCW databases as all sequences are considered regardless of origin. 
-<p>For a sequence to be added to a Closure cluster,
-it must pass the <b>%Similarity</b> and <b>%Coverage</b>
-with every other sequence in the cluster.
+<p>For a sequence to be added to a Closure cluster, it must have a search hit with every
+other sequence in the cluster, and 
+it must pass the <b>%Similarity</b> and <b>%Coverage</b> filter
+with at least one sequence in the cluster.
 
 <h3>Best Hit</h3>
 Clusters will be created from the best annotation hit description or hitID. If the hit description is used,
@@ -65,12 +63,15 @@ there is text at the end starting with "{", it is removed.
 Clusters are formed as follows:
 <ol>
 <li>All sequences share the same best HitID or best Description.
-<li>Each sequence in the cluster must have &gt;=%Similarity and &gt;=%Coverage to the hit protein. 
-<li>Each sequence in the cluster must be part of at least one pair in the cluster, where the two 
-paired sequences have &gt;=%Similarity and at least one of them have &gt;=%Coverage to it's pair.
-Without this restrictions, it is possible to get clusters that have no sequence overlaps as they
-all hit the protein in different regions.
+<li>Each sequence in the cluster must have &gt;=<b>%Similarity</b> and &gt;=<b>%Coverage</b> to the hit protein. 
+<li>Each sequence must have &gt;=%Similarity and &gt;=%Coverage to at least one other sequence in the cluster.
+<li>If the <b>All Hit</b> filter is "Yes", then all sequences in a cluster must have a hit with all others, otherwise,
+each sequence only needs to have one hit (rule #3).
+If the parameters are too lax, this can create some bad clusters. Rule of thumb:
+<br>Yes - you can reduce <b>%Similarity</b> and <b>%Coverage</b>.
+<br>No -  you should increase <b>%Similarity</b> and <b>%Coverage</b> significantly.
 </ol>
+
 
 <h3>OrthoMCL</h3>
 

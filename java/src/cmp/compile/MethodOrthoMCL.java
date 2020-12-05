@@ -112,8 +112,8 @@ public class MethodOrthoMCL {
 		}
 
 		// orthoMCL uses the original combined file
-		File blastDir = new File(projDir, Globals.CompilePanel.BLASTDIR);
-		File combFile = new File(blastDir, Globals.CompilePanel.ALL_AA_FASTA);
+		File blastDir = new File(projDir, Globals.Search.BLASTDIR);
+		File combFile = new File(blastDir, Globals.Search.ALL_AA_FASTA);
 		if (!combFile.exists() || combFile.length() < 10)
 			if (!runMTCWMain.generateFastaFromDB(cmpPanel)) return false;
 		

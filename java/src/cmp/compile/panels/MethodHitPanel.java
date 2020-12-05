@@ -24,7 +24,7 @@ public class MethodHitPanel  extends JPanel {
 		setBackground(Globals.BGCOLOR);
 		add(Box.createVerticalStrut(20));
 
-		int width = Globals.CompilePanel.WIDTH;
+		int width = Globals.Methods.WIDTH;
 		
 		JPanel row = Static.createRowPanel();	
 		lblPrefix = new JLabel("Prefix");
@@ -40,6 +40,7 @@ public class MethodHitPanel  extends JPanel {
 		add(row);
 		add(Box.createVerticalStrut(20));
 		
+// Cluster on
 		row = Static.createRowPanel();
 		JLabel type = new JLabel("Cluster on ");
 		row.add(type);
@@ -54,9 +55,26 @@ public class MethodHitPanel  extends JPanel {
 		ButtonGroup group = new ButtonGroup();
 		group.add(idButton); group.add(descButton); 
 		
-		add(row);  add(Box.createVerticalStrut(25));
+		add(row);  add(Box.createVerticalStrut(10));
 		
-		// cutoff
+// Has hit
+		row = Static.createRowPanel();
+		JLabel type2 = new JLabel("All hit ");
+		row.add(type2);
+		row.add(Box.createHorizontalStrut(width - type2.getPreferredSize().width));
+		
+		hitButton = Static.createRadioButton("Yes",false); 
+		row.add(hitButton); row.add(Box.createHorizontalStrut(5));
+		
+		noHitButton = Static.createRadioButton("No",true); 
+		row.add(noHitButton); row.add(Box.createHorizontalStrut(5));
+		
+		ButtonGroup group2 = new ButtonGroup();
+		group2.add(hitButton); group2.add(noHitButton); 
+		
+		add(row);  add(Box.createVerticalStrut(10));
+		
+// cutoff
 		row = Static.createRowPanel();
 		lblCovCutoff = new JLabel("%Coverage");
 		row.add(lblCovCutoff);
@@ -68,7 +86,7 @@ public class MethodHitPanel  extends JPanel {
 		add(row);
 		add(Box.createVerticalStrut(10));
 		
-		// similarity
+// similarity
 		row = Static.createRowPanel();
 		lblSimCutoff = new JLabel("%Similarity");
 		row.add(lblSimCutoff);
@@ -98,6 +116,7 @@ public class MethodHitPanel  extends JPanel {
 	
 		txtCovCutoff.setText(Globals.Methods.Hit.COVERAGE_CUTOFF);
 		txtSimCutoff.setText(Globals.Methods.Hit.SIMILARITY);
+		hitButton.setSelected(true);
 	}
 	
 	public static String getMethodType() { 
@@ -111,13 +130,21 @@ public class MethodHitPanel  extends JPanel {
 	public void setPrefix(String prefix) { txtPrefix.setText(prefix); }
 	
 	public String getComment() {  
+		int sim = Static.getInteger(txtSimCutoff.getText());
+		int cov = Static.getInteger(txtCovCutoff.getText());
+		String yn = (hitButton.isSelected()) ? "; Hits" : "";
+		
+		String com = "Sim " + sim + "; Cov " + cov + yn ; 
 		int x = (descButton.isSelected()) ? 1 : 0;
-		String com = "Sim " + txtSimCutoff.getText() + "; Cov " + txtCovCutoff.getText(); 
 		return  com + "; " + hitTypes[x];
 	}
 	public String getSettings() {
 		int x = (descButton.isSelected()) ? 1 : 0;
-		return  xDELIM + ":" + x + ":" + txtCovCutoff.getText() + ":" + txtSimCutoff.getText() + ":" + xDELIM ;
+		int sim = Static.getInteger(txtSimCutoff.getText());
+		int cov = Static.getInteger(txtCovCutoff.getText());
+		int yn = (hitButton.isSelected()) ? 0 : 1;
+		
+		return  xDELIM + ":" + x + ":" + cov + ":" + sim + ":" + yn + ":" + xDELIM ;
 	}
 		
 	public void setSettings(String settings) {
@@ -129,11 +156,18 @@ public class MethodHitPanel  extends JPanel {
 		
 		txtCovCutoff.setText(vals[2]);
 		txtSimCutoff.setText(vals[3]);
+		
+		if (vals.length>=4) {
+			if (vals[4].contentEquals("0")) hitButton.setSelected(true);
+			else noHitButton.setSelected(true);
+		}
 	}
 	
 	private JRadioButton idButton, descButton;
 	private JLabel     lblPrefix = null;
 	private JTextField txtPrefix = null;
+	
+	private JRadioButton hitButton, noHitButton;
 	
 	private JLabel lblCovCutoff = null;
 	private JTextField txtCovCutoff = null;

@@ -25,10 +25,11 @@ import util.methods.BestAnno;
 
 public class MethodHit {
 	private boolean debug=false;
-	private String groupFile = Globals.Compile.GROUP_FILE_HIT;
+	private String groupFile = Globals.Methods.Hit.TYPE_NAME;
 	private String hitName = Globals.Methods.Hit.TYPE_NAME;
 	private String [] hitTypes = {"HitID", "Description"}; 
-	private int covCutoff=60, simCutoff=40;
+	private int covCutoff, simCutoff;
+	private final int DES_IDX = 1;
 	 
 	private int grpNum=0;
 	
@@ -76,14 +77,18 @@ public class MethodHit {
 		}
 		else {
 			nHitType = Static.getInteger(settings[1].trim());
-			if (nHitType<0 || nHitType>1) {
-				Out.PrtWarn("Incorrect parameter for Hit: " + settings[1].trim() + " - must be 0 or 1");
-				return false;
-			}
+			if (nHitType<0 || nHitType>1) nHitType=1;
+	
 			covCutoff = Static.getInteger(settings[2].trim());
 			if (covCutoff<0) covCutoff=0;
+			
 			simCutoff = Static.getInteger(settings[3].trim());
 			if (simCutoff<0) simCutoff=0;
+			
+			if (settings.length>=4) {
+				int n = Static.getInteger(settings[4].trim());
+				bAllHits = (n==1) ? false : true;
+			}
 		}
 		String root = cmpPanel.getCurProjMethodDir() +  groupFile + "." + prefix + "_" + nHitType;
 		groupFile = root;
@@ -92,7 +97,8 @@ public class MethodHit {
 		Out.PrtSpMsg(1, "HitType:    " + hitTypes[nHitType]);
 		Out.PrtSpMsg(1, "Coverage:   " + covCutoff);
 		Out.PrtSpMsg(1, "Similarity: " + simCutoff);
-		Out.PrtSpMsg(1, "Seqs must pair with at least one other in cluster");
+		if (bAllHits) Out.PrtSpMsg(1, "Seqs must pair with all other in cluster");
+		else          Out.PrtSpMsg(1, "Seqs must pair with at least one other in cluster");
 		Out.PrtSpMsg(1, "");
 		
 		return true;
@@ -119,13 +125,17 @@ public class MethodHit {
 			HashSet <Integer> cpSeqs = new HashSet <Integer> ();
 			
 			int cnt=0, rm=0;
-			for (int seqIdx : cpSeqs) {
+			boolean allPair=true;
+			for (int seqIdx : gObj.grpSeqs) {
 				Seq sObj = seqMap.get(seqIdx);
 					
 				for (int mIdx : gObj.grpSeqs) {
-					if (sObj.mate.contains(mIdx)) cnt++;
+					if (sObj.bestHitIdx!=0 && seqIdx!=mIdx) {
+						if (sObj.mate.contains(mIdx)) cnt++;
+						if (bAllHits && !sObj.pair.contains(mIdx)) allPair=false; // CAS312 add totally connected
+					}
 				}
-				if (cnt>=1) {
+				if (cnt>=1 && allPair) {
 					cpSeqs.add(seqIdx);
 				}
 				else {
@@ -147,7 +157,7 @@ public class MethodHit {
 			grpIdxMap.put(gObj.grpNum, gObj);
 		}
 		Out.PrtSpCntMsgZero(3, cntNoPairs, "Remove sequence from cluster due to no shared pair");
-		Out.PrtSpCntMsgZero(3, grpNum,      "Clusters from best anno hits " + hitTypes[nHitType]);	
+		Out.PrtSpCntMsgZero(3, grpNum,     "Clusters from best anno hits " + hitTypes[nHitType]);	
 	}
 	catch (Exception e) {ErrorReport.die(e, "load Best Hits from DB"); bSuccess=false;}
 	}
@@ -195,7 +205,7 @@ public class MethodHit {
 		int cnt=0;
 		ResultSet rs = cmpDBC.executeQuery("select PGid, PGstr, HITid, HITstr from pog_groups where PMid=" + GRPid);
 		while (rs.next()) {
-			 int dbGrpIdx =   rs.getInt(1);
+			 //int dbGrpIdx =   rs.getInt(1);
 			 String grpName = rs.getString(2);
 			 int hitIdx =     rs.getInt(3);
 			 String hitStr = rs.getString(4);
@@ -283,9 +293,10 @@ public class MethodHit {
 			String desc = rs.getString(3);
 			int nGO = rs.getInt(4);
 			
-			String xdesc=hitStr;
-			if (nHitType==1 && BestAnno.descIsGood(desc)) 
-				       xdesc = BestAnno.getBestDesc(desc); // descBrief is too generous for this
+			String xdesc;
+			if (nHitType==DES_IDX  && BestAnno.descIsGood(desc)) 
+				 xdesc = BestAnno.getBestDesc(desc); // This is exact; descBrief is too generous for this
+			else xdesc=hitStr;
 			
 			if (!grpMap.containsKey(xdesc)) grpMap.put(xdesc, new Grp());
 			
@@ -294,43 +305,36 @@ public class MethodHit {
 			
 			hitMap.put(hitIdx, new Hit(hitIdx, hitStr, xdesc, desc, nGO, gObj));
 		}
-		
 		if (hitMap.size()==0) {
 			Out.PrtWarn("No hits data");
 			bSuccess=false;
 			return;
 		}
 		
-		if (nHitType==1) Out.PrtCntMsg(grpMap.size(), "Unique descriptions from " + hitMap.size() + " hits");
-		else             Out.PrtCntMsg(hitMap.size(), "Unique hits");
+		if (nHitType==DES_IDX) Out.PrtCntMsg(grpMap.size(), "Unique descriptions from " + hitMap.size() + " hits");
+		else                   Out.PrtCntMsg(hitMap.size(), "Unique hits");
 		
-	/* Create Seq list with at least one pair and hit*/
-		rs = cmpDBC.executeQuery("select UTid, UTstr, asmID, aaLen,  HITid from unitrans where nPairs>0 and HITid>0");
+	/* Create Seq list with at least one hit (was checking nPair, but that only refers to hits with other datasets )*/
+		rs = cmpDBC.executeQuery("select UTid, UTstr, asmID, aaLen,  HITid from unitrans where HITid>0");
 		while (rs.next()) {
 			int  seqIdx = rs.getInt(1);
 			String name = rs.getString(2);
 			int  asmIdx = rs.getInt(3);
 			int len =     rs.getInt(4);
-			int bestIdx = rs.getInt(5);
+			int bestANid = rs.getInt(5);
 			
-			Seq sObj = new Seq(asmIdx, name, len, bestIdx);
+			Seq sObj = new Seq(asmIdx, name, len, bestANid);
 			seqMap.put(seqIdx, sObj);
 		}
-		Out.PrtCntMsg(seqMap.size(), "Sequences with at least one hit and one pair");
+		Out.PrtCntMsg(seqMap.size(), "Sequences with at least one hit");
 		
-		if (seqMap.size()==0) {
-			Out.PrtWarn("No valid sequence data");
-			bSuccess=false;
-			return;
-		}
-		
-		int failSim=0, failOlap=0, pass=0;
 	/* Add best hit per seq list ordered */
+		int failSim=0, failOlap=0, pass=0;
 		rs = cmpDBC.executeQuery("select UTid, HITid, percent_id, alignment_len, e_value from unitrans_hits "
 				+ " where bestAnno=1");
 		while (rs.next()) {
 			int seqIdx = rs.getInt(1);
-			if (!seqMap.containsKey(seqIdx)) continue; // no pairs
+			if (!seqMap.containsKey(seqIdx)) continue; 
 			
 			int hitIdx = rs.getInt(2);	
 			if (!hitMap.containsKey(hitIdx)) continue; // shouldn't happen
@@ -353,27 +357,34 @@ public class MethodHit {
 			Hit hObj = hitMap.get(hitIdx);
 			hObj.addBest(seqIdx,  eval);  // adds to grpMap also
 		}
-		Out.PrtCntMsg(failSim, "Seq-hit fail similarity");
+		Out.PrtCntMsg(failSim,  "Seq-hit fail similarity");
 		Out.PrtCntMsg(failOlap, "Seq-hit fail coverage");
-		Out.PrtCntMsg(pass, "Seq-hit pass parameters ");
+		Out.PrtCntMsg(pass,     "Seq-hit pass parameters ");
 	
 	/* Seq pairs */
 		failSim=failOlap=pass=0;
 		rs = cmpDBC.executeQuery("select UTid1, UTid2, aaOlap1, aaOlap2, aaSim from pairwise");
 		while (rs.next()) {
-			int sim = rs.getInt(5);
-			if (sim<simCutoff) {
-				failSim++;
-				continue;
+			int seq1=rs.getInt(1);
+			int seq2=rs.getInt(2);
+			
+			if (seqMap.containsKey(seq1) && seqMap.containsKey(seq2)) {
+				seqMap.get(seq1).addPair(seq2);
+				seqMap.get(seq2).addPair(seq1);
 			}
+			else continue;
+			
 			int olap1 = rs.getInt(3);
 			int olap2 = rs.getInt(4);
 			if (olap1<covCutoff || olap2<covCutoff) {
 				failOlap++;
 				continue;
 			}
-			int seq1=rs.getInt(1);
-			int seq2=rs.getInt(2);
+			int sim = rs.getInt(5);
+			if (sim<simCutoff) {
+				failSim++;
+				continue;
+			}
 			
 			if (seqMap.containsKey(seq1) && seqMap.containsKey(seq2)) {
 				seqMap.get(seq1).addMate(seq2);
@@ -470,14 +481,15 @@ public class MethodHit {
 		}
 		
 		void addMate(int pairIdx) {mate.add(pairIdx);}
+		void addPair(int pairIdx) {if (bAllHits) pair.add(pairIdx);}
 		
 		int asmIdx;
 		
 		String name;
 		int len=0;
 		int bestHitIdx=0;
-	
 		HashSet <Integer> mate = new HashSet <Integer> (); // fast search
+		HashSet <Integer> pair = new HashSet <Integer> (); // fast search
 	}
 	/*******************************************************/
 	private HashMap <Integer, String> asmMap = new HashMap <Integer, String> ();
@@ -486,6 +498,7 @@ public class MethodHit {
 	 private CompilePanel cmpPanel;	// get all parameters from this
 	
 	 private boolean bSuccess = true;
+	 private boolean bAllHits = true;
 	 private int nHitType=1;
 	 private String prefix;
 	 private int GRPid=-1;

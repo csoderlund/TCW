@@ -17,7 +17,7 @@ before <b>Read</b> can be selected. See KaKs below.
 
 <h3>PCC (Pearson Correlation Coefficient) </h3>
 PCC is computed on the TPM for shared conditions. This can be run at anytime after
-the pairs have been added. If there are many pairs and conditions, this can take awhile.
+the pairs have been added.
 
 <h3>Alignment of hit pairs in cluster</h3>
 If you execute <b>Run Stats</b> with <b>Compute statistics</b> and <b>KaKs files - Write</b> selected, 
@@ -33,7 +33,7 @@ Dynamic programming is a more precise alignment but takes longer than blast, mor
 not be parallelized. To align over 200k pairs took over 2 hours on a linux machine (if you have
 a big dataset, plan to leave it running over night).
 
-<h3>KaKs</h3>
+<h4>KaKs</h4>
 <ol>
 <li>The <b>write</b> will write alignment files into <tt>projcmp/&lt;project name&gt;/KaKs</tt> directory.
 A file called <tt>runKaKs</tt> will also be written into this file. If your computer has N CPUs,
@@ -50,13 +50,19 @@ sh runKaKs
 </ol>
 See KaKs below for more information.
 
-<h3>Multiple Alignment of cluster</h3>
-This will execute the program <tt>MAFFT</tt> on each cluster, score the results, and enter the
-scores into the database. One of the two scores computed is from executing the program 
-<tt>MstatX</tt> and reading the results.
+<h3>Multiple alignment of cluster</h3>
+This will execute the program <tt>MAFFT</tt> on each cluster, score each MSA, and enter the
+resulting MSAs and scores into the database. Occassionally, <tt>MAFFT</tt> fails, in which case, <tt>MUSCLE</tt> is run.
 
-<p>The <tt>MAFFT</tt> and <tt>MstatX</tt> executables are in the sub-directory <tt>Ext/linux</tt>
-for Linux and <tt>Ext/mac</tt> for Mac.
+<p>The MSA scores are the Sum-of-Pairs and Wentropy, where Wentropy is computed just like the 
+<tt>MstatX</tt> program except the score is (1 - score). 
+
+<p>The user can request
+that external program <tt>MstatX</tt> be run instead, where any of their valid methods can be specified
+(see <tt>runMultiTCW -h</tt>). If this step has already been run, but you 
+want to try a <tt>MstatX</tt> method, select the <b>Compute MSA and score</b> option and <b>Run Stat</b>;
+the MSAs in the database will be scored and the scores in the database will be updated.
+<hr>
 
 <h3>Add additional cluster sets</h3>
 If you add additional cluster sets after executing <b>Run Stats</b> on initial clusters,

@@ -7,8 +7,8 @@ import java.text.DecimalFormat;
 // shared by sTCW and mTCW
 // They both have their own database/Globals.java
 public class Globalx {
-	public static final String strRelDate = "(10-Nov-20)"; 
-	public static final String strTCWver = "3.1.1"; 
+	public static final String strRelDate = "(4-Dec-20)"; 
+	public static final String strTCWver = "3.1.2"; 
 	public static final String URL = "http://www.agcol.arizona.edu ";
 	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate;
 	public static final String error="***";
@@ -47,6 +47,8 @@ public class Globalx {
 	
 	public static final String gapStr = "-";
 	public static final char gapCh = '-';
+	public static final String stopStr = "*";
+	public static final char stopCh = '*';
 	
 	public static final String CSV_DELIM = "\t";
 	public static final String CSV_SUFFIX = ".tsv"; 
@@ -76,7 +78,6 @@ public class Globalx {
 	public static final double dNaDE		=		3.0;   // DE computation returns NA
 	
 	public static final String frameField = "Frame";
-	public static final String scoreField = "Score"; //
 	public static final float  dNoScore = -100000; // Float.MAX_VALUE does not work
 	
 	static public final String GO_FORMAT = "GO:%07d";
@@ -120,6 +121,8 @@ public class Globalx {
 	public static final Color lightGray =  new Color(230, 230, 230);
 	public static final Color mediumGray =  new Color(180, 180, 180);
 	public static final Color purple = new Color(138, 0, 184); 
+	
+	public static final Color red = Color.red;
 	
 	public static final Color colorORF = Color.YELLOW;
 	public static final Color colorHIT = new Color(157, 189, 242);

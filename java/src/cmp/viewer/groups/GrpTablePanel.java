@@ -46,7 +46,6 @@ import cmp.viewer.MTCWFrame;
 import cmp.viewer.ViewerSettings;
 import cmp.viewer.pairs.PairTablePanel;
 import cmp.viewer.seq.SeqsTopRowPanel;
-import cmp.viewer.seq.SeqsTablePanel;
 import cmp.viewer.table.*;
 
 public class GrpTablePanel extends JPanel {
@@ -57,7 +56,9 @@ public class GrpTablePanel extends JPanel {
 	private static final String CLUSTERID = FieldData.CLUSTERID;
 	private static final String HITID = FieldData.HITID;
 	private static final String HITDESC = FieldData.HITDESC;
-	private static final String helpHTML = "html/viewMultiTCW/GrpTable.html";
+	private static final String SCORE1 = FieldData.SCORE1;
+	private static final String SCORE2 = FieldData.SCORE2;
+	private static final String helpHTML = Globals.helpDir + "GrpTable.html";
 
 	// from filter or 'All Clusters'
 	public GrpTablePanel(MTCWFrame parentFrame, String resultName) {
@@ -113,9 +114,10 @@ public class GrpTablePanel extends JPanel {
     	
 	   	btnShowSeqs = Static.createButton("Sequences", false, Globals.FUNCTIONCOLOR);
     	btnShowSeqs.addActionListener(new ActionListener() {
-		public void actionPerformed(ActionEvent arg0) {
-			viewSequences();	
-		} });
+			public void actionPerformed(ActionEvent arg0) {
+				viewSequences();	
+			} 
+		});
     	topRow.add(btnShowSeqs);
     	topRow.add(Box.createHorizontalStrut(3));
     	
@@ -325,6 +327,7 @@ public class GrpTablePanel extends JPanel {
 		hasGOs = (theViewerFrame.getInfo().getCntGO()>0);
 		hasAAdb = (theViewerFrame.getnAAdb()>0);
 		hasCounts = theViewerFrame.getInfo().hasCounts();
+		hasMSA	= theViewerFrame.getInfo().hasMultiScore();
 		
 		colSelectChange = new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -377,9 +380,9 @@ public class GrpTablePanel extends JPanel {
 	private void buildTable(ResultSet rset) {
         FieldData theFields = null;
        
-        	theFields = FieldData.getGrpFields(asmNames);
+        theFields = FieldData.getGrpFields(asmNames);
     
-        	tableButtonPanel = createTableButton();    
+        tableButtonPanel = createTableButton();    
 		tableStatusPanel = createTableStatusPanel();	
 		tableSummaryPanel = createFilterSummaryPanel();
 		fieldSelectPanel = createFieldSelectPanel();
@@ -515,31 +518,31 @@ public class GrpTablePanel extends JPanel {
     	return page;
 	}
     private JPanel createTableStatusPanel() {
-	    	JPanel thePanel = Static.createRowPanel();
-	    	tableType = Static.createTextFieldNoEdit(20);
-	    	Font f = tableType.getFont();
-	    	tableType.setFont(new Font(f.getFontName(),Font.BOLD, f.getSize()));
-	    	tableType.setMaximumSize(tableType.getPreferredSize());
-	    	tableType.setAlignmentX(LEFT_ALIGNMENT);
-	
-	    	tableHeader =  Static.createTextFieldNoEdit(30);
-	    	thePanel.add(tableType);
-	    	thePanel.add(tableHeader);
-	    	thePanel.setMaximumSize(thePanel.getPreferredSize());
-	    	
-	    	return thePanel;
+    	JPanel thePanel = Static.createRowPanel();
+    	tableType = Static.createTextFieldNoEdit(20);
+    	Font f = tableType.getFont();
+    	tableType.setFont(new Font(f.getFontName(),Font.BOLD, f.getSize()));
+    	tableType.setMaximumSize(tableType.getPreferredSize());
+    	tableType.setAlignmentX(LEFT_ALIGNMENT);
+
+    	tableHeader =  Static.createTextFieldNoEdit(30);
+    	thePanel.add(tableType);
+    	thePanel.add(tableHeader);
+    	thePanel.setMaximumSize(thePanel.getPreferredSize());
+    	
+    	return thePanel;
 	}
     private JPanel createFilterSummaryPanel() {
-	    	JPanel thePanel = Static.createRowPanel();
-	   
-	    	JLabel header = Static.createLabel(MTCWFrame.FILTER, true);
-	    	thePanel.add(header);
-	    	
-	    	JLabel lblSummary = Static.createLabel(strQuerySummary, true);
-	    	lblSummary.setFont(getFont());
-	    	thePanel.add(lblSummary);
-	    	
-	    	return thePanel;
+    	JPanel thePanel = Static.createRowPanel();
+   
+    	JLabel header = Static.createLabel(MTCWFrame.FILTER, true);
+    	thePanel.add(header);
+    	
+    	JLabel lblSummary = Static.createLabel(strQuerySummary, true);
+    	lblSummary.setFont(getFont());
+    	thePanel.add(lblSummary);
+    	
+    	return thePanel;
 	}
 	
 	public String getSummary() { return strQuerySummary; }
@@ -547,25 +550,25 @@ public class GrpTablePanel extends JPanel {
 	
 	private String buildQueryStr(DBConn mdb) {
         try {
-        		FieldData theFields = FieldData.getGrpFields(asmNames);
-        		
-	        	String strQuery = "SELECT " + theFields.getDBFieldQueryList() + " FROM " + TABLE + " ";
-	        	if(theFields.hasJoins())
-	        		strQuery += theFields.getJoins();
-	        	
-	        	if(strSubQuery != null && strSubQuery.length() > 0)
-	        		strQuery += " WHERE " + strSubQuery;
-	        	else strSubQuery = " 1 ";
-	        	
-	        	if (strSubQuery.contains("unique_hits")) { 
-	        		  loadProgress.setText("Getting filtered clusters from database" );
-	        	}
-	        	else {
-		        	int cnt = mdb.executeCount("select count(*) from " + TABLE + " WHERE " + strSubQuery);
-		        	String per = Static.perText(cnt, theViewerFrame.getInfo().getCntGrp());
-			    loadProgress.setText("Getting " + cnt + " " + per + " filtered clusters from database" );
-	        	}
-        		return strQuery;
+    		FieldData theFields = FieldData.getGrpFields(asmNames);
+    		
+        	String strQuery = "SELECT " + theFields.getDBFieldQueryList() + " FROM " + TABLE + " ";
+        	if(theFields.hasJoins())
+        		strQuery += theFields.getJoins();
+        	
+        	if(strSubQuery != null && strSubQuery.length() > 0)
+        		strQuery += " WHERE " + strSubQuery;
+        	else strSubQuery = " 1 ";
+        	
+        	if (strSubQuery.contains("unique_hits")) { 
+        		  loadProgress.setText("Getting filtered clusters from database" );
+        	}
+        	else {
+	        	int cnt = mdb.executeCount("select count(*) from " + TABLE + " WHERE " + strSubQuery);
+	        	String per = Static.perText(cnt, theViewerFrame.getInfo().getCntGrp());
+	        	loadProgress.setText("Getting " + cnt + " " + per + " filtered clusters from database" );
+        	}
+        	return strQuery;
         } catch(Exception e) {ErrorReport.reportError(e, "Error processing query"); return null;}
 	}
 	private void buildShortList() {
@@ -589,43 +592,43 @@ public class GrpTablePanel extends JPanel {
 		}
 	}
     private String [] getSelectedColumns() {
-	    	String [] retVal = null;
-	    	
-	    	int selectedCount = 0;
-	    	for(int x=0; x<chkFields.length; x++) 
-	    		if(chkFields[x].isSelected())
-	    			selectedCount++;
-	    	
-	    	if(selectedCount == 0) {
-    			for(int x=0; x<FieldData.GRP_DEFAULT.length; x++) {
-    				chkFields[x].setSelected(FieldData.GRP_DEFAULT[x]);
-    				if(chkFields[x].isSelected())
-    					selectedCount++;
-    			}
-	    	}
-	    	retVal = new String[selectedCount];
-	    	int targetIndex = 0;
-	    	for(int x=0; x<chkFields.length; x++) 
-	    		if(chkFields[x].isSelected()) {
-	    			retVal[targetIndex] = chkFields[x].getText();
-	    			targetIndex++;
-	    		}
-	    	
-	    	return retVal;
+    	String [] retVal = null;
+    	
+    	int selectedCount = 0;
+    	for(int x=0; x<chkFields.length; x++) 
+    		if(chkFields[x].isSelected())
+    			selectedCount++;
+    	
+    	if(selectedCount == 0) {
+			for(int x=0; x<FieldData.GRP_DEFAULT.length; x++) {
+				chkFields[x].setSelected(FieldData.GRP_DEFAULT[x]);
+				if(chkFields[x].isSelected())
+					selectedCount++;
+			}
+    	}
+    	retVal = new String[selectedCount];
+    	int targetIndex = 0;
+    	for(int x=0; x<chkFields.length; x++) 
+    		if(chkFields[x].isSelected()) {
+    			retVal[targetIndex] = chkFields[x].getText();
+    			targetIndex++;
+    		}
+    	
+    	return retVal;
     }
     private boolean [] getColumnSelections(String [] columns, 
-			boolean [] defaultSelections, String [] selections) {
-	
-	    	if(selections == null || selections.length == 0)
-	    		return defaultSelections;
-	    	Vector<String> sels = new Vector<String> ();
-	    	boolean [] retVal = new boolean[columns.length];
-	    	for(int x=0; x<selections.length; x++)
-	    		sels.add(selections[x]);
-	    	for(int x=0; x<columns.length; x++) {
-	    		retVal[x] = sels.contains(columns[x]);
-	    	}
-	    	return retVal;
+		boolean [] defaultSelections, String [] selections) {
+
+    	if(selections == null || selections.length == 0)
+    		return defaultSelections;
+    	Vector<String> sels = new Vector<String> ();
+    	boolean [] retVal = new boolean[columns.length];
+    	for(int x=0; x<selections.length; x++)
+    		sels.add(selections[x]);
+    	for(int x=0; x<columns.length; x++) {
+    		retVal[x] = sels.contains(columns[x]);
+    	}
+    	return retVal;
     }
     
     /*******************************************************
@@ -742,7 +745,17 @@ public class GrpTablePanel extends JPanel {
 			String desc = (String)theTableData.getValueAt(sels[0], descidx);
 			if (desc==null) desc = Globals.uniqueDesc;
 			
-			summary = "Cluster " + name + ";   " + desc;
+			String scores="";
+			if (hasMSA) {	// CAS312
+				int score1 = theTableData.getColumnHeaderIndex(SCORE1);
+				float s1 = (Float)theTableData.getValueAt(sels[0], score1);
+				
+				int score2 = theTableData.getColumnHeaderIndex(SCORE2);
+				float s2 = (Float)theTableData.getValueAt(sels[0], score2);
+				scores = String.format("   (%.3f, %.3f)", s1, s2);
+			}
+			
+			summary = "Cluster " + name + ";   " + desc + scores;
 			subquery = sourceTable + " = " + ((Integer)theTableData.getValueAt(sels[0], IDidx));
 			grpID = ((Integer)theTableData.getValueAt(sels[0], IDidx)) + "";
 			hitID = (String)  theTableData.getValueAt(sels[0], Hitidx); // CAS305
@@ -1021,7 +1034,7 @@ public class GrpTablePanel extends JPanel {
 	private int totalGrp=0;
 	private boolean isList=false;
 	private String [] asmNames;
-	private boolean hasGOs=false, hasAAdb=false, hasCounts;
+	private boolean hasGOs=false, hasAAdb=false, hasCounts=false, hasMSA=false;
 	
 	private SeqsTopRowPanel theSeqTable = null;
 	private PairTablePanel thePairTable = null;

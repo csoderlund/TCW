@@ -284,7 +284,8 @@ public class ScoreCDS
 			
 			ps1.setInt(i++, idx1);
 			ps1.setInt(i++, idx2);
-			ps1.execute();
+			ps1.executeUpdate();
+			ps1.close(); // CAS312 probably not necessary....
 		}
 		catch(Exception e) {ErrorReport.die(e, "computing stats");}
 	}

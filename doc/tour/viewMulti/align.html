@@ -42,16 +42,10 @@ If there are only protein (AA) sequences in the database, only the AA options de
 <h3>Pairwise</h3> 
 </td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
 This drop-down has the following options, where all options use dynamic programming for the selected sequence(s):
-<ol>
-<li>AA for each pair
-<li>NT for each pair
-<li>AA, CDS and NT alignments for one pair
-<li>5UTR, CDS and 3UTR alignments for one pair
-<li>AA, CDS and NT alignments for one pair
-<li>AA to sequence best hit
-<li>AA to cluster best hit (Clusters only) 
-</ol>
-
+<table border=0>
+<tr><td><br><a  href="img/pairOpt.png"><img width=200 src="img/pairOpt.png" border=1></a>
+<td>The "for one pair" options are only enabled if a pair is selected.
+</table>
 <br>AA, CDS and NT alignments of a pair. The text alignment can be viewed by clicking the AA, CDS or NT buttons.
 <br><a  href="img/pairAlign.png"><img width=700 src="img/pairAlign.png" border=1></a>
 <br><br>
@@ -77,6 +71,8 @@ This option is only available for <small>Sequence view for clusters</small>, as 
 is computed when the database is built.
 <br>
 <a  href="img/MSAdb.png"><img width=700 src="img/MSAdb.png" border=1></a>
+<br>
+<a  href="img/MSAzappo.png"><img width=700 src="img/MSAzappo.png" border=1></a>
 
 <p>
 <a name=msa>
@@ -84,12 +80,10 @@ is computed when the database is built.
 <h3>MSA...</h3> 
 </td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
 This drop-down has the following options, where all options execute the MSA program for the set of selected sequences:
-<ul>
-<li>MUSCLE-AA: Align the AA sequences.
-<li>MAFFTA-AA: Align the AA sequences.
-<li>MAFFTA-CDS: Align the CDS sequences.
-<li>MAFFTA-NT: Align the NT sequences (i.e. full transcript).
-</ul>
+<table border=0>
+<tr><td><br><a  href="img/msaOpt.png"><img width=120 src="img/msaOpt.png" border=1></a>
+<td>Where AA is the translated ORF, CDS is the un-translated ORF, and NT is the entire transcript.
+</table>
 The display is the same as shown above for MSAdb.
 
 <!--#include virtual="../../ssi/end.html" -->

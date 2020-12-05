@@ -14,8 +14,8 @@ import cmp.compile.LoadSingleTCW; // db62 only
  * If columns are being added for a version, add them here and to schema
  */
 public class Version {
-	public static final String DBver = "6.2"; 
-	private final double nVer=6.2;
+	public static final String DBver = "6.3"; 
+	private final double nVer=6.3;
 	
 	/************************************************
 	 * CAS310 added this with return value as nothing works if not updated
@@ -48,12 +48,44 @@ public class Version {
 			if (d < 6.0) addv60(mDB);
 			if (d < 6.1) addv61(mDB);
 			if (d < 6.2) addv62(mDB);
+			if (d < 6.3) addv63(mDB);
 			
 			Out.prt("Complete update for mdb" + DBver);
 			return true;
 		}
 		catch (Exception e) {ErrorReport.die(e, "Error checking schema"); return false;}
 	}
+	//--------------------------------------------------------//
+	private void addv63(DBConn mDB) { //v3.1.2 Nov/2020
+		try {
+			Out.PrtSpMsg(1, "Updating for mdb6.3 (v3.1.2) - add infoKeys");
+			if (!mDB.tableExist("infoKeys")) {
+				String sqlU = "CREATE TABLE infoKeys (" + // CAS312 db63 add info here from now on
+						"KEYid 		tinyint NOT NULL PRIMARY KEY AUTO_INCREMENT, " +
+						"iKey varchar(20), " + 
+						"iVal text," +
+						"unique (iKey) " +
+						") ENGINE=MyISAM;";
+				mDB.executeUpdate(sqlU);
+			}
+			DBinfo info = new DBinfo(mDB);
+			info.updateInfoKey("MSAscore1", "Sum-of-Pairs");
+			info.updateInfoKey("MSAscore2", "MstatX Trident");
+			
+			if (!mDB.tableExist("pog_scores")) {
+				String sqlU = "CREATE TABLE pog_scores ( " +
+					"PGid int, " +
+					"score1 text, "		+ //comma-delimited list of column score1
+					"score2 text,  "	+ //comma-delimited list of column score2
+					"nType  tinytext"   + //comma-delimited list of AA/cnt (max 11 char for each of 21)
+					") ENGINE=MyISAM;";
+				mDB.executeUpdate(sqlU);
+			}
+			mDB.executeUpdate("update info set schemver='6.3'");
+		}
+		catch (Exception e) {ErrorReport.die(e, "Update to version 6.3"); }
+	}
+	//--------------------------------------------------------//
 	private void addv62(DBConn mDB) { // v3.1.0 Oct/2020
 		try {
 			Out.PrtSpMsg(1, "Updating for mdb6.2 - add new hit columns");

@@ -3,18 +3,19 @@
 <body style="padding:20px;width:650px;font-family:Times">
 <h2>Build a multiTCW database (runMultiTCW)</h2>
 
-The multiTCW manager allows you to build a new multiTCW database (mTCWdb), modify an existing one,
-and perform clustering of transcripts and/or proteins. 
-Note that a multiTCW database is built by combining 
-one or more existing singleTCW databases (sTCWdb), which must already have been created and 
-(optionally) annotated. The sTCWdbs could have been built with 
-DNA or protein sequences.
+The multiTCW manager allows to perform clustering of multi-species sequences. 
+A multiTCW database is built by combining 
+one or more existing annotated singleTCW databases (sTCWdb). 
+The sTCWdbs could have been built with nucleotide sequences (transcripts or
+genes) or amino acid sequences (proteins), typically abbreviated as AA and NT sequences. 
+For NT sTCWdbs, both the nucleotide
+sequences and translated ORFs will be used in the mTCW analysis.
 
-<h2>1. Project</h2>
-<b>Add Project:</b> This will request a project name. 
-As soon as you choose the name, the manager
-begins to store the project configuration information in the file <tt>mTCW.cfg</tt> under
-<tt>/projcmp/&lt;project name&gt;</tt>. If you exit the manager and return,
+<h2>Project</h2>
+<b>Add Project:</b> This will request a project name; the prefix "mTCW_" will be added to it.
+As soon as you choose the name, the manager creates a <tt>/projcmp/&lt;project name&gt;</tt>
+directory with the file <tt>mTCW.cfg</tt> with the information you enter. 
+If you exit the manager and return,
 the partially-completed project will now be available through "Select Project". 
 <p>
 <b>Project:</b> Browse for existing projects, which are listed under
@@ -22,52 +23,44 @@ the <tt>/projcmp</tt> directory. You can either click on the "Select..." to view
 of projects, or select the arrows to scroll through them. Note: using the arrows can have
 a bit of wait time because it loads and checks each project that appears in the Project
 select box.
-Select <b>Overview</b> to determine if the database
-has been built yet.
+Select <b>Overview</b> to view the state of the database.
 <p>
-<b>mTCW database:</b> The name of the database to build. It must be prefixed with 'mTCW_'. 
-
-<p>
-<b>Remove:</b> See the last section. 
+<b>Remove...</b> See the last section. 
 
 
-<h2>2. Build Database</h2>
+<h2>1. sTCWdbs (single TCW databases)</h2>
 
 Add one or more sTCWdbs, using the <b>Add</b> button, which brings up a
-new window, which has its own Help. 
+new window, which has its own <b>Help</b>. 
 <p>
 When you are finished adding sTCWdbs, click <b>Build Database</b>. 
-This extracts all the individual
-singeTCW data and enters it into an mTCWdb. 
-Progress reports will print to the
-terminal window, and the loading usually takes 10-30 minutes. 
+This extracts the necessary singeTCW data and enters it into an mTCWdb. 
 
 <h3>Add GOs</h3>
 If the sTCWdbs have GOs, they will be added to the mTCWdb, which are useful
-in viewMultiTCW for downloading tables of GOs. This step takes a long
-time (a couple hours on a large database). 
+in viewMultiTCW for downloading tables of GOs. This step takes the longest. 
 It can be done at any time after the "Build Database", i.e. GOs are not used
-for clustering or stats, so can be added after everything else is added.
+for clustering or statistics, so can be added after everything else is added.
 
-<h2>3. Compare Sequences</h2>
-To cluster the sequences,  a file of database sequences needs to be searched against itself
+<h2>2. Compare Sequences</h2>
+To cluster the sequences,  the database sequences needs to be searched against itself
 to see what pairs are similar. 
 Use the <b>Settings</b> button to set the search program and parameters;
-this opens a new window which has further Help. 
+this opens a new window which has further <b>Help</b>. 
 <p>
 Press <b>Run Search</b> to run the search. If this button is disabled, it means
 the file exists. 
 If you want to run the search again, you must removed, which can be done with the 
-<b>Remove</b> button. Alternatively, you may rename the file "hitsAA" or "hitsNT"
+<b>Remove...</b> button at the top. Alternatively, you may rename the file "hitsAA" or "hitsNT"
 under the directory "projcmp/&lt;project-name&gt;/hitResults".
 <p>
 After running the search, select <b>Add Pairs</b>, which adds all pairs from the
 hit file(s) to the database.
 
-<h2>4. Cluster</h2>
+<h2>3. Cluster Sets</h2>
 
 To create clusters (e.g. putative ortholog sets), click <b>Add</b>, which brings
-up a new window with its own help. After adding one or more cluster methods, 
+up a new window with its own <b>Help</b>. After adding one or more cluster methods, 
 click <b>Add New Clusters</b> to run the calculations for each
 new method and store the clusters to the database. 
 
@@ -77,18 +70,17 @@ You can add new clusters or remove existing clusters.
 If there are really big clusters, the parameters were probably not tight enough; remove
 the cluster method and add a new one with tighter parameters. 
 
-<h2> 5. Run Stats</h2>
+<h2> 4. Statistics</h2>
 After you add Cluster, execute this function to do the following:
 
-<table border=1>
+<table border=1 cellpadding=3>
 <tr><td colspan=2><i>1. Compute for all pairs</i>
-<tr><td nowrap>PCC of RPKM
+<tr><td nowrap>PCC of TPM
 <td>Computes the Pearson Correlation Coefficient on
 all conditions that are shared between the two sequences of a pair. 
 
-
 <tr><td colspan=2><i>2. Alignment of hit pairs in clusters (NT pairs only)</i>
-<tr><td nowrap>Alignment Statistics
+<tr><td nowrap>Pairwise Statistics
 <td>Computes coding and nucleotide statistics for each pair.
 <br>Compute summary statistics.
 <tr><td nowrap>KaKs write
@@ -101,17 +93,14 @@ run the <tt>KaKs_calculator</tt>, which must be in the 'projcmp' directory.
 <td>After running the <tt>KaKs_calculator</tt>, read the results into the database.
 
 <tr><td colspan=2><i>3. Multiple alignment of cluster</tt></i>
-<tr><td nowrap>Statistics
-<td>The <tt>MAFFT</tt> program is run on each cluster and the resulting alignment is score for
-sum-of-pairs and Trident, where Trident is computed by executing the
-<tt>MstatX</tt> program.
-
+<tr><td nowrap>MSA Score
+<td>The <tt>MAFFT</tt> program is run on each cluster, the resulting alignment is scored,
+and the results entered into the database. 
 </table> 
 <br><br>
-<hr>
-<h2>Remove</h2>
-If you only want to remove one set of clusters from the database, select it from
-the 'Cluster Methods' table followed by 'Remove'. 
+
+<h2>Remove...</h2>
+
 The following explains options of the "Remove..." button.
 <table border=1>
 <tr><td nowrap>1. Pairs and clusters from database<td>
@@ -131,6 +120,6 @@ If you remove the database in order to recreate it with datasets that
 have any differences from the previous datasets, you must remove the hit files
 and redo the search.
 <tr><td nowrap>5. All files from disk for this mTCW project<td>
-Remove the project directory found under <tt>/projcmp</tt>.
+Remove the <tt>projcmp/&lt;project-name&gt;</tt> directory.
 </table>
 </html>

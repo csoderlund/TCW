@@ -22,7 +22,7 @@ import util.methods.Static;
 import util.methods.Out;
 
 public class MethodClosure {
-	 private String groupFile = Globals.Compile.GROUP_FILE_CLOSURE;
+	 private String groupFile =  Globals.Methods.Closure.TYPE_NAME;
 	 private String [] covTypes = {"Either", "Both"};
 	 private String [] strType = {"Amino acid", "Nucleotide"};
 	 

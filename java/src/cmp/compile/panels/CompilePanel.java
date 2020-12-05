@@ -351,7 +351,7 @@ public class CompilePanel extends JPanel {
 			editPanel.cfgFileDefaults();
 			
 			// aa selfblast
-			int tp = Globals.CompilePanel.AA;
+			int tp = Globals.AA;
 			String aa = props.getProperty("MTCW_search_file").trim();
 			if (!aa.equals("")) {
 				editPanel.cfgSetBlast(tp, aa);
@@ -364,7 +364,7 @@ public class CompilePanel extends JPanel {
 			}
 			
 			// nt selfblast
-			tp = Globals.CompilePanel.NT;
+			tp = Globals.NT;
 			String runBlastNT = props.getProperty("MTCW_run_blastn"); 
 			if (runBlastNT.equals("0")) editPanel.cfgFileNoBlastN();
 			else {
@@ -472,7 +472,7 @@ public class CompilePanel extends JPanel {
 			out.print("MTCW_db = " + pnlProject.getDBName() + "\n");
 			
 			EditBlastPanel editPanel = pnlBlast.getEditPanel();
-			int tp = Globals.CompilePanel.AA;
+			int tp = Globals.AA;
 			if (editPanel.isBlast(tp)) { // always on
 				out.print("\n");
 				// Always print search program 
@@ -484,7 +484,7 @@ public class CompilePanel extends JPanel {
 					out.print("MTCW_search_params = " + editPanel.getBlastParams(tp) + "\n");	
 			}
 			
-			tp = Globals.CompilePanel.NT;
+			tp = Globals.NT;
 			if (editPanel.isBlast(tp)) {
 				out.print("\n");
 				String file = editPanel.getBlastFileToProcess(tp);

@@ -1,4 +1,4 @@
-package cmp.viewer.seq;
+package cmp.viewer.seq.align;
 /************************************************************
  * When the members table is displayed for pairs, this is called 
  * to align with PairAlignPanel
@@ -15,7 +15,9 @@ import java.util.Vector;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
@@ -31,12 +33,13 @@ import cmp.align.Share;
 import cmp.database.Globals;
 import cmp.viewer.MTCWFrame;
 
-public class AlignPairView3Panel extends JPanel {
+public class Pair3ViewPanel extends JPanel {
 	private static final long serialVersionUID = -2090028995232770402L;
-	private static final String helpHTML = "html/viewMultiTCW/PairAlign.html";
+	private static final String help1HTML = Globals.helpDir + "PairAlign.html";
+	private static final String help2HTML = Globals.helpDir + "BaseAlign.html";
 	private int viewType=1; // 0=AA,CDS,NT  1=5'UTR,CDS, 3'UTR
 	
-	public AlignPairView3Panel(MTCWFrame parentFrame, String [] members, int [] lens, int type) { 
+	public Pair3ViewPanel(MTCWFrame parentFrame, String [] members, int [] lens, int type) { 
 		theParentFrame = parentFrame;
 		thePair = members;
 		theLens = lens;
@@ -52,26 +55,38 @@ public class AlignPairView3Panel extends JPanel {
 		buttonPanel = Static.createPagePanel();
 		JPanel theRow = Static.createRowPanel();
 		
-		btnShowType = Static.createButton("View Sequence", true);
+		btnShowType = Static.createButton("Line", true);
 		btnShowType.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if(isShowGraphic) {
 					isShowGraphic = false;
-					btnShowType.setText("View Graphic");
+					btnShowType.setText("Seq");
 					menuZoom.setEnabled(false);
+					dotBox.setEnabled(true);
 				}
 				else {
 					isShowGraphic = true;
-					btnShowType.setText("View Sequence");
+					btnShowType.setText("Line");
 					menuZoom.setEnabled(true);
+					dotBox.setEnabled(false);
 				}
 				refreshPanels();
 			}
 		});
-		//theRow.add(btnShowType);
-		//theRow.add(Box.createHorizontalStrut(3));
+		theRow.add(new JLabel("View:")); theRow.add(Box.createHorizontalStrut(1));
+		theRow.add(btnShowType);         theRow.add(Box.createHorizontalStrut(2));
 		
-		menuZoom = Static.createZoom();
+		dotBox = Static.createCheckBox("Dot", true);
+		dotBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				refreshPanels();
+			}
+		});
+		dotBox.setEnabled(false);
+		theRow.add(dotBox);
+		theRow.add(Box.createHorizontalStrut(2));
+		
+		menuZoom = Static.createZoom2();
 		menuZoom.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				refreshPanels();
@@ -79,7 +94,17 @@ public class AlignPairView3Panel extends JPanel {
 		});	
 		
 		theRow.add(menuZoom);
-		theRow.add(Box.createHorizontalStrut(10));
+		theRow.add(Box.createHorizontalStrut(2));
+		
+		JButton btnHelp1 = Static.createButton("Help1", true, Globals.HELPCOLOR);
+		btnHelp1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				UserPrompt.displayHTMLResourceHelp(theParentFrame, 
+						"Alignment...",  help2HTML);
+			}
+		});
+		theRow.add(btnHelp1);
+		theRow.add(Box.createHorizontalStrut(20));
 		
 		// Align functions
 		theRow.add(Static.createLabel("Align: ", true));
@@ -109,7 +134,7 @@ public class AlignPairView3Panel extends JPanel {
 			}
 		});
 		theRow.add(btnCDSalign);
-		theRow.add(Box.createHorizontalStrut(4));
+		theRow.add(Box.createHorizontalStrut(2));
 		
 		type = (viewType==0) ? "NT..." : "3UTR...";
 		btnNTalign = Static.createButton(type, true); 
@@ -125,23 +150,20 @@ public class AlignPairView3Panel extends JPanel {
 			if (utr3_1<=Share.minAlignLen || utr3_2<=Share.minAlignLen)
 				btnNTalign.setEnabled(false);
 		}
-		
-		theRow.add(Box.createHorizontalStrut(20));
-	    theRow.add(Box.createHorizontalGlue()); 
+		theRow.add(Box.createHorizontalStrut(2));
 	    
-		JButton btnShowHelp = Static.createButton("Help", true, Globals.HELPCOLOR);
-		btnShowHelp.addActionListener(new ActionListener() {
+		JButton btnHelp = Static.createButton("Help2", true, Globals.HELPCOLOR);
+		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				UserPrompt.displayHTMLResourceHelp(theParentFrame, 
-						"Pairwise...",  helpHTML);
+						"Align: ",  help1HTML);
 			}
 		});
-		theRow.add(btnShowHelp);
-		theRow.setMaximumSize(theRow.getPreferredSize()); 
-		theRow.setMinimumSize(theRow.getPreferredSize()); 
-		add(theRow);
+		theRow.add(btnHelp);
 		
-		buttonPanel.setAlignmentX(LEFT_ALIGNMENT);
+		theRow.add(Box.createHorizontalGlue()); 
+	
+		buttonPanel.add(theRow);
 		buttonPanel.setMaximumSize(buttonPanel.getPreferredSize()); 
 		buttonPanel.setMinimumSize(buttonPanel.getPreferredSize()); 
 	}
@@ -172,14 +194,14 @@ public class AlignPairView3Panel extends JPanel {
 	private void createAA_CDS_NTPanel() {
 	try {
 		DBConn mDB = theParentFrame.getDBConnection();
-		theGraphicPanels = new AlignPair3Panel[theAlignData.length];
+		theGraphicPanels = new Pair3AlignPanel[theAlignData.length];
 		
 		if (theLens[0]>0 && theLens[1]>0) { // has AA for both sequences
 			theParentFrame.setStatus("Aligning AA " + thePair[0] + " and " + thePair[1]);
 			theAlignData[0] = new PairAlignData(mDB, thePair, PairAlignData.AlignAA); //  !isNT
 			
 			if (theAlignData[0].getAlignFullSeq1().length()>0 && theAlignData[0].getAlignFullSeq2().length()>0) {
-				theGraphicPanels[0] = new AlignPair3Panel(theParentFrame, theAlignData[0]); 
+				theGraphicPanels[0] = new Pair3AlignPanel(theParentFrame, theAlignData[0]); 
 				theGraphicPanels[0].setAlignmentY(Component.LEFT_ALIGNMENT);
 			}
 			else System.err.println("No AA alignment for pair");
@@ -191,7 +213,7 @@ public class AlignPairView3Panel extends JPanel {
 			theAlignData[1] = new PairAlignData(mDB, thePair,  PairAlignData.AlignCDS_AA); // isCDS
 			
 			if (theAlignData[1].getAlignFullSeq1().length()>0 && theAlignData[1].getAlignFullSeq2().length()>0) {
-				theGraphicPanels[1] = new AlignPair3Panel(theParentFrame, theAlignData[1]); 
+				theGraphicPanels[1] = new Pair3AlignPanel(theParentFrame, theAlignData[1]); 
 				theGraphicPanels[1].setAlignmentY(Component.LEFT_ALIGNMENT);
 			}
 			else System.err.println("No CDS alignment for pair");
@@ -200,7 +222,7 @@ public class AlignPairView3Panel extends JPanel {
 			theAlignData[2] = new PairAlignData(mDB, thePair,  PairAlignData.AlignNT); //  isNT
 			
 			if (theAlignData[2].getAlignFullSeq1().length()>0 && theAlignData[2].getAlignFullSeq2().length()>0) {
-				theGraphicPanels[2] = new AlignPair3Panel(theParentFrame, theAlignData[2]); 
+				theGraphicPanels[2] = new Pair3AlignPanel(theParentFrame, theAlignData[2]); 
 				theGraphicPanels[2].setAlignmentY(Component.LEFT_ALIGNMENT);
 			}
 			else System.err.println("No NT alignment for pair");
@@ -213,7 +235,7 @@ public class AlignPairView3Panel extends JPanel {
 	}
 	private void createUTR_CDSPanel() {
 		try {
-			theGraphicPanels = new AlignPair3Panel[theAlignData.length];
+			theGraphicPanels = new Pair3AlignPanel[theAlignData.length];
 			
 			if (theLens[2]<=0 && theLens[3]<=0) {
 				Out.PrtError("Should not happen");
@@ -227,7 +249,7 @@ public class AlignPairView3Panel extends JPanel {
 			theParentFrame.setStatus("Aligning CDS " + thePair[0] + " and " + thePair[1]);
 			theAlignData[1] = new PairAlignData(mDB, thePair,  PairAlignData.AlignCDS_AA); // isCDS
 			if (theAlignData[1].getAlignFullSeq1().length()>0 && theAlignData[1].getAlignFullSeq2().length()>0) {
-				theGraphicPanels[1] = new AlignPair3Panel(theParentFrame, theAlignData[1]); 
+				theGraphicPanels[1] = new Pair3AlignPanel(theParentFrame, theAlignData[1]); 
 				theGraphicPanels[1].setAlignmentY(Component.LEFT_ALIGNMENT);
 			}
 			else Out.PrtWarn("No CDS alignment for pair");
@@ -237,7 +259,7 @@ public class AlignPairView3Panel extends JPanel {
 			theParentFrame.setStatus("Aligning 5UTR " + thePair[0] + " and " + thePair[1]);
 			theAlignData[0] = new PairAlignData(name1, name2, theAlignData[1].get5UTR1(), theAlignData[1].get5UTR2(), true);
 			if (theAlignData[0].getAlignFullSeq1().length()>0 && theAlignData[0].getAlignFullSeq2().length()>0) {
-				theGraphicPanels[0] = new AlignPair3Panel(theParentFrame, theAlignData[0]); 
+				theGraphicPanels[0] = new Pair3AlignPanel(theParentFrame, theAlignData[0]); 
 				theGraphicPanels[0].setAlignmentY(Component.LEFT_ALIGNMENT);
 			}
 			else Out.PrtWarn("No 5'UTR alignment for pair");
@@ -245,7 +267,7 @@ public class AlignPairView3Panel extends JPanel {
 			theParentFrame.setStatus("Aligning 3UTR " + thePair[0] + " and " + thePair[1]);
 			theAlignData[2] = new PairAlignData(name1, name2, theAlignData[1].get3UTR1(), theAlignData[1].get3UTR2(), false);
 			if (theAlignData[2].getAlignFullSeq1().length()>0 && theAlignData[2].getAlignFullSeq2().length()>0) {
-				theGraphicPanels[2] = new AlignPair3Panel(theParentFrame, theAlignData[2]); 
+				theGraphicPanels[2] = new Pair3AlignPanel(theParentFrame, theAlignData[2]); 
 				theGraphicPanels[2].setAlignmentY(Component.LEFT_ALIGNMENT);
 			}
 			else Out.PrtWarn("No 3'UTR alignment for pair");
@@ -292,16 +314,17 @@ public class AlignPairView3Panel extends JPanel {
 		try {
 			MenuMapper ratioSelection = (MenuMapper) menuZoom.getSelectedItem();
 			int ratio = ratioSelection.asInt();
-			int view = AlignPair3Panel.GRAPHICMODE;
-			//int view = (isShowGraphic) ? AlignPair3Panel.GRAPHICMODE : AlignPair3Panel.TEXTMODE;
+			int view = (isShowGraphic) ? BaseAlignPanel.GRAPHICMODE : BaseAlignPanel.TEXTMODE;
+			boolean bDot = dotBox.isSelected();
 			
 			for(int x=0; x<theGraphicPanels.length; x++) {	
 				if (theGraphicPanels[x]==null) continue;
 				
 				theGraphicPanels[x].setBorderColor(Color.BLACK);
 			
-				theGraphicPanels[x].setBasesPerPixel(ratio);
+				theGraphicPanels[x].setZoom(ratio);
 				theGraphicPanels[x].setDrawMode(view);
+				theGraphicPanels[x].setDotMode(bDot);
 				
 				mainPanel.add(theGraphicPanels[x]);
 			}
@@ -310,30 +333,7 @@ public class AlignPairView3Panel extends JPanel {
 		} catch (Exception e) {ErrorReport.reportError(e);}
 	}
 	
-	// don't think I need
-	private void handleClick(MouseEvent e) {
-		int viewX = (int) (e.getX() + scroller.getViewport().getViewPosition().getX());
-		int viewY = (int) (e.getY() + scroller.getViewport().getViewPosition().getY());
-	
-		for(int x=0; x<theGraphicPanels.length; x++)
-		{
-			if (theGraphicPanels[x]==null) continue;
-			
-			int nPanelX = viewX - theGraphicPanels[x].getX();
-			int nPanelY = viewY - theGraphicPanels[x].getY();
-		
-			if ( theGraphicPanels[x].contains( nPanelX, nPanelY ) ) {
-				theGraphicPanels[x].handleClick( e, new Point( nPanelX, nPanelY ) );
-			}
-			else if ( !e.isShiftDown() && !e.isControlDown() ) {
-				theGraphicPanels[x].selectNone();
-			}
-		}
-		boolean allVisible = true;
-		for(int x=0; x<theGraphicPanels.length && allVisible; x++) {
-			allVisible = theGraphicPanels[x].isVisible();
-		}
-	}
+	private void handleClick(MouseEvent e) { }// CAS312 removed unnecessary code - nothing is selectable
 	
     private void alignPopUp(int index) {
     		String msg = "CDS codon align";
@@ -384,6 +384,8 @@ public class AlignPairView3Panel extends JPanel {
 
 	private JComboBox <MenuMapper> menuZoom = null;
 	private JButton btnShowType = null;
+	private JCheckBox dotBox = null;
+	
 	private JButton btnAAalign=null;
 	private JButton btnNTalign=null;
 	private JButton btnCDSalign=null;
@@ -391,7 +393,7 @@ public class AlignPairView3Panel extends JPanel {
 	private Thread theThread = null;
 	
 	private PairAlignData [] theAlignData = new PairAlignData [3];
-	private AlignPair3Panel [] theGraphicPanels = null;
+	private Pair3AlignPanel [] theGraphicPanels = null;
 	private String [] thePair;
 	private int [] theLens; // 1: ntlen, aaLen; 2: ntLen, aaLen
 }

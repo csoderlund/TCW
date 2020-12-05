@@ -42,6 +42,9 @@ import cmp.viewer.MTCWFrame;
 import cmp.viewer.groups.GrpTablePanel;
 import cmp.viewer.hits.HitTablePanel;
 import cmp.viewer.pairs.PairTablePanel;
+import cmp.viewer.seq.align.MultiViewPanel;
+import cmp.viewer.seq.align.Pair3ViewPanel;
+import cmp.viewer.seq.align.PairNViewPanel;
 import cmp.viewer.seqDetail.SeqTopRowPanel;
 import cmp.viewer.table.FieldData;
 import cmp.viewer.table.TableUtil;
@@ -635,7 +638,7 @@ public class SeqsTopRowPanel extends JPanel  {
 			oldCDSset = curSeqSet;
 			
 			int [] theLens = theSeqTable.getPairLens(); 
-			theCDSpairPanel = new AlignPairView3Panel(theViewerFrame, curSeqSet, theLens, 0); 
+			theCDSpairPanel = new Pair3ViewPanel(theViewerFrame, curSeqSet, theLens, 0); 
 			lowerPanel.add(theCDSpairPanel);		
 		}
 		setVisible(false);
@@ -658,7 +661,7 @@ public class SeqsTopRowPanel extends JPanel  {
 			oldUTRset = curSeqSet;
 			
 			int [] theLens = theSeqTable.getPairLens(); 
-			theUTRpairPanel = new AlignPairView3Panel(theViewerFrame, curSeqSet, theLens, 1); 
+			theUTRpairPanel = new Pair3ViewPanel(theViewerFrame, curSeqSet, theLens, 1); 
 			lowerPanel.add(theUTRpairPanel);		
 		}
 		setVisible(false);
@@ -679,7 +682,7 @@ public class SeqsTopRowPanel extends JPanel  {
 		else {
 			oldAAset=curSeqSet;
 			
-			theAAPairPanel = new AlignPairViewNPanel(theViewerFrame, curSeqSet,  PairAlignData.AlignAA); 	
+			theAAPairPanel = new PairNViewPanel(theViewerFrame, curSeqSet,  PairAlignData.AlignAA); 	
 			lowerPanel.add(theAAPairPanel);
 		}
 		setVisible(false);
@@ -697,7 +700,7 @@ public class SeqsTopRowPanel extends JPanel  {
 		else {
 			oldAAset=curSeqSet;
 			
-			theAAHit0Panel = new AlignPairViewNPanel(theViewerFrame, curSeqSet,  PairAlignData.AlignHIT0_AA); 	
+			theAAHit0Panel = new PairNViewPanel(theViewerFrame, curSeqSet,  PairAlignData.AlignHIT0_AA); 	
 			lowerPanel.add(theAAHit0Panel);
 		}
 		setVisible(false);
@@ -715,7 +718,7 @@ public class SeqsTopRowPanel extends JPanel  {
 		else {
 			oldAAset=curSeqSet;
 			
-			theAAHit1Panel = new AlignPairViewNPanel(theViewerFrame, curSeqSet,  
+			theAAHit1Panel = new PairNViewPanel(theViewerFrame, curSeqSet,  
 					PairAlignData.AlignHIT1_AA, consensusHitID); 	
 			lowerPanel.add(theAAHit1Panel);
 		}
@@ -736,7 +739,7 @@ public class SeqsTopRowPanel extends JPanel  {
 		else {
 			oldNTSet = curSeqSet;
 			
-			theNTPairPanel = new AlignPairViewNPanel(theViewerFrame, curSeqSet, PairAlignData.AlignNT); 
+			theNTPairPanel = new PairNViewPanel(theViewerFrame, curSeqSet, PairAlignData.AlignNT); 
 			lowerPanel.add(theNTPairPanel);
 		}
 		setVisible(false);
@@ -752,7 +755,7 @@ public class SeqsTopRowPanel extends JPanel  {
 		}
 		else {
 			oldMultiDB = curSeqSet;
-			theMultiDBPanel = new AlignMultiViewPanel(theViewerFrame, curSeqSet, grpID);
+			theMultiDBPanel = new MultiViewPanel(theViewerFrame, curSeqSet, grpID);
 			lowerPanel.add(theMultiDBPanel);
 		}
 		setVisible(false);
@@ -788,7 +791,7 @@ public class SeqsTopRowPanel extends JPanel  {
 			else if (type == Globals.CDS) oldMafftCDS=curSeqSet;
 			else                          oldMafftNT=curSeqSet;
 			
-			theMultiPanel[algIndex] = new AlignMultiViewPanel(theViewerFrame, curSeqSet, alignPgm, type);
+			theMultiPanel[algIndex] = new MultiViewPanel(theViewerFrame, curSeqSet, alignPgm, type);
 			lowerPanel.add(theMultiPanel[algIndex]);
 		}
 		setVisible(false);
@@ -1028,12 +1031,12 @@ public class SeqsTopRowPanel extends JPanel  {
     private JPanel lowerPanel;
     private String [] curSeqSet;
     private String [] oldUTRset, oldAAset, oldNTSet, oldCDSset;
-    private AlignPairView3Panel theCDSpairPanel = null, theUTRpairPanel = null;
-	private AlignPairViewNPanel theAAPairPanel = null, theNTPairPanel = null;
-	private AlignPairViewNPanel theAAHit0Panel = null, theAAHit1Panel = null;
+    private Pair3ViewPanel theCDSpairPanel = null, theUTRpairPanel = null;
+	private PairNViewPanel theAAPairPanel = null, theNTPairPanel = null;
+	private PairNViewPanel theAAHit0Panel = null, theAAHit1Panel = null;
 	private String [] oldMuscle, oldMafftAA, oldMafftNT,oldMafftCDS, oldMultiDB;
-	private AlignMultiViewPanel theMultiDBPanel =  null;
-	private AlignMultiViewPanel [] theMultiPanel = new AlignMultiViewPanel [4];
+	private MultiViewPanel theMultiDBPanel =  null;
+	private MultiViewPanel [] theMultiPanel = new MultiViewPanel [4];
 	
 	private JPanel theTablePanel;
     private JButton btnCopy = null, btnTable = null;

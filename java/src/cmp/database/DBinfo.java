@@ -85,7 +85,6 @@ public class DBinfo {
 		catch (Exception e){ErrorReport.prtReport(e, "Error getting methods");}
 	}
 	
-	/***  set on demand ***/
 	private void setCounts() {
 		try {
 			cntSeq = mDB.executeCount("select count(*) from unitrans");
@@ -194,7 +193,13 @@ public class DBinfo {
 				hasNTblast =    hasVal("select ntInfo from info"); 
 				
 				hasMulti = mDB.executeBoolean("select hasMA from info");
-				hasDBalign =    hasMulti;
+				hasDBalign = hasMulti;
+				
+				String val = infoKeyVal("MSAscore1");
+				msaScore1 = (val!=null) ? val : "Sum-of-pairs";
+				
+				val = infoKeyVal("MSAscore2");
+				msaScore2 = (val!=null) ? val : "Unknown";
 			}
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "setting pair info");}
@@ -206,6 +211,15 @@ public class DBinfo {
 			return true;
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "setting pair info"); return false;}
+	}
+	//------ CAS312 use this to get all values from table -----------//
+	private String infoKeyVal(String key) {
+		String val="";
+		try {
+			val = mDB.executeString("select iVal from infoKeys where iKey='" + key + "'");
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "Getting value for " + key);}
+		return val;
 	}
 	/*******************************************************
 	 * XXX Updates from runMultiTCW
@@ -248,6 +262,24 @@ public class DBinfo {
 		
 		return "'" + buffer.toString() + "'";
 	}
+	//--- CAS312 add key-value pair to infoKey table ---------//
+	public void updateInfoKey(String key, String val) {
+		try {
+			if (!key.contentEquals("MSAscore1") && !key.contentEquals("MSAscore2")) {
+				Out.PrtWarn("No such infoKey keyword: " + key);
+				return;
+			}
+			String oldVal = infoKeyVal(key);
+			String sql;
+			
+			if (oldVal==null) sql = "insert into infoKeys set iKey= '"  + key + "', iVal='" + val + "'";
+			else              sql = "update infoKeys set iVal='" + val + "' where iKey='" + key + "'";
+			
+			mDB.executeUpdate(sql);
+		}
+		catch(Exception e) {ErrorReport.die(e, "Error updating info method");}
+	}
+	
 	/*********************************************************
 	 * XXX SAMPLEs: Want to show between 20 and 1000 of each
 	 */
@@ -579,7 +611,8 @@ public class DBinfo {
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Reseting GO count");}
 	}
-	
+	public String getMSA_Score1() {return msaScore1;} // CAS312 - used in Summary and GrpTable column description
+	public String getMSA_Score2() {return msaScore2;} // ditto
 	/**********************************************************/
 	private String [] allsTCW=null;
 	private HashMap <String, Integer> asmIdxMap = new HashMap <String, Integer> ();
@@ -592,6 +625,7 @@ public class DBinfo {
 	private int [] methodID=null;
 	private String [] methodName=null, methodPrefix=null;
 	private String [] allTaxa=null;
+	private String msaScore1="", msaScore2="";
 	
 	private boolean hasDBalign=false, hasNTblast=false, isNTonly=false, hasCounts=true;
 	private boolean hasPCC=false, hasStats=false, hasKaKs=false, hasMulti=false;

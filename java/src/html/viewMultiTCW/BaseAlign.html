@@ -1,0 +1,28 @@
+<html>
+<body style="padding:20px;width:650px;">
+<title>Alignment</title>
+<h2>Alignment</h2>
+This <b><tt>Help</tt></b> applies to the <tt>View</tt>, <tt>Zoom</tt>, <tt>Dot</tt> and <tt>Blosum62</tt> buttons.
+
+<p>
+<b><tt>View: </tt></b> is followed by a toggle button:
+<ol>
+<li><b><tt>Line</tt></b> is a graphical view. A horizontal line covers the length of each sequence, where mismatches
+are displayed as vertical (hash) lines.
+<li><b><tt>Seq</tt></b> is a sequence view. 
+</ol>
+<b><tt>Dot</tt></b> (<tt>View: Seq</tt> only): When it is selected, a "." represents exact matches.
+When it is un-checked, all characters are shown.
+<p>
+<b><tt>Zoom</tt></b> (<tt>View: Line</tt> only): The 1:N options shrink the image and the N:1 expand the image. The expanded
+image has spaces between the individual hash lines, and makes the <tt>Zappo</tt> coloring easier to read.
+
+<p>Blosum68/Zappo (AA only): This colors the hash lines and AA characters based on comparing the column amino acids with the consensus. 
+<ol>
+<li><b><tt>Blosum68</tt></b>: This uses the Blosum68 matrix, and is described in the alignment legend.  
+<li><b><tt>Zappo</tt></b>: The amino acid residues are coloured according to their physicochemical properties, as is described in
+the alignment legend.
+</ol>
+For both of the above, the hash line is longer if the Blosum68 matrix substitution value is &lt;0.
+</html>
+

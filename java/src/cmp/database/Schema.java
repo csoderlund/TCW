@@ -100,18 +100,26 @@ public class Schema {
 					"allTaxa 	text" +
 					") ENGINE=MyISAM;";
 			mDB.executeUpdate(sqlU);
-		   		
+			
+			sqlU = "CREATE TABLE infoKeys (" + // CAS312 db63 add info here from now on
+					"KEYid 		tinyint NOT NULL PRIMARY KEY AUTO_INCREMENT, " +
+					"iKey varchar(20), " + 
+					"iVal text, " +
+					"unique (iKey) " +
+					") ENGINE=MyISAM;";
+			mDB.executeUpdate(sqlU);
+			
 			// all sTCW databases in mTCW database; the term 'assembly' is outdated 
 			// -- should be dataset
 			sqlU =  "CREATE TABLE assembly ( " +
 					"ASMid 		smallint NOT NULL PRIMARY KEY AUTO_INCREMENT, " +
-					"ASMstr 		VARCHAR(30), " +
+					"ASMstr 	VARCHAR(30), " +
 					"prefix		VARCHAR(10), " +
 					"username 	tinytext, " +
 					"nPep 		int default 0, " +		// # AA sequences
 					"nUT 		int default 0, " +		// # NT sequences
 					"nAnnoUT 	int default 0, " +		// # annotated sequences
-					"nAlign 		int default 0, " +		// # aligned sequences for all contigs
+					"nAlign 	int default 0, " +		// # aligned sequences for all contigs
 					"nExp  		bigint default 0, " +	// expression level count for all contigs
 					"nLib 		smallint default 0, " +
 					"nAnnoDB 	smallint default 0, " +
@@ -242,6 +250,14 @@ public class Schema {
 					"index idx1(PGstr)," +
 					"index idx2(HITid)," +
 					"index idx3(HITstr)" +
+					") ENGINE=MyISAM;";
+			mDB.executeUpdate(sqlU);
+			
+			sqlU = "CREATE TABLE pog_scores ( " + // CAS312 added, but not used until CAS313
+					"PGid int, " +
+					"score1 text, "		+ //comma-delimited list of column score1
+					"score2 text, "		+ //comma-delimited list of column score2
+					"nType  tinytext"   + //comma-delimited list of AA/cnt (max 11 char for each of 21)
 					") ENGINE=MyISAM;";
 			mDB.executeUpdate(sqlU);
 		

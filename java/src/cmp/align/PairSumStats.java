@@ -15,10 +15,10 @@ import util.methods.Out;
 import util.methods.Stats;
 import util.ui.UserPrompt;
 
-public class SumStats {
+public class PairSumStats {
 	private String pad = Summary.padTitle;
 	
-	public SumStats(DBConn mDB) {
+	public PairSumStats(DBConn mDB) {
 		this.mDB = mDB;
 	}
 	

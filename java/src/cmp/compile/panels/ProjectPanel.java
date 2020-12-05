@@ -154,7 +154,7 @@ public class ProjectPanel extends JPanel {
 	    	
 	    	String [] allFiles = dir.list();
 	    	for(int x=0; x<allFiles.length; x++) {
-	    		if (allFiles[x].equals(Globals.Compile.summaryDir)) continue;
+	    		if (allFiles[x].equals(Globals.summaryDir)) continue;
 	    		
 	    		File temp = new File(Globals.PROJECTDIR + "/" + allFiles[x]);
 	    		
@@ -177,9 +177,9 @@ public class ProjectPanel extends JPanel {
 				}
 					
 				valid = true;
-				if (newProjectName.equals(Globals.Compile.summaryDir)) {
+				if (newProjectName.equals(Globals.summaryDir)) {
 					JOptionPane.showMessageDialog(theCompilePanel, 
-							Globals.Compile.summaryDir +
+							Globals.summaryDir +
 							" is a reserved directory name, please select another",
 							"Invalid name", JOptionPane.PLAIN_MESSAGE);
 					Out.PrtError("reserved directory name");
@@ -314,7 +314,7 @@ public class ProjectPanel extends JPanel {
 		private static final long serialVersionUID = 1L;
 		public static final int OK = 1;
 	    	public static final int CANCEL = 2;
-	    	private static final String blastDir = Globals.CompilePanel.BLASTDIR;
+	    	private static final String blastDir = Globals.Search.BLASTDIR;
 	    	private static final String kaksDir = Globals.KaKsDIR;
 	    	private static final String methodDir = Globals.Methods.METHODDIR;
 	    	private static final String statsDir = Globals.StatsDIR;
@@ -498,7 +498,7 @@ public class ProjectPanel extends JPanel {
     					"Remove hit files\n");
     			if (!ret) return;
     			
-    			String blastDir = theCompilePanel.getCurProjAbsDir() +  "/" + Globals.CompilePanel.BLASTDIR; 
+    			String blastDir = theCompilePanel.getCurProjAbsDir() +  "/" + Globals.Search.BLASTDIR; 
     			Out.PrtSpMsg(0, "Remove directory " +  blastDir);		
     			FileHelpers.deleteDir(new File(blastDir));
 				theCompilePanel.updateDeleteBlastDir(blastDir);

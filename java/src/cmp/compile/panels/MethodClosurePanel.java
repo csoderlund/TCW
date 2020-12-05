@@ -28,7 +28,7 @@ public class MethodClosurePanel extends JPanel {
 		setBackground(Globals.BGCOLOR);
 		add(Box.createVerticalStrut(20));
 		
-		int width = Globals.CompilePanel.WIDTH;
+		int width = Globals.Methods.WIDTH;
 		
 		JPanel row = Static.createRowPanel();
 		lblPrefix = new JLabel("Prefix");
@@ -137,12 +137,12 @@ public class MethodClosurePanel extends JPanel {
 	public void setPrefix(String prefix) { txtPrefix.setText(prefix); }
 	
 	public String getComment() { 
-		String com = "Sim " + txtSimCutoff.getText() + "; Cov " + txtCovCutoff.getText(); 
-		
 		int forx = covLenMode.getSelectedIndex();
 		int sim = Static.getInteger(txtSimCutoff.getText());
 		int cov = Static.getInteger(txtCovCutoff.getText());
-		if (sim!=0 || cov!=0) com += "(" + covTypes[forx] +")";
+		
+		String com = "Sim " + sim + "; Cov " + cov; 
+		com += "(" + covTypes[forx] +")";
 		
 		if (ntButton.isSelected()) com += ";" + abbrev[1];
 		

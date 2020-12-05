@@ -29,8 +29,8 @@ import cmp.viewer.panels.DatabaseSelectPanel;
 
 public class EditSpeciesPanel extends JPanel {
 	private static final long serialVersionUID = -8431928635947256814L;
-
-	private final int WIDTH = 90; // Globals.CompilePanel.WIDTH;
+	private final String helpHTML = Globals.helpRunDir + "EditSpeciesPanel.html";
+	private final int WIDTH = 90; 
 	
 	public EditSpeciesPanel(CompilePanel parentPanel) {
 		theCompilePanel = parentPanel;
@@ -45,7 +45,7 @@ public class EditSpeciesPanel extends JPanel {
 		
 		add(mainPanel);
 		
-		pnlDBSelect = new DatabaseSelectPanel(Globals.Viewer.DB_NAME_PREFIX, this); 
+		pnlDBSelect = new DatabaseSelectPanel(Globals.STCW, this); 
 		pnlDBSelect.setVisible(false);
 		
 		add(pnlDBSelect);
@@ -58,7 +58,7 @@ public class EditSpeciesPanel extends JPanel {
 		JPanel page = Static.createPageCenterPanel();
 
 		lblDatabase = new JLabel("singleTCW");
-		btnSelectDB = new JButton("Select " + Globals.Viewer.DB_NAME_PREFIX + " Database");
+		btnSelectDB = new JButton("Select " + Globals.STCW  + " Database");
 		btnSelectDB.setBackground(Globals.MENUCOLOR);
 		btnSelectDB.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -117,7 +117,7 @@ public class EditSpeciesPanel extends JPanel {
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(theCompilePanel.getParentFrame(), 
-						"Edit species", "html/runMultiTCW/EditSpeciesPanel.html");
+						"Edit species", helpHTML);
 			}
 		});
 		row = Static.createRowPanel();

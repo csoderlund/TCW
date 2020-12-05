@@ -22,7 +22,7 @@ public class MethodLoadPanel extends JPanel {
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setAlignmentX(Component.LEFT_ALIGNMENT);
 		setBackground(Globals.BGCOLOR);
-		int width = Globals.CompilePanel.WIDTH;
+		int width = Globals.Methods.WIDTH;
 		add(Box.createVerticalStrut(20));
 	
 		// prefix

@@ -16,12 +16,12 @@ The bottom panel can be switch between <b>Table</b> and the results of any of th
 <tr><td><b>AA for each pair</b> <td><td>Perform pairwise 
 alignment for all pairs of amino acid sequences from the selected sequences. 
 <tr><td><b>NT for each pair</b><td nowrap>NT-mTCW only<td> Perform pairwise 
-alignment for all pairs of nucleotide sequences from the selected sequences (. 
-<tr><td><b>AA,NT,CDS for one pair</b> <td>NT-mTCW only; 2 seqs 
+alignment for all pairs of nucleotide sequences from the selected sequences. 
+<tr><td><b>AA,NT,CDS for one pair</b> <td>NT-mTCW only 
 <td>Align the selected pair using the amino acid sequence,
 CDS sequence, and nucleotide sequences. The resulting panel will have these 3 alignments.
-<tr><td><b>5UTR, CDS, 3UTR for one pair</b> <td>NT-mTCW only; 2 seqs
-<td>Align these three regions separately for the pair.
+<tr><td><b>5UTR, CDS, 3UTR for one pair</b> <td>NT-mTCW only
+<td>Align these three regions separately for the selected pair.
 The resulting panel will have these 3 alignments.
 <tr><td><b>AA to sequence best hit</b><td>
 <td>The best hit for each sequence will be aligned to it.
@@ -36,10 +36,12 @@ The resulting panel will have these 3 alignments.
 <li><u>MSAdb</u> (Cluster set of sequences only) 
 The MAFFT-AA alignment has been stored in the database, so can be displayed
 without running the program. However, this option does not produce the alignment 
-or score files, where the MSA... option does.
+file, where the MSA... option does.
 <br>&nbsp;
 
 <li><u>MSA...</u> 
+All the following provide the alignment file in the <tt>ResultAlign</tt> directory.
+<p>
 <ul>
 <li><b>MUSCLE-AA</b>: 
 Run MUSCLE to build a multiple alignment 
@@ -48,12 +50,7 @@ when run on many sequences. The command executed is:
 <pre>
 /Ext/linux/muscle/muscle -in ResultAlign/inSeq.fa -out ResultAlign/outAln.fa
 </pre>
-You can view the results along with the scores in the <tt>ResultAlign</tt> directory.
-The first score is the average of the column sums from the sum-of-pairs. The
-second is the trident method, run as follows (use -g to output global score only):
-<pre>
-/Ext/linux/mstatX/mstatx -s trident -i ResultAlign/outAln.fa -o ResultAlign/score2.txt
-</pre>
+
 <li><b>MAFFT-AA</b>: Same as above.
 The command executed is:
 <pre>
@@ -69,11 +66,26 @@ Where N is the number of available threads (processors/CPUs).
 <p><i>On Mac, replace <tt>Ext/linux</tt> with <tt>Ext/mac</tt></i>.
 </ul>
 
+
+<h3>Second row of functions at the top</h3>
 <ul>
+<li><u>Details</u> For the selected sequence: show counts, TPM values, 
+and annotations. 
+<br>&nbsp;
+<li><u>Pairs</u> For the selected sequence(s): 
+Show the table of pairs containing at least one of the selected sequences.
+<br>&nbsp;
+<li><u>Clusters</u> For the selected sequence: 
+Show the table of clusters containing the sequence.
+<br>&nbsp;
+<li><u>Copy...</u> For the selected sequence: 
+Copies the seqID, AA, NT or CDS sequence, Best hitID, Best description or Best hit sequence.
+<br>&nbsp;
+<li><u>Clear</u> Clears the selected sequences.
+<br>&nbsp;
 <li><u>Table...</u>
 <ul>
-<li><b>Show Column Stats</b>: Popup a table of statistics for the numeric columns in the table. Note: if you Export the table and 
-compute the statistics, their results will not be as precise.
+<li><b>Show Column Stats</b>: Popup a table of statistics for the numeric columns in the table. 
 <br>&nbsp;
 
 <li><b>Copy Table</b>: Copies the table to the clipboard either the entire table. 
@@ -82,17 +94,16 @@ compute the statistics, their results will not be as precise.
 <li><b>Export Table</b>: Exports the table to file in tab delimited file. 
 <br>&nbsp;
 
-<li><b>Export AA sequences</b>:Export the translated CDS sequences..
+<li><b>Export AA sequences</b>: Export the translated CDS sequences..
 <br>&nbsp;
 
-<li><b>Export CDS sequences</b>:Export the CDS sequences.
+<li><b>Export CDS sequences</b>: Export the CDS sequences.
 <br>&nbsp;
 
-<li><b>Export NT sequences</b>:Export the full nucleotide sequences.
+<li><b>Export NT sequences</b>: Export the full nucleotide sequences.
 <br>&nbsp;
 
-
-<li><b>Export all GOs:</b> output all assigned and inherited GOs for all seq-hit pairs 
+<li><b>Export all GOs</b> (If GOs are in the database): Output all assigned and inherited GOs for all seq-hit pairs 
 for all sequences in the table. 
 The first three are filters::
 <ol>
@@ -122,23 +133,6 @@ GOterm	#Seqs	Level	Term_type	Description
 </ol>
 </ul>
 </ul>
-
-<h3>Second row of functions at the top</h3>
-<ul>
-<li><u>Details</u> For the selected sequence: show counts, TPM values, 
-and annotations. 
-<br>&nbsp;
-<li><u>Pairs</u> For the selected sequence(s): 
-Show the table of pairs containing at least one of the selected sequences.
-<br>&nbsp;
-<li><u>Clusters</u> For the selected sequence: 
-Show the table of clusters containing the sequence.
-<br>&nbsp;
-<li><u>Copy...</u> For the selected sequence: 
-Copies the seqID, AA, NT or CDS sequence, Best hitID, Best description or Best hit sequence.
-<br>&nbsp;
-<li><u>Clear</u> Clears the selected sequences.
-
 </ul>
 
 

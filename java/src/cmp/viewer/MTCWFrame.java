@@ -159,8 +159,6 @@ public class MTCWFrame extends JFrame {
 				dbName = Globals.MTCW + "_" + dbName;
 			strDBName = dbName;
 			
-			if (!Globals.isRelease) System.err.println("Production version - not for release");
-			
 			if(!hostsObj.checkDBConnect(strDBName)) 
 			{
 				System.err.println("Could not connect to database " + strDBName + " on host " + hostsObj.host() + ", exiting. ");
@@ -502,7 +500,7 @@ public class MTCWFrame extends JFrame {
 			
 			// Blast path gets checked in HostsCfg
 			// Check muscle/muscle, mafft, mstat
-			System.err.println("Check external");
+			System.err.println("Check /Ext");
 			String cmdPath = TCWprops.getExtDir();
 			if (!FileHelpers.existDir(cmdPath)) {
 				Out.PrtError("directory does not exists: " + cmdPath);

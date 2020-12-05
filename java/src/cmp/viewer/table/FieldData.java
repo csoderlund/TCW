@@ -29,6 +29,8 @@ public class FieldData {
 	public static final String SEQID2 = "SeqID2";
 	public static final String ROWNUM = "Row #";
 	public static final String KaKs = "KaKs";
+	public static final String SCORE1 = "Score1";
+	public static final String SCORE2 = "Score2";
 	
 	//Main table for the different query modes - MYSQL and column table names.
 	public static final String GRP_TABLE =    "pog_groups";
@@ -45,6 +47,7 @@ public class FieldData {
 	public static final String AASEQ_SQL = "aaSeq"; // not used in this file, but since all MySQL is here...
 	public static final String NTSEQ_SQL = "ntSeq"; // not used in this file, but since all MySQL is here...
 	public static final String HIT_SQLID = "HITidx";
+	private static String msaScore1="", msaScore2="";
 	
 	private static DBinfo theInfo;
 	public static boolean hasNTdb=false, hasGO=false, hasPCC=false, hasKaKs=false, hasStats=false, hasNTblast=false, hasMultiScore=false;
@@ -57,6 +60,8 @@ public class FieldData {
 		hasNTblast = theInfo.hasNTblast();
 		hasMultiScore = theInfo.hasMultiScore();
 		hasKaKs = theInfo.hasKaKs();
+		msaScore1 = theInfo.getMSA_Score1();
+		msaScore2 = theInfo.getMSA_Score2();
 		
 		if (theInfo.nNTdb()==0) System.out.println("   This is an AA-mTCW.");
 	}
@@ -117,21 +122,18 @@ public class FieldData {
 			 addGrp(c++, "sdLen", Double.class,       GRP_TABLE,  "sdLen" , 
 					 "Standard deviation of the AA sequence lengths (AAlen) in the cluster ",  false);
 			 // if the name starts with Globalx.scoreField, can have any value; otherwise, expect -1 to 1
-			 addGrp(c++, Globalx.scoreField, Integer.class,       GRP_TABLE,  "score1" , 
-					 "Sum-of-pairs: Average of the column scores. Larger score indicates more similar.",  false);
-			 String scoreName = Globals.Ext.score2;
-			 addGrp(c++, scoreName, Integer.class,       GRP_TABLE,  "score2" , 
-					 scoreName + " score using the MstatX package. A '1' is most conserved.",  false);
+			 // TODO: not true if override SCORE1 in runMultiTCW
+			 addGrp(c++, SCORE1, Integer.class,       GRP_TABLE,  "score1" , msaScore1,  false);
+			 addGrp(c++, SCORE2, Integer.class,       GRP_TABLE,  "score2" , msaScore2,  false);
 		}
 		mkSection.add(c);
-		
 		
 		addGrp(c++, HITID, String.class,     GRP_TABLE,  "HITstr" , "Identifier of majority best anno hit", false);
 		addGrp(c++, HITDESC, String.class,   HIT_TABLE, "description", "Description of majority best anno hit", false);
 		addGrp(c++, "Species", String.class, HIT_TABLE, "species" , "Species of majority best anno hit", false);
 		addGrp(c++, "Type", String.class,    HIT_TABLE, "dbtype" , "Type of majority best anno hit", false);
 		addGrp(c++, "Tax", String.class,     HIT_TABLE, "taxonomy" , "Taxonomy of majority best anno hit", false);
-		addGrp(c++, "HitLen", Integer.class,  HIT_TABLE, "length" , "Length of the majority best anno hit", false);
+		addGrp(c++, "HitLen", Integer.class, HIT_TABLE, "length" , "Length of the majority best anno hit", false);
 		
 		mkBreak.add(c);
 		if (hasGO) {

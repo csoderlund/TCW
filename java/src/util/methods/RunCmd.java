@@ -24,11 +24,11 @@ public class RunCmd {
 	}
 	private int runCmd(String cmd, boolean prt) {
 	 	int exitVal=0;
-	    	try {
-	    		String[] args = cmd.split("\\s+");
+	    try {
+	    	String[] args = cmd.split("\\s+");
 	    		
-	    		Process p = Runtime.getRuntime().exec(args, null, null); // directory is last arg
-	    		p.getOutputStream().flush();
+	    	Process p = Runtime.getRuntime().exec(args, null, null); // directory is last arg
+	    	p.getOutputStream().flush();
 			OutputHandler oh = new OutputHandler(p.getErrorStream());
 			InputHandler ih = new InputHandler(p.getOutputStream());
 			
@@ -40,26 +40,26 @@ public class RunCmd {
 			
 			oh.Stop();
 			ih.Stop();
-	    		exitVal = p.exitValue();
+	    	exitVal = p.exitValue();
 	    		
-	    		if (prt) Out.prt("");
-	    	}
-	    	catch (MalformedURLException e) { 
-	    		ErrorReport.reportError(e, "Run cmd: MalformedURLException");
-	    		if (!prt) Out.prt("Cmd: " + cmd);
-	    		exitVal=-3;
-	    	}
+	    	if (prt) Out.prt("");
+	    }
+	    catch (MalformedURLException e) { 
+	    	ErrorReport.reportError(e, "Run cmd: MalformedURLException");
+	    	if (!prt) Out.prt("Cmd: " + cmd);
+	    	exitVal=-3;
+	    }
 	    catch (IOException e) {
-	    		ErrorReport.reportError(e, "Run cmd: IOException - check permissions");
-	    		if (!prt) Out.prt("Cmd: " + cmd);
-	    		exitVal=-2;
-	    	}
-	    	catch (Exception e) {
-	    		ErrorReport.reportError(e, "Run cmd: command failed");
-	    		if (!prt) Out.prt("Cmd: " +cmd);
-	    		exitVal=-1;
-	    	}
-	    	return exitVal;
+	    	ErrorReport.reportError(e, "Run cmd: IOException - check permissions");
+	    	if (!prt) Out.prt("Cmd: " + cmd);
+	    	exitVal=-2;
+	    }
+	    catch (Exception e) {
+	    	ErrorReport.reportError(e, "Run cmd: command failed");
+	    	if (!prt) Out.prt("Cmd: " +cmd);
+	    	exitVal=-1;
+	    }
+	    return exitVal;
 	}
 	private class OutputHandler extends Thread
 	{
@@ -67,13 +67,13 @@ public class RunCmd {
 	    public OutputHandler(InputStream is){this.is = is;}
 	    
 	    public void Stop() {
-		    	try {
-		    		if (is != null) {
-		    			for (int i=0; i<100000; i++);
-		    			is.close();
-		    		}
-		    	}
-		    	catch(Exception e) {	}
+	    	try {
+	    		if (is != null) {
+	    			for (int i=0; i<100000; i++);
+	    			is.close();
+	    		}
+	    	}
+	    	catch(Exception e) {	}
 		}
 	    public void run()
 	    {
@@ -104,18 +104,18 @@ public class RunCmd {
 	    public void run()
 	    {
 	        try {
-		        	while (keepRunning)
-		        	{
-		        		if (isr.ready())
-		        		{
-		        			int c = isr.read();
-		        			osw.write(c);
-		        			osw.flush();
-		        		}
-		        		Thread.sleep(100);
-		        	}
-		        	osw.close();
-		        	inRead.close();
+	        	while (keepRunning)
+	        	{
+	        		if (isr.ready())
+	        		{
+	        			int c = isr.read();
+	        			osw.write(c);
+	        			osw.flush();
+	        		}
+	        		Thread.sleep(100);
+	        	}
+	        	osw.close();
+	        	inRead.close();
 	        } 
 	        catch (Exception e) {}
 	    }
@@ -150,9 +150,9 @@ public class RunCmd {
     		exitVal=-3;
     	}
 	    catch (IOException e) {
-	    		ErrorReport.reportError(e, "Run Cmd: IOException - check permissions");
-	    		if (!prt) Out.prt("Cmd: " + cmd);
-	    		exitVal=-2;
+    		ErrorReport.reportError(e, "Run Cmd: IOException - check permissions");
+    		if (!prt) Out.prt("Cmd: " + cmd);
+    		exitVal=-2;
     	}
     	catch (Exception e) { 
     		ErrorReport.reportError(e, "Run Cmd: command failed");
@@ -164,22 +164,22 @@ public class RunCmd {
 	/*******************************************************************/
 	public int runCmdStdin(String cmd, String dir, Vector <File> stdin) {
 	 	int exitVal=0;
-	    	try {
-	    		String[] args = cmd.split("\\s+");
-	    		File d = (dir==null) ? null : new File(dir);
-	    		Process p = Runtime.getRuntime().exec(args, null, d);
+	    try {
+	    	String[] args = cmd.split("\\s+");
+	    	File d = (dir==null) ? null : new File(dir);
+	    	Process p = Runtime.getRuntime().exec(args, null, d);
 	    		
 	    		// Write into the standard input of the subprocess
 	        PrintStream pin = new PrintStream(new BufferedOutputStream(p.getOutputStream()));
 	       
 	        for (File f : stdin) {
-    				BufferedReader br = new BufferedReader(new FileReader (f));
-    				String line;
-    				while ((line = br.readLine()) !=null) {
-    					pin.print(line);
-    				}
-    				br.close();
-    			}
+				BufferedReader br = new BufferedReader(new FileReader (f));
+				String line;
+				while ((line = br.readLine()) !=null) {
+					pin.print(line);
+				}
+				br.close();
+			}
 	        pin.close();
 	        
 	        p.waitFor();
@@ -187,15 +187,15 @@ public class RunCmd {
 			exitVal = p.exitValue();
 	    	}
 	    catch (IOException e) {
-	    		e.printStackTrace();
-	    		Out.PrtWarn("IOException: command failed");
-	    		exitVal=-2;
-	    	}
-	    	catch (Exception e) { 
-	    		e.printStackTrace();
-	    		Out.PrtWarn("Exception: command failed");
-	    		exitVal=-3;
-	    	}
-	    	return exitVal;
+    		e.printStackTrace();
+    		Out.PrtWarn("IOException: command failed");
+    		exitVal=-2;
+    	}
+    	catch (Exception e) { 
+    		e.printStackTrace();
+    		Out.PrtWarn("Exception: command failed");
+    		exitVal=-3;
+    	}
+    	return exitVal;
 	}
 }

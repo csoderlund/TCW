@@ -33,8 +33,8 @@ import util.ui.UserPrompt;
 
 public class BlastPanel extends JPanel {
 	private static final long serialVersionUID = 312139563542324851L;
-	public static final int AA=Globals.CompilePanel.AA;
-	public static final int NT=Globals.CompilePanel.NT;
+	public static final int AA=Globals.AA;
+	public static final int NT=Globals.NT;
 	private static final String [] tpStr = {"AA", "NT"};
 	
 	public BlastPanel(CompilePanel parentPanel, EditBlastPanel ep) {
@@ -146,7 +146,7 @@ public class BlastPanel extends JPanel {
 	private void runBlast() { 
 		Out.createLogFile(theCompilePanel.getCurProjAbsDir(), Globals.searchFile);
 	
-		String blastDir = theCompilePanel.getCurProjAbsDir() +  "/" + Globals.CompilePanel.BLASTDIR; 
+		String blastDir = theCompilePanel.getCurProjAbsDir() +  "/" + Globals.Search.BLASTDIR; 
 		FileHelpers.createDir(blastDir);
 		String [] sql = new String [2];
 		sql[0]=sql[1]=null; // actual program run
@@ -299,7 +299,7 @@ public class BlastPanel extends JPanel {
 	{
 		String projDir = theCompilePanel.getCurProjRelDir();
 		if (!projDir.endsWith("/")) projDir += "/"; 
-		return "./" + projDir + Globals.CompilePanel.BLASTDIR;
+		return "./" + projDir + Globals.Search.BLASTDIR;
 	}	
 	/***************************************************/
 	public void update(boolean dbExists) {

@@ -283,15 +283,15 @@ public class PairAlignText extends JDialog {
     		
     		String cropStr,fullStr,hangStr;
     		if (isCDS) {
-    			cropStr = String.format("%6s (%4s)", Out.df(crop), Out.df(crop/3)); 
-    			fullStr = String.format("%6s (%4s)", Out.df(full), Out.df(full/3)); 
+    			cropStr = String.format("%6s (%5s)", Out.df(crop), Out.df(crop/3)); 
+    			fullStr = String.format("%6s (%5s)", Out.df(full), Out.df(full/3)); 
     			int aa = (hang>3) ? hang/3 : 0;
-    			hangStr =  String.format("%6s (%4s)", Out.df(hang), Out.df(aa)); 
+    			hangStr =  String.format("%6s (%5s)", Out.df(hang), Out.df(aa)); 
     		}
     		else {
     			cropStr = String.format("%6s", Out.df(crop)); 
     			fullStr = String.format("%6s", Out.df(full)); 
-    			hangStr =  String.format("%6s", Out.df(hang)); 
+    			hangStr = String.format("%6s", Out.df(hang)); 
     		}
     		hangCol[2] =  "Hang: " + hangStr;
     		if (chkRemoveHang.isSelected()) {

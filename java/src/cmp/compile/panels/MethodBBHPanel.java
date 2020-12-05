@@ -40,7 +40,7 @@ public class MethodBBHPanel extends JPanel {
 		setBackground(Globals.BGCOLOR);
 		add(Box.createVerticalStrut(20));
 		
-		int width = Globals.CompilePanel.WIDTH;
+		int width = Globals.Methods.WIDTH;
 		
 		JPanel row = Static.createRowPanel();
 		lblPrefix = new JLabel("Prefix");

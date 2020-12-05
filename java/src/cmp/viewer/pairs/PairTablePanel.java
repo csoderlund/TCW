@@ -43,7 +43,7 @@ import util.methods.ErrorReport;
 import util.methods.Out;
 import util.methods.Static;
 import util.ui.UserPrompt;
-import cmp.align.SumStats;
+import cmp.align.PairSumStats;
 import cmp.database.DBinfo;
 import cmp.database.Globals;
 import cmp.viewer.MTCWFrame;
@@ -257,7 +257,7 @@ public class PairTablePanel extends JPanel {
 	 					Vector <Integer> ids = getSeqQueryAll();
 	 					DBConn mDB = theViewerFrame.getDBConnection();
 	 					String summary = "Pairs: " + strQuerySummary;
-	 					new SumStats(mDB).fromView(ids, summary);
+	 					new PairSumStats(mDB).fromView(ids, summary);
 	 					// close in SumStats
 	 				} catch(Exception ee) {ErrorReport.reportError(ee,  "View stats");
 	 				} catch(Error ee) {Out.prt("Error");ErrorReport.reportFatalError(ee, "View stats", theViewerFrame);}

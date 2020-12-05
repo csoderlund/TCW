@@ -159,6 +159,7 @@ public class HitQueryPanel  extends JPanel {
 	}
 	private void clearFilters() {
 		txtHitID.clear(); txtDesc.clear();
+		rgNseq.clear(); rgNbest.clear();
 	}
 	
 	private void hitSQLwhere() {
@@ -351,22 +352,6 @@ public class HitQueryPanel  extends JPanel {
 		private int width=90;
 	}
 	
-	private JLabel toolTipLabel(String label, String descript, boolean enable) {
-		JLabel tmp = new JLabel(label);
-		tmp.setBackground(Color.white);
-		tmp.setEnabled(enable);
-		final String desc = descript;
-		tmp.addMouseListener(new MouseAdapter() 
-		{
-			public void mouseEntered(MouseEvent e) {
-			    theViewerFrame.setStatus(desc);
-			}
-			public void mouseExited(MouseEvent e) {
-			    theViewerFrame.setStatus("");
-			}
-		});
-		return tmp;
-	}
 	private MTCWFrame theViewerFrame = null;
 	
 	//Top button panel

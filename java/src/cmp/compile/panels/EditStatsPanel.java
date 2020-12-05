@@ -90,7 +90,7 @@ public class EditStatsPanel  extends JPanel  {
 		add(row); add(Box.createVerticalStrut(5));
 		
 		row = Static.createRowPanel(); row.add(Box.createHorizontalStrut(20));
-		chkMulti = Static.createCheckBox("Compute cluster scores", true);
+		chkMulti = Static.createCheckBox("Compute MSA and score", true);
 		row.add(chkMulti);
 		add(row);
 		add(Box.createVerticalStrut(25));
@@ -195,6 +195,7 @@ public class EditStatsPanel  extends JPanel  {
 	public boolean isRead()  { return  (chkKaKs.isSelected() && kaksRdButton.isSelected());}
 	public boolean isWrite()  { return (chkKaKs.isSelected() && kaksWrButton.isSelected());}
 	public boolean isMulti() { return chkMulti.isSelected();}
+	public boolean isDoneMulti() { return bDoneMulti;}
 	
 	/******************* Standard interface ********************/
 	public void updateDBexists() {
@@ -230,6 +231,7 @@ public class EditStatsPanel  extends JPanel  {
 		int cntMulti = info.getCntMultiScore();
 		lblSum[index++].setText(html(cntGrp,   "Clusters", 0));
 		lblSum[index++].setText(html(cntMulti, "with scores", 1));
+		bDoneMulti = (cntGrp==cntMulti) ? true : false;
 		
 		if (cntGrp>0) {
 			chkMulti.setEnabled(true);
@@ -364,6 +366,7 @@ public class EditStatsPanel  extends JPanel  {
 	private JCheckBox	chkStats = null, chkPCC = null, chkMulti = null;
 	
 	private boolean bStats=false, bWrite=false, bRead=false, bPCC=false, bKaKs=false, bMulti=false;
+	private boolean bDoneMulti=false;
 	
 	private JLabel [] lblSum = new JLabel [10];
 	private JPanel buttonPanel = null;

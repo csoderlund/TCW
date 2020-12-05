@@ -26,7 +26,7 @@ import cmp.compile.panels.MethodPanel;
 import cmp.database.Globals;
 
 public class MethodBBH {
-	 private String groupFile = Globals.Compile.GROUP_FILE_BEST_RECIP;
+	 private String groupFile = Globals.Methods.BestRecip.TYPE_NAME;
 	 private String [] covTypes = {"Either", "Both"};
 	 private String [] strType = {"Amino acid", "Nucleotide"};
 		 

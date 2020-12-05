@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.ArrayList;
 
-import cmp.align.SumStats;
+import cmp.align.PairSumStats;
 import cmp.database.*;
 import cmp.compile.panels.CompilePanel;
 import util.database.DBConn;
@@ -52,7 +52,7 @@ public class Pairwise {
 			String summary="";
 			if (cntPreviouslyAligned>0) { // redo stats from scratch
 				Out.PrtSpMsg(0, "Compute summary on all pairs");
-			    summary = new SumStats(mDB).allCodingStats();
+			    summary = new PairSumStats(mDB).allCodingStats();
 			    Out.prt("                                                        ");
 			}
 			else { // have everything necessary in ScoreCDS object
@@ -187,7 +187,7 @@ public class Pairwise {
 			if (cntNull>0) Out.PrtSpCntMsg(2, cntNull, " with null entries               ");
 			if (cntGt1000>0)Out.PrtSpCntMsg(2, cntGt1000, " KaKs>1000               ");
 			
-			new SumStats(mDB).allKaKsStats(method);
+			new PairSumStats(mDB).allKaKsStats(method);
 			mDB.close();
 			
 			Out.PrtSpMsgTime(0, "Complete KaKs ", time);

@@ -19,23 +19,21 @@ the existing one, which can be done from the main panel with the "Remove..." but
 you can rename the existing hit file.
 </ul>
 <h3>NT (nucleotide)</h3> 
-<p>These AA instruction apply to the NT Hit file, but you cannot select the
-search program as only Blastn can be used for the NT self-blast. 
+<p>Only Blastn can be used for the NT self-blast. 
 This option is NOT available if any of your input sTCWdbs are created from protein sequences.
 
-
+<br><br>
 <h3>Running the search yourself</h3>
 If you want to run the AA search on a different machine (e.g. computed on an HPC cluster):
 <ol>
 <li>When the database is built, it creates a sub-directory <tt>projcmp/&lt;project name&gt;/hitResults</tt> which 
 contains the file of proteins sequences (<tt>combineAA.fasta</tt>).
-<li>Use the fasta file as input to blast and have it produce the tabular output.
+<li>Use the fasta file as input to search program and have it produce the tabular output.
 <li>Put the blast tabular formatted file in the <tt>hitResults</tt> directory with the
 name <tt>hitsAA.tab</tt>.
 </ol>
 The same instructions apply generating the NT blast file, where the input would
-be <tt>combineNT.fasta</tt> to produce the file <tt>hitsNT.tab</tt>; this only applies
-if none of the input sTCWdbs are created from protein sequences.
+be <tt>combineNT.fasta</tt> to produce the file <tt>hitsNT.tab</tt>.
 
 
 </html>

@@ -325,7 +325,7 @@ public class Summary {
 		if (cnt==0) return; 
 		
 		lines.add("");
-		String [] dfields = {"Prefix", "conLen", "sdLen", "   Score","SD  ", Globals.Ext.score2, "SD  "};
+		String [] dfields = {"Prefix", "conLen", "sdLen", "   Score1","SD  ", "Score2", "SD  "};
 		int [] djust = 	    {1,      0,     0,        0,     0,     0,       0};
 		int nCol = djust.length;
 		String [][] rows = new String[nMethod][nCol];
@@ -556,13 +556,18 @@ public class Summary {
 			nt = mDB.executeString("select ntPgm from info");
 		if (nt==null) nt="";
 		
-		if (aa=="" && nt=="") return;
+		String s1 = info.getMSA_Score1();
+		String s2 = info.getMSA_Score2();
+		
+		if (aa=="" && nt=="" && s1=="" && s2=="") return;
 		
 		lines.add("----------------------------------------------------");
 		lines.add("PROCESSING:");
-		lines.add("AA " + aa);
-		lines.add("NT " + nt);
-    	}
+		if (aa!="") lines.add("AA: " + aa);
+		if (nt!="") lines.add("NT: " + nt);
+		if (s1!=null && s1!="") lines.add("Score1: " + info.getMSA_Score1());
+		if (s1!=null && s1!="") lines.add("Score2: " + info.getMSA_Score2());
+    }
 	catch (Exception e) {ErrorReport.prtReport(e, "processing");}	
     }
     private void makeLegend() {
@@ -570,7 +575,7 @@ public class Summary {
     }
 	public void writeOverview(String text) {
 		String projDir = Globals.PROJECTDIR;
-		String sumDir = Globals.Compile.summaryPath;
+		String sumDir = Globals.summaryPath;
 		String overFilePath = sumDir + "/" + dbName + ".html";
 		try {
 			if (!new File(projDir).exists()) return; // should exist

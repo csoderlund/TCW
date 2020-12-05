@@ -22,12 +22,13 @@ import util.methods.Static;
 import cmp.database.Globals;
 
 public class EditMethodPanel extends JPanel {
-	public static String LBLPREFIX = "Required (unique, 5 char max)";
-	private String helpHTML =  Globals.helpDir + "EditMethodPanel.html";
-	private int maxPrefix = 5;
-	
 	private static final long serialVersionUID = -3057836165213279944L;
 	
+	public  static final String LBLPREFIX = "Required (unique, 5 char max)";
+	
+	private final String helpHTML =  Globals.helpRunDir + "EditMethodPanel.html";
+	private final int maxPrefix = 5;
+
 	private final short BB = 0;
 	private final short TR = 1;
 	private final short HT = 2;

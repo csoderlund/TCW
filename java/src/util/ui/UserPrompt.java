@@ -162,7 +162,7 @@ public class UserPrompt {
 			hlpDiag.setVisible(true);
 		}
 		catch(Exception ex) {
-			ErrorReport.prtReport(ex, "Error loading manager help");
+			ErrorReport.prtReport(ex, "Error loading manager help: " + urlstr);
 		}
 	}
 	

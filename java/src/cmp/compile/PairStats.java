@@ -46,7 +46,7 @@ public class PairStats {
 			if (!initKaKs()) return -1; 
 			scoreObj = new ScoreCDS();
 			
-			SumStats sumObj = new SumStats(mDB); // CAS310 was creating new obj each time through loop
+			PairSumStats sumObj = new PairSumStats(mDB); // CAS310 was creating new obj each time through loop
 			PairAlignData cdsAlnObj = new PairAlignData();
 			PairAlignData utr5AlnObj = new PairAlignData();
 			PairAlignData utr3AlnObj = new PairAlignData();
@@ -84,7 +84,7 @@ public class PairStats {
 				cdsAlnObj.clear(); utr5AlnObj.clear(); utr3AlnObj.clear();
 				
 				cntAligned++;
-				if (cntAligned%1000==0) {
+				if (cntAligned%100==0) {
 					 Out.r("aligned " + cntAligned);
 					 Thread.sleep(1000);
 				}

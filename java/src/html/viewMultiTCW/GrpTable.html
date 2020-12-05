@@ -11,9 +11,9 @@ Select a cluster or clusters followed by this button to view the sequence table
 of the members of the cluster(s). 
 <br>&nbsp;
 
-<li><u>Pair</u> Select a cluster followed by this button to view all pairs
-that have a hit, which are computed when the database is created. 
-The BBH and Closure clusters are guaranteed to have a
+<li><u>Pair</u> Select a cluster or clusters followed by this button to view all pairs
+that have a pair hit, which are computed when the database is created. 
+The BBH, Closure and Hit clusters are guaranteed to have a
 hit for all possible pairs in the cluster, however, orthoMCL clusters do not have this
 requirement.
 <br>&nbsp;
@@ -24,8 +24,7 @@ Cluster ID, Hit ID or Hit Description.
 
 <li><u>Table...</u>
 <ul>
-<li><b>Show Column Stats</b>: Popup a table of statistics for the numeric columns in the table. Note: if you Export the table and 
-compute the statistics, their results will not be as precise.
+<li><b>Show Column Stats</b>: Popup a table of statistics for the numeric columns in the table. 
 <br>&nbsp;
 
 <li><b>Copy Table</b>: Copies the entire table to the clipboard. 
@@ -103,14 +102,8 @@ datasets have more than 1 member in the cluster.
 <tr><td  valign="top">&nbsp;&nbsp;&nbsp;perPCC<td> If the Pearson Correlation Coefficient of the TPM values
 was computed during the database build, then this column contains the percentage that are >=0.8. See below for
 more detail explanation.
-<tr><td  valign="top">&nbsp;&nbsp;&nbsp;Score<td>The average of the sum of each column, where the sum is the Sum-of-pairs score.
-The Sum-of-pairs score compares each two characters in the column, where there are 22 possible characters (20 amino acids,
-gap '-', and leading/trailing space ' '). The comparison scores are: (aa,aa) is the BLOSUM68 score, (aa,'-') is -4, (aa,' ') is -1,
-('-','-') is 0, (' ',' ') is 0. A large score indicates greater similarity.
-<tr><td  valign="top">&nbsp;&nbsp;&nbsp;Trident<td>The Trident score is computed by the MstatX package (//github.com/gcollet/MstatX).
-This score is a function of normalized symbol
-diversity, sterochemical diversity and gaps (reviewed in Valdir 2002, Scoring Residue Conservation). A score of '1' is the most
-conserved.
+<tr><td  valign="top">&nbsp;&nbsp;&nbsp;Score1<td>See the section at the end.
+<tr><td  valign="top">&nbsp;&nbsp;&nbsp;Score2<td>See the section at the end.
 <tr><td colspan=2><i>Majority Best Anno Hit</i>
 <tr><td  valign="top">&nbsp;&nbsp;&nbsp;HitID<td>The majority hit is 
 computed based on initial substring of all descriptions of all sequences
@@ -134,5 +127,19 @@ it has (4*3)/2 = 6 pairs. If two of them have PCC>=0.8, then the perPCC will be 
 100% means that their expression profiles on their shared conditions are highly correlated. 
 Select "Pairs" for a cluster to see the actual PCC values and "Sequences" to view the TPM values.
 <p>TPM NOTE: For pre-v3.0.4 releases, RPKM was computed instead of TPM.
+
+<h3>MSA Scores</h3>
+By default, <tt>Score1</tt> is the Sum-of-Pairs.The Sum-of-pairs score compares each two characters in the column, where there are 22 possible characters (20 amino acids,
+gap '-', and leading/trailing space ' '). The comparison scores are: (aa,aa) is the BLOSUM68 score, (aa,'-') is -4, (aa,' ') is -1,
+('-','-') is 0, (' ',' ') is 0. A large score indicates greater similarity.
+<p>By default, <tt>Score2</tt> is Wentropy, as discussed in
+the MstatX documentation (//github.com/gcollet/MstatX) and reviewed in Valdir 2002 "Scoring Residue Conservation"". 
+A score of '1' is the most conserved.
+<p>When the database is built, these defaults can be replaced with other methods from the MstatX package.
+If this occurs, the explanation of the column in the lower left corner will tell what method was used.
+<p>In all cases, the score is computed per column, and the values shown for <tt>Score1</tt> and <tt>Score2</tt>
+are the average.
+</body>
+</html>
 
 

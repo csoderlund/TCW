@@ -26,12 +26,14 @@ import cmp.database.Globals;
 
 public class EditBlastPanel extends JPanel {
 	private static final long serialVersionUID = -6189127919667748457L;
-	private static final String BLAST_AA_TAB = Globals.CompilePanel.BLAST_AA_TAB;
-	private static final String BLAST_NT_TAB = Globals.CompilePanel.BLAST_NT_TAB;
+	
+	private final String helpHTML = Globals.helpRunDir + "EditBlastPanel.html";
+	private final String BLAST_AA_TAB = Globals.Search.BLAST_AA_TAB;
+	private final String BLAST_NT_TAB = Globals.Search.BLAST_NT_TAB;
 
-	private static final int AA=Globals.CompilePanel.AA;
-	private static final int NT=Globals.CompilePanel.NT;
-	private static final String fexists = "- file exists";
+	private final int AA=Globals.AA;
+	private final int NT=Globals.NT;
+	private final String fexists = "- file exists";
 	
 	public EditBlastPanel(CompilePanel parentPanel) {
 		theCompilePanel = parentPanel;
@@ -71,7 +73,8 @@ public class EditBlastPanel extends JPanel {
 		btnHelp.setBackground(Globals.HELPCOLOR);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(theCompilePanel.getParentFrame(), "Edit Blast Settings", "html/runMultiTCW/EditBlastPanel.html");
+				UserPrompt.displayHTMLResourceHelp(theCompilePanel.getParentFrame(), 
+						"Edit Search Settings", helpHTML);
 			}
 		});
 	

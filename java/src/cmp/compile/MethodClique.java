@@ -26,7 +26,7 @@ public class MethodClique {
 	  * and then modified to replace the BestHit class with Clique
 	  * and additional data structures are added to the Seq class.
 	  */
-	 private String groupFile = Globals.Compile.GROUP_FILE_CLOSURE;
+	 private String groupFile = Globals.Methods.Closure.TYPE_NAME;
 	 private String [] covTypes = {"Either", "Both"};
 	 private String [] strType = {"Amino acid", "Nucleotide"};
 	 

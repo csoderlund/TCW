@@ -138,7 +138,7 @@ public class TableUtil {
 					}
 				}
 			}
-			boolean isScore = (colName.startsWith(Globalx.scoreField)) ? true : false;
+			boolean isScore = (colName.equals(FieldData.SCORE1)) ? true : false;
 			double [] results = Stats.averages(colName, dArr, isScore);
 			rows[r][0] = colName;
 			for (int i=0, c=1; i<results.length; i++, c++) {

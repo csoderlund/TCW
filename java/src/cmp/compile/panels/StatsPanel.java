@@ -12,6 +12,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import util.database.DBConn;
+import util.database.Globalx;
 import util.methods.ErrorReport;
 import util.methods.FileHelpers;
 import util.methods.Out;
@@ -21,6 +22,7 @@ import util.ui.UserPrompt;
 import cmp.compile.MultiStats;
 import cmp.compile.Pairwise;
 import cmp.compile.Summary;
+import cmp.compile.runMTCWMain;
 import cmp.database.DBinfo;
 import cmp.database.Globals;
 import cmp.database.Schema;
@@ -73,7 +75,6 @@ public class StatsPanel extends JPanel {
 	}
 
 	private void runStats() {
-	
 		if (!editPanel.isFunction()) return;
 		
 		try {
@@ -86,7 +87,7 @@ public class StatsPanel extends JPanel {
 			boolean doStats = 		editPanel.isStats();
 			boolean doWriteKaKs = 	editPanel.isWrite();
 			boolean doReadKaKs = 	editPanel.isRead();
-			boolean doPCC = 			editPanel.isPCC();
+			boolean doPCC = 		editPanel.isPCC();
 			boolean doAlign = 		(doStats || doWriteKaKs);
 			boolean doMulti = 		editPanel.isMulti();
 			
@@ -140,7 +141,21 @@ public class StatsPanel extends JPanel {
 				Out.Print("");
 			}
 			if (doMulti) {
-				new MultiStats(theCompilePanel.getDBconn()).scoreAll();
+				boolean bRedo=false, bSkip=false; // CAS312
+				if (editPanel.isDoneMulti()) {
+					if (UserPrompt.showYesNo("Run Multi Stats", "Multi-align is complete. Redo scores?\n")) {
+						if (runMTCWMain.bRmMSA) {
+							if (UserPrompt.showYesNo("Run Multi Stats", "Remove MSAs first?\n")) rmMSA();
+							else bSkip=true;
+						}
+						else {
+							bRedo=true;
+						}
+					} 
+					else bSkip=true;
+				}
+				
+				if (!bSkip) new MultiStats(theCompilePanel).scoreAll(bRedo);
 				Out.Print("");
 			}
 			
@@ -156,6 +171,16 @@ public class StatsPanel extends JPanel {
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Running stats");}
 		Out.close();
+	}
+	private void rmMSA() {
+		try {
+			DBConn mDB = theCompilePanel.getDBconn(); // CAS312
+			mDB.executeUpdate("update pog_groups set conLen=0, sdLen=0, "
+					+ "score1=" + Globalx.dNoScore +  ", score2=" + Globalx.dNoVal);
+			mDB.executeUpdate("update pog_members set alignMap=''");
+			mDB.close();
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "Remove MSA");}
 	}
 	public void setStatsSummary() {
 		if(theCompilePanel.getProjectName() == null) {

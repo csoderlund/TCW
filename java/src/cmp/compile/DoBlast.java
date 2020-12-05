@@ -21,7 +21,7 @@ public class DoBlast {
 			int n = cmpPanel.getBlastPanel().getCPUs();
 			if (n==0) n=1;
 			
-			String combinedFile = combinedFile(cmpPanel, Globals.CompilePanel.ALL_AA_FASTA); 
+			String combinedFile = combinedFile(cmpPanel, Globals.Search.ALL_AA_FASTA); 
 			File f = (combinedFile!=null) ? new File(combinedFile) : null;
 			if (f==null || !f.exists()) {
 				Out.PrtError("Could not create combined file");
@@ -51,7 +51,7 @@ public class DoBlast {
 			int n = cmpPanel.getBlastPanel().getCPUs();
 			if (n==0) n=1;
 			
-			String combinedFile = combinedFile(cmpPanel, Globals.CompilePanel.ALL_NT_FASTA);
+			String combinedFile = combinedFile(cmpPanel, Globals.Search.ALL_NT_FASTA);
 			File f = (combinedFile!=null) ? new File(combinedFile) : null;
 			if (f==null || !f.exists()) {
 				Out.PrtError("Could not create combined file");
@@ -75,7 +75,7 @@ public class DoBlast {
 		}
 	}
 	private static String combinedFile(CompilePanel cmpPanel, String file) {
-		String blastDir = cmpPanel.getCurProjAbsDir() + "/" + Globals.CompilePanel.BLASTDIR;
+		String blastDir = cmpPanel.getCurProjAbsDir() + "/" + Globals.Search.BLASTDIR;
 		String combinedFile = blastDir + "/" + file; 		
 		File testDir = new File(blastDir);
 		if(!testDir.exists()) { // should have been made during Create database

@@ -8,6 +8,60 @@
 <p>
 <font color="#000000" face="Verdana, Arial, Helvetica, sans-serif" size="2"> 
 <p><b><big><u>TCW Version 3.1</u></b></big>
+<p><b>v3.1.2  4-Dec-20</b>
+<br>This release concentrates on improving the multiTCW MSA scores and viewing alignments.
+<ul>
+<li><code>runMultiTCW</code>
+<ul>
+<li>Schema (mTCW db6.3): small change to add storage for the two score methods. 
+<li>The MSA score2 was the external MstatX Trident method. Score2 has been changed to a built-in Wentrophy, 
+which is exactly the same as the MstatXd Wentropy
+except that the score is (1 - score) so that a value of '1' is the most conserved.
+<li>The user can request that Score1 and/or Score2 be an MstatX method, where this is a command line
+option (see <tt>./runMultiTCW -h</tt>). Scores can be updated just by, setting a command line flag,
+and then running the "Run Stats" with the "Compute MSA and score" option.
+<li>Sum-of-Pairs can get large negative numbers if the cluster is large and has many gaps, hence, TCW 
+will not compute this score if this is the case (this is a temporary fix, as it is rare, but can hang
+the machine).
+<li>The Hit Cluster method has a new parameter, that when set, requires all sequences in a cluster to
+have a hit with all other sequences.
+</ul>
+<li><code>viewMultiTCW</code>
+<ul>
+<li>Since the MSA scores can be different from the defaults, they are now referred to as
+<tt>Score1</tt> and <tt>Score2</tt>:
+<ul>
+<li>At the bottom of the Overview, it is stated what methods were used.
+<li>In the Cluster table, mousing over the column <tt>Score1</tt> and <tt>Score2</tt> in
+the column panel shows the method in the lower left hand corner.
+</ul>
+<li>The alignment views have been improved:
+<ul>
+<li>The 3-views for a pair will scroll now and allow the viewing of the sequence.
+<li>The default view is to show non-synonymous amino acids in one color and the synonymous
+ones in another. It still does that, but the colors have been altered to make them easier
+to detect.
+<li>An option has been added to view the "Zappo" physicochemical coloring.
+<li>For the "View Seq" option:
+<ul> 
+<li>The characters 
+that are different from the consensus are in bigger bold face to make them more obvious.
+<li>The "Dot" options allows for all matches to be shown as a '.', which makes it easier
+to view the differences.
+</ul>
+<li>For the "View Line" graphical option:
+<ul>
+<li>The Zoom now has both 1:N and N:1 options, where 1:N decreases the graphic size,
+and N:1 increases the size. The N:1 provides more space between the vertical hashes (differences),
+which makes them easier to distinguish.
+</ul>
+</ul>
+</ul>
+<li>Updates to the Help and on-line documentation.
+</ul>
+For developers: 
+The alignment classes are now in a new seq.align package. The SumStats method is renamed to PairSumStats.
+A <tt>./runMultiTCW -x</tt> will remove clusters before re-scoring clusters. 
 
 <p><b>v3.1.1  10-Nov-20</b>
 <br>It is often easier to use the TCW generated sequence names (e.g. Os_00001) than the sequence names supplied
