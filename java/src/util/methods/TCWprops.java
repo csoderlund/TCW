@@ -11,10 +11,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileReader;
 
-import sng.database.Globals;
+import sng.database.Globals; // cmp does not access anything that accesses this, otherwise, would crash
 import util.database.Globalx;
-
-
 
 /**
  * Parse and store the sTCW.cfg and LIB.cfg properties. 

@@ -8,6 +8,85 @@
 <p>
 <font color="#000000" face="Verdana, Arial, Helvetica, sans-serif" size="2"> 
 <p><b><big><u>TCW Version 3.1</u></b></big>
+<p><b>v3.1.3  30-Dec-20</b>
+<br>This release continues to improve on the multiTCW MSA scores and viewing alignments.
+<ul>
+<li><code>runMultiTCW</code> Align
+<ul>
+<li>The score1 and score2 column values are stored in the database to be displayed
+for a MSA.
+<li>Min-Max normalization is applied to the Sum-of-pairs scores so that they are within 0-1.
+</ul>
+<br>
+<li><code>viewMultiTCW</code> 
+<ul>
+	<li>Align
+	<ul>
+		<li>For blosum=0, a different color is used (it was the same color as &lt;0).
+		<li>All align panels have a "Trim" option, which removes hanging sequence.
+		<li>MSA
+		<ul>
+			<li>Header: The description and global score is shown above the alignment
+			<li>In the Sequence view, clicking on an AA character will show the scores and composition of column
+			<li>If other then the default score methods were used for building the mTCW database, they will be
+			used for running the external MSA program (i.e. MSA...). The scores are written to file in 
+			<tt>/ResultsAlign</tt>.
+			<li>Tiny bug: stop was not removed on perfect aligns
+		</ul>
+	</ul>
+	<li>Other
+	<ul>
+	<li>Hit Table: Add "Copy hit Sequence"
+	</ul>
+</ul>
+<br>
+<li><code>runSingleTCW</code>
+<ul>
+<li>If the sTCWdb was annotated with NT and AA hits, the Best Annotated Hit will be an AA hit
+(these are used for ORF finding). Note, the NT can still be the Best Eval.
+</ul>
+<br>
+<li><code>viewSingleTCW</code> Align
+<ul>
+<li>Align
+	<ul>
+	<li>For hit and pair alignments, there is now a N:1 increase zoom along with the original 1:N decrease zoom
+	<li>The "View" line has been modified so that all options show the current state (like viewMulti does).
+	<li>Tiny interface cleanups:
+	<ul>
+	<li>For AA-sTCWdb (i.e. the database was created with protein sequences), the alignment process produced
+	incorrect warnings (the alignment was fine). The Find Hits did not work for the AA-Seqs.
+	<li>For an NT hit aligned to an NT sequence, the "Align..." pop-up produced incorrect warnings.
+	<li>For the "Seq" view: (1) the Ruler extended the length of the NT sequences for an AA display.
+	(2) Only 15 bases of the overhang was suppose to be shown, but that did not always work.
+	<li>For selecting a sequence for the "Align...", the bottom sequence had to be selected; now either can be.
+	</ul>
+</ul>
+<li>Other
+<ul>
+<li>Basic AnnoDB Hit: Copy Hit Sequence: the name is copied with the sequence in FASTA format.
+</ul>
+</ul>
+<br>
+<li>For both <code>viewSingleTCW</code> and <code>viewMultiTCW</code> 
+<ul>
+<li>The information popup windows have selectable text.
+<li>Find Hits - AA-ORFs (sTCW) and AA-Seq (mTCW) are the default Subject
+with Diamond as the default search program.
+For "Delete search files", not all files were being deleted.
+A few confusing aspects of the interface were fixed, mainly dealing with parameters.
+</ul>
+<br>
+<li>Developers
+<ul>
+<li>Move single align classes to sng.viewer.panels.align (only AlignPairOrig is shared)
+<li>Split MainToolPanel into PairViewPanel and ContigViewPanel.
+<li>Renamed sng classes to correspond to cmp classes of similar type.
+<li>Removed any references to 'sng' in /util or /cmp
+<li>Cleaned up a lot of dead code from graphics routines
+</ul>
+
+</ul>
 <p><b>v3.1.2  4-Dec-20</b>
 <br>This release concentrates on improving the multiTCW MSA scores and viewing alignments.
 <ul>

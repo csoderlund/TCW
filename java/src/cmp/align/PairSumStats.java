@@ -175,7 +175,7 @@ public class PairSumStats {
 		private void createSummary(String method) {
 			if (kkVec.size()==0) return;
 			
-			double [] qrt = Stats.setQuartiles(kkVec);
+			double [] qrt = Stats.setQuartiles(kkVec, Globalx.dNoVal);
 			
 			// table for overview
 			String [] fields = {"Average", "","   Ka/Ks", "", "   Quartiles", "", "   P-value", ""};

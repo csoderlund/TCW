@@ -242,8 +242,8 @@ public class Schema {
 					"conSeq		mediumTEXT, " +    // consensus sequence
 					"conLen		int default 0, " + // consensus length
 					"sdLen		float default " +   Globalx.dNoVal + ", " +// stddev from conLen
-					// SortTable checks for Globalx.scoreField (prefix "score")
-					"score1		float default " +   Globalx.dNoScore + ", " + // sum of sum of pairs - any value
+					// dNoVal is -2
+					"score1		float default " +   Globalx.dNoVal + ", " + // sum of sum of pairs CAS313 0-1 
 					"score2		float default " +   Globalx.dNoVal +  ", " +  // trident -1 to 1
 					
 					// dynamic summed counts for each sTCWdb is added 
@@ -257,7 +257,9 @@ public class Schema {
 					"PGid int, " +
 					"score1 text, "		+ //comma-delimited list of column score1
 					"score2 text, "		+ //comma-delimited list of column score2
-					"nType  tinytext"   + //comma-delimited list of AA/cnt (max 11 char for each of 21)
+					"nType  tinytext,"  + //comma-delimited list of AA/cnt (max 11 char for each of 21)
+					"unique (PGid),"	+
+					"index idx1(PGid)"  + // added v3.1.3
 					") ENGINE=MyISAM;";
 			mDB.executeUpdate(sqlU);
 		

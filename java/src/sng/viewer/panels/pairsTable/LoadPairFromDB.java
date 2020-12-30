@@ -3,7 +3,6 @@ package sng.viewer.panels.pairsTable;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 
-import sng.database.Globals;
 import sng.database.MetaData;
 import sng.dataholders.BlastHitData;
 import sng.dataholders.CodingRegion;
@@ -64,7 +63,8 @@ public class LoadPairFromDB {
             String seqString = rs.getString(2);
             SequenceData seqObj = new SequenceData ("consensus");
             seqObj.setName( strContigID );
-            seqObj.setSequence ( SequenceData.normalizeBases( seqString, '*', Globals.gapCh ) );
+            // CAS313 seqObj.setSequence ( SequenceData.normalizeBases( seqString, '*', Globals.gapCh ) );
+            seqObj.setSequence(seqString);
             curContig.setSeqData( seqObj );
             
             curContig.setBestMatch(rs.getString(3));

@@ -1,7 +1,10 @@
 package cmp.viewer.seq.align;
 
+/**************************************************************
+ * Draws lines or characters for a sequences
+ * Inherited by MultiAlignPanel, PairNAlignPanel, Pair3AlignPanel
+ */
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -12,8 +15,6 @@ import java.awt.event.MouseListener;
 import java.awt.font.TextLayout;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
-import java.util.Iterator;
-import java.util.TreeSet;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -34,8 +35,7 @@ public class BaseAlignPanel extends JPanel implements MouseListener
 	private final char gapCh = Globalx.gapCh;
 	private final char stopCh = Globalx.stopCh;
 	
-	public BaseAlignPanel ( )
-	{
+	public BaseAlignPanel ( ) {
 		theFont = new Font("Monospaced", Font.PLAIN, 11); // CAS312 baseFont;
 		theBoldFont = new Font("Monospaced", Font.BOLD, 12);
 		fontMetrics = getFontMetrics ( theBoldFont );
@@ -45,83 +45,69 @@ public class BaseAlignPanel extends JPanel implements MouseListener
 		setZappo();
 	}
 	
-	// Abstract methods (child class should over-ride)
-	// called from classes other than extend AlignBasePanel 
+	// Abstract methods (child class must over-ride the following four)
 	public void handleClick( MouseEvent e, Point localPoint ) { }
-	public double getGraphicalDeadWidth ( ) { return 0; }
 	public void refreshPanels ( ) { }
-
-	public    void 		selectNoRows () { }
-	public    void 		selectNoColumns () { }
-	public    void 		getSelectedSeqIDs ( TreeSet<String> set ) { }
-	public    boolean 	hasSelection () { return false; }
-	
-	protected void 		selectAllRows () { }
-	protected void 		selectAllColumns () { }
+	public void paintComponent(Graphics g){
+		super.paintComponent( g ); // XXX LINUX
+		refreshPanels();
+	}
 	
 	protected char getChar(boolean bFirst, int nPos) {return ' ';}
 	protected boolean isEndGap(boolean bFirst, int nPos) {return false;}
 	
-	public void setZoom ( int n ) throws Exception
-	{ 
-		if (n<0) {
-			nScale = -n;
+	//------- setup -------//
+	public void setMinPixelX ( double dX ) { //  lowest pixel on the x-axis for drawing
+		dMinPixelX = dX; 
+	}
+	public void setTrimRange(int nMin, int nMax) {
+		nMinTrim = nMin;
+		nMaxTrim = nMax+1;
+	}
+	public void setIndexRange ( int nMin, int nMax )  { 
+		nMinIndex = nMinLen = nMin;   // the lowest index for bases in the alignment (always 0)
+		nMaxIndex = nMaxLen = nMax;	  // the highest index for bases in the alignment
+	}		
+	
+	//---- change in drawing ----//
+	public int getViewMode ( ) { 
+		return nViewMode; 
+	}
+	public void setOpts(int nViewMode, int nColorMode, boolean bDot, boolean bTrim, int nZoom) {
+		this.nViewMode = nViewMode;
+		this.nColorMode = nColorMode;
+		this.bDot = bDot;
+		
+		this.bTrim = bTrim;
+		if (bTrim) {
+			nMinIndex = nMinTrim;
+			nMaxIndex = nMaxTrim;
+		}
+		else {
+			nMinIndex = nMinLen;
+			nMaxIndex = nMaxLen;
+		}
+		
+		if (nZoom<0) {
+			nScale = -nZoom;
 			bScaleUp=true;
 		}
 		else { 
-			nScale = n; 
+			nScale = nZoom; 
 			bScaleUp=false;
 		}
-		clearPanels ( ); 
-	}
-	
-	// Min Pixel X : the lowest pixel on the x-axis for drawing; corresponds to the base at Min Index
-	public void setMinPixelX ( double dX ) { 
-		dMinPixelX = dX; 
-		clearPanels ( ); 
-	}
-	public void setIndexRange ( int nMin, int nMax )  { 
-		nMinIndex = nMin;   // the lowest index for bases in the alignment (always 0)
-		nMaxIndex = nMax;	// the highest index for bases in the alignment
-		clearPanels ( );
-	}		
-	public int getDrawMode ( ) { 
-		return nDrawMode; 
-	}
-	public void setDrawMode(int mode) {
-		nDrawMode = mode;
-		clearPanels();
-	}
-	public void setColorMode(int mode) {
-		nColorMode=mode;
-	}
-	public void setDotMode(boolean mode) {
-		bDot = mode;
-	}
-	public void paintComponent(Graphics g){
-		Graphics2D g2 = (Graphics2D)g;
-		super.paintComponent( g );
-		
-		if ( bPanelsDirty ){
-			refreshPanels ();
-			bPanelsDirty = false;
-		}
-		drawCodingPanels ( g2 );
+		super.repaint(); // XXX LINUX refreshPanels();
 	}
 	
 	//------------- Called from align panels --------------------//
 	protected void drawSequence( Graphics2D g2, String label, String alignSeq, 
-			double dYTop, double dYBottom , boolean isFirst, boolean isDNA, boolean isPair)
-	{
-		int start=0, end=alignSeq.length();
-		while(start<end-1 && alignSeq.charAt(start) == Globalx.gapCh)  start++;
-		while(end>0 &&       alignSeq.charAt(end-1) == Globalx.gapCh)  end--;
-		if (end==0) end=alignSeq.length();
-		
-		if( nDrawMode == GRAPHICMODE )
-			drawGraphics( g2, alignSeq, dYTop, dYBottom , isFirst, isDNA, start, end);
+			double dYTop, double dYBottom , int start, int end,
+			boolean isFirst, boolean isDNA, boolean isPair) 
+	{	
+		if( nViewMode == GRAPHICMODE )
+			drawSequenceLine( g2, alignSeq, dYTop, dYBottom , isFirst, isDNA, start, end+1); 
 		else
-			writeSequence( g2, alignSeq, dYTop, dYBottom , isFirst, isDNA, isPair, start, end);
+			writeSequence( g2, alignSeq, dYTop, dYBottom , isFirst, isDNA, isPair, start, end+1);
 	}
 	//--------------- View NT/AA -------------------------------/
 	// BOLD: (1) isGrp and isFirst (consensus)
@@ -133,9 +119,11 @@ public class BaseAlignPanel extends JPanel implements MouseListener
 		boolean isMulti = !isPair;
 		double dWriteBaseline = (dYBottom - dYTop) / 2 - dFontMinHeight / 2 + dYTop + dFontAscent; 
 
+		int s = (bTrim) ? Math.max(start, nMinTrim) : start;
+		int e = (bTrim) ? Math.min(end,   nMaxTrim) : end;
 		g2.setColor(Color.black);
 			
-		for( int i = start; i < end; i++ )
+		for( int i = s; i < e; i++ )
 		{		
 			double dX = calculateWriteX ( i );
 			
@@ -144,8 +132,8 @@ public class BaseAlignPanel extends JPanel implements MouseListener
 			Color baseColor = Color.BLACK;
 			
 			if (isEndGap(isFirst, i)) baseColor = getColorEnd(c2);
-			else if (isDNA) 		 baseColor = getColorNT(c1, c2);
-			else            		 baseColor = getColorAA(c1, c2);
+			else if (isDNA) 		  baseColor = getColorNT(c1, c2);
+			else            		  baseColor = getColorAA(c1, c2);
 			
 			boolean isBold=false, isDot=false;
 	
@@ -180,13 +168,13 @@ public class BaseAlignPanel extends JPanel implements MouseListener
 	}
 	/*******************************************************************************/
 	//--------------------- Draw line with hashes ---------------------------------//
-	private void drawGraphics( Graphics2D g2, String alignSeq, 
+	private void drawSequenceLine( Graphics2D g2, String alignSeq, 
 			double dYTop, double dYBottom, boolean isFirst, boolean isDNA, int start, int end)
 	{
 		// Determine the position of the sequence line, but don't draw until after the hashes
-		double dXPosStart = calculateDrawX ( start );
-		double dXPosEnd = 	calculateDrawX ( end );
-
+		int s = (bTrim) ? Math.max(start, nMinTrim) : start;
+		int e = (bTrim) ? Math.min(end,   nMaxTrim) : end;
+		
 		double dHeight = 	dYBottom - dYTop;   // always 15.0
 		double dY 	= 		dHeight / 2.0 + dYTop; // center, so +/- hash
 
@@ -195,11 +183,11 @@ public class BaseAlignPanel extends JPanel implements MouseListener
 		int hash_MD = 		hashHeight - 1;
 		int hash_SM = 		hashHeight - 2;
 		
-		double dW=0.5;  // does not fill rectangle
+		double dW=0.5;  // width of line
 		if (bScaleUp && nScale>2) dW = nScale*0.5;
 
 		// For each letter in the sequence
-		for( int pos = start; pos < end; pos++) {
+		for( int pos = s; pos < e; pos++) {
 			double dX = calculateDrawX ( pos);
 		
 			char c1 = getChar(isFirst, pos); // either consensus or other half of pair
@@ -207,24 +195,25 @@ public class BaseAlignPanel extends JPanel implements MouseListener
 			Color baseColor = Color.BLACK;
 
 			if (isEndGap(isFirst, pos)) baseColor = getColorEnd(c2);
-			else if (isDNA) 		   baseColor = getColorNT(c1, c2);
-			else            		   baseColor = getColorAA(c1, c2);
+			else if (isDNA) 		    baseColor = getColorNT(c1, c2);
+			else            		    baseColor = getColorAA(c1, c2);
 			
 			if (baseColor==Color.black) continue;
 				
 			int hash=hash_SM;
 			if (nColorMode==1) {
-				if (aaDefault(c1,c2)==aaLtZero) hash = hash_LG; // get size of hash
+				Color cHigh = aaDefault(c1,c2);
+				if (cHigh==aaLtZero) hash = hash_LG; // get size of hash
+				else if (cHigh==aaEqZero) hash = hash_MD;
 			}
 			else {
 				if ( baseColor== aaLtZero || baseColor == ntMisMatch) hash=hash_LG;
-				else if ( baseColor== anyGap || baseColor == anyUnk)  hash=hash_MD;
+				else if ( baseColor== anyGap || baseColor == anyUnk || baseColor==aaEqZero)  hash=hash_MD;
 			}
 			
 			double dH = hash*2;
 			if (isFirst) {
 				Hash h = new Hash( g2, dX, dY-hash, dW, dH,  baseColor , c2, pos);
-				if (hiPoint!=null) h.isHigh(g2, hiPoint);
 				hashSet.add(h);
 			}
 			else drawHash ( g2, dX, dY-hash, dW, dH, baseColor );
@@ -232,6 +221,9 @@ public class BaseAlignPanel extends JPanel implements MouseListener
 			if (baseColor==aaStop)  drawStop(g2, dX, dYTop);
 		}
 		// Draw the line for the sequence and arrow head
+		double dXPosStart = calculateDrawX ( s );
+		double dXPosEnd = 	calculateDrawX ( e );
+
 		g2.setColor( Color.black );
 		g2.draw( new Line2D.Double( dXPosStart, dY, dXPosEnd, dY ) );
 
@@ -260,10 +252,7 @@ public class BaseAlignPanel extends JPanel implements MouseListener
 		g2.draw( new Line2D.Double( dXStart, dYStartBottom, dX, dY ) );
 		g2.draw( new Line2D.Double( dXStart - 1, dYStartBottom, dX - 1, dY ) );
 	}
-	private void drawDot ( Graphics2D g2, double dX, double dY, Color dotColor ) {
-		g2.setColor( dotColor );
-		g2.draw( new Line2D.Double( dX - 0.5, dY, dX + 0.5, dY ) );		
-	}
+	
 	private void drawHash ( Graphics2D g2, double dx, double dy, double dw, double dh, Color hashColor ){
 		g2.setColor( hashColor );
 		if (bScaleUp) {
@@ -289,9 +278,10 @@ public class BaseAlignPanel extends JPanel implements MouseListener
 			else {
 				g2.draw( new Line2D.Double( dx,  dy, dx, dy+dh ) );
 			}
-			this.ch = ch;
-			this.index = index;
+			//this.ch = ch;
+			//this.index = index;
 		} 
+		/** this is to make consensus rectangle clickable for information as shown for sequence
 		public boolean isHigh(Graphics2D g2, Point p) {// CAS313 will be for clickable hashes
 			if (hRect!=null && contains(p)) {
 				g2.setColor(Color.black);
@@ -311,9 +301,10 @@ public class BaseAlignPanel extends JPanel implements MouseListener
 			}
 			else return false;
 		}
+		**/
 		//private double dx, dy, dw, dh; 
-		private char ch;
-		private int index;
+		//private char ch;
+		//private int index;
 		private Rectangle2D hRect=null;
 	}
 	/****************************************************************
@@ -322,7 +313,6 @@ public class BaseAlignPanel extends JPanel implements MouseListener
 	 */
 	private Color getColorNT(char c1, char c2) { 
 		if (c2==gapCh)  return anyGap;  // colored gap even if consensus is
-		if (c1==gapCh)	return Color.black;
 		
 		if (c2=='n') 	return anyUnk;	// colored anyUnk even if all are anyUnk
 		
@@ -343,15 +333,17 @@ public class BaseAlignPanel extends JPanel implements MouseListener
 	
 	private Color aaDefault(char c1, char c2) { //isFirst c1==c2
 		if (c2==gapCh)		return anyGap;
-		if (c1==gapCh)		return Color.black;
 		if (c2==stopCh)		return aaStop;
-		
 		if (c2=='X') 		return anyUnk;	
+		
+		if (c1==gapCh)		return Color.BLACK;
 		
 		if (c1==c2)         return Color.BLACK;
 		
-		if (blosumObj.isHighSub(c1, c2))return aaGtZero;
-		else							return aaLtZero;
+		int s = ScoreAA.getBlosum(c1, c2);
+		if (s>0) return aaGtZero;
+		if (s<0) return aaLtZero;
+		return aaEqZero;
 	}
 	
 	//---------	 Draw a ruler indicating base position-------------------//
@@ -360,21 +352,19 @@ public class BaseAlignPanel extends JPanel implements MouseListener
 		TextLayout layout = new TextLayout( "9999", theFont, g2.getFontRenderContext() );		
 		double dY = (dYBottom + dYTop) / 2 + layout.getBounds().getWidth() / 2;
 		
-		int nTickIncrement = 100;
-		if ( nDrawMode != GRAPHICMODE ) nTickIncrement = 10;
+		int nTickInc = ( nViewMode==GRAPHICMODE ) ? 100 : 10;
 		
-		int nTickStart = ( nMinIndex / nTickIncrement ) * nTickIncrement;		
-		if ( nTickStart < nMinIndex ) nTickStart += nTickIncrement;
+		int nTickStart = ( nMinIndex / nTickInc ) * nTickInc;		
+		if ( nTickStart < nMinIndex ) nTickStart += nTickInc;
 		
-		for ( int i = nTickStart; i < nMaxIndex; i += nTickIncrement )
-		{	
+		for ( int i = nTickStart; i < nMaxIndex; i += nTickInc ) {	
 			double dX;
-			if ( nDrawMode != GRAPHICMODE )
-				dX = ( calculateWriteX (i) + calculateWriteX (i+1) ) / 2;
-			else
+			if ( nViewMode == GRAPHICMODE ) 
 				dX = calculateDrawX (i);
+			else 
+				dX = (calculateWriteX(i) + calculateWriteX(i+1)) / 2;
 			
-			if ( dX > dXMin )
+			if ( dX > dXMin ) 
 				drawVerticalText ( g2, String.valueOf(i), dX, dY );
 		}
 	}
@@ -407,7 +397,6 @@ public class BaseAlignPanel extends JPanel implements MouseListener
 	}
 	protected void drawName ( Graphics2D g2, String name, double dXleft, double dYtop ){
 		//drawText ( g2, str, dX, dY, Color.BLACK );
-		
 		if ( name.length() == 0 ) return;
 		
 		g2.setColor (Color.BLACK );
@@ -420,43 +409,14 @@ public class BaseAlignPanel extends JPanel implements MouseListener
 		return (int)( (dX - dMinPixelX) / dFontCellWidth ) + nMinIndex; 
 	}	
 	protected double getSequenceWidth ( ){
-		if( nDrawMode == GRAPHICMODE ) {
+		if( nViewMode == GRAPHICMODE ) {
 			if (bScaleUp) return ( nMaxIndex - nMinIndex + 1 ) * nScale;
-			else return ( nMaxIndex - nMinIndex + 1 ) / nScale;
+			else          return ( nMaxIndex - nMinIndex + 1 ) / nScale;
 		}
 		else return dFontCellWidth * ( nMaxIndex - nMinIndex + 1 );
 	}
-
-	//-- Remove if coding not added to NT ---------/
-	private void drawCodingPanels ( Graphics2D g2 )
-	{
-		Iterator<JPanel> iterPanel = codingPanels.iterator();
-		while ( iterPanel.hasNext() ) {
-			JPanel curPanel = iterPanel.next();
-			g2.setColor( curPanel.getBackground() );
-			g2.fill( curPanel.getBounds() );
-		}		
-	}
-	private void clearPanels ( )
-	{
-		// Remove the old panels
-		bPanelsDirty = true;
-		Iterator<JPanel> iter = codingPanels.iterator();
-		while ( iter.hasNext() )
-			remove( (Component)iter.next() );
-		codingPanels.removeAllElements();
-		super.repaint();
-	}
 	/*****************************************************************************/
-	public void mouseClicked(MouseEvent e) {  
-        for (Hash h : hashSet) {
-        	if (h.contains(e.getPoint())) {
-        		hiPoint = e.getPoint();
-        		repaint();
-        		return;
-        	}
-        }
-    }  
+	public void mouseClicked(MouseEvent e) { }  
     public void mouseEntered(MouseEvent e) {}  
     public void mouseExited(MouseEvent e) {}  
     public void mousePressed(MouseEvent e) {}  
@@ -482,52 +442,47 @@ public class BaseAlignPanel extends JPanel implements MouseListener
 	
 	// Attibutes for positioning
 	private double dMinPixelX = 0;		// The lowest pixel (associated base at min index) 
-	private int nMinIndex = 1;			// The lowest base position in the alignment
-	private int nMaxIndex = 1;
+	private int nMinIndex = 0, nMaxIndex = 0; // Either nMinLen or nMinTrim; 
+	private int nMinLen=0, nMaxLen=0;   // Zero and length of longest sequence, respectively
+	private int nMinTrim =0, nMaxTrim = 0; // CAS313 Where consensus starts/stops having gaps for trim
 	private double dFontMinHeight = 0;  // The minimum sized box a letter will fit in based on our font
 	private double dFontCellWidth = 0;	
 	private double dFontAscent = 0;		// The distance from the top of the write cell to the baseline
 	
-	// Panels to show the coding region - not used, but maybe add to pairwise NT align
-	private boolean bPanelsDirty = false;
-	private Vector<JPanel> codingPanels = new Vector<JPanel> ();      
-	
 	private Vector <Hash> hashSet = new Vector <Hash> ();
-	private Point hiPoint = null;
-	private ScoreAA blosumObj = new ScoreAA();
 	
 	// Set by calling program in interface
-	private int nDrawMode = GRAPHICMODE;
+	private int nViewMode = GRAPHICMODE;
 	
 	private int     nScale = 1;		// Zoom	
 	private boolean bScaleUp=false;	
 	
-	private boolean bTrim=false;
-
 	private boolean bDot	=true;
+	private boolean bTrim	=false; // CAS313
 	private int nColorMode	= 0;
 	
 	//-- don't set any color black ---//
 	// Default 
-	public static Color anyHang 	= new Color(180, 180, 180); // mediumGray
-	public static Color anyUnk		= Color.cyan;
-	public static Color anyGap 		= new Color(0,200,0);		// light green; shared with aaZappo
-	public static Color aaStop		= new Color(138, 0, 184); 	// purple; shared with aaZappo
+	public static final Color anyHang 	= Globalx.anyHang; // new Color(180, 180, 180); mediumGray
+	public static final Color anyUnk	= Globalx.anyUnk;  // Color.cyan;
+	public static final Color anyGap 	= Globalx.anyGap;  // new Color(0,200,0); light green; shared with aaZappo
 	
-	public static Color ntMisMatch 	= Color.red;
+	public static final Color ntMisMatch = Globalx.ntMisMatch; // Color.red;
 	
-	public static Color aaLtZero 	= Color.red; 		// new Color(255, 173, 190); // light red;
-	public static Color aaGtZero 	= Color.blue; 		
+	public static final Color aaLtZero 	= Globalx.aaLtZero; // Color.red; 		
+	public static final Color aaEqZero	= Globalx.aaEqZero; // new Color(255, 173, 190);  light red
+	public static final Color aaGtZero 	= Globalx.aaGtZero; // Color.blue; 	
+	public static final Color aaStop	= Globalx.aaStop;   // new Color(138, 0, 184); 	purple; shared with aaZappo
 	
 	// Zappo
 	private HashMap <Character, Color>  aaZappo	= new HashMap <Character, Color> ();
-	public static Color zPhobic		= Color.pink; // new Color(255, 0, 127);	// Rose;
-	public static Color zAro		= Color.orange;
-	public static Color zPos		= Color.blue;
-	public static Color zNeg		= Color.red;
-	public static Color zPhilic		= Color.green;
-	public static Color zCys		= Color.gray;
-	public static Color zCon		= Color.magenta;
+	public static final Color zPhobic	= Color.pink; // new Color(255, 0, 127);	// Rose;
+	public static final Color zAro		= Color.orange;
+	public static final Color zPos		= Color.blue;
+	public static final Color zNeg		= Color.red;
+	public static final Color zPhilic	= Color.green;
+	public static final Color zCys		= Color.gray;
+	public static final Color zCon		= Color.magenta;
 	
 	protected static final Color selectColor = Color.GRAY;
 }

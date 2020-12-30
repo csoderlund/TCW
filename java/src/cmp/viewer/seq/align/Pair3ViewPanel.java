@@ -3,9 +3,7 @@ package cmp.viewer.seq.align;
  * When the members table is displayed for pairs, this is called 
  * to align with PairAlignPanel
  */
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -74,7 +72,7 @@ public class Pair3ViewPanel extends JPanel {
 			}
 		});
 		theRow.add(new JLabel("View:")); theRow.add(Box.createHorizontalStrut(1));
-		theRow.add(btnShowType);         theRow.add(Box.createHorizontalStrut(2));
+		theRow.add(btnShowType);         theRow.add(Box.createHorizontalStrut(5));
 		
 		dotBox = Static.createCheckBox("Dot", true);
 		dotBox.addActionListener(new ActionListener() {
@@ -84,7 +82,16 @@ public class Pair3ViewPanel extends JPanel {
 		});
 		dotBox.setEnabled(false);
 		theRow.add(dotBox);
-		theRow.add(Box.createHorizontalStrut(2));
+		theRow.add(Box.createHorizontalStrut(5));
+		
+		trimBox = Static.createCheckBox("Trim", false); // CAS313 new
+		trimBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				refreshPanels();
+			}
+		});
+		theRow.add(trimBox);
+		theRow.add(Box.createHorizontalStrut(5));
 		
 		menuZoom = Static.createZoom2();
 		menuZoom.addActionListener(new ActionListener() {
@@ -94,7 +101,7 @@ public class Pair3ViewPanel extends JPanel {
 		});	
 		
 		theRow.add(menuZoom);
-		theRow.add(Box.createHorizontalStrut(2));
+		theRow.add(Box.createHorizontalStrut(5));
 		
 		JButton btnHelp1 = Static.createButton("Help1", true, Globals.HELPCOLOR);
 		btnHelp1.addActionListener(new ActionListener() {
@@ -107,8 +114,9 @@ public class Pair3ViewPanel extends JPanel {
 		theRow.add(Box.createHorizontalStrut(20));
 		
 		// Align functions
-		theRow.add(Static.createLabel("Align: ", true));
-		theRow.add(Box.createHorizontalStrut(2));
+		JPanel theRow2 = Static.createRowPanel();
+		theRow2.add(Static.createLabel("Align: ", true));
+		theRow2.add(Box.createHorizontalStrut(2));
 		
 		String type = (viewType==0) ? "AA..." : "5UTR...";
 		btnAAalign = Static.createButton(type, true); 
@@ -124,8 +132,8 @@ public class Pair3ViewPanel extends JPanel {
 			if (utr5_1<=Share.minAlignLen || utr5_2<=Share.minAlignLen)
 				btnAAalign.setEnabled(false);
 		}
-		theRow.add(btnAAalign);
-		theRow.add(Box.createHorizontalStrut(2));
+		theRow2.add(btnAAalign);
+		theRow2.add(Box.createHorizontalStrut(2));
 		
 		btnCDSalign = Static.createButton("CDS...", true); 
 		btnCDSalign.addActionListener(new ActionListener() {
@@ -133,8 +141,8 @@ public class Pair3ViewPanel extends JPanel {
 				alignPopUp(1);
 			}
 		});
-		theRow.add(btnCDSalign);
-		theRow.add(Box.createHorizontalStrut(2));
+		theRow2.add(btnCDSalign);
+		theRow2.add(Box.createHorizontalStrut(2));
 		
 		type = (viewType==0) ? "NT..." : "3UTR...";
 		btnNTalign = Static.createButton(type, true); 
@@ -143,27 +151,27 @@ public class Pair3ViewPanel extends JPanel {
 				alignPopUp(2);
 			}
 		});
-		theRow.add(btnNTalign);
+		theRow2.add(btnNTalign);
 		if (viewType==1) {
 			int utr3_1 = theAlignData[2].getSeq1().length();
 			int utr3_2 = theAlignData[2].getSeq2().length();
 			if (utr3_1<=Share.minAlignLen || utr3_2<=Share.minAlignLen)
 				btnNTalign.setEnabled(false);
 		}
-		theRow.add(Box.createHorizontalStrut(2));
+		theRow2.add(Box.createHorizontalStrut(5));
 	    
 		JButton btnHelp = Static.createButton("Help2", true, Globals.HELPCOLOR);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				UserPrompt.displayHTMLResourceHelp(theParentFrame, 
-						"Align: ",  help1HTML);
+				UserPrompt.displayHTMLResourceHelp(theParentFrame, "Align: ",  help1HTML);
 			}
 		});
-		theRow.add(btnHelp);
+		theRow2.add(btnHelp);
 		
-		theRow.add(Box.createHorizontalGlue()); 
+		theRow2.add(Box.createHorizontalGlue()); 
 	
 		buttonPanel.add(theRow);
+		buttonPanel.add(theRow2);
 		buttonPanel.setMaximumSize(buttonPanel.getPreferredSize()); 
 		buttonPanel.setMinimumSize(buttonPanel.getPreferredSize()); 
 	}
@@ -289,14 +297,6 @@ public class Pair3ViewPanel extends JPanel {
 		mainPanel = Static.createPagePanel();
 		scroller.setViewportView( mainPanel );
 		refreshPanels();
-		/** does not work the first time and causes blank display
-		scroller.addComponentListener(new ComponentAdapter() {
-			public void componentResized(ComponentEvent e) {
-				setZoom();
-				scroller.removeComponentListener(this);
-			}
-		});
-		**/
 	}
 	private void refreshPanels() {
 		try {
@@ -313,49 +313,48 @@ public class Pair3ViewPanel extends JPanel {
 		mainPanel.removeAll();
 		try {
 			MenuMapper ratioSelection = (MenuMapper) menuZoom.getSelectedItem();
-			int ratio = ratioSelection.asInt();
+			int nZoom = ratioSelection.asInt();
 			int view = (isShowGraphic) ? BaseAlignPanel.GRAPHICMODE : BaseAlignPanel.TEXTMODE;
 			boolean bDot = dotBox.isSelected();
+			boolean bTrim = trimBox.isSelected();
+			int colMode = 0;
 			
 			for(int x=0; x<theGraphicPanels.length; x++) {	
 				if (theGraphicPanels[x]==null) continue;
 				
-				theGraphicPanels[x].setBorderColor(Color.BLACK);
-			
-				theGraphicPanels[x].setZoom(ratio);
-				theGraphicPanels[x].setDrawMode(view);
-				theGraphicPanels[x].setDotMode(bDot);
+				theGraphicPanels[x].setOpts(view, colMode, bDot, bTrim, nZoom);
 				
+				theGraphicPanels[x].addDescLines(); // CAS313 was called in setZoom
+			
 				mainPanel.add(theGraphicPanels[x]);
 			}
 			mainPanel.add(Box.createVerticalStrut(20));
-			//scroller.getViewport().getView().setVisible( true );
 		} catch (Exception e) {ErrorReport.reportError(e);}
 	}
 	
 	private void handleClick(MouseEvent e) { }// CAS312 removed unnecessary code - nothing is selectable
 	
     private void alignPopUp(int index) {
-    		String msg = "CDS codon align";
-    		boolean isNT=true, isCDS=true, isUTR=false;
-    		if (viewType==0) {
-    			if (index==0) {
-    				isNT=isCDS=false;
-    				msg="Amino acid align";
-    			}
-    			else if (index==2) {
-    				isCDS=false;
-    				msg="Nucleotide align";
-    			}
-    		}
-    		else { 
-    			if (index!=1) {
-    				isUTR=true; isCDS=false;
-    				if (index==0)  msg="5'UTR align";
-    				else if (index==2) msg="3'UTR align";
-    			}
-    		}
-    		final PairAlignText at = new PairAlignText(isCDS, isNT, isUTR); // Pop up menu of options
+		String msg = "CDS codon align";
+		boolean isNT=true, isCDS=true, isUTR=false;
+		if (viewType==0) {
+			if (index==0) {
+				isNT=isCDS=false;
+				msg="Amino acid align";
+			}
+			else if (index==2) {
+				isCDS=false;
+				msg="Nucleotide align";
+			}
+		}
+		else { 
+			if (index!=1) {
+				isUTR=true; isCDS=false;
+				if (index==0)  msg="5'UTR align";
+				else if (index==2) msg="3'UTR align";
+			}
+		}
+		final PairAlignText at = new PairAlignText(isCDS, isNT, isUTR); // Pop up menu of options
 		at.setVisible(true);
 		final int mode = at.getSelection();
 		
@@ -373,22 +372,19 @@ public class Pair3ViewPanel extends JPanel {
 			}
 		}
     }
-
+/********************************************************************/
 	private boolean isShowGraphic=true;
 	
 	private MTCWFrame theParentFrame = null;
 	private JScrollPane scroller = null;
 	
-	private JPanel buttonPanel = null;
-	private JPanel mainPanel = null;
+	private JPanel buttonPanel = null, mainPanel = null;
 
 	private JComboBox <MenuMapper> menuZoom = null;
 	private JButton btnShowType = null;
-	private JCheckBox dotBox = null;
+	private JCheckBox dotBox = null , trimBox = null;
 	
-	private JButton btnAAalign=null;
-	private JButton btnNTalign=null;
-	private JButton btnCDSalign=null;
+	private JButton btnAAalign=null, btnNTalign=null, btnCDSalign=null;
 
 	private Thread theThread = null;
 	

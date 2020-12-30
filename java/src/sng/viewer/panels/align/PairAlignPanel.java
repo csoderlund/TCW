@@ -1,7 +1,7 @@
 /**
  * Displays alignment of a pair in two nucleotide or two amino acid
  */
-package sng.viewer.panels;
+package sng.viewer.panels.align;
 
 import java.awt.BasicStroke;
 import java.awt.Dimension;
@@ -21,36 +21,32 @@ import sng.database.Globals;
 import sng.dataholders.CodingRegion;
 import sng.dataholders.SequenceData;
 import util.align.AAStatistics;
-import util.align.AlignData;
 import util.database.Globalx;
 import util.methods.ErrorReport;
 import util.methods.Out;
 import util.ui.MultilineTextPanel;
 
-public class MainPairAlignPanel extends MainAlignPanel
-{
-	// gets called first with the nucleotide alignment, then the AA alignment
-	// Called from MainToolBarPanel.createPairAlignPanel
-	
+public class PairAlignPanel extends BaseAlignPanel {
 	Color background1 = new Color(0xEEFFEE);
 	Color background2 = new Color(0xEEFFFF);
 	
-	public MainPairAlignPanel ( int num, AlignData align, boolean alt,
+	public PairAlignPanel ( int num, AlignData align, boolean alt, boolean isHit,
 			int nInTopGap, int nInBottomGap, int nInLeftGap, int nInRightGap )
 	{		
 		super ( Globals.textFont );
 		Color c;
 		numAlign = num;
+		this.isHit = isHit;
 		
 		if (alt) c = background1; 
 		else c = background2;
 		
 		super.setBackground( c );
 		super.setLayout( null );
-		dSequenceStart = Math.max( super.getTextWidth( align.getDisplayStr1() ), 
+		dSeqStart = Math.max( super.getTextWidth( align.getDisplayStr1() ), 
 									super.getTextWidth( align.getDisplayStr2() ) );
-		dSequenceStart += nInsetGap * 2.0d + nInLeftGap;
-		super.setMinPixelX ( dSequenceStart );
+		dSeqStart += nInsetGap * 2.0d + nInLeftGap;
+		super.setMinPixelX ( dSeqStart );
 		
 		boolean isSeq = super.isDrawSeqMode();
 		super.setIndexRange ( align.getLowIndex(isSeq), align.getHighIndex(isSeq) );
@@ -60,7 +56,7 @@ public class MainPairAlignPanel extends MainAlignPanel
 		seqData1 = alignData.getSequence1();
 		seqData2 = alignData.getSequence2();
 		nTopGap = nInTopGap;
-		nBottomGap = nInBottomGap;
+		nLowGap = nInBottomGap;
 		nRightGap = nInRightGap;
 		nLeftGap = nInLeftGap;		
 
@@ -72,22 +68,22 @@ public class MainPairAlignPanel extends MainAlignPanel
 		dRulerHeight = super.getTextWidth( "999999" );
 	}
 	
-	public void refreshPanels ( ) 
-	{ 
+	public void refreshPanels ( )  { 
 		selectionBox = new Rectangle2D.Double ( dFrameLeftX, dFrameTopY,  getFrameWidth (), dFrameHeight );
 		
 		if (super.isShowHit())
-			if (alignData.isNtAA() || alignData.isAAAA()) 
+			if (isHit) 
 				highlightHit();
 		if (super.isShowORF()) 
-			if (alignData.isNtAA() && alignData.getFrame1()==alignData.getORFCoding1().getFrame())
-				highlightAAORF ();
+			if (alignData.isNTsTCW()) {
+				if (alignData.getFrame1()==alignData.getORFCoding1().getFrame())
+						highlightAAORF ();
+			}
 	};
 	
 	//---------------------------------JPanel Over-rides-------------------------------------//
 
-	public void paintComponent(Graphics g)
-	{
+	public void paintComponent(Graphics g) {
 		Graphics2D g2 = (Graphics2D)g;
 		super.paintComponent( g );
 		
@@ -97,9 +93,8 @@ public class MainPairAlignPanel extends MainAlignPanel
 		Rectangle2D highlightBox = new Rectangle2D.Double ( dFrameLeftX - 2, dFrameTopY - 2, 
 				getFrameWidth () + 4, dFrameHeight + 4 );
 		
-		if ( hasSelection() )
-		{
-			// Outline whole thing
+		if ( hasSelection() )// Outline whole thing
+		{	
 			Stroke oldStroke = g2.getStroke();
 			g2.setColor( Globalx.selectColor );
 			g2.setStroke( new BasicStroke (3) );
@@ -107,12 +102,12 @@ public class MainPairAlignPanel extends MainAlignPanel
 			g2.setStroke ( oldStroke );
 			
 			if ( bSeq1Selected )
-				g2.fill( new Rectangle2D.Double( dFrameLeftX, dSelectionRow1Top, 
-						getFrameRight ( ) - dFrameLeftX, dSelectionMid - dSelectionRow1Top ) );		
+				g2.fill( new Rectangle2D.Double( dFrameLeftX, dSelectRow1Top, 
+						getFrameRight ( ) - dFrameLeftX, dSelectMid - dSelectRow1Top ) );		
 
 			if ( bSeq2Selected )
-				g2.fill( new Rectangle2D.Double( dFrameLeftX, dSelectionMid, 
-						getFrameRight ( ) - dFrameLeftX, dSelectionRow2Bottom - dSelectionMid ) );					
+				g2.fill( new Rectangle2D.Double( dFrameLeftX, dSelectMid, 
+						getFrameRight ( ) - dFrameLeftX, dSelectRow2Low - dSelectMid ) );					
 			
 			g2.setColor( Color.BLACK );
 		}	
@@ -120,54 +115,37 @@ public class MainPairAlignPanel extends MainAlignPanel
 		g2.draw ( outsideBox );
 		g2.draw( new Line2D.Double( dFrameLeftX, dDivider1Y, getFrameRight ( ), dDivider1Y ) );
 		
-		super.drawRuler( g2, 0, dRulerTop, dRulerBottom ); // FIXME for amino acid alignment	
+		super.drawRuler( g2, 0, dRulerTop, dRulerLow ); // FIXME for amino acid alignment	
 	
 		super.drawText( g2, alignData.getDisplayStr1(), dFrameLeftX + nInsetGap, dSeq1Top );
-		super.drawSequence ( g2, seqData1, dSeq1Top, dSeq1Bottom );
+		super.drawSequence ( g2, seqData1, dSeq1Top, dSeq1Low );
 		
 		super.drawText( g2, alignData.getDisplayStr2(), dFrameLeftX + nInsetGap, dSeq2Top );
-		super.drawSequence ( g2, seqData2, dSeq2Top, dSeq2Bottom );
+		super.drawSequence ( g2, seqData2, dSeq2Top, dSeq2Low );
 	}
 	
-	public Dimension getMaximumSize()
-	{
+	public Dimension getMaximumSize() {
 		return new Dimension ( Integer.MAX_VALUE, (int)getPreferredSize ().getHeight() );
 	}
 	
-	public Dimension getPreferredSize()
-	{
+	public Dimension getPreferredSize() {
 		int nWidth = nLeftGap + (int)getFrameWidth ( ) + nRightGap;
-		int nHeight = nTopGap + (int)dFrameHeight + nBottomGap;
+		int nHeight = nTopGap + (int)dFrameHeight + nLowGap;
 		return new Dimension( nWidth, nHeight ); 
 	}
 	
 	//---------------------------------AlignmentPanelBase Over-rides-------------------------------------//
 	
-	protected boolean getOverHang ( SequenceData seq, int nPos ) 
-	{ 	
-		char x1 = seqData1.safeGetBaseAt( nPos );
-		char x2 = seqData2.safeGetBaseAt( nPos );
-		
-		if (x1 == ' ' || x2 == ' ') return true; // space is no base
-
-		return false;
-	}
-	
-	protected boolean getIsStop ( SequenceData seq, int nPos ) // 
-	{   // get changed to upper case in safeGetBaseAt
-
+	protected boolean getIsStop ( SequenceData seq, int nPos ) {    
 		if (isDNA) return false;
 		
-		if (seq == seqData1 && seqData1.safeGetBaseAt( nPos ) == '*') return true;
-		if (seq	 == seqData2 && seqData2.safeGetBaseAt( nPos ) == '*') return true;
+		if (seq == seqData1 && seqData1.safeGetBaseAt( nPos ) == Globalx.stopCh) return true;
+		if (seq	== seqData2 && seqData2.safeGetBaseAt( nPos ) == Globalx.stopCh) return true;
 
 		return false;
 	}
-	
-	protected boolean getIsNAt ( SequenceData seq, int nPos ) // ambiguous
-	{   // get changed to upper case in safeGetBaseAt
-		char x = 'X';
-		if (isDNA) x = 'N';
+	protected boolean getIsNAt ( SequenceData seq, int nPos ) { // get changed to upper case in safeGetBaseAt
+		char x = (isDNA) ? 'N' : 'X';
 		char c1 = seqData1.safeGetBaseAt( nPos );
 		char c2 = seqData2.safeGetBaseAt( nPos );
 		
@@ -175,18 +153,14 @@ public class MainPairAlignPanel extends MainAlignPanel
 		if (seq == seqData2 && (c2 == x || c1 == ' ')) return true;
 		return false;
 	}
-	
-	protected boolean getIsGapAt ( SequenceData seq, int nPos ) // only green on gap strand
-	{ 
+	protected boolean getIsGapAt ( SequenceData seq, int nPos ) { // only green on gap strand
 		if (seq == seqData1 && seqData1.safeGetBaseAt( nPos ) == Globals.gapCh) return true;
 		if (seq == seqData2 && seqData2.safeGetBaseAt( nPos ) == Globals.gapCh) return true;
 		return false;
 	}
-	
-	protected boolean getIsMismatchAt ( SequenceData seq, int nPos ) 
-	{ 	
-		char x = 'X';
-		if (isDNA) x = 'N';
+	protected boolean getIsMismatchAt ( SequenceData seq, int nPos ) { 	
+		char x = (isDNA) ? 'N' : 'X';
+		
 		char x1 = seqData1.safeGetBaseAt( nPos );
 		char x2 = seqData2.safeGetBaseAt( nPos );
 		
@@ -195,43 +169,42 @@ public class MainPairAlignPanel extends MainAlignPanel
 
 		return x1 != x2; // mis both strands
 	}
-	// whether to color substitution<0
-	protected boolean getIsHighSubAt ( SequenceData seq, int nPos )         // sub both strands
-	{ 
+	protected boolean getIsAAgt ( SequenceData seq, int nPos )  {
+		if (isDNA) return false;
 		char c1 = seqData1.safeGetBaseAt( nPos );
 		char c2 = seqData2.safeGetBaseAt( nPos );
-		if (isDNA) return false;
 		if (c1==c2) return false;
 		return AAStatistics.isHighSub( c1, c2 ); 
+	}
+	protected boolean getIsAAeq( SequenceData seq, int nPos )  { // CAS313
+		if (isDNA) return false;
+		char c1 = seqData1.safeGetBaseAt( nPos );
+		char c2 = seqData2.safeGetBaseAt( nPos );
+		if (c1==c2) return false;
+		return AAStatistics.isZeroSub( c1, c2 ); 
 	}
 	
 	public void setDrawMode(int mode) {
 		super.setDrawMode(mode);
 		boolean isSeq = super.isDrawSeqMode();
 		super.setIndexRange ( alignData.getLowIndex(isSeq), alignData.getHighIndex(isSeq) );
-  		super.setMinPixelX ( dSequenceStart );
+  		super.setMinPixelX ( dSeqStart );
 	}
 	
-	public void changeDraw()
-  	{
-		super.changeDraw ();
-  		super.setMinPixelX ( dSequenceStart );
-  	}
 	// XXX
-	public void setBasesPerPixel ( int nBasesPerPixel ) throws Exception
+	public void setZoom ( int nBasesPerPixel ) throws Exception
 	{
-		super.setBasesPerPixel( nBasesPerPixel );
-		super.setMinPixelX ( dSequenceStart );
+		super.setZoom( nBasesPerPixel );
+		super.setMinPixelX ( dSeqStart );
 		
-		if ( headerPanel != null )
-			remove ( headerPanel );
+		if ( headerPanel != null ) remove ( headerPanel );
 		
 		headerPanel = new MultilineTextPanel ( Globals.textFont, 
-						alignData.getDescription(numAlign), 
-						nInsetGap, (int)getFrameWidth ( ) - 2, 1); 
+				alignData.getDescription(numAlign), nInsetGap, (int)getFrameWidth ( ) - 2, 1); 
 		headerPanel.setBackground( Color.WHITE );  
 		add ( headerPanel );  
-        headerPanel.setLocation( nLeftGap + 1, nTopGap + 1 );		
+        headerPanel.setLocation( nLeftGap + 1, nTopGap + 1 );	
+        
         dHeaderHeight = headerPanel.getHeight() + 1;
 		dFrameHeight = dHeaderHeight 						// Header
 					+ nInsetGap * 2.0d + nRowHeight * 2.0d + // Sequences
@@ -239,38 +212,31 @@ public class MainPairAlignPanel extends MainAlignPanel
 		dDivider1Y = dFrameTopY + dHeaderHeight;
 		
 		dRulerTop = dDivider1Y;// + nInsetGap;
-		dRulerBottom = dRulerTop + dRulerHeight;
+		dRulerLow = dRulerTop + dRulerHeight;
 		
-		dSeq1Top =    dRulerBottom + (nInsetGap-2); 
-		dSeq1Bottom = dSeq1Top + nRowHeight;
+		dSeq1Top =    dRulerLow + (nInsetGap-2); 
+		dSeq1Low = dSeq1Top + nRowHeight;
 			
-		dSeq2Top = 	  dSeq1Bottom + (nInsetGap+2);
-		dSeq2Bottom = dSeq2Top + nRowHeight;
+		dSeq2Top = 	  dSeq1Low + (nInsetGap+2);
+		dSeq2Low = dSeq2Top + nRowHeight;
 		
-		dSelectionRow1Top = dSeq1Top - nInsetGap / 2.0;
-		dSelectionMid = dSeq1Bottom + nInsetGap / 2.0;
-		dSelectionRow2Bottom = dSeq2Bottom + nInsetGap;
+		dSelectRow1Top = dSeq1Top - nInsetGap / 2.0;
+		dSelectMid = dSeq1Low + nInsetGap / 2.0;
+		dSelectRow2Low = dSeq2Low + nInsetGap;
 	}
 	
-	public double getGraphicalDeadWidth ( )
-	{
+	public double getGraphicalDeadWidth ( ) {
 		// The total width of what can't be used for drawing the bases in graphical mode
-		return dSequenceStart + nInsetGap;
+		return dSeqStart + nInsetGap;
 	}
-	
-	private double getFrameWidth ( )
-	{
-		double dWidth = dSequenceStart + getSequenceWidth ( ) + nInsetGap;
+	private double getFrameWidth ( ) {
+		double dWidth = dSeqStart + getSequenceWidth ( ) + nInsetGap;
 		return Math.max ( 700, dWidth );
 	}
-	
-	protected double getFrameLeft ( )
-	{
+	protected double getFrameLeft ( ){
 		return dFrameLeftX;
-	}
-	
-	protected double getFrameRight ( )
-	{
+	}	
+	protected double getFrameRight ( ){
 		return dFrameLeftX + getFrameWidth ( );
 	}
 	
@@ -280,49 +246,33 @@ public class MainPairAlignPanel extends MainAlignPanel
 	
 	public boolean hasSelection () { return bSeq1Selected || bSeq2Selected; };
 	
-	// called for MultiAlignmentPaenel.alignSelectedESTs
-	public Vector<String> getContigIDs ( ) 
-	{		
+	public Vector<String> getSeqIDs ( ) {		
 		Vector<String> out = new Vector<String>();
 		out.add(alignData.getName1());
 		out.add(alignData.getName2());
 		
 		return out;
 	}
-	
-	public void getSelectedContigIDs ( TreeSet<String> set ) 
-	{
-		if ( alignData.getName1() != null && bSeq1Selected )
-			set.add( alignData.getName1() );
-		if ( alignData.getName2() != null && bSeq2Selected )
-			set.add( alignData.getName2() );		
+	public void getSelectedSeqIDs ( TreeSet<String> set ) {
+		if ( alignData.getName1() != null && bSeq1Selected ) 
+			set.add( alignData.getName2() ); // CAS313 was getName1, but selects the 1st alignment always
+		if ( alignData.getName2() != null && bSeq2Selected ) set.add( alignData.getName2() );		
 	};
 	
-	public void setSelectedContigIDs ( TreeSet<String> set ) 
-	{ 
-		selectNone ();  // Clear old selections
-		
-		if ( alignData.getName1() != null && set.contains( alignData.getName1() ) )
-			bSeq1Selected = true;
-		if ( alignData.getName2() != null && set.contains( alignData.getName2() ) )
-			bSeq2Selected = true;		
-	};
-	
-	public void handleClick( MouseEvent e, Point localPoint )
-	{
+	public void handleClick( MouseEvent e, Point localPoint ){
         if ( selectionBox.contains(localPoint) )
         {       	
             // Determine the row for the click.
-	    		if ( dSelectionRow1Top <= localPoint.y && localPoint.y <= dSelectionRow2Bottom )
+	    		if ( dSelectRow1Top <= localPoint.y && localPoint.y <= dSelectRow2Low )
 	    		{
 	    			// Clear all selected rows if neither shift nor control are down
 	    			if ( !e.isControlDown() && !e.isShiftDown() )
 	    				selectNone();
 	    			
 	    			// determine the newly selected sequence and toggle it
-	    			if ( dSelectionRow1Top <= localPoint.y && localPoint.y <= dSelectionMid )
+	    			if ( dSelectRow1Top <= localPoint.y && localPoint.y <= dSelectMid )
 	    				bSeq1Selected = !bSeq1Selected;
-	    			else if ( dSelectionMid <= localPoint.y && localPoint.y <= dSelectionRow2Bottom )
+	    			else if ( dSelectMid <= localPoint.y && localPoint.y <= dSelectRow2Low )
 	    				bSeq2Selected = !bSeq2Selected;
 	    		}
 	    		else
@@ -343,108 +293,104 @@ public class MainPairAlignPanel extends MainAlignPanel
 	
 	//---------------------------------Private Methods-------------------------------------//
 	
-	// The coords are sometimes +1
-	// no hit for Nt-Nt pair, though the Hit can be NT
-	private void highlightHit ( )
-	{
-		if (!alignData.isAAdb() && !alignData.isNtAA()) return;
+	private void highlightHit ( ) {
+		if (!isHit) return; 
 		
-	try {
-		String alignSeq = alignData.getAlignSeq1();
-		double start = (double) alignData.getHitData().getCtgStart();
-		double end =  (double) alignData.getHitData().getCtgEnd();
-		
-		if (!alignData.isAAdb() && !alignData.isNtHit()) {
-			int aFrame = Math.abs(alignData.getFrame1());
-			if (aFrame==3) aFrame=0;
+		try {
+			String alignSeq = alignData.getAlignSeq1();
+			double start = (double) alignData.getHitData().getCtgStart();
+			double end =   (double) alignData.getHitData().getCtgEnd();
 			
+			if (alignData.isNTsTCW() && !alignData.isNTalign()) {
+				int aFrame = Math.abs(alignData.getFrame1());
+				if (aFrame==3) aFrame=0;
+				
+				if (start>end) {
+					start = (start/3.0);
+					end  =  ((end-aFrame)/3.0);
+				}
+				else {
+					start = ((start-aFrame)/3.0);
+					end  =  (end/3.0);
+				}
+			}
 			if (start>end) {
-				start = (start/3.0);
-				end  =  ((end-aFrame)/3.0);
+				int aaLen = 0;
+				for (int i = 0; i < alignSeq.length(); i++)
+					if (alignSeq.charAt(i) != Globals.gapCh) ++aaLen;
+				start = (double)aaLen-start+1.0;
+				end =   (double)aaLen-end+1.0;
 			}
-			else {
-				start = ((start-aFrame)/3.0);
-				end  =  (end/3.0);
-			}
+			double top = dSeq1Top - nInsetGap / 2.0;
+			double low = dSeq1Low + nInsetGap / 2.0;
+			
+			// drawing coords
+			int nStart = (int) start;
+			int nEnd   = (int)   end;
+			int gapStart = addGaps(alignSeq, nStart); // beginning of hit
+			while (alignSeq.charAt(gapStart)==Globals.gapCh && gapStart<alignSeq.length()) // skip any leading gaps
+				gapStart++;
+			
+			int gapStop =  addGaps(alignSeq, nEnd); 
+			
+			String tip = String.format("Seq Coords of Hit: %d-%d  Gap adjust: %d-%d", 
+							(int)start, (int)end, gapStart, gapStop);
+			
+			super.setupHitPanels(tip, gapStart, gapStop, top, low); // MainAlignPanel
 		}
-		if (start>end) {
-			int aaLen = 0;
-			for (int i = 0; i < alignSeq.length(); i++)
-				if (alignSeq.charAt(i) != Globals.gapCh) ++aaLen;
-			start = (double)aaLen-start+1.0;
-			end =   (double)aaLen-end+1.0;
-		}
-		
-		double top = dSeq1Top - nInsetGap / 2.0;
-		double bottom = dSeq1Bottom + nInsetGap / 2.0;
-		
-		// drawing coords
-		int nStart = (int) start;
-		int nEnd = (int)   end;
-		int gapStart = highAlignGap(alignSeq, nStart); 
-		// if  ---Hit start, the gapStart is at the beginning of gaps; move to end
-		while (alignSeq.charAt(gapStart)==Globals.gapCh && gapStart<alignSeq.length()) 
-			gapStart++;
-		
-		int gapStop =  highAlignGap(alignSeq, nEnd);
-		
-		String tip = String.format("Hit: %d,%d  Gap adjust: %d,%d", 
-				(int)start, (int)end, gapStart, gapStop);
-		super.setupHitPanels(tip, gapStart, gapStop, top, bottom); // MainAlignPanel
-	}
-	catch (Exception e) {ErrorReport.prtReport(e, "Showing hit region");}
+		catch (Exception e) {ErrorReport.prtReport(e, "Showing hit region");}
 	}
 	
 	private void highlightAAORF() {
 	try {
 		double top = dSeq1Top  - nInsetGap / 2.0;
-		double bottom = dSeq1Bottom + nInsetGap / 2.0;
+		double bottom = dSeq1Low + nInsetGap / 2.0;
+		
 		SequenceData seq = seqData1;
 		CodingRegion orf = alignData.getORFCoding1 ();
 		String alignSeq = alignData.getAlignSeq1();
 			
-		int oFrame = Math.abs(orf.getFrame());
-		int oEnd5 = orf.getBegin()-oFrame;
-		int oStart3 =  orf.getEnd()-oFrame;
+		int oFrame = 	Math.abs(orf.getFrame());
+		int oEnd5 = 	orf.getBegin()-oFrame;
+		int oStart3 =  	orf.getEnd()-oFrame;
 		
 		oEnd5 =   (oEnd5/3)+1; 
 		oStart3 = (oStart3/3)+1;		
 		
-		int gapEnd5 =  highAlignGap(alignSeq, oEnd5); 
-		int gapStart3 =   highAlignGap(alignSeq, oStart3);
+		int gapEnd5 =  	  addGaps(alignSeq, oEnd5); 
+		int gapStart3 =   addGaps(alignSeq, oStart3);
 		
 		int startAlign = seq.getLowIndex(); // already in AA coords if AA
-		int endAlign = seq.getHighIndex();
+		int endAlign =   seq.getHighIndex();
 		
-		String tip5 = String.format("5'UTRs: NT %d  AA %d  Gapped %d,%d", 
-				orf.getBegin(), oEnd5,   startAlign, gapEnd5);
-		String tip3 = String.format("3'UTRs: NT %d  AA %d  Gapped %d,%d", 
-				orf.getEnd(), oStart3, gapStart3, endAlign);
-		
-		super.setupUtrPanels(tip5, startAlign, gapEnd5, top, bottom); // MainAlignPanel
-		super.setupUtrPanels(tip3, gapStart3, endAlign, top, bottom); // MainAlignPanel
+		String tip5 = String.format("5'UTRs Gapped Coords %d-%d", startAlign,gapEnd5);
+		String tip3 = String.format("3'UTRs Gapped Coords %d-%d", gapStart3, endAlign);
+	
+		super.setupUtrPanels(tip5, startAlign, gapEnd5, top, bottom); // BaseAlignPanel
+		super.setupUtrPanels(tip3, gapStart3, endAlign, top, bottom); // BaseAlignPanel
 	}
 	catch (Exception e) {ErrorReport.prtReport(e, "Showing UTRs region");}
 	}
-	
-	private int highAlignGap(String alignSeq, int endCoord) {
+	// aaaaaaa--aaaaaaaaa
+	// ---aaaabb
+	private int addGaps(String alignSeq, int endCoord) { 
 	try {
 		int gapCoord=endCoord;
 		int aLen = alignSeq.length()-1;
 		int aLast=aLen;
 		
-		while (alignSeq.charAt(aLast) == Globals.gapCh && aLast>1) // trailing gaps
-			aLast--;
+		while (alignSeq.charAt(aLast) == Globals.gapCh && aLast>1) aLast--;// trailing gaps
 			
 		for (int sIdx=0, aIdx=0; sIdx<endCoord && aIdx<aLast; sIdx++, aIdx++) {
+			
 			while (alignSeq.charAt(aIdx) == Globals.gapCh && aIdx<aLast) {
 				gapCoord++;
 				aIdx++;
 			}
 		}
 		return gapCoord;
-		}
-	catch (Exception e) {ErrorReport.prtReport(e, "Extending coords across gaps");}
+	}
+	catch (Exception e) {Out.prt("TCW error");ErrorReport.prtReport(e, "Extending coords across gaps");}
 	return endCoord;
 	}
 	
@@ -453,7 +399,7 @@ public class MainPairAlignPanel extends MainAlignPanel
 	private SequenceData seqData1 = null;
 	private SequenceData seqData2 = null;
 	private AlignData alignData = null;
-	private boolean isDNA = true;
+	private boolean isDNA = true, isHit=true;
 	private int numAlign = 0;
 	
     private MultilineTextPanel headerPanel;
@@ -462,13 +408,13 @@ public class MainPairAlignPanel extends MainAlignPanel
 	private Rectangle2D selectionBox = new Rectangle2D.Double (0,0,0,0);
 	
 	// Attributes for where to draw
-	private int nTopGap = 0, nBottomGap = 0, nRightGap = 0, nLeftGap = 0;
+	private int nTopGap = 0, nLowGap = 0, nRightGap = 0, nLeftGap = 0;
 	private double dFrameLeftX = 0, dFrameTopY = 0, dFrameHeight = 0;
-	private double dDivider1Y = 0, dRulerTop = 0, dRulerBottom = 0;
+	private double dDivider1Y = 0, dRulerTop = 0, dRulerLow = 0;
 	
-	private double dSeq1Top = 0, dSeq1Bottom = 0, dSeq2Top = 0, dSeq2Bottom = 0;
-	private double dSelectionRow1Top = 0, dSelectionMid = 0, dSelectionRow2Bottom = 0;
-	private double dHeaderHeight = 0, dRulerHeight = 0, dSequenceStart = 0;
+	private double dSeq1Top = 0, dSeq1Low = 0, dSeq2Top = 0, dSeq2Low = 0;
+	private double dSelectRow1Top = 0, dSelectMid = 0, dSelectRow2Low = 0;
+	private double dHeaderHeight = 0, dRulerHeight = 0, dSeqStart = 0;
 	
 	static private final int nInsetGap = 5, nRowHeight = 15;
 	

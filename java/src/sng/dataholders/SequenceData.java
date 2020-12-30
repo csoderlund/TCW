@@ -17,6 +17,7 @@ import java.util.Vector;
 
 import sng.database.Globals;
 import util.align.AAStatistics;
+import util.database.Globalx;
 import util.methods.Out;
 
 public class SequenceData implements Serializable {
@@ -97,7 +98,7 @@ public class SequenceData implements Serializable {
 	
 	public static String getORFtrans(String name, String seq, int frame, int start, int end) {
 		String strSeq =  getTranslatedORF(name, seq, frame, start, end);
-		if (strSeq!=null) return strSeq.replace("*", ""); // calling routine does not allow '*'
+		if (strSeq!=null) return strSeq.replace(Globalx.stopStr, ""); // calling routine does not allow '*'
 		return strSeq; 
 	}
 	public static String getTranslatedORF(String name, String strSeq, int frame, int start, int end) {
@@ -114,9 +115,9 @@ public class SequenceData implements Serializable {
 			c = AAStatistics.getAminoAcidFor(
 					seq.charAt(i), seq.charAt(i+1),seq.charAt(i+2));
 			aa += c;
-			if (c=='*') cnt++;
+			if (c==Globalx.stopCh) cnt++;
 		}
-		if (c=='*') cnt--; // stop codon
+		if (c==Globalx.stopCh) cnt--; // stop codon
 		if (cnt>0) Out.PrtErr(name + " has stop " + cnt + " codons in translation. CDS " 
 								+ strSeq.length() + ";  AA " + aa.length());
 		return aa;
@@ -228,7 +229,12 @@ public class SequenceData implements Serializable {
 		
 		return seq;
 	}
-	
+	public SequenceData newSeqData() { // CAS313 only for protein
+		SequenceData seq = new SequenceData("copy Seq");
+		seq.copyNonSequenceData(this);
+		seq.strSequence = strSequence;
+		return seq;
+	}
 	public SequenceData newSeqDataRevComp() {
 		if (!isDNA()) {
 			System.out.println("Sequence type is " + nSequenceType);
@@ -573,8 +579,7 @@ public class SequenceData implements Serializable {
 	public int getNumNonGapBases() {return nNonGapBases;}
 
 	private char getBaseAt(int n) {
-		if(strSequence == null || strSequence.length() <= (n + nOffsetVal))
-			return '-';
+		if (strSequence == null || strSequence.length() <= (n + nOffsetVal)) return '-';
 		return strSequence.charAt(n + nOffsetVal);
 	}
 	// MainAlignPanel

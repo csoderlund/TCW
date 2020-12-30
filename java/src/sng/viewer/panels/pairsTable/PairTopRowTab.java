@@ -21,11 +21,11 @@ import sng.dataholders.MultiCtgData;
 import sng.util.CenteredMessageTab;
 import sng.util.Tab;
 import sng.viewer.STCWFrame;
-import sng.viewer.panels.MainToolAlignPanel;
+import sng.viewer.panels.align.AlignCompute;
+import sng.viewer.panels.align.AlignData;
+import sng.viewer.panels.align.PairViewPanel;
 import util.methods.ErrorReport;
 import util.ui.MenuMapper;
-import util.align.AlignCompute;
-import util.align.AlignData;
 import util.database.DBConn;
 
 public class PairTopRowTab extends Tab  implements ClipboardOwner
@@ -53,9 +53,7 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 			loadedPairObj.setPairHit(hitData);
 			dbc.close();
 		}
-		catch (Exception e) {
-			ErrorReport.reportError(e, "Internal error: creating Pair alignment object");
-		}
+		catch (Exception e) {ErrorReport.reportError(e, "Pair Table alignment"); }
 	
 		/********************************************
 		 *  XXX Create dropdown menu of pairwise display options
@@ -80,7 +78,7 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 			
 		displayDropDown.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				displayTypeInit();
+				displayPair();
 			}
 		});
 		JButton jbView = new JButton("View Sequences");
@@ -121,10 +119,10 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 		JButton btnPrev = new JButton("<<Prev");
 		btnPrev.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {				
-				if(displayedJPanel != null)
-					setPrevDisplaySettings(((MainToolAlignPanel)displayedJPanel).getDisplaySettings());
+				if(alignPanel != null)
+					setPrevDisplaySettings(alignPanel.getDisplaySettings());
 				
-				addPrevNextTab( ((PairListTab)getParentTab()).getPrevRowNum( nRecordNum ) );
+				addPrevNextTab( ((PairTableTab)getParentTab()).getPrevRowNum( nRecordNum ) );
 			}
 		});
 		btnPrev.setBackground(buttonColor);
@@ -132,10 +130,10 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 		JButton btnNext = new JButton("Next>>");
 		btnNext.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(displayedJPanel != null) {
-					setPrevDisplaySettings(((MainToolAlignPanel)displayedJPanel).getDisplaySettings());
+				if(alignPanel != null) {
+					setPrevDisplaySettings(alignPanel.getDisplaySettings());
 				}
-				addPrevNextTab( ((PairListTab) getParentTab()).getNextRowNum( nRecordNum ) );
+				addPrevNextTab( ((PairTableTab) getParentTab()).getNextRowNum( nRecordNum ) );
 			}
 		});
 		btnNext.setBackground(buttonColor);
@@ -188,7 +186,7 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 	public void lostOwnership(Clipboard arg0, Transferable arg1) {} // needed for clipboard
 	
 	// called on ActionPerformed for displaydropdown
-	private void displayTypeInit()
+	private void displayPair()
 	{
 		// So this a bit crazy, but otherwise the event for closing the
 		// drop down menu never seems to come, and all of the other 
@@ -197,28 +195,17 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 			public void run() {
 				MenuMapper selection = (MenuMapper) displayDropDown.getSelectedItem();
 				int displayType = selection.asInt();
-				displayTypeLoad(displayType);
+				
+				try { 
+					loadPairAndDraw ( displayType);
+				} 		
+				catch ( Exception err ) { ErrorReport.reportError(err, "Load Pair " +displayType);
+				}	
 			}
 		});
 	}
-
-	// called on initialization of display (above) and on ActionaListener (below)
-	private void displayTypeLoad ( int nDisplayType)
-	{
-		try
-		{
-			if ( displayedJPanel != null  ) 
-				selectedContigs = getSelectedContigIDs ( );
-
-			loadContigDataAndDraw ( nDisplayType);
-		} 		
-		catch ( Exception err )
-		{
-			ErrorReport.reportError(err, "Internal error in displayTypeLoad " + nDisplayType);
-		}			
-	}
 	// XXX display for contig overview panel
-	private void loadContigDataAndDraw ( int nDisplayAfterLoad) throws Exception
+	private void loadPairAndDraw ( int nDisplayAfterLoad) throws Exception
 	{	
 		// Swap in a wait tab while we hit the database
 		final int saveDisplayAfterLoad = nDisplayAfterLoad;
@@ -322,7 +309,7 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 						allFramePanel = installPairAlignPanel( pairs );
 						break;
 					case SHOW_SHARED_HITS: 
-						pairs = AlignCompute.pairAlignSharedHits(pairObj, metaData.isProteinDB()  );
+						pairs = AlignCompute.pairAlignSharedHits(pairObj, metaData.isAAsTCW()  );
 						sharedHitPanel = installPairAlignPanel( pairs );
 						break;
 					default:
@@ -340,10 +327,10 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 	
 	private void addPrevNextTab(int nNewRecordNum) {
 		Tab parentTab = getParentTab();
-		int pairNum = ((PairListTab)parentTab).getPairNumAtRow(nNewRecordNum);
+		int pairNum = ((PairTableTab)parentTab).getPairNumAtRow(nNewRecordNum);
 		String strTitle = "Pair # " + 	pairNum;
 
-		String[] contigIDs = ((PairListTab)parentTab).getContigIDsAtRow( nNewRecordNum );
+		String[] contigIDs = ((PairTableTab)parentTab).getContigIDsAtRow( nNewRecordNum );
 		MultiCtgData theCluster = new MultiCtgData(contigIDs[0], contigIDs[1]);
 		
 		getParentFrame().addPairAlignNextPrev( 
@@ -354,35 +341,28 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 	 * Install panels
 	 ***************************************************************/
 
-	private MainToolAlignPanel installPairAlignPanel ( 
+	private PairViewPanel installPairAlignPanel ( 
 			Vector<AlignData> theAlignmentsToView )
 	{
-		MainToolAlignPanel alignmentPanel = 
-			MainToolAlignPanel.createPairAlignPanel (false, false, theAlignmentsToView );
+		PairViewPanel alignmentPanel = 
+			PairViewPanel.createPairAlignPanel (false, false, theAlignmentsToView );
 		installMainPanel ( alignmentPanel );
 		alignmentPanel.applyDisplaySettings(prevContigDisplaySettings);
 		return alignmentPanel;
 	}
 	
-	private void installMainPanel ( MainToolAlignPanel thePanel )
+	private void installMainPanel ( PairViewPanel thePanel )
 	{
-		displayedJPanel = thePanel;
-		thePanel.setSelectedContigs ( selectedContigs );// Pass in the select contigs from the
-														// last one that we displayed		
+		alignPanel = thePanel;
+			
 		bottomPanel.removeAll();
 		bottomPanel.setLayout( new BorderLayout () );
-		bottomPanel.add( displayedJPanel, BorderLayout.CENTER );
+		bottomPanel.add( alignPanel, BorderLayout.CENTER );
 		setVisible(false);
 		setVisible(true);
 	}
-	
-	public TreeSet<String> getSelectedContigIDs ( )
-	{
-		MainToolAlignPanel panel = (MainToolAlignPanel)displayedJPanel;
-		return panel.getSelectedContigIDs();
-	}
 
-	public void setPrevDisplaySettings(int [] prevContigDisplaySettings)
+	private void setPrevDisplaySettings(int [] prevContigDisplaySettings)
 	{
 		this.prevContigDisplaySettings = prevContigDisplaySettings;
 	}
@@ -391,7 +371,7 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 	{
 		displayDropDown = null;
 		bottomPanel = null;
-		displayedJPanel = null;
+		alignPanel = null;
 		if(selectedContigs != null) selectedContigs.clear();
 		if(pairCtgObj != null) pairCtgObj.clear();
 		if(loadedPairObj != null) loadedPairObj.clear();
@@ -414,10 +394,10 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 	
 	private MenuMapper menuBestalign = null; 
 	
-	private MainToolAlignPanel bestFramePanel = null;
-	private MainToolAlignPanel orientFramePanel = null;
-	private MainToolAlignPanel allFramePanel = null;
-	private MainToolAlignPanel sharedHitPanel = null;
+	private PairViewPanel bestFramePanel = null;
+	private PairViewPanel orientFramePanel = null;
+	private PairViewPanel allFramePanel = null;
+	private PairViewPanel sharedHitPanel = null;
 
 	/*******************************************************/
 	private int nRecordNum, nPairNum;	
@@ -425,7 +405,7 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 	private JComboBox <MenuMapper> displayDropDown = null;
 
 	private JPanel bottomPanel = null;
-	private JPanel displayedJPanel = null;
+	private PairViewPanel alignPanel = null;
 	
 	private TreeSet<String> selectedContigs = new TreeSet<String> ();
 	private MultiCtgData pairCtgObj = null;

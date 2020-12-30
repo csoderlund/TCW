@@ -17,7 +17,7 @@ public class Globals {
 	public final static String seqFile = "sequences.fa"; // write sequences for blasting
 	
 	public static final String STCWCFG = "sTCW.cfg";
-	public static final String LIBCFG = 	"LIB.cfg";
+	public static final String LIBCFG =  "LIB.cfg";
 	public static final String STCW = 	Globalx.STCW; // database prefix
 	
 	public static final String helpDir = "html/viewSingleTCW/";
@@ -28,20 +28,17 @@ public class Globals {
 	public static final String def5p = ".f";
 	public static final String def3p = ".r";
 	
-	public static final int SHORT_UTR = 10;
-	
 	public static final Color BGCOLOR = Color.WHITE;
-	public static final Color FUNCTIONCOLOR = new Color(215, 229, 243); // replace with no color
-	public static final Color MENUCOLOR = new Color(229, 245, 237);	// beige
-	public static final Color HELPCOLOR = new Color(245, 213, 234);	// rose
-	public static final Color PROMPTCOLOR = new Color(243, 235, 227);	// light beige
-	public static final Color LAUNCHCOLOR = new Color(200, 200, 240); // light purple
+	public static final Color FUNCTIONCOLOR = Globalx.FUNCTIONCOLOR; // replace with no color
+	public static final Color MENUCOLOR = Globalx.MENUCOLOR;	// beige
+	public static final Color HELPCOLOR = Globalx.HELPCOLOR;	// rose
+	public static final Color PROMPTCOLOR = Globalx.PROMPTCOLOR;	// light beige
+	public static final Color LAUNCHCOLOR = Globalx.LAUNCHCOLOR; // light purple
 	
-	public static final Color altRowColor = new Color(0xEEF2FF);
-	public static final Color selectColor = new Color(0xB0C4DE);
-	public static final Font boldUIFont = new Font("Sans", Font.BOLD, 12);
-	public static final Font textFont = new Font("Sans", Font.PLAIN, 11);
-	public static final Color componentBGColor = Color.white;
+	public static final Color altRowColor = Globalx.altRowColor;
+	public static final Color selectColor = Globalx.selectColor;
+	public static final Font boldUIFont = Globalx.boldUIFont;
+	public static final Font textFont = Globalx.textFont;
 	
 	public static final int numDB = 40; // number of annoDBs
 	
@@ -68,7 +65,7 @@ public class Globals {
 	static public final String RMK_ORF_NOTHit = 		"ORF!Hit";
 	static public final String RMK_ORF_Ns = 			"ORF>=9Ns";
 	static public final String RMK_ORF_ANNO = 		"ORF:AN";
-	static public final String ORF_MARK = "*";
+	static public final String ORF_MARK = Globalx.stopStr;
 	static public final String ORF_NoMARK = "-";
 	
 	// Anno Option parameters - put in one place
@@ -78,4 +75,7 @@ public class Globals {
 	static public final String pTRAIN_MIN = "50";
 	static public final String pSP_PREF = "0";
 	static public final String pRM_ECO = "1";
+	
+	// view options
+	static public final int OVERHANG=15;
 }

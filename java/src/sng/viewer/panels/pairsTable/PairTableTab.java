@@ -1,6 +1,6 @@
 /**
  * Table of Pairs
- * Object created for Table from JPaveFraem.handleLoadQuery
+ * Object created for Table from sng.viewer.STCWFrame.loadQueryFilter
  */
 package sng.viewer.panels.pairsTable;
 
@@ -34,9 +34,9 @@ import util.methods.Static;
 import util.ui.UIHelpers;
 import util.ui.UserPrompt;
 
-public class PairListTab extends Tab
+public class PairTableTab extends Tab
 {	
-	public PairListTab ( STCWFrame parentFrame, 
+	public PairTableTab ( STCWFrame parentFrame, 
 						FieldMapper inIndexer, 
 						RunQuery inQuery,	
 						Vector <String> tableRows, String summary ) 
@@ -174,7 +174,7 @@ public class PairListTab extends Tab
 	
 	private void doRefreshColumns() {
 		close(); // XXX
-		getParentFrame().loadQueryFilter( PairListTab.this, theQuery, null );
+		getParentFrame().loadQueryFilter( PairTableTab.this, theQuery, null );
 	}
 	
 	// a row in the Pairs table has been selected for viewing
@@ -190,7 +190,7 @@ public class PairListTab extends Tab
 		int pairNum = getPairNumAtRow( nRow );
 		String strTitle = "Pair #" + pairNum;
 
-		getParentFrame().addPairAlignTab(pairObj, strTitle, PairListTab.this, nRow, pairNum);
+		getParentFrame().addPairAlignTab(pairObj, strTitle, PairTableTab.this, nRow, pairNum);
 	}
 	
 	private void addPairViewTab ()

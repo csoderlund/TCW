@@ -66,7 +66,7 @@ public class MetaData {
 				String b = mDB.executeString("SELECT pvalue FROM ASM_params  WHERE pname=\"USE_TRANS_NAME\"");
 				if (b.contentEquals("1")) bUseOrigName=true;
 			}
-			bIsProteinDB = mDB.tableColumnExists("assem_msg", "peptide") ;
+			bIsAAsTCW = mDB.tableColumnExists("assem_msg", "peptide") ;
 			bHasLoc = mDB.tableColumnExists("assem_msg", "hasLoc");
 			bHasNgroup = mDB.tableColumnExists("contig", "seq_ngroup");
 			
@@ -442,8 +442,8 @@ public class MetaData {
 	
 	 public boolean hasPairWise() {return bHasPairwise;}
 	 public int getnPairs() {return nPairs;}
-	 public boolean isProteinDB () {return bIsProteinDB;}
-	 public boolean isNucleoDB() {return !bIsProteinDB;}
+	 public boolean isAAsTCW () {return bIsAAsTCW;}
+	 public boolean isNTsTCW() {return !bIsAAsTCW;}
 
 	 public int getNumSeqSets() { return seqLibNames.length; }
 	 public String [] getSeqNames() { return seqLibNames; }
@@ -504,7 +504,7 @@ public class MetaData {
 	 private String [] termTypes = null;
 	
 	 private boolean bHasPairwise = false;
-	 private boolean bIsProteinDB = false;
+	 private boolean bIsAAsTCW = false;
 	 private boolean bHasLoc = false;
 	 private boolean bHasNgroup = false;
 	 private boolean bHasORFs = false;

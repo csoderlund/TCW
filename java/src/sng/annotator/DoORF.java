@@ -1130,7 +1130,7 @@ public class DoORF {
 					
 					// sanity check
 					String orfnoStop = orfAASeq.substring(0, orfAASeq.length()-1);
-					if (orfnoStop.contains("*")) {
+					if (orfnoStop.contains(Globalx.stopStr)) {
 						// prints error to stdout in SequenceData during writeFilesForBestORF
 						badORF++;
 						if (badORF>BADORFS) ErrorReport.die("Too many ORFs with stop codons (" + badORF + ") - something is wrong");

@@ -127,7 +127,6 @@ public class HitTablePanel  extends JPanel {
   				int row = theTable.getSelectedRow();
   				int idx = theTableData.getColumnHeaderIndex(HITID);
   				String hitID =  ((String)theTableData.getValueAt(row, idx));
-  Out.prt(row + " " + idx + " " + hitID);
   				Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
   				cb.setContents(new StringSelection(hitID), null);
   			}
@@ -140,6 +139,18 @@ public class HitTablePanel  extends JPanel {
   				String desc =  ((String)theTableData.getValueAt(row, idx));
   				Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
   				cb.setContents(new StringSelection(desc), null);
+  			}
+  		}));
+  		copyPop.add(new JMenuItem(new AbstractAction("Hit Sequence") {
+  			private static final long serialVersionUID = 1L;
+  			public void actionPerformed(ActionEvent e) {
+  				int row = theTable.getSelectedRow();
+  				int idx = theTableData.getColumnHeaderIndex(HITID);
+  				String hitID =  ((String)theTableData.getValueAt(row, idx));
+  				String seq = loadSeq(hitID);
+  				seq = ">" + hitID + "\n" + seq;
+  				Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+  				cb.setContents(new StringSelection(seq), null);
   			}
   		}));
   		btnCopy.addMouseListener(new MouseAdapter() {
@@ -542,7 +553,18 @@ public class HitTablePanel  extends JPanel {
     	}
     	catch (Exception e) {ErrorReport.prtReport(e, "View HIT Sequences");}
     }
-    
+    private String loadSeq(String hitStr) {
+    	try {
+    		DBConn mDB = theViewerFrame.getDBConnection();
+			ResultSet rs = mDB.executeQuery("select sequence from unique_hits where HITstr='" + hitStr + "'");
+			if (rs.next()) return rs.getString(1);
+			else return "Error reading sequence";
+    	}
+    	catch (Exception e) {ErrorReport.prtReport(e, "Load HIT Sequence " + hitStr);}
+    	
+    	Out.prt("Error reading sequence for " + hitStr);
+    	return "Error reading sequence";
+    }
    
     /**********************************************************************************/
   //When the view table gets sorted, sort the master table to match (Called by TableData)

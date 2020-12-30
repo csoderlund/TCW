@@ -1,5 +1,6 @@
 package util.align;
 
+import util.database.Globalx;
 import util.methods.Out;
 
 /**
@@ -11,6 +12,7 @@ import util.methods.Out;
  */
 public class AlignPairOrig 
 {
+	private final char stopCh = Globalx.stopCh;
 	private float matchScore = 1.8f;
 	private float mismatchScore = -1.0f;
 	private float gapOpen =   4.0f;	// 3.0f changed to negative in code
@@ -27,26 +29,27 @@ public class AlignPairOrig
 	
     public boolean DPalign ( String strHorz, String strVert, boolean dna )
     {
-    		strGapHorz=strGapVert=null;
-	    	isDNA = dna;
-	    	if (bUseAffineGap) return matchAffine( strHorz, strVert );
-	    	else return matchNonAffine( strHorz, strVert );
+		strGapHorz=strGapVert=null;
+    	isDNA = dna;
+    	
+    	if (bUseAffineGap) 	return matchAffine( strHorz, strVert );
+    	else 				return matchNonAffine( strHorz, strVert );
     }
     public String getHorzResult ( char chGap )
     {
-    		if (strGapHorz==null) buildOutput ( chGap ); 
-    		return strGapHorz; 
+		if (strGapHorz==null) buildOutput ( chGap ); 
+		return strGapHorz; 
     }
     public String getVertResult ( char chGap )
     {
-    		if (strGapHorz==null) buildOutput ( chGap ); 
-    		return strGapVert; 
+		if (strGapHorz==null) buildOutput ( chGap ); 
+		return strGapVert; 
     }
     // Build strGapHorz and strGapVert which have inserted gaps
     private void buildOutput ( char chGap )
     {       
         if ( bUseAffineGap )	buildAffineOutput ( chGap );
-        else		buildNonAffineOutput ( chGap );   
+        else					buildNonAffineOutput ( chGap );   
         
         score(chGap);
     }   
@@ -455,11 +458,11 @@ public class AlignPairOrig
         		if (isOpen && bUseAffineGap) OLPscore -= gapExtend;
         		else OLPscore -= gapOpen;
         		isOpen = true;
-        		if (strGapHorz.charAt(i) == '*' || strGapVert.charAt(i) == '*') OLPstops++;
+        		if (strGapHorz.charAt(i) == stopCh || strGapVert.charAt(i) == stopCh) OLPstops++;
         	}
         	else {
         		isOpen = false;
-        		if (strGapHorz.charAt(i) == '*' || strGapVert.charAt(i) == '*') {
+        		if (strGapHorz.charAt(i) == stopCh || strGapVert.charAt(i) == stopCh) {
         			OLPstops++;
         			OLPscore -= 4;
         		}
@@ -480,6 +483,7 @@ public class AlignPairOrig
     public int getOLPgap() 	    { return OLPgap;}
     public boolean isGood() { return isGood;}
     /*******************************************************/
+   
     private String strInHorz = null;
     private String strInVert = null;
     private String strGapHorz = null; // final results
@@ -518,6 +522,7 @@ public class AlignPairOrig
     private boolean isGood=true;
     
     // BLOSUM62 7/17/19 from ftp://ftp.ncbi.nlm.nih.gov/blast/matrices/BLOSUM62
+    // Called in cmp above. 
     // Also called by util.align.AlignData
     // by moving the array to this file sped it up about 10-fold!!
     static public int getBlosum(char a1, char a2) {
@@ -525,8 +530,8 @@ public class AlignPairOrig
 		int idx1 = residues.indexOf(a1);
 		int idx2 = residues.indexOf(a2);
 		if (idx1==-1 || idx2==-1) {
-			if (idx1==-1) System.out.println("Warning: AA not recognized a1 " + a1 + " ");
-			if (idx2==-1) System.out.println("Warning: AA not recognized a2 " + a2 + " ");
+			if (idx1==-1) Out.PrtWarn("AA not recognized a1 '" + a1 + "' ");
+			if (idx2==-1) Out.PrtWarn("AA not recognized a2 '" + a2 + "' ");
 			return -10;
 		}
 		return (blosum[idx1][idx2]); 

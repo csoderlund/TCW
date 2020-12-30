@@ -45,17 +45,18 @@ public class LegendPanel extends JPanel
 		g2.setFont(new Font(g2.getFont().getName(), Font.PLAIN, g2.getFont().getSize()));
 
 		if (colorScheme==0) {
-			drawKey(0, g2, BaseAlignPanel.anyGap, 	    "Gap", 							x+20, y+=15);
+			drawKey(0, g2, Globalx.anyGap, 	    "Gap", 							x+20, y+=15);
 			if (type==Globals.AA) {
-				drawKey(0, g2, BaseAlignPanel.aaLtZero, 	Globalx.blosumNeg, 		x+20, y+=15);
-				drawKey(0, g2, BaseAlignPanel.aaGtZero, 	Globalx.blosumPosLegend,x+20, y+=15);
-				drawKey(1, g2, BaseAlignPanel.aaStop, 		"Stop Codon	", 	 		x+20, y+=15);
+				drawKey(0, g2, Globalx.aaGtZero, 	Globalx.blosumGtLegend,x+20, y+=15);
+				drawKey(0, g2, Globalx.aaEqZero, 	Globalx.blosumEq, 		x+20, y+=15);
+				drawKey(0, g2, Globalx.aaLtZero, 	Globalx.blosumLt, 		x+20, y+=15);
+				drawKey(1, g2, Globalx.aaStop, 		"Stop Codon	", 	 		x+20, y+=15);
 			}
 			else {
-				drawKey(0, g2, BaseAlignPanel.ntMisMatch, 	"Mismatch", 			x+20, y+=15);
+				drawKey(0, g2, Globalx.ntMisMatch, 	"Mismatch", 			x+20, y+=15);
 			}
-			drawKey(0, g2, BaseAlignPanel.anyHang, 		"Extended end", 	 		x+20, y+=15);
-			drawKey(0, g2, BaseAlignPanel.anyUnk, 		"Unknown", 	 				x+20, y+=15);
+			drawKey(0, g2, Globalx.anyHang, 		"Extended end", 	 		x+20, y+=15);
+			drawKey(0, g2, Globalx.anyUnk, 		"Unknown", 	 				x+20, y+=15);
 		}
 		else {
 			drawKey(0, g2, BaseAlignPanel.zPhobic, 		"Hydrophobic	[ILVAM]", 	 	x+20, y+=15);

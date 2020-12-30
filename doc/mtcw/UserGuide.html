@@ -551,12 +551,13 @@ select "Read KaKs files", Keep. Now <b>Run Stats</b>.
 
 <a name=msa></a>
 <h4>Details on MSA score and using <code>MstatX</code></h4>
-The default Score1 and Score2 are built-in methods, where Score2 is "Wentropy", which is copied
+The default Score1 and Score2 are built-in methods. Score1 is Sum-of-Pairs, which are normalized between 0-1, where 1 is the best score. 
+Score2 is "Wentropy", which is copied
 directly from the <code>MstatX</code><sup>4</sup> with the exception that the scores are (1-score) so that
-'1' is the best score.
+1 is the best score. 
 <p>The <code>MstatX</code> executable is in the <tt>/Ext</tt> directory and can be used for computing the scores.
 From the appropriate <tt>/Ext</tt> sub-directory, run <tt>./mstatx -h</tt> to view the scoring methods available.
-The method can be changed from the command line, as follows:
+The method used by <code>runMultiTCW</code> can be changed from the command line, as follows:
 <pre>
 ./runMultiTCW -M1 &lt;method&gt; -M2 &lt;method&gt;
 </pre>
@@ -566,10 +567,7 @@ For example:
 ./runMultiTCW -M1 trident 
 </pre>
 will cause Score1 to be Trident and Score2 will be the default Wentropy computation.
-<p>This is not fully supported as the following problem can arise: If a set of clusters
-are scored, new clusters are added and then scored with different methods, <code>mTCW</code> does not detect
-this, hence, the database will be a mix of scores with no indication. 
-<p>The scores can be changed after ALL the MSAs are computed, as follows: Check "Compute MSA and scores" and execute
+<p><b>Update scores</b>: The scores can be changed after ALL the MSAs are computed, as follows: Check "Compute MSA and scores" and execute
 "Run Stats". The MSAs from the database will be used for computing the scores, and the database will
 be updated with the new scores.
 <p>For developers: you can add your own method to the <code>MstatX</code> program and use it in <code>mTCW</code>.

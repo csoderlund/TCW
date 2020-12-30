@@ -80,7 +80,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		
 		metaData = frame.getMetaData();
 		norm = metaData.getNorm(); // CAS304
-		isAAtcw = metaData.isProteinDB();
+		isAAtcw = metaData.isAAsTCW();
 		if (metaData.hasGOs()) dbhits[0] += ", WG)";
 		else dbhits[0] += ")";
 		
@@ -359,7 +359,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 	 * Make the textArea
 	 */
 	private String createTextArea() {
-		boolean isProteinDB = metaData.isProteinDB();
+		boolean isProteinDB = metaData.isAAsTCW();
 		boolean isOneSeq = metaData.hasNoAssembly();
 		int     nContigSets = metaData.nContigSets();
 		boolean hasGO = metaData.hasGOs();
@@ -1057,15 +1057,16 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		if (hitMap.containsKey(id)) return hitMap.get(id).nEnd;
 		else return 0;
 	}
+	// Msg is shown in the header line of Align Hits (should be same as LoadFromDB.loadBlastHitData)
 	public String getHitMsg(String id) {
 		if (!hitMap.containsKey(id)) return "error";
 		HitListData hd = hitMap.get(id);
 		String e = "0.0";
 		if (hd.eval!=0) e =  String.format("%.0E", hd.eval); 
 		
-		String h = " Hit: E-value " +  e + 
-				", Sim " + hd.nPercent  + "%, Align " + hd.nAlignLen + ";    " 
-				+ hd.strType + " " + hd.strDesc;
+		String h = " Hit: " +  e        + ", "  + 
+							hd.nPercent + "%, Align " + hd.nAlignLen  + "    " +
+							hd.strType  + " " + hd.strDesc;
 		return h;
 	}
 	

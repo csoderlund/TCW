@@ -448,6 +448,7 @@ public class ProjectPanel extends JPanel {
     			mDB.executeUpdate("TRUNCATE TABLE pog_method");
     			mDB.executeUpdate("TRUNCATE TABLE pog_groups");
     			mDB.executeUpdate("TRUNCATE TABLE pog_members");
+    			mDB.executeUpdate("TRUNCATE TABLE pog_scores");
     			// Pairs
     			mDB.executeUpdate("TRUNCATE TABLE pairwise"); 
     			mDB.executeUpdate("TRUNCATE TABLE pairMap");

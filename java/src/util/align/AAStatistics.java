@@ -9,10 +9,10 @@ public class AAStatistics
 {
 	public AAStatistics () { }	
 	
-	// ISSUB - checked blast, and it uses ' ' for ==0
 	public static String getSubChar(char a1, char a2) {
 		if (a1==a2) return a1+"";
 		if (a1==Globalx.gapCh || a2==Globalx.gapCh) return " ";
+		if (a1==' ' || a2==' ') return " "; // extended ends
 		
 		int score = AlignPairOrig.getBlosum(a1, a2);
 		if (score>0) return Globalx.AA_POS;
@@ -25,6 +25,15 @@ public class AAStatistics
 		
 		int score = AlignPairOrig.getBlosum(a1, a2);
 		if (score>0) return true;
+		else return false;
+	}
+	public static boolean isZeroSub(char a1, char a2) {
+		if (a1==a2) return false;
+		if (a1==Globalx.gapCh || a2==Globalx.gapCh) return false;
+		if (a1==' ' || a2==' ') return false; // extended ends
+		
+		int score = AlignPairOrig.getBlosum(a1, a2);
+		if (score==0) return true;
 		else return false;
 	}
 	// this approach is 'slightly' faster than the direct codon.equals approach in ScoreAA

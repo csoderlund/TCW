@@ -78,7 +78,7 @@ public class UIfieldBestHit extends JPanel implements ActionListener  {
 	  	return box;
 	}
 	public void addNames(String [] names, String grpName) {
-		if (grpName.equals(FieldContigData.GROUP_NAME_OVER_BEST)) 
+		if (grpName.equals(FieldSeqData.GROUP_NAME_OVER_BEST)) 
 			for (int i=0; i<names.length; i++) overLabel[i] = names[i];
 		else 
 			for (int i=0; i<names.length; i++) goLabel[i] = names[i];

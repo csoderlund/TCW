@@ -1,6 +1,9 @@
-package util.align;
+package sng.viewer.panels.align;
 
 import sng.database.Globals;
+import util.align.AAStatistics;
+
+
 /***********************************************************
  * This code was copied off the internet, with this foreword:
 // Implementation of some algorithms for pairwise alignment from

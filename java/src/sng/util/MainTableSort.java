@@ -27,6 +27,7 @@ import javax.swing.event.ListSelectionEvent;
 import java.io.File;
 
 import sng.database.Globals;
+import util.database.Globalx;
 import util.methods.ErrorReport;
 import util.ui.DisplayFloat;
 import util.ui.DisplayInt;
@@ -135,18 +136,18 @@ public class MainTableSort extends JTable implements TableModel
 	}
 	 private int[] getColumnWidths()
     {
-	    	int numColumns = getModel().getColumnCount();
-	    	int[] widths = new int[numColumns];
-	    	for (int i = 0;  i < numColumns;  i++)
-	    		widths[i] = getColumnModel().getColumn(i).getPreferredWidth();
-	    	
-	    	return widths;
+    	int numColumns = getModel().getColumnCount();
+    	int[] widths = new int[numColumns];
+    	for (int i = 0;  i < numColumns;  i++)
+    		widths[i] = getColumnModel().getColumn(i).getPreferredWidth();
+    	
+    	return widths;
     }
     
     private void setColumnWidths(int[] widths)
     {
-	    	for (int i = 0;  i < getModel().getColumnCount();  i++)
-	    		getColumnModel().getColumn(i).setPreferredWidth(widths[i]);
+	    for (int i = 0;  i < getModel().getColumnCount();  i++)
+	    	getColumnModel().getColumn(i).setPreferredWidth(widths[i]);
     }
 		
 	protected int getMappedColumn(int columnIndex, boolean debug) {
@@ -364,15 +365,15 @@ public class MainTableSort extends JTable implements TableModel
 			JLabel label = (JLabel)renderer.getTableCellRendererComponent( table, value, isSelected, hasFocus, row, column );				
 			if ( bHeader ) {
 				label.setBorder( BorderFactory.createEtchedBorder() );
-				label.setBackground ( Globals.componentBGColor );
+				label.setBackground ( Globalx.BGCOLOR );
 			}
 			else {
 				label.setBorder( null );
 			
 				if ( isSelected )
-					label.setBackground ( Globals.selectColor );
+					label.setBackground ( Globalx.selectColor );
 				else {
-					if ( bBlueBG ) label.setBackground( Globals.altRowColor );
+					if ( bBlueBG ) label.setBackground( Globalx.altRowColor );
 					else label.setBackground( null );
 				}
 			}
@@ -574,7 +575,7 @@ public class MainTableSort extends JTable implements TableModel
 	/************************************************
 	 * Private variables
 	 */
-	private Font theFont = Globals.textFont;
+	private Font theFont = Globalx.textFont;
 	private SortableCellRenderer rendererWrapper = new SortableCellRenderer ();
 	private SortableCellRenderer headerRenderer = new SortableCellRenderer ();
 	private FieldMapper fieldObj = null;

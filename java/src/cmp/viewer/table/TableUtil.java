@@ -138,8 +138,7 @@ public class TableUtil {
 					}
 				}
 			}
-			boolean isScore = (colName.equals(FieldData.SCORE1)) ? true : false;
-			double [] results = Stats.averages(colName, dArr, isScore);
+			double [] results = Stats.averages(colName, dArr, false); // CAS313 scores are now >= 0
 			rows[r][0] = colName;
 			for (int i=0, c=1; i<results.length; i++, c++) {
 				if ((i>=intCol && isInt) || (i==results.length-1)) {

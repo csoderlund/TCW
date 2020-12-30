@@ -31,12 +31,12 @@ import sng.database.MetaData;
 import sng.dataholders.ContigData;
 import sng.dataholders.MultiCtgData;
 import sng.viewer.STCWFrame;
-import util.align.AAStatistics;
 import util.methods.ErrorReport;
 import util.methods.Static;
 import util.methods.Markov;
 import util.ui.UIHelpers;
 import util.ui.UserPrompt;
+import util.align.AAStatistics;
 import util.database.DBConn;
 /********************************************************************
  * from ContigOverview (i.e. View Selected Sequence)
@@ -57,7 +57,7 @@ public class SeqFramePanel extends JPanel {
 	{
 		theMainFrame = frame;
 		metaData = frame.getMetaData();
-		isProtein = metaData.isProteinDB();
+		isProtein = metaData.isAAsTCW();
 		ctgData = theCluster.getContig();
 		
 		if (seqDetail.hasHit()) {

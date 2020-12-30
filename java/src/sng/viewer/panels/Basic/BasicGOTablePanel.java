@@ -57,7 +57,6 @@ import sng.viewer.STCWFrame;
 import util.database.DBConn;
 import util.database.Globalx;
 import util.methods.ErrorReport;
-import util.methods.GOtree;
 import util.methods.Static;
 import util.methods.Out;
 import util.methods.Stats;

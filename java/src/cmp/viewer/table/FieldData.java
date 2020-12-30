@@ -121,8 +121,6 @@ public class FieldData {
 					 "Length of the consenus sequence for the amino acid alignment.",  false);
 			 addGrp(c++, "sdLen", Double.class,       GRP_TABLE,  "sdLen" , 
 					 "Standard deviation of the AA sequence lengths (AAlen) in the cluster ",  false);
-			 // if the name starts with Globalx.scoreField, can have any value; otherwise, expect -1 to 1
-			 // TODO: not true if override SCORE1 in runMultiTCW
 			 addGrp(c++, SCORE1, Integer.class,       GRP_TABLE,  "score1" , msaScore1,  false);
 			 addGrp(c++, SCORE2, Integer.class,       GRP_TABLE,  "score2" , msaScore2,  false);
 		}

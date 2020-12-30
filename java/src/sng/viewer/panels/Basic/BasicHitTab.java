@@ -35,7 +35,6 @@ import sng.database.MetaData;
 import sng.util.Tab;
 import sng.viewer.STCWFrame;
 import util.methods.ErrorReport;
-import util.methods.GOtree;
 import util.methods.Static;
 import util.ui.DisplayFloat;
 import util.ui.UserPrompt;
@@ -154,8 +153,12 @@ public class BasicHitTab extends Tab {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
-					String hit = getSelectedHitSeq();
-					if (hit!=null && hit!="") cb.setContents(new StringSelection(hit), null);
+					String name = getSelectedHitID();
+					String hit =  getSelectedHitSeq();
+					if (hit!=null && hit!="") {
+						String x = ">" + name + "\n" + hit; // CAS313
+						cb.setContents(new StringSelection(x), null);
+					}
 					else System.err.println("Failed to get sequence for hit");
 				} catch (Exception er) {ErrorReport.reportError(er, "Error copying hit sequence");
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error copying hit sequence", null);}

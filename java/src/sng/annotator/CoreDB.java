@@ -14,14 +14,14 @@ import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.ArrayList;
 
-import sng.database.Globals;
 import sng.database.Schema;
 import sng.database.Version;
 import sng.dataholders.BlastHitData;
 import sng.dataholders.ContigData;
 import sng.dataholders.SequenceData;
-import util.align.AlignData;
+import sng.viewer.panels.align.AlignData;
 import util.database.DBConn;
+import util.database.Globalx;
 import util.methods.*;
 
 public class CoreDB {
@@ -277,7 +277,7 @@ public class CoreDB {
  					(uniBlastType==2 && numClones ==1 )) 
  				{
  					CCS = CCS.toUpperCase();
- 					file.append(">" + ctgid + "\n" + CCS.replace("*","") + "\n"); 
+ 					file.append(">" + ctgid + "\n" + CCS.replace(Globalx.stopStr,"") + "\n"); 
  					cnt++;
  				}				
  			}
@@ -405,7 +405,7 @@ public class CoreDB {
       
         try
         {
-        		PreparedStatement ps = mDB.prepareStatement("INSERT into pja_pairwise set " +
+        	PreparedStatement ps = mDB.prepareStatement("INSERT into pja_pairwise set " +
                 "AID=?, contig1=?, contig2=?, coding_frame1=?, coding_frame2=?, " +
                 "NT_olp_ratio=?, NT_olp_score=?, NT_olp_len=?, " +
                 "AA_olp_ratio=?, AA_olp_score=?, AA_olp_len=?, " +
@@ -415,7 +415,7 @@ public class CoreDB {
             mDB.openTransaction();
             for (  AlignData alignObj : alignList )
             {
-            		ps.setInt(1, 1);
+            	ps.setInt(1, 1);
                 ps.setString(2, alignObj.getName1());					// contig1
                 ps.setString(3, alignObj.getName2());
                
@@ -427,7 +427,7 @@ public class CoreDB {
                 
                 AlignData aaObj = alignObj.getAApwData();
                 if (aaObj==null) {
-                		ps.setDouble(9, 0.0);
+                	ps.setDouble(9, 0.0);
 	                ps.setInt(10, 0);
 	                ps.setInt(11, 0);
                 }
@@ -460,13 +460,14 @@ public class CoreDB {
     public boolean setAnnotationDate() 
 	{
 		try {
-	    		if (!existsAnno()) 
-	    			mDB.executeUpdate("UPDATE assembly SET annotationdate=null WHERE AID=1");
-	    		else 
-	    			mDB.executeUpdate("UPDATE assembly SET annotationdate=(CAST(NOW() as DATE)) WHERE AID=1");	
+    		if (!existsAnno()) 
+    			mDB.executeUpdate("UPDATE assembly SET annotationdate=null WHERE AID=1");
+    		else 
+    			mDB.executeUpdate("UPDATE assembly SET annotationdate=(CAST(NOW() as DATE)) WHERE AID=1");	
 			
 			return true;
-		}catch (Exception e) {ErrorReport.prtReport(e, "cannot set annotation date");} 
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "cannot set annotation date");} 
 		return false;
 	}
     // used in ManagerFrame for Remove
@@ -474,14 +475,14 @@ public class CoreDB {
     	try {
 			boolean bgc=true, bsim=true;
 			ResultSet rs = mDB.executeQuery ("SELECT gc_ratio from contig where gc_ratio>0 limit 1");
-	    		if ( !rs.next() ) bgc=false;
-	    		
-	    		rs = mDB.executeQuery ("SELECT PWID FROM pja_pairwise WHERE PWID>0 limit 1");
-	    		if ( !rs.next() ) bsim=false;
-	    		
-	    		int nAnno = mDB.executeCount ("SELECT count(*) FROM pja_databases");
-	    		
-	    		return (bgc || bsim || nAnno>0);
+    		if ( !rs.next() ) bgc=false;
+    		
+    		rs = mDB.executeQuery ("SELECT PWID FROM pja_pairwise WHERE PWID>0 limit 1");
+    		if ( !rs.next() ) bsim=false;
+    		
+    		int nAnno = mDB.executeCount ("SELECT count(*) FROM pja_databases");
+    		
+    		return (bgc || bsim || nAnno>0);
 		}catch (Exception e) {ErrorReport.prtReport(e, "cannot determine if annotation exists");} 
 		return false;
     }
@@ -520,7 +521,8 @@ public class CoreDB {
            SequenceData consensus = new SequenceData ("consensus");
            
            consensus.setName( ctgName );
-           consensus.setSequence ( SequenceData.normalizeBases( seqString, '*', Globals.gapCh ) );
+           consensus.setSequence ( seqString );
+           // CAS313 consensus.setSequence ( SequenceData.normalizeBases( seqString, '*', Globals.gapCh ) );
            curContig.setSeqData( consensus );
            curContig.setConsensusBases(consensus.getLength());
            curContig.setNumSequences( Integer.parseInt(rset.getString(3)) ); 

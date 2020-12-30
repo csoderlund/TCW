@@ -286,7 +286,7 @@ public class SeqTopRowPanel extends JPanel {
 	    final JPopupMenu copyPop = new JPopupMenu();
 	    copyPop.setBackground(Color.WHITE);
 	    
- 		copyPop.add(new JMenuItem(new AbstractAction(SEQID) {
+ 		copyPop.add(new JMenuItem(new AbstractAction("Pair " + SEQID) {
  			private static final long serialVersionUID = 4692812516440639008L;
  			public void actionPerformed(ActionEvent e) {
  				String seqid = detailPanel.getSelectedSeqID();
@@ -295,7 +295,7 @@ public class SeqTopRowPanel extends JPanel {
  			}
  		}));
 		
-		copyPop.add(new JMenuItem(new AbstractAction("AA  Sequence") {
+		copyPop.add(new JMenuItem(new AbstractAction("Pair AA  Sequence") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
 				String seqid = detailPanel.getSelectedSeqID();
@@ -307,7 +307,7 @@ public class SeqTopRowPanel extends JPanel {
 				}
 			}
 		}));
-		copyPop.add(new JMenuItem(new AbstractAction("CDS Sequence") {
+		copyPop.add(new JMenuItem(new AbstractAction("Pair CDS Sequence") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
 				String seqid = detailPanel.getSelectedSeqID();
@@ -319,7 +319,7 @@ public class SeqTopRowPanel extends JPanel {
 				}
 			}
 		}));
-		copyPop.add(new JMenuItem(new AbstractAction("NT  Sequence") {
+		copyPop.add(new JMenuItem(new AbstractAction("Pair NT  Sequence") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
 				String seqid = detailPanel.getSelectedSeqID();
@@ -331,7 +331,7 @@ public class SeqTopRowPanel extends JPanel {
 				}
 			}
 		}));
-		
+		copyPop.addSeparator();
 		copyPop.add(new JMenuItem(new AbstractAction("Hit ID") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {

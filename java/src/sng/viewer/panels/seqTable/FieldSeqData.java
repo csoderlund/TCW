@@ -15,11 +15,11 @@ import sng.util.FieldMapper;
 import sng.viewer.STCWFrame;
 import util.database.Globalx;
 
-public class FieldContigData implements Serializable
+public class FieldSeqData implements Serializable
 {	
 	private static final long serialVersionUID = 930670111826862169L;
 
-	public FieldContigData(){}
+	public FieldSeqData(){}
 	
 	public static final int FILTER_NONE = -1;
 	public static final int FILTER_OR = 0;
@@ -206,7 +206,7 @@ public class FieldContigData implements Serializable
      */
     static public FieldMapper createContigFieldMapper (STCWFrame parentFrame)
     {
-    		QueryContigTab qTab = parentFrame.getQueryContigTab();
+    		SeqQueryTab qTab = parentFrame.getQueryContigTab();
     		MetaData metaData = parentFrame.getMetaData();
     	
     	String norm = metaData.getNorm();
@@ -240,7 +240,7 @@ public class FieldContigData implements Serializable
         			GROUP_NAME_CONTIG, GROUP_DESC_CONTIG, 
         			"Length of the sequence." );
         
-        if(!metaData.isProteinDB()) {
+        if(!metaData.isAAsTCW()) {
         		mapper.addIntField( CNT_NS_FIELD, "Ns", "contig", "cnt_ns", 
         			GROUP_NAME_CONTIG, GROUP_DESC_CONTIG, 
         			"Number of ns" );
@@ -757,7 +757,7 @@ public class FieldContigData implements Serializable
     /*************************************
      * Builds the mySQL statement with a where clause of contig names
      */
-    public String getSeqListSQL (FieldMapper fields, FieldContigTab fTab, String [] contigIDs)
+    public String getSeqListSQL (FieldMapper fields, FieldSeqTab fTab, String [] contigIDs)
     {
 	    	String strQuery = "", strNFold="";
 	    	summary= "Basic search";
@@ -791,7 +791,7 @@ public class FieldContigData implements Serializable
     /**
      * XXX Builds the mySQL statement with a where clause of the filters
      */
-    public String getSeqFilterSQL (QueryContigTab queryObj, FieldMapper fields, FieldContigTab fTab)
+    public String getSeqFilterSQL (SeqQueryTab queryObj, FieldMapper fields, FieldSeqTab fTab)
     {
 	    String strQuery = "";
 	    String strRStat = "";

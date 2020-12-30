@@ -30,9 +30,9 @@ public class UIqueryIncEx extends JPanel implements ItemSelectable, ItemListener
 {
 	private static final long serialVersionUID = -8714286499322636798L;
 
-	public final static int INCLUDE = FieldContigData.FILTER_INCLUDE;
-	public final static int EXCLUDE = FieldContigData.FILTER_EXCLUDE;
-	public final static int IGNORE  = FieldContigData.FILTER_NONE;
+	public final static int INCLUDE = FieldSeqData.FILTER_INCLUDE;
+	public final static int EXCLUDE = FieldSeqData.FILTER_EXCLUDE;
+	public final static int IGNORE  = FieldSeqData.FILTER_NONE;
 	
 	private JLabel titleLabel;
 	private JRadioButton includeButton;
@@ -91,22 +91,22 @@ public class UIqueryIncEx extends JPanel implements ItemSelectable, ItemListener
 	
 	public int getValue()
 	{
-		if (includeButton.isSelected()) return FieldContigData.FILTER_INCLUDE;
-		if (excludeButton.isSelected()) return FieldContigData.FILTER_EXCLUDE;
-		return FieldContigData.FILTER_NONE;
+		if (includeButton.isSelected()) return FieldSeqData.FILTER_INCLUDE;
+		if (excludeButton.isSelected()) return FieldSeqData.FILTER_EXCLUDE;
+		return FieldSeqData.FILTER_NONE;
 	}
 	
 	public void setValue( int nVal )
 	{
 		switch ( nVal )
 		{
-		case FieldContigData.FILTER_INCLUDE:
+		case FieldSeqData.FILTER_INCLUDE:
 			group.setSelected(includeButton.getModel(), true);
 			break;
-		case FieldContigData.FILTER_EXCLUDE:
+		case FieldSeqData.FILTER_EXCLUDE:
 			group.setSelected(excludeButton.getModel(), true);
 			break;		
-		case FieldContigData.FILTER_NONE:
+		case FieldSeqData.FILTER_NONE:
 			group.setSelected(ignoreButton.getModel(), true);
 			break;		
 		}

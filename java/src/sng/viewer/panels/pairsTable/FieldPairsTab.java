@@ -291,8 +291,8 @@ public class FieldPairsTab extends Tab implements ActionListener
 	private void refreshAll() {
 		Tab tabs[] = getParentFrame().tabbedPane.getTabs();
 		for ( int i = 0; i < tabs.length; ++i ) {
-			if ( tabs[i] instanceof PairListTab ) {
-				PairListTab tab = (PairListTab)tabs[i];
+			if ( tabs[i] instanceof PairTableTab ) {
+				PairTableTab tab = (PairTableTab)tabs[i];
 				getParentFrame().loadQueryFilter ( tab, tab.getQuery(), null );
 			}
 		}

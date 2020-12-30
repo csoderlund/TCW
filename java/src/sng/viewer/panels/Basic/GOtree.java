@@ -1,4 +1,4 @@
-package util.methods;
+package sng.viewer.panels.Basic;
 
 /*******************************************************
  * Creates the 'Show' outputs for GO, e.g. ancestors, descendants, and hit lists
@@ -30,9 +30,11 @@ import javax.swing.JSeparator;
 
 import sng.util.ExportFile;
 import sng.viewer.STCWFrame;
-import sng.viewer.panels.Basic.BasicGOTablePanel;
 import util.database.DBConn;
 import util.database.Globalx;
+import util.methods.ErrorReport;
+import util.methods.Out;
+import util.methods.Static;
 import util.ui.UIHelpers;
 import util.ui.UserPrompt;
 

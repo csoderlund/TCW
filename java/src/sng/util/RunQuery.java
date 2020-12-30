@@ -14,9 +14,9 @@ import java.util.Vector;
 import sng.viewer.STCWFrame;
 import sng.viewer.panels.pairsTable.FieldPairsData;
 import sng.viewer.panels.pairsTable.FieldPairsTab;
-import sng.viewer.panels.seqTable.FieldContigData;
-import sng.viewer.panels.seqTable.FieldContigTab;
-import sng.viewer.panels.seqTable.QueryContigTab;
+import sng.viewer.panels.seqTable.FieldSeqData;
+import sng.viewer.panels.seqTable.FieldSeqTab;
+import sng.viewer.panels.seqTable.SeqQueryTab;
 import util.database.DBConn;
 
 import util.methods.ErrorReport;
@@ -28,13 +28,13 @@ public class RunQuery implements Serializable
 	public final static int QUERY_CONTIGS	 	= 0;
 	public final static int QUERY_PAIRS 			= 1;
 	
-	public final static int QUERY_AND = FieldContigData.FILTER_AND;
-	public final static int QUERY_OR = FieldContigData.FILTER_OR;
+	public final static int QUERY_AND = FieldSeqData.FILTER_AND;
+	public final static int QUERY_OR = FieldSeqData.FILTER_OR;
 
 	public RunQuery (int inType ) 
 	{
 		if (inType==QUERY_PAIRS) pairData = new FieldPairsData();
-		else contigData = new FieldContigData();
+		else contigData = new FieldSeqData();
 		
 		nType = inType;
 	}
@@ -65,7 +65,7 @@ public class RunQuery implements Serializable
 	 *  Contigs with contig list
 	 */
     public int loadTableRowsForContigs (STCWFrame f, 
-    		FieldContigTab fieldObj,  FieldMapper mapObj , 
+    		FieldSeqTab fieldObj,  FieldMapper mapObj , 
     		String [] contigIDs, Vector <String> tableRows )	throws Exception
     {	
 		String strSQL = contigData.getSeqListSQL(mapObj, fieldObj, contigIDs);
@@ -78,8 +78,8 @@ public class RunQuery implements Serializable
 	 *  Contigs with filter
 	 */
     public int loadTableRowsForFilterSeq (STCWFrame f,
-    			FieldContigTab fieldObj, FieldMapper mapObj, 
-    			QueryContigTab queryObj, Vector <String> tableRows) throws Exception
+    			FieldSeqTab fieldObj, FieldMapper mapObj, 
+    			SeqQueryTab queryObj, Vector <String> tableRows) throws Exception
     {			
     		if (contigData==null) {
     			System.err.println("ERROR: contigData not defined in RunQuery");
@@ -98,7 +98,7 @@ public class RunQuery implements Serializable
      * Runs query. --fieldObj is currently null for pairs query
      */
     private int runDBQuery (STCWFrame f, String strQuery,
-					FieldMapper mapper, FieldContigTab fieldObj, Vector <String> tableRows) 
+					FieldMapper mapper, FieldSeqTab fieldObj, Vector <String> tableRows) 
     throws Exception
 	{    	
     		int count = 0; 
@@ -152,8 +152,8 @@ public class RunQuery implements Serializable
 	public FieldPairsData getPairsData ( ) { return pairData; }	
  	public void setPairsData(FieldPairsData pd) {pairData=pd;}
  	
- 	public FieldContigData getContigData ( ) { return contigData; }	
- 	public void setContigData(FieldContigData pd) {contigData=pd;}
+ 	public FieldSeqData getContigData ( ) { return contigData; }	
+ 	public void setContigData(FieldSeqData pd) {contigData=pd;}
  	
  	public int getType() { return nType; }
 	public void setType(int type) { nType = type; }
@@ -162,6 +162,6 @@ public class RunQuery implements Serializable
 	
 	/************ variables ******************/
 	private int nType = QUERY_CONTIGS; 
-	private FieldContigData contigData = null;
+	private FieldSeqData contigData = null;
 	private FieldPairsData pairData = null;
 }

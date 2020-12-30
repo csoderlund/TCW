@@ -741,21 +741,7 @@ public class GrpTablePanel extends JPanel {
 			String name = (String)theTableData.getValueAt(sels[0], Nameidx);
 			tab = MTCWFrame.SEQ_PREFIX + ": " + name;
 			
-			int descidx = theTableData.getColumnHeaderIndex(HITDESC);
-			String desc = (String)theTableData.getValueAt(sels[0], descidx);
-			if (desc==null) desc = Globals.uniqueDesc;
-			
-			String scores="";
-			if (hasMSA) {	// CAS312
-				int score1 = theTableData.getColumnHeaderIndex(SCORE1);
-				float s1 = (Float)theTableData.getValueAt(sels[0], score1);
-				
-				int score2 = theTableData.getColumnHeaderIndex(SCORE2);
-				float s2 = (Float)theTableData.getValueAt(sels[0], score2);
-				scores = String.format("   (%.3f, %.3f)", s1, s2);
-			}
-			
-			summary = "Cluster " + name + ";   " + desc + scores;
+			summary = getSummary(sels[0]);
 			subquery = sourceTable + " = " + ((Integer)theTableData.getValueAt(sels[0], IDidx));
 			grpID = ((Integer)theTableData.getValueAt(sels[0], IDidx)) + "";
 			hitID = (String)  theTableData.getValueAt(sels[0], Hitidx); // CAS305
@@ -801,18 +787,33 @@ public class GrpTablePanel extends JPanel {
 		int IDidx = theTableData.getColumnHeaderIndex(GRP_SQLID);
 		int grpID = ((Integer)theTableData.getValueAt(row, IDidx));
 		
-		int descidx = theTableData.getColumnHeaderIndex(HITDESC);
-		String desc = (String)theTableData.getValueAt(row, descidx);
-		if (desc==null) desc = Globals.uniqueDesc;
-		
 		String [] retVal = new String[4];
 		retVal[0] = MTCWFrame.SEQ_PREFIX + ": " + name;
-		retVal[1] = "Cluster " + name + ";  " + desc;
+		retVal[1] = getSummary(row);
 		retVal[2] = "pog_members.PGid = " + grpID;
 		retVal[3] = grpID +"";
 		return retVal;
     }
-   
+    private String getSummary(int row) { // CAS313 shared between Next and getting Cluster from table
+    	int Nameidx = theTableData.getColumnHeaderIndex(CLUSTERID);
+		String name = (String)theTableData.getValueAt(row, Nameidx);
+		
+		int descidx = theTableData.getColumnHeaderIndex(HITDESC);
+		String desc = (String)theTableData.getValueAt(row, descidx);
+		if (desc==null) desc = Globals.uniqueDesc;
+		
+		String scores="";
+		if (hasMSA) {	// CAS312
+			int score1 = theTableData.getColumnHeaderIndex(SCORE1);
+			float s1 = (Float)theTableData.getValueAt(row, score1);
+			
+			int score2 = theTableData.getColumnHeaderIndex(SCORE2);
+			float s2 = (Float)theTableData.getValueAt(row, score2);
+			scores = String.format("   (%.3f, %.3f)", s1, s2); 
+		}
+		
+		return "Cluster " + name + ";   " + desc + scores;
+    }
     static public String makeSQLfromGRPid(Integer [] grpids) {
 		String sourceTable = "pog_groups.PGid";
 		String subquery = "";

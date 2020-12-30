@@ -5,13 +5,12 @@ package cmp.align;
  */
 import util.database.Globalx;
 import util.methods.ErrorReport;
-import cmp.database.Globals;
 
 public class Share {
 	public static final int minAlignLen=3; // some 3'UTR are only the stop; the sequence will be treated as 0 length
-	public static final String noNTStr = "n";
-	public static final char noAACh = 'X';	
-	public static final String stopStr="*";
+	public static final String noNTStr = Globalx.noNTstr;
+	public static final char noAACh = 	 Globalx.noAAch;	
+	public static final String stopStr=	 Globalx.stopStr;
 	public static final String DELIM="::";
 	
 // Ways to view CDS  && NT in PairText
@@ -42,18 +41,18 @@ public class Share {
 			
 	// CDS per position - for Amino Acid display
 	public static final String AA_POS = Globalx.AA_POS; // blosum>0
-	public static final String AA_NEG =  Globalx.AA_NEG; // blosum<=0
+	public static final String AA_NEG = Globalx.AA_NEG; // blosum<=0
 	
 	// NT per postion
 	public static final String NT_MM = "|"; 
 	
-	public static final String gapStr = Globals.gapStr;
-	public static final char   gapCh = Globals.gapCh;
+	public static final String gapStr = Globalx.gapStr;
+	public static final char   gapCh =  Globalx.gapCh;
 
 	public static String compress(String aSeq) {
 		try {
 			if (aSeq==null || aSeq=="") return ""; // CAS310 add null check
-			if (aSeq.endsWith(stopStr)) aSeq = aSeq.substring(0, aSeq.length()-1);
+			// CAS313 STOP if (aSeq.endsWith(stopStr)) aSeq = aSeq.substring(0, aSeq.length()-1); don't change aligned seq
 			
 			String gapMap="";
 			char [] base = aSeq.toCharArray();
@@ -83,8 +82,8 @@ public class Share {
 	 // recreates alignSeq from gapMap and original sequence 
 	public static String uncompress(String gapMap, String seq) {
 		try {
+			if (seq.endsWith(stopStr)) seq = seq.substring(0, seq.length()-1); // CAS313 Remove first, or is shown
 			if (gapMap.equals("0") || gapMap.equals("")) return seq;
-			if (seq.endsWith(stopStr)) seq = seq.substring(0, seq.length()-1);
 			
 			String [] tok = gapMap.split(":");
 			int [] gapStart = new int [tok.length];

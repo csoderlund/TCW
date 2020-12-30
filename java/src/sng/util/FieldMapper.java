@@ -12,8 +12,8 @@ import java.util.Iterator;
 import java.sql.ResultSet;
 
 import sng.viewer.STCWFrame;
-import sng.viewer.panels.seqTable.FieldContigData;
-import sng.viewer.panels.seqTable.FieldContigTab;
+import sng.viewer.panels.seqTable.FieldSeqData;
+import sng.viewer.panels.seqTable.FieldSeqTab;
 import util.methods.Converters;
 import util.methods.ErrorReport;
 import util.methods.Out;
@@ -111,7 +111,7 @@ public class FieldMapper
     // FieldContigTab and FieldMapper
     public boolean isNFoldField( int id )
     {
-    		return id >= FieldContigData.N_FOLD_LIB && id <= FieldContigData.N_FOLD_LIB_LIMIT;
+    		return id >= FieldSeqData.N_FOLD_LIB && id <= FieldSeqData.N_FOLD_LIB_LIMIT;
     }  
     // FieldContigData, FieldPairsData
     public void setDefaultFieldIDs ( int [] fieldIDs )
@@ -188,7 +188,7 @@ public class FieldMapper
         if ( n >= 0)  return listFields.get( n );
         
     		if (theParentFrame!=null) {
-        		FieldContigTab fieldObj = theParentFrame.getFieldContigTab();
+        		FieldSeqTab fieldObj = theParentFrame.getFieldContigTab();
 	        	if(isSeq && fieldObj!=null) { // NFold
 	        		n = fieldObj.getNFoldFieldID(str);
 	        		if (n>=0) {
@@ -498,7 +498,7 @@ public class FieldMapper
  
             if ( fields[i] == null || fields[i].strField == null || fields[i].strField.length()==0)
             			strFields += "NULL"; // Place holder so we have the correct number of columns
-            else if (fields[i].nID==FieldContigData.SEQ_ID_FIELD) // CAS304 KLUDGE - it has strSubquery if GOs
+            else if (fields[i].nID==FieldSeqData.SEQ_ID_FIELD) // CAS304 KLUDGE - it has strSubquery if GOs
             	strFields += fields[i].strTable + "." + fields[i].strField;
             else if ( fields[i].strSubQuery != null )
             		strFields += fields[i].strSubQuery;
@@ -517,7 +517,7 @@ public class FieldMapper
      * that are too be shown. Hence, the values can be extracted from the result set.
      */
     public String getObjFromSeqResultSet ( ResultSet rs, int nRow,  
-    		FieldContigTab fieldObj) throws Exception
+    		FieldSeqTab fieldObj) throws Exception
     {    	
 	    	FieldData [] fields = getVisibleFields ( );
 		StringBuffer sb = new StringBuffer();
@@ -547,7 +547,7 @@ public class FieldMapper
 	    			}
 	    		}
 	    		**/
-	    		else if(fields[i].nID >= FieldContigData.N_FOLD_LIB && fields[i].nID <= FieldContigData.N_FOLD_LIB_LIMIT) {
+	    		else if(fields[i].nID >= FieldSeqData.N_FOLD_LIB && fields[i].nID <= FieldSeqData.N_FOLD_LIB_LIMIT) {
 	    			String [] libs = fields[i].strName.split("/");
 	    			int index0=-1, index1=-1;
 	    			for (int j=0; j<nfoldLibNames.length; j++) {

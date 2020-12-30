@@ -39,16 +39,18 @@ import cmp.database.Schema;
 public class runMTCWMain {
 	static public runMTCWMain cmpMain;
 
-	static public boolean test=false, bWithPivot=false, bWoPivot=false, bRmMSA=false;
+	static public boolean test=false, bWithPivot=false, bWoPivot=false;
 	
 	static public int MS = Globals.MSA.MSTATX_SCORE;
 	static public int BI = Globals.MSA.BUILTIN_SCORE;
 	static public int     msaScore1=BI,              msaScore2=BI; // defaults repeated in MultiAlignData
 	static public String  strScore1=Globals.MSA.SoP, strScore2=Globals.MSA.Wep;
+	static public boolean bNSoP=true;   // if true, normalize (default)
+	static public boolean bRmMSA=false; // Remove MSA alignments on ReDo - developer only
 	
 	public static void main(String[] args) {
 		try {
-			System.out.println("runMultiTCW v" + Globalx.strTCWver + " " + Globalx.strRelDate);
+			System.out.println("--------- runMultiTCW v" + Globalx.strTCWver + " " + Globalx.strRelDate + "----------");
 			
 			printHelp(args);
 			
@@ -63,26 +65,32 @@ public class runMTCWMain {
 	static void printHelp(String [] args) {
 		if (args.length>0 && (args[0].equals("-h") || args[0].contains("help"))) {
 			System.out.println("runMultiTCW is typically run with no arguments, however:");
-			
+			System.out.println("  -v Check MySQl variables");
 			System.out.println("  The 'Closure' seeding with BBH algorithm can be replaced with:");
 			System.out.println("  	-BHwop  #Use Bron_Kerbosch Without Pivot");
 			System.out.println("  	-BHwp   #Use Bron_Kerbosch With Pivot");
-			
+			//This is not fully supported, so only for testing
+			//System.out.println("  Sum-of-Pairs:"); // CAS313 add
+			//System.out.println("  	-nSoP Do not normalize SoP scores (default Score1).");
 			System.out.println("  The MSA score1 of built-in Sum-of-Pairs can be replaced with:"); // CAS312 add
 			System.out.println("  	-M1 <string>, where <string> is a valid MstatX method.");
 			System.out.println("  The MSA score2 of built-in Wentropy can be replaced with:"); // CAS312 add
 			System.out.println("  	-M2 <string>, where <string> is a valid MstatX method.");
 			System.out.println("  MstatX methods: trident, wentropy, mvector, jensen, kabat, gap");
 			System.out.println("    See agcol.arizona.edu/software/TCW/doc/mtcw/UserGuide.html for more info");
-			
-			System.out.println("  -x (developer only probably)");
-			System.out.println("     Run Stats with 'Compute MSA and Score' - remove MSA and scores first");
+			System.out.println("  Developer only:"); 
+			System.out.println("    -x  when Run Stats with 'Compute MSA and Score' - remove existing MSAs first");
 			System.exit(0);
 		}
 	}
 	static void setArgs(String [] args) {
 		if (args.length==0) return;
-		
+/* CAS313 */	
+		if (hasArg(args, "-v")) {
+			System.out.println("Check MySQL variables and search paths");
+			new HostsCfg(true);
+			System.exit(0);
+		}
 		if (hasArg(args, "-test")) {
 			test=true;
 			System.out.println("In test mode");
@@ -112,6 +120,11 @@ public class runMTCWMain {
 			System.out.println("MSA score2 with mStatx " + strScore2);
 			isMstatX(strScore2);
 		}
+	/*  CAS313  SoP */		
+	if (hasArg(args, "-nSoP")) {
+		bNSoP=false;
+		System.out.println("Do not normalize SoP scores ");
+	}
 /*  CAS312  developer */		
 		if (hasArg(args, "-x")) {
 			bRmMSA=true;

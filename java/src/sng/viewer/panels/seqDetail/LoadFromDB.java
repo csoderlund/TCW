@@ -17,7 +17,6 @@ import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.Vector;
 
-import sng.database.Globals;
 import sng.database.MetaData;
 import sng.dataholders.BlastHitData;
 import sng.dataholders.CodingRegion;
@@ -25,6 +24,7 @@ import sng.dataholders.ContigData;
 import sng.dataholders.MultiCtgData;
 import sng.dataholders.SNPData;
 import sng.dataholders.SequenceData;
+import util.database.Globalx;
 import util.methods.Converters;
 import util.methods.ErrorReport;
 import util.methods.Static;
@@ -71,8 +71,7 @@ public class LoadFromDB {
             	"o_frame, o_coding_start, o_coding_end, o_coding_has_begin, o_coding_has_end, " +
                 "bestmatchid, cnt_swiss, cnt_trembl, cnt_nt, cnt_gi," +
                 "cnt_gene, cnt_species,  cnt_overlap, cnt_annodb, user_notes, longest_clone  " +     // CAS311 longest                                                  
-                 "FROM contig " +
-                 		"WHERE contig.contigid = '" + strContigID + "' ";
+                 "FROM contig WHERE contig.contigid = '" + strContigID + "' ";
 
             ResultSet rset = mDB.executeQuery( strQuery );
             if ( !rset.next() ) {
@@ -87,7 +86,11 @@ public class LoadFromDB {
             String seqString = rset.getString(3).trim();
             SequenceData consensus = new SequenceData ("consensus");
             consensus.setName( strContigID );
-            consensus.setSequence ( SequenceData.normalizeBases( seqString, '*', Globals.gapCh ) );
+           
+            // CAS313 I must of just copied without paying attention..... stupid
+            //consensus.setSequence ( SequenceData.normalizeBases( seqString, '*', Globals.gapCh ) );
+            consensus.setSequence ( seqString );
+            
             curContig.setSeqData( consensus );
             
             curContig.setConsensusBases( rset.getInt( 4 ) );
@@ -222,8 +225,8 @@ public class LoadFromDB {
 	    	  return hitList;
       }
       catch(Exception e) {
-	        	ErrorReport.reportError(e, "Error: reading database loadHitsSeqforContig");
-	        	throw e;
+	        ErrorReport.reportError(e, "Error: reading database loadHitsSeqforContig");
+	        throw e;
       }
       finally 
       {
@@ -253,6 +256,7 @@ public class LoadFromDB {
 		catch(Exception e) {ErrorReport.reportError(e, "Reading database for Hit data " + hitID);}		
 		return null;
 	}
+	// only used by AnnoDB Hits. It uses other methods from this class also
 	public BlastHitData loadBlastHitData(String seqID, String hitID) {
 		try {
 			 String strQ = 	"SELECT t.ctg_start, t.ctg_end, t.isProtein, " +
@@ -261,7 +265,6 @@ public class LoadFromDB {
 		         " WHERE t.uniprot_id = '" + hitID + "'" +
 		         " AND   t.contigid = '" + seqID + "'";
 			 
-          		
 			ResultSet rs = mDB.executeQuery( strQ );
 			if (!rs.next()) return null;
 			
@@ -270,14 +273,14 @@ public class LoadFromDB {
 			boolean isP = rs.getBoolean(3);
 			double eval = rs.getDouble(4);
 			int pid = rs.getInt(5);
-			int align = rs.getInt(6);
-			 
+			int nAlign = rs.getInt(6); 
+			
+			// Msg is shown in the header line of AnnoDB Hits (should be same as SeqDetailPanel.getHitMsg
 			String e = "0.0";
 			if (eval!=0) e =  String.format("%.0E", eval); 
-			String msg = String.format("Hit: E-value %s, Sim=%d%s, Align=%d", 
-					e, pid, "%", align);
-			BlastHitData blastData = new BlastHitData(hitID, isP, 
-					start, end, msg);
+			String msg = String.format("Hit: %s, %d%s, Align %d", e, pid, "%", nAlign);
+			
+			BlastHitData blastData = new BlastHitData(hitID, isP, start, end, msg);
 			
 			return blastData;
 		}
@@ -314,7 +317,7 @@ public class LoadFromDB {
             Vector<Integer> qualVector = getIntVectorFromReader (rset.getCharacterStream( 4 ) );
             SequenceData consensus = new SequenceData ("consensus");
             consensus.setName( strContigID );
-            consensus.setSequence ( SequenceData.normalizeBases( seqString, '*', Globals.gapCh ) );
+            consensus.setSequence ( SequenceData.normalizeBases( seqString, Globalx.stopCh, Globalx.gapCh ) );
             consensus.padAndSetQualities ( qualVector );
             curContig.setSeqData( consensus );
  
@@ -391,7 +394,8 @@ public class LoadFromDB {
 			curClone.setName ( rset.getString( 1 ) ); // cloneid
 			
 			String seqString = ( getStringFromReader (rset.getCharacterStream( 2 ) ) ).trim();
-			seqString = SequenceData.normalizeBases( seqString, '*', Globals.gapCh );
+			// CAS313 apparently, ESTs could have '*'
+			seqString = SequenceData.normalizeBases( seqString, Globalx.stopCh, Globalx.gapCh );
 			Vector<Integer> qualVect = getIntVectorFromReader (rset.getCharacterStream( 3 ) );
 			int nSeqLen = rset.getInt( 4 );
 			
@@ -415,7 +419,7 @@ public class LoadFromDB {
 			{	
 				int q = qualVect.get(0);
 				for (int i=1; i<nSeqLen; i++) {
-					if (seqString.charAt(i) == Globals.gapCh) qualVect.add(i, 0);
+					if (seqString.charAt(i) == Globalx.gapCh) qualVect.add(i, 0);
 					else qualVect.add(i, q);
 				}	
 			}
@@ -592,7 +596,7 @@ public class LoadFromDB {
  			
  				String seqString = ( getStringFromReader (
  					rset.getCharacterStream( "clone.sequence" ) ) ).trim();
- 				seqString = SequenceData.normalizeBases( seqString, '*', Globals.gapCh );
+ 				seqString = SequenceData.normalizeBases( seqString, Globalx.stopCh, Globalx.gapCh );
   
      				if ( nSeqLen != seqString.length () )
      					throw new RuntimeException ( 

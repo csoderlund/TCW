@@ -1,6 +1,7 @@
 package cmp.viewer;
 
 import util.database.Globalx;
+import util.methods.Out;
 
 public class MTCWMain {
 	public static boolean test = false;
@@ -20,12 +21,23 @@ public class MTCWMain {
 			System.err.println("-  list all mTCW databases.\n");
 			System.exit(0);
 		}
-		if(args.length > 0)
+		if(args.length > 0) {
+			if (hasArg(args, "-test")) { 
+				Out.prt("Test mode on");
+				test=true; // CAS313 added for ScoreMulti SoP
+			}
+			
 			mainWindow = new MTCWFrame(args[0], args);
+		}
 		else
 			mainWindow = new MTCWFrame();
 		
 		mainWindow.setVisible(true);
 		return;
+	}
+	static boolean hasArg(String [] args, String arg) { 
+		for (int i=0; i<args.length; i++)
+			if (args[i].equals(arg)) return true;
+		return false;
 	}
 }

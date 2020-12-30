@@ -55,13 +55,12 @@ This will execute the program <tt>MAFFT</tt> on each cluster, score each MSA, an
 resulting MSAs and scores into the database. Occassionally, <tt>MAFFT</tt> fails, in which case, <tt>MUSCLE</tt> is run.
 
 <p>The MSA scores are the Sum-of-Pairs and Wentropy, where Wentropy is computed just like the 
-<tt>MstatX</tt> program except the score is (1 - score). 
+<tt>MstatX</tt> program except the score is (1 - score) to make 1 the best score.  
+The Sum-of-Pairs is normalized to be between 0-1, where 1 is the best score.
 
-<p>The user can request
-that external program <tt>MstatX</tt> be run instead, where any of their valid methods can be specified
-(see <tt>runMultiTCW -h</tt>). If this step has already been run, but you 
-want to try a <tt>MstatX</tt> method, select the <b>Compute MSA and score</b> option and <b>Run Stat</b>;
-the MSAs in the database will be scored and the scores in the database will be updated.
+<p>The <tt>MstatX</tt> methods can be used in place of the defaults. 
+In order to obtain more information, run <tt>runMultiTCW -h</tt>; 
+also see www.agcol.arizona.edu/software/tcw/doc/mtcw/UserGuide.html.
 <hr>
 
 <h3>Add additional cluster sets</h3>

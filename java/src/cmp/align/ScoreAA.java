@@ -58,8 +58,8 @@ public class ScoreAA {
 		
 		
 		String r1c3 = String.format("%-16s %4d %s", "Exact:", cntExact, Out.perFtxtP(cntExact, cntNoGap));
-		String r2c3 = String.format("%-16s %4d %s", Globalx.blosumPos + ":", cntPos, Out.perFtxtP(cntPos, cntNoGap));
-		String r3c3 = String.format("%-16s %4d %s", Globalx.blosumNeg + ":", cntNeg, Out.perFtxtP(cntNeg, cntNoGap));
+		String r2c3 = String.format("%-16s %4d %s", Globalx.blosumGt + ":", cntPos, Out.perFtxtP(cntPos, cntNoGap));
+		String r3c3 = String.format("%-16s %4d %s", Globalx.blosumLtEq + ":", cntNeg, Out.perFtxtP(cntNeg, cntNoGap));
 		
 		lines.add(r1c1+r1c2+r1c3);
 		lines.add(r2c1+r2c2+r2c3);
@@ -69,8 +69,8 @@ public class ScoreAA {
 	public void legendAA(Vector <String> lines) {
 		lines.add("LEGEND: ");
 		lines.add("  AA char = AA match");
-		lines.add("        " + Share.AA_POS +  " = " + Globalx.blosumPosLegend);
-		lines.add("        " + Share.AA_NEG +  " = " + Globalx.blosumNeg);
+		lines.add("        " + Share.AA_POS +  " = " + Globalx.blosumGtLegend);
+		lines.add("        " + Share.AA_NEG +  " = " + Globalx.blosumLtEq);
 	}
 	// CAS310 used in PairAlignData when Hit is NT (rare, assuming it is an ORF)
 	public String nt2aa(String cdsSeq) {
@@ -212,6 +212,9 @@ public class ScoreAA {
 		if (aa=='R') return "Arg";
 		return "???";
 	}
+	static public char [] getaaCh() { return aaCh;}
+	static char [] aaCh = {'A','R','N','D','C','Q','E','G','H','I','L','K','M','F','P','S','T','W','Y','V','B','Z','X','*'};
+	
 	// BLOSUM62 7/17/19 from ftp://ftp.ncbi.nlm.nih.gov/blast/matrices/BLOSUM62
 	static String residues = "ARNDCQEGHILKMFPSTWYVBZX*";
 	public static final int blosum[][] = new int [][] {

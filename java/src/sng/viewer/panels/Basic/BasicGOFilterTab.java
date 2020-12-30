@@ -53,7 +53,6 @@ import util.ui.UserPrompt;
 import util.methods.ErrorReport;
 import util.methods.Out;
 import util.methods.Static;
-import util.methods.GOtree;
 import util.database.DBConn;
 import util.database.Globalx;
 

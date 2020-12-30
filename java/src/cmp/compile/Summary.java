@@ -133,17 +133,19 @@ public class Summary {
 			
 			rs = mDB.executeQuery("SELECT compiledate, version, lastDate, lastVer FROM info");
 			if (rs.next())  {
-				String b = rs.getString(1);
-				String date = TimeHelpers.convertDate(b);
-				String version = rs.getString(2);
+				String bDate = rs.getString(1);
+				String date = TimeHelpers.convertDate(bDate);
+				String bVer = rs.getString(2);
 				
-				dateLine = "Created: " + date + " v" + version;
+				dateLine = "Created: " + date + " v" + bVer;
 				
-				String u = rs.getString(3);
-				if (u!=null && u!="" && !b.equals(u)) {
-					date = TimeHelpers.convertDate(u);
-					version = rs.getString(4);	
-					dateLine += "     Last Update: " + date + " v" + version;
+				String uDate = rs.getString(3);
+				String uVer = rs.getString(4);
+				if ((uDate!=null && uDate!="" && !bDate.equals(uDate)) 
+				 || (uVer!=null  && uVer!=""  && !bVer.equals(uVer))) 
+				{
+					date = TimeHelpers.convertDate(uDate);	
+					dateLine += "     Last Update: " + date + " v" + uVer;
 				}
 				lines.add("");
 				lines.add(dateLine);
@@ -321,7 +323,7 @@ public class Summary {
 
     private void makeMethodScoreTable() {
     try {
-		int cnt = mDB.executeCount("select count(*) from pog_groups where score1>0 limit 1");
+		int cnt = mDB.executeCount("select count(*) from pog_groups where score1>=0 limit 1");
 		if (cnt==0) return; 
 		
 		lines.add("");

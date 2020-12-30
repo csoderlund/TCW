@@ -12,9 +12,9 @@ import java.util.ArrayList;
 
 import sng.dataholders.BlastHitData;
 import sng.dataholders.ContigData;
-import util.align.AlignCompute;
+import sng.viewer.panels.align.AlignCompute;
+import sng.viewer.panels.align.AlignData;
 import util.align.AlignPairOrig;
-import util.align.AlignData;
 import util.database.DBConn;
 import util.methods.ErrorReport;
 import util.methods.Out;

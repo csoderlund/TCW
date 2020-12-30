@@ -1,12 +1,12 @@
 package sng.viewer.panels.seqDetail;
 /***************************************************
  * Show: Detail Contig SNP Frame GO... Align...
- * Detail: 	ContigOverviewPanel
- * Contig: 	ContigALignPanel
- * SNP: 		SNPMultiPanel
- * Frame: 	ContigFramePanel
- * GO: 		ContigGOPanel
- * Align: 	MainToolAlignPanel, MainPairAlignPanel (shared with Pairs)
+ * Detail: 	SeqDetailPanel
+ * Contig: 	ContigViewPanel, ContigAlignPanel
+ * SNP: 	SNPMultiPanel
+ * Frame: 	SeqFramePanel
+ * GO: 		SeqGOPanel
+ * Align:   PairViewPanel, PairAlignPanel(shared with Pairs)
  */
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -15,7 +15,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.TreeSet;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
@@ -34,13 +33,13 @@ import sng.util.CenteredMessageTab;
 import sng.util.MenuTreeNode;
 import sng.util.Tab;
 import sng.viewer.STCWFrame;
-import sng.viewer.panels.MainToolAlignPanel;
-import sng.viewer.panels.seqTable.ContigListTab;
-import util.methods.ErrorReport;
+import sng.viewer.panels.align.AlignCompute;
+import sng.viewer.panels.align.AlignData;
+import sng.viewer.panels.align.PairViewPanel;
+import sng.viewer.panels.align.ContigViewPanel;
+import sng.viewer.panels.seqTable.SeqTableTab;
 import util.methods.Static;
 import util.ui.UserPrompt;
-import util.align.AlignCompute;
-import util.align.AlignData;
 import util.database.DBConn;
 
 public class SeqTopRowTab extends Tab {
@@ -166,7 +165,7 @@ public class SeqTopRowTab extends Tab {
 				opAlign(ALIGN_SELECTED);
 			}
 		}));
-		if (!metaData.isProteinDB()) {
+		if (!metaData.isAAsTCW()) {
 			alignpopup.add(new JMenuItem(new AbstractAction("DB hits: Selected hit(s) in all frames") {
 				private static final long serialVersionUID = 4692812516440639008L;
 				public void actionPerformed(ActionEvent e) {
@@ -190,10 +189,8 @@ public class SeqTopRowTab extends Tab {
 		JButton btnPrev = Static.createButton("<<Prev", true);
 		btnPrev.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {				
-				if(displayedJPanel != null)
-					setPrevDisplaySettings(((MainToolAlignPanel)displayedJPanel).getDisplaySettings());
-				if (getParentTab() instanceof ContigListTab) {
-					addPrevNextTab( ((ContigListTab)getParentTab()).getPrevRowNum( nRecordNum ) );
+				if (getParentTab() instanceof SeqTableTab) {
+					addPrevNextTab( ((SeqTableTab)getParentTab()).getPrevRowNum( nRecordNum ) );
 				}
 				else System.err.println("<< Prev TCW error"); 
 			}
@@ -202,11 +199,11 @@ public class SeqTopRowTab extends Tab {
 		JButton btnNext = Static.createButton("Next>>", true);
 		btnNext.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(displayedJPanel != null) {
-					setPrevDisplaySettings(((MainToolAlignPanel)displayedJPanel).getDisplaySettings());
-				}
-				if (getParentTab() instanceof ContigListTab) { 
-					addPrevNextTab( ((ContigListTab) getParentTab()).getNextRowNum( nRecordNum ) );
+				//if(displayedJPanel != null) {
+				//	setPrevDisplaySettings(((PairViewPanel)displayedJPanel).getDisplaySettings());
+				//}
+				if (getParentTab() instanceof SeqTableTab) { 
+					addPrevNextTab( ((SeqTableTab) getParentTab()).getNextRowNum( nRecordNum ) );
 				}
 				else System.err.println("Next >> TCW error"); 
 			}
@@ -305,7 +302,7 @@ public class SeqTopRowTab extends Tab {
 		bottomPanel.removeAll();	
 		bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.Y_AXIS));
 		bottomPanel.add ( detailPanel );
-		displayedJPanel= null;
+		ctgAlignPanel = null;
 		setVisible(false);
 		setVisible(true);
 	}
@@ -348,7 +345,8 @@ public class SeqTopRowTab extends Tab {
 				bottomPanel.removeAll();	
 				bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.Y_AXIS));
 				bottomPanel.add ( detailPanel );
-				displayedJPanel= null;
+				ctgAlignPanel=null;
+				pairAlignPanel= null;
 				setVisible(false);
 				setVisible(true);
 				
@@ -372,7 +370,8 @@ public class SeqTopRowTab extends Tab {
 				bottomPanel.removeAll();	
 				bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.Y_AXIS));
 				bottomPanel.add ( framePanel );
-				displayedJPanel= null;
+				ctgAlignPanel=null;
+				pairAlignPanel= null;
 				setVisible(false);
 				setVisible(true);
 				
@@ -421,7 +420,8 @@ public class SeqTopRowTab extends Tab {
 				bottomPanel.removeAll();	
 				bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.Y_AXIS));
 				bottomPanel.add ( goPanel );
-				displayedJPanel= null;
+				ctgAlignPanel=null;
+				pairAlignPanel= null;
 				setVisible(false);
 				setVisible(true);
 				
@@ -456,10 +456,10 @@ public class SeqTopRowTab extends Tab {
 					if (hitBestPanel==null) {
 						Vector<AlignData> hitbest =  
 								AlignCompute.DBhitsAlignDisplay(displayedHits1, ctgFullData, 
-										AlignCompute.frameResult, metaData.isProteinDB(), detailPanel );
-						hitBestPanel = MainToolAlignPanel.createPairAlignPanel (true, false, hitbest );
+										AlignCompute.frameResult, metaData.isAAsTCW(), detailPanel );
+						hitBestPanel = PairViewPanel.createPairAlignPanel (true, false, hitbest );
 					}
-					installAlignPanel(hitBestPanel);
+					installPairPanel(hitBestPanel);
 					
 					break;
 				case ALIGN_SELECTED:
@@ -471,10 +471,10 @@ public class SeqTopRowTab extends Tab {
 					if ( hitSelectedPanel == null ) {
 						Vector<AlignData> hitSL =  
 							AlignCompute.DBhitsAlignDisplay(displayedHits1, ctgFullData, 
-									AlignCompute.frameResult, metaData.isProteinDB(), detailPanel);
-						hitSelectedPanel = MainToolAlignPanel.createPairAlignPanel (true,false, hitSL );
+									AlignCompute.frameResult, metaData.isAAsTCW(), detailPanel);
+						hitSelectedPanel = PairViewPanel.createPairAlignPanel (true,false, hitSL );
 					}
-					installAlignPanel(hitSelectedPanel);
+					installPairPanel(hitSelectedPanel);
 					
 					break;
 				case ALIGN_SELECTED_ALL:
@@ -486,10 +486,10 @@ public class SeqTopRowTab extends Tab {
 					if (hitAllFramePanel==null) {
 						Vector<AlignData> hitSLA =  // selected hits in all frames
 							AlignCompute.DBhitsAlignDisplay(displayedHits2, ctgFullData,  
-									AlignCompute.allResult, metaData.isProteinDB(), detailPanel );
-						hitAllFramePanel = MainToolAlignPanel.createPairAlignPanel (true, true, hitSLA );
+									AlignCompute.allResult, metaData.isAAsTCW(), detailPanel );
+						hitAllFramePanel = PairViewPanel.createPairAlignPanel (true, true, hitSLA );
 					}
-					installAlignPanel(hitAllFramePanel);;
+					installPairPanel(hitAllFramePanel);;
 					break;		
 				default:
 					System.err.println("Internal error for alignment: " + alignType);
@@ -499,14 +499,23 @@ public class SeqTopRowTab extends Tab {
 			}
 		});
 	}
-	// used by opAlign and opContig as they are both MainToolAlignPanels -- for now
-	private void installAlignPanel ( MainToolAlignPanel thePanel )
+
+	private void installPairPanel ( PairViewPanel thePanel )
 	{
-		displayedJPanel = thePanel;
-		thePanel.setSelectedContigs ( selectedContigs );// select contigs from the last displayed		
+		pairAlignPanel = thePanel;		
 		bottomPanel.removeAll();
 		bottomPanel.setLayout( new BorderLayout () );
-		bottomPanel.add( displayedJPanel, BorderLayout.CENTER );
+		bottomPanel.add( pairAlignPanel, BorderLayout.CENTER );
+		
+		setVisible(false);
+		setVisible(true);
+	}
+	private void installContigPanel (ContigViewPanel thePanel )
+	{
+		ctgAlignPanel = thePanel;		
+		bottomPanel.removeAll();
+		bottomPanel.setLayout( new BorderLayout () );
+		bottomPanel.add( ctgAlignPanel, BorderLayout.CENTER );
 		
 		setVisible(false);
 		setVisible(true);
@@ -526,7 +535,8 @@ public class SeqTopRowTab extends Tab {
 				bottomPanel.removeAll();	
 				bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.Y_AXIS));
 				bottomPanel.add ( snpPanel );
-				displayedJPanel= null;
+				ctgAlignPanel=null;
+				pairAlignPanel= null;
 				setVisible(false);
 				setVisible(true);
 				
@@ -546,56 +556,24 @@ public class SeqTopRowTab extends Tab {
 		theFrame.addTabAndRun(SeqTopRowTab.this, null, waitTab, 
 		  new STCWFrame.RunnableCanThrow() {
 			public void run() throws Throwable {
-				int mode = 0;
-				if(displayedJPanel != null) 
-					mode= ((MainToolAlignPanel)displayedJPanel).getShowBuriedMenuSelection();
-
-				MainToolAlignPanel clusterPanel = 
-					MainToolAlignPanel.createESTPanel( metaData.hasCAP3(),
-							ctgFullData, nRecordNum, getID(), !metaData.hasAssembly());
+				ContigViewPanel ctgPanel = 
+					ContigViewPanel.createESTPanel( metaData.hasCAP3(),
+							ctgFullData, nRecordNum, getID());
 				
-				if(showHideListener != null) clusterPanel.addShowHideListener(showHideListener);
-				installAlignPanel ( clusterPanel );
+				installContigPanel ( ctgPanel );
 				
-				clusterPanel.setShowBuriedAllPanels(!metaData.hasAssembly());
-				clusterPanel.applyDisplaySettings(prevDisplaySettings);
-				clusterPanel.setShowBuriedMenuSelection(mode, metaData.hasAssembly());
-				clusterPanel.setSelectedClones(strSelectedClones);
-				
-				prevDisplaySettings = null;
-			
 				theFrame.swapInTab( waitTab, getTitle(), SeqTopRowTab.this );
 			}
 		});
 	}
 	
-	private ActionListener showHideListener = 
-		new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-			try {
-				int mode = ((MainToolAlignPanel)displayedJPanel).getShowBuriedMenuSelection();
-
-				if(mode == MainToolAlignPanel.SHOW_BURIED_EST_LOCATION  && !bBuriedShown ||
-				   mode == MainToolAlignPanel.SHOW_BURIED_EST_DETAIL && !bBuriedShown)
-				{
-					bBuriedShown = true;			
-					opContig();
-				}
-				else
-				{
-					((MainToolAlignPanel)displayedJPanel).setShowBuriedAllPanels(!metaData.hasAssembly());
-				}
-			} 
-			catch (Exception err) {ErrorReport.reportError(err, "Internal error: with listerner");}
-		}
-	};
 	/***************************************************
 	 * Prev Next tabs
 	 **************************************************/
 	private void addPrevNextTab(int nNewRecordNum )
 	{	
 		Tab parentTab = getParentTab();
-		String strTitle = ((ContigListTab)parentTab).getContigIDAtRow(nNewRecordNum);
+		String strTitle = ((SeqTableTab)parentTab).getContigIDAtRow(nNewRecordNum);
 		if (strTitle==null) return;
 		
 		Tab newTab = getParentFrame().addNewContigTab( strTitle, parentTab, 
@@ -623,25 +601,13 @@ public class SeqTopRowTab extends Tab {
 		}
 		return null;
 	}
-	public TreeSet<String> getSelectedContigIDs ( )
-	{
-		MainToolAlignPanel panel = (MainToolAlignPanel)displayedJPanel;
-		return panel.getSelectedContigIDs();
-	}
-	
-	public void setSelectedClones(String selectedClones) {
-		strSelectedClones = selectedClones;
-	}
-	
-	public void setPrevDisplaySettings(int [] prevSettings){
-		prevDisplaySettings = prevSettings;
-	}
 	
 	public void close()
 	{
 		bottomPanel = null;
-		displayedJPanel = null;
-		if(selectedContigs != null) selectedContigs.clear();
+		ctgAlignPanel=null;
+		pairAlignPanel=null;
+		
 		if(ctgNameData != null) ctgNameData.clear();
 		if(ctgFullData != null) ctgFullData.clear();
 
@@ -656,9 +622,9 @@ public class SeqTopRowTab extends Tab {
 	private SeqGOPanel goPanel = null;
 	private SNPMultiPanel snpPanel = null; 
 	
-	private MainToolAlignPanel hitBestPanel = null;
-	private MainToolAlignPanel hitSelectedPanel = null;
-	private MainToolAlignPanel hitAllFramePanel = null;	
+	private PairViewPanel hitBestPanel = null;
+	private PairViewPanel hitSelectedPanel = null;
+	private PairViewPanel hitAllFramePanel = null;	
 	
 	/*******************************************************/
 	private int nRecordNum;	
@@ -666,25 +632,22 @@ public class SeqTopRowTab extends Tab {
 	private STCWFrame theMainFrame = null;
 	private MetaData metaData = null;
 	
-	private JButton rbDetails = null;
-	private JButton rbFrame = null;
-	private JButton rbContig = null;
-	private JButton rbSNP = null;
-	private JButton rbGO = null;
-	private JButton rbAlign = null;
+	private JButton rbDetails = null, rbFrame = null;
+	private JButton rbGO = null, rbAlign = null;
+	private JButton rbContig = null, rbSNP = null;
 	
 	private JPanel bottomPanel = null;
-	private JPanel displayedJPanel = null;
-	private TreeSet<String> selectedContigs = new TreeSet<String> ();
+	private PairViewPanel pairAlignPanel = null;
+	private ContigViewPanel ctgAlignPanel=null;
+	
 	private MultiCtgData ctgNameData = null;
 	private MultiCtgData ctgFullData = null;
-	private String strSelectedClones = ""; 
+
 	private String [] displayedHits1 = null;
 	private String [] displayedHits2 = null;
 	private String goHit = null;
 	
 	/**********************************************************/
-	private int [] prevDisplaySettings = null;
+	private int [] prevDisplaySettings = null; // not working right now
 	private int lastDisplay=0;
-	private boolean bBuriedShown = false;
 }

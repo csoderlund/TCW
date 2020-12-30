@@ -32,7 +32,7 @@ import util.methods.Static;
 
 public class UIfieldNFold extends JPanel {
 	private static final long serialVersionUID = 5636465225630988236L;
-	final int BASE = FieldContigData.N_FOLD_LIB;
+	final int BASE = FieldSeqData.N_FOLD_LIB;
 	
 	public UIfieldNFold( JCheckBox [] allLibraries, boolean bF) {
 		final int THEIGHT = 100;

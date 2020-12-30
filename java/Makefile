@@ -1,6 +1,6 @@
 # Makefile for sTCW and mTCW 
 JAVA_PATH=/usr
-#JAVA_PATH=/Library/Java/JavaVirtualMachines/jdk-14.0.1.jdk/Contents/Home
+#JAVA_PATH=/Library/Java/JavaVirtualMachines/adoptopenjdk-15.jdk/Contents/Home
 
 
 JAVA_FILES=	./src/sng/runDE/*.java \
@@ -14,6 +14,7 @@ JAVA_FILES=	./src/sng/runDE/*.java \
 			./src/sng/dataholders/*.java \
            	./src/sng/viewer/*.java \
            	./src/sng/viewer/panels/*.java \
+           	./src/sng/viewer/panels/align/*.java \
            	./src/sng/viewer/panels/Basic/*.java \
            	./src/sng/viewer/panels/seqDetail/*.java \
            	./src/sng/viewer/panels/seqTable/*.java \

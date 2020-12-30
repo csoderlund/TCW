@@ -25,11 +25,11 @@ import util.database.Globalx;
 import util.methods.*;
 
 
-public class ContigListTab extends Tab
+public class SeqTableTab extends Tab
 {		
 	private final String HTML = "html/viewSingleTCW/SeqTable.html";
 	
-	public ContigListTab ( 	STCWFrame inFrame, FieldMapper inContigFields, 
+	public SeqTableTab ( 	STCWFrame inFrame, FieldMapper inContigFields, 
 							RunQuery inQuery, String [] contigs, 
 							Vector <String> tableRows, 
 							int nTotalContigs, String summary)
@@ -40,7 +40,7 @@ public class ContigListTab extends Tab
 		super.setAlignmentX(Component.LEFT_ALIGNMENT);
 		
 		hasGOs = inFrame.getMetaData().hasGOs();
-		isAAdb = inFrame.getMetaData().isProteinDB(); 
+		isAAdb = inFrame.getMetaData().isAAsTCW(); 
 		hasReps = inFrame.getMetaData().hasReps();
 		
 		theContigIDs = contigs;
@@ -252,9 +252,9 @@ public class ContigListTab extends Tab
 	private void doRefreshColumns() {
 		if (contigTable!=null) contigTable.clearTable();
 		if(theContigIDs != null) // from Basic Query, where query is list of contigs
-			getParentFrame().loadQueryContigs( ContigListTab.this, theQuery, theContigIDs, nViewMode,  null );
+			getParentFrame().loadQueryContigs( SeqTableTab.this, theQuery, theContigIDs, nViewMode,  null );
 		else if(theQuery != null)
-			getParentFrame().loadQueryFilter( ContigListTab.this, theQuery, null );
+			getParentFrame().loadQueryFilter( SeqTableTab.this, theQuery, null );
 		else {
 			System.out.println("TCW error in Refresh Columns");
 		}
@@ -266,14 +266,14 @@ public class ContigListTab extends Tab
 		if (nRow < 0) return;
 		
 		String strName = (String)theFields.extractFieldByID( contigTable.getRowAt(nRow), 
-				FieldContigData.SEQ_ID_FIELD);
+				FieldSeqData.SEQ_ID_FIELD);
 		getParentFrame().addContigPage(strName, this, nRow);
 	}
 	
 	public String getContigIDAtRow(int nRow) {
 		if (nRow >= 0 && nRow < contigTable.getDataRowCount())
 			return (String)theFields.extractFieldByID( contigTable.getRowAt(nRow), 
-					FieldContigData.SEQ_ID_FIELD );		
+					FieldSeqData.SEQ_ID_FIELD );		
 		return null;
 	}
 	

@@ -15,6 +15,7 @@ import java.util.Vector;
 import java.sql.ResultSet;
 
 import cmp.database.Globals;
+import cmp.database.DBinfo;
 import cmp.compile.runMTCWMain;
 
 import util.database.DBConn;
@@ -27,38 +28,83 @@ import util.methods.TCWprops;
 
 public class MultiAlignData {
 	// if either of the following is 1, then running MstatX
-	private final int BUILTIN =     Globals.MSA.BUILTIN_SCORE;
-	private final int MSTATX_TYPE = Globals.MSA.MSTATX_SCORE;
+	private final int tBUILT =  Globals.MSA.BUILTIN_SCORE;
+	private final int tMSTATX = Globals.MSA.MSTATX_SCORE;
 
-	private int    msaScoreType1=BUILTIN, msaScoreType2 = BUILTIN;  // Defaults set in runMTCWMain
+	private int    msaScoreType1=tBUILT, msaScoreType2 = tBUILT;  // Defaults set in runMTCWMain
 	private String msaScoreName1 = Globals.MSA.SoP, msaScoreName2 = Globals.MSA.Wep;
 	private String scoreMethods=null;
-	private int nMSTATX=0;
+	private int    nMSTATX=0;
 	
 	private final int    SEQUENCE_LINE_LENGTH = 80;
-	private final int    MUSCLE =   Globals.Ext.MUSCLE;
 	private final String BASEDIR =  Globalx.ALIGNDIR;
 	
-	private final String inFileName =     "inSeq.fa";
-	private final String outFileName =    "outAln.fa";
-	private final String msaTraceFileName =  "trace.log";
-	private final String score1FileName = "msa_score1.txt"; // Mstatx results
-	private final String score2FileName = "msa_score2.txt"; // Mstatx results
+	private final String inFileName =     	"inSeq.fa";
+	private final String outFileName =    	"outAln.fa";
+	private final String msaTraceFileName = "trace.log";
+	private final String mstatxPre = "MstatX";
 	private final String consName = Globals.MSA.consName;
 	
 	/*******************************************************
 	 * Already aligned: Get the MSA from database
-	 * 1. View: seq.align.MultiViewPanel
-	 * 2. Run:  compile.MultiStats
 	 */
-	public MultiAlignData(boolean isRun) {
-		if (isRun) setRunMultiParam();
+	// Run:  compile.MultiStats - score type can be changed in runMultiTCW
+	public MultiAlignData() {
+		this.isRun = true;
+		
+		msaScoreType1 = runMTCWMain.msaScore1; 
+		msaScoreName1 = runMTCWMain.strScore1;
+		String prt1 = msaScoreName1;
+		if (msaScoreType1==tMSTATX) {
+			prt1=  mstatxPre + " " + prt1;
+			msaScoreName1 = msaScoreName1.toLowerCase(); // for Mstatx
+			nMSTATX++;
+		}	
+		msaScoreType2 = runMTCWMain.msaScore2; 
+		msaScoreName2 = runMTCWMain.strScore2;
+		String prt2 = msaScoreName2;
+		if (msaScoreType2==tMSTATX) {
+			prt2=  mstatxPre + " " + prt2;
+			msaScoreName2 = msaScoreName2.toLowerCase(); // for Mstatx
+			nMSTATX++;
+		}
+		scoreMethods =  prt1 + ";" + prt2;
+		
+		Out.PrtSpMsg(1,"MSA Score1 " + prt1);
+		Out.PrtSpMsg(1,"MSA Score2 " + prt2);
 	}
-	public boolean getAlignFromDB(DBConn mDB, int grpID) {
+	// View: seq.align.MultiViewPanel - get score type from DBinfo
+	public MultiAlignData(DBinfo info) {
+		this.isRun = false;
+		if (info==null) return; // MSAdb
+		
+		String l = mstatxPre.toLowerCase();
+		
+		String s1 = info.getMSA_Score1();
+		if (s1.toLowerCase().startsWith(l)) {
+			msaScoreType1 = tMSTATX;
+			msaScoreName1 = s1.substring(s1.indexOf(" ")).trim();
+			nMSTATX++;
+		}
+		else msaScoreName1 = s1.trim();
+		
+		String s2 = info.getMSA_Score2();
+		if (s2.toLowerCase().startsWith(l)) {
+			msaScoreType2 = tMSTATX;
+			msaScoreName2 = s2.substring(s2.indexOf(" ")).trim();
+			nMSTATX++;
+		}
+		else msaScoreName2 = s2.trim();
+	}
+	/**********************************************************************
+	 * viewMulti - MSAdb
+	 * runMulti -  scores only
+	 */
+	public boolean loadAlignFromDB(DBConn mDB, int grpID) {
 		try {	
 			ResultSet rs = mDB.executeQuery("select conSeq, count, PGstr from pog_groups where PGid="+grpID);
 			if (!rs.next()) {
-				computeFailure("No alignment in database for this cluster " + grpID, "No align");
+				alignFailure("No alignment in database for this cluster " + grpID, "No align");
 				return false; 
 			}
 			String conSeq = rs.getString(1);
@@ -100,6 +146,14 @@ public class MultiAlignData {
 				nameVec.add(aName[i]);
 				algnSeqVec.add(aSeq[i]);
 			}
+			
+			rs = mDB.executeQuery("select score1, score2 from pog_scores where PGid=" + grpID);
+			if (rs.next()) {
+				strColScores1=rs.getString(1);
+				strColScores2=rs.getString(2);
+			}
+			else strColScores1=strColScores2=null;
+				
 			return true;
 		}
 		catch(Exception e) {
@@ -111,41 +165,39 @@ public class MultiAlignData {
 		return false;
 	}
 	/*****************************************************************
-	 * Run: can only score AA. 
+	 * Run: can only score AA. Called from cmp.compile.MultiStats
 	 */
 	public boolean scoreOnly() {
 		try {
-			if (msaScoreType1==MSTATX_TYPE || msaScoreType2==MSTATX_TYPE) {
+			if (msaScoreType1==tMSTATX || msaScoreType2==tMSTATX) {
 				setOutAlgnFile(true);
-				writeSeqVec(outAlgnFile, algnSeqVec); // writes the aligned nameVec and seqVec
+				writeSeqVec(outAlgnFile, algnSeqVec); // writes the previously aligned sequences
 			}
-			scoreMSA(false /* prt cmd */); 
+			scoreMSA(); 
 			return true;
 		}
 		catch(Exception e) {ErrorReport.reportError(e, "Cannot get alignment from db"); return false;}
 	}
 	/*************************************************************************
-	 * XXX Everything below is for running a multi-alignment with scores
+	 * XXX multi-alignment with scores
+	 * viewMulti: bView true - write scores to file
+	 * runMulti:  bView false - write scores to DB
 	 */
-	public MultiAlignData(int alignPgm, boolean isRun) {
-		this.alignPgm = alignPgm;
+	public int runAlignPgm(int alignPgm, boolean isAA) {
+		int rc = runAlign(alignPgm, isAA);
+		if (rc!=0) return rc;
 		
-		if (isRun) setRunMultiParam();
+		alignConsensus(isAA);
+		if (isAA) scoreMSA(); 
+			
+		return 0;
 	}
-	public void setAlignPgm(int alignPgm) { // CAS312 for run.multiAlign
-		this.alignPgm = alignPgm;
-		clear();
-	}
-	
-	// viewMulti: prtCmd false, prtScores true - write scores to file
-	// runMulti:  prtCmd false, prtScores false
-	public int runAlignPgm(boolean prtCmd, boolean prtScores, boolean isAA) {
+	private int runAlign(int alignPgm, boolean isAA) {
 		String cmd=""; 
 		int rc=0;
 		
 		try {
-			long time = Out.getTime();
-
+		/** write sequence to file **/
 			setOutAlgnFile(isAA); // creates ResultAlign directory if necessary
 			File out = new File(outAlgnFile);
 			if (out.exists()) out.delete();
@@ -156,50 +208,41 @@ public class MultiAlignData {
 			writeSeqVec(seqFile, origSeqVec);
 			
 			String cmdPath = TCWprops.getExtDir();
-			if (alignPgm==MUSCLE) cmdPath +=  Globals.Ext.muscleExe;
-			else 				  cmdPath +=  Globals.Ext.mafftExe;
-	
+			
 		/** run alignment **/		
 			RunCmd rCmd = new RunCmd();
 			
 			if (alignPgm==Globals.Ext.MUSCLE) {
-				cmd = cmdPath + " -in " + seqFile + " -out " + outAlgnFile;
-				rc = rCmd.runP(cmd, prtCmd);
+				cmd = cmdPath + Globals.Ext.muscleExe + " -in " + seqFile + " -out " + outAlgnFile;
+				rc = rCmd.runP(cmd, false /* prt cmd */);
 			}
 			else { 
 				int cpus = Runtime.getRuntime().availableProcessors(); 
-				cmd = cmdPath + " --auto --reorder --thread " + cpus + " " + seqFile;
+				
+				cmd = cmdPath + Globals.Ext.mafftExe + " --auto --reorder --thread " + cpus + " " + seqFile;
 				String traceFile = outDir + msaTraceFileName;
 				
-				rc = rCmd.runP(cmd, outAlgnFile, traceFile, prtCmd);
+				rc = rCmd.runP(cmd, outAlgnFile, traceFile,  false /* prt cmd */);
 			}
 			if (rc!=0) {
 				Out.prt(cmd); // CAS303
-				//computeFailure("Failed alignment", "Failed"); CAS303 prints in calling routine
 				return rc;
 			}
 			
+		/** read alignment to nameVec and alignSeqVec **/	
 			if (!readAlgnSeq(outAlgnFile)) {
-				computeFailure("Failed reading alignment", "Failed");
-				return rc;
+				alignFailure("Failed reading alignment", "Failed");
+				return -1;
 			}
-		
-		/** create consensus at pos0 **/
-			computeConsensus(isAA);
-			if (prtScores) {
-				String xx = (alignPgm==Globals.Ext.MUSCLE) ? "MUSCLE " : "MAFFT ";
-				Out.PrtSpMsgTime(0, xx + (nameVec.size()-1) + " in " + outAlgnFile, time);
-			}
-			
-		/** compute MSA score **/
-			if (isAA) scoreMSA(prtCmd); 
-			return rc;
+			return 0;
 		} 
 		catch(Exception e) {ErrorReport.reportError(e, "Exec: " + cmd); return -1;}
 	}
 	
-	// Set consensus for alignment
-	private void computeConsensus(boolean isAA) {
+	/************************************************
+	 * Compute consensus for alignment
+	 */
+	private void alignConsensus(boolean isAA) {
 		String conSeq = "";
 		
 		int seqLen = algnSeqVec.get(0).length(); //All sequences are aligned.. they are all the same length
@@ -215,33 +258,32 @@ public class MultiAlignData {
 			}
 			
 			//Convert counts to a ordered list
-			Vector <SymbolCount> cList = new Vector<SymbolCount> ();
+			Vector <AlignSymbol> cList = new Vector<AlignSymbol> ();
 			for(Map.Entry<Character, Integer> val : counts.entrySet())
-				cList.add(new SymbolCount(val.getKey(), val.getValue()));
+				cList.add(new AlignSymbol(val.getKey(), val.getValue()));
 		
 			//Map no longer needed at this point
 			counts.clear();
 			Collections.sort(cList);
 			
 			//Test if the there is one symbol most frequent
-			if( getTotalCount(cList) <= 1)
+			if( alignTotalCount(cList) <= 1)
 				conSeq += Globals.gapCh;
-			else if( cList.size() == 1 || (cList.get(0).count > cList.get(1).count && cList.get(0).symbol != Globals.gapCh))
+			else if(cList.size() == 1 || (cList.get(0).count>cList.get(1).count && cList.get(0).symbol!=Globals.gapCh))
 				conSeq += cList.get(0).symbol;
-			else if ( cList.get(0).symbol == Globals.gapCh && (cList.size() == 2 || cList.get(1).count > cList.get(2).count))
+			else if (cList.get(0).symbol == Globals.gapCh && (cList.size()==2 || cList.get(1).count>cList.get(2).count))
 				conSeq += cList.get(1).symbol;
 			else
-				conSeq += getMostCommonRelated(cList, isAA);
+				conSeq += alignBestChar(cList, isAA);
 		}
 		nameVec.insertElementAt(consName, 0);
 		algnSeqVec.insertElementAt(conSeq, 0);
 	}
-	private Character getMostCommonRelated(Vector<SymbolCount> symbols, boolean isAA) {
+	private Character alignBestChar(Vector<AlignSymbol> symbols, boolean isAA) {
 		//Special case: need at least 2 non-gap values to have consensus
-		if(getTotalCount(symbols) == 1)
+		if(alignTotalCount(symbols) == 1)
 			return Globals.gapCh;
 		
-		//Create/initialize counters
 		int [] relateCounts = new int[symbols.size()];
 		for(int x=0; x<relateCounts.length; x++)
 			relateCounts[x] = 0;
@@ -272,31 +314,31 @@ public class MultiAlignData {
 		}
 		return symbols.get(maxPos).symbol;
 	}
-	private static int getTotalCount(Vector <SymbolCount> cList) {
+	private static int alignTotalCount(Vector <AlignSymbol> cList) {
 		int retVal = 0;
 		
-		Iterator<SymbolCount> iter = cList.iterator();
+		Iterator<AlignSymbol> iter = cList.iterator();
 		while(iter.hasNext()) {
-			SymbolCount temp = iter.next();
+			AlignSymbol temp = iter.next();
 			if(temp.symbol != Globals.gapCh)
 				retVal += temp.count;
 		}
 		return retVal;
 	}
 	//Data structure for sorting/retrieving counts
-	private class SymbolCount implements Comparable<SymbolCount> {
-		public SymbolCount(Character symbol, Integer count) {
+	private class AlignSymbol implements Comparable<AlignSymbol> {
+		public AlignSymbol(Character symbol, Integer count) {
 			this.symbol = symbol;
 			this.count = count;
 		}
-		public int compareTo(SymbolCount arg) {
+		public int compareTo(AlignSymbol arg) {
 			return -1 * count.compareTo(arg.count);
 		}
 		public Character symbol;
 		public Integer count;
 	}
 	// viewMultiTCW will try to display - 
-	private void computeFailure(String msg, String name) {
+	private void alignFailure(String msg, String name) {
 		try {
 			Out.PrtError(msg);
 			nameVec.insertElementAt(name, 0);
@@ -305,31 +347,54 @@ public class MultiAlignData {
 	}
 	/*********************************************************
 	// Compute MSA score
-	 * prtSc -  for built-in - print to file (MstatX prints to file)
+	 * bView -  true - print to file if builtin, false - save to DB
 	 * prtCmd - MstatX - print command
 	******************************************************/
-	private void scoreMSA(boolean prtCmd) {
+	private void scoreMSA() {
 		try {
 			ScoreMulti smObj = new ScoreMulti();
-			String [] alignSeq=null;
-			if (nMSTATX<2) alignSeq = algnSeqVec.toArray(new String[algnSeqVec.size()]);
+			
+			String [] alignSeq= (nMSTATX<2) ? algnSeqVec.toArray(new String[algnSeqVec.size()]) : null;
 			
 		/** Score 1 Default type0 Sum-of-pairs **/
-			if (msaScoreType1==MSTATX_TYPE) 
-				msa_score1 = smObj.scoreMstatX(prtCmd, msaScoreName1, outAlgnFile, outDir+score1FileName);
+			if (msaScoreType1==tMSTATX) {
+				String resultFile = getScoreFile(mstatxPre + "_" + msaScoreName1);
+				glScore1 = smObj.scoreMstatX(msaScoreName1, outAlgnFile, resultFile);
+			}
 			else 
-				msa_score1 = smObj.scoreSumOfPairs(grpName, alignSeq);
-			colScores1 = smObj.getColScore();
-				
-		/** Score 2 Default type1 Built-in Entropy **/		
-			if (msaScoreType2==MSTATX_TYPE) 
-				msa_score2 = smObj.scoreMstatX(prtCmd, msaScoreName2, outAlgnFile, outDir+score2FileName);
-			else 
-				msa_score2 = smObj.scoreEntropy(grpName, alignSeq);
-			colScores2 = smObj.getColScore();
+				glScore1 = smObj.scoreSumOfPairs(grpName, alignSeq, isRun);
 			
-			if (Double.isNaN(msa_score1)) msa_score1=Globalx.dNoVal; // SoP can be negative....
-			if (Double.isNaN(msa_score2)) msa_score2=Globalx.dNoVal;
+			double [] score1 = smObj.getScores();
+			String [] tScore1 = smObj.getStrSc();
+			if (Double.isNaN(glScore1)) glScore1=Globalx.dNoVal; // non-norm SoP can be negative....
+				
+		/** Score 2 Default type1 Built-in Entropy **/	
+			if (msaScoreType2==tMSTATX) {
+				String resultFile = getScoreFile(mstatxPre + "_"  + msaScoreName2);
+				glScore2 = smObj.scoreMstatX(msaScoreName2, outAlgnFile, resultFile);
+			}
+			else 
+				glScore2 = smObj.scoreEntropy(grpName, alignSeq);
+			
+			double [] score2 = smObj.getScores();
+			String [] tScore2 = smObj.getStrSc();
+			if (Double.isNaN(glScore2)) glScore2=Globalx.dNoVal;
+			
+			if (!isRun) {
+				if (msaScoreType1!=tMSTATX && tScore1!=null) writeScore("SoP", tScore1);
+				if (msaScoreType2!=tMSTATX && tScore2!=null) writeScore("Wentropy", tScore2);
+			}
+			
+		/** Comma delimited list for saving and for MSA View **/
+			strColScores1=strColScores2=null;
+			for (double d : score1) {
+				if (strColScores1==null)  	strColScores1 =  String.format("%.3f", d);
+				else 						strColScores1 += String.format(", %.3f", d);
+			}
+			for (double d : score2) {
+				if (strColScores2==null)  	strColScores2 =  String.format("%.3f", d);
+				else 						strColScores2 += String.format(", %.3f", d);
+			}
 		} 
 		catch(Exception e) {ErrorReport.reportError(e, "Write Scores");}
 	}
@@ -370,7 +435,7 @@ public class MultiAlignData {
 	}
 	/*******************************************************************
 	 * 1. Write original sequences for MSA
-	 * 2. Write aligned sequences for scoreing
+	 * 2. Write aligned sequences for scoring MSTATX
 	 *****/
 	private void writeSeqVec(String fname, Vector <String> seqVec) {
 		try {
@@ -394,45 +459,18 @@ public class MultiAlignData {
 			out.close();
 		} catch(Exception e) {ErrorReport.reportError(e);}
 	}
-	/*****************************************************
-	 * Setup for scores.
-	 */
-	private void setRunMultiParam() {
-		msaScoreType1 = runMTCWMain.msaScore1; 
-		msaScoreName1 = runMTCWMain.strScore1;
-		String prt1 = msaScoreName1;
-		if (msaScoreType1==MSTATX_TYPE) {
-			prt1=  "Mstatx " + prt1;
-			msaScoreName1 = msaScoreName1.toLowerCase(); // for Mstatx
-			nMSTATX++;
-		}	
-		msaScoreType2 = runMTCWMain.msaScore2; 
-		msaScoreName2 = runMTCWMain.strScore2;
-		String prt2 = msaScoreName2;
-		if (msaScoreType2==MSTATX_TYPE) {
-			prt2=  "Mstatx " + prt2;
-			msaScoreName2 = msaScoreName2.toLowerCase(); // for Mstatx
-			nMSTATX++;
-		}
-		scoreMethods =  prt1 + ";" + prt2;
-		
-		Out.PrtSpMsg(1,"MSA Score1 " + prt1);
-		Out.PrtSpMsg(1,"MSA Score2 " + prt2);
-	}
 	
-	// TODO cmp.viewer.seq.align.MultiViewPanel for aligning a selected set
-	// Get score types from dbInfo
-	private void setViewMultiParam(String type1, String type2) {
-		if (type1.startsWith("MstatX")) {
-			msaScoreType1 = MSTATX_TYPE;
-			msaScoreName1 = type1.substring(type1.indexOf(" "));
-		}
-		if (type2.startsWith("MstatX")) {
-			msaScoreType2 = MSTATX_TYPE;
-			msaScoreName2 = type1.substring(type1.indexOf(" "));
-		}
+	private void writeScore(String name, String [] score) { 
+		try {
+			String fname = getScoreFile(name);
+			PrintWriter out = new PrintWriter(new FileWriter(fname));
+			
+			for (int i=0; i<score.length; i++) {
+				out.println(score[i]);
+			}
+			out.close();
+		} catch(Exception e) {ErrorReport.reportError(e);}
 	}
-	
 	private void setOutAlgnFile(boolean isAA) {
 		String x = (isAA) ? "AA_" : "NT_";
 		File b = new File(BASEDIR);
@@ -440,7 +478,9 @@ public class MultiAlignData {
 		outDir = BASEDIR + "/";
 		outAlgnFile = outDir + x + outFileName;
 	}
-	
+	private String getScoreFile(String name) {
+		 return outDir + Globals.MSA.filePrefix + name + ".txt";
+	}
 	/******************************************************
 	 * Set sequence by calling program
 	 * runMulti -  called from ScoreMulti
@@ -452,7 +492,6 @@ public class MultiAlignData {
 	}
 	/***************************************************
 	 * get results by calling program 
-	 * seqVec has been changed from original sequence to aligned
 	 ***/
 	public String [] getSequenceNames() { 
 		return nameVec.toArray(new String[nameVec.size()]); 
@@ -460,8 +499,13 @@ public class MultiAlignData {
 	public String [] getAlignSeq() { // returns aligned seqs after alignSequences is called
 		return algnSeqVec.toArray(new String[algnSeqVec.size()]); 
 	}
-	public double getMSA_Score1() {return msa_score1;}
-	public double getMSA_Score2() {return msa_score2;}
+	
+	public double getMSA_gScore1() {return glScore1;}
+	public double getMSA_gScore2() {return glScore2;}
+	
+	public String getGlScores()   {return String.format("(%.3f,%.3f)", glScore1, glScore2);}
+	public String getColScores1() {return strColScores1;} 
+	public String getColScores2() {return strColScores2;}
 	
 	public String getScoreMethods() { return scoreMethods;} // for entering into database
 	
@@ -469,11 +513,9 @@ public class MultiAlignData {
 		nameVec.clear();
 		algnSeqVec.clear();
 		origSeqVec.clear();
-		if (colScores1!=null) colScores1.clear();
-		if (colScores2!=null) colScores2.clear();
 	}
 	/*********************************************************************/
-	private double msa_score1=Globalx.dNoVal, msa_score2=Globalx.dNoVal;
+	private double glScore1=Globalx.dNoVal, glScore2=Globalx.dNoVal;
 	private String outDir=null, outAlgnFile=null;
 	
 	// holds names, where 'consensus' is the first entry after alignment
@@ -484,10 +526,10 @@ public class MultiAlignData {
 	private Vector<String> algnSeqVec = new Vector<String> ();
 	
 	// holds column scores
-	private Vector <String> colScores1 = null; // col# score; skip last line
-	private Vector <String> colScores2 = null;
+	private String strColScores1=null, strColScores2=null; // comma delimited list
 	
 	private ScoreAA scoreObj = new ScoreAA ();
-	private int alignPgm;
-	private String grpName="";
+	private String grpName=""; // Only for loadAlignFromDB
+	
+	private boolean isRun=false;
 }

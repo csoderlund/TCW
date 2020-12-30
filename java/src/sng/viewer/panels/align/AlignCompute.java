@@ -5,7 +5,7 @@
  * CoreAnno.doHomologyTests: pairwise Nucleotide against nucleotide alignment
  * PairTopRowTab: display pairwise contigs
  */
-package util.align;
+package sng.viewer.panels.align;
 
 import java.lang.Math;
 import java.util.ArrayList;
@@ -16,9 +16,11 @@ import java.util.Vector;
 
 import sng.dataholders.*;
 import sng.viewer.panels.seqDetail.SeqDetailPanel;
+import util.align.AlignPairOrig;
 import util.database.Globalx;
 import util.methods.BlastArgs;
 import util.methods.ErrorReport;
+import util.methods.Out;
 
 public class AlignCompute 
 {
@@ -36,11 +38,12 @@ public class AlignCompute
 	static public Vector<AlignData> DBhitsAlignDisplay(
 			Vector <String> seqList, Vector <String> hitList, Vector <BlastHitData> blastList,
 			HashMap <String, ContigData> seqObj,HashMap <String, SequenceData> hitObj, 
-			short type, boolean isP)  {
+			short type, boolean isP)  
+	{
 		 dpAlgoObj = new AlignPairOrig ();
 		 alignList = new Vector<AlignData> ();
 		 typeResult = type;
-		 isProteinDB = isP;
+		 isAAsTCW = isP;
 		
 		 for (int i=0; i<seqList.size(); i++) {
 			 ContigData ctgData = seqObj.get(seqList.get(i));
@@ -64,7 +67,7 @@ public class AlignCompute
        dpAlgoObj = new AlignPairOrig ();
        alignList = new Vector<AlignData> ();
        typeResult = type;
-       isProteinDB = isP;
+       isAAsTCW = isP;
         
         // just one contig in set
   	   TreeSet<String> contigSet = listData.getContigIDSet(); 
@@ -72,24 +75,24 @@ public class AlignCompute
        ContigData ctgData1 = listData.findContig( it.next() );	
 		
        for (String hitName : selected) {
-    	   		String seq = seqPanel.getHitSeq(hitName);
-    	   		String dbtype = seqPanel.getHitType(hitName);
-    	   		
-    	   		SequenceData seqData = new SequenceData(dbtype);
-    	   		seqData.setSequence(seq);
-    	   		seqData.setName(hitName);
-    	   		
-    	   		boolean isProtein;
-    	   		dbtype = dbtype.toLowerCase();
-    	   		if (dbtype.equals("sp") || dbtype.equals("tr") || dbtype.equals("pr")) isProtein = true;
-    	   		else if (dbtype.equals("nt")) isProtein  = false;
-    	   		else isProtein = BlastArgs.isProtein(seq);
-    	   		
-    	   		BlastHitData blastData = new BlastHitData(hitName, isProtein, 
-    	   				seqPanel.getHitStart(hitName), seqPanel.getHitEnd(hitName), seqPanel.getHitMsg(hitName));
-    	   		seqData.setBlastHitData(blastData);
-    	   		
-    	   		hitAlign(ctgData1, seqData);
+	   		String seq = seqPanel.getHitSeq(hitName);
+	   		String dbtype = seqPanel.getHitType(hitName);
+	   		
+	   		SequenceData seqData = new SequenceData(dbtype);
+	   		seqData.setSequence(seq);
+	   		seqData.setName(hitName);
+	   		
+	   		boolean isProtein;
+	   		dbtype = dbtype.toLowerCase();
+	   		if (dbtype.equals("sp") || dbtype.equals("tr") || dbtype.equals("pr")) isProtein = true;
+	   		else if (dbtype.equals("nt")) isProtein  = false;
+	   		else isProtein = BlastArgs.isProtein(seq);
+	   		
+	   		BlastHitData blastData = new BlastHitData(hitName, isProtein, 
+	   				seqPanel.getHitStart(hitName), seqPanel.getHitEnd(hitName), seqPanel.getHitMsg(hitName));
+	   		seqData.setBlastHitData(blastData);
+	   		
+	   		hitAlign(ctgData1, seqData);
        }
 	
        clear(true);
@@ -101,20 +104,19 @@ public class AlignCompute
 	{		
 		ctgDataI = ctgData;
 		ctgDataII = null;
-		label = "";
 		
 		SequenceData seq1 = ctgData.getSeqData(); // for proteins
-		if (!isProteinDB) seq1 = seq1.newSeqDataNoGap();
+		if (!isAAsTCW) seq1 = seq1.newSeqDataNoGap();
 		
 		SequenceData seq2 = seqData.newSeqDataNoQual();
 		BlastHitData hitData = seqData.getBlastHitData();
 		
-		if (!hitData.isProtein()) {	// database is nt and hit is nt
+		if (!hitData.isAAhit()) {	// database is nt and hit is nt
 			seq2.setIsDNA(); 
 			if (typeResult==frameResult) typeResult=bestResult;
 			hitAlignNT(seq1, seq2, 1, 0, hitData);
 		}
-		else if (isProteinDB)       // database and hit are aa
+		else if (isAAsTCW)       // database and hit are aa
 			hitAlignAA(seq1, seq2, 0, 0, hitData);
 		else {						// database is nt and hit is as
 			int f1 = hitData.getFrame1(seq1.getLength()); 
@@ -174,7 +176,7 @@ public class AlignCompute
 			int s1, e1;
 			if (f1 < 0) 		{s1 = -3; e1 = -1;}
 			else if (f1 > 0)	{s1 = 1;  e1 = 3;}
-			else 			{s1 = -3; e1 = 3;}
+			else 				{s1 = -3; e1 = 3;}
 			
 			for ( int i = s1; i <= e1; i++ )
 			{
@@ -197,11 +199,11 @@ public class AlignCompute
 			int s1, e1, s2, e2;
 			if (f1 < 0) 		{s1 = -3; e1 = -1;}
 			else if (f1 > 0)	{s1 = 1;  e1 = 3;}
-			else 			{s1 = -3; e1 = 3;}
+			else 				{s1 = -3; e1 = 3;}
 			
 			if (f2 < 0) 		{s2 = -3; e2 = -1;}
 			else if (f2 > 0)	{s2 = 1;  e2 = 3;}
-			else 			{s2 = -3; e2 = 3;}
+			else 			    {s2 = -3; e2 = 3;}
 			
 			for ( int i = s1; i <= e1; i++ )
 				for ( int j = s2; j <= e2; j++ )
@@ -223,8 +225,7 @@ public class AlignCompute
 				}
 		}
 		else {
-			System.err.println("***Internal error: alignAA " + typeResult + " " + f1 + " " + f2);
-			System.exit(-1);
+			Out.die("***Internal error: alignAA " + typeResult + " " + f1 + " " + f2);
 		}	
 	}
 		
@@ -345,8 +346,8 @@ public class AlignCompute
 	        ctgDataI = pairCtgObj.getContigAt(0);	
       		SequenceData ntSeq1 = ctgDataI.getSeqData().newSeqDataNoGap();
       				
-    	    		ctgDataII = pairCtgObj.getContigAt(1);
-    	    		SequenceData ntSeq2 = ctgDataII.getSeqData().newSeqDataNoGap();
+    	    ctgDataII = pairCtgObj.getContigAt(1);
+    	    SequenceData ntSeq2 = ctgDataII.getSeqData().newSeqDataNoGap();
 	    			
             BlastHitData hitData = pairCtgObj.getPairHit(); // Blast and CoreAnno values from database
 		 	int f1 = hitData.getFrame1(); 
@@ -354,37 +355,37 @@ public class AlignCompute
  		
 		 	AlignData alignObj;
             if (type==frameResult) {
-            		alignObj = alignNTdoDP (ntSeq1, ntSeq2, f1, f2, hitData);
-            		if (alignObj != null) alignList.add(alignObj);
-            		
-            		alignObj = alignAAdoDP (ntSeq1, ntSeq2, f1, f2, hitData);
-            		if (alignObj != null) alignList.add(alignObj);
+        		alignObj = alignNTdoDP (ntSeq1, ntSeq2, f1, f2, hitData);
+        		if (alignObj != null) alignList.add(alignObj);
+        		
+        		alignObj = alignAAdoDP (ntSeq1, ntSeq2, f1, f2, hitData);
+        		if (alignObj != null) alignList.add(alignObj);
             }
             else { // all frame
-            		AlignData nt1Obj = alignNTdoDP (ntSeq1, ntSeq2, 1, 1, hitData);
-            		if (nt1Obj != null)  alignList.add(nt1Obj);
-            		AlignData nt2Obj = alignNTdoDP (ntSeq1, ntSeq2, 1, -1, hitData);
-            		if (nt2Obj != null)  alignList.add(nt2Obj);
-            		
-            		int of1=1, of2=1;
-            		if (nt1Obj.getOLPsim() < nt2Obj.getOLPsim()) of2=-1;
-            		boolean orient = isSameOrient(of1, of2);
-    				
-            		alignObj = alignAAdoDP (ntSeq1, ntSeq2, f1, f2, hitData);
-    				if (alignObj != null) alignList.add(alignObj);
-    				
-            		for ( int i = 3; i >= -3; i-- )
-            			for ( int j = 3; j >= -3; j-- )
-            			{
-            				if (i==0 || j==0) continue;
-            				if (i==f1 && j==f2) continue;
-            				if (type==orientResult) {
-            					boolean o = isSameOrient(i, j);
-            					if (o!=orient) continue;
-            				}
-            				alignObj = alignAAdoDP (ntSeq1, ntSeq2, i, j, hitData);
-            				if (alignObj != null) alignList.add(alignObj);
-            			}
+        		AlignData nt1Obj = alignNTdoDP (ntSeq1, ntSeq2, 1, 1, hitData);
+        		if (nt1Obj != null)  alignList.add(nt1Obj);
+        		AlignData nt2Obj = alignNTdoDP (ntSeq1, ntSeq2, 1, -1, hitData);
+        		if (nt2Obj != null)  alignList.add(nt2Obj);
+        		
+        		int of1=1, of2=1;
+        		if (nt1Obj.getOLPsim() < nt2Obj.getOLPsim()) of2=-1;
+        		boolean orient = isSameOrient(of1, of2);
+				
+        		alignObj = alignAAdoDP (ntSeq1, ntSeq2, f1, f2, hitData);
+				if (alignObj != null) alignList.add(alignObj);
+				
+        		for ( int i = 3; i >= -3; i-- )
+        			for ( int j = 3; j >= -3; j-- )
+        			{
+        				if (i==0 || j==0) continue;
+        				if (i==f1 && j==f2) continue;
+        				if (type==orientResult) {
+        					boolean o = isSameOrient(i, j);
+        					if (o!=orient) continue;
+        				}
+        				alignObj = alignAAdoDP (ntSeq1, ntSeq2, i, j, hitData);
+        				if (alignObj != null) alignList.add(alignObj);
+        			}
             }
 	        clear(true);
 	        return alignList;
@@ -400,7 +401,7 @@ public class AlignCompute
 	{
         dpAlgoObj = new AlignPairOrig ();
         alignList = new Vector<AlignData> ();
-        isProteinDB = isP;
+        isAAsTCW = isP;
         typeResult = frameResult; 
 		
         ContigData ctgData1 = pairListObj.getContigAt(0);	
@@ -475,7 +476,7 @@ public class AlignCompute
 		ntSeq2.setSequenceToLower();
 		
 		// see comment below for same code in alignAAdoDP
-		if (!dpAlgoObj.DPalign ( ntSeq1.getSequence(), ntSeq2.getSequence(), isNT ))
+		if (!dpAlgoObj.DPalign ( ntSeq1.getSequence(), ntSeq2.getSequence(), isNT )) // XXX
 				return null;	
 		String seq1 = dpAlgoObj.getHorzResult(Globalx.gapCh); 
 		String seq2 = dpAlgoObj.getVertResult(Globalx.gapCh);
@@ -483,8 +484,8 @@ public class AlignCompute
 		ntSeq2.buildDPalignedSeq( seq2 );
 
 		AlignData curAlign = new AlignData ( 
-				label, dpAlgoObj, ctgDataI, ctgDataII, 
-				ntSeq1, ntSeq2, 0, 0, hitData, isProteinDB, seq1, seq2);
+				dpAlgoObj, ctgDataI, ctgDataII, 
+				ntSeq1, ntSeq2, 0, 0, hitData, isAAsTCW, seq1, seq2);
 
 		return curAlign;
 	} 
@@ -492,18 +493,18 @@ public class AlignCompute
     		SequenceData ntSeq1, SequenceData xxSeq2, int f1, int f2, 
     		BlastHitData hitData)
     {
-	    	try {
-	    		SequenceData aaSeq1, aaSeq2;
+	    try {
+	    	SequenceData aaSeq1, aaSeq2;
 	 
 			if ( f1 < 0)      aaSeq1 = ntSeq1.newSeqDataRevComp().newSeqDataNTtoAA(Math.abs(f1));
 			else if (f1 != 0) aaSeq1 = ntSeq1.newSeqDataNTtoAA(f1);
-			else              aaSeq1 = ntSeq1.newSeqDataNoQual();  // protein sequence
+			else              aaSeq1 = ntSeq1.newSeqData();  // protein sequence
 			
-			if ( f2 < 0)      aaSeq2 =  xxSeq2.newSeqDataRevComp().newSeqDataNTtoAA(Math.abs(f2));
+			if ( f2 < 0)      aaSeq2 = xxSeq2.newSeqDataRevComp().newSeqDataNTtoAA(Math.abs(f2));
 			else if (f2 !=0)  aaSeq2 = xxSeq2.newSeqDataNTtoAA(f2);
-			else              aaSeq2 = xxSeq2.newSeqDataNoQual(); // protein sequence		
-			
-			if (!dpAlgoObj.DPalign (aaSeq1.getSequence(), aaSeq2.getSequence(), !isNT ))
+			else              aaSeq2 = xxSeq2.newSeqData(); // protein sequence		
+	
+			if (!dpAlgoObj.DPalign (aaSeq1.getSequence(), aaSeq2.getSequence(), !isNT )) // XXX
 						return null;
 		
 			// Builds the alignment string with trailing and internal gaps
@@ -514,11 +515,11 @@ public class AlignCompute
 			aaSeq2.buildDPalignedSeq( seq2 );	
 			
 			return new AlignData ( 
-					label, dpAlgoObj, ctgDataI, ctgDataII, 
-					aaSeq1, aaSeq2, f1, f2, hitData, isProteinDB, seq1, seq2);
-	    	}
-	    	catch (Exception e) {crash(e, "AA DP alignment");}
-	    	return null;
+					dpAlgoObj, ctgDataI, ctgDataII, 
+					aaSeq1, aaSeq2, f1, f2, hitData, isAAsTCW, seq1, seq2);
+	    }
+	    catch (Exception e) {crash(e, "AA DP alignment");}
+	    return null;
     }
     // heuristics - true: cur better than best, false: keep best
     static private boolean cmpAlignData(AlignData cur, AlignData best) 
@@ -543,16 +544,14 @@ public class AlignCompute
  	static int typeResult=frameResult; 
  	static AlignPairOrig dpAlgoObj;
  	static ContigData ctgDataI=null, ctgDataII=null;
- 	static String label;
- 	static private boolean isProteinDB = false;
+ 	static private boolean isAAsTCW = false;
  	
  	// results
  	static Vector<AlignData> alignList = null;	
  	public static int cntNewBest=0; // for core pairwise
  	
      static private void clear(boolean flag) {
-     		if (flag) dpAlgoObj.clear();
-     		ctgDataI = ctgDataII = null;
-     		label = "";
+     	if (flag) dpAlgoObj.clear();
+     	ctgDataI = ctgDataII = null;
      }
 }

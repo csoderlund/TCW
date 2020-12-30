@@ -11,13 +11,16 @@ their coordinates stored in the database; any references to 'Hit' indicate these
 <li>Dynamic programming is a slower search, but is considered more likely to get the correct alignment;
 this display uses a semi-global dynamic programming with 
 affine gaps algorithm. 
-<li>In the display, the percentage after "AA" is the similarity for the dynamic programming algorithm. The statistics
+<li>In the display, the percentage after "DP:" is the similarity for the dynamic programming algorithm. The statistics
 after "Hit:" are from the search program results.
+<li>For the "Seq" view, overhangs are automatically trimmed to first and last 15 bases.
 </ul>
 
 <h2>Second row of buttons</h2>
-<p><b>View Bases</b> changes the display from a line drawing to the actual sequence.
-<p><b>Zoom</b> changes the horizontal zoom.
+<p><b>View Seq/Line</b> changes the display from a line drawing to the actual sequence.
+<p><b>Zoom</b> changes the horizontal zoom. The 1:1 displays each mismatch with no space between adjacent ones.
+The 1:N (N&gt;1) compresses the mismatches. The N:1 (N&gt;1) puts a space between adjacent mismatches, and 
+increases the width of the mismatch vertical line.
 
 <p><b>UTR</b> Highlights the UTRs in yellow (nucleotide databases only). 
 <br><i>Caveats:</i> The UTRs are not displayed if the RF is not the selected frame (this happens if there are hits
@@ -28,10 +31,12 @@ available for "Selected hit(s) in all frames".
 sequence is nucleotide, they are 
 are converted to protein coordinates and shifted to take account of the gaps.
 
-<br><i>Caveats:</i>  (1) The alignment are occasionally off by plus one. (2) This is not
+<br><i>Caveats:</i>  (1) The display starts at 0, whereas the search program coords start at 1. (2) This is not
 available for "Selected hit(s) in all frames".
+<p><u>Tool Tip</u> When the Hit is highlighted, mouse over the blue region and it will show the sequence coordinates (adjusted
+for AA sequences) and  the coordinates adjusted for gap insertion.
 
-<p><b>Alignment....</b> 
+<p><b>Align....</b> 
 This provides a multi-line character based alignment.
 This features requires that the 2nd sequence in an alignment pair be selected;
 if none is selected, then the first alignment pair will be aligned. 

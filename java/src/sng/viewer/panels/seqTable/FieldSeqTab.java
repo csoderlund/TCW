@@ -35,7 +35,7 @@ import util.ui.CollapsiblePanel;
 import util.ui.UserPrompt;
 import util.ui.DisplayFloat;
 
-public class FieldContigTab extends Tab implements ActionListener {
+public class FieldSeqTab extends Tab implements ActionListener {
 	private static final long serialVersionUID = -1208399171249754290L;
 	
 	private static final String HTML = "html/viewSingleTCW/SeqColumn.html";
@@ -48,13 +48,13 @@ public class FieldContigTab extends Tab implements ActionListener {
 	private String prefLabel() {return sTCWdb + "_ctgLabel";}
 	private String prefRound() {return "rounding";}
 	
-	public FieldContigTab ( STCWFrame inFrame) {
+	public FieldSeqTab ( STCWFrame inFrame) {
 		super(inFrame, null);
 		theParentFrame = inFrame;
 		
 		sTCWdb = theParentFrame.getdbName(); 
 		prefsRoot = theParentFrame.getPreferencesRoot();
-		theMapper = FieldContigData.createContigFieldMapper(theParentFrame);
+		theMapper = FieldSeqData.createContigFieldMapper(theParentFrame);
 		
 		createColumnPanel();
 		
@@ -100,44 +100,44 @@ public class FieldContigTab extends Tab implements ActionListener {
 	        String[] fieldNames = theMapper.getFieldNamesByGroup(grpNames[i]);
 	        String[] fieldDesc = theMapper.getFieldDescriptionsByGroup(grpNames[i]);
 	        
-	        if(grpNames[i].equals(FieldContigData.GROUP_NAME_OVER_BEST)) {
-	        		bestObj.addNames(fieldNames, FieldContigData.GROUP_NAME_OVER_BEST);
+	        if(grpNames[i].equals(FieldSeqData.GROUP_NAME_OVER_BEST)) {
+	        		bestObj.addNames(fieldNames, FieldSeqData.GROUP_NAME_OVER_BEST);
 				continue;
 			}
-			if(grpNames[i].equals(FieldContigData.GROUP_NAME_GO_BEST)) {
-				bestObj.addNames(fieldNames, FieldContigData.GROUP_NAME_GO_BEST);
+			if(grpNames[i].equals(FieldSeqData.GROUP_NAME_GO_BEST)) {
+				bestObj.addNames(fieldNames, FieldSeqData.GROUP_NAME_GO_BEST);
 				continue;
 			}
 			
-			String name = grpNames[i].equals(FieldContigData.GROUP_NAME_FIRST_BEST) ?
+			String name = grpNames[i].equals(FieldSeqData.GROUP_NAME_FIRST_BEST) ?
 					"Best Hits" : grpNames[i];
-			String desc = grpNames[i].equals(FieldContigData.GROUP_NAME_FIRST_BEST) ?
+			String desc = grpNames[i].equals(FieldSeqData.GROUP_NAME_FIRST_BEST) ?
 					"EV - Best E-value, AN - Best Annotation, WG - Best with GO" : grpDesc[i];
 	        CollapsiblePanel subPanel = new CollapsiblePanel(name, desc);
 	     
-	        if(grpNames[i].equals(FieldContigData.GROUP_NAME_CONTIG)) {
+	        if(grpNames[i].equals(FieldSeqData.GROUP_NAME_CONTIG)) {
 	        		ctgGeneralSelect = createGroupUIFromFields(subPanel, fieldNames, fieldDesc, grpNames[i]);
 	        }
-	        else if(grpNames[i].equals(FieldContigData.GROUP_NAME_LIB)) {
+	        else if(grpNames[i].equals(FieldSeqData.GROUP_NAME_LIB)) {
 		        createLibUIFromFields(subPanel, fieldNames, grpNames[i], fieldDesc);
 	        }
-	        else if(grpNames[i].equals(FieldContigData.GROUP_NAME_SEQ_SET)) {
+	        else if(grpNames[i].equals(FieldSeqData.GROUP_NAME_SEQ_SET)) {
 	        		ctgSetSelect = createGroupUIFromFields(subPanel, fieldNames, fieldDesc, grpNames[i]);
 	        }
-	        else if(grpNames[i].equals(FieldContigData.GROUP_NAME_PVAL)) {
+	        else if(grpNames[i].equals(FieldSeqData.GROUP_NAME_PVAL)) {
 	        		createPvalUIFromFields(subPanel, fieldNames, fieldDesc, grpNames[i]);
 	        }
-	        else if(grpNames[i].equals(FieldContigData.GROUP_NAME_RSTAT)) {
+	        else if(grpNames[i].equals(FieldSeqData.GROUP_NAME_RSTAT)) {
  				nFoldObj = new UIfieldNFold(libListSelect, false); 
  				subPanel.add(nFoldObj);
  				
  				subPanel.add(new JSeparator());
 	        		ctgRStatSelect = createGroupUIFromFields(subPanel, fieldNames, fieldDesc, grpNames[i]);
 	        }
-	        else if(grpNames[i].equals(FieldContigData.GROUP_NAME_FIRST_BEST)) {
+	        else if(grpNames[i].equals(FieldSeqData.GROUP_NAME_FIRST_BEST)) {
 	        		createBestHit(subPanel, fieldNames, fieldDesc, name);
 	        }
-	        else if(grpNames[i].equals(FieldContigData.GROUP_NAME_SNPORF)) {
+	        else if(grpNames[i].equals(FieldSeqData.GROUP_NAME_SNPORF)) {
 	        		ctgSNPORFSelect = createGroupUIFromFields(subPanel, fieldNames, fieldDesc, grpNames[i]);
 	        }
 	        centerPanel.add(new ItemPanel(subPanel, tabLevel));	 // create a "tab" option	
@@ -162,7 +162,7 @@ public class FieldContigTab extends Tab implements ActionListener {
 		    			retVal[j].setEnabled(false);
 		    		}
 		    	}
-		    	if (grpName.equals(FieldContigData.GROUP_NAME_CONTIG)) {
+		    	if (grpName.equals(FieldSeqData.GROUP_NAME_CONTIG)) {
 		    		if (fieldNames[j].equals("#Taxonomy") || fieldNames[j].equals("SeqGroup"))
 		    			subPanel.add(new JSeparator());
 		    	}
@@ -197,8 +197,8 @@ public class FieldContigTab extends Tab implements ActionListener {
 	private void createLibUIFromFields(CollapsiblePanel subPanel, 
 			String [] fieldNames, String grpName, String[] fieldDesc) {
 		Integer[] fieldIDs = theMapper.getFieldIDsByGroup(grpName);
-		int minID = FieldContigData.N_LIBRARY_COUNT_ALL;
-		int maxID = FieldContigData.CONTIG_SET_COUNT;
+		int minID = FieldSeqData.N_LIBRARY_COUNT_ALL;
+		int maxID = FieldSeqData.CONTIG_SET_COUNT;
 		
 		// Count RPKM Panel
 		JPanel libCntPanel = Static.createRowPanel();
@@ -206,8 +206,8 @@ public class FieldContigTab extends Tab implements ActionListener {
 		chkLibExpLevel = Static.createCheckBox("Counts");
 		chkLibExpLevel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				updateLibSelectedGroupFields(FieldContigData.LIBRARY_COUNT_ALL, 
-						FieldContigData.N_LIBRARY_COUNT_ALL);
+				updateLibSelectedGroupFields(FieldSeqData.LIBRARY_COUNT_ALL, 
+						FieldSeqData.N_LIBRARY_COUNT_ALL);
 			}
 		});
 		libCntPanel.add(chkLibExpLevel);
@@ -216,8 +216,8 @@ public class FieldContigTab extends Tab implements ActionListener {
 		chkLibNExpLevel = Static.createCheckBox(norm + " Normalized Counts");
 		chkLibNExpLevel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				updateLibSelectedGroupFields(FieldContigData.N_LIBRARY_COUNT_ALL, 
-						FieldContigData.CONTIG_SET_COUNT);
+				updateLibSelectedGroupFields(FieldSeqData.N_LIBRARY_COUNT_ALL, 
+						FieldSeqData.CONTIG_SET_COUNT);
 			}
 		});
 		libCntPanel.add(chkLibNExpLevel);
@@ -362,12 +362,12 @@ public class FieldContigTab extends Tab implements ActionListener {
 	
 	// On started and Restore Defaults
 	private void setSelectedFromMapper() {
-		setSelectedForGroup(ctgGeneralSelect, 	FieldContigData.GROUP_NAME_CONTIG);
-		setSelectedForGroup(ctgSetSelect,  		FieldContigData.GROUP_NAME_SEQ_SET);
-		setSelectedForGroup(pValSelect, 			FieldContigData.GROUP_NAME_PVAL);
-		setSelectedForGroup(ctgRStatSelect, 		FieldContigData.GROUP_NAME_RSTAT);
-		setSelectedForGroup(ctgDBHitSelect, 		FieldContigData.GROUP_NAME_CNTS);
-		setSelectedForGroup(ctgSNPORFSelect, 	FieldContigData.GROUP_NAME_SNPORF);
+		setSelectedForGroup(ctgGeneralSelect, 	FieldSeqData.GROUP_NAME_CONTIG);
+		setSelectedForGroup(ctgSetSelect,  		FieldSeqData.GROUP_NAME_SEQ_SET);
+		setSelectedForGroup(pValSelect, 			FieldSeqData.GROUP_NAME_PVAL);
+		setSelectedForGroup(ctgRStatSelect, 		FieldSeqData.GROUP_NAME_RSTAT);
+		setSelectedForGroup(ctgDBHitSelect, 		FieldSeqData.GROUP_NAME_CNTS);
+		setSelectedForGroup(ctgSNPORFSelect, 	FieldSeqData.GROUP_NAME_SNPORF);
 		
 		setSelectedForBest();
 		setSelectedLibsFromMapper(libListSelect);
@@ -424,15 +424,15 @@ public class FieldContigTab extends Tab implements ActionListener {
 		
 		for(int x=0; x<strIDList.length; x++) {
 			int id = Integer.parseInt(strIDList[x]);
-			if(id >= FieldContigData.LIBRARY_COUNT_ALL && id < FieldContigData.N_LIBRARY_COUNT_ALL && 
+			if(id >= FieldSeqData.LIBRARY_COUNT_ALL && id < FieldSeqData.N_LIBRARY_COUNT_ALL && 
 					colNames.contains(strLabelList[x])) {
 				expLevel = true;
-				chkFields[id - FieldContigData.LIBRARY_COUNT_ALL].setSelected(true);
+				chkFields[id - FieldSeqData.LIBRARY_COUNT_ALL].setSelected(true);
 			}
-			else if(id >= FieldContigData.N_LIBRARY_COUNT_ALL && id < FieldContigData.CONTIG_SET_COUNT && 
+			else if(id >= FieldSeqData.N_LIBRARY_COUNT_ALL && id < FieldSeqData.CONTIG_SET_COUNT && 
 					colNames.contains(strLabelList[x])) {
 				expNLevel = true;
-				chkFields[id - FieldContigData.N_LIBRARY_COUNT_ALL].setSelected(true);
+				chkFields[id - FieldSeqData.N_LIBRARY_COUNT_ALL].setSelected(true);
 			}
 		}
 
@@ -578,8 +578,8 @@ public class FieldContigTab extends Tab implements ActionListener {
 		Tab tabs[] = getParentFrame().tabbedPane.getTabs();
 		for ( int i = 0; i < tabs.length; ++i ) {
 			// Update any open contig list tabs
-			if ( tabs[i] instanceof ContigListTab ) {
-				ContigListTab tab = (ContigListTab)tabs[i];
+			if ( tabs[i] instanceof SeqTableTab ) {
+				SeqTableTab tab = (SeqTableTab)tabs[i];
 				if(tab.getQuery() != null && tab.getContigIDs() != null)
 					getParentFrame().loadQueryContigs ( tab, tab.getQuery(), tab.getContigIDs(), tab.getViewMode(), null );
 				else if(tab.getQuery() != null)
@@ -596,7 +596,7 @@ public class FieldContigTab extends Tab implements ActionListener {
 			
 	public FieldMapper getMapper() { // called before query. mapObj is belongs to this query.
 		setMapperFromSelected();
-		FieldMapper mapObj = FieldContigData.createContigFieldMapper(theParentFrame);
+		FieldMapper mapObj = FieldSeqData.createContigFieldMapper(theParentFrame);
 		mapObj.setVisibleFieldNames(theMapper.getVisibleFieldNames());
 		mapObj.setNFoldLibNames(theMapper.getNfoldLibNames());
 		return mapObj;

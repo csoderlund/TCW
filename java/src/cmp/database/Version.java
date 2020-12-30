@@ -77,7 +77,9 @@ public class Version {
 					"PGid int, " +
 					"score1 text, "		+ //comma-delimited list of column score1
 					"score2 text,  "	+ //comma-delimited list of column score2
-					"nType  tinytext"   + //comma-delimited list of AA/cnt (max 11 char for each of 21)
+					"nType  tinytext, "   + //comma-delimited list of AA/cnt (max 11 char for each of 21)
+					"unique (PGid), " 	+ // add v3.1.3
+					"index idx1(PGid)"  + // add v3.1.3
 					") ENGINE=MyISAM;";
 				mDB.executeUpdate(sqlU);
 			}

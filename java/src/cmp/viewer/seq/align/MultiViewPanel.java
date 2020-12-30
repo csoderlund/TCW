@@ -3,7 +3,6 @@ package cmp.viewer.seq.align;
 /*************************************************************
  * Called from SeqsTopRowPanel.opMulti to show a Muscle or Mafft multiple alignment
  */
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -25,6 +24,7 @@ import javax.swing.JTextField;
 import javax.swing.JCheckBox;
 
 import util.database.DBConn;
+import util.database.Globalx;
 import util.methods.ErrorReport;
 import util.methods.Out;
 import util.methods.Static;
@@ -37,28 +37,31 @@ import cmp.viewer.MTCWFrame;
 public class MultiViewPanel extends JPanel {
 	private static final long serialVersionUID = -2090028995232770402L;
 	private static final String help1HTML = Globals.helpDir + "BaseAlign.html";
+	private static final String help2HTML = Globals.helpDir + "MSAScores.html";
 	
 	// runs MSA program and displays results
-	public MultiViewPanel(MTCWFrame parentFrame, String [] POGMembers, int alignPgm, int type) {
-		theParentFrame = parentFrame;
+	public MultiViewPanel(MTCWFrame parentFrame, String [] POGMembers, int alignPgm, int type, String sum) {
+		theMainFrame = parentFrame;
 		isAA = (type==Globals.AA);
 		alignType = type;
+		headerLine = sum;
 		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-		setBackground(theParentFrame.getSettings().getFrameSettings().getBGColor());
+		setBackground(Globalx.BGCOLOR);
 		
-		buildMultiAlignments(alignPgm, POGMembers);
+		buildMSArun(alignPgm, POGMembers);
 	}
 	// displays existing MSA from database
-	public MultiViewPanel(MTCWFrame parentFrame, String [] POGMembers, int grpid) {
-		theParentFrame = parentFrame;
+	public MultiViewPanel(MTCWFrame parentFrame, String [] POGMembers, int grpid, String sum) {
+		theMainFrame = parentFrame;
 		isAA = true;
 		alignType = Globals.AA;
+		headerLine = sum;
 		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-		setBackground(theParentFrame.getSettings().getFrameSettings().getBGColor());
+		setBackground(Globalx.BGCOLOR);
 		
-		buildMultiAlignments(POGMembers, grpid);
+		buildMSAfromDB(POGMembers, grpid);
 	}
 	private void createButtonPanel() {
 		buttonPanel = Static.createPagePanel();
@@ -96,6 +99,15 @@ public class MultiViewPanel extends JPanel {
 		theRow.add(dotBox);
 		theRow.add(Box.createHorizontalStrut(5));
 		
+		trimBox = Static.createCheckBox("Trim", false); // CAS313 new
+		trimBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				refreshPanels();
+			}
+		});
+		theRow.add(trimBox);
+		theRow.add(Box.createHorizontalStrut(5));
+		
 		menuZoom = Static.createZoom2(); // CAS312 Zoom2 allows increase size
 		menuZoom.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -116,13 +128,31 @@ public class MultiViewPanel extends JPanel {
 			theRow.add(Box.createHorizontalStrut(5));
 		}
 		
-		JButton btnHelp1 = Static.createButton("Help", true, Globals.HELPCOLOR); // CAS312
+		JButton btnHelp1 = Static.createButton("Help1", true, Globals.HELPCOLOR); // CAS312
 		btnHelp1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				UserPrompt.displayHTMLResourceHelp(theParentFrame, "Alignment...", help1HTML);
+				UserPrompt.displayHTMLResourceHelp(theMainFrame, "Alignment...", help1HTML);
 			}
 		});
 		theRow.add(btnHelp1);
+		theRow.add(Box.createHorizontalStrut(10));
+		
+		JButton btnScore = Static.createButton("Scores...", true, Globals.PROMPTCOLOR); // CAS312
+		btnScore.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				String s1 = theMainFrame.getInfo().getMSA_Score1();
+				String s2 = theMainFrame.getInfo().getMSA_Score2();
+				theAlignPanel.showScores(theMainFrame, s1, s2, headerLine);
+			}
+		});
+		theRow.add(btnScore); theRow.add(Box.createHorizontalStrut(2));
+		JButton btnHelp2 = Static.createButton("Help2", true, Globals.HELPCOLOR); // CAS312
+		btnHelp2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				UserPrompt.displayHTMLResourceHelp(theMainFrame, "MSA Scores...", help2HTML);
+			}
+		});
+		theRow.add(btnHelp2);
 		
 		theRow.setMaximumSize(theRow.getPreferredSize());
 		
@@ -146,27 +176,26 @@ public class MultiViewPanel extends JPanel {
 		
 		refreshPanels();
 	}
-	
-	private void createMultiAlignPanels() {
-		theMultiPanel = new MultiAlignPanel(theParentFrame, isAA, theMultiAlignData);
-		theMultiPanel.setAlignmentY(Component.LEFT_ALIGNMENT);
-	}
-	private void buildMultiAlignments(String [] POGMembers, int grpid) {
+	/***********************************************************************
+	 * MSA methods
+	 */
+	private void buildMSAfromDB(String [] POGMembers, int grpid) {
 		try {
-			setStatus();
+			createButtonPanel();	add(buttonPanel);
+			createInfo();			add(infoText);
+			add(Box.createVerticalStrut(10));
 			
 			loadMultiDB(POGMembers, grpid);
 			
-			createButtonPanel();
-			createMainPanel();
-			showStatus(false);
-		
-			add(buttonPanel);
-			add(scroller);
+			createMultiAlignPanels();	
 			
-		} catch (Exception e) {e.printStackTrace();}
+			createMainPanel();		add(scroller);
+			
+			updateInfo("");
+		} 
+		catch (Exception e) {ErrorReport.prtReport(e, "MSA from DB");}
 	}
-	private void buildMultiAlignments(int alignPgm, String [] POGMembers) {
+	private void buildMSArun(int alignPgm, String [] POGMembers) {
 		final String [] theMembers = POGMembers;
 		final int pgm = alignPgm;
 		if(theThread == null)
@@ -174,17 +203,15 @@ public class MultiViewPanel extends JPanel {
 			theThread = new Thread(new Runnable() {
 				public void run() {
 					try {
-						setStatus();
+						createButtonPanel();	add(buttonPanel);
+						createInfo();			add(infoText);
+						add(Box.createVerticalStrut(10));
 						
-						loadMultiAndRun(pgm, theMembers);
+						String scores = loadMultiAndRun(pgm, theMembers);
 						
-						createButtonPanel();
-						add(buttonPanel);
-						
-						createMainPanel();
-						add(scroller);
-						
-						showStatus(false);
+						createMainPanel();		add(scroller);
+	
+						updateInfo("Results also in /ResultAlign " + scores);
 						
 					} catch (Exception e) {e.printStackTrace();}
 				}
@@ -193,29 +220,19 @@ public class MultiViewPanel extends JPanel {
 			theThread.start();
 		}		
 	}
-		
-	private void setStatus() {
-		progressField = new JTextField(100);
-		progressField.setEditable(false);
-		progressField.setMaximumSize(progressField.getPreferredSize());
-		progressField.setBackground(theParentFrame.getSettings().getFrameSettings().getBGColor());
-		progressField.setBorder(BorderFactory.createEmptyBorder());
-		
-		add(progressField);
-		add(Box.createVerticalStrut(10));
-	}
-	private void showStatus(boolean show) {
-		progressField.setVisible(show);
-	}
-	private void updateStatus(String status) {
-		progressField.setText(status);
-	}
+	private void createMultiAlignPanels() {
+		theAlignPanel = new MultiAlignPanel(getInstance(),
+						isAA, 
+						theMultiAlignData);
+		theAlignPanel.setAlignmentY(Component.LEFT_ALIGNMENT);
+	}	
+	private MultiViewPanel getInstance() {return this;}
 	
     private String [] loadSequencesFromDB(String [] IDs, boolean isAA) {
     	ResultSet rs = null;
     	Vector<String> sequences = null;
     	try {
-	    	DBConn mDB = theParentFrame.getDBConnection();
+	    	DBConn mDB = theMainFrame.getDBConnection();
 	  
 	    	sequences = new Vector<String> ();
 	    	if (alignType==Globals.AA) {
@@ -250,38 +267,41 @@ public class MultiViewPanel extends JPanel {
     		return null;
     	}
     }	
-	private void loadMultiAndRun(int alignPgm, String [] POGMembers) {
+    
+    private String loadMultiAndRun(int alignPgm, String [] POGMembers) {
 		String [] POGSeq = loadSequencesFromDB(POGMembers, isAA);
 		
-		theMultiAlignData = new MultiAlignData(alignPgm, false /* not from runMulti */);
+		theMultiAlignData = new MultiAlignData(theMainFrame.getInfo());
 		for(int x=0; x<POGMembers.length; x++) {
-			if(POGSeq[x] != null)
-				theMultiAlignData.addSequence(POGMembers[x], POGSeq[x]);
-			else
-				System.out.println("Error: no sequence in database for " + POGMembers[x]);
+			theMultiAlignData.addSequence(POGMembers[x], POGSeq[x]);
 		}
-		updateStatus("Aligning sequences please wait. Results will be written to the ResultAlign directory");
-		int rc = theMultiAlignData.runAlignPgm(false, true, isAA); // false - program output, true - write scores to file
+		updateInfo("Aligning sequences please wait. Results will be written to the ResultAlign directory");
+		
+		int rc = theMultiAlignData.runAlignPgm(alignPgm, isAA); 
+		String scores = theMultiAlignData.getGlScores();
+		
 		bAlign = (rc==0) ? true : false;
+		
 		createMultiAlignPanels();
+		return scores;
 	}
 	private void loadMultiDB(String [] POGMembers, int grpid) {
+	try {	
 		String [] POGSeq = loadSequencesFromDB(POGMembers, isAA);
 		
-		theMultiAlignData = new MultiAlignData(false /* not run */);
-		for(int x=0; x<POGMembers.length; x++) {
-			if(POGSeq[x] != null) theMultiAlignData.addSequence(POGMembers[x], POGSeq[x]);
-			else  System.out.println("Error: no sequence in database for " + POGMembers[x]);
-		}
-		try {
-			DBConn mDB = theParentFrame.getDBConnection();
-			bAlign = theMultiAlignData.getAlignFromDB(mDB, grpid); 
-			mDB.close();
-			
-			createMultiAlignPanels();
-		}
-		catch (Exception e) {ErrorReport.prtReport(e, "Load Multi DB");}
+		theMultiAlignData = new MultiAlignData(null);
+		for(int x=0; x<POGMembers.length; x++) 
+			theMultiAlignData.addSequence(POGMembers[x], POGSeq[x]);
+		
+		DBConn mDB = theMainFrame.getDBConnection();
+		
+		bAlign = theMultiAlignData.loadAlignFromDB(mDB, grpid); 
+		
+		mDB.close();
 	}
+	catch (Exception e) {ErrorReport.prtReport(e, "Load Multi DB");}
+	}
+	/*****************************************************************************/
 	private void refreshPanels() {
 		try {
 			refreshMultiPanels();
@@ -297,26 +317,21 @@ public class MultiViewPanel extends JPanel {
 	private void refreshMultiPanels() {
 		mainPanel.removeAll();
 		try {
-			if(theMultiPanel == null) {
-				mainPanel.add(new JLabel("No Sequences"));
+			if(theAlignPanel == null) {
+				mainPanel.add(new JLabel("No MSA Sequences"));
 				return;
 			}
-			theMultiPanel.setBorderColor(Color.BLACK);
+			int mode = (isShowGraphic) ? BaseAlignPanel.GRAPHICMODE : BaseAlignPanel.TEXTMODE;
+			int col = menuColor.getSelectedIndex();
+			boolean bDot = dotBox.isSelected();
+			boolean bTrim = trimBox.isSelected();
 			
 			MenuMapper ratioSelection = (MenuMapper) menuZoom.getSelectedItem();
-			int ratio = ratioSelection.asInt();
-			theMultiPanel.setZoom(ratio);
+			int nZoom = ratioSelection.asInt();
 			
-			int mode = (isShowGraphic) ? BaseAlignPanel.GRAPHICMODE : BaseAlignPanel.TEXTMODE;
-			theMultiPanel.setDrawMode(mode);
+			theAlignPanel.setOpts(mode, col, bDot, bTrim, nZoom); // causes repaint
 			
-			int col = menuColor.getSelectedIndex();
-			theMultiPanel.setColorMode(col);
-			
-			boolean bDot = dotBox.isSelected();
-			theMultiPanel.setDotMode(bDot);
-			
-			mainPanel.add(theMultiPanel);
+			mainPanel.add(theAlignPanel);
 
 			mainPanel.add(Box.createVerticalStrut(40));
 			
@@ -325,33 +340,42 @@ public class MultiViewPanel extends JPanel {
 			
 		} catch (Exception e) {ErrorReport.reportError(e);}
 	}
-
+	private void createInfo() {
+		infoText = new JTextField(100);
+		infoText.setEditable(false);
+		infoText.setMaximumSize(infoText.getPreferredSize());
+		infoText.setBackground(Globalx.BGCOLOR);
+		infoText.setBorder(BorderFactory.createEmptyBorder());
+	}
+	public void updateInfo(String status) { // Called in MultiAlign for column click
+		String sp="   ";
+		if (status==null || status=="") infoText.setText(sp + headerLine);
+		else                            infoText.setText(sp + status);
+	}
 	private void handleClick(MouseEvent e) {
-		if(theMultiPanel == null) return;
+		if(theAlignPanel == null) return;
 		
 		// Convert to view relative coordinates
 		int viewX = (int) (e.getX() + scroller.getViewport().getViewPosition().getX());
 		int viewY = (int) (e.getY() + scroller.getViewport().getViewPosition().getY());
 		
 		// Get the panel and convert to panel relative coordinates
-		int nPanelX = viewX - theMultiPanel.getX();
-		int nPanelY = viewY - theMultiPanel.getY();
+		int nPanelX = viewX - theAlignPanel.getX();
+		int nPanelY = viewY - theAlignPanel.getY();
 
-		if ( theMultiPanel.contains( nPanelX, nPanelY ) )
-			// Click is in current panel, let the object handle it
-			theMultiPanel.handleClick( e, new Point( nPanelX, nPanelY ) );
-		else
-			// Clear all selections in the panel unless shift or control are down
-			if ( !e.isShiftDown() && !e.isControlDown() ) {
-				theMultiPanel.selectNoRows();
-				theMultiPanel.selectNoColumns();
-			}
+		if (theAlignPanel.contains(nPanelX, nPanelY) )
+			theAlignPanel.handleClick( e, new Point(nPanelX, nPanelY) );
+		else {
+			theAlignPanel.selectNoRows();
+			theAlignPanel.selectNoColumns();
+			updateInfo("");
+		}
 	}
 	private int alignType=0;
 	private boolean isAA=true, bAlign=true;
 	private boolean isShowGraphic=true;
 	
-	private MTCWFrame theParentFrame = null;
+	private MTCWFrame theMainFrame = null;
 	private JScrollPane scroller = null;
 	
 	private JPanel buttonPanel = null;
@@ -360,12 +384,13 @@ public class MultiViewPanel extends JPanel {
 	private JComboBox <String> menuColor = null;
 	private JComboBox <MenuMapper> menuZoom = null;
 	private JButton btnViewType = null;
-	private JCheckBox dotBox = null;
+	private JCheckBox dotBox = null, trimBox=null;
 	
-	private JTextField progressField = null;
+	private JTextField infoText = null;
+	private String headerLine = "";
 	
 	private Thread theThread = null;
 	
 	private MultiAlignData theMultiAlignData = null;
-	private MultiAlignPanel theMultiPanel = null;
+	private MultiAlignPanel theAlignPanel = null;
 }

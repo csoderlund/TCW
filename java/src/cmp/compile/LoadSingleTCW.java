@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import javax.swing.JOptionPane;
 
-import util.align.AAStatistics;
 import util.database.DBConn;
 import util.database.Globalx;
 import util.methods.Converters;
@@ -19,6 +18,8 @@ import util.methods.Out;
 import util.ui.UserPrompt;
 
 import cmp.database.*;
+import cmp.align.ScoreAA;
+//import sng.viewer.panels.align.AAStatistics;
 import cmp.compile.panels.CompilePanel;
 import cmp.compile.panels.SpeciesPanel;
 
@@ -294,6 +295,8 @@ public class LoadSingleTCW {
 					qSQL + ",?,?)");
 			
 			int cntSave=0;
+			ScoreAA aaChr = new ScoreAA();
+			
 	 // loop through contigs transferring data
 	   		int numRows = stcwDBC.executeCount("SELECT COUNT(*) FROM contig");
 	   			
@@ -334,8 +337,8 @@ public class LoadSingleTCW {
         			int cntStop=0;
         			char c=' ';
         			for (int i = start-1; i <end && (i+2)<ntSeq.length(); i+=3) {
-        				c = AAStatistics.getAminoAcidFor(
-        						ntSeq.charAt(i), ntSeq.charAt(i+1),ntSeq.charAt(i+2));
+        				String codon = ntSeq.substring(i, i+3);
+        				c = aaChr.codonToAA(codon); // CAS313 changed from AAstatistics
         				aaSeq += c;
         				if (c=='*') cntStop++;
         			}

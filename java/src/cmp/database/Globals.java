@@ -71,7 +71,7 @@ public final class Globals {
 	// Compile and viw: Cutoff for Pearson's Correlation Coefficient for perPCC
 	public static final double PCCcutoff = 0.8;
 	
-	public static final int COLUMN_SELECT_WIDTH = 75, COLUMN_PANEL_WIDTH = 900;
+	
 
 	public static class Ext { 
 		public final static int MUSCLE = 0;
@@ -91,6 +91,7 @@ public final class Globals {
 		public final static int MSTATX_SCORE = 1;  // executed by external MstatX
 		public final static String SoP = "Sum-of-Pairs";
 		public final static String Wep = "Wentropy";
+		public final static String filePrefix = "MSA_";
 	}
 	
 	public static class Search {
@@ -126,7 +127,7 @@ public final class Globals {
 			public static final String 	COVERAGE_CUTOFF = "20"; 
 			public static final String 	SIMILARITY =      "20"; 
 			public static final int 	TYPE_TOGGLE=1; // Description
-			public static final int 	HIT_TOGGLE=0;  // All hits - closure
+			public static final int 	HIT_TOGGLE=0;  // All hits - closure - reason for low cov and sim
 		}
 		public static class OrthoMCL {	
 			public static final String TYPE_NAME = "OrthoMCL";

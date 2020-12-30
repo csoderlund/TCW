@@ -3,39 +3,22 @@ package sng.dataholders;
 /*******************************************
  * Both runSingle and viewSingle use this class
  * DoBlast and DoUniProt create objects from files
+ * Query	Subject					%ID		Len	MM	Gap	Qs	Qe	Ss	Se
+ * bar_001	gi|1041540644|ref|XM_	87.160	514	64	2	301	813	639	127	9.66e-166	582   // NT-NT Ss<Se
+ * bar_001	sp|Q963B6|RL10A_SPOFR	87.6	217	27	0	813	163	1	217	1.3e-106	380.6 // NT-AA Qs>Qe
+ * pBar_001	sp|Q963B6|RL10A_SPOFR	87.6	217	27	0	1	217	1	217	1.5e-106	379.8 // AA-AA 
+ * bar_001	bar_217					60.938	64	25	0	741	550	125	316	3.97e-27	101	  // NT-NT
+ * 1. Can't flip a AA sequence, so only the NT may have Start<End
+ * 2. Len is in AA coords for NT-AA, though the Start-End are in NT coords for NT sequence.
  * 
- * Unitrans to DBhit database 
-Only Unitrans coords are ever reversed (>< 604706  <>0  >>0  <<760342 for PaRpi to TRpla)
-Unitran coords are relative to NT
-cari_mix_08  sp|P31414|AVP1_ARATH    92.00   125  10  0  667   293     645   769     3e-63    231
-cari_mix_12  sp|P07728|GLUA1_ORYSJ   100.00  129   0  0  34    420     1     129     2e-73    265
-cari_mix_12  sp|Q6VAK4|HP1_ORYSJ     100.00  78    0  0  471   704     72    149     3e-42    161
-cari_mix_13  sp|P07728|GLUA1_ORYSJ   100.00  126   0  0  29    406     1     126     1e-71    259
-cari_mix_13  sp|P07728|GLUA1_ORYSJ   100.00  111   0  0  477   809     389   499     3e-61    224
-
-megablast selfblast
-Only the second coords ever seem to be reversed (>< 0  <>127054  >>0  <<271070 from PaRpi)
-cari_mix_12     cari_mix_13     100.00  413     0  0  7      419     2       414     0.0 819
-cari_mix_13     cari_mix_12     100.00  414     0  0  2      415     7       420     0.0 821
-PaRpi_000011    PaRpi_007798    94.29   631     33 3  3246   3874    3554    2925    0.0 961
-
-tblastx selfblast
-Every combination seems to occur (>< 499619  <>495498  >>916132  <<941384 from PaRpi)
-cari_mix_12     cari_mix_13     100.00  138     0  0  7     420   2       415     4e-95    335
-cari_mix_12     cari_mix_13     99.28   138     1  0  419   6     414     1       2e-94    332
-cari_mix_12     cari_mix_13     100.00  87      0  0  420   160   415     155     2e-77    273
-cari_mix_12     cari_mix_13     100.00  33      0  0  105   7     100     2       2e-77    273
-cari_mix_12     cari_mix_13     100.00  113     0  0  346   8     341     3       1e-76    273
-cari_mix_12     cari_mix_13     100.00  93      0  0  9     287   4       282     2e-76    251
-cari_mix_12     cari_mix_13     100.00  31      0  0  327   419   322     414     2e-76    251
-cari_mix_12     cari_mix_13     100.00  137     0  0  8     418   3       413     6e-70    251
+ * Start-End in SeqTable and SeqDetail are exactly like in Hit File
+ * Coords in PairAlign are the Hit Coords from file
  ********************************************/
 import java.lang.Comparable;
 import java.io.*;
 
 import sng.annotator.LineParser;
 import util.methods.ErrorReport;
-
 
 public class BlastHitData implements Serializable, Comparable <BlastHitData> 
 {
@@ -86,20 +69,19 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 		if (rc == false) return false;
 		
 		try{
-			  FileWriter fstream = new FileWriter(badHits,true);
-			  BufferedWriter out = new BufferedWriter(fstream);
-			  out.write(err + "\n");
-			  out.close();
-		}catch (Exception e){
-			  ErrorReport.prtReport(e, "Print ignored hit");
-		}
+			FileWriter fstream = new FileWriter(badHits,true);
+			BufferedWriter out = new BufferedWriter(fstream);
+			out.write(err + "\n");
+			out.close();
+		}catch (Exception e){ErrorReport.prtReport(e, "Print ignored hit");}
 		return true;		  
 	}
-	
+	// LoadFromDB.loadBlastHitData for Basic AnnoDB
+	// 
 	public BlastHitData(String name, boolean isProtein, int start, int end, String msg) {
 		descForAlign = msg;
 		contigID = name;
-		hitIsProtein = isProtein;
+		hitIsAA = isProtein;
 		ctgStart = start;
 		ctgEnd = end;
 	}
@@ -129,8 +111,7 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 			hitID = lp.getHitID();
 			dbType = lp.getDBtype();
 		}
-		else 
-		{
+		else {
 			if (parseWarnings < 20)
 				ErrorReport.reportError("Cannot parse: "  + line);
 			parseWarnings++;
@@ -141,7 +122,7 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 		}
 		// this length problem is reported in DoUniProt
 		if (hitID.length() > 30) hitID = hitID.substring(0,30);
-		hitIsProtein = isProtein;	
+		hitIsAA = isProtein;	
 		if (ctgEnd<=0) ctgEnd+=3; 	
 		if (ctgStart > ctgEnd) ctg_orient = -1;		
 	}
@@ -172,7 +153,7 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 			int x = Integer.parseInt(tokens[13]);
 			if (b==1) isSelf=true;
 			if (x==1) isTself = true;
-			hitIsProtein = false;	
+			hitIsAA = false;	
 			if (ctgStart > ctgEnd) ctg_orient = -1;
 			return;
 		}	
@@ -191,7 +172,7 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 			bitScore = Float.parseFloat(tokens[9]);
 			
 			int x = Integer.parseInt(tokens[11]);
-			if (x==1) hitIsProtein = true; 
+			if (x==1) hitIsAA = true; 
 			blastRank = Integer.parseInt(tokens[12]);
 			filtered = Integer.parseInt(tokens[13]);
 			
@@ -214,22 +195,28 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 	}
 
 	/**
-	 *  MainPairAlignData/AlignmentData to be displayed in alignment header
+	 *  for Seq-seq pair (see below) - formatted in 3 different places
 	 */
 	public String getHitBlast(boolean isNT) {
 		if (isNT && isTself) return "";   // hit from tblastx
 		if (!isNT && !isTself) return ""; // hit from megablast
 		String e = String.format("%.1E", eVal);
+		if (eVal==0.0) e = "0.0";
 		
-		return "Hit: " + e + "; Sim " + (int) (simPercent+0.5)  +  "% ; Align " + alignLen;
+		return "Hit: " + e + ", " + (int) (simPercent+0.5)  +  "%, Align " + alignLen;
 	}
-	// for Seq-hit pair
+	/**********************************
+	 *  Constructed in: (same as getHitBlast above)
+	 *    Seq-Hit: seqDetail.SeqDetailPanel.getHitMsg  for Sequence  Detail
+	 *    Seq-Hit: seqDetail.LoadFromDB.loadBlastHitData for Basic AnnoDB
+	*****/
 	public String getHitBlast() { 
 		return descForAlign;
 	}
 	
 	public String getHitBlast(int len1, int len2) { 
 		String e = String.format("%.1E", eVal);
+		if (eVal==0.0) e = "0.0";
 		String x = " " + e + " " + (int) (simPercent+0.5)  +  "% AL: " + alignLen;
 		x += "  ( " + ctgStart + " " + ctgEnd +  " " + len1 + " )";
 		x += "  ( " + hitStart + " " + hitEnd +  " " + len2  + " )";
@@ -262,8 +249,8 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
     public int getGapOpen() { return gapOpen;}
     
 	// DB hit or ctg2 hit
-    public boolean hitIsProtein () { return hitIsProtein;}
-    public String getHitID ( ) { return hitID; }
+    public boolean isAAhit () { return hitIsAA;}
+    public String  getHitID ( ) { return hitID; }
     public int getHitStart() { return hitStart; }
     public int getHitEnd() { return hitEnd; }   
     
@@ -271,8 +258,6 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
     public void setBlastRank ( int n ) { blastRank = n; }
     public int getBlastRank ( ) { return blastRank; }  
     public int getRank ( ) { return rank; }  
-    public void setIsProtein(boolean b) { hitIsProtein = b;}
-	public boolean isProtein ( ) { return hitIsProtein; }	
 
 	// specific for DB hits 
     public String getDBtype() { return dbType;}
@@ -320,8 +305,7 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 	public boolean getIsShared () {return (sharedHitID!="");}	
 	public String getSharedHitID() { return sharedHitID;}
 		
-	public void clear()
-	{
+	public void clear(){
 		contigID=hitID=dbType=sharedHitID="";
 		simPercent=eVal=0.0;
 		alignLen=mismatches=gapOpen=ctgStart=ctgEnd=hitStart=hitEnd=0;
@@ -354,7 +338,7 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 	private int blastRank = 0;
 	private int rank=0;
 	private int ctg_orient = 1;
-	private boolean hitIsProtein = false;
+	private boolean hitIsAA = false;
 	private String descForAlign="";
 	
 	// specific for DB hits

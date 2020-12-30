@@ -45,13 +45,13 @@ import util.ui.ToggleTextField;
 import util.ui.UserPrompt;
 
 
-public class QueryContigTab extends Tab
+public class SeqQueryTab extends Tab
 {
 	private static final long serialVersionUID = 4667335387617904461L;
 	private final int nIntField = 6;
 	private final static String HTML = "html/viewSingleTCW/SeqFilter.html";
 	
-	public QueryContigTab ( STCWFrame inFrame, RunQuery inQuery ) throws Exception
+	public SeqQueryTab ( STCWFrame inFrame, RunQuery inQuery ) throws Exception
 	{
 		super(inFrame, null); 
 		metaData = inFrame.getMetaData();
@@ -67,7 +67,7 @@ public class QueryContigTab extends Tab
 		MIN_ROW_HEIGHT = (int)test.getPreferredSize().getHeight() + 5;
 		
 		theQuery = inQuery;
-		tempContigData = (FieldContigData) Converters.deepCopy( theQuery.getContigData() );
+		tempContigData = (FieldSeqData) Converters.deepCopy( theQuery.getContigData() );
 		
 		createFilterPanel();
 	}
@@ -529,7 +529,7 @@ public class QueryContigTab extends Tab
 			cmbFirstBest = new UIqueryIncEx("  Search", "Best Eval", "Best Anno", "Best With GO",  0, 0);
 		addRowToPanel(cmbFirstBest, thePanel);
 		
-		cmbDBHitAndOr = new UIqueryIncEx( "", "AND", "OR", null, FieldContigData.FILTER_AND, 0 );
+		cmbDBHitAndOr = new UIqueryIncEx( "", "AND", "OR", null, FieldSeqData.FILTER_AND, 0 );
 		JPanel bar5 = addTwoToRow ( Box.createHorizontalStrut(SUBGROUP_INSET_WIDTH), cmbDBHitAndOr );
 		addRowToPanel( bar5, thePanel );
 		
@@ -1034,7 +1034,7 @@ public class QueryContigTab extends Tab
 		getParentFrame().addQueryResultsTab ( theQuery, "Filter" + nChildren ); 
 	}
 	// this merges both the Query Include/Exclude and the Columns Nfold
-	public String [] getAllRequiredLibs(FieldContigTab fTab) { 
+	public String [] getAllRequiredLibs(FieldSeqTab fTab) { 
 		Vector<String> retVal = new Vector<String> ();
 		if (!metaData.hasExpLevels()) return retVal.toArray(new String[0]);
 		
@@ -1553,12 +1553,12 @@ public class QueryContigTab extends Tab
 
 		if (chkNumAligns!=null) chkNumAligns.setSelected(false);
 		if (chkTotalExpLevel!=null) chkTotalExpLevel.setSelected(false);
-		if (hasRemarkQuery!=null) hasRemarkQuery.setValue(FieldContigData.FILTER_NONE);
+		if (hasRemarkQuery!=null) hasRemarkQuery.setValue(FieldSeqData.FILTER_NONE);
 		if (hasLocQuery!=null) {
-			hasLocQuery.setValue(FieldContigData.FILTER_NONE);
+			hasLocQuery.setValue(FieldSeqData.FILTER_NONE);
 			chkLocN.setSelected(false); chkLocStart.setSelected(false); chkLocEnd.setSelected(false);
 		}
-		if (hasNQuery!=null) hasNQuery.setValue(FieldContigData.FILTER_NONE);
+		if (hasNQuery!=null) hasNQuery.setValue(FieldSeqData.FILTER_NONE);
 		
 		// libraries
 		if (metaData.hasExpLevels()) {
@@ -1744,6 +1744,6 @@ public class QueryContigTab extends Tab
     private MetaData metaData = null;
 	private int nChildren = 0;
 	private RunQuery theQuery = null;
-	private FieldContigData tempContigData = null;
+	private FieldSeqData tempContigData = null;
 	private String norm="RPKM";
 }

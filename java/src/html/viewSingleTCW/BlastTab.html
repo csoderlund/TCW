@@ -7,26 +7,27 @@ of protein sequences.
 <ol>
 <li><i>Query:</i> Input one or more sequence in FASTA format into the entry box. 
 <ul>
-<li>If your sequence contains characters other than A,G,C,T, or N, it will
-be treated as a protein sequence.
+<li>If your sequence contains characters A,G,C,T, or N, it will
+be treated as a nucleotide sequence, else a protein sequence.
 <li>From the Sequence Detail page, you can use the <b>Copy...</b> command to copy 
 a hit sequence or the seqID sequence, and <b>Paste</b> it here.
 </ul>
 <p>
-<li><i>Subject:</i> For NT-sTCW, there will be the following options: 
+<li><i>Subject:</i> 
+<br>For NT-sTCW, there will be the following options: 
 <ul>
-<li>NT-Seq (nucleotide sequences in the database), 
-<li>AA-ORF (translated ORFs from the nucleotide sequences), 
-<li>AA-DB  (a selected protein database). 
+<li>NT-Seq (nucleotide sequences in the database)
+<li>AA-ORF (translated ORFs from the nucleotide sequences)
+<li>AA-DB  (a selected protein database)
 </ul>
 For AA-sTCW, the options will be:
 <ul>
 <li>AA-Seq (amino acid sequences in the database) 
-<li>AA-DB (a selected protein database). 
+<li>AA-DB (a selected protein database)
 </ul>
 <p>
 <li>You have a choice to use <tt>Blast</tt> and <tt>Diamond</tt>. 
-<tt>Diamond</tt> can only be used with an AA subject.
+<tt>Diamond</tt> can only be used with an AA subject (blastp or blastx mode).
 
 <p> 
 <li>You may enter/change
@@ -42,12 +43,15 @@ to a file in the "/hitResults" directory.
 <li>If tabular format is chosen, then you can
 select a row followed by <b>View Selected Sequence</b>, which displays the detail view of the sequence. 
 
-<p>
-<li><b>Delete Files</b>: Files written by the TCW search command will go into the "/ResultHits"
+</ol>
+
+<b>Delete Files</b>: Files written by the TCW search command will go into the "/ResultHits"
 directory. These files will end with ".fa" or be formated files. These files will be
 deleted when you execute this command. Result files will not be deleted. If you select a protein database that is
 not in the "/ResultHits" directory, the formatted files are not deleted. 
-</ol>
+
+<p>
+<b>Reset</b>: Sets the display back to all defaults.
  
 
 <h3>No Results Found</h3>
@@ -62,6 +66,11 @@ the terminal; copy it and run it from the terminal. If there was
 any error (e.g. in the parameters), it will tell you the error. 
 </ol>
 
+<h3>Original Search Results</h3>
+When the database was built, the sequences were annotated with one or more "AnnoDBs" (e.g. UniProt).
+In order to view the search results, select a given sequence for the query, then the appropriate
+AnnoDB (usually in <tt>/projects/DBfasta</tt>) for the subject. Note that the E-value and Bitscore will be different,
+and there is a chance it will not ever be shown since the input is one sequence versus 1000's.
 <h2>Relevant parameters</h2>
 <h3>Blastx</h3>
 Execute 'blastx -help' or 'blastp -help' from the command line to view the full set of parameters.

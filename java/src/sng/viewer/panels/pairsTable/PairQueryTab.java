@@ -33,12 +33,12 @@ import util.methods.Static;
 import util.ui.CollapsiblePanel;
 import util.ui.UserPrompt;
 
-public class QueryPairsTab extends Tab 
+public class PairQueryTab extends Tab 
 {	
 	private static final long serialVersionUID = 1127876634478104544L;
 	private static final String HTML = "html/viewSingleTCW/PairFilter.html";
 			
-	public QueryPairsTab ( STCWFrame inFrame, RunQuery inQuery ) throws Exception
+	public PairQueryTab ( STCWFrame inFrame, RunQuery inQuery ) throws Exception
 	{
 		super(inFrame, null); 
 		

@@ -11,9 +11,8 @@ import java.util.prefs.Preferences;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 
-
-import sng.database.Version;
 import util.database.HostsCfg;
+import util.database.Globalx;
 import util.methods.ErrorReport;
 import util.methods.FileHelpers;
 import util.methods.Out;
@@ -38,7 +37,7 @@ public class CompileFrame extends JFrame {
 	private void runMultiTCW() {
 		Vector<String> hostNames = new Vector<String>();
 		hostNames.add(hostsObj.host());
-		setTitle("runMultiTCW " + Version.strTCWver); 
+		setTitle("runMultiTCW " + Globalx.strTCWver); 
 		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		

@@ -69,8 +69,8 @@ public class ScoreCDS
 	
 	final private int nCounts	= 38;
 	
-	final private String bPos = Globalx.blosumPos;
-	final private String bNeg = Globalx.blosumNeg;
+	final private String bPos = Globalx.blosumGt;
+	final private String bNeg = Globalx.blosumLtEq;
 		
 	public ScoreCDS () {
 		curScore = new int[nCounts];
@@ -458,8 +458,8 @@ public class ScoreCDS
 		String r3c3 = String.format("%-14s %4d %3s", "Nonsynonymous:", curScore[IDX_cNonSyn],""); 
 		
 		String r1c4 = String.format("%-17s %3d %4s", "Amino exact:",   curScore[IDX_aaExact],""); 
-		String r2c4 = String.format("%-17s %3d %4s", Globalx.blosumPos + ":",curScore[IDX_aaPos],"");
-		String r3c4 = String.format("%-17s %3d %4s", Globalx.blosumNeg + ":", curScore[IDX_aaNeg],"");
+		String r2c4 = String.format("%-17s %3d %4s", Globalx.blosumGt + ":",curScore[IDX_aaPos],"");
+		String r3c4 = String.format("%-17s %3d %4s", Globalx.blosumLtEq + ":", curScore[IDX_aaNeg],"");
 	
 		if (isCDS) {
 			r1c3 = String.format("%-14s %4d %6s %3s", "Codon exact:", curScore[IDX_cExact],
@@ -472,9 +472,9 @@ public class ScoreCDS
 		else {
 			r1c4 = String.format("%-17s %3d %6s %4s", "Amino exact:",   curScore[IDX_aaExact],
 					Out.perFtxtP(curScore[IDX_aaExact], c), "");
-			r2c4 = String.format("%-17s %3d %6s %4s", Globalx.blosumPos + ":",curScore[IDX_aaPos],
+			r2c4 = String.format("%-17s %3d %6s %4s", Globalx.blosumGt + ":",curScore[IDX_aaPos],
 					Out.perFtxtP(curScore[IDX_aaPos], c), "");
-			r3c4 = String.format("%-17s %3d %6s %4s", Globalx.blosumNeg + ":", curScore[IDX_aaNeg],
+			r3c4 = String.format("%-17s %3d %6s %4s", Globalx.blosumLtEq + ":", curScore[IDX_aaNeg],
 					Out.perFtxtP(curScore[IDX_aaNeg], c), "");
 		}
 		lines.add(r1c1+r1c2+r1c3+r1c4);
@@ -648,8 +648,8 @@ public class ScoreCDS
 		else if (cdsMode==Share.CDS_AA) {
 			lines.add("LEGEND: ");
 			lines.add("  AA char = AA match");
-			lines.add("        " + Share.AA_POS +  " = " + Globalx.blosumPosLegend);
-			lines.add("        " + Share.AA_NEG +  " = " + Globalx.blosumNeg);
+			lines.add("        " + Share.AA_POS +  " = " + Globalx.blosumGtLegend);
+			lines.add("        " + Share.AA_NEG +  " = " + Globalx.blosumLtEq);
 		}
 		else if (cdsMode==Share.CDS_ND) {
 			lines.add("LEGEND: ");

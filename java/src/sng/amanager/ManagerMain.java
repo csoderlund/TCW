@@ -7,7 +7,7 @@ import util.database.HostsCfg;
 import util.methods.FileHelpers;
 
 public class ManagerMain {
-	static public boolean verbose=false, chkDB=false;
+	static public boolean verbose=false;
 	
 	public static void main(String[] args) {
 		System.out.println("\n----- runSingleTCW v" + Version.strTCWver + " " + 
@@ -23,7 +23,6 @@ public class ManagerMain {
 			System.out.println("Running in verbose mode");
 		}
 		if (hasArg(args, "-v")) {
-			chkDB=true;
 			System.out.println("Check MySQL variables and search paths");
 			new HostsCfg(true);
 			System.exit(0);

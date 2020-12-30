@@ -6,9 +6,7 @@ import java.io.FileWriter;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-
-import sng.database.Version;
-import util.ui.UIHelpers;
+import util.database.Globalx;
 
 /**
  * A set of static methods to report errors to a file for debugging 
@@ -89,7 +87,7 @@ public class ErrorReport {
 		else System.err.println("Error: see " + strFileName);
 	
 		String x = (debugInfo!=null) ? debugInfo : "";
-		pWriter.println("\n" + Version.TCWhead + " " + TimeHelpers.getDate() + " " + x); 
+		pWriter.println("\n" + Globalx.TCWhead + " " + TimeHelpers.getDate() + " " + x); 
 		e.printStackTrace(pWriter);
 		pWriter.close();
 	}

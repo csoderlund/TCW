@@ -5,7 +5,6 @@ package cmp.viewer.seq.align;
  * Almost exactly like AlignPairView3Panel, but different buttons 
  * and it calls AlignPairNPanel as the display is a bit different.
  */
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -68,8 +67,6 @@ public class PairNViewPanel extends JPanel {
 		buttonPanel = Static.createPagePanel();
 		JPanel theRow = Static.createRowPanel();
 		
-		int dist=3;
-		
 		btnViewType = Static.createButton("Line", true);
 		btnViewType.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -90,7 +87,7 @@ public class PairNViewPanel extends JPanel {
 			}
 		});
 		theRow.add(new JLabel("View:")); theRow.add(Box.createHorizontalStrut(1));
-		theRow.add(btnViewType);         theRow.add(Box.createHorizontalStrut(dist));
+		theRow.add(btnViewType);         theRow.add(Box.createHorizontalStrut(5));
 		
 		dotBox = Static.createCheckBox("Dot", true); // CAS312 new
 		dotBox.addActionListener(new ActionListener() {
@@ -100,7 +97,16 @@ public class PairNViewPanel extends JPanel {
 		});
 		dotBox.setEnabled(false);
 		theRow.add(dotBox);
-		theRow.add(Box.createHorizontalStrut(dist));
+		theRow.add(Box.createHorizontalStrut(5));
+		
+		trimBox = Static.createCheckBox("Trim", false); // CAS313 new
+		trimBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				refreshPanels();
+			}
+		});
+		theRow.add(trimBox);
+		theRow.add(Box.createHorizontalStrut(5));
 		
 		menuZoom = Static.createZoom2();	// CAS312 Zoom2 allows increase size
 		menuZoom.addActionListener(new ActionListener() {
@@ -117,8 +123,7 @@ public class PairNViewPanel extends JPanel {
 			}
 		});
 		if (!isNT) {
-			theRow.add(menuColor);
-			theRow.add(Box.createHorizontalStrut(dist));
+			theRow.add(menuColor); theRow.add(Box.createHorizontalStrut(5));
 		}
 		JButton btnHelp1 = Static.createButton("Help1", true, Globals.HELPCOLOR); // CAS312
 		btnHelp1.addActionListener(new ActionListener() {
@@ -126,18 +131,10 @@ public class PairNViewPanel extends JPanel {
 				UserPrompt.displayHTMLResourceHelp(theParentFrame, "Alignment...", help1HTML);
 			}
 		});
+		theRow.add(Box.createHorizontalStrut(10));
 		theRow.add(btnHelp1);
 		
 	// pairwise specific
-		theRow.add(Box.createHorizontalStrut(15));
-		btnShowAll = Static.createButton("Show All", false);
-		btnShowAll.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				displayAllPairwise();
-				unselectAll();
-				setButtonsEnabled();
-			}
-		});
 		btnShowAllPairs = Static.createButton("Show Only", false);
 		btnShowAllPairs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -152,31 +149,36 @@ public class PairNViewPanel extends JPanel {
 				showSelectedPair();
 			}
 		});
+		btnShowAll = Static.createButton("Show All", false);
+		btnShowAll.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				displayAllPairwise();
+				unselectAll();
+				setButtonsEnabled();
+			}
+		});
 		JButton btnShowHelp = Static.createButton("Help2", true, Globals.HELPCOLOR);
 		btnShowHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				UserPrompt.displayHTMLResourceHelp(theParentFrame, "Selected:", help2HTML);
 			}
 		});
+		buttonPanel.add(theRow); buttonPanel.add(Box.createVerticalStrut(5));
 		
+		JPanel theRow2 = Static.createRowPanel();
 		if (numSeqs>3) { // CAS312 need second row
-			buttonPanel.add(theRow); buttonPanel.add(Box.createVerticalStrut(5));
-			JPanel theRow2 = Static.createRowPanel();
-			theRow2.add(btnShowAll);				theRow2.add(Box.createHorizontalStrut(dist));
 			theRow2.add(new JLabel("Selected:"));	theRow2.add(Box.createHorizontalStrut(2));
-			theRow2.add(btnShowAllPairs);			theRow2.add(Box.createHorizontalStrut(2));
-			theRow2.add(btnAlign); 					theRow2.add(Box.createHorizontalStrut(dist)); 
-			theRow2.add(btnShowHelp);
-			buttonPanel.add(theRow2);
+			theRow2.add(btnAlign); 					theRow2.add(Box.createHorizontalStrut(2)); 
+			theRow2.add(btnShowHelp);				theRow2.add(Box.createHorizontalStrut(10));
+			theRow2.add(btnShowAllPairs);			theRow2.add(Box.createHorizontalStrut(5));
+			theRow2.add(btnShowAll);				
 		}
 		else  {
-			if (numSeqs>2) {
-				theRow.add(new JLabel("Selected:"));theRow.add(Box.createHorizontalStrut(2));
-			}
-			theRow.add(btnAlign); 		theRow.add(Box.createHorizontalStrut(dist)); 
-			theRow.add(btnShowHelp);
-			buttonPanel.add(theRow);
+			if (numSeqs>2) {theRow2.add(new JLabel("Selected:"));theRow2.add(Box.createHorizontalStrut(2));}
+			theRow2.add(btnAlign); 					theRow2.add(Box.createHorizontalStrut(2)); 
+			theRow2.add(btnShowHelp);				
 		}
+		buttonPanel.add(theRow2);
 		
 		buttonPanel.setMaximumSize(buttonPanel.getPreferredSize()); 
 		buttonPanel.setMinimumSize(buttonPanel.getPreferredSize()); 
@@ -242,16 +244,20 @@ public class PairNViewPanel extends JPanel {
 					cnt++;
 					theParentFrame.setStatus(msg + " aligning " + cnt + " of " + max);
 					
-					align = new PairAlignData(mDB, seqIDs,  alignType);
-					if (!align.isGood()) {
+					align = new PairAlignData(mDB, 
+							seqIDs,  
+							alignType);
+					
+					if (!align.isGood()) 
 						UserPrompt.showWarn(seqIDs[0] + " and " + seqIDs[1] + " may not be aligned correctly");
-					}
+					
 					results.add(align);
 				}
 			}
 			theParentFrame.setStatus(msg + " alignment is done - now generate display.....");
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Aligning pairs for Member table");}
+		
 		//Sort by 2nd sequence
 		Collections.sort(results);
 		theAlignData = results.toArray(new PairAlignData[results.size()]);
@@ -287,6 +293,7 @@ public class PairNViewPanel extends JPanel {
 			theParentFrame.setStatus("Seq-Hit alignment is done - now generate display.....");
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Aligning seq-hits for Member table");}
+		
 		//Sort by 2nd seqName
 		Collections.sort(results);
 		theAlignData = results.toArray(new PairAlignData[results.size()]);
@@ -323,17 +330,13 @@ public class PairNViewPanel extends JPanel {
 	}
 	private void displaySelectedPairs(boolean pairsOnly) {
 		String [] selectedIDs = getSelectedIDsPairwise();
-		for(int x=0; x<theGraphicPanels.length; x++) {
+		for(int x=0; x<theGraphicPanels.length; x++) 
 			theGraphicPanels[x].setVisible(theGraphicPanels[x].hasSeqIDs(selectedIDs, pairsOnly));
-		}
-	}
-		
+	}	
 	private void displayAllPairwise() {
-		for(int x=0; x<theGraphicPanels.length; x++) {
+		for(int x=0; x<theGraphicPanels.length; x++) 
 			theGraphicPanels[x].setVisible(true);
-		}
 	}
-	
 	private void setButtonsEnabled() {
 		boolean allVisible = true;
 		
@@ -358,7 +361,6 @@ public class PairNViewPanel extends JPanel {
 		}
 		return 0;
 	}
-
 	private String [] getSelectedIDsPairwise() {
 		Vector<String> theIDs = new Vector<String> ();
 		for(int x=0; x<theGraphicPanels.length; x++) {
@@ -373,7 +375,6 @@ public class PairNViewPanel extends JPanel {
 		}
 		return theIDs.toArray(new String[theIDs.size()]);
 	}
-
 	private int getNumSelectedIDsPairwise() {
 		Vector<String> theIDs = new Vector<String> ();
 		for(int x=0; x<theGraphicPanels.length; x++) {
@@ -408,17 +409,10 @@ public class PairNViewPanel extends JPanel {
 			int view = (isShowGraphic) ? PairNAlignPanel.GRAPHICMODE : PairNAlignPanel.TEXTMODE;
 			int col = menuColor.getSelectedIndex();
 			boolean bDot = dotBox.isSelected();
+			boolean bTrim = trimBox.isSelected();
 			
 			for(int x=0; x<theGraphicPanels.length; x++) {				
-				theGraphicPanels[x].setBorderColor(Color.BLACK);
-			
-				theGraphicPanels[x].setZoom(ratio);
-				
-				theGraphicPanels[x].setDrawMode(view);
-				
-				theGraphicPanels[x].setColorMode(col);
-				
-				theGraphicPanels[x].setDotMode(bDot);
+				theGraphicPanels[x].setOpts(view, col, bDot, bTrim, ratio);
 				
 				mainPanel.add(theGraphicPanels[x]);
 			}
@@ -441,11 +435,10 @@ public class PairNViewPanel extends JPanel {
 			if ( theGraphicPanels[x].contains( nPanelX, nPanelY ) ) {
 				theGraphicPanels[x].handleClick( e, new Point( nPanelX, nPanelY ) );
 			}
-			else if ( !e.isShiftDown() && !e.isControlDown() ) {
+			else { // if ( !e.isShiftDown() && !e.isControlDown() ) {
 				theGraphicPanels[x].selectNone();
 			}
 		}
-		
 		setButtonsEnabled();
 	}
 	
@@ -463,7 +456,7 @@ public class PairNViewPanel extends JPanel {
 	private JComboBox <String> menuColor = null;
 	private JComboBox <MenuMapper> menuZoom = null;
 	private JButton btnViewType = null;
-	private JCheckBox dotBox = null;
+	private JCheckBox dotBox = null, trimBox = null;
 	
 	private JButton btnShowAll = null;
 	private JButton btnShowAllPairs = null;

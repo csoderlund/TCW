@@ -1,0 +1,21 @@
+<html>
+<body style="padding:20px;width:650px;">
+<title>MSA Scores</title>
+<h2>MSA Scores</h2>
+The MSA is scored by two methods, which by default are Sum-of-pairs and Wentropy.
+However, it is possible to create the database using other scoring methods,
+where the method used is at the bottom of the <tt>Overview</tt>.
+<p>For any method, all columns are scored. The Cluster table shows the 
+global score, which is the average of the column scores.
+<p>The column scores can be viewed with any of the following ways:
+<ol>
+<li>Switch the <tt>View:</tt> from <tt>Line</tt> to <tt>Seq</tt>. Select
+any column and the two scores will be shown above the alignment.
+<li>Select the <tt>Scores...</tt> button and a popup of all column scores will be shown.
+<li>If you run the alignment using the <tt>MSA...</tt> AA options, the resulting
+alignment and scores will be in the <tt>/ResultAlign</tt> directory.
+</ol>
+In option 1 and 2, it will also show the composition. A "=" indicates a leading or 
+trailing gap, whereas a "-" indicates an internal gap. For example, "3:M, 2L, 1:-, 1:="
+represents a column of 7 rows, where there is a leading/trailing gap and an internal gap.
+</html>

@@ -1,44 +1,33 @@
-package sng.viewer.panels.seqDetail;
+package sng.viewer.panels.align;
 /**
  * Draws the contig
  */
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.*;
 import java.awt.event.*;
 import java.util.TreeSet;
-import java.util.TreeMap;
 import java.util.Vector;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.io.PrintStream;
 
 import sng.database.Globals;
 import sng.dataholders.ContigData;
 import sng.dataholders.SequenceData;
-import sng.viewer.panels.MainAlignPanel;
-import sng.viewer.panels.MainToolAlignPanel;
 import util.ui.MultilineTextPanel;
-import util.ui.UIHelpers;
 import util.database.Globalx;
 import util.methods.Converters;
 import util.methods.ErrorReport;
 
-public class DrawContigPanel extends MainAlignPanel 
+public class ContigAlignPanel extends BaseAlignPanel 
 {	
-	private static final boolean DEBUG = false;
-	
-	public DrawContigPanel (	ContigData inContig, 
-							int nTopGap, 
-							int nBottomGap, 
-							int nLeftGap, 
-							int nRightGap ) throws Exception 
+	private static final long serialVersionUID = 1L;
+
+	public ContigAlignPanel (	ContigData inContig, 
+			int nTopGap, int nBottomGap,  int nLeftGap, int nRightGap ) throws Exception 
 	{
 		super ( Globals.textFont );
-		
-		if (DEBUG)	System.err.println("ContigPanel: contigID="+inContig.getContigID());
 		
 		theContig = inContig;
 		theContig.setSortOrder( ContigData.SORT_BY_GROUPED_LEFT_POS );
@@ -70,26 +59,18 @@ public class DrawContigPanel extends MainAlignPanel
 		// Set the name for the reference sequence
 		strRefSeqName = "Consensus";
         
-        setBasesPerPixel ( 3 );	
+        setZoom ( 3 );	
 		super.setIndexRange( theContig.getLowIndex(), theContig.getHighIndex() );
 		super.setMinPixelX ( graph_DATA_X_START_POS );
 	}	
 	
-	public ContigData getContig() 
-	{
-		return theContig;
-	}
-	
-	public String getContigID ( )
-	{
+	public String getContigID ( ){
 		return theContig.getContigID();
 	}
 	
-	public Vector<String> getContigIDs ( ) 
-	{
+	public Vector<String> getSeqIDs ( ) {
 		Vector<String> out = new Vector<String>();
 		out.add(getContigID());
-		
 		return out;
 	}
 	
@@ -136,9 +117,9 @@ public class DrawContigPanel extends MainAlignPanel
 		return count;
 	}
 	
-	public void setBasesPerPixel ( int nBasesPerPixel ) throws Exception
+	public void setZoom ( int nBasesPerPixel ) throws Exception
 	{
-		super.setBasesPerPixel( nBasesPerPixel );
+		super.setZoom( nBasesPerPixel );
 		
 		basesPerPIXEL = nBasesPerPixel;		
 		
@@ -402,7 +383,7 @@ public class DrawContigPanel extends MainAlignPanel
 		}
 	}
    
-	void highlightSNPs ()
+	private void highlightSNPs ()
 	{
 		// Highlight each SNP's column
 		int nYTop = read_TOP_Y_POS_START;
@@ -413,7 +394,7 @@ public class DrawContigPanel extends MainAlignPanel
 			if ( theContig.maybeSNPAt(i) ) {
 				if ( super.getDrawMode() == GRAPHICMODE ) {
 					int nX = (int)calculateDrawX(i);
-					g2.setColor (Globalx.mediumGray);
+					g2.setColor (BaseAlignPanel.mediumGray);
 					g2.drawLine ( nX, nYTop, nX, nYBottom );
 				}
 				else {
@@ -465,10 +446,7 @@ public class DrawContigPanel extends MainAlignPanel
 	}
 	
 	private void drawRowBackground( SequenceData seqData, 
-										double dYTop, 
-										double dYBottom,
-										int nMatePos,
-										boolean bSelectedRow )
+					double dYTop, double dYBottom, int nMatePos, boolean bSelectedRow )
 	{	
 		// Fill in the background based on context
 		if ( bSelectedRow ) g2.setColor( Globalx.selectColor );
@@ -489,12 +467,8 @@ public class DrawContigPanel extends MainAlignPanel
 		g2.setColor(Color.black);
 	}
 	
-	void drawRowForeground ( SequenceData seqData, 
-								int numExtras,
-								double dYTop, 
-								double dYBottom,
-								int nMatePos,
-								boolean bSelectedRow )
+	void drawRowForeground ( SequenceData seqData, int numExtras,
+				double dYTop, double dYBottom, int nMatePos, boolean bSelectedRow )
 	{
 		// If the clone is being drawn on the same line as its mate, adjust the name
 		String clonename = getSequenceName ( seqData );
@@ -531,7 +505,6 @@ public class DrawContigPanel extends MainAlignPanel
 		g2.setColor(Color.black);		
 	}
 	
-
 	//----------------TEXT MODE----------------//
 	
 	private void writeBackground ( SequenceData seqData, double dYTop, double dYBottom, int nMatePos, boolean bSelectedRow  ) 
@@ -627,7 +600,7 @@ public class DrawContigPanel extends MainAlignPanel
 		for ( int i = 0; i < theContig.getNumSequences (); ++i )
 		{
 			SequenceData cloneData = theContig.getSequenceAt( i );
-			if(cloneData.isBuried() && nShowBuriedMode == MainToolAlignPanel.HIDE_BURIED_EST )
+			if(cloneData.isBuried() && nShowBuriedMode == ContigViewPanel.HIDE_BURIED_EST )
 				continue;
 			
 			if ( Converters.compareObjects( lastESTClicked, cloneData ) )
@@ -660,7 +633,7 @@ public class DrawContigPanel extends MainAlignPanel
 		
 			if ( !bDrawWithMate )
 			{
-				if ((nShowBuriedMode != MainToolAlignPanel.HIDE_BURIED_EST) ||
+				if ((nShowBuriedMode != ContigViewPanel.HIDE_BURIED_EST) ||
 						!cloneData.isBuried()) rowsOfESTS.add( cloneData ); 
 			}
 			else
@@ -669,7 +642,7 @@ public class DrawContigPanel extends MainAlignPanel
 				ESTPair[0] = cloneData;
 				ESTPair[1] = cloneMateData;				
 				
-				if (nShowBuriedMode != MainToolAlignPanel.HIDE_BURIED_EST || !cloneData.isBuried() || 
+				if (nShowBuriedMode != ContigViewPanel.HIDE_BURIED_EST || !cloneData.isBuried() || 
 						!cloneMateData.isBuried()) rowsOfESTS.add( ESTPair );
 				++i;
 			}
@@ -687,18 +660,6 @@ public class DrawContigPanel extends MainAlignPanel
         outsideBox = new Rectangle2D.Double ( LEFT_GAP - 2, TOP_GAP - 2, 
         		insideWIDTH + 4, insideHEIGHT + 4 );
 
-	}
-	
-	public boolean scrollToMate ( String str )
-	{
-		JPanel matesPanel = splitPairMap.get ( str );
-		if ( matesPanel == null )
-			return false;
-		else
-		{
-			UIHelpers.scrollToCenter( matesPanel, false );
-			return true;
-		}
 	}
 	
 	private String getSequenceName ( SequenceData seq )
@@ -813,13 +774,6 @@ public class DrawContigPanel extends MainAlignPanel
 		repaint ();		
 	}
 	
-	public void getSelectedContigIDs ( TreeSet <String> set ) 
-	{
-		String str = theContig.getContigID();
-		if (str==null || str.length() == 0) return;
-		if ( hasSelection ()) set.add( str );	
-	};
-	
 	public void setSelectedContigIDs ( TreeSet <String> set ) 
 	{ 
 		String str = theContig.getContigID();
@@ -833,7 +787,7 @@ public class DrawContigPanel extends MainAlignPanel
 		return !selectedESTs.isEmpty();
 	}
 	
-	public void setSelectedSequences ( TreeSet <String> toSelect )
+	private void setSelectedSequences ( TreeSet <String> toSelect )
 	{	
 		// Clear the old selection
 		selectNone ();
@@ -848,7 +802,7 @@ public class DrawContigPanel extends MainAlignPanel
 			{
 				SequenceData est = theContig.getSequenceAt( i );
 				if (s.equals(est.getName()) && est.isBuried()) {
-					nShowBuriedMode = MainToolAlignPanel.SHOW_BURIED_EST_DETAIL;
+					nShowBuriedMode = ContigViewPanel.SHOW_BURIED_EST_DETAIL;
 				}
 			}
 		}
@@ -870,7 +824,7 @@ public class DrawContigPanel extends MainAlignPanel
 		}
 	}
 
-	public void selectMatchingSequences( String strSeqName ) 
+	public void selectMatchSeqs( String strSeqName ) 
 	{
 		if (strSeqName.length() == 0) {
 			selectNone();
@@ -892,52 +846,7 @@ public class DrawContigPanel extends MainAlignPanel
 		setSelectedSequences(matches);
 	}
 	
-	public void addSelectedConsensusToFASTA ( PrintStream seqFile, PrintStream qualFile ) throws Exception
-	{
-		if ( hasSelection() )
-		{
-			addConsensusToFASTA(seqFile, qualFile); 
-		}
-	}
-
-	public void addConsensusToFASTA ( PrintStream seqFile, PrintStream qualFile ) throws Exception
-	{
-		SequenceData refSeq = theContig.getSeqData();
-		refSeq = refSeq.newSeqDataNoGap();	
-		refSeq.appendToFASTAFiles( seqFile, qualFile );
-	}
-	
-	public void addSelectedSequencesToFASTA ( PrintStream seqFile, PrintStream qualFile ) throws Exception
-	{
-		Iterator <String> iter = selectedESTs.iterator();
-		while ( iter.hasNext() )
-		{
-			SequenceData curEST = theContig.getSequenceByName( iter.next() );
-			curEST = curEST.newSeqDataNoGap(); 
-			curEST.appendToFASTAFiles( seqFile, qualFile );				
-		}
-	}
-
-	public void addAllSequencesToFASTA(PrintStream seqFile, PrintStream qualFile) throws Exception
-	{
-		int cnt=0;
-		for (Object obj : theContig.getAllSequences()) {
-			cnt++;
-			if ((cnt % 1000) == 0) System.err.println("Wrote " + cnt + " sequences...\r");
-			if (obj instanceof SequenceData) {
-				SequenceData est = (SequenceData)obj;
-				est.newSeqDataNoGap().appendToFASTAFiles( seqFile, qualFile );	
-			}
-			else if (obj instanceof SequenceData[]) {
-				SequenceData[] ests = (SequenceData[])obj;
-				ests[0].newSeqDataNoGap().appendToFASTAFiles( seqFile, qualFile );	
-				ests[1].newSeqDataNoGap().appendToFASTAFiles( seqFile, qualFile );	
-			}
-		}
-		System.err.println("Complete writing " + cnt + " sequences and quals to file");
-	}
-	
-	public void addSelectedSequencesToSet ( TreeSet <String> set )
+	public void addSelectedSeqsToSet ( TreeSet <String> set )
 	{ 
 		set.addAll( selectedESTs );		
 	}
@@ -956,20 +865,6 @@ public class DrawContigPanel extends MainAlignPanel
 		repaint ();		
 	}
 	
-	public void changeDraw()
-  	{
-		super.changeDraw();
-  		if(super.getDrawMode() == GRAPHICMODE)
-  		{
-  			super.setMinPixelX ( graph_DATA_X_START_POS );
-  		}
-    	else
-    	{
-    		super.setMinPixelX ( base_DATA_X_START_POS );
-    	}
-		setupRows ( );
-		repaint ();
-  	}
 	
 	public Dimension getMaximumSize()
 	{
@@ -1041,30 +936,29 @@ public class DrawContigPanel extends MainAlignPanel
 	private Graphics2D g2; // what draws stuff
 
 	private TreeSet<String> selectedESTs = new TreeSet<String> (); 
-	// Maps the EST name, to its "find EST" panel
-	private TreeMap<String,JPanel> splitPairMap = new TreeMap<String,JPanel> (); 
-    MultilineTextPanel textPanel;
+	
+    private MultilineTextPanel textPanel;
 	private Vector <Object> rowsOfESTS = null; // SequenceData or SequenceData[]
 	private int nHighlightX = 0;
 	private int nLastRowClicked = -1;
 	
-	public static final Color contigErr = new Color(255, 230, 230);
+	
+	private Font theFont = Globals.textFont;
+	
+	private ContigData theContig;
+	private SequenceData theRefSequence;
+	
+	private boolean bShowSNPs = false;
+	private int nShowBuriedMode = ContigViewPanel.HIDE_BURIED_EST; 
+
+   
+    public static final Color contigErr = new Color(255, 230, 230);
 	public static final Color contigFor = new Color(230, 230, 255);
-	public static final Color contigRev = Globalx.lightGray;
+	public static final Color contigRev = new Color(230, 230, 230);;
 	
 	public static final Color colorGreen = new Color ( 0x12B600 );
 	public static final Color colorYellow = new Color ( 0xC69E00 );
 	
 	public static final Color SNPbgColor = new Color ( 0xEEF2FF );
-	
-	Font theFont = Globals.textFont;
-	
-	ContigData theContig;
-	SequenceData theRefSequence;
-	
-	boolean bShowSNPs = false;
-	int nShowBuriedMode = MainToolAlignPanel.HIDE_BURIED_EST; 
-
-    private static final long serialVersionUID = 1;
 }
 

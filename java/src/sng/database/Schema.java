@@ -790,7 +790,7 @@ public class Schema
 	{
 		if (current()) return dbVerStr;
 		
-		System.err.println("Database schema is " + dbVerStr + "; current schema is " + curVerStr);
+		System.err.println("sTCW database schema is " + dbVerStr + "; current schema is " + curVerStr);
 		
 		if (!FileHelpers.yesNo("The database needs to be updated; continue?"))
 		{

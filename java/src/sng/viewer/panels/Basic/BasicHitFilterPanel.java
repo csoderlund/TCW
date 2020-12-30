@@ -51,10 +51,10 @@ import sng.dataholders.BlastHitData;
 import sng.dataholders.ContigData;
 import sng.dataholders.SequenceData;
 import sng.viewer.STCWFrame;
-import sng.viewer.panels.MainToolAlignPanel;
+import sng.viewer.panels.align.AlignCompute;
+import sng.viewer.panels.align.AlignData;
+import sng.viewer.panels.align.PairViewPanel;
 import sng.viewer.panels.seqDetail.LoadFromDB;
-import util.align.AlignCompute;
-import util.align.AlignData;
 import util.database.DBConn;
 import util.methods.ErrorReport;
 import util.methods.Out;
@@ -119,11 +119,11 @@ public class BasicHitFilterPanel extends JPanel {
 		setAlignmentX(Component.LEFT_ALIGNMENT);
 		setBackground(Color.white);
 		
-		queryPanel = new MainQueryPanel();
-		annoDBPanel = new AnnoDBPanel();
-		speciesPanel = new SpeciesPanel();
-		goPanel = new GOetcPanel();
-		countPanel = new CountPanel();
+		annoDBPanel = 	new AnnoDBPanel();
+		speciesPanel = 	new SpeciesPanel();
+		goPanel = 		new GOetcPanel(); // checkbox not added in MainQueryPanel if !hasGO
+		countPanel = 	new CountPanel();
+		queryPanel = 	new MainQueryPanel();
 		
 		colSeqPanel = new ColumnPanel(seqStaticColNames, false);
 		colGrpPanel = new ColumnPanel(grpStaticColNames, true);
@@ -192,7 +192,7 @@ public class BasicHitFilterPanel extends JPanel {
 		
 		Vector<AlignData> hitSeqList =  
 				AlignCompute.DBhitsAlignDisplay(seqList, hitList, blastObj, seqObj, hitObj, 
-						AlignCompute.frameResult, metaData.isProteinDB());
+						AlignCompute.frameResult, metaData.isAAsTCW());
 		
 		alignPanel.removeAll();
 		
@@ -209,12 +209,13 @@ public class BasicHitFilterPanel extends JPanel {
 		row.add(btnReturn);
 		row.setMaximumSize(new Dimension (Integer.MAX_VALUE, (int)row.getPreferredSize ().getHeight()));
 		page.add(row, BorderLayout.WEST);
+		
 		alignPanel.add(page);
 		alignPanel.add(Box.createVerticalStrut(3));
 		
 		JPanel page2 = Static.createPagePanel();
-		MainToolAlignPanel drawPanel = 
-				MainToolAlignPanel.createPairAlignPanel (true, false, hitSeqList );
+		PairViewPanel drawPanel = 
+				PairViewPanel.createPairAlignPanel (true, false, hitSeqList );
 		page2.add(drawPanel);
 		alignPanel.add( page2, BorderLayout.WEST);
 		
@@ -465,7 +466,7 @@ public class BasicHitFilterPanel extends JPanel {
 					catch(Exception e) {ErrorReport.prtReport(e, "GO etc");}
 				}});
 			btnGOetc.setEnabled(isActive);
-			if (metaData.hasGOs()) {
+			if (hasGO) {
 				rowFilter2.add(chkGOetc);
 				rowFilter2.add(btnGOetc);
 			}
@@ -491,7 +492,7 @@ public class BasicHitFilterPanel extends JPanel {
 			add(rowFilter2);
 			add(Box.createVerticalStrut(5));	
 			
-			// Results
+	// Results
 			add(new JSeparator());
 			add(Box.createVerticalStrut(3));	
 			
@@ -543,7 +544,7 @@ public class BasicHitFilterPanel extends JPanel {
 				}
 			});
 			rowResults.add(showGrouped);
-			add(rowResults);
+			add(rowResults); // CAS313 Occasionally, gets extra lines. Also, Align has extra lines. 
 			
 			enableSections();
 			setMinimumSize(getPreferredSize());
@@ -733,7 +734,7 @@ public class BasicHitFilterPanel extends JPanel {
 			txtField.setEnabled(sec1);  btnFindFile.setEnabled(sec1);
 			if (sec1) {
 				if (!radHitID.isSelected()) lblID.setEnabled(false);
-				if (!radDesc.isSelected()) lblDesc.setEnabled(false);
+				if (!radDesc.isSelected())  lblDesc.setEnabled(false);
 			}
 			
 			lblFilters.setEnabled(sec2);
@@ -752,15 +753,10 @@ public class BasicHitFilterPanel extends JPanel {
 				if (!chkSpecies.isSelected()) 	btnSpecies.setEnabled(false);
 				if (!chkGOetc.isSelected())   	btnGOetc.setEnabled(false);	
 				if (!chkCount.isSelected())   	btnCount.setEnabled(false);	
-				if (chkUseEval.isSelected()) 	{
-					txtEval.setEnabled(sec2);
-				}
-				if (chkUseSim.isSelected())  	{
-					txtSim.setEnabled(sec2);
-				}
-				if (chkUseAlign.isSelected())  	{
-					txtAlign.setEnabled(sec2);
-				}
+				
+				if (chkUseEval.isSelected()) 	txtEval.setEnabled(sec2);
+				if (chkUseSim.isSelected())  	txtSim.setEnabled(sec2);
+				if (chkUseAlign.isSelected())  	txtAlign.setEnabled(sec2);
 			}
 		}
 		
@@ -1116,62 +1112,61 @@ public class BasicHitFilterPanel extends JPanel {
 			row.setAlignmentX(Component.LEFT_ALIGNMENT);
 			
 			int width = chkHasIP.getPreferredSize().width;
-			if (metaData.hasGOs()) {
-				
-				row = Static.createRowPanel();
-				row.add(new JLabel("Assigned to Hit:"));
-				panel.add(Box.createVerticalStrut(10));
-				panel.add(row);
-				
-				row = Static.createRowPanel();
-				row.add(chkHasGO);
-				row.add(Box.createHorizontalStrut(width - chkHasGO.getPreferredSize().width));
-				row.add(Box.createHorizontalStrut(30));
-				row.add(txtGO);
-				row.add(new JLabel("(exact)"));
-				row.setMaximumSize(row.getPreferredSize());
-				panel.add(Box.createVerticalStrut(10));
-				panel.add(row);
-				
-				row = Static.createRowPanel();
-				row.add(chkHasIP);
-				row.add(Box.createHorizontalStrut(30));
-				row.add(txtIP);
-				row.add(new JLabel("(contains)"));
-				row.setMaximumSize(row.getPreferredSize());
-				panel.add(Box.createVerticalStrut(10));
-				panel.add(row);
-				
-				row = Static.createRowPanel();
-				row.add(chkHasKEGG);
-				row.add(Box.createHorizontalStrut(width - chkHasKEGG.getPreferredSize().width));
-				row.add(Box.createHorizontalStrut(30));
-				row.add(txtKEGG);
-				row.add(new JLabel("(contains)"));
-				row.setMaximumSize(row.getPreferredSize());
-				panel.add(Box.createVerticalStrut(10));
-				panel.add(row);
-				
-				row = Static.createRowPanel();
-				row.add(chkHasPFAM);
-				row.add(Box.createHorizontalStrut(width - chkHasPFAM.getPreferredSize().width));
-				row.add(Box.createHorizontalStrut(30));
-				row.add(txtPFAM);
-				row.add(new JLabel("(contains)"));
-				row.setMaximumSize(row.getPreferredSize());
-				panel.add(Box.createVerticalStrut(10));
-				panel.add(row);
-				
-				row = Static.createRowPanel();
-				row.add(chkHasEC);
-				row.add(Box.createHorizontalStrut(width - chkHasEC.getPreferredSize().width));
-				row.add(Box.createHorizontalStrut(30));
-				row.add(txtEC);
-				row.add(new JLabel("(contains)"));
-				row.setMaximumSize(row.getPreferredSize());
-				panel.add(Box.createVerticalStrut(10));
-				panel.add(row);
-			}
+			
+			row = Static.createRowPanel();
+			row.add(new JLabel("Assigned to Hit:"));
+			panel.add(Box.createVerticalStrut(10));
+			panel.add(row);
+			
+			row = Static.createRowPanel();
+			row.add(chkHasGO);
+			row.add(Box.createHorizontalStrut(width - chkHasGO.getPreferredSize().width));
+			row.add(Box.createHorizontalStrut(30));
+			row.add(txtGO);
+			row.add(new JLabel("(exact)"));
+			row.setMaximumSize(row.getPreferredSize());
+			panel.add(Box.createVerticalStrut(10));
+			panel.add(row);
+			
+			row = Static.createRowPanel();
+			row.add(chkHasIP);
+			row.add(Box.createHorizontalStrut(30));
+			row.add(txtIP);
+			row.add(new JLabel("(contains)"));
+			row.setMaximumSize(row.getPreferredSize());
+			panel.add(Box.createVerticalStrut(10));
+			panel.add(row);
+			
+			row = Static.createRowPanel();
+			row.add(chkHasKEGG);
+			row.add(Box.createHorizontalStrut(width - chkHasKEGG.getPreferredSize().width));
+			row.add(Box.createHorizontalStrut(30));
+			row.add(txtKEGG);
+			row.add(new JLabel("(contains)"));
+			row.setMaximumSize(row.getPreferredSize());
+			panel.add(Box.createVerticalStrut(10));
+			panel.add(row);
+			
+			row = Static.createRowPanel();
+			row.add(chkHasPFAM);
+			row.add(Box.createHorizontalStrut(width - chkHasPFAM.getPreferredSize().width));
+			row.add(Box.createHorizontalStrut(30));
+			row.add(txtPFAM);
+			row.add(new JLabel("(contains)"));
+			row.setMaximumSize(row.getPreferredSize());
+			panel.add(Box.createVerticalStrut(10));
+			panel.add(row);
+			
+			row = Static.createRowPanel();
+			row.add(chkHasEC);
+			row.add(Box.createHorizontalStrut(width - chkHasEC.getPreferredSize().width));
+			row.add(Box.createHorizontalStrut(30));
+			row.add(txtEC);
+			row.add(new JLabel("(contains)"));
+			row.setMaximumSize(row.getPreferredSize());
+			panel.add(Box.createVerticalStrut(10));
+			panel.add(row);
+			
 			// needed to do this to get it centered
 			JPanel selectPanel = new JPanel();
 			selectPanel.setBackground(Color.white);
@@ -1222,12 +1217,12 @@ public class BasicHitFilterPanel extends JPanel {
 		}
 		private String getGO(String txt) {
 			try {
-	    			if (txt.startsWith("GO:")) txt = txt.substring(3);
-	    			int gonum = Integer.parseInt(txt);
-	    			String goterm = String.format(GO_FORMAT, gonum);
-	    			return goterm;
-	    		}
-	    		catch (Exception e) { return null;}
+    			if (txt.startsWith("GO:")) txt = txt.substring(3);
+    			int gonum = Integer.parseInt(txt);
+    			String goterm = String.format(GO_FORMAT, gonum);
+    			return goterm;
+    		}
+    		catch (Exception e) { return null;}
 		}
 		public String getSummary() { 
 			String ret = "";
@@ -2951,6 +2946,7 @@ public class BasicHitFilterPanel extends JPanel {
 		catch(Exception e) {ErrorReport.reportError(e,"Error: reading database for hit data");}
 		return null;
 	}
+	
 	private String strMerge(String t1, String t2) {
 		if (t1!="" && t2!="") return t1 + "; " + t2;
 		if (t1!="") return t1;

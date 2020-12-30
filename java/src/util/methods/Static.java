@@ -191,7 +191,7 @@ public class Static {
 		return separate;
 		**/
 	}
-   static public JComboBox<MenuMapper> createZoom() {
+   static public JComboBox<MenuMapper> createZoom() { // for single contig display
 	   	JComboBox <MenuMapper> menuZoom = new JComboBox<MenuMapper> ();
 		menuZoom.addItem( new MenuMapper ( "Zoom 1:1", 1 ) );
 		menuZoom.addItem( new MenuMapper ( "Zoom 1:2", 2 ) );
@@ -213,9 +213,10 @@ public class Static {
 		
 		return menuZoom;
    }
-   static public JComboBox<MenuMapper> createZoom2() {
+   static public JComboBox<MenuMapper> createZoom2() { // for sng pair and all cmp pair display
 	   	JComboBox <MenuMapper> menuZoom = new JComboBox<MenuMapper> ();
 		
+		menuZoom.addItem( new MenuMapper ( "Zoom 5:1", -5 ) );
 	   	menuZoom.addItem( new MenuMapper ( "Zoom 4:1", -4 ) );
 		menuZoom.addItem( new MenuMapper ( "Zoom 3:1", -3 ) );
 	   	menuZoom.addItem( new MenuMapper ( "Zoom 2:1", -2 ) );
@@ -225,7 +226,7 @@ public class Static {
 		menuZoom.addItem( new MenuMapper ( "Zoom 1:4", 4 ) );
 		
 		menuZoom.setBackground(Globalx.BGCOLOR);
-		menuZoom.setSelectedIndex(3);
+		menuZoom.setSelectedIndex(4); // if change this, Change sng.PairViewPanel
 		
 		Dimension dim = new Dimension ( (int)(menuZoom.getPreferredSize().getWidth()), 
 				(int)menuZoom.getPreferredSize().getHeight() );

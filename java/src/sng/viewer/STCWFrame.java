@@ -47,13 +47,13 @@ import sng.viewer.panels.Basic.BasicGOFilterTab;
 import sng.viewer.panels.Basic.BasicHitTab;
 import sng.viewer.panels.Basic.BasicSeqTab;
 import sng.viewer.panels.pairsTable.FieldPairsTab;
-import sng.viewer.panels.pairsTable.PairListTab;
+import sng.viewer.panels.pairsTable.PairTableTab;
 import sng.viewer.panels.pairsTable.PairTopRowTab;
-import sng.viewer.panels.pairsTable.QueryPairsTab;
+import sng.viewer.panels.pairsTable.PairQueryTab;
 import sng.viewer.panels.seqDetail.SeqTopRowTab;
-import sng.viewer.panels.seqTable.ContigListTab;
-import sng.viewer.panels.seqTable.FieldContigTab;
-import sng.viewer.panels.seqTable.QueryContigTab;
+import sng.viewer.panels.seqTable.SeqTableTab;
+import sng.viewer.panels.seqTable.FieldSeqTab;
+import sng.viewer.panels.seqTable.SeqQueryTab;
 import util.database.DBConn;
 import util.database.Globalx;
 import util.database.HostsCfg;
@@ -208,15 +208,15 @@ public class STCWFrame extends JFrame {
 			MenuTreeNode blastNode = new MenuTreeNode(Blast,blastTab); // CAS305 move here
 			
 			// Contig (Sequence) query (Filter) window
-			filterContigTab = new QueryContigTab(this, new RunQuery(RunQuery.QUERY_CONTIGS));
+			filterContigTab = new SeqQueryTab(this, new RunQuery(RunQuery.QUERY_CONTIGS));
 			tabbedPane.addTab(ContigsFilters, filterContigTab); 
 			
 			// Pairs query (Filter) window
-			filterPairsTab = new QueryPairsTab(this, new RunQuery(RunQuery.QUERY_PAIRS));
+			filterPairsTab = new PairQueryTab(this, new RunQuery(RunQuery.QUERY_PAIRS));
 			tabbedPane.addTab(PairsFilters, filterPairsTab); 
 				
 			//Setup the columns for Contigs and Pairs
-			fieldContigTab = new FieldContigTab(this);
+			fieldContigTab = new FieldSeqTab(this);
 			tabbedPane.addTab(ContigsColumns, fieldContigTab);
 			
 			fieldPairsTab = new FieldPairsTab(this); 
@@ -487,7 +487,7 @@ public class STCWFrame extends JFrame {
 					int count = theQuery.loadTableRowsForContigs(
 							getInstance(), fieldContigTab, fields, contigIDs, tableRows);
 					
-					Tab newTab = new ContigListTab(STCWFrame.this,
+					Tab newTab = new SeqTableTab(STCWFrame.this,
 								fields, theQuery, contigIDs, tableRows, 
 								metaData.nContigs(), summary);
 					
@@ -596,7 +596,7 @@ public class STCWFrame extends JFrame {
 						progress.setProgressLabel("Loading " + count + " sequences...");
 
 						summary = theQuery.getContigSummary();
-						newTab = new ContigListTab(STCWFrame.this,
+						newTab = new SeqTableTab(STCWFrame.this,
 								fields, theQuery, null, tableRows, metaData.nContigs(), summary);
 					}
 					else {
@@ -607,7 +607,7 @@ public class STCWFrame extends JFrame {
 						progress.setProgressLabel("Loading " + count + " pairs...");
 
 						summary = theQuery.getPairsSummary();
-						newTab = new PairListTab(STCWFrame.this,
+						newTab = new PairTableTab(STCWFrame.this,
 								fields, theQuery, tableRows, summary);
 					}
 					progress.swapOutProgress(newTab);
@@ -937,10 +937,10 @@ public class STCWFrame extends JFrame {
 		}
 		catch (Exception e) {ErrorReport.reportError(e, "Error shuting down");}
 	}
-	public QueryPairsTab getQueryPairsTab() { return filterPairsTab;}
-	public QueryContigTab getQueryContigTab() { return filterContigTab;}
+	public PairQueryTab getQueryPairsTab() { return filterPairsTab;}
+	public SeqQueryTab getQueryContigTab() { return filterContigTab;}
 	public FieldPairsTab getFieldPairsTab() { return fieldPairsTab;}
-	public FieldContigTab getFieldContigTab() { return fieldContigTab;}
+	public FieldSeqTab getFieldContigTab() { return fieldContigTab;}
 	
 	public MetaData getMetaData() { return metaData;}
 	public String getdbName() {return dbName;}
@@ -997,10 +997,10 @@ public class STCWFrame extends JFrame {
 
 	// TABs
 	private DecimalNumbersTab decimalTab = null;
-	private QueryContigTab filterContigTab = null;
-	private FieldContigTab fieldContigTab = null;
+	private SeqQueryTab filterContigTab = null;
+	private FieldSeqTab fieldContigTab = null;
 	
-	private QueryPairsTab  filterPairsTab = null;
+	private PairQueryTab  filterPairsTab = null;
 	private FieldPairsTab  fieldPairsTab = null;
 	
 	private BasicSeqTab basicSeqQueryTab = null;

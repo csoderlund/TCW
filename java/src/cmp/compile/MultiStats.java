@@ -56,7 +56,7 @@ public class MultiStats {
 	 */
 	 private String runAlignScoreSave() {
 		 try {
-			MultiAlignData multiObj = new MultiAlignData(Globals.Ext.MAFFT, true /* from runMulti */);
+			MultiAlignData multiObj = new MultiAlignData();
 			
 			String [] score = multiObj.getScoreMethods().split(";");
 			
@@ -67,38 +67,41 @@ public class MultiStats {
 			PreparedStatement psF = mDB.prepareStatement("update pog_groups set " +
 				"conLen=0, sdLen=0, " + "score1=" + Globalx.dNoScore +    ", score2=" + Globalx.dNoVal + " where PGid=?");
 			
-			// alignment for group
+			// alignment for group - group already exists
 			PreparedStatement psG = mDB.prepareStatement("update pog_groups set " +
 				"conLen=?, sdLen=?, score1=?, score2=?, conSeq=? where PGid=?");
 			
-			// alignment for member
+			// alignment for member - members already exist
 			PreparedStatement psM = mDB.prepareStatement("update pog_members set " +
 					" alignMap=? where UTstr=? and PGid=?");
 			
 			int cnt=0, cntErr=0;
 			mDB.openTransaction(); 
-			for (int grpID=nGrpMin; grpID<=nGrpMax; grpID++) {
-				if (cntErr>20) return "Too many alignment errors - aborting";
-				
+			for (int grpID=nGrpMin; grpID<=nGrpMax; grpID++) 
+			{
 				int hasRun = mDB.executeInteger("select conLen from pog_groups where PGid=" + grpID);
 				if (hasRun>0) continue;
 				
-				nSeqs = loadSeqFromDB(grpID);
-				
+				multiObj.clear();
 				cnt++;
 				Out.r("Process cluster #" + cnt + " with " + nSeqs + " members ");
+				
+				nSeqs = loadSeqFromDB(grpID); // global seqName and seqStr
+				if (seqName.size()==0) continue; // some may have been removed
 				
 			// Alignment
 				if (!runAlign(grpID, multiObj)) { 
 					psF.setInt(1, grpID);
 					psF.execute();
 					cntErr++;
-					continue;
+					if (cntErr>20) return "Too many alignment errors - aborting";
+					else continue;
 				}	
 				String [] alignedSeqs =  multiObj.getAlignSeq();
 				String [] alignedNames = multiObj.getSequenceNames();
-				double score1 =       multiObj.getMSA_Score1();
-				double score2 =       multiObj.getMSA_Score2();
+				
+				double score1 =       multiObj.getMSA_gScore1();
+				double score2 =       multiObj.getMSA_gScore2();
 				
 				psG.setInt(1, alignedSeqs[0].length());
 				psG.setDouble(2, sdLen);
@@ -108,7 +111,8 @@ public class MultiStats {
 				psG.setInt(6, grpID);
 				psG.execute();
 				
-				for (int pos=1; pos<alignedSeqs.length; pos++) {
+				// save aligned sequences
+				for (int pos=1; pos<alignedSeqs.length; pos++) { 
 					String map = pos + Share.DELIM + Share.compress(alignedSeqs[pos]);
 					psM.setString(1, map);
 					psM.setString(2, alignedNames[pos]);
@@ -116,6 +120,8 @@ public class MultiStats {
 					psM.addBatch();
 				}
 				psM.executeBatch();
+				
+				saveScores(grpID, multiObj); // CAS313
 			}
 			mDB.closeTransaction(); 
 			
@@ -126,7 +132,7 @@ public class MultiStats {
 		 catch(Exception e) {ErrorReport.die(e, "run align and score"); return "Error";}
 	 }
 	
-	 //-- muscleObj and mafftObj write the sequences to file, align and score --//
+	 //-- write the sequences to file, align and score --//
 	 private boolean runAlign(int grpID, MultiAlignData multiObj) {
 		try {
 			// Sequences to be aligned
@@ -136,23 +142,22 @@ public class MultiStats {
 			double sumLen=0;
 			
 			// Execute Mafft
-			multiObj.setAlignPgm(Globals.Ext.MAFFT); // clears
 			for (int s=0; s<nSeqs; s++)  {
 				multiObj.addSequence(name[s], seqs[s]);
 				len[s] =  seqs[s].length(); // for sdLen
 				sumLen += seqs[s].length();
 			}
-			int rc = multiObj.runAlignPgm(false, false, true); // prtCmd, prtScore, isAA
+			int rc = multiObj.runAlignPgm(Globals.Ext.MAFFT, true); // isAA
 			
-			// Execute Muscle if Mafft failes
+			// Execute Muscle if Mafft fails
 			if (rc!=0) { 
 				String cl = mDB.executeString("select PGstr from pog_groups where PGid=" + grpID);
 				Out.prt("*** MAFFT failed for cluster " + cl + " -- try MUSCLE..."); 
 				
-				multiObj.setAlignPgm(Globals.Ext.MUSCLE); // clears, so re-add sequences
+				multiObj.clear();
 				for (int s=0; s<nSeqs; s++)  multiObj.addSequence(name[s], seqs[s]); 
 				
-				int rc2 = multiObj.runAlignPgm(false /*prtCmd*/, false/*prtScore*/, true/*isAA*/);
+				int rc2 = multiObj.runAlignPgm(Globals.Ext.MUSCLE, true/*isAA*/);
 				
 				if (rc2!=0) {
 					Out.prt("*** MUSCLE failed for cluster " + cl);
@@ -176,61 +181,72 @@ public class MultiStats {
 	  */
 	 private String redoAllScoresSave() {
 		 try {
-			MultiAlignData multiObj =  new MultiAlignData(true /* is run */); // set and print score type
+			MultiAlignData multiObj =  new MultiAlignData(); 
 				
 			String [] score = multiObj.getScoreMethods().split(";"); 
 			infoObj.updateInfoKey("MSAscore1", score[0]); 
 			infoObj.updateInfoKey("MSAscore2", score[1]); 
 			
-			double def1 = Globalx.dNoScore;
-			if (!score[0].contentEquals(Globals.MSA.SoP)) def1 = Globalx.dNoVal;
-			mDB.executeUpdate(
-					"update pog_groups set score1=" + def1 + ", score2=" + Globalx.dNoVal);
+			// clear current scores
+			mDB.executeUpdate("TRUNCATE TABLE pog_scores");
+			mDB.executeUpdate("update pog_groups set score1=" + Globalx.dNoVal + ", score2=" + Globalx.dNoVal);
 			
-			PreparedStatement psS = mDB.prepareStatement(
+			PreparedStatement psG = mDB.prepareStatement(
 					"update pog_groups set score1=?, score2=? where PGid=?");
 			
-			int cnt=0,  fail=0, cntAdd=0, cntBad=0;
-			for (int grpID=nGrpMin; grpID<=nGrpMax; grpID++) {
-				if (fail>20) Out.die("Too many errors");
-				
+			int cnt=0,  fail=0, cntBad=0;
+			for (int grpID=nGrpMin; grpID<=nGrpMax; grpID++) 
+			{	
 				multiObj.clear();
 				
-				loadSeqFromDB(grpID);
+				loadSeqFromDB(grpID); // seqName and seqStr
+				if (seqName.size()==0) continue; // some may have been removed
 				
 				for (int s=0; s<seqName.size(); s++)  
 					multiObj.addSequence(seqName.get(s), seqStr.get(s)); // need sequence to create each alignment
 				
-				if (!multiObj.getAlignFromDB(mDB, grpID)) {fail++; continue;} // maps alignment to seq
+				if (!multiObj.loadAlignFromDB(mDB, grpID)) {
+					fail++; 
+					if (fail>20) Out.die("Too many errors");
+					else continue;
+				} 
 				
 				if (!multiObj.scoreOnly())                {fail++; continue;}
 				
-				double score1 = multiObj.getMSA_Score1();
+				double score1 = multiObj.getMSA_gScore1();
 				if (score1==Globalx.dNoScore) cntBad++;
-				double score2 = multiObj.getMSA_Score2();
+				double score2 = multiObj.getMSA_gScore2();
 				
-				psS.setDouble(1, score1);
-				psS.setDouble(2, score2);
-				psS.setInt(3, grpID);
-				psS.addBatch();
-				cntAdd++;
-				if (cntAdd==1000) {
-					psS.executeBatch();
-					cntAdd=0;
-				}
+				psG.setDouble(1, score1);
+				psG.setDouble(2, score2);
+				psG.setInt(3, grpID);
+				psG.execute();
+				
+				saveScores(grpID, multiObj);
+				
 				cnt++;
 				if (cnt % 1000==0) {
 					if (cntBad>0) Out.r("Scored " + cnt + " Skip SoP " + cntBad);
 					else Out.r("Scored " + cnt);
 				}
 			}
-			if (cntAdd>0) psS.executeBatch();
 			
 			Out.PrtSpCntMsgNz(1, cntBad, "Too many gaps - no SoP score");
 			return "Complete scoring of " + cnt + " clusters";
 		 }
 		 catch(Exception e) {ErrorReport.die(e, "run align");}
 		 return "Error";
+	 }
+	 private boolean saveScores(int grpid, MultiAlignData multiObj) {
+		 try {
+			 String strScore1=multiObj.getColScores1();
+			 String strScore2=multiObj.getColScores2();
+			
+			 mDB.executeUpdate("insert into pog_scores set PGid=" + grpid + 
+					", score1='" + strScore1 + "', score2='" + strScore2 + "'");
+			 return true;
+		 }
+		 catch(Exception e) {ErrorReport.die(e, "run align"); return false;}
 	 }
 	 /*********************************************************/
 	 //-- load group sequences --/
