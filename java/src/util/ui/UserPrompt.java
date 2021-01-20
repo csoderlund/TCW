@@ -262,7 +262,7 @@ public class UserPrompt extends JDialog {
 	 */
 	public UserPrompt(JFrame theMainFrame, String msg) {
 		this.theMainFrame = theMainFrame;
-		this.fileName = msg.replace(" ","_"); // no ':' allowed either
+		
     	setModal(true);
     	setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
     	setTitle(msg);
@@ -325,11 +325,11 @@ public class UserPrompt extends JDialog {
     	this.setResizable(false);
     	UIHelpers.centerScreen(this);
 	}
-	public boolean cont() {
+	public boolean getAction(String dir, String fileName) {
 		try {
 			if (nMode==0) return false;
 			if (nMode==1) return true;
-			if (nMode==2) return getFileHandle(fileName + ".txt");
+			if (nMode==2) return getFileHandle(dir, fileName + ".txt");
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Error in selection");}
 		return false;
@@ -364,31 +364,37 @@ public class UserPrompt extends JDialog {
 		catch (Exception e) {ErrorReport.prtReport(e, "Error in seleciton"); return;}
 		
 	}
-	public boolean getFileHandle(String fileName) {
-		final JFileChooser fc = new JFileChooser(Globalx.EXPORTDIR);
-		fc.setSelectedFile(new File(fileName));
-		
-		if (fc.showSaveDialog(theMainFrame) != JFileChooser.APPROVE_OPTION) return false;
-		if (fc.getSelectedFile() == null) return false;
-		
-		final File f = fc.getSelectedFile();
-		final File d = f.getParentFile();
-		if (!d.canWrite()) { 
-			JOptionPane.showMessageDialog(null, 
-					"You do not have permission to write to directory " + d.getName(), "Warning", JOptionPane.PLAIN_MESSAGE);
-		}
-		else {
-			int writeOption = JOptionPane.YES_OPTION;
-			if (f.exists()) {
-				writeOption = JOptionPane.showConfirmDialog(theMainFrame,
-					    " The file '" + f.getName() + "' already exists. \nOverwrite it?", "Save to File",
-					    JOptionPane.YES_NO_OPTION);
+	public boolean getFileHandle(String dirName, String fileName) {
+		try {
+			File nDir = new File(dirName);
+			if (!nDir.exists()) if (nDir.mkdir()) Out.prt("Create " + dirName);
+	
+			final JFileChooser fc = new JFileChooser(dirName);
+			fc.setSelectedFile(new File(fileName));
+			
+			if (fc.showSaveDialog(theMainFrame) != JFileChooser.APPROVE_OPTION) return false;
+			if (fc.getSelectedFile() == null) return false;
+			
+			final File f = fc.getSelectedFile();
+			final File d = f.getParentFile();
+			if (!d.canWrite()) { 
+				JOptionPane.showMessageDialog(null, 
+						"You do not have permission to write to directory " + d.getName(), "Warning", JOptionPane.PLAIN_MESSAGE);
 			}
-			if (writeOption==JOptionPane.YES_OPTION) {
-				exportFH = f;
-				return true;
+			else {
+				int writeOption = JOptionPane.YES_OPTION;
+				if (f.exists()) {
+					writeOption = JOptionPane.showConfirmDialog(theMainFrame,
+						    " The file '" + f.getName() + "' already exists. \nOverwrite it?", "Save to File",
+						    JOptionPane.YES_NO_OPTION);
+				}
+				if (writeOption==JOptionPane.YES_OPTION) {
+					exportFH = f;
+					return true;
+				}
 			}
 		}
+		catch (Exception e) {ErrorReport.prtReport(e, "Error in get file selection"); }
 		return false;
 	}
 	public boolean isPopUp() {return (nMode==1);}

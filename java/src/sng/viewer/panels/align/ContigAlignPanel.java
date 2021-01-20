@@ -20,7 +20,7 @@ import util.database.Globalx;
 import util.methods.Converters;
 import util.methods.ErrorReport;
 
-public class ContigAlignPanel extends BaseAlignPanel 
+public class ContigAlignPanel extends ContigBasePanel 
 {	
 	private static final long serialVersionUID = 1L;
 
@@ -222,9 +222,6 @@ public class ContigAlignPanel extends BaseAlignPanel
             
 			/************** Background **************/
 			
-			// Fill in the backgrounds for non-coding regions
-			drawCodingPanels ( g2 );
-			
 			// Draw the colored background and the column text for each EST 
 			drawESTRows ( true /* background */ );	
 
@@ -232,7 +229,6 @@ public class ContigAlignPanel extends BaseAlignPanel
 			if ( bShowSNPs && theContig.getSNPCount() > 0 ) 
 				highlightSNPs ();
 			
-			// TODO make draw like blast. If a column is selected, fill in the background
 			if ( super.getDrawMode() != GRAPHICMODE )
 			{		
 				int nMaxX =  super.getWriteWidthInt( ) + base_DATA_X_START_POS;
@@ -251,19 +247,15 @@ public class ContigAlignPanel extends BaseAlignPanel
 			/************** Header **************/
 			Rectangle clipRect = g2.getClipBounds();
 			if ( clipRect.getMinY() < read_Y_POS_START )
-			{							
-				// Ruler for base position
-				int nRulerTop = seq_Y_TOP - INSET_WIDTH - 
-						(int)getTextWidth ( "9999" );
+			{								
+				int nRulerTop = seq_Y_TOP - INSET_WIDTH - (int)getTextWidth ( "9999" );
 				super.drawRuler ( g2, INSET_WIDTH, nRulerTop, seq_Y_TOP );
 				
 				// draw/write Consensus
 				if( super.getDrawMode() == GRAPHICMODE )
-					super.drawSequenceLine ( g2, theRefSequence, 
-							seq_Y_TOP, seq_Y_BOTTOM );	
+					super.drawSequenceLine ( g2, theRefSequence, seq_Y_TOP, seq_Y_BOTTOM );	
 				else
-					super.writeSequenceLetters( g2, theRefSequence, 
-							seq_Y_TOP, seq_Y_BOTTOM );					
+					super.writeSequenceLetters( g2, theRefSequence, seq_Y_TOP, seq_Y_BOTTOM );					
 			}
 			
 			/************** Foreground for ESTs **************/
@@ -288,9 +280,8 @@ public class ContigAlignPanel extends BaseAlignPanel
 			int nDivideY = read_TOP_Y_POS_START - 1;
 			g2.draw( new Line2D.Double( LEFT_GAP, nDivideY, LEFT_GAP + insideWIDTH, nDivideY ) );
 		} 
-		catch (Exception e) 
-		{
-			ErrorReport.reportError("ContigAlignPanel Internal error: painting components");
+		catch (Exception e) {
+			ErrorReport.reportError(e, "ContigAlignPanel Internal error: painting components");
 		}
 	}
 		
@@ -307,10 +298,8 @@ public class ContigAlignPanel extends BaseAlignPanel
 		boolean bHaveMate = false;
 
         // Choose the range of row indices for the ESTs that are visible
-        int nStart = Math.max( (int) ( (clipRect.getMinY() - 
-        		read_Y_POS_START) / READ_Y_ROW_HEIGHT ), 0 );
-        int nEnd = Math.min( (int)( (clipRect.getMaxY() - read_Y_POS_START) / 
-        		READ_Y_ROW_HEIGHT  ) + 2, rowsOfESTS.size() );
+        int nStart = Math.max((int)((clipRect.getMinY()-read_Y_POS_START)/READ_Y_ROW_HEIGHT ), 0);
+        int nEnd =   Math.min((int)((clipRect.getMaxY()-read_Y_POS_START)/READ_Y_ROW_HEIGHT)+2, rowsOfESTS.size());
         
 		double dYTop = read_TOP_Y_POS_START + nStart * READ_Y_ROW_HEIGHT;
 		double dYBottom = dYTop + READ_Y_ROW_HEIGHT;
@@ -342,14 +331,10 @@ public class ContigAlignPanel extends BaseAlignPanel
 				nMatePos = MATE_IN_SAME_ROW_PART_1;
 				numExtras += curMateEST.getNumTGaps();
 			}
-			else if ( !bHaveMate )
-				nMatePos = MATE_NOT_IN_CONTIG;
-			else if ( ContigData.areMates( curEST, nextEST ) )
-				nMatePos = MATE_IS_NEXT;
-			else if ( ContigData.areMates( prevEST, curEST ) )
-				nMatePos = MATE_IS_PREV;
-			else 
-				nMatePos = MATE_NOT_ADJACENT;		
+			else if ( !bHaveMate ) 								nMatePos = MATE_NOT_IN_CONTIG;
+			else if ( ContigData.areMates( curEST, nextEST ) )	nMatePos = MATE_IS_NEXT;
+			else if ( ContigData.areMates( prevEST, curEST ) )	nMatePos = MATE_IS_PREV;
+			else 												nMatePos = MATE_NOT_ADJACENT;		
 			
 			boolean bRowSelected = selectedESTs.contains( curEST.getName() );
 			if ( curMateEST != null ) bRowSelected |= selectedESTs.contains( curMateEST.getName() ); 
@@ -394,7 +379,7 @@ public class ContigAlignPanel extends BaseAlignPanel
 			if ( theContig.maybeSNPAt(i) ) {
 				if ( super.getDrawMode() == GRAPHICMODE ) {
 					int nX = (int)calculateDrawX(i);
-					g2.setColor (BaseAlignPanel.mediumGray);
+					g2.setColor (ContigAlignPanel.mediumGray);
 					g2.drawLine ( nX, nYTop, nX, nYBottom );
 				}
 				else {

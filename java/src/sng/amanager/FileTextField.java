@@ -14,6 +14,8 @@ import java.io.FileReader;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -30,23 +32,25 @@ public class FileTextField extends JPanel  {
 	private static final long serialVersionUID = 6670096855895700182L;
 	private static final int TEXTFIELD_WIDTH = 25;
 	
-	private final static String LIBDIR = Globalx.PROJDIR + "/"; 
-	private final static String PROJDIR = Globalx.PROJDIR + "/";
-	private final static String ANNODIR = Globalx.ANNODIR + "/";
-	
 	// default directory
 	public static final int PROJ = 1;
 	public static final int LIB = 2;
 	public static final int ANNO = 3;
-	private int pathType;
+	public static final int BLAST = 4;
 	
 	public static final int FASTA =1;	// Sequence file
 	public static final int QUAL = 2;	// Quality file
 	public static final int COUNT = 3;	// TCW count file
-	public static final int TAB = 4;		// Blast tab
+	public static final int TAB = 4;	// Blast tab
 	public static final int USAGE = 5;	// Usage for ORF finder
-	public static final int OBO = 6;		// GO Slim formated file
+	public static final int OBO = 6;	// GO Slim formated file
 	private int fileType;
+	
+	private final static String LIBDIR =    Globalx.PROJDIR + "/"; 
+	private final static String PROJDIR =   Globalx.PROJDIR + "/";
+	private final static String ANNODIR =   Globalx.ANNODIR + "/";
+	private final static String BLASTDIR =  "/" + Globalx.BLASTDIR + "/";
+	private int pathType;
 	
 	private boolean bStdout=false;
 	
@@ -92,6 +96,21 @@ public class FileTextField extends JPanel  {
 					JFileChooser fc = new JFileChooser();
 					fc.setCurrentDirectory(getPath());
 
+					// CAS314 add file extension
+					FileFilter ff=null;
+					if (fileType==FASTA)
+						ff=new FileNameExtensionFilter("Fasta file (.fa, .fasta ...)", "fa","fasta","fna", "ffn", "faa", "frn");
+					else if (fileType==TAB) 
+						ff=new FileNameExtensionFilter("Hit tab file (.tab)", "tab");
+					if (ff!=null) {
+						fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
+						fc.addChoosableFileFilter(ff);//ff added to filechooser
+						fc.setFileFilter(ff);	//st ff as default selection
+					}
+					fc.setFileSelectionMode(JFileChooser.FILES_ONLY);//user must select a file not folder
+					fc.setMultiSelectionEnabled(false);//disabled selection of multiple files
+					// complete CAS314 add
+					
 					if(fc.showOpenDialog(getInstance()) == JFileChooser.APPROVE_OPTION) {
 						String file = fc.getSelectedFile().getPath();
 						verify(file);
@@ -118,9 +137,11 @@ public class FileTextField extends JPanel  {
 		
 		String d="";
 		if (lastDir!=null && pathType==lastType) d = lastDir;
-		else if (pathType==1) d = PROJDIR + projectName;
-		else if (pathType==2) d = LIBDIR + projectName;
-		else if (pathType==3) d = ANNODIR;
+		else if (pathType==PROJ)   	d = PROJDIR + projectName;
+		else if (pathType==LIB)    	d = LIBDIR + projectName;
+		else if (pathType==ANNO)   	d = ANNODIR;
+		else if (pathType==BLAST)  	d = PROJDIR + projectName + BLASTDIR; // CAS314
+		else 						d = PROJDIR + projectName;
 		
 		File f = new File(d);
 		if (!f.exists() || !f.isDirectory()) {

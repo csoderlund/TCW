@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -27,20 +26,17 @@ import sng.dataholders.SequenceData;
 import util.database.Globalx;
 import util.methods.Converters;
 import util.methods.ErrorReport;
+import util.methods.Out;
 import util.methods.Static;
 
 import util.database.DBConn;
 
 public class LoadFromDB {
-	private boolean debug=false;
-	private void prt(String msg) {if (debug) System.err.println("LoadFromDB: " + msg);}
-	
 	public LoadFromDB(DBConn d, MetaData m) {mDB=d; metaData = m;}
 	
 	// Called from SeqTopRowTab when sequence is selected from Sequence table
 	public MultiCtgData loadContig ( MultiCtgData inCluster) throws Exception		
 	{	
-		prt("public loadContig");
 		String ctgid = inCluster.getContig().getContigID();
 		
 		ContigData fullContig;
@@ -84,17 +80,14 @@ public class LoadFromDB {
             curContig.setContigID( rset.getString( 2 ) );
  
             String seqString = rset.getString(3).trim();
-            SequenceData consensus = new SequenceData ("consensus");
-            consensus.setName( strContigID );
+            SequenceData seqCSS = new SequenceData ("consensus");
+            seqCSS.setName( strContigID );
            
-            // CAS313 I must of just copied without paying attention..... stupid
-            //consensus.setSequence ( SequenceData.normalizeBases( seqString, '*', Globals.gapCh ) );
-            consensus.setSequence ( seqString );
+            // CAS313 consensus.setSequence ( SequenceData.normalizeBases( seqString, '*', '-' ) );
+            seqCSS.setSequence ( seqString );
             
-            curContig.setSeqData( consensus );
-            
-            curContig.setConsensusBases( rset.getInt( 4 ) );
- 
+            curContig.setSeqData(seqCSS);
+            curContig.setConsensusBases(rset.getInt(4));
             curContig.setTCWNotes(rset.getString(5));
           
             curContig.setGCratio(rset.getFloat(6)); 
@@ -109,16 +102,13 @@ public class LoadFromDB {
 			curContig.setLargestCoding( coding ); 
         
             curContig.setBestMatch(rset.getString(13));
-            curContig.setSwissTremblNTCnt(rset.getInt(14), 
-            		rset.getInt(15), rset.getInt(16), rset.getInt(17)); 
-            curContig.setGeneCntEtc(rset.getInt(18),
-              	rset.getInt(19), rset.getInt(20), rset.getInt(21));
+            curContig.setSwissTremblNTCnt(rset.getInt(14), rset.getInt(15), rset.getInt(16), rset.getInt(17)); 
+            curContig.setGeneCntEtc(rset.getInt(18), rset.getInt(19), rset.getInt(20), rset.getInt(21));
             curContig.setUserNotes( rset.getString(22));
             curContig.setLongest( rset.getString(23)); // CAS311
             
             boolean hasGO=false;
-         	if (mDB.tableExist("go_info") && mDB.tableExist("pja_gotree"))
-         		hasGO=true;
+         	if (mDB.tableExist("go_info") && mDB.tableExist("pja_gotree")) hasGO=true;
          	rset.close();
              
             if (hasGO) {
@@ -135,104 +125,7 @@ public class LoadFromDB {
         }
         return curContig;
     }
-	// Called by pairsTable.LoadPairFromDB, which only needs sequence and hitID
-	public ArrayList <SequenceData>loadSeqHitDataForCtg ( ContigData ctgData) throws Exception
-	{
-      ResultSet rs = null;
-      ArrayList <SequenceData> hitList= new ArrayList <SequenceData> ();
-      try
-      {
-          String ctgID = ctgData.getContigID();
-  
-          String strQ = 	"SELECT q.DUHID, " +
-          		"q.hitID, q.description, q.sequence, q.species, q.dbtype, q.taxonomy, " +
-          		"q.kegg, q.pfam, q.ec, q.goBrief, q.interpro, " +  // goBrief, not goList because just want #n from front
-          		
-          		"t.uniprot_id, t.percent_id, t.alignment_len," +
-          		"t.ctg_start, t.ctg_end, t.prot_start, t.prot_end, " +
-          		"t.e_value, t.bit_score,  t.blast_rank, t.isProtein, t.filtered, t.best_rank " +
-          		
-          		"FROM pja_db_unique_hits as q " +
-          		"JOIN pja_db_unitrans_hits as t " +
-          		"WHERE t.DUHID = q.DUHID " + 
-          		"AND   t.contigid = '" + ctgID + "'";
-       
-          rs = mDB.executeQuery( strQ );
-	    	  while( rs.next() )
-	    	  {	
-	    		  	int duhid = rs.getInt(1);
-	    			String hitid = rs.getString(2);
-	    			String desc  = rs.getString(3);
-	    			String sequence   = rs.getString(4);
-	    			String species = rs.getString(5);
-	    			String type = rs.getString(6);
-	    			String tax = rs.getString(7);
-	    			String kegg = rs.getString(8); if (kegg==null) kegg="";
-	    			String pfam = rs.getString(9); if (pfam==null) pfam="";
-	    			String ec = rs.getString(10);  if (ec==null) ec="";
-	    			String go = rs.getString(11); if (go==null) go="";
-	    			String interpro = rs.getString(12); if (interpro==null) interpro="";
-	    			
-	    			String id = rs.getString(13);
-	    			String perc = rs.getString(14);
-	    			String align = rs.getString(15);
-	    			String cstart = rs.getString(16);
-	    			String cend = rs.getString(17);
-	    			String pstart = rs.getString(18);
-	    			String pend = rs.getString(19);
-	    			String eval = rs.getString(20);
-	    			String bit = rs.getString(21);
-	    			String brank = rs.getString(22);
-	    			String isProtein = rs.getString(23);
-	    			String filter = rs.getString(24);
-	    			String rank = rs.getString(25);
-	    			
-	    			SequenceData seq = new SequenceData ("DB");
-	    			seq.setID(duhid);
-	    			seq.setName(hitid);
-	    			seq.setSequence(sequence);
-	    			seq.setDBdesc(desc);
-	    			seq.setDBspecies(species);
-	    			seq.setDBtype(type);
-	    			seq.setDBfiltered(Integer.parseInt(filter));
-	    			seq.setGOstuff(go, kegg, pfam, ec, interpro);
-	    			
-	    			StringBuffer line = new StringBuffer();
-	            	line.append(ctgID); 		line.append("\t");            
-	            	line.append(id);			line.append("\t");        
-	            	line.append(perc);		line.append("\t");        
-	            	line.append(align);		line.append("\t");        
-	            	line.append(cstart);		line.append("\t");        
-	            	line.append(cend);		line.append("\t");        
-	            	line.append(pstart);		line.append("\t");        
-	            	line.append(pend);		line.append("\t");        
-	            	line.append(eval);		line.append("\t");        
-	            	line.append(bit); 		line.append("\t");        
-	            	line.append("1\t");
-	            	line.append(isProtein); line.append("\t");        
-	            	line.append(brank); 		line.append("\t");        
-	            	line.append(filter);		line.append("\t");        
-	            	line.append(type);		line.append("\t");        
-	            	line.append(tax);		line.append("\t");        
-	            	line.append(species);	line.append("\t");        
-	            	line.append(desc);		line.append("\t"); 
-	            	line.append(rank);		line.append("\t"); 
-	            	BlastHitData hitData = new BlastHitData(BlastHitData.DB_UNITRANS, line.toString());
-	            	hitData.setCTGID(ctgData.getCTGID());
-	    			seq.setBlastHitData(hitData);
-	    			hitList.add(seq);
-	    		}
-	    	  return hitList;
-      }
-      catch(Exception e) {
-	        ErrorReport.reportError(e, "Error: reading database loadHitsSeqforContig");
-	        throw e;
-      }
-      finally 
-      {
-          if ( rs != null ) rs.close();
-      }		
-	}
+	
 	// used by BasicHitFilter for sequence hit
 	public SequenceData loadHitData(String hitID) {
 		try {
@@ -312,15 +205,19 @@ public class LoadFromDB {
             int CTGID = rset.getInt(1);
             curContig.setCTGID(CTGID);
             curContig.setContigID( rset.getString( 2 ) );
- 
+
             String seqString = ( getStringFromReader (rset.getCharacterStream( 3 ) ) ).trim();
-            Vector<Integer> qualVector = getIntVectorFromReader (rset.getCharacterStream( 4 ) );
-            SequenceData consensus = new SequenceData ("consensus");
-            consensus.setName( strContigID );
-            consensus.setSequence ( SequenceData.normalizeBases( seqString, Globalx.stopCh, Globalx.gapCh ) );
-            consensus.padAndSetQualities ( qualVector );
-            curContig.setSeqData( consensus );
- 
+            //CAS314 Vector<Integer> qualVector = getIntVectorFromReader (rset.getCharacterStream( 4 ) );
+            
+            SequenceData seqCSS = new SequenceData ("consensus");
+            seqCSS.setName( strContigID );
+            
+           //seqCSS.setSequence ( SequenceData.normalizeBases( seqString, Globalx.assmGapCh, Globalx.gapCh ) );
+            // seqCSS.padAndSetQualities ( qualVector );
+            // CAS314 the CSS has "*", but the quality does not, so needs to be padded using GAP before change to 'n'
+            seqCSS.setSequence (seqString);
+            
+            curContig.setSeqData( seqCSS );
             curContig.setTCWNotes( rset.getString(5));
             curContig.setHasNs( asBool ( rset.getInt( 6 ) ) );
             curContig.setConsensusBases( rset.getInt( 7 ) );
@@ -374,7 +271,7 @@ public class LoadFromDB {
 	private void loadESTs( ContigData theContig ) throws Exception {
 		boolean tGapsExist=mDB.tableColumnExists("contclone", "tgaps");
 		boolean extrasExist=mDB.tableColumnExists("contclone", "extras");
-		prt("loadESTs");
+		
         String tGapField = "";
         if(tGapsExist) tGapField = ", contclone.tgaps ";
         else if(extrasExist) tGapField = ", contclone.extras ";
@@ -466,11 +363,11 @@ public class LoadFromDB {
             
             rset = mDB.executeQuery ( strQ );
             while(rset.next()) {
-	            	SNPData temp = new SNPData(SNPData.TYPE_AMINO_ACIDS);
-	            	temp.setMaybeSNP(true);
-	            	temp.setPosition(rset.getInt(1));
-	            	temp.setValuesFromDBBaseVarsField(rset.getString(2));
-	            	retVal.add(temp);
+            	SNPData temp = new SNPData(SNPData.TYPE_AMINO_ACIDS);
+            	temp.setMaybeSNP(true);
+            	temp.setPosition(rset.getInt(1));
+            	temp.setValuesFromDBBaseVarsField(rset.getString(2));
+            	retVal.add(temp);
             }
             
             if(retVal.isEmpty())
@@ -582,26 +479,22 @@ public class LoadFromDB {
  			{		
  				SequenceData curClone = new SequenceData ("EST");
  	
- 				String cloneid = rset.getString( "clone.cloneid" );
+ 				String cloneid = rset.getString( 1);
  				curClone.setName ( cloneid );
  			
- 				int nSeqLen = rset.getInt( "clone.length" );
+ 				String seqString = (getStringFromReader (rset.getCharacterStream(2))).trim();
+ 	 			seqString = SequenceData.normalizeBases( seqString, Globalx.assmGapCh, Globalx.gapCh );
+ 	 				
+ 	 			Vector<Integer> qualVect = getIntVectorFromReader (rset.getCharacterStream(3));
+ 	 			
+ 				int nSeqLen = rset.getInt( 4 );
  			
- 				Vector<Integer> qualVect = getIntVectorFromReader ( 
- 						rset.getCharacterStream( "clone.quality" ) );
-
- 				if ( nSeqLen != qualVect.size() )
- 					throw new RuntimeException ( 
- 					"Error: Failed to parse the correct number of quality values.");	
+ 				if (nSeqLen != qualVect.size())
+ 					Out.bug("Error: Failed to parse the correct number of quality values.");	
  			
- 				String seqString = ( getStringFromReader (
- 					rset.getCharacterStream( "clone.sequence" ) ) ).trim();
- 				seqString = SequenceData.normalizeBases( seqString, Globalx.stopCh, Globalx.gapCh );
-  
-     				if ( nSeqLen != seqString.length () )
-     					throw new RuntimeException ( 
-     						"Error: Failed to parse the correct number of bases." );	
- 			
+     			if (nSeqLen != seqString.length ())
+     				Out.bug("Error: Failed to parse the correct number of bases." );	
+ 		Out.bug(" clone " + nSeqLen + " " + seqString.length() + " " + qualVect);	
  				curClone.compAndSet ( seqString, qualVect, false );
  			                
  				out.add( curClone );		

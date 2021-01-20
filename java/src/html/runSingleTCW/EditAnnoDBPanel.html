@@ -13,12 +13,12 @@
 		<tr>
 			<td valign="top">Taxonomy</td>
 			<td>
-				The taxonomy of an annoDB (e.g. 'plants') or it can be some other identifier. 
-				<br><b><i>Naming Rules</i></b>:
+				The taxonomy of an annoDB (e.g. 'plants') or it can be some other identifier.  
+				<b><i>Naming Rules</i></b>:
 				<ul>
 				<li>The annoDB is named by its DBtype + Taxonomy, e.g. "SP-plants".
 				
-				<li>DBtype: If the annotation file uses definition lines like
+				<li><u>DBtype</u>: If the annotation file uses definition lines like
 				">sp|Q6V4H0|10HGO_CATRO", then the two letters before the "|" is used as the DBtype, 
 				e.g. "SP" for SwissProt, "TR" for TrEMBL.
 				Otherwise, the DBtype is "PR" for proteins files and "NT" for nucleotide files.
@@ -31,9 +31,13 @@
 			   </td>
 		</tr>
 			<td valign="top" nowrap>annoDB FASTA File</td>
-			<td>For "Generate Hit Tabular File", the sequences will be searched against this file.
-			For both the "Generate" and the "Use Existing" options, this is used to extract
+			<td>
+			<ul>
+			<li>A FASTA file with any of the following suffixes: .fa, .fasta, .fna, .ffn, .faa, .frn.
+			<li>For "Generate Hit Tabular File", the sequences will be searched against this file.
+			<li>For both the "Generate" and the "Use Existing" options, this file is used to extract
 			the description and species information.
+			</ul>
 		<tr>
 			<td valign="top" nowrap>Date of annoDB download</td>
 			<td>This will be used as the date of the annoDB. 
@@ -46,27 +50,17 @@
 			 <td>The sequences will be searched against the FASTA file and loaded into the database.
 		<tr>
 			<td valign="top" nowrap>&nbsp;&nbsp;&nbsp;&nbsp;Search program</td>
-			<td>
-			<ul>
-			<li><tt>Blast</tt> - this should be in your path or the path should be defined in HOSTS.cfg
-			<li><tt>Diamond</tt> - if you want to use this problem, the path should be defined in HOSTS.cfg
-		    </ul>
-		    <i><b>It is strongly advised to use <tt>Diamond</tt></i></b> as it is so much faster; 
-		    the TCW Diamond default parameters
-		    have been tested to make it perform as well on transcript annotation with
-		    protein databases. 
+			<td><tt>Diamond</tt> and <tt>Blast</tt>. These are supplied in the <tt>/Ext</tt>
+			directory.
 		    </td>
 		</tr>
 		
 		<tr>
 			<td valign="top" nowrap>&nbsp;&nbsp;&nbsp;&nbsp;Parameters</td>
-			<td>Add or change the search parameters. TCW will automatically add to the parameters the number of CPUs to use
-			and the output file name.
+			<td>Add or change the search parameters. This can not be blank.
+			TCW will automatically add the number of CPUs and output file name.
 			<br>See the documentation for the search program for explanation of their parameters. 
-			For example, the Diamond parameter "--masking 0" turns off masking; TCW tests show that
-			this can often get exact hits that are not found with masking turned on, but it can also
-			get more false positives.
-			<br><i><b>TCW does not check the correctness of changed parameters.</b></i> 
+			<i><b>TCW does not check the correctness of changed parameters.</b></i> 
 			</td>
 		</tr>
 		
@@ -75,7 +69,7 @@
 			 
 		<tr>
 			<td valign="top" nowrap>&nbsp;&nbsp;&nbsp;&nbsp;Hit Tabular File</td>
-			<td>User supplied tabular file of sequences searched against annoDB FASTA file </td>
+			<td>User supplied tabular file of search results that correspond to the "annoDB FASTA file".</td>
 		</tr>
 		
 	</table>

@@ -1211,7 +1211,7 @@ public class BasicGOTablePanel {
 	
 				int colCnt = theTableModel.getColumnCount();
 				int rowCnt = getRowCount();
-				Out.prt(1, "Processing " + rowCnt + " rows and " + colCnt + " columns...");
+				Out.prtSp(1, "Processing " + rowCnt + " rows and " + colCnt + " columns...");
 				
 				for(int x=0; x<theTableModel.getColumnCount()-1; x++) {
 					String colName = theTableModel.getColumnName(x).replaceAll("\\s", "-"); 
@@ -1561,7 +1561,7 @@ public class BasicGOTablePanel {
 						dArr[c++] = (Double) theTable.getValueAt(x, y);
 					}
 					else { 
-						Out.prt("BasicTablePanel: class? " + (String) theTable.getValueAt(x, y) + " " + dtype);
+						Out.prtToErr("BasicTablePanel: class? " + (String) theTable.getValueAt(x, y) + " " + dtype);
 					}
 				}
 				double [] results = Stats.averages(colName, dArr, false);

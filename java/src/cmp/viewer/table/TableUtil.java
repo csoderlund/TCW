@@ -1,5 +1,8 @@
 package cmp.viewer.table;
 
+/*****************************************************
+ * All Tables calls this for Export
+ */
 import java.awt.Dimension;
 import java.awt.Color;
 import java.awt.Component;
@@ -171,6 +174,7 @@ public class TableUtil {
 		// print header line
 		String val = "";
 		int rowNumColIndex = -1;
+		outFH.write("#"); // CAS314
 		for(int x=0; x<theTable.getColumnCount()-1; x++) {
 			val = theTable.getColumnName(x);
 			if (val.equals(FieldData.ROWNUM)) rowNumColIndex = x;
@@ -196,7 +200,7 @@ public class TableUtil {
 			outFH.write(val + "\n");
 			outFH.flush();
 		}
-		System.err.println("Complete writing  - " + theTable.getRowCount() + " lines");
+		Out.prt("Complete writing " + theTable.getRowCount() + " lines");
 		outFH.close();
 	} catch(Exception e) {ErrorReport.reportError(e, "Error saving file");
 	} catch(Error e) {ErrorReport.reportFatalError(e, "Fatal error saving file", theViewerFrame);}
@@ -240,7 +244,7 @@ public class TableUtil {
 			}
 			out.close();
 			dbc.close();
-			System.out.println("  Complete " + n + " clusters -- " + cnt + " lines");
+			Out.prt("Complete writing " + n + " clusters -- " + cnt + " lines");
 			
 		} catch(Exception e) {ErrorReport.reportError(e, "Error saving file");}
 	 }
@@ -294,7 +298,7 @@ public class TableUtil {
 			out.close();
 			dbc.close();
 			
-			System.out.println("  Complete " + msg + " -- " + cnt + " lines");
+			Out.prt("Complete " + msg + " -- " + cnt + " lines");
 		} catch(Exception e) {ErrorReport.reportError(e, "Error saving file");}
 	 }
 	
@@ -326,7 +330,7 @@ public class TableUtil {
 			}
 			out.close();
 			dbc.close();
-			System.out.println("   Complete " + column + " -- " + cnt + " lines");
+			Out.prt("Complete writing " + column + " -- " + cnt + " lines");
 			
 		} catch(Exception e) {ErrorReport.reportError(e, "Error saving file");}
 	 }
@@ -379,7 +383,7 @@ public class TableUtil {
 			}
 			out.close();
 			dbc.close();
-			System.out.println("   Complete  " + cnt + " lines");
+			Out.prt("Complete writing " + cnt + " lines");
 			
 		} catch(Exception e) {ErrorReport.reportError(e, "Error saving file");}
 	 }
@@ -555,7 +559,7 @@ public class TableUtil {
 				}
 				outBW.close();
 				if (rs!=null) rs.close(); mdb.close();
-				Out.PrtSpMsg(0, "Complete writing " + goCntMap.size() + " GOs");
+				Out.prt("Complete writing " + goCntMap.size() + " GOs");
 				return;
 			}
 			
@@ -628,8 +632,7 @@ public class TableUtil {
 		catch (Exception e) {ErrorReport.prtReport(e, "Exporting GOs ");}
 	}
 	
-	
-	 private class ExportGO extends JDialog {
+	private class ExportGO extends JDialog {
 		private static final long serialVersionUID = 1L;
 		public static final int EXPORT_CANCEL = 0;
 		public static final int EXPORT_OK = 1;
@@ -655,16 +658,16 @@ public class TableUtil {
  			txtGOlevel.setText("2");
  			
  			cmbTermTypes = new ButtonComboBox();
-	    		cmbTermTypes.addItem("Any domain");
-	    		for(int x=0; x<Globalx.GO_TERM_LIST.length; x++)
-	    				cmbTermTypes.addItem(Globalx.GO_TERM_LIST[x]);
-	    		
-	    		cmbTermTypes.setSelectedIndex(0);
-	    		cmbTermTypes.setMaximumSize(cmbTermTypes.getPreferredSize());
-	    		cmbTermTypes.setMinimumSize(cmbTermTypes.getPreferredSize());
-	    		cmbTermTypes.setBackground(Globalx.BGCOLOR);
-	    		
-	    		row.add(goLabel);  row.add(Box.createHorizontalStrut(2));
+    		cmbTermTypes.addItem("Any domain");
+    		for(int x=0; x<Globalx.GO_TERM_LIST.length; x++)
+    				cmbTermTypes.addItem(Globalx.GO_TERM_LIST[x]);
+    		
+    		cmbTermTypes.setSelectedIndex(0);
+    		cmbTermTypes.setMaximumSize(cmbTermTypes.getPreferredSize());
+    		cmbTermTypes.setMinimumSize(cmbTermTypes.getPreferredSize());
+    		cmbTermTypes.setBackground(Globalx.BGCOLOR);
+    		
+    		row.add(goLabel);  row.add(Box.createHorizontalStrut(2));
 	        row.add(txtGOlevel);
 	        row.add(Box.createHorizontalStrut(5));
 	         
@@ -747,11 +750,11 @@ public class TableUtil {
 		}
 		 
 		public int getSelection() {
-	    		return nMode; 
-	    	}
+	    	return nMode; 
+	    }
 	 	public String getGOLevel() { 
-	    		String x = txtGOlevel.getText().trim();
-	    		if (x.equals("-") || x.equals("") || x.equals("0")) return "0";
+	    	String x = txtGOlevel.getText().trim();
+	    	if (x.equals("-") || x.equals("") || x.equals("0")) return "0";
 	    		
 			try {Integer.parseInt(x);}
 			catch (Exception e) {
@@ -760,10 +763,10 @@ public class TableUtil {
 				x="2";
 				txtGOlevel.setText(x);
 			}
-	    		return x; 
-	    	}
+	    	return x; 
+	    }
 	    public String getGOEval() { 
-	    		String x = txtGOEval.getText().trim();
+	    	String x = txtGOEval.getText().trim();
 			if (x.equals("") || x.equals("-")) return "";
 			
 			try {Double.parseDouble(x);}
@@ -773,11 +776,11 @@ public class TableUtil {
 				x="";
 				txtGOEval.setText(x);
 			}
-	    		return x; 
-	    	}
+	    	return x; 
+	    }
 	    
 	    public int getGOCnt() { 
-	    		int x = 0;
+	    	int x = 0;
 			String y = txtGOCnt.getText().trim();
 			if (y.equals("")) return 0;
 			
@@ -787,11 +790,11 @@ public class TableUtil {
 					"Incorrect Count limit " + y + "\nSet limit to 0", "Error", JOptionPane.PLAIN_MESSAGE);
 				txtGOEval.setText("0");
 			}
-	    		return x; 
-	    	}
+	    	return x; 
+	    }
 		public String getTermType() {
-    			if(cmbTermTypes.getSelectedIndex() > 0) return  cmbTermTypes.getSelectedItem();
-    			else return "";
+			if(cmbTermTypes.getSelectedIndex() > 0) return  cmbTermTypes.getSelectedItem();
+			else return "";
 		}
 		
 		public boolean isAllColumns() {return btnVerbose.isSelected();}
@@ -800,23 +803,23 @@ public class TableUtil {
 		public String getGOfile(String filePrefix) {
 			String file=filePrefix+"GO";
     		
-	    		String level = getGOLevel();
-	    		if (!level.equals("-")) file += "_" + level;
-	    		if (cmbTermTypes.getSelectedIndex() > 0) {
-	    			int idx = cmbTermTypes.getSelectedIndex();
-	    			file += "_" + Globalx.GO_TERM_ABBR[idx-1];
-	    		}
-	    		String eval = getGOEval();
-	    		if (!eval.equals("")) {
-	    			file += "_" + eval;
-	    		}
-	    		
-	    		if (isAllColumns()) file += "_vb";
-	    		else if (isGOCnt()) file += "_cnt";
-	    		else file += "_desc";
-	    		
-	    		return file + Globalx.CSV_SUFFIX;
+    		String level = getGOLevel();
+    		if (!level.equals("-")) file += "_" + level;
+    		if (cmbTermTypes.getSelectedIndex() > 0) {
+    			int idx = cmbTermTypes.getSelectedIndex();
+    			file += "_" + Globalx.GO_TERM_ABBR[idx-1];
     		}
+    		String eval = getGOEval();
+    		if (!eval.equals("")) {
+    			file += "_" + eval;
+    		}
+    		
+    		if (isAllColumns()) file += "_vb";
+    		else if (isGOCnt()) file += "_cnt";
+    		else file += "_desc";
+    		
+    		return file + Globalx.CSV_SUFFIX;
+		}
 		private ButtonComboBox cmbTermTypes = null;
 	    private JTextField txtGOlevel = null, txtGOEval = null, txtGOCnt = null;
 	    private JRadioButton btnGOCnt = null, btnDescCnt = null, btnVerbose = null;
@@ -876,12 +879,15 @@ public class TableUtil {
 	private static String lastSaveFilePath=null;
 	private BufferedWriter getWriter(String dName) {
  		try {
- 			if (lastSaveFilePath==null) lastSaveFilePath = System.getProperty("user.dir");
- 			lastSaveFilePath = System.getProperty("user.dir") + "/" + Globalx.EXPORTDIR;
+ 			if (lastSaveFilePath==null) 
+ 				lastSaveFilePath = System.getProperty("user.dir") + "/" + Globalx.EXPORTDIR;
  			File nDir = new File(lastSaveFilePath);
  			if (!nDir.exists()) {
  				if (nDir.mkdir()) Out.prt("Create " + lastSaveFilePath);
- 				else lastSaveFilePath = System.getProperty("user.dir");
+ 				else {
+ 					Out.PrtWarn("Cannot create " + lastSaveFilePath);
+ 					lastSaveFilePath = System.getProperty("user.dir") + "/" + Globalx.EXPORTDIR;
+ 				}
  			}
  			
 			JFileChooser fc = new JFileChooser(lastSaveFilePath);	
@@ -898,6 +904,8 @@ public class TableUtil {
 				return null;
 			}
 			lastSaveFilePath = d.getAbsolutePath();
+			if (lastSaveFilePath.equals(System.getProperty("user.dir"))) lastSaveFilePath=null;
+			
 			boolean append=false;
 			String msg="Writing to ";
 			
@@ -914,7 +922,7 @@ public class TableUtil {
 					append=true;
 				}
 			}
-			System.out.println(msg + filePath + " ...");
+			Out.prt(msg + filePath + " ...");
  			return new BufferedWriter(new FileWriter(f, append));
  		} 
  		catch (Exception e) {ErrorReport.prtReport(e, "Error: cannot write file");}
@@ -922,7 +930,6 @@ public class TableUtil {
 	 }
 	 /*********************************************************************/
 	
-	 
 	 public void runBlast(String name, String seq, boolean tabular) {
  		try {
  			boolean runFormat = false;
@@ -1013,7 +1020,7 @@ public class TableUtil {
 	        BufferedWriter pw = new BufferedWriter(new FileWriter(target));
 	        // we are allowing duplicate sequence identifiers, so need to search by ASMid
 	        for (int i=1; i<= cntDS;  i++) {
-	        		rs = conn.executeQuery("SELECT UTstr, aaSeq FROM unitrans" +
+	        	rs = conn.executeQuery("SELECT UTstr, aaSeq FROM unitrans" +
 	        			" WHERE ASMid=" + i);
 				while(rs.next()) {
 					String id = rs.getString(1);
@@ -1102,7 +1109,7 @@ public class TableUtil {
             for (int j = 0;  j < messageTable.getModel().getRowCount();  j++) { // for each row
 	            comp = messageTable.getDefaultRenderer(messageTable.getColumnClass(i)).
 	                             getTableCellRendererComponent(
-	                            		 messageTable, messageTable.getValueAt(j, i),
+	                            	 messageTable, messageTable.getValueAt(j, i),
 	                                 false, false, j, i);
 
 	            if(comp != null) {

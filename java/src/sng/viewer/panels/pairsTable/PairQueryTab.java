@@ -92,9 +92,9 @@ public class PairQueryTab extends Tab
 		add(scroller);
 	}
 	private JComponent createSearchFilter () {
-		JComponent thePanel = new CollapsiblePanel("Search", "Find pairs with Seq ID");
+		JComponent thePanel = new CollapsiblePanel("Search", "Find pairs based on substring");
 		JPanel row = Static.createRowPanel();
-		chkFindSeqName = new JCheckBox ( "Seq ID (exact)" );
+		chkFindSeqName = new JCheckBox ( "Seq ID   (substring)" );
 		chkFindSeqName.setBackground(Color.WHITE);
 		chkFindSeqName.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -102,12 +102,29 @@ public class PairQueryTab extends Tab
 				txtSeqName.setEnabled(chkFindSeqName.isSelected());
 			}
 		});
-		txtSeqName = Static.createTextField("", 10); 
+		txtSeqName = Static.createTextField("", 15); 
 		chkFindSeqName.setSelected(false);
 		txtSeqName.setEnabled(false);
 		row.add(chkFindSeqName);
 		row.add(txtSeqName);
 		thePanel.add(row);
+		
+		row = Static.createRowPanel();
+		chkFindType = new JCheckBox ( "Hit Type (substring)" );
+		chkFindType.setBackground(Color.WHITE);
+		chkFindType.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				enableFilters(chkApplyFilters.isSelected());
+				txtAlignType.setEnabled(chkFindType.isSelected());
+			}
+		});
+		txtAlignType = Static.createTextField("", 10); 
+		chkFindType.setSelected(false);
+		txtAlignType.setEnabled(false);
+		row.add(chkFindType);
+		row.add(txtAlignType);
+		thePanel.add(row);
+		
 		return thePanel;
 	}
 	private JComponent createPairsFilters ( )
@@ -271,14 +288,18 @@ public class PairQueryTab extends Tab
 		getParentFrame().addQueryResultsTab ( theQuery, "Filter" + nChildren ); 
 	}
 	private String getSQLWhere() {
-		if (!chkApplyFilters.isSelected() && !chkFindSeqName.isSelected()) return "1";
+		if (!chkApplyFilters.isSelected() && !chkFindSeqName.isSelected()  && !chkFindType.isSelected()) return "1";
 		
 		String where="";
 		
 		if (chkFindSeqName.isSelected()) {
 			String id = txtSeqName.getText();
-			where = "(contig1 = '" + id + "' or contig2 = '" + id + "')";
+			where = "(contig1 like '%" + id + "%' or contig2 like '%" + id + "%')";
 		}	
+		if (chkFindType.isSelected()) {
+			String id = txtAlignType.getText();
+			where = "(hit_type like '%" + id + "%')";
+		}
 		if (chkApplyFilters.isSelected()) {
 			if (where!="") where += " AND ";
 			double ntRatio = Double.parseDouble(txtNTPercentLen.getText())/100.0;
@@ -286,7 +307,7 @@ public class PairQueryTab extends Tab
 			double ntPid  =  Double.parseDouble(txtNTPercentSim.getText())/100.0;
 			double aaPid  =  Double.parseDouble(txtAAPercentSim.getText())/100.0;
 			
-			where = "(NT_olp_len >= " + txtNTLen.getText();
+			where =  "(NT_olp_len >= " + txtNTLen.getText();
 			where += " AND NT_olp_ratio >= " + ntRatio;
 			where += " AND (NT_olp_score/NT_olp_len) >= " + ntPid;	
 			
@@ -297,10 +318,13 @@ public class PairQueryTab extends Tab
 		return where;
 	}
 	private String getSummary() {
-		if (!chkApplyFilters.isSelected() && !chkFindSeqName.isSelected()) return "All pairs";
+		if (!chkApplyFilters.isSelected() && !chkFindSeqName.isSelected()  && !chkFindType.isSelected()) return "All pairs";
+		
 		String sum = "";
 		if (chkFindSeqName.isSelected()) 
-			sum = "SeqID1 or SeqID2 = '" +  txtSeqName.getText() + "' ";
+			sum = "SeqID1 or SeqID2 contains '" +  txtSeqName.getText() + "' ";
+		if (chkFindType.isSelected()) 
+			sum += "Hit Type contains '" +  txtAlignType.getText() + "' ";
 		if (chkApplyFilters.isSelected()) 
 		    sum +=  "NT %Sim >= " + txtNTPercentSim.getText() + 
 				", NT Len >= " + txtNTLen.getText() +
@@ -410,6 +434,9 @@ public class PairQueryTab extends Tab
 
 	private JCheckBox chkFindSeqName = null;
 	private JTextField txtSeqName = null;
+	
+	private JCheckBox chkFindType = null; // CAS314 add
+	private JTextField txtAlignType = null;
 	
 	private int nChildren = 0;
 	private RunQuery theQuery = null;

@@ -116,13 +116,11 @@ use the interface <b>runAS</b>.
 If you use databases other then UniProt, you need to make sure there that the descriptor line
 for each sequence (i.e. > lines) is formated correctly. Genbank formats are accepted,
 plus a generic format (see the online Annotation Setup).
-<p>You have a choice of using <tt>blast</tt> or <tt>diamond</tt> for searching the database sequences
-against an annoDB. See <tt>HOSTS.cfg</tt> for further information on locations of these programs.
-You can either request
-a particular search program when you add an annoDB, or use the default "TCW Select" to let
-TCW select an appropriate program (see Help on Add/Edit page). 
 
-<br>When you select "Step 3: Annotate", there will be a popup with the choice:
+<p>You have a choice of using <tt>blast</tt> or <tt>diamond</tt> for searching the database sequences
+against an annoDB (these programs are in <tt>/Ext</tt> subdirectory).
+
+<p>When you select "Step 3: Annotate", there will be a popup with the choice:
 <ul>
 <li>Answer - Answer prompts at command line.
 <br>All parameters are written out to the terminal. There may be questions if
@@ -147,7 +145,7 @@ to their importance, where they will be shown in that order in the <tt>viewSingl
 <li>Uncheck all annoDBs that have been added (they are in italics). You need to click the
 line twice - once to highlight it and once to uncheck.
 <li>Add any additional annoDBs and check them.
-<li>Select in "Options" if you want to add similarity pairs.
+<li>Select "Options" if you want to add similarity pairs.
 <li>Execute "Step 3: Annotate".
 <br>You will be prompt at the command line as to whether you want to 
 <br><tt>
@@ -191,13 +189,13 @@ to see additional Help.
 attributes, even if "Load Data" has not be executed. To make a change, remove the dataset and re-add. 
 <li>After a TCW database has been created, runSingleTCW can be used to edit
 the attributes (i.e. tissue, etc). This ONLY works right from the TCW directory that has 
-the /project subdirectories, as it needs to read the LIB.cfg and sTCW.cfg 
+the <tt>/project</tt> subdirectories, as it needs to read the LIB.cfg and sTCW.cfg 
 project files. 
 <li>runSingleTCW will detect certain file format problems, etc, 
 but some errors are not found until "Load Data" is executed.
 If that happens, remove the mySQL database, fix the error and restart.
 <li>If something appears wrong and you do not know how to fix it, you can remove
-the /projects/<i>project-name</i>/LIB.cfg file and restart. 
+the <tt>/projects/<i>project-name</i>/LIB.cfg</tt> file and restart. 
 <li>If any process seems to "hang", i.e. no output to terminal for a very long time,
 either close the runSingleTCW window or ctrl-C. Then just restart. NOTE: on Macs,
 pop-up windows get hidden easy and freeze the main singleTCW window until you acknowledge

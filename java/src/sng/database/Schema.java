@@ -41,7 +41,8 @@ enum DBVer
 	Ver52, // 5.2 - add user_remark
 	Ver53, // 5.3 add assem_msg.spAnno and assem_msg.go_ec
 	Ver54, // 5.4 add o_markov and rename p_coding fields; the Engine was not set for all tables.
-	Ver55  // MySQL V8 changed rank to best_rank
+	Ver55, // MySQL V8 changed rank to best_rank
+	Ver56  // Pairwise changes
 }
 
 /********************************************
@@ -59,13 +60,13 @@ enum DBVer
 public class Schema 
 {
 	DBConn mDB;
-	DBVer  dbVer =  DBVer.Ver55; // default to this, as in other cases we get it from the schemver table
+	DBVer  dbVer =  DBVer.Ver56; // default to this, as in other cases we get it from the schemver table
 	String dbVerStr = null;      // read from database
 	
-	DBVer  curVer = DBVer.Ver55; 
-	String curVerStr = "5.5";
-	public static String currentVerString() {return "5.5";}
-	public static DBVer  currentVer() 		{return DBVer.Ver55;}
+	DBVer  curVer = DBVer.Ver56; 
+	String curVerStr = "5.6";
+	public static String currentVerString() {return "5.6";}
+	public static DBVer  currentVer() 		{return DBVer.Ver56;}
 	
 	public Schema(DBConn db)
 	{
@@ -88,6 +89,7 @@ public class Schema
 			else if (dbVerStr.equals("5.3"))	dbVer = DBVer.Ver53;
 			else if (dbVerStr.equals("5.4"))	dbVer = DBVer.Ver54;
 			else if (dbVerStr.equals("5.5"))	dbVer = DBVer.Ver55;
+			else if (dbVerStr.equals("5.6"))	dbVer = DBVer.Ver56;
 			else System.err.println("Unknown version string " + dbVerStr + " in schemver table");
 		}
 		catch (Exception e){}
@@ -126,6 +128,7 @@ public class Schema
 			"   meta_msg text default null," +     // contains test at bottom of overview
 			"	spAnno boolean default false,"  +  // if SP takes precedence for Best Anno
 			"	orf_msg text default null,"  +  // added in DoORF
+			"   pair_msg tinytext default null, " + // CAS314 added in CoreAnno
 			"	gc_msg text default null,"  +  //  added in DoORF
 			"   go_msg text default null, "	+  //  name of goterm file, which contains date
 			"   go_ec  text default null, " +  //  evidence codes in db
@@ -458,31 +461,26 @@ public class Schema
 			"AID 		integer not null, " +				
 			"contig1 	varchar(30) NOT NULL, " +
 			"contig2 	varchar(30) NOT NULL, " +
-			" " +
-			"coding_frame1 TINYINT, " +
-			"coding_frame2 TINYINT, " +
-			" " +	
+			"align_frame1 TINYINT, " +			// CAS314 rename from coding_frame
+			"align_frame2 TINYINT, " +
+			"shared_hitID			varchar(30), " +		// if have protein results
+			// DP results	
 			"NT_olp_ratio	Float default 0, " +				// len_of_olap/longest_ctgLen
 			"NT_olp_score	int  unsigned default 0, " +		// #match 	sim=(score/len)*100.0
-			"NT_olp_len		int  unsigned default 0, " +		// length of overlap
-			" " +				
+			"NT_olp_len		int  unsigned default 0, " +		// length of overlap			
 			"AA_olp_ratio	Float default 0, " +
 			"AA_olp_score	int  unsigned default 0, " +
-			"AA_olp_len		int  unsigned default 0, " +
-			" " +		
-			"in_self_blast_set 		BOOLEAN default 0, " +
-			"in_uniprot_set 		BOOLEAN default 0, " +
-			"in_translated_self_blast BOOLEAN default 0, " +
-			// if have protein results
-			" shared_hitID			varchar(30), " +
+			"AA_olp_len		int  unsigned default 0, " +	
 			// selfblast result
+			" hit_type		varchar(40) NOT NULL DEFAULT ''," + // CAS314 - replace 3 tinyint fields
 			" e_value 				DOUBLE PRECISION, " +			
 			" percent_id			SMALLINT  unsigned default 0, " +
 			" alignment_len			INTEGER  unsigned default 0, " +
 			" ctg1_start			SMALLINT default 0, " +
 			" ctg1_end				SMALLINT default 0, " +
 			" ctg2_start 			SMALLINT default 0, " +
-			" ctg2_end				SMALLINT default 0  " +
+			" ctg2_end				SMALLINT default 0,  " +
+			" UNIQUE INDEX(contig1, contig2) " +  // CAS314
 			" ) ENGINE=MyISAM; ";
 			mDB.executeUpdate(sql);
 
@@ -790,17 +788,17 @@ public class Schema
 	{
 		if (current()) return dbVerStr;
 		
-		System.err.println("sTCW database schema is " + dbVerStr + "; current schema is " + curVerStr);
+		Out.prtToErr("sTCW database schema is " + dbVerStr + "; current schema is " + curVerStr);
 		
 		if (!FileHelpers.yesNo("The database needs to be updated; continue?"))
 		{
 			if (FileHelpers.yesNo("Terminate (y) or try to continue (n)?")) {
-				System.err.println("Terminated");
+				Out.prtToErr("Terminated");
 				System.exit(0);
 			}
 			else {
-				System.err.println("Schema is version " + dbVerStr + ", expecting version " + curVerStr );
-				System.err.println("Run TCW anyway -- warning, may not work");
+				Out.prtToErr("Schema is version " + dbVerStr + ", expecting version " + curVerStr );
+				Out.prtToErr("Run TCW anyway -- warning, may not work");
 				return dbVerStr;
 			}
 		}
@@ -813,7 +811,27 @@ public class Schema
 		if (dbVer==DBVer.Ver52) updateTo53();
 		if (dbVer==DBVer.Ver53) updateTo54();
 		if (dbVer==DBVer.Ver54) updateTo55();
+		if (dbVer==DBVer.Ver55) updateTo56();
 		return dbVerStr;
+	}
+	/*************************************************
+	 * Jan2021 v3.1.4 change for similar pairs
+	 */
+	private void updateTo56() {
+		try {
+			Out.Print("Update to sTCW schema db5.6 for " + Version.sTCWhead);
+			
+			mDB.tableCheckAddColumn("pja_pairwise", "hit_type", "varchar(40) NOT NULL DEFAULT ''", "AA_olp_len");
+			mDB.tableCheckRenameColumn("pja_pairwise", "coding_frame1", "align_frame1", "tinyint");
+			mDB.tableCheckRenameColumn("pja_pairwise", "coding_frame2", "align_frame2", "tinyint");
+			mDB.tableCheckAddColumn("assem_msg", "pair_msg", "tinytext default null", "orf_msg");
+			
+			mDB.executeUpdate("update schemver set schemver='5.6'");
+			dbVer = DBVer.Ver56;
+			dbVerStr = curVerStr;
+			Out.Print("Finish update for sTCW Schema db5.6");
+		}
+		catch (Exception e) {ErrorReport.reportError(e, "Error on update schema to v5.6");}	
 	}
 	/*************************************************
 	 * May2020 v3.0.3 change for MySQL v8

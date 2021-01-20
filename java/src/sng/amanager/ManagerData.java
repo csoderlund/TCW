@@ -1,13 +1,5 @@
 package sng.amanager;
-/*************************************************************
- * Store all data.
- * Reads/writes LIB.cfg and sTCW.cfg
- * Import annoDB
- * Reads HOSTS.cfg
- */
-// CAS304 for -Xlint
-//  changed SeqData and CountData extends Attributes to having an attribute object 
-//  removed equal method for CountData and AnnodbData
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -18,9 +10,7 @@ import java.util.Vector;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.swing.JOptionPane;
-
 
 import sng.database.Globals;
 import sng.database.Version;
@@ -33,6 +23,16 @@ import util.methods.Static;
 import util.methods.TCWprops;
 import util.methods.Out;
 import util.ui.UserPrompt;
+
+/*************************************************************
+ * Store all data and shares with the appropriate panel
+ * Reads/writes LIB.cfg and sTCW.cfg (separate from CfgAnno - which shares with computation methods)
+ * Import annoDB
+ * Reads HOSTS.cfg
+ */
+// CAS304 for -Xlint
+//  changed SeqData and CountData extends Attributes to having an attribute object 
+//  removed equal method for CountData and AnnodbData
 
 public class ManagerData {
 	private boolean debug=false;
@@ -206,7 +206,6 @@ public class ManagerData {
 		}
 		return fileObj.pathMakeRelative(path);
 	}
-	
 	
 	 //if file not there, read rep labels from database
 	private String [] readLibCountsFromDB(String transID) {
@@ -404,7 +403,9 @@ public class ManagerData {
 		return seqObjList.size() -1;
 	}
 	public int addNewAnnoDB() {
-		annoObjList.add(new AnnodbData());
+		AnnodbData ad = new AnnodbData();
+		ad.setDefaults();
+		annoObjList.add(ad);
 		return annoObjList.size() - 1;
 	}
 	public void removeCountLib(int index) {
@@ -444,8 +445,8 @@ public class ManagerData {
 	public void setUseTransNames(boolean useNames) { bUseTransNames = useNames; }
 	public boolean getUseTransNames() { return bUseTransNames; }
 	
-	public boolean isProteinDB() { return bProteinDB; }
-	public void setProteinDB(boolean isProteinDB) { bProteinDB = isProteinDB; }
+	public boolean isProteinDB() { return isAAstcw; }
+	public void setProteinDB(boolean isProteinDB) { isAAstcw = isProteinDB; }
 	
 	public AnnodbData getAnnoDBAt(int pos) { return annoObjList.get(pos); }
 	public void setAnnoDBAt(int pos, AnnodbData data) { annoObjList.set(pos, data); }
@@ -686,33 +687,29 @@ public class ManagerData {
 	 * Data for annoDB
 	 */
 	public class AnnodbData {
-		public void setLoaded(boolean loaded) { bLoaded = loaded; }
-		public boolean isLoaded() { return bLoaded; }		
+		public void setLoaded(boolean loaded) 	{ bLoaded = loaded; }
+		public boolean isLoaded() 				{ return bLoaded; }		
 		public void setSelected(boolean selected) { bSelected = selected; }
-		public boolean isSelected() { return bSelected; }	
+		public boolean isSelected() 			{ return bSelected; }	
 		
-		public void setTaxo(String taxo) { strTaxo = taxo; }
-		public String getTaxo() { return strTaxo; }		
+		public void setTaxo(String taxo) 	{ strTaxo = taxo; }
+		public String getTaxo() 			{ return strTaxo; }		
 		public void setTabularFile(String filename) { strTabularFile = filename; }
-		public String getTabularFile() { return strTabularFile; }		
+		public String getTabularFile() 		{ return strTabularFile; }		
 		public void setFastaDB(String filename) { strFastaDB = filename; }
-		public String getFastaDB() { return strFastaDB; }		
-		public void setParams(String args) { strParams = args; }
-		public String getParams() { 
-			return strParams; 
-		}			
-		public void setDate(String date) { strDate = date; }
-		public String getDate() { return strDate; }
-		public void setSearchPgm(String p) { searchPgm = p; }
-		public String getSearchPgm() {return searchPgm; }
-		public boolean outParams() {
-			if (searchPgm.equals("blast"))
-				if (strParams.equals(BlastArgs.getBlastxOptions())) return false;
-			if (searchPgm.equals("diamond"))
-				if (strParams.equals(BlastArgs.getDiamondOpDefaults())) return false;
-			return true;
-		}
+		public String getFastaDB() 			{ return strFastaDB; }		
+		public void setParams(String args) 	{ strParams = args; }
+		public String getParams() 			{ return strParams; }
+		public void setDate(String date) 	{ strDate = date; }
+		public String getDate() 			{ return strDate; }
+		public void setSearchPgm(String p) 	{ searchPgm = p; }
+		public String getSearchPgm() 		{ return searchPgm; }
 		
+		public void setDefaults() {
+			if (!Globals.hasVal(searchPgm)) searchPgm = BlastArgs.defPgm;
+			if (!Globals.hasVal(strParams)) 
+				strParams = BlastArgs.getArgsDB(searchPgm, "blastp");
+		}
 		private boolean bLoaded = false;
 		private boolean bSelected = true;
 		private String strTaxo = "";
@@ -726,41 +723,45 @@ public class ManagerData {
 	public class AnnoData {
 		// Assign best anno
 		public void setSPpref(String b) {strSPpref=b;}
-		public String getSPpref() { return strSPpref;}
+		public String getSPpref() {return strSPpref;}
 		
 		public void setRmECO(String b) {strRmECO=b;} // CAS305
-		public String getRmECO() { return strRmECO;}
+		public String getRmECO() {return strRmECO;}
 
-
-		// similarity
-		public void setTSelfBlast(String filename) { strTSelfBlast = filename; }
-		public String getTSelfBlast() { return strTSelfBlast; }
+	// similarity - the filename is fixed in CfgAnno
+		public void   setSelfBlastn(boolean b) 				{ bBlastn=b;}
+		public void   setSelfBlastnParams(String param) 	{ self_blastn_params = param; }
+		public boolean getSelfBlastn() 						{ return bBlastn; }
+		public String  getSelfBlastnParams() 				{ return self_blastn_params; }
 		
-		public void setSelfBlast(String filename) { strSelfBlast = filename; }
-		public String getSelfBlast() { return strSelfBlast; }
-
-		public void setTSelfBlastParams(String parameters) { strTSelfBlastParams = parameters; }
-		public String getTSelfBlastParams() { return strTSelfBlastParams; }
+		public void 	setSelfTblastx(boolean b) 			{ bTblastx=b;}
+		public void   	setSelfTblastxParams(String param) 	{ self_tblastx_params = param; }
+		public boolean  getSelfTblastx() 					{ return bTblastx; }
+		public String   getSelfTblastxParams() 	{ return self_tblastx_params; }
 		
-		public void setSelfBlastParams(String parameters) { strSelfBlastParams = parameters; }
-		public String getSelfBlastParams() { return strSelfBlastParams; }
+		public void   	setSelfBlastp(boolean b) 			{ bBlastp=b; }
+		public void   	setSelfBlastpParams(String param) 	{ self_blastp_params = param; }
+		public void   	setSelfBlastpPgm(String pgm) 		{ self_blastp_pgm = pgm; }
+		public boolean 	getSelfBlastp() 					{ return bBlastp; }
+		public String  	getSelfBlastpParams() 				{ return self_blastp_params;} 
+		public String 	getSelfBlastpPgm() 					{ return self_blastp_pgm; }
 		
 		public int getDoPairs() {
-			if (strSelfBlast!=null || strTSelfBlast!=null) return nPairsLimit;
+			if (bTblastx || bBlastn || bBlastp) return nPairsLimit;
 			else return 0;
 		}
-		public void setPairsLimit(int limit) { nPairsLimit = limit; }
-		public int getPairsLimit() { return nPairsLimit; }
+		public void setPairsLimit(int limit) 	{ nPairsLimit = limit; }
+		public int getPairsLimit() 				{ return nPairsLimit; }
 		
-		private String strTSelfBlast = null;// "" means to run blast
-		private String strTSelfBlastParams = "";
+		private boolean bTblastx=false, bBlastn=false, bBlastp=false;
+		private String self_blastn_params =   null; // not '' because blank is acceptable (use defaults)
+		private String self_tblastx_params =  null;
+		private String self_blastp_params =   null;
+		private String self_blastp_pgm = "diamond";
 		
-		private String strSelfBlast = null;// "" means to run blast
-		private String strSelfBlastParams = "";
+		private int nPairsLimit = 1000;
 		
-		private int nPairsLimit = 0;
-		
-		// ORF
+	// ORF
 		public void setORFaltStart(String r) { strORFaltStart = r; }
 		public String getORFaltStart() { return strORFaltStart; }
 				
@@ -1037,7 +1038,6 @@ public class ManagerData {
 				TCWprops theProps = new TCWprops(TCWprops.PropType.Assem);
 				
 				out.write("# " + strProject + " sTCW.cfg " + Version.strTCWver + "\n");
-				out.write("# Terminology is very out-dated, e.g. Trans can now be proteins.\n\n");
 				out.write("SingleID = " + strAssemblyID + "      # singleTCW ID\n");
 				out.write("STCW_db    = " + strTCWdb +      "      # Database (same as in LIB.cfg)\n");
 				out.write("CPUs = " + getNumCPUs() + "\n\n");
@@ -1089,53 +1089,67 @@ public class ManagerData {
 				if (!bSkipAssembly) out.write("SKIP_ASSEMBLY = 0\n"); // Note, now defaulting to 1
 				if (bUseTransNames)
 					out.write("USE_TRANS_NAME = " + (bUseTransNames?"1":"0") +"\n");
-				out.write("\n");
 				out.flush();
 
-				// annotation
+			//------- ANNOTAION--------------//
+			// ORFs
 				theProps = new TCWprops(TCWprops.PropType.Annotate);
-				out.write("# Annotation\n");
-				if (annoObj.strSPpref.equals("1")) out.write("Anno_SwissProt_pref = 1\n"); 
-				if (annoObj.strRmECO.equals("0"))  out.write("Anno_Remove_ECO = 0\n"); 
 				
-				if (annoObj.strORFaltStart.equals("1")) out.write("Anno_ORF_alt_start = 1\n");
+				out.write("\n### Annotation Start ###\n");
 				
-				if (!annoObj.strORFhitEval.equalsIgnoreCase(theProps.getProperty("Anno_ORF_hit_evalue")))
-					out.write("Anno_ORF_hit_evalue = " + annoObj.strORFhitEval + "\n");
+				if (!isAAstcw) {
+					out.write("\n# ORF finding\n");
+					
+					if (annoObj.strORFaltStart.equals("1")) out.write("Anno_ORF_alt_start = 1\n");
+					
+					if (!annoObj.strORFhitEval.equalsIgnoreCase(theProps.getProperty("Anno_ORF_hit_evalue")))
+						out.write("Anno_ORF_hit_evalue = " + annoObj.strORFhitEval + "\n");
+					
+					if (!annoObj.strORFhitSim.equals(theProps.getProperty("Anno_ORF_hit_sim")))
+						out.write("Anno_ORF_hit_sim = " + annoObj.strORFhitSim + "\n");
+					
+					if (!annoObj.strORFlenDiff.equals(theProps.getProperty("Anno_ORF_len_diff")))
+						out.write("Anno_ORF_len_diff = " + annoObj.strORFlenDiff + "\n");
+					
+					String file = annoObj.strORFtrainCDSfile;
+					if(file != null && !file.equals("") && !file.equals("-1")) 
+						out.write("Anno_ORF_train_CDS_file = " + file + "\n");
+					else {
+						if (!annoObj.strORFtrainMinSet.equalsIgnoreCase(theProps.getProperty("Anno_ORF_train_min_set")))
+							out.write("Anno_ORF_train_min_set = " + annoObj.strORFtrainMinSet + "\n");
+					}
+				}
+		// Self blast - v314 change parameters - not backwards compatible
+				out.write("\n# Self search for pairs\n");
+				String parm; // can be blank
 				
-				if (!annoObj.strORFhitSim.equals(theProps.getProperty("Anno_ORF_hit_sim")))
-					out.write("Anno_ORF_hit_sim = " + annoObj.strORFhitSim + "\n");
+				if(annoObj.bBlastn) out.write("Anno_pairs_blastn = 1\n");
+				parm = annoObj.self_blastn_params;
+				if (Globals.hasVal(parm) && !parm.equals(BlastArgs.getBlastnArgs()))
+					out.write("Anno_pairs_blastn_args = " + parm + "\n");
 				
-				if (!annoObj.strORFlenDiff.equals(theProps.getProperty("Anno_ORF_len_diff")))
-					out.write("Anno_ORF_len_diff = " + annoObj.strORFlenDiff + "\n");
+				if (annoObj.bTblastx) out.write("Anno_pairs_tblastx = 1\n");
+				parm = annoObj.self_tblastx_params;
+				if (Globals.hasVal(parm) && !parm.equals(BlastArgs.getTblastxArgs()))
+					out.write("Anno_pairs_tblastx_args = " + parm + "\n");
 				
-				String file = annoObj.strORFtrainCDSfile;
-				if(file != null && !file.equals("") && !file.equals("-1")) 
-					out.write("Anno_ORF_train_CDS_file = " + file + "\n");
+				if (annoObj.bBlastp) out.write("Anno_pairs_blastp = 1\n");
+				parm = annoObj.self_blastp_params;
+				if (Globals.hasVal(parm) && annoObj.self_blastp_pgm.equals("blast")) {
+					out.write("Anno_pairs_blastp_pgm = blast\n"); 
+					if (!parm.equals(BlastArgs.getBlastArgsORF()))
+						out.write("Anno_pairs_blastp_args = " + parm + "\n");
+				}
 				else {
-					if (!annoObj.strORFtrainMinSet.equalsIgnoreCase(theProps.getProperty("Anno_ORF_train_min_set")))
-						out.write("Anno_ORF_train_min_set = " + annoObj.strORFtrainMinSet + "\n");
+					if (Globals.hasVal(parm) &&  !parm.equals(BlastArgs.getDiamondArgsORF()))
+						out.write("Anno_pairs_blastp_args = " + parm + "\n");
 				}
-				
-				if(annoObj.strTSelfBlast != null) {
-					out.write("Anno_unitrans_tselfblast = " + annoObj.strTSelfBlast + "\n");
-				}
-				String parm = annoObj.strTSelfBlastParams;
-				if(parm != null && parm.length() > 0 && 
-				   !parm.equals(BlastArgs.getTblastxOptions()))
-					out.write("Anno_tselfblast_args = " + parm + "\n");
-
-				if(annoObj.strSelfBlast != null) {
-					out.write("Anno_unitrans_selfblast = " + annoObj.strSelfBlast + "\n");
-				}
-				parm = annoObj.strSelfBlastParams;
-				if(parm != null && parm.length() > 0 && !parm.equals(BlastArgs.getBlastnOptions()))
-					out.write("Anno_selfblast_args = " + parm + "\n");
-			
-				if(annoObj.nPairsLimit > 0)
+				if (annoObj.nPairsLimit != 1000)
 					out.write("Anno_pairs_limit = " + annoObj.nPairsLimit + "\n");
-				out.write("\n");
 				out.flush();
+				
+		// GO		
+				out.write("\n# Gene Ontology\n");
 				if(strGODB.length() > 0) {
 					out.write("Anno_GO_DB = " + strGODB + "\n");
 					if (strSlimSubset.length()>0)
@@ -1143,30 +1157,40 @@ public class ManagerData {
 					else if (strSlimFile.length()>0)
 						out.write("Anno_SLIM_OBOFile = " + strSlimFile + "\n");
 				}
-				out.write("\n");
-					
+				
+		// Anno DBs		
+				out.write("\n# AnnoDBs\n");
+				if (annoObj.strSPpref.equals("1")) out.write("Anno_SwissProt_pref = 1\n"); 
+				if (annoObj.strRmECO.equals("0"))  out.write("Anno_Remove_ECO = 0\n"); 
+				
 				for(int x=0; x<getNumAnnoDBs(); x++) {
 					if(getAnnoDBAt(x) == null) continue;
 					AnnodbData annoDB = getAnnoDBAt(x);
 					String comment = "";
 					if(!annoDB.isSelected()) comment = "#";
 						
-					if(annoDB.getTaxo().length() > 0)
+					if (Globals.hasVal(annoDB.getTaxo()))
 						out.write(comment + "Anno_DBtaxo_" + (x+1) + " = " + annoDB.getTaxo() + "\n");
-					if(annoDB.getFastaDB().length() > 0)
+					if(Globals.hasVal(annoDB.getFastaDB()))
 						out.write(comment + "Anno_DBfasta_" + (x+1) + " = " + annoDB.getFastaDB() + "\n");
-					if(annoDB.getDate().length() > 0)
+					if (Globals.hasVal(annoDB.getDate()))
 						out.write(comment + "Anno_DBdate_" + (x+1) + " = " + annoDB.getDate() + "\n");
 					
-					if(annoDB.getTabularFile().length() > 0)
-						out.write(comment + "Anno_unitrans_DBblast_" + (x+1) + " = " + annoDB.getTabularFile() + "\n");
+					if(Globals.hasVal(annoDB.getTabularFile()))
+						out.write(comment + "Anno_DBtab_" + (x+1) + " = " + annoDB.getTabularFile() + "\n");
 					else {
-						if(annoDB.getSearchPgm().length() > 0)
+						String pgm = annoDB.getSearchPgm();
+						if(Globals.hasVal(pgm) && !pgm.equals(BlastArgs.defPgm))
 							out.write(comment + "Anno_DBsearch_pgm_" + (x+1) + " = " + annoDB.getSearchPgm() + "\n");
-						if(annoDB.outParams()) 
+						
+						String param = annoDB.getParams();
+						boolean rc=true;
+						if (Globals.hasVal(parm)) {
+							if (pgm.equals("blast")   && param.equals(BlastArgs.getBlastArgsDB())) rc= false;
+							if (pgm.equals("diamond") && param.equals(BlastArgs.getDiamondArgsDB())) rc= false;
+						}
+						if (rc) 
 							out.write(comment + "Anno_DBargs_" + (x+1) + " = " + annoDB.getParams() + "\n");
-						//if(annoDB.getUnannotated())
-						//	out.write(comment + "Anno_unitrans_subset_" + (x+1) + " = yes\n");
 					}
 					out.write("\n");
 					out.flush();
@@ -1204,21 +1228,22 @@ public class ManagerData {
 						}
 					}					
 				}
-				for(int x=0; x<tempAnnos.length; x++) {
+				// Set default args
+				if (!Globals.hasVal(annoObj.self_blastn_params)) 
+					annoObj.self_blastn_params = BlastArgs.getBlastnArgs();
+				if (!Globals.hasVal(annoObj.self_tblastx_params)) 
+					annoObj.self_tblastx_params = BlastArgs.getTblastxArgs();
+				if (!Globals.hasVal(annoObj.self_blastp_params)) 
+					annoObj.self_blastp_params = BlastArgs.getArgsORF(annoObj.self_blastp_pgm); 
+				for(int x=0; x<tempAnnos.length; x++) { 
 					if(tempAnnos[x] != null) {
-						addSearch(tempAnnos[x]);
-						annoObjList.add(tempAnnos[x]);
+						tempAnnos[x].setDefaults(); // DB params defaults set here
+						annoObjList.add(tempAnnos[x]); 
 					}
 				}
 				projReader.close();	
 			}
 			catch(Exception e) {ErrorReport.prtReport(e, "Loading sTCW.cfg  failed");}
-		}
-		private void addSearch(AnnodbData ad) {
-			if (ad.searchPgm==null || ad.searchPgm=="") 
-				ad.searchPgm = BlastArgs.getSearch();
-			if (ad.strParams.equals("-")) 
-				ad.strParams = BlastArgs.getParams(ad.searchPgm);
 		}
 		
 		private boolean readSTCWkeyVal(String key, String value, AnnodbData [] annoArray) {
@@ -1228,7 +1253,7 @@ public class ManagerData {
 			else if(key.equalsIgnoreCase("STCW_db"))	strTCWdb = value;
 			else if(key.equalsIgnoreCase("CPUs"))	nCPUs = Integer.parseInt(value);
 			
-			// Assembly/Instantiation
+		// Assembly/Instantiation
 			else if(key.equalsIgnoreCase("SKIP_ASSEMBLY")) {
 				if(value.equals("1"))	bSkipAssembly = true;
 				else	 bSkipAssembly = false;
@@ -1263,7 +1288,7 @@ public class ManagerData {
 					cntErrors++;
 				}
 			}
-			// ORF finding
+	// ORF finding
 			else if(key.equalsIgnoreCase("Anno_ORF_alt_start")) {
 				if (value.equals("1") || value.equals("0")) annoObj.strORFaltStart = value;
 				else {
@@ -1287,21 +1312,27 @@ public class ManagerData {
 				annoObj.strORFtrainCDSfile = setFile(value, FileTextField.PROJ, FileTextField.FASTA);
 			}
 			
-			// Similarity
-			else if(key.equalsIgnoreCase("Anno_unitrans_tselfblast")) {
-				annoObj.strTSelfBlast = setFile(value, FileTextField.PROJ, FileTextField.FASTA);
-			}
-			else if(key.equalsIgnoreCase("Anno_unitrans_selfblast"))  {
-				annoObj.strSelfBlast = setFile(value, FileTextField.PROJ, FileTextField.FASTA);
-			}
+		// Similarity CAS314 change keywords - not backward compatible
+			// Even if not blast is selected, save any parameters in case they reset
 			else if(key.equalsIgnoreCase("Anno_pairs_limit")) {
 				if (Static.isInteger(value)) annoObj.nPairsLimit = Integer.parseInt(value);
 				else annoObj.nPairsLimit = -1;
 			}
-			else if(key.equalsIgnoreCase("Anno_tselfblast_args")) 	annoObj.strTSelfBlastParams = value;
-			else if(key.equalsIgnoreCase("Anno_selfblast_args"))	annoObj.strSelfBlastParams = value;
+			else if(key.equalsIgnoreCase("Anno_pairs_blastn"))  {
+				if (value.contentEquals("1")) annoObj.bBlastn=true;
+			}
+			else if(key.equalsIgnoreCase("Anno_pairs_tblastx")) {
+				if (value.contentEquals("1")) annoObj.bTblastx=true;
+			}
+			else if(key.equalsIgnoreCase("Anno_pairs_blastp")) {
+				if (value.contentEquals("1")) annoObj.bBlastp=true;
+			}
+			else if (key.equalsIgnoreCase("Anno_pairs_tblastx_args")) annoObj.self_tblastx_params = value;
+			else if (key.equalsIgnoreCase("Anno_pairs_blastn_args"))  annoObj.self_blastn_params = value;
+			else if (key.equalsIgnoreCase("Anno_pairs_blastp_args"))  annoObj.self_blastp_params = value;
+			else if (key.equalsIgnoreCase("Anno_pairs_blastp_pgm"))	  annoObj.self_blastp_pgm = value;
 			
-			// GO
+		// GO
 			else if(key.equalsIgnoreCase("Anno_GO_DB")) 		strGODB = value;
 			else if(key.equalsIgnoreCase("Anno_SLIM_SUBSET")) 	strSlimSubset = value;
 			else if(key.equalsIgnoreCase("Anno_SLIM_OBOFile")) 	strSlimFile = value;
@@ -1309,7 +1340,7 @@ public class ManagerData {
 			
 			if (!isAnnoDB) return true; // if none of the above match...
 			
-			// annoDB get index
+		// annoDB get index
 			if (key.startsWith("#")) {
 				isSel = false;
 				key = key.substring(1);
@@ -1318,7 +1349,7 @@ public class ManagerData {
 			Pattern fasta =  Pattern.compile("Anno_(\\w+)_(\\d+)"); 
 			Matcher x = fasta.matcher(key);
 			if (!x.find()) {
-				if (isSel) return true; // comment -- ignore
+				if (isSel) return true; // # comment -- ignore
 				else {
 					Out.PrtWarn("Invalid sTCW.cfg keyword: " + key);
 					cntErrors++;
@@ -1347,16 +1378,13 @@ public class ManagerData {
 				annoArray[index].strTaxo = value;
 				annoArray[index].setSelected(isSel);
 			}
-			else if(key.startsWith("Anno_unitrans_DBblast_")) { 
+			else if(key.startsWith("Anno_DBtab_")) { 
 				annoArray[index].strTabularFile = setFile(value, FileTextField.PROJ, FileTextField.TAB);
 				annoArray[index].setSelected(isSel);
 			}
 			else if(key.startsWith("Anno_DBsearch_pgm_")) { 
-				if (value.equals("TCW Select")) {
-					if (BlastArgs.isDiamond()) value = "diamond";
-					else value = "blast";
-				}
-				else if (value.equals("diamond") && !BlastArgs.isDiamond()) value = "blast";
+				if (value.equals("TCW Select")) value = "diamond"; // don't use TCW Select anymore
+				if (value.equals("diamond") && !BlastArgs.isDiamond()) value = "blast"; // diamond part of package now
 				annoArray[index].searchPgm = value;
 				annoArray[index].setSelected(isSel);
 			}
@@ -1425,7 +1453,6 @@ public class ManagerData {
 				// does not replace if already has the file name
 				for(int x=0; x<tempAnnos.length; x++) {
 					if(tempAnnos[x] == null) continue;
-					addSearch(tempAnnos[x]);
 					
 					boolean found = false;
 					for(int y=0; y<getNumAnnoDBs() && !found; y++) {
@@ -1473,7 +1500,7 @@ public class ManagerData {
 	private boolean bLibLoaded = false;
 	private boolean bInstantiated = false;
 	
-	private boolean bProteinDB = false;
+	private boolean isAAstcw = false;
 	private HostsCfg hostObj=null;
 	private ManagerFrame theParentFrame=null;
 	private FileTextField fileObj=null;

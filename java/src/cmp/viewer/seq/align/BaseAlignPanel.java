@@ -348,16 +348,21 @@ public class BaseAlignPanel extends JPanel implements MouseListener
 	
 	//---------	 Draw a ruler indicating base position-------------------//
 	protected void drawRuler ( Graphics2D g2, double dXMin, double dYTop, double dYBottom )   {
-		// Center the text (as much as possible in the input box)
-		TextLayout layout = new TextLayout( "9999", theFont, g2.getFontRenderContext() );		
+		String tLen = (nMaxIndex>9999) ? "99999" : "9999"; // CAS314
+		TextLayout layout = new TextLayout( tLen, theFont, g2.getFontRenderContext() );		
 		double dY = (dYBottom + dYTop) / 2 + layout.getBounds().getWidth() / 2;
+	
+		int inc = 10;
+		if (nViewMode==GRAPHICMODE) {
+			if (bScaleUp) {
+				 inc =  (nScale<4) ? 25 : 10;
+			}
+			else inc = 100;
+		}
+		int nTickStart = ( nMinIndex / inc ) * inc;		
+		if ( nTickStart < nMinIndex ) nTickStart += inc;
 		
-		int nTickInc = ( nViewMode==GRAPHICMODE ) ? 100 : 10;
-		
-		int nTickStart = ( nMinIndex / nTickInc ) * nTickInc;		
-		if ( nTickStart < nMinIndex ) nTickStart += nTickInc;
-		
-		for ( int i = nTickStart; i < nMaxIndex; i += nTickInc ) {	
+		for ( int i = nTickStart; i < nMaxIndex; i += inc ) {	
 			double dX;
 			if ( nViewMode == GRAPHICMODE ) 
 				dX = calculateDrawX (i);
@@ -432,7 +437,7 @@ public class BaseAlignPanel extends JPanel implements MouseListener
 		aaZappo.put('S', zPhilic); 	aaZappo.put('T', zPhilic);
 		aaZappo.put('N', zPhilic); 	aaZappo.put('Q', zPhilic);
 		aaZappo.put('P', zCon);		aaZappo.put('G', zCon);
-		aaZappo.put('C', zCys); 	aaZappo.put('-', anyGap);
+		aaZappo.put('C', zCys); 	aaZappo.put(Globalx.gapCh, anyGap);
 		aaZappo.put('X', anyUnk); 	aaZappo.put('*', aaStop);
 	}
 	

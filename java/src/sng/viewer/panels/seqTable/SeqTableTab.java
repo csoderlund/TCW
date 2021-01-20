@@ -18,6 +18,7 @@ import sng.util.MainTable;
 import sng.util.RunQuery;
 import sng.util.Tab;
 import sng.viewer.STCWFrame;
+import sng.database.Globals;
 import util.ui.ButtonComboBox;
 import util.ui.UIHelpers;
 import util.ui.UserPrompt;
@@ -27,12 +28,12 @@ import util.methods.*;
 
 public class SeqTableTab extends Tab
 {		
-	private final String HTML = "html/viewSingleTCW/SeqTable.html";
+	private final String helpDir = Globals.helpDir + "SeqTable.html";
 	
-	public SeqTableTab ( 	STCWFrame inFrame, FieldMapper inContigFields, 
-							RunQuery inQuery, String [] contigs, 
-							Vector <String> tableRows, 
-							int nTotalContigs, String summary)
+	public SeqTableTab (STCWFrame inFrame, FieldMapper inContigFields, 
+						RunQuery inQuery, String [] contigs, 
+						Vector <String> tableRows, 
+						int nTotalContigs, String summary)
 	throws Exception
 	{
 		super(inFrame, null);
@@ -142,7 +143,7 @@ public class SeqTableTab extends Tab
 		btnHelp.setBackground(Globalx.HELPCOLOR);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(getParentFrame(), "Sequence table", HTML );
+				UserPrompt.displayHTMLResourceHelp(getParentFrame(), "Sequence table", helpDir );
 			}
 		});
 
@@ -318,8 +319,8 @@ public class SeqTableTab extends Tab
 
 	private void runExport(int mode) {
 		final int saveMode = mode;
-		Thread theThread = new Thread(new Runnable() {
-			public void run() {
+		//Thread theThread = new Thread(new Runnable() { // CAS314 maybe this is why the file popup sometimes doens't work
+		//	public void run() {
 				try {
 					btnTable.setEnabled(false);
 					if(saveMode == EXPORT_TABLE) {
@@ -341,9 +342,9 @@ public class SeqTableTab extends Tab
 					btnTable.setEnabled(true);
 				}
 				catch(Exception e) {ErrorReport.prtReport(e, "Error creating export file");}
-			}
-		});
-		theThread.start();
+			//}
+		//});
+		//theThread.start();
 	}
 	private void runExportHit() {
 		final ExportHit eh = new ExportHit();
@@ -389,11 +390,11 @@ public class SeqTableTab extends Tab
 	private class ExportHit extends JDialog {
 		private static final long serialVersionUID = 1L;
 		public ExportHit() {
-	    		setModal(true);
-	    		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-	    		setTitle("Export.... ");
-	       
-	    		JPanel selectPanel = Static.createPagePanel();
+    		setModal(true);
+    		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+    		setTitle("Export.... ");
+       
+    		JPanel selectPanel = Static.createPagePanel();
 	        JLabel label = Static.createLabel("Hit Sequences from table (" + Globalx.FASTA_SUFFIX + ")");
 	       
 	        btnHitEval = Static.createRadioButton("Best Eval", false);
@@ -408,60 +409,60 @@ public class SeqTableTab extends Tab
 	        row.add(btnHitAnno); row.add(Box.createHorizontalStrut(3));
 	        row.add(btnHitBoth); 
 	        
-	    		selectPanel.add(Box.createVerticalStrut(5));
-	    		selectPanel.add(label);
-	    		selectPanel.add(Box.createVerticalStrut(5));
-	    		selectPanel.add(row);
-	    		
-	    		 // bottom buttons
-        		btnOK = new JButton("OK");
-        		btnOK.addActionListener(new ActionListener() {
-    				public void actionPerformed(ActionEvent e) {
-    					nMode = EXPORT_OK;
-    					setVisible(false);
-    				}
-    			});
-        		btnCancel = new JButton("Cancel");
-        		btnCancel.addActionListener(new ActionListener() {
-    				public void actionPerformed(ActionEvent e) {
-    					nMode = EXPORT_CANCEL;
-    					setVisible(false);
-    				}
-    			});
-        		
-        		btnOK.setPreferredSize(btnCancel.getPreferredSize());
-        		btnOK.setMaximumSize(btnCancel.getPreferredSize());
-        		btnOK.setMinimumSize(btnCancel.getPreferredSize());
-        		
-        		JPanel buttonPanel = Static.createRowPanel();
-        		buttonPanel.add(btnOK);
-        		buttonPanel.add(Box.createHorizontalStrut(20));
-        		buttonPanel.add(btnCancel);
-        		buttonPanel.setMaximumSize(buttonPanel.getPreferredSize());
+    		selectPanel.add(Box.createVerticalStrut(5));
+    		selectPanel.add(label);
+    		selectPanel.add(Box.createVerticalStrut(5));
+    		selectPanel.add(row);
+    		
+    		 // bottom buttons
+    		btnOK = new JButton("OK");
+    		btnOK.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					nMode = EXPORT_OK;
+					setVisible(false);
+				}
+			});
+    		btnCancel = new JButton("Cancel");
+    		btnCancel.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					nMode = EXPORT_CANCEL;
+					setVisible(false);
+				}
+			});
+    		
+    		btnOK.setPreferredSize(btnCancel.getPreferredSize());
+    		btnOK.setMaximumSize(btnCancel.getPreferredSize());
+    		btnOK.setMinimumSize(btnCancel.getPreferredSize());
+    		
+    		JPanel buttonPanel = Static.createRowPanel();
+    		buttonPanel.add(btnOK);
+    		buttonPanel.add(Box.createHorizontalStrut(20));
+    		buttonPanel.add(btnCancel);
+    		buttonPanel.setMaximumSize(buttonPanel.getPreferredSize());
   
            	JPanel mainPanel = Static.createPagePanel();
-        		mainPanel.add(selectPanel);
-        		mainPanel.add(Box.createVerticalStrut(15));
-        		mainPanel.add(buttonPanel);
-        		
-        		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        		add(mainPanel);
-        		
-        		pack();
-        		this.setResizable(false);
-        		UIHelpers.centerScreen(this);
+    		mainPanel.add(selectPanel);
+    		mainPanel.add(Box.createVerticalStrut(15));
+    		mainPanel.add(buttonPanel);
+    		
+    		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+    		add(mainPanel);
+    		
+    		pack();
+    		this.setResizable(false);
+    		UIHelpers.centerScreen(this);
 		}
 		public String getHitSQL() {
-	    		if (btnHitEval.isSelected()) return "filter_best=1";
-	    		if (btnHitAnno.isSelected()) return "filter_ovbest=1";
-	    		return "(filter_best=1 or filter_ovbest=1)";
-	    	}
+    		if (btnHitEval.isSelected()) return "filter_best=1";
+    		if (btnHitAnno.isSelected()) return "filter_ovbest=1";
+    		return "(filter_best=1 or filter_ovbest=1)";
+    	}
 	    public String getHitFile() {
-	    		String prefix = filePrefix+"Hits";
-	    		if (btnHitEval.isSelected()) return prefix + "Eval" + Globalx.FASTA_SUFFIX;
-	    		if (btnHitAnno.isSelected()) return prefix + "Anno" + Globalx.FASTA_SUFFIX;
-	    		return prefix + "Both"+ Globalx.FASTA_SUFFIX;
-	    	}
+    		String prefix = filePrefix+"Hits";
+    		if (btnHitEval.isSelected()) return prefix + "Eval" + Globalx.FASTA_SUFFIX;
+    		if (btnHitAnno.isSelected()) return prefix + "Anno" + Globalx.FASTA_SUFFIX;
+    		return prefix + "Both"+ Globalx.FASTA_SUFFIX;
+    	}
 		public int getSelection() { return nMode; }
 		
 	    public int nMode;
@@ -471,58 +472,58 @@ public class SeqTableTab extends Tab
     private class ExportGO extends JDialog {
 		private static final long serialVersionUID = 6152973237315914324L;
     	
-    	    /***********************************************
-    	     * the methods to output the files are in SortableTable in util.ui
-    	     * Called above (search for Export button)
-    	     */
-        	public ExportGO() {
-        		setModal(true);
-        		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        		setTitle("Export GOs.... ");
+	    /***********************************************
+	     * the methods to output the files are in SortableTable in util.ui
+	     * Called above (search for Export button)
+	     */
+    	public ExportGO() {
+    		setModal(true);
+    		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+    		setTitle("Export GOs.... ");
             
             JLabel label = Static.createLabel("GOs from table (" + Globalx.CSV_SUFFIX + ")");
            
             JLabel goLabel = new JLabel("GO Level: ");
-    			txtGOlevel  = new JTextField(3);
-    			txtGOlevel.setMaximumSize(txtGOlevel.getPreferredSize());
-    			txtGOlevel.setText("2");
-    			
-    			cmbTermTypes = new ButtonComboBox();
-	    		cmbTermTypes.addItem("Any domain");
-	    		for(int x=0; x<Globalx.GO_TERM_LIST.length; x++)
-	    				cmbTermTypes.addItem(Globalx.GO_TERM_LIST[x]);
-	    		
-	    		cmbTermTypes.setSelectedIndex(0);
-	    		cmbTermTypes.setMaximumSize(cmbTermTypes.getPreferredSize());
-	    		cmbTermTypes.setMinimumSize(cmbTermTypes.getPreferredSize());
-	    		cmbTermTypes.setBackground(Globalx.BGCOLOR);
-	    		
-    			JLabel goEvalLabel = new JLabel("E-value: ");
+			txtGOlevel  = new JTextField(3);
+			txtGOlevel.setMaximumSize(txtGOlevel.getPreferredSize());
+			txtGOlevel.setText("2");
+			
+			cmbTermTypes = new ButtonComboBox();
+    		cmbTermTypes.addItem("Any domain");
+    		for(int x=0; x<Globalx.GO_TERM_LIST.length; x++)
+    				cmbTermTypes.addItem(Globalx.GO_TERM_LIST[x]);
+    		
+    		cmbTermTypes.setSelectedIndex(0);
+    		cmbTermTypes.setMaximumSize(cmbTermTypes.getPreferredSize());
+    		cmbTermTypes.setMinimumSize(cmbTermTypes.getPreferredSize());
+    		cmbTermTypes.setBackground(Globalx.BGCOLOR);
+    		
+			JLabel goEvalLabel = new JLabel("E-value: ");
             txtGOEval  = new JTextField(4);
             txtGOEval.setMaximumSize(txtGOEval.getPreferredSize());
             txtGOEval.setText("");
     		
             // bottom buttons
-        		btnOK = new JButton("OK");
-        		btnOK.addActionListener(new ActionListener() {
-    				public void actionPerformed(ActionEvent e) {
-    					nMode=EXPORT_OK;
-    					setVisible(false);
-    				}
-    			});
-        		btnCancel = new JButton("Cancel");
-        		btnCancel.addActionListener(new ActionListener() {
-    				public void actionPerformed(ActionEvent e) {
-    					nMode=EXPORT_CANCEL;
-    					setVisible(false);
-    				}
-    			});
-        		
-        		btnOK.setPreferredSize(btnCancel.getPreferredSize());
-        		btnOK.setMaximumSize(btnCancel.getPreferredSize());
-        		btnOK.setMinimumSize(btnCancel.getPreferredSize());
-        		
-	    		JPanel selectPanel = Static.createPagePanel();
+    		btnOK = new JButton("OK");
+    		btnOK.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					nMode=EXPORT_OK;
+					setVisible(false);
+				}
+			});
+    		btnCancel = new JButton("Cancel");
+    		btnCancel.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					nMode=EXPORT_CANCEL;
+					setVisible(false);
+				}
+			});
+    		
+    		btnOK.setPreferredSize(btnCancel.getPreferredSize());
+    		btnOK.setMaximumSize(btnCancel.getPreferredSize());
+    		btnOK.setMinimumSize(btnCancel.getPreferredSize());
+    		
+    		JPanel selectPanel = Static.createPagePanel();
 	        JPanel goPanel = Static.createPagePanel();
 	        JPanel row = Static.createRowPanel();
 	        
@@ -549,41 +550,41 @@ public class SeqTableTab extends Tab
 	    
 	        selectPanel.add(new JSeparator());
 	        
-        		JPanel buttonPanel = Static.createRowPanel();
-        		buttonPanel.add(btnOK);
-        		buttonPanel.add(Box.createHorizontalStrut(20));
-        		buttonPanel.add(btnCancel);
-        		buttonPanel.setMaximumSize(buttonPanel.getPreferredSize());
+    		JPanel buttonPanel = Static.createRowPanel();
+    		buttonPanel.add(btnOK);
+    		buttonPanel.add(Box.createHorizontalStrut(20));
+    		buttonPanel.add(btnCancel);
+    		buttonPanel.setMaximumSize(buttonPanel.getPreferredSize());
   
            	JPanel mainPanel = Static.createPagePanel();
-        		mainPanel.add(selectPanel);
-        		mainPanel.add(Box.createVerticalStrut(15));
-        		mainPanel.add(buttonPanel);
-        		
-        		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        		add(mainPanel);
-        		
-        		pack();
-        		this.setResizable(false);
-        		UIHelpers.centerScreen(this);
-        	}
+    		mainPanel.add(selectPanel);
+    		mainPanel.add(Box.createVerticalStrut(15));
+    		mainPanel.add(buttonPanel);
+    		
+    		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+    		add(mainPanel);
+    		
+    		pack();
+    		this.setResizable(false);
+    		UIHelpers.centerScreen(this);
+    	}
         
-        	public String getGOLevel() { 
-        		String x = txtGOlevel.getText().trim();
-        		if (x.equals("-")) return x;
-        		if (x.equals("")) return "-";
-        		if (x.equals("0")) return "-";
-    			try {Integer.parseInt(x);}
-    			catch (Exception e) {
-    				JOptionPane.showMessageDialog(null, 
-    					"Incorrect level " + x + "\nUsing default 2", "Error", JOptionPane.PLAIN_MESSAGE);
-    				x="2";
-    				txtGOlevel.setText(x);
-    			}
-        		return x; 
-        	}
+    	public String getGOLevel() { 
+    		String x = txtGOlevel.getText().trim();
+    		if (x.equals("-")) return x;
+    		if (x.equals("")) return "-";
+    		if (x.equals("0")) return "-";
+			try {Integer.parseInt(x);}
+			catch (Exception e) {
+				JOptionPane.showMessageDialog(null, 
+					"Incorrect level " + x + "\nUsing default 2", "Error", JOptionPane.PLAIN_MESSAGE);
+				x="2";
+				txtGOlevel.setText(x);
+			}
+    		return x; 
+    	}
         public String getGOEval() { 
-        		String x = txtGOEval.getText().trim();
+        	String x = txtGOEval.getText().trim();
 			if (x.equals("") || x.equals("-")) return "";
 			
 			try {Double.parseDouble(x);}
@@ -593,35 +594,35 @@ public class SeqTableTab extends Tab
 				x="";
 				txtGOEval.setText(x);
 			}
-        		return x; 
-        	}
+        	return x; 
+        }
         public String getTermType() {
     			String type = (cmbTermTypes.getSelectedIndex() > 0) ? cmbTermTypes.getSelectedItem() : "";
     			return type;
         }
    
-        	public int getSelection() { return nMode; }
-        	public String getGOfile() {
-        		String file=filePrefix+"GO";
-        		
-        		String level = getGOLevel();
-        		if (!level.equals("-")) file += "_" + level;
-        		if (cmbTermTypes.getSelectedIndex() > 0) {
-        			int idx = cmbTermTypes.getSelectedIndex();
-        			file += "_" + Globalx.GO_TERM_ABBR[idx-1];
-        		}
-        		
-        		String eval = getGOEval();
-        		if (!eval.equals("")) file += "_" + eval;
-        		return file + Globalx.CSV_SUFFIX;
-        	}
-        	 	
-        	ButtonComboBox cmbTermTypes = null;
-        	JTextField txtGOlevel = null, txtGOEval = null;
-        	
-        	JButton btnOK = null, btnCancel = null;
-        	
-        	int nMode = EXPORT_OK;
+    	public int getSelection() { return nMode; }
+    	public String getGOfile() {
+    		String file=filePrefix+"GO";
+    		
+    		String level = getGOLevel();
+    		if (!level.equals("-")) file += "_" + level;
+    		if (cmbTermTypes.getSelectedIndex() > 0) {
+    			int idx = cmbTermTypes.getSelectedIndex();
+    			file += "_" + Globalx.GO_TERM_ABBR[idx-1];
+    		}
+    		
+    		String eval = getGOEval();
+    		if (!eval.equals("")) file += "_" + eval;
+    		return file + Globalx.CSV_SUFFIX;
+    	}
+    	 	
+    	ButtonComboBox cmbTermTypes = null;
+    	JTextField txtGOlevel = null, txtGOEval = null;
+    	
+    	JButton btnOK = null, btnCancel = null;
+    	
+    	int nMode = EXPORT_OK;
     } // end ExportType
     
     private FieldMapper theFields;

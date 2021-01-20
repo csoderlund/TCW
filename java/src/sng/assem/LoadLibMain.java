@@ -81,7 +81,7 @@ public class LoadLibMain
 	}
 	
 	private static void checkDirectories() {
-		FileHelpers.mergeDir(Globals.OLDLIBDIR, Globalx.PROJDIR, true); 
+		// FileHelpers.mergeDir(Globals.OLDLIBDIR, Globalx.PROJDIR, true); CAS314 don't need anymore
 		String libDir = Globalx.PROJDIR;
 		String[] libdirs = { libDir, "../" + libDir, "../../" + libDir };
 		boolean found = false;

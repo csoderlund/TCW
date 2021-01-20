@@ -1361,13 +1361,13 @@ private class AllDialog extends JDialog {
 			}
 		
 			if (nMode==MODE_WRITE) {
-				Out.Print("Writing " + exportFH.getName() + " ...");
+				Out.Print("Writing " + lines.size() + " lines ...");
 				PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(exportFH)));
 				
 				for (String l : lines) pw.println(l);
 		
 				pw.close();
-				Out.Print("Wrote " + lines.size() + " lines");
+				Out.Print("Complete writing to " + exportFH.getName());
 			}
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Error in seleciton");}
@@ -1476,7 +1476,7 @@ private class AllDialog extends JDialog {
 							
 							if (gt.msg.equals("*")) godesc = "<i>" + godesc + "</i>";
 						}
-						else Out.debug("no " + gonum);
+						else Out.bug("no " + gonum);
 					}
 					line += "<td width=50>" + godesc;
 				}
@@ -1510,7 +1510,7 @@ private class AllDialog extends JDialog {
 									gt.desc : String.format(GO_FORMAT, gt.gonum); 
 							godesc += gt.msg;
 						}
-						else Out.debug("no " + gonum);
+						else Out.bug("no " + gonum);
 					}
 					line +=  godesc + "\t";
 				}

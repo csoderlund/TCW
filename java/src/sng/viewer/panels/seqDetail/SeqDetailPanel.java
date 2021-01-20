@@ -3,8 +3,6 @@ package sng.viewer.panels.seqDetail;
 /********************************************************
  * The SeqTopRowTab does the Overview, Align DB hits, Next and Prev buttons
  * This file does the rest.
- * 
- * -Do not show Copy Hit if no hit for sequence.
  */
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -30,11 +28,8 @@ import java.util.ArrayList;
 import java.util.Vector;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.BufferedWriter;
-import java.io.PrintWriter;
 
+import util.database.Globalx;
 import sng.database.Globals;
 import sng.database.MetaData;
 import sng.dataholders.CodingRegion;
@@ -42,6 +37,7 @@ import sng.dataholders.ContigData;
 import sng.dataholders.MultiCtgData;
 import sng.dataholders.SequenceData;
 import sng.viewer.STCWFrame;
+import sng.util.ExportFile;
 import util.methods.ErrorReport;
 import util.methods.Static;
 import util.methods.Out;
@@ -54,13 +50,14 @@ import util.database.DBConn;
 
 public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardOwner {
 	private static final long serialVersionUID = 4196828062981388452L;
+	private static final String helpDir =  Globals.helpDir + "ContigDetailPanel.html";
 	private static final int NUM_DISPLAY_ROWS = 15;
 	private static final int MAX_TABLE_WIDTH = 550;
 	
 	private static final int MAX_COL = 130; // maximum size of column, e.g. description and species
-	private static final String L = Globals.LIBCNT;
-	private static final String LN = Globals.LIBRPKM;
-	private static final String P = Globals.PVALUE;
+	private static final String L = Globalx.LIBCNT;
+	private static final String LN = Globalx.LIBRPKM;
+	private static final String P = Globalx.PVALUE;
 	private static final String noGO = "---";
 	
 	private boolean isCAP=false;
@@ -92,7 +89,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		nHits= ctgData.getCntTotal();
 		hasHit = (nHits>0);
 		loadHitData(); // initializes even if nHits=0
-		loadDBdata();
+		loadCountData();
 		
 		createPanel();
 		createSecondRow ();
@@ -142,8 +139,8 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 			
 			MultilineTextPanel textPanel = null;
 			try {
-				textPanel = new MultilineTextPanel ( Globals.textFont, 
-					ctgData.getUniProtURL(), 1, 200, 1 ); 
+				textPanel = new MultilineTextPanel ( Globalx.textFont, 
+				ctgData.getUniProtURL(), 1, 200, 1 ); 
 		        textPanel.setBackground( Color.WHITE );   
 			} catch (Exception e) {
 				ErrorReport.reportError(e, "Internal error: making MultilineTextPanel");
@@ -296,28 +293,28 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 	            }
 	        });
 		
-		// Export
+		// Export CAS314 moved saveTextToFile to ExportFile
 		final JPopupMenu exportpopup = new JPopupMenu();
-		exportpopup.add(new JMenuItem(new AbstractAction("Sequence (.fasta)") {
+		exportpopup.add(new JMenuItem(new AbstractAction("Sequence (fasta)") {
 			private static final long serialVersionUID = -4657464918724936018L;
 			public void actionPerformed(ActionEvent e) {
-				saveTextToFile(getUnitransString(), "Seq.fasta");
+				ExportFile.saveTextToFile(getUnitransString(), "Seq" + Globalx.FASTA_SUFFIX, theMainFrame);
 			}			
 		}));
 		
 		if (metaData.hasAssembly()) {
-			exportpopup.add(new JMenuItem(new AbstractAction("Aligned reads (.fasta)") {
+			exportpopup.add(new JMenuItem(new AbstractAction("Aligned reads (fasta)") {
 				private static final long serialVersionUID = -8613746472039641395L;
 				public void actionPerformed(ActionEvent e) {
-					saveTextToFile(getAlignedReads(), "Reads.fasta");
+					ExportFile.saveTextToFile(getAlignedReads(), "Reads" + Globalx.FASTA_SUFFIX, theMainFrame);
 				}
 			}));
 		}
 		if (nHits>0) {
-			exportpopup.add(new JMenuItem(new AbstractAction("DB hits (.fasta)") {
+			exportpopup.add(new JMenuItem(new AbstractAction("DB hits (fasta)") {
 				private static final long serialVersionUID = 424842778593736605L;
 				public void actionPerformed(ActionEvent arg0) {
-					saveTextToFile(getAllDBHitsString(), "DBhits.fasta");
+					ExportFile.saveTextToFile(getAllDBHitsString(), "DBhits" + Globalx.FASTA_SUFFIX, theMainFrame);
 				}
 			}));
 		}
@@ -328,11 +325,10 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 	            }
 	        });
 		
-		JButton btnHelp = Static.createButton("Help2", true, Globals.HELPCOLOR);
+		JButton btnHelp = Static.createButton("Help2", true, Globalx.HELPCOLOR);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(getInstance(),"Sequence Details", 
-						"html/viewSingleTCW/ContigDetailPanel.html");
+				UserPrompt.displayHTMLResourceHelp(getInstance(),"Sequence Details", helpDir);
 			}
 		});
 			
@@ -980,38 +976,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		return retVal;
 	}
 	
-	private void saveTextToFile(String lines, String dName) {
-		final JFileChooser fc = new JFileChooser(theMainFrame.lastSaveFilePath);
-		fc.setSelectedFile(new File(dName));
-		final String theLines = lines;
-		if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-			final File f = fc.getSelectedFile();
-			int writeOption = JOptionPane.YES_OPTION;
-			if (f.exists()) {
-				writeOption = JOptionPane.showConfirmDialog(
-					    this,
-					    "The file already exists, overwrite it?",
-					    "Save to File",
-					    JOptionPane.YES_NO_OPTION);
-			}
-			if (writeOption == JOptionPane.YES_OPTION) {
-				theMainFrame.setLastPath(f.getPath());
-				Thread theThread = new Thread(new Runnable() {
-					public void run() {
-					    	PrintWriter pw = null;
-					    	try {
-					    		System.out.println("Write to " + f.getPath());
-					    		pw = new PrintWriter(new BufferedWriter(new FileWriter(f)));
-					    		pw.print(theLines);
-					    		pw.close();
-					    	}
-					    	catch(Exception e) {ErrorReport.prtReport(e,  "Could not write to " + f.getPath());}
-					}
-				});
-				theThread.start();
-			}
-		}
-	}
+	
 	// SeqTopRowTab
 	public boolean hasHits () {return nHits>0;}
 	public int cntSelectedHits() {
@@ -1251,7 +1216,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 	} catch (Exception e) {ErrorReport.prtReport(e, "Getting hit data for " + ctgData.getContigID());}
 	}
 	// load from database. Not in ctgData
-	private void loadDBdata()
+	private void loadCountData()
 	{	
 	    ResultSet rs = null;
 	    

@@ -21,7 +21,7 @@ public class STCWMain
 
 	public static boolean updateMSG = false; // update Overview, accessed from database.Overview
 	public static int COVER1=0, COVER2=0;
-	public static boolean doTIME = false, test=false;
+	public static boolean doTIME = false;
 
 	public static void main(String[] args)
 	{   
@@ -64,7 +64,7 @@ public class STCWMain
 		}
 		if (hasOption(args, "-test")) { // CAS313
 			System.err.println("Test turned on.");
-			test = true;
+			Globalx.debug = true;
 		}
 		String dbstr = (args.length>0) ? args[0] : "";  
 		HostsCfg hostsObj = new HostsCfg();  

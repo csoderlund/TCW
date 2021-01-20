@@ -1,8 +1,5 @@
 package sng.viewer.panels.pairsTable;
-/**
- * Called when a row is selected from pairs table
- * Displays buttons at top
- */
+
 import java.util.Vector;
 import java.util.TreeSet;
 import java.awt.*;
@@ -25,8 +22,14 @@ import sng.viewer.panels.align.AlignCompute;
 import sng.viewer.panels.align.AlignData;
 import sng.viewer.panels.align.PairViewPanel;
 import util.methods.ErrorReport;
+import util.methods.Out;
 import util.ui.MenuMapper;
 import util.database.DBConn;
+
+/**
+ * PairTopRow of Alignment
+ * Displays buttons at top the alignment
+ */
 
 public class PairTopRowTab extends Tab  implements ClipboardOwner
 {
@@ -44,12 +47,16 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 		nPairNum = pairNum;
 		pairCtgObj = listData;
 		metaData = theFrame.getMetaData();	
+		isAAdb = metaData.isAAsTCW();
 		
 		try {
 			DBConn dbc = theMainFrame.getNewDBC();
-			LoadPairFromDB dbObj = new LoadPairFromDB(dbc, theFrame.getMetaData());
-			loadedPairObj = dbObj.loadTwoContigs(pairCtgObj);
-			BlastHitData hitData =  dbObj.loadPairHitData(listData.getCtgIDAt(0), listData.getCtgIDAt(1));
+			LoadPairFromDB dbObj = 
+					new LoadPairFromDB(dbc, theFrame.getMetaData());
+			loadedPairObj = 
+					dbObj.loadTwoContigs(pairCtgObj);
+			BlastHitData hitData =  
+					dbObj.loadPairHitData(listData.getCtgIDAt(0), listData.getCtgIDAt(1));
 			loadedPairObj.setPairHit(hitData);
 			dbc.close();
 		}
@@ -64,15 +71,14 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 		displayDropDown.setPreferredSize( dim );
 		displayDropDown.setMaximumSize ( dim );
 
-		menuBestalign = new MenuMapper(ShowPWbestFrame, SHOW_BEST_FRAME);
+		if (isAAdb) menuBestalign = new MenuMapper(ShowPWpair, SHOW_PAIR);
+		else        menuBestalign = new MenuMapper(ShowPWbestFrame, SHOW_BEST_FRAME);
 		displayDropDown.addItem(menuBestalign);
 		
-		MenuMapper menuOrientalign = new MenuMapper ( ShowPWorientFrames, SHOW_ORIENT_FRAMES );
-		displayDropDown.addItem( menuOrientalign );	
-		
-		MenuMapper menuAllalign = new MenuMapper ( ShowPWallFrames, SHOW_ALL_FRAMES );
-		displayDropDown.addItem( menuAllalign );	
-		
+		if (!isAAdb) {
+			MenuMapper menuAllalign = new MenuMapper ( ShowPWallFrames, SHOW_ALL_FRAMES );
+			displayDropDown.addItem( menuAllalign );	
+		}
 		MenuMapper menuSharedHits = new MenuMapper ( ShowPWsharedHits, SHOW_SHARED_HITS);
 		displayDropDown.addItem( menuSharedHits);		
 			
@@ -94,21 +100,53 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
         });
 		// copy 
 		final JPopupMenu copypopup = new JPopupMenu();
-		copypopup.add(new JMenuItem(new AbstractAction("First Seq ID") {
+		copypopup.add(new JMenuItem(new AbstractAction("Seq ID 1") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
 				String ctg1 = pairCtgObj.getContigAt(0).getContigID();
 				saveTextToClipboard(ctg1);
 			}
 		}));
-		copypopup.add(new JMenuItem(new AbstractAction("Second Seq ID") {
+		copypopup.add(new JMenuItem(new AbstractAction("Seq ID 2") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
 				String ctg2 = pairCtgObj.getContigAt(1).getContigID();
 				saveTextToClipboard(ctg2);
 			}
 		}));
-		JButton jbCopy = new JButton("Copy ID...");
+		copypopup.add(new JMenuItem(new AbstractAction("Sequence 1") { // CAS314
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				String ctg1 = pairCtgObj.getContigAt(0).getContigID();
+				String seq =  pairCtgObj.getContigAt(0).getSeqData().getSequence();
+				saveTextToClipboard(">" + ctg1 + "\n" + seq);
+			}
+		}));
+		copypopup.add(new JMenuItem(new AbstractAction("Sequence 2") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				String ctg2 = pairCtgObj.getContigAt(1).getContigID();
+				String seq =  pairCtgObj.getContigAt(1).getSeqData().getSequence();
+				saveTextToClipboard(">" + ctg2 + "\n" + seq);
+			}
+		}));
+		copypopup.add(new JMenuItem(new AbstractAction("Reverse Complement 1") { // CAS314
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				String ctg1 = pairCtgObj.getContigAt(0).getContigID();
+				String seq =  pairCtgObj.getContigAt(0).getSeqData().getSeqRevComp();
+				saveTextToClipboard(">" + ctg1 + "\n" + seq);
+			}
+		}));
+		copypopup.add(new JMenuItem(new AbstractAction("Reverse Complement 2") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				String ctg2 = pairCtgObj.getContigAt(1).getContigID();
+				String seq =  pairCtgObj.getContigAt(1).getSeqData().getSeqRevComp();
+				saveTextToClipboard(">" + ctg2 + "\n" + seq);
+			}
+		}));
+		JButton jbCopy = new JButton("Copy...");
 		jbCopy.setBackground(Globals.PROMPTCOLOR);
 		jbCopy.addMouseListener(new MouseAdapter() {
 	            public void mousePressed(MouseEvent e) {
@@ -178,6 +216,7 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 
 		displayDropDown.setSelectedItem( menuBestalign );	
 	}
+	
 	
 	private void saveTextToClipboard(String lines) {
 		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -269,6 +308,13 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 				bHaveData = true;
 			}
 			break;
+		case SHOW_PAIR:
+            strWaitMsg = "Aligning pair, please wait...";
+			if ( bestFramePanel != null ) {
+				installMainPanel ( bestFramePanel );
+				bHaveData = true;
+			}
+			break;
 		default:
 			System.err.println("Internal error MainTopRow: " + displayType);
 		} // end displayType
@@ -300,7 +346,7 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 						pairs = AlignCompute.pairAlignDisplay( pairObj, AlignCompute.frameResult);
 						bestFramePanel = installPairAlignPanel( pairs );
 						break;
-					case SHOW_ORIENT_FRAMES:
+					case SHOW_ORIENT_FRAMES: // not currently used
 						pairs = AlignCompute.pairAlignDisplay( pairObj, AlignCompute.orientResult);
 						orientFramePanel = installPairAlignPanel( pairs );
 						break;
@@ -312,8 +358,12 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 						pairs = AlignCompute.pairAlignSharedHits(pairObj, metaData.isAAsTCW()  );
 						sharedHitPanel = installPairAlignPanel( pairs );
 						break;
+					case SHOW_PAIR: 
+						pairs = AlignCompute.pairAlignDisplayAA(pairObj);
+						bestFramePanel = installPairAlignPanel( pairs );
+						break;
 					default:
-						System.err.println("Internal error in Pair Top Row: " + saveDisplay);
+						Out.bug("Internal error in Pair Top Row: " + saveDisplay);
 					} 	
 					theFrame.swapInTab( tempTab, null, PairTopRowTab.this );
 				}
@@ -384,13 +434,15 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 	 */
 	static final private String ShowPWsharedHits = 	"Align shared hits to pair (max 3)";
 	static final private String ShowPWbestFrame = 	"Align in Best Frame";
-	static final private String ShowPWorientFrames = "Align in Best Orient Frames";
+	static final private String ShowPWpair = 			"Align pair";
+	//static final private String ShowPWorientFrames = "Align in Best Orient Frames";
 	static final private String ShowPWallFrames = 	"Align in All Frames";
 	
 	static final private int SHOW_BEST_FRAME = 1;
 	static final private int SHOW_ORIENT_FRAMES = 2;
 	static final private int SHOW_ALL_FRAMES = 3;
 	static final private int SHOW_SHARED_HITS = 4;
+	static final private int SHOW_PAIR = 5; // CAS314
 	
 	private MenuMapper menuBestalign = null; 
 	
@@ -413,4 +465,5 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 	private STCWFrame theMainFrame = null;
 
 	private int [] prevContigDisplaySettings = null;
+	private boolean isAAdb=false;
 }

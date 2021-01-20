@@ -1155,7 +1155,7 @@ public class DoUniProt
 		}
 	}
     /******************* Instance variables ****************************/
-	public void setFlankingRegion(int f) {flank = f; System.out.println("flanking " + flank);} // default 30
+	public void setFlankingRegion(int f) {flank = f; } // default 30 CAS314 always set 
 	public void setSwissProtPref(int b) {if (b==0) bUseSP=false; else bUseSP=true;}
 	public void setRemoveECO(int b) {if (b==0) bRmECO=false; else bRmECO=true;}
 	public void setMinBitScore(int m) {minBitScore = m; } // default 0

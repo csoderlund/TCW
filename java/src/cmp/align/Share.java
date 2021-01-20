@@ -58,7 +58,7 @@ public class Share {
 			char [] base = aSeq.toCharArray();
 			int cntGap=0;
 			for (int i=0; i<base.length; i++) {
-				if (base[i]=='-') {
+				if (base[i]==Globalx.gapCh) {
 					if (cntGap==0) {
 						cntGap=1;
 						gapMap += ":" + i;

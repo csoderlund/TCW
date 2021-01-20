@@ -135,12 +135,19 @@ public class TCWprops
 			break;
 			
 		case Annotate:
-			// All defaults are here. User supplied values are written to aUserKey.
-			// Reflect changes in CfgAnno, AnnoOptionsPanel
-			// ManagerData.STCWmethods -- NOTE defaults are hard coded in here
-			// getProperty() 		returns default; 
-			// getAnnoProperty() 	returns user supplied or default
-			// getNotDefault() 		only return value if user supplied.
+			/******************************************
+			 * All defaults are here. User supplied values are written to aUserKey.
+			 * Reflect changes in 
+			 *	 CfgAnno - read sTCW.cfg for execution and sends values to appropriate methods (e.g. DoBlast)
+			 * 		Defaults: Pair search args are set in CfgAnno and DB search args set in DoBlast
+			 *   ManagerData - read sTCW.cfg for interface and sends values to interface methods
+			 * 		Defaults: STCWmethods: some defaults are hard coded. 
+			 * 			      Search Args: in STCWmethods, EditAnnoPanel, AnnoOptionsPanel
+			 *	 CAS314 Search args must have a value 
+			*  getProperty() 		returns default; 
+			*  getAnnoProperty() 	returns user supplied or default
+			*  getNotDefault() 		only return value if user supplied.
+			*****************************************************/
 			mProps.setProperty("STCW_db", ""); // new
 			mProps.setProperty("SingleID", ""); 	 //new
 			mProps.setProperty("CPUs", "1");							
@@ -149,24 +156,28 @@ public class TCWprops
 			mProps.setProperty("Anno_SwissProt_pref", Globals.pSP_PREF); 
 			mProps.setProperty("Anno_Remove_ECO", Globals.pRM_ECO); // CAS305
 			
-			mProps.setProperty("Anno_uniprot_taxo", "-");     
+			    
 			mProps.setProperty("Anno_DBdate", "-");     
 			mProps.setProperty("Anno_min_bitscore", "-1"); 
 			
 			for (int i=1; i<Globals.numDB; i++) {
-				mProps.setProperty("Anno_unitrans_DBblast_" + Integer.toString(i), "-");
+				mProps.setProperty("Anno_DBtab_" +   Integer.toString(i), "-"); // CAS314 was "Anno_unitrans_DBblast_"
 				mProps.setProperty("Anno_DBfasta_" + Integer.toString(i), "-");
-				mProps.setProperty("Anno_DBtaxo_" + Integer.toString(i), "-");
-				mProps.setProperty("Anno_DBargs_" + Integer.toString(i), "-"); 
+				mProps.setProperty("Anno_DBtaxo_" +  Integer.toString(i), "-");
+				mProps.setProperty("Anno_DBargs_" +  Integer.toString(i), "-"); 
 				mProps.setProperty("Anno_DBsearch_pgm_" + Integer.toString(i), "-");
-				mProps.setProperty("Anno_DBdate_" + Integer.toString(i), "-");
+				mProps.setProperty("Anno_DBdate_" +  Integer.toString(i), "-");
 			}
 			
-			mProps.setProperty("Anno_pairs_limit", "0");
-			mProps.setProperty("Anno_unitrans_selfblast", "-");
-			mProps.setProperty("Anno_selfblast_args", "");
-			mProps.setProperty("Anno_unitrans_tselfblast", "-");
-			mProps.setProperty("Anno_tselfblast_args", "");
+			// self blast  - v314 changed all parameter - not backwards compatible
+			mProps.setProperty("Anno_pairs_limit", "1000");
+			mProps.setProperty("Anno_pairs_blastn", "0"); 
+			mProps.setProperty("Anno_pairs_blastn_args", "-");      
+			mProps.setProperty("Anno_pairs_tblastx", "0");
+			mProps.setProperty("Anno_pairs_tblastx_args", "-");  
+			mProps.setProperty("Anno_pairs_blastp", "0");
+			mProps.setProperty("Anno_pairs_blastp_args", "-");  
+			mProps.setProperty("Anno_pairs_blastp_pgm", "diamond");
 			
 			// NOTE defaults are hardcoded in ManagerData!!!
 			mProps.setProperty("Anno_ORF_alt_start", "0"); 
@@ -220,7 +231,7 @@ public class TCWprops
 			break;
 			
 		default:
-			Out.prt("TCWprops " + type + " " + mType);	
+			Out.prtToErr("TCWprops " + type + " " + mType);	
 		}		
 	}
 
@@ -400,7 +411,6 @@ public class TCWprops
 				String key = fields[0].trim();
 				if (key.equals("")) continue;
 				
-				if (key.startsWith("JPAVE")) key = key.replace("JPAVE", "Anno"); 
 				String val = fields[1].trim();
 									
 				if (mProps.containsKey(key))
@@ -501,7 +511,7 @@ public class TCWprops
 			fixProps(mProps);
 			checkRequiredFields();
 		} catch(Exception e) {
-		    e.printStackTrace();
+		    ErrorReport.reportError(e, "Reading mTCW.cfg");
 		}
 	}
 
@@ -557,37 +567,6 @@ public class TCWprops
 		}
 	}
 
-	public void printProperties()
-	{
-		dumpProps(mProps);
-	}
-	// Since we print the properties to the basic log as they are read in, this
-	// just prints to the detail log now
-	public void dumpProps(Properties props)
-	{
-		System.err.println("Properties set in config file:\n");
-		Enumeration<?> keys = props.propertyNames();
-		while (keys.hasMoreElements())
-		{
-			String key = keys.nextElement().toString();
-			if (!mUserKeys.contains(key)) continue;
-			String val = props.getProperty(key);
-			System.err.println("   " +key + " = " + val);
-			key = key.replace("STCW_", "");
-			System.err.println("   " +key + " = " + val);
-		}
-		System.err.println("\nDefaulted properties:\n");
-		keys = props.propertyNames();
-		while (keys.hasMoreElements())
-		{
-			String key = keys.nextElement().toString();
-			if (mUserKeys.contains(key)) continue;
-			String val = props.getProperty(key);
-			System.err.println("   " + key + ":" + val);
-		}
-
-		System.err.println("");
-	}
 	public Set<Object> keySet()
 	{
 		return mProps.keySet();	

@@ -87,24 +87,22 @@ public class Out {
 	}
 	static public void Print(String s) {
 		if (bStdout) System.out.println(s);
-		else System.err.println(s);
+		else 		 System.err.println(s);
 	    if (logFileObj != null) { 
-	    		logFileObj.println(s);
+	    	logFileObj.println(s);
 	        logFileObj.flush();
 	    }
 	}	
-	static public void FileLog(String s) {
-		if (logFileObj != null) { 
-	    		logFileObj.println(s);
-	        logFileObj.flush();
-	    }
-	}
+	
 	// Count first
 	static public void PrtSpCntMsg(int sp, long cnt, String msg) {
 		PrtSpMsg(sp, String.format("%7s %s", df.format(cnt), msg));
 	}
 	static public void PrtSpCntMsg2(int sp, int cnt, String msg, int cnt2, String msg2) {
-		PrtSpMsg(sp, String.format("%7s %-10s  %7s %s", df.format(cnt), msg, df.format(cnt2), msg2));
+		PrtSpMsg(sp, String.format("%7s %-12s  %7s %s", df.format(cnt), msg, df.format(cnt2), msg2));
+	}
+	static public void PrtSpCntkMsg2(int sp, long cnt, String msg, long cnt2, String msg2) {
+		PrtSpMsg(sp, String.format("%7s %-12s  %7s %s", kMText(cnt), msg, kMText(cnt2), msg2));
 	}
 	static public void PrtSpCntMsg(int sp, int cnt, String msg) {
 		PrtSpMsg(sp, String.format("%7s %s", df.format(cnt), msg));
@@ -173,28 +171,28 @@ public class Out {
 	}	
     static public void PrtDateMsgTime (String msg, long t)
     {
-    		String str = String.format("%-50s %20s  %s", msg, TimeHelpers.getDate(), TimeHelpers.getElapsedNanoTime(t));
+    	String str = String.format("%-50s %20s  %s", msg, TimeHelpers.getDate(), TimeHelpers.getElapsedNanoTime(t));
         Print(str);
     }
     static public void PrtMsgTime (String msg, long t)
     {
-    		String str = String.format("%-70s  %s", msg, TimeHelpers.getElapsedNanoTime(t));
+    	String str = String.format("%-70s  %s", msg, TimeHelpers.getElapsedNanoTime(t));
         Print(str);
     }	
     static public void PrtSpMsgTime (int i, String msg, long t)
     {
-    		String sp = "";
-    		for (int j=0; j < i; j++) sp += "   ";
-    		msg = sp + msg;
-    		String str = String.format("%-70s  %s", msg, TimeHelpers.getElapsedNanoTime(t));
+    	String sp = "";
+    	for (int j=0; j < i; j++) sp += "   ";
+    	msg = sp + msg;
+    	String str = String.format("%-70s  %s", msg, TimeHelpers.getElapsedNanoTime(t));
         Print(str);
     }
     // Used by all calculations to finish
     static public void PrtSpMsgTimeMem (int i, String msg, long t)
     {
-    		String sp = "";
-    		for (int j=0; j < i; j++) sp += "   ";
-    		msg = sp + msg;
+    	String sp = "";
+    	for (int j=0; j < i; j++) sp += "   ";
+    	msg = sp + msg;
     		
        	String x = String.format("%-70s  %s  (%s)", msg, 
        			TimeHelpers.getElapsedNanoTime(t),
@@ -218,22 +216,22 @@ public class Out {
     }
     // Only message - used by most of the above to add sp
     static public void PrtSpMsg (int i, String msg) {
-    		String sp = "";
-    		for (int j=0; j < i; j++) sp += "   ";
+    	String sp = "";
+    	for (int j=0; j < i; j++) sp += "   ";
         sp += msg;
         Print(sp);
     }
-    static public void PrtErr(String msg)
+    static public void PrtErr(String msg) // does not begin with nl
 	{
-	    	Print("***Error: " + msg);
+	    Print("***Error: " + msg);
 	}	
 	static public void PrtError(String msg)
 	{
-	    	Print("\n***Error: " + msg);
+	    Print("\n***Error: " + msg);
 	}	
 	static public void PrtWarn(String msg)
 	{
-	    	Print("+++Warning: " + msg);
+	    Print("+++Warning: " + msg);
 	}	
 	static public void die(String msg)
 	{
@@ -245,22 +243,35 @@ public class Out {
 	    return TimeHelpers.getNanoTime(); 
 	}	
 	/***************************************************************
-	 * Print routines
+	 * Print routines - no log
 	 */
-	static public void debug(String msg) { // so I can trace where these statements are
+	static public void debug(String msg) {
+		if (Globalx.debug) System.err.println(msg);
+	}
+	static public void bug(String msg) { // used for "shouldn't happen
 		System.err.println(msg);
 	}
-	static public void prt(String msg) { 
+	static public void tmp(String msg) { // allow finding temporary print statements
 		System.err.println(msg);
 	}
-	static public void prtm(String msg) { 
-		System.out.println(msg);
+	static public void prt(String msg) {
+		if (bStdout) System.out.println(msg);
+		else 		 System.err.println(msg);
 	}
-	static public void prt(int i, String msg) {
+	static public void prtSp(int i, String msg) {
 		String sp = "";
 		for (int j=0; j < i; j++) sp += "   ";
 		msg = sp + msg;
+		prt(msg);
+	}
+	static public void prtSpCnt(int i, int cnt, String msg) {
+		prtSp(i, String.format("%7s %s", df.format(cnt), msg));
+	}
+	static public void prtToErr(String msg) { 
 		System.err.println(msg);
+	}
+	static public void prtToOut(String msg) { 
+		System.out.println(msg);
 	}
 	static public void r(String msg) {
 		System.err.print("  " + msg + "...\r");
@@ -290,7 +301,21 @@ public class Out {
 			return false;
 		}
 	}
-	
+	/*************************************************************
+	 * XXX Log only
+	 */
+	static public void logOnly(String s) {
+		if (logFileObj != null) { 
+	    	logFileObj.println(s);
+	        logFileObj.flush();
+	    }
+	}
+	static public void logOnly(int i, String msg) {
+		String sp = "";
+		for (int j=0; j < i; j++) sp += "   ";
+		msg = sp + msg;
+		logOnly(msg);
+	}
 	/**************************************************************************
 	 * XXX Codon and alignment methods 
 	 */
@@ -375,7 +400,7 @@ public class Out {
 	static public void printAlign(String name1, String name2, String alignSeq1, String alignSeq2) {
 		int len = Math.min(alignSeq1.length(), alignSeq2.length());
 		if (alignSeq1.length() != alignSeq2.length()) {
-			prt("Unequal lengths: " + alignSeq1.length() +"!="+ alignSeq2.length());
+			prtToErr("Unequal lengths: " + alignSeq1.length() +"!="+ alignSeq2.length());
 		}
 	// compute the alignMatch line 
 		StringBuffer sb = new StringBuffer (len);

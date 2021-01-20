@@ -37,13 +37,12 @@ public class Overview {
 	/*****************************************************
 	 * called from runSTCMain, ManagerFrame (Get Start if pja_msg==null), QRFrame, Schema (updateTo41)
 	 */
-	public String createOverview(Vector<String> lines) throws Exception
-	{
+	public String createOverview(Vector<String> lines) throws Exception {
         try { 
-            	return computeOverview(lines);
+            return computeOverview(lines);
         }
         catch ( Exception err ) {
-	    	    ErrorReport.reportError(err,"Error: processing data for overview");
+        	ErrorReport.reportError(err,"Error: processing data for overview");
 	        return null;
         }
 	}
@@ -52,47 +51,46 @@ public class Overview {
 	 * called from STCWFrame.addOverviewTab on startup  to be displayed in Overview panel
 	 * if STCWMain.updateMSG, overview is regenerated
 	 */
-    public void overview (Vector<String> lines ) throws Exception
-    {   
+    public void overview (Vector<String> lines ) {   
         try {   
         	boolean found=true;
         	String pga_msg="", meta_msg="";
     		
             ResultSet rset = mDB.executeQuery("SELECT pja_msg FROM assem_msg");
             if (rset.next() ) {
-            		pga_msg = rset.getString(1);
-            		try {
-            			rset = mDB.executeQuery("SELECT meta_msg FROM assem_msg");
-            			if (rset.next()) meta_msg = rset.getString(1);
-            		} catch (Exception e) {};
+            	pga_msg = rset.getString(1);
+            	try {
+            		rset = mDB.executeQuery("SELECT meta_msg FROM assem_msg");
+            		if (rset.next()) meta_msg = rset.getString(1);
+            	} catch (Exception e) {};
             }
             else{
-            		lines.add("Error creating overview (email tcw@agcol.arizona.edu for fix)");
-            		found=false;
+            	lines.add("Error creating overview (email tcw@agcol.arizona.edu for fix)");
+            	found=false;
             }
             rset.close();
             if (!found) return;
           
             // Sanity check overview
             if (pga_msg != null && !pga_msg.startsWith("Project: Not") && !STCWMain.updateMSG) {
-                	lines.add(pga_msg);
-                	lines.add(meta_msg);
+                lines.add(pga_msg);
+                lines.add(meta_msg);
             }
             else { // Update overview from viewSingleTCW
-            		if (STCWMain.COVER1!=0) {
-            			COVER1 = STCWMain.COVER1;
-            			Out.PrtSpMsg(1, "Using Cover1 values " + COVER1);
-            		}
-            		if (STCWMain.COVER2!=0) {
-            			COVER2 = STCWMain.COVER2;
-            			Out.PrtSpMsg(1, "Using Cover2 values " + COVER2);
-            		}
-                	computeOverview(lines);
+        		if (STCWMain.COVER1!=0) {
+        			COVER1 = STCWMain.COVER1;
+        			Out.prtSp(1, "Using Cover1 values " + COVER1);
+        		}
+        		if (STCWMain.COVER2!=0) {
+        			COVER2 = STCWMain.COVER2;
+        			Out.prtSp(1, "Using Cover2 values " + COVER2);
+        		}
+            	computeOverview(lines);
             }     
             return;
         }
         catch ( Exception err ) {
-    		    ErrorReport.reportError(err,"Error: processing data for overview");
+    		ErrorReport.reportError(err,"Error: processing data for overview");
             return;
         }
     }
@@ -102,12 +100,12 @@ public class Overview {
      ****************************************************/
     private String computeOverview(Vector <String> lines)  {
     	try {   
-    		long stime = Out.getTime();
     		setFlags();
 		    computeSections(lines, true); 
-		    if (lines.size()<3)
-		        lines.add("Error creating overview");
+		    
+		    if (lines.size()<3)  lines.add("Error creating overview");
     	    
+		 // Put pieces together
     		String text = "";
     		for (int i=0; i< lines.size(); i++)
     			text = text + lines.get(i) + "\n";
@@ -117,18 +115,14 @@ public class Overview {
     		}
          	// If this is a SKIP_ASSEMBLY, there is no entry so it needs to be inserted
             ResultSet rset = mDB.executeQuery("SELECT pja_msg FROM assem_msg where AID=1");
-            if (rset.next() ) {
-            	    mDB.executeUpdate("update assem_msg set pja_msg = \"" + text + "\" where AID=1"); 
-            }
-            else {
+            if (rset.next() ) 
+            	mDB.executeUpdate("update assem_msg set pja_msg = \"" + text + "\" where AID=1"); 
+            else 
                 mDB.executeUpdate("insert assem_msg set AID = 1, pja_msg = \"" + text + "\""); 
-            }
             rset.close();
             
-            
             String mtext = "";
-            if (hasDBhitData) {
-            		// second part is separate so the message is not so long
+            if (hasDBhitData) {// second part is separate so the message is not so long
                 Vector <String> mlines = new Vector <String> ();
                
             	finalAnnoDBs(mlines);
@@ -145,13 +139,14 @@ public class Overview {
 			else // strictly to update published v1.3.7 without any other changes
 				mDB.executeUpdate("update assem_msg set pja_msg = \"" + fullText + "\" where AID=1");
             rset.close();
-            			
+            	
+         // Finish
            	writeHTML(fullText);
-           	Out.PrtMsgTime("Complete Overview", stime);
+           	Out.prtSp(0, "Complete Overview");
            	return fullText;
         }  
         catch ( Exception err ) {
-    		    ErrorReport.reportError(err,"Error: adding overview");
+    		ErrorReport.reportError(err,"Error: adding overview");
             return null;
         }    
     }
@@ -159,13 +154,13 @@ public class Overview {
     	try {
 		    Out.prt("\nUpdating overview, this can take awhile on large databases, " +
 		    		" but only is done when database content has changed...");
-		    Out.prt("   Dataset statistics....");
+		    Out.prtSp(0, "Dataset statistics....");
 			if (!inputSection(lines)) return false;
 			
 			if (!annoHeader(lines)) return false;
 			
-			Out.prt("   Annotation statistics....");
 			if (hasDBhitData && hasAnno) { 
+				Out.prtSp(1, "Annotation statistics....");
 				if (!annoStats(lines, ask)) return false;	
 				if (!annoDatabases(lines)) return false;
 				if (!annoSpecies(lines)) return false;
@@ -174,13 +169,12 @@ public class Overview {
 			
 			if (!pairStats(lines)) return false;	
 			
-			Out.prt("   Expression statistics....");
 			if (!expStats(lines)) return false;	
 			
-			Out.prt("   Sequence statistics....");
 			if (!seqStats(lines)) return false;
+			
 			if (!geneLocsStats(lines)) return false;
-			Out.prt("Complete update overview");
+			
 			return true;
     		}
 	    catch ( Exception err ) {
@@ -191,8 +185,7 @@ public class Overview {
 /**
 * Libraries and Sequence Sets
 **/
-    private boolean inputSection(Vector<String> lines) 
-    {
+    private boolean inputSection(Vector<String> lines) {
 	    try {	 
     		if (mDB==null) { 
     			lines.add( "Project: cannot create overview");
@@ -238,23 +231,23 @@ public class Overview {
     
     private boolean inputExp(Vector<String> lines) {
 		try {
-	    		int nReadLibs = mDB.executeCount("SELECT COUNT(*) FROM library " +
-	        		"WHERE avglen = 0 && ctglib=0");
-	    		if (nReadLibs==0) return true;
-	  
-	    		lines.add("   Counts: ");	 
-	    		String [] fields = {"SEQID", "ID", "SIZE", "TITLE", "SPECIES", 
-	    						"CULTIVAR", "STRAIN", "TISSUE", "STAGE", 
-	    						"TREATMENT", "SOURCE", "YEAR", "#REPS"};     		
-	    		int [] just = {1, 1,0,1,1, 1,1,1,1, 1,1,1,0};
-	    
-	    		int nCol=fields.length; 
-	    		rows = new String[nReadLibs][nCol];
-	    		int r=0;
-	       
-	    		ResultSet rset = mDB.executeQuery("SELECT parent, libid, libsize, title, organism, cultivar, " +
-    				"strain, tissue, stage, treatment, source, year, reps  " +
-    				"FROM library WHERE ctglib=0 && avglen=0");	
+    		int nReadLibs = mDB.executeCount("SELECT COUNT(*) FROM library " +
+        		"WHERE avglen = 0 && ctglib=0");
+    		if (nReadLibs==0) return true;
+  
+    		lines.add("   Counts: ");	 
+    		String [] fields = {"SEQID", "ID", "SIZE", "TITLE", "SPECIES", 
+    						"CULTIVAR", "STRAIN", "TISSUE", "STAGE", 
+    						"TREATMENT", "SOURCE", "YEAR", "#REPS"};     		
+    		int [] just = {1, 1,0,1,1, 1,1,1,1, 1,1,1,0};
+    
+    		int nCol=fields.length; 
+    		rows = new String[nReadLibs][nCol];
+    		int r=0;
+       
+    		ResultSet rset = mDB.executeQuery("SELECT parent, libid, libsize, title, organism, cultivar, " +
+				"strain, tissue, stage, treatment, source, year, reps  " +
+				"FROM library WHERE ctglib=0 && avglen=0");	
         	    
 	        while(rset.next()) {
 	            for (int i=0; i< nCol; i++) {
@@ -276,39 +269,39 @@ public class Overview {
 	        rset.close();
 	        makeTable(nCol, r, fields, just, lines);
 	        return true;
-        	}
-        	catch ( Exception err ) {
-        		ErrorReport.reportError(err,"Error: processing data for overview libriries");
-        		return false;
-        	}       
+    	}
+    	catch ( Exception err ) {
+    		ErrorReport.reportError(err,"Error: processing data for overview libriries");
+    		return false;
+    	}       
     }
     
     private boolean inputSeq(Vector<String> lines) {
-        	try {
-        		int nSets = mDB.executeCount( "SELECT COUNT(*) FROM library WHERE avglen > 0");
-        		if (nSets==0) return true;
-            
-        		lines.add("   Sequences: ");
-        		String[] fields2 = {"SEQID", "SIZE", "TITLE", "SPECIES", 
-            			"CULTIVAR", "STRAIN", "TISSUE", "STAGE", 
-            			"TREATMENT", "SOURCE", "YEAR", "AVG-len", 
-            			"MED-len"};
-        		int [] just2 = {1,0,1,1, 1,1,1,1, 1,1,1,0, 0};
-        		int nCol=fields2.length;
-        		rows = new String[nSets][nCol];
-        		int r=0;
-               
-        		ResultSet rset = mDB.executeQuery("SELECT libid, libsize," +
-            		"title, organism, cultivar, strain, tissue, stage, treatment, source, year, " +
-            		"avglen, medlen FROM library WHERE avglen>0");	
+    	try {
+    		int nSets = mDB.executeCount( "SELECT COUNT(*) FROM library WHERE avglen > 0");
+    		if (nSets==0) return true;
+        
+    		lines.add("   Sequences: ");
+    		String[] fields2 = {"SEQID", "SIZE", "TITLE", "SPECIES", 
+        			"CULTIVAR", "STRAIN", "TISSUE", "STAGE", 
+        			"TREATMENT", "SOURCE", "YEAR", "AVG-len", 
+        			"MED-len"};
+    		int [] just2 = {1,0,1,1, 1,1,1,1, 1,1,1,0, 0};
+    		int nCol=fields2.length;
+    		rows = new String[nSets][nCol];
+    		int r=0;
+           
+    		ResultSet rset = mDB.executeQuery("SELECT libid, libsize," +
+        		"title, organism, cultivar, strain, tissue, stage, treatment, source, year, " +
+        		"avglen, medlen FROM library WHERE avglen>0");	
 
 	        while(rset.next()) {
-		    		for (int i=0; i< nCol; i++) {
-		    			if (just2[i]==0) {
-		        			int v = rset.getInt(i+1);
-		        			rows[r][i] = dff.format(v);
-		        		}
-		        		else rows[r][i] = rset.getString(i+1);
+	    		for (int i=0; i< nCol; i++) {
+	    			if (just2[i]==0) {
+	        			int v = rset.getInt(i+1);
+	        			rows[r][i] = dff.format(v);
+	        		}
+	        		else rows[r][i] = rset.getString(i+1);
 	            }
 	            r++;
 	        }
@@ -326,17 +319,16 @@ public class Overview {
     /**
      * make Annotation header stats
      **/
-    private boolean annoHeader(Vector<String> lines) 
-    {
+    private boolean annoHeader(Vector<String> lines) {
         lines.add( "ANNOTATION" ); 
   
         try {
-        		String msg="";
-        		String annoVer = mDB.executeString( "SELECT annoVer from schemver");
-        		if (annoVer != null) {
-        			msg = "   Annotated with TCW release: " + annoVer;
-        			if (!annoVer.equals(Version.strTCWver)) msg += "    Updated with: " + Version.strTCWver;
-        		}
+    		String msg="";
+    		String annoVer = mDB.executeString( "SELECT annoVer from schemver");
+    		if (annoVer != null) {
+    			msg = "   Annotated with TCW release: " + annoVer;
+    			if (!annoVer.equals(Version.strTCWver)) msg += "    Updated with: " + Version.strTCWver;
+    		}
             String annotationDate = mDB.executeString (  "SELECT annotationdate FROM assembly");    
             if (annotationDate==null || annotationDate.equals("") || annotationDate.equals("0000-00-00")) {
                 msg += "   Annotate has not been run yet";
@@ -359,10 +351,10 @@ public class Overview {
 	        return true;
         }
         catch ( Exception err ) {
-     	    	ErrorReport.reportError(err, "Error: processing data for annotation header");
-    			hasAnno = false;
-        		lines.add("   execAnno encountered error" );
-        		return true;
+ 	    	ErrorReport.reportError(err, "Error: processing data for annotation header");
+			hasAnno = false;
+    		lines.add("   execAnno encountered error" );
+    		return true;
      	} 	
     }
     private boolean annoORF(Vector<String> lines) 
@@ -377,12 +369,12 @@ public class Overview {
             }
             
             // compute ORF overview with GC in DoORF
-		    	String gcMsg = mDB.executeString("select gc_msg from assem_msg");
-		    	if (gcMsg==null || gcMsg=="") {
-		    		lines.add("    No ORF or GC information");
-		    		lines.add("");
-		    		return true;
-		    	}
+	    	String gcMsg = mDB.executeString("select gc_msg from assem_msg");
+	    	if (gcMsg==null || gcMsg=="") {
+	    		lines.add("    No ORF or GC information");
+	    		lines.add("");
+	    		return true;
+	    	}
 		    	
 	        String [] gc = gcMsg.split("\n");
 	        for (String l : gc) lines.add(l);
@@ -390,10 +382,10 @@ public class Overview {
 	        return true;
         }
         catch ( Exception err ) {
-     	    	ErrorReport.reportError(err, "Error: processing data for annotation header");
-    			hasAnno = false;
-        		lines.add("   execAnno encountered error" );
-        		return true;
+	    	ErrorReport.reportError(err, "Error: processing data for annotation header");
+			hasAnno = false;
+			lines.add("   execAnno encountered error" );
+			return true;
      	} 	
     }
     
@@ -406,12 +398,10 @@ public class Overview {
 		 
         try {
 		    int nCtgHits = mDB.executeCount( "SELECT count(*) FROM contig WHERE bestmatchid is not null" );
-		    zPrtMsg(nCtgHits, "Sequences with hits");
 		    	
-		    zPrtMsg(nUniqueHits,"Unique hits");
+		    Out.prtSpCnt(1, nUniqueHits,"Unique hits");
 		    
 		    int nTotalHits = mDB.executeCount( "SELECT count(*) FROM pja_db_unitrans_hits ");
-		    zPrtMsg(nTotalHits,"Total hits");
 		   
 		    if (nTotalHits==0 || nUniqueHits==0) {
 			    lines.add("   Annotation not complete");
@@ -426,21 +416,19 @@ public class Overview {
 		    int nCtgGOs=0, nCtgBestGOs=0, nHitGOs=0, nSlims=0;
 		    String  slimSubset="";
 		    if (hasGO) {  
-                zPrtMsg(nUniqueGOs,"Unique GOs");
+		    	Out.prtSpCnt(1, nUniqueGOs,"Unique GOs");
                 
                 nCtgGOs = mDB.executeCount( "SELECT count(DISTINCT CTGID) FROM pja_unitrans_go" );        
-                zPrtMsg(nCtgGOs, "Sequences with GOs");
                 
                 nCtgBestGOs = mDB.executeCount("SELECT count(*) FROM pja_db_unitrans_hits as tn, pja_db_unique_hits as uq, contig as ct " +
                 		" WHERE tn.DUHID = uq.DUHID AND tn.CTGID = ct.CTGID AND tn.filter_best=1 AND uq.goBrief <> '' ");
                 
                 nHitGOs = mDB.executeCount( "select count(*) from pja_db_unique_hits where goList!=''");
-               
                 
                 nSlims = mDB.executeCount("select count(*) from go_info where slim=1");
                 if (nSlims>0) {
-                		slimSubset = mDB.executeString("select go_slim from assem_msg");
-                		zPrtMsg(nSlims, "Slims from " + slimSubset);
+                	slimSubset = mDB.executeString("select go_slim from assem_msg");
+                	Out.prtSpCnt(1,nSlims, "Slims from " + slimSubset);
                 }
 		    }
                 
@@ -498,7 +486,7 @@ public class Overview {
                 r++; c=0;
                 
                 if (nSlims>0) {
-                	 	rows[r][c++] = "Has " + slimSubset;
+                	rows[r][c++] = "Has " + slimSubset;
                     rows[r][c++] = dff.format(nSlims);
                     rows[r][c++] = "";
                     
@@ -511,21 +499,19 @@ public class Overview {
 	        makeTable(just.length, r, null, just, lines); 
         }    
         catch ( Exception err ) {
-        		ErrorReport.reportError(err,"processing data for overview annotation");
-        		return false;
+        	ErrorReport.reportError(err,"processing data for overview annotation");
+        	return false;
         }
         return true;
     }
    
 	 // ANNO DBS
-    private boolean annoDatabases(Vector <String> lines) 
-    {	  
-    		try {    			
+    private boolean annoDatabases(Vector <String> lines) {	  
+    	try {    			
 	        int nDB = nAnnoDBs;   
 	        lines.add("   annoDBs (Annotation databases): " + nDB + "   (see Legend below)");
-	        zPrtMsg(nDB, "Annotation databases");
 	        
-	        Out.prt("      Processing each annoDB.....");
+	        Out.prtSp(1, "Processing each annoDB.....");
 	   /* Loop through seq-hits for each annoDB creating stats */  
 	        nDB++; // do not used index 0
 	        double [] totSimSum = new double [nDB]; // divide by totPairs
@@ -583,7 +569,7 @@ public class Overview {
 	    		// even if the indices are not sequential (from assembly), 
 	    		// this is only counting the ones with a value
 	    		for (int i=0; i<maxIdx; i++) if (!noHit[i]) hitSeq[dbid]++;
-	    	   	zPrtMsg(hitSeq[dbid], " Seqs with hits for DB#" + dbid + "             ");
+	    	   	Out.prtSpCnt(1, hitSeq[dbid], "Seqs with hits for DB#" + dbid + "             ");
 	     	}
 	   /* Loop through annoDBs creating table */
 	        String [] dfields =  {"ANNODB",  "ONLY", "EVAL", "ANNO", "UNIQUE", "TOTAL", "AVG", "HIT-SEQ (#SEQ)", "BEST  AVG", "COVER", "COVER"};
@@ -630,22 +616,20 @@ public class Overview {
 	        makeTable(nCol, r, dfields, djust, lines); // finish database
     	}    
         catch ( Exception err ) {
-        		ErrorReport.reportError(err,"processing data for overview annotation");
-        		return false;
+        	ErrorReport.reportError(err,"processing data for overview annotation");
+        	return false;
         }
     	return true;
     }
    
  // SPECIES table
-    private boolean annoSpecies(Vector <String> lines) 
-    {
-    		try {
-	      
+    private boolean annoSpecies(Vector <String> lines) {
+    	try {
     	    int nSpecies = mDB.executeCount(  "SELECT count(*) FROM pja_db_species "); 
     	    if (nSpecies==0) return true;
     	    
     	 	lines.add("   Top " + NSPECIES + " species from total: "+ dff.format(nSpecies));
-    	 	zPrtMsg(nSpecies, "species");
+    	 	Out.prtSpCnt(1, nSpecies, "Species");
     	 	
     	    String [] sfields = {"SPECIES (25 char)", " EVAL", " ANNO", "TOTAL", "","SPECIES", " EVAL", " ANNO", "TOTAL"};
             int nGrp = 4;
@@ -668,14 +652,14 @@ public class Overview {
         		na = rset.getInt(4);
 
         		if (r == nRow && inc == 0) {      			
-        		    	r = 0;
-        		    	inc = nGrp;
+        		    r = 0;
+        		    inc = nGrp;
         		}
         		else if (r == nRow-1 && inc == nGrp){
-        		    	oCnt+=t;
-        		    	oBest+=ne;
-        		    	oAnno+=na;
-        		    	continue;
+    		    	oCnt+=t;
+    		    	oBest+=ne;
+    		    	oAnno+=na;
+    		    	continue;
         		}
         		c=inc;
         		if (inc == nGrp) rows[r][c++] = " ";	        		
@@ -710,12 +694,12 @@ public class Overview {
     // ANNO DBS
     private boolean finalAnnoDBs(Vector<String> lines) 
     {     
-    		lines.add("-------------------------------------------------------------------");
-    		lines.add("PROCESSING INFORMATION:");
+    	lines.add("-------------------------------------------------------------------");
+    	lines.add("PROCESSING INFORMATION:");
 		lines.add("   AnnoDB Files:");
 		 
         try {
-        		if (hasDBhitData && hasAnno) {
+    		if (hasDBhitData && hasAnno) {
 		        int nDBs = mDB.executeCount ( "SELECT COUNT(*) FROM pja_databases");  
 		        String [] dfields = 
 		        			{"Type", "Taxo", "FILE", "DB DATE", "ADD DATE", "EXECUTE"};
@@ -728,104 +712,104 @@ public class Overview {
 		        rows = new String[nDBs][nCol];
 		        int r=0;     
 		        ResultSet rset = mDB.executeQuery(strQ);
-		        
+			        
 		        while(rset.next()) {
-	        	        	String s;
-	        	        	int i=0;
-	        	        	
-	        	        	s = rset.getString("dbtype");
-	        	        	rows[r][i++] = s;
-	        	        	s = rset.getString("taxonomy");
-	        	        	rows[r][i++] = s;
-	        	        	
-	        	        	s = rset.getString("path");
-	        	        	int last = s.lastIndexOf("/");
-	            		rows[r][i++] = s.substring(last+1);
-	    	        	
-	            		s = rset.getString("dbDate");
-	            		rows[r][i++] = TimeHelpers.convertDate(s);        		
-	            		s = rset.getString("addDate");
-	            		rows[r][i++] = TimeHelpers.convertDate(s);
-	            		
-	            		s = rset.getString("parameters");
-	            		if (s==null) s="unknown";
-	            		else {
-	            			s = zRemoveSubStr(s, "--tmpdir tmpDmnd");
-	            			s = zRemoveSubStr(s, "-t tmpDmnd");
-	            			s = zRemoveSubStr(s, "--compress 0");
-	            		}
-	            		rows[r][i++] = s;
+		        	String s;
+		        	int i=0;
+		        	
+		        	s = rset.getString("dbtype");
+		        	rows[r][i++] = s;
+		        	s = rset.getString("taxonomy");
+		        	rows[r][i++] = s;
+		        	
+		        	s = rset.getString("path");
+		        	int last = s.lastIndexOf("/");
+	        		rows[r][i++] = s.substring(last+1);
+		        	
+	        		s = rset.getString("dbDate");
+	        		rows[r][i++] = TimeHelpers.convertDate(s);        		
+	        		s = rset.getString("addDate");
+	        		rows[r][i++] = TimeHelpers.convertDate(s);
+	        		
+	        		s = rset.getString("parameters");
+	        		if (s==null) s="unknown";
+	        		else {
+	        			s = zRemoveSubStr(s, "--tmpdir tmpDmnd");
+	        			s = zRemoveSubStr(s, "-t tmpDmnd");
+	        			s = zRemoveSubStr(s, "--compress 0");
+	        		}
+	        		rows[r][i++] = s;
 	            		
 		            r++;
 		        }
 		        rset.close();
 		        
 		        makeTable(nCol, r, dfields, djust, lines); // finish database  
-        		} 
+	    	} 
         		// GO 
-        		if (mDB.tableColumnExists("assem_msg", "go_msg")) {
-        			String go = mDB.executeString( "Select go_msg from assem_msg");
-        			if (go!=null && !go.equals("")) {
-        				if (go.endsWith(".tar.gz")) go = go.replace(".tar.gz", "");
-        				lines.add("   Over-represented GOs: " + go);
-        				
-        				if (mDB.tableColumnExists("assem_msg", "go_slim")) { 
-            				String slim = mDB.executeString( "Select go_slim from assem_msg");
-                			if (slim!=null && !slim.equals("")) {
-                				lines.add("   GO Slim: " + slim);
-                			}
-                		}
-            			lines.add("");
-        			}
-        		}
+    		if (mDB.tableColumnExists("assem_msg", "go_msg")) {
+    			String go = mDB.executeString( "Select go_msg from assem_msg");
+    			if (go!=null && !go.equals("")) {
+    				if (go.endsWith(".tar.gz")) go = go.replace(".tar.gz", "");
+    				lines.add("   Over-represented GOs: " + go);
+    				
+    				if (mDB.tableColumnExists("assem_msg", "go_slim")) { 
+        				String slim = mDB.executeString( "Select go_slim from assem_msg");
+            			if (slim!=null && !slim.equals("")) {
+            				lines.add("   GO Slim: " + slim);
+            			}
+            		}
+        			lines.add("");
+    			}
+    		}
         	
 	        // ORF
 	        if (!isProteinDB && mDB.tableColumnExists("assem_msg", "orf_msg")) {
-	        		String orf = mDB.executeString( "Select orf_msg from assem_msg");
-	        		if (orf!=null && !orf.equals("")) {
-		        		lines.add("   ORF finder:"); // use directly what DoORFs created
-	        			String [] tok = orf.split(Globals.tcwDelim);
-	        			for (int i=0; i<tok.length; i++) {
-	        				lines.add("      " + tok[i]);	
-	        			}
-		        		lines.add("");
-	        		}
+        		String orf = mDB.executeString( "Select orf_msg from assem_msg");
+        		if (orf!=null && !orf.equals("")) {
+	        		lines.add("   ORF finder:"); // use directly what DoORFs created
+        			String [] tok = orf.split(Globals.tcwDelim);
+        			for (int i=0; i<tok.length; i++) {
+        				lines.add("      " + tok[i]);	
+        			}
+	        		lines.add("");
+        		}
 	        }
 	        
 	        // DE
 	        if (hasSeqDE && mDB.tableExists("libraryDE") && mDB.tableColumnExists("libraryDE", "method")) {
-	        		lines.add("   DE (Differential Expression) computation: ");
-	        		String msg = String.format("      %-12s %-30s %s", "DE column", "Conditions", "Method");
+        		lines.add("   DE (Differential Expression) computation: ");
+        		String msg = String.format("      %-12s %-30s %s", "DE column", "Conditions", "Method");
+        		lines.add(msg);
+        		
+        		ResultSet rs = mDB.executeQuery("Select pCol, title, method from libraryDE");
+        		while (rs.next()) {
+        			String de = rs.getString(1).substring(2); // remove P_
+        			msg = String.format("      %-12s %-30s %s", de, rs.getString(2), rs.getString(3));
 	        		lines.add(msg);
-	        		
-	        		ResultSet rs = mDB.executeQuery("Select pCol, title, method from libraryDE");
-	        		while (rs.next()) {
-	        			String de = rs.getString(1).substring(2); // remove P_
-	        			msg = String.format("      %-12s %-30s %s", de, rs.getString(2), rs.getString(3));
-		        		lines.add(msg);
-	        		}
-	        		rs.close();
-	        		lines.add("");
-	        		
-	        		if (mDB.tableColumnExists("assem_msg", "goDE")) { 
-		        		String goDE = mDB.executeString("Select goDE from assem_msg");
-		        		if (goDE!=null && !goDE.trim().equals("")) {
-		        			lines.add("   GOseq: " + goDE);
-		        			lines.add("");
-		        		}	
-	        		}
+        		}
+        		rs.close();
+        		lines.add("");
+        		
+        		if (mDB.tableColumnExists("assem_msg", "goDE")) { 
+	        		String goDE = mDB.executeString("Select goDE from assem_msg");
+	        		if (goDE!=null && !goDE.trim().equals("")) {
+	        			lines.add("   GOseq: " + goDE);
+	        			lines.add("");
+	        		}	
+        		}
 	        }
-    			return true;
+    		return true;
         }
         catch ( Exception err ) {
-        		ErrorReport.reportError(err,"processing data for overview annotation");
-        		return false;
+        	ErrorReport.reportError(err,"processing data for overview annotation");
+        	return false;
         }
     }
     private void finalLegend(Vector<String> lines) 
     {     
-    		lines.add("-------------------------------------------------------------------");
-    		lines.add("LEGEND:");
+    	lines.add("-------------------------------------------------------------------");
+    	lines.add("LEGEND:");
         lines.add("   annoDB:");
         lines.add("      ANNODB    is DBTYPE-TAXO, which is the DBtype and taxonomy");
         lines.add("      ONLY      #Seqs that hit the annoDB and no others");
@@ -854,36 +838,48 @@ public class Overview {
 		if (!hasAnno) return true;
 		if (!hasPairwise) return true;
 			
-		Out.prt("   Similarity....");
-		lines.add("   Similar pairs:");
+		Out.prtSp(1, "Similarity....");
+		
         int [] djust = {1, 0};
         rows = new String[20][2];
         int r = 0;
         	    
         try {
 	        int nPairs = mDB.executeCount( "SELECT COUNT(*) FROM pja_pairwise");     
-	        zPrtMsg(nPairs, "similarity pairs");
+	        Out.prtSpCnt(1, nPairs, "similarity pairs");
 	        
-        		int self  = mDB.executeCount( "SELECT COUNT(*) " +                
-        		        "FROM pja_pairwise WHERE in_self_blast_set = 1");
-        		int tself  = mDB.executeCount( "SELECT COUNT(*) " +                
-        		        "FROM pja_pairwise WHERE in_translated_self_blast = 1");
-      
-        		rows[r][0] = "Total pairs:";
-        		rows[r][1] = dff.format(nPairs);
-        		r++;
-        		if (self>0) {
-        			rows[r][0] = "with Nucleotide selfblast:";
-        			rows[r][1] = dff.format(self);
-        			r++;
-        		}
-        		if (tself>0) { 
-        			rows[r][0] = "with Translated selfblast:";
-        			rows[r][1] = dff.format(tself);
-        			r++;
-        		}
-            	makeTable(2, r, null, djust, lines);
-        		return true;
+	        lines.add("   Similar pairs: " + nPairs);
+	        
+        	String msg = mDB.executeString( "SELECT pair_msg from assem_msg"); // CAS314
+        	String [] tok = msg.split("::");
+        	int cntAA=0, cntNT=0, cntORF=0;
+        	
+        	if (tok.length>=3) { // can be a DP on end
+        		String x = tok[0].split(" ")[1];
+            	cntAA = Integer.parseInt(x);
+            	x = tok[1].split(" ")[1];
+            	cntORF = Integer.parseInt(x);
+            	x = tok[2].split(" ")[1];
+            	cntNT = Integer.parseInt(x);
+        	}	
+    		
+    		if (cntNT>0) { 
+    			rows[r][0] = "Nucleotide ";
+    			rows[r][1] = dff.format(cntNT);
+    			r++;
+    		}
+    		if (cntAA>0) {
+    			rows[r][0] = "Translated nucleotide";
+    			rows[r][1] = dff.format(cntAA);
+    			r++;
+    		}
+    		if (cntORF>0) {
+    			rows[r][0] = "Translated ORFs";
+    			rows[r][1] = dff.format(cntORF);
+    			r++;
+    		}
+        	makeTable(2, r, null, djust, lines);
+    		return true;
         }
         catch (SQLException err) {
 			ErrorReport.reportError(err,"reading database for overview pairwise");
@@ -902,6 +898,7 @@ public class Overview {
 			lines.add("");
 			return true;
 		}	
+		Out.prtSp(1, "Expression statistics....");
 		if (!expStatsRPKM(lines)) return false;
     		
         if (hasSeqDE==false) return true;
@@ -927,14 +924,10 @@ public class Overview {
             rset.close();
             strQ += " FROM " + table;
              
-            if (title.equals("GO")) {
-            		lines.add("   Over-represented GOs: (% of " + dff.format(nTot) + ")");
-            		zPrtMsg(rowLab.size(), "Over-represented GOs");
-            }
-            else {
-            		lines.add("   Differential expression: (% of " + dff.format(nTot) + ")");
-            		zPrtMsg(rowLab.size(), "Differential Expression Counts");
-            }
+            if (title.equals("GO")) 
+            	lines.add("   Over-represented GOs: (% of " + dff.format(nTot) + ")");
+            else 
+            	lines.add("   Differential expression: (% of " + dff.format(nTot) + ")");
             
             double [] cuts =    {     1e-5,    1e-4,    0.001,   0.01,     0.05};
             String [] dfields = {"", "<1E-5", "<1E-4", "<0.001", "<0.01", "<0.05"};
@@ -989,20 +982,18 @@ public class Overview {
             }
             strQ += " FROM contig";
             
-            zPrtMsg(libCol.size(), normType);
-            
             String [] dfields = {"", "<2.0", "2-5", "5-10", "10-50", "50-100", "100-1k", "1k-5k", ">=5k"};
     	    int[] start=   {0, 2, 5,10, 50,100, 1000, 5000};
     	    int[] end=     {2, 5,10,50,100,1000,5000, 10000000};
             int [] djust = {1, 0, 0, 0, 0, 0, 0, 0, 0};
     	    		
             int nCol=start.length+1;
-    	    		int nrow = libs.size();
-    	    		rows = new String[nrow+1][nCol]; 
+    	    int nrow = libs.size();
+    	    rows = new String[nrow+1][nCol]; 
     	    		
-    	        int [][] cnts = new int [nrow][start.length];
-    	        ResultSet rs = mDB.executeQuery(strQ);
-    	        while(rs.next()) {
+    	    int [][] cnts = new int [nrow][start.length];
+    	    ResultSet rs = mDB.executeQuery(strQ);
+    	    while(rs.next()) {
                 for (int i=0; i<nrow; i++) {
                     double ln = rs.getDouble(libCol.get(i));
                     for (int j=0; j<start.length; j++) {
@@ -1015,18 +1006,14 @@ public class Overview {
             }
             rs.close();
         		
-    		    lines.add("   " +  normType + ": (% of " + dff.format(numSeqs) + ")");
-    		    for (int i=0; i<libs.size(); i++) {
-    		    	 	int cnt=0;
-                 rows[i][0] = libs.get(i);
-                 for (int j=0; j<start.length; j++) {
-                	 	cnt+=cnts[i][j];
+    		lines.add("   " +  normType + ": (% of " + dff.format(numSeqs) + ")");
+    		for (int i=0; i<libs.size(); i++) {
+                rows[i][0] = libs.get(i);
+                for (int j=0; j<start.length; j++) {
                      String x = Out.kbFText(cnts[i][j]);      
                      rows[i][j+1]= String.format("%s%5s", x, Out.perItxtP(cnts[i][j], numSeqs));
-                 }
-                 if (cnt!=numSeqs) Out.prt(libs.get(i) + " " + cnt);
-            }
-    		   
+                }
+            }  
             makeTable(nCol, nrow, dfields, djust, lines);
     	   
             return true;    
@@ -1038,11 +1025,10 @@ public class Overview {
      */
     private boolean seqStats (Vector<String> lines ) throws Exception
     {
-    		if (!hasTranscripts) return true;
-    		
-		String assemblyDate = mDB.executeString ( 
-                "SELECT assemblydate FROM assembly");
-		
+    	if (!hasTranscripts) return true;
+    	Out.prtSp(1, "Sequence statistics....");
+    	
+		String assemblyDate = mDB.executeString ( "SELECT assemblydate FROM assembly");
 		if (assemblyDate==null) return true;
 		
 		if (hasNoAssembly) lines.add("SEQUENCES");
@@ -1051,29 +1037,29 @@ public class Overview {
 		lines.add("   Build date: " + TimeHelpers.convertDate(assemblyDate));
 		
 	    if (hasNoAssembly) {
-		    	if (isProteinDB) lines.add("   Proteins loaded from external source");
-		    	else             lines.add("   Sequences loaded from external source");
+		    if (isProteinDB) lines.add("   Proteins loaded from external source");
+		    else             lines.add("   Sequences loaded from external source");
 			lines.add("");
 	    }
 	    else {
-	    		seqStatCounts(lines);
+	    	seqStatCounts(lines);
 		    seqStatSizeTable(lines);
 	    }
 	    seqStatLenTable(lines);
 	    if (!isProteinDB) {
-	    		seqStatORFLenTable(lines);
-	    		seqStatQuals(lines);
+	    	seqStatORFLenTable(lines);
+	    	seqStatQuals(lines);
 	    }
 	    return true;
     }
     private void seqStatCounts(Vector<String> lines) throws Exception {
-    	 	int [] djust = {1, 0};
+    	int [] djust = {1, 0};
  	    rows = new String[20][2];
  	    int r = 0;
  	    int nClones = mDB.executeCount ( 
  		        "SELECT COUNT(*) FROM contig JOIN contclone " +
  		        "ON contig.contigid=contclone.contigid");	 
- 	    zPrtMsg(nClones, "Sequences");
+ 	    Out.prtSpCnt(1, nClones, "Sequences");
  	    
  	    rows[r][0] = "Reads:";
  	    rows[r][1] = dff.format(nClones);
@@ -1160,7 +1146,7 @@ public class Overview {
 	    rows = new String[3][n+1];
 	    
 	    try {
-	    		int c=0;
+	    	int c=0;
 		    for (int i = 0; i<n; i++) {
 		    	 int cnt = mDB.executeCount (  "SELECT count(*) FROM contig " +
 		   	          "WHERE numclones > " + start[i] + " AND numclones <= " + end[i]);
@@ -1174,24 +1160,24 @@ public class Overview {
     }
     
     private void seqStatQuals(Vector<String> lines) {
-    		try {
-    			int cntN1 = mDB.executeCount( "SELECT count(*) FROM contig " +
-    		    		"WHERE cnt_ns>0" );
-    			if (cntN1==0) return;
-    			
-    		    int cntN10 = mDB.executeCount( "SELECT count(*) FROM contig " +
-    		    		"WHERE cnt_ns>10" );
-    		    int cntN100 = mDB.executeCount( "SELECT count(*) FROM contig " +
-    		    		"WHERE cnt_ns>100" );
-    		    int cntN1000 = mDB.executeCount( "SELECT count(*) FROM contig " +
-    		    		"WHERE cnt_ns>1000" );
-    		   
-    			lines.add("   Quality:");
-    			int [] djust = {1, 0, 1};
-        	    rows = new String[20][3];
-        	    int r = 0;
-        	    
-        		rows[r][0] = "Sequences with #n>0:";
+		try {
+			int cntN1 = mDB.executeCount( "SELECT count(*) FROM contig " +
+		    		"WHERE cnt_ns>0" );
+			if (cntN1==0) return;
+			
+		    int cntN10 = mDB.executeCount( "SELECT count(*) FROM contig " +
+		    		"WHERE cnt_ns>10" );
+		    int cntN100 = mDB.executeCount( "SELECT count(*) FROM contig " +
+		    		"WHERE cnt_ns>100" );
+		    int cntN1000 = mDB.executeCount( "SELECT count(*) FROM contig " +
+		    		"WHERE cnt_ns>1000" );
+		   
+			lines.add("   Quality:");
+			int [] djust = {1, 0, 1};
+    	    rows = new String[20][3];
+    	    int r = 0;
+    	    
+    		rows[r][0] = "Sequences with #n>0:";
  	        rows[r][1] = dff.format(cntN1);
  	        rows[r][2] = Out.perFtxtP(cntN1, numSeqs);
  	        r++;
@@ -1200,21 +1186,21 @@ public class Overview {
  	        rows[r][2] = Out.perFtxtP(cntN10, numSeqs);
  	        r++;
  	        if (cntN100>0) {
- 	        		rows[r][0] = "Sequences with #n>100:";
+ 	        	rows[r][0] = "Sequences with #n>100:";
 	 	        rows[r][1] = dff.format(cntN100);
 	 	        rows[r][2] = Out.perFtxtP(cntN100, numSeqs);
 	 	        r++;
  	        }
  	       if (cntN1000>0) {
-	        		rows[r][0] = "Sequences with #n>1000:";
+	        	rows[r][0] = "Sequences with #n>1000:";
 	 	        rows[r][1] = dff.format(cntN1000);
 	 	        rows[r][2] = Out.perFtxtP(cntN1000, numSeqs);
 	 	        r++;
  	       }
 	         
-    		    makeTable(3, r, null, djust, lines);
-    		}
-    		catch (Exception err) {ErrorReport.reportError(err,"reading database for overview quality info");}
+ 	       makeTable(3, r, null, djust, lines);
+    	}
+    	catch (Exception err) {ErrorReport.reportError(err,"reading database for overview quality info");}
     }
     private void seqStatLenTable(Vector<String> lines) {
         String [] dfields = 
@@ -1236,7 +1222,7 @@ public class Overview {
 		    if (!isProteinDB) lines.add("   Sequence lengths:");
 		    else             lines.add("   Protein lengths:");
 		    makeTable(n, 1, dfields, djust, lines);
-		    if (cnt!=numSeqs) Out.prt("Incorrect sequence lengths count " + cnt);
+		    if (cnt!=numSeqs) Out.PrtErr("Incorrect sequence lengths count " + cnt);
 	    }
 	    catch (Exception err) {
 			ErrorReport.reportError(err,"Error: reading database for overview len table");
@@ -1256,17 +1242,17 @@ public class Overview {
 	    rows = new String[3][n+1];
 	
 	    try {
-	    		ResultSet rset = mDB.executeQuery("Select o_coding_start, o_coding_end from contig");
-	    		while (rset.next()) {
-	    			int l = rset.getInt(2)-rset.getInt(1)+1;
-	    			for (int i = 0; i<n; i++) {
-	    				if (l>start[i] && l <= end[i]) {
-	    					cnt[i]++;
-	    					break;
-	    				}
-	    			}
-	    		}
-	    		rset.close();
+    		ResultSet rset = mDB.executeQuery("Select o_coding_start, o_coding_end from contig");
+    		while (rset.next()) {
+    			int l = rset.getInt(2)-rset.getInt(1)+1;
+    			for (int i = 0; i<n; i++) {
+    				if (l>start[i] && l <= end[i]) {
+    					cnt[i]++;
+    					break;
+    				}
+    			}
+    		}
+    		rset.close();
 	    		
 		    for (int i = 0; i<n; i++) {
 		        rows[0][i] = Out.kbFText(cnt[i]) + Out.perItxtP(cnt[i], numSeqs);;
@@ -1281,66 +1267,66 @@ public class Overview {
     }
     private boolean geneLocsStats (Vector<String> lines ) throws Exception
     {
-    		try {
-    			if (!mDB.tableColumnExists("assem_msg", "hasLoc")) return true;
-    			
-    			int cntLoc = mDB.executeCount("select count(*) from contig where seq_end>0");
-    			if (cntLoc==0) return true;
-    			zPrtMsg(cntLoc, "Sequences have locations");
-    			
-    			lines.add( "LOCATIONS" );
-    			String [] dfields = {"1", "2", "3-4", "5-7", "8-10", "11-20", "21-30", ">30"};
-    		    int[] start= {1,2, 3,5,8, 11, 21,31};
-    		    int[] end=   {2,3, 5,8,11,21, 31,100000000};
-    	        int [] djust = {0, 0, 0, 0, 0, 0, 0, 0};
-    	        int [] cnt = {0,0,0,0,0,0,0,0};
-    		    int n=start.length;
-    		    rows = new String[3][n+1];
-    		    
-    		    HashMap <String, Integer> seqMap = new HashMap <String, Integer> ();
-    		    HashMap <String, Integer> seqMapCnt = new HashMap <String, Integer> ();
-    		    int cnt_pos=0, cnt_neg=0, total=0;
-    		    ResultSet rs = mDB.executeQuery("select seq_group, seq_strand, seq_start, seq_end from contig" +
-    		    		" where seq_end>0");
-    		    while (rs.next()) {
-    		    		total++;
-    		    		String grp = rs.getString(1);
-    		    		String strand = rs.getString(2);
-    		    		
-    		    		if (seqMap.containsKey(grp)) seqMap.put(grp, seqMap.get(grp)+1);
-    		    		else seqMap.put(grp, 1);
-    		    		
-    		    		if (strand.equals("-")) cnt_neg++; else cnt_pos++;
-    		    		
-    		    		String key = grp + ":" + rs.getString(3) + ":" + rs.getString(4) + strand;
-    		    		if (seqMapCnt.containsKey(key)) seqMapCnt.put(key, seqMapCnt.get(key)+1);
-    		    		else seqMapCnt.put(key, 1);
-    		    }
-    		    rs.close();
-    		    
-    		    for (String g : seqMap.keySet()) {
-    		    		int num = seqMap.get(g);
-    		    		for (int i=0; i< n; i++) {
-    		    			if (num < end[i]) {
-    		    				cnt[i]++;
-    		    				break;
-    		    			}
-    		    		}
-    		    }
-    		    for (int i=0; i<n; i++) rows[0][i] = dff.format(cnt[i]);
-    			
-    		    	lines.add("   Sequences with location:       " + String.format("%5d",total) +
-    		    			    "  unique locations: " + seqMapCnt.size());
-    		    	lines.add("   Sequences on positive strand:  " + String.format("%5d",cnt_pos) + 
-    		    				"  negative strand:  " + cnt_neg);
-    		    lines.add("   Sequences per group:");
-    		    makeTable(n, 1, dfields, djust, lines);   
-    		}
-    		catch (Exception err) {
-    			ErrorReport.reportError(err," reading database for gene location information");
-    			return false;
-    		}
-    		return true;
+		try {
+			if (!mDB.tableColumnExists("assem_msg", "hasLoc")) return true;
+			
+			int cntLoc = mDB.executeCount("select count(*) from contig where seq_end>0");
+			if (cntLoc==0) return true;
+			Out.prtSpCnt(1, cntLoc, "Sequences have locations");
+			
+			lines.add( "LOCATIONS" );
+			String [] dfields = {"1", "2", "3-4", "5-7", "8-10", "11-20", "21-30", ">30"};
+		    int[] start= {1,2, 3,5,8, 11, 21,31};
+		    int[] end=   {2,3, 5,8,11,21, 31,100000000};
+	        int [] djust = {0, 0, 0, 0, 0, 0, 0, 0};
+	        int [] cnt = {0,0,0,0,0,0,0,0};
+		    int n=start.length;
+		    rows = new String[3][n+1];
+		    
+		    HashMap <String, Integer> seqMap = new HashMap <String, Integer> ();
+		    HashMap <String, Integer> seqMapCnt = new HashMap <String, Integer> ();
+		    int cnt_pos=0, cnt_neg=0, total=0;
+		    ResultSet rs = mDB.executeQuery("select seq_group, seq_strand, seq_start, seq_end from contig" +
+		    		" where seq_end>0");
+		    while (rs.next()) {
+	    		total++;
+	    		String grp = rs.getString(1);
+	    		String strand = rs.getString(2);
+	    		
+	    		if (seqMap.containsKey(grp)) seqMap.put(grp, seqMap.get(grp)+1);
+	    		else seqMap.put(grp, 1);
+	    		
+	    		if (strand.equals("-")) cnt_neg++; else cnt_pos++;
+	    		
+	    		String key = grp + ":" + rs.getString(3) + ":" + rs.getString(4) + strand;
+	    		if (seqMapCnt.containsKey(key)) seqMapCnt.put(key, seqMapCnt.get(key)+1);
+	    		else seqMapCnt.put(key, 1);
+		    }
+		    rs.close();
+		    
+		    for (String g : seqMap.keySet()) {
+	    		int num = seqMap.get(g);
+	    		for (int i=0; i< n; i++) {
+	    			if (num < end[i]) {
+	    				cnt[i]++;
+	    				break;
+	    			}
+	    		}
+		    }
+		    for (int i=0; i<n; i++) rows[0][i] = dff.format(cnt[i]);
+			
+		    lines.add("   Sequences with location:       " + String.format("%5d",total) +
+		    			    "  unique locations: " + seqMapCnt.size());
+		    lines.add("   Sequences on positive strand:  " + String.format("%5d",cnt_pos) + 
+		    				"  negative strand:  " + cnt_neg);
+		    lines.add("   Sequences per group:");
+		    makeTable(n, 1, dfields, djust, lines);   
+		}
+		catch (Exception err) {
+			ErrorReport.reportError(err," reading database for gene location information");
+			return false;
+		}
+		return true;
     }
     private void writeHTML(String text) {
 		try {
@@ -1354,7 +1340,7 @@ public class Overview {
 				}
 				if (h.exists()) file = "./projects/"  + Globalx.HTMLDIR + "/" + file;
 			}
-			Out.prt("Writing overview HTML file: " + file);
+			Out.prtSp(1, "Writing overview HTML file: " + file);
 			FileOutputStream out = new FileOutputStream(file);
 			PrintWriter fileObj = new PrintWriter(out); 
 			fileObj.println("<html>");
@@ -1559,9 +1545,6 @@ public class Overview {
   		return x.substring(0, index) + x.substring(index+sub.length());
     }
 	
-	 private void zPrtMsg(int cnt, String msg) {
- 		Out.prt(String.format("    %10s %s", dff.format(cnt), msg));
-	 }
 	private String strAssmID = "";
 	private boolean hasAnno = true, hasTranscripts=true;; 
 	// set flags

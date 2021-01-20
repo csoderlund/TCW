@@ -8,24 +8,53 @@ click on the "+".
 <p>
 The description of each column is explained on the column page. 
 
-<h2>Blast results for the pair</h2>
-These three columns are from blasting all sequences against each other using megablast or
-tblastx (when viewing an alignment, if the Blast e-value is on the nucleotide alignment,
-the HSP is from megablast; if the Blast e-value is on the amino acid alignment, the HSP is
-from tblastx). 
+<h2>Sequence Information</h2>
+<table cellspacing=3 cellpadding=3>
+<tr><td nowrap valign=top>Pair#<td>The pair number.
+<tr><td nowrap valign=top>Seq ID 1<td>The Seq ID of the first sequence of the pair.
+<tr><td nowrap valign=top>Seq ID 2<td>The Seq ID of the second sequence of the pair.
+<tr><td nowrap valign=top>Shared Hit<td>The best shared hit between the pair. This is blank if they do not share a hit.
+</table>
+<h2>Hit results for the pair</h2>
+These four columns are from searching all sequences against each other using one or more of the following:
+<table>
+<tr><td nowrap valign=top><code>tblastx</code><td>(AA)<td>&nbsp;&nbsp;&nbsp;6-frame translated of nucleotide sequences
+<tr><td nowrap valign=top><code>blastp</code><td>(AA)<td>&nbsp;&nbsp;&nbsp;Either translated ORFs (NT-sTCW) or proteins sequences (AA-sTCW)
+<tr><td nowrap valign=top><code>blastn</code><td>(NT)<td>&nbsp;&nbsp;&nbsp;Nucleotide sequence comparison.
+</table>
+
+<p>Columns: 
+<table cellspacing=3 cellpadding=3>
+<tr><td nowrap valign=top>Hit E-value<td>The E-value of the first hit for a pair.
+<tr><td nowrap valign=top>Hit %Sim<td>The %Similarity of the first hit for a pair.
+<tr><td nowrap valign=top>Hit Align<td>The alignment length of the first hit for a pair.
+<tr><td nowrap valign=top>Hit Type<td>
+	<table>
+	<tr><td>AA<td>The pair had a tblastx hit.
+	<tr><td>ORF<td>The pair had a blastp hit. 
+	<tr><td>NT<td>The pair had a blastn hit.
+	<tr><td>DP<td>The sequences ORF frames do not match with the first hit frames.
+	</table>
+</table>
+<u>DP example</u>: AA::NT::DP (1,2)->(2,2)
+<table cellspacing=3 cellpadding=3>
+<tr><td nowrap valign=top>AA::NT:<td>The pair has an AA and NT hit, where the Hit values (E-value, %Sim, Align) are from the AA hit. 
+<tr><td nowrap valign=top>DP:<td>The first sequence's ORF is in Frame 1, yet its AA hit
+with the second sequence was in Frame 2.
+</table>
 <h2>Total Coverage</h2>
-The "Total Coverage" columns are based on a semi-global dynamic programming algorithm,
-which allows one sequence to be shorter than the other, but then aligns the rest, even if there 
-are gaps. Hence, if "NT %Len" and/or ""AA %Len" is 100, the sequences align their entire length;
-if additionally, "NT %Sim" and/or ""AA %Sim" is 100, then they are the same sequence.
-<ul>
-<li><i>NT %Sim</i> - the number of match nucleotides divided by the alignment length.
-<li><i>NT Len</i> - the alignment length, which does not include overhangs at the beginning or end.
-<li><i>NT %Len</i> - the number of match nucleotides divided by the longest length.
-<li><i>AA %Sim</i> - the number of match amino acids divided by the alignment length; 
+The "Total Coverage" columns are based on a semi-global dynamic programming algorithm.
+<p>Columns:
+<table cellspacing=3 cellpadding=3>
+<tr><td nowrap valign=top>NT %Sim<td>The number of match nucleotides divided by the alignment length.
+<tr><td nowrap valign=top>NT Len<td>The alignment length, which does not include overhangs at the beginning or end.
+<tr><td nowrap valign=top>NT %Len<td>The number of match nucleotides divided by the longest length. If this is 100,
+then the sequence align their entire length. If "NT %Sim" is also 100, the pair of sequences are the same.
+<tr><td nowrap valign=top>AA %Sim<td>The number of match amino acids divided by the alignment length; 
 both exact and amino acids substitutions (blosum score>0) are considered a match; 
 two aligned stop codons are not counted as a match.
-<li><i>AA Len</i> - the alignment length, which does not include overhangs at the beginning or end.
-<li><i>AA %Len</i> - the number of match amino acids divided by the longest length.
-</ul>
+<tr><td nowrap valign=top>AA Len<td>The alignment length, which does not include overhangs at the beginning or end.
+<tr><td nowrap valign=top>AA %Len<td>The number of match amino acids divided by the longest length. If this is 100,
+then the sequence align their entire length. 
+</table>
 </html>

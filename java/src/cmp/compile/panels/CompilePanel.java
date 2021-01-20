@@ -480,7 +480,7 @@ public class CompilePanel extends JPanel {
 				String file = editPanel.getBlastFileToProcess(tp);
 				out.print("MTCW_search_file = " + file + "\n");
 				
-				if(!editPanel.getBlastParams(tp).equals(BlastArgs.getBlastpOptions()))
+				if(!editPanel.getBlastParams(tp).equals(BlastArgs.getBlastArgsDB()))
 					out.print("MTCW_search_params = " + editPanel.getBlastParams(tp) + "\n");	
 			}
 			
@@ -490,7 +490,7 @@ public class CompilePanel extends JPanel {
 				String file = editPanel.getBlastFileToProcess(tp);
 				out.print("MTCW_blastn_file = " + file + "\n");
 				
-				if(!editPanel.getBlastParams(tp).equals(BlastArgs.getBlastnOptions()))
+				if(!editPanel.getBlastParams(tp).equals(BlastArgs.getBlastnArgs()))
 					out.print("MTCW_blastn_params = " + editPanel.getBlastParams(tp) + "\n");
 			}
 			else out.print("MTCW_run_blastn = 0\n");

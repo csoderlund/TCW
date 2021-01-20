@@ -517,6 +517,8 @@ public class AssemMain
 		
 		if (!Utils.isDebug()) schObj.dropInnoDBTables();
 		
+		removeStopCh();
+		
 		Log.msg("\n" + Out.getMsgTimeMem(">>>End Assembly", startTime),LogLevel.Basic);
 		Log.finish();
 		
@@ -576,6 +578,16 @@ public class AssemMain
 			Utils.clearDir(mInitialBuryDir);
 		}
 	}	
+	private void removeStopCh()  { // CAS314 - was being removed when writing, but caused frame shifts
+		try {
+			mDB.executeUpdate("update contig set consensus = replace(consensus, '*', 'n')");
+		}
+		catch (Exception e) {
+			System.err.println("Failed replace");
+			e.printStackTrace();
+		}
+		
+	}
 	// As clones are buried, they are dropped from further consideration. 
 	// At the end, their correct contigs have to be identified, which means
 	// we have to find the top parent in their bury chain, which may be multiple levels deep. 
@@ -4187,7 +4199,7 @@ public class AssemMain
 				String seq = rs.getString("consensus");
 				numWritten++;
 				numThisTime++;
-				ctgFileW.write(">CTG" + id + "\n" + seq.replace("*", "") + "\n");
+				ctgFileW.write(">CTG" + id + "\n" + seq.replace(Globalx.assmGap, "") + "\n");
 				ctgFileW.flush();
 				maxID = id;
 			}

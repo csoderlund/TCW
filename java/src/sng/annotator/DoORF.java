@@ -55,6 +55,7 @@ import util.methods.Out;
 
 public class DoORF {
 	private final String orfDir = Globalx.ORFDIR;
+	private final boolean debug = Globalx.debug;
 	
 	// set from CoreMain (-r {n} {-t}) when only ORFs are executed
 	private int 		pmTestType=0; // n= 0-none, 1=longest, 2=Markov
@@ -141,7 +142,7 @@ public class DoORF {
 		mDB = d;
 		try { 
 			long time = Out.getTime();
-			Out.PrtSpMsg(1,"Annotate  with GC and ORF");
+			Out.PrtSpMsg(1,"Annotate with GC and ORF");
 			
 			prtObj.parameters();
 			if (!train.setMode()) return;
@@ -259,7 +260,7 @@ public class DoORF {
     					
     				// Stops in hit
 	    	 			if (start<0 || end> seqData[idx].seqLen || end < 0) { 
-	    	 				Out.prt("Bad coordinates: " + seqData[idx].name + " Length: " +  seqData[idx].seqLen + " Start: " + start + " End: " + end);
+	    	 				Out.bug("Bad coordinates: " + seqData[idx].name + " Length: " +  seqData[idx].seqLen + " Start: " + start + " End: " + end);
 	    	 				continue;
 	    	 			}
 	    	 			int orient = 1;
@@ -311,18 +312,15 @@ public class DoORF {
     				}
     	   		} // end loop through sequenses
     	   		if ( rs != null ) rs.close();
-    	   		Out.PrtSpCntMsg(3, cntNoHit,    "Sequences with no hits ");
-    	   		Out.PrtSpCntMsg(3, cntHit,      "Sequences with hit");
-    	   		Out.PrtSpCntMsgZero(3, cntNT,   "Ignored NT hit ");
-    	   		Out.PrtSpCntMsgZero(4, cntAN,   "Used Best Anno (instead of Eval) ");
+    	   		Out.PrtSpCntMsg2(3, cntHit,    "With hits", cntNoHit,  "With no hit"); // CAS314
+    	   		Out.PrtSpCntMsgZero(3, cntNT,   "Ignored NT hit");
+    	   		Out.PrtSpCntMsgZero(4, cntAN,   "Used Best Anno (vs Eval) ");
     	   		
-    	   		Out.PrtSpCntMsg(3, cntGoodHit,  "Good hit");
-    	   		Out.PrtSpCntMsg(3, cntGreatHit, "Good coverage ");
-    	   		if (piSeqOlap>0 || piHitOlap>0) {
-    	   			Out.PrtSpCntMsg(5, cntScov, "Failed seq coverage " + piSeqOlap);
-    	   			Out.PrtSpCntMsg(5, cntHcov, "Failed hit coverage " + piHitOlap);
-    	   		}
-    	   		Out.PrtSpCntMsgZero(3, cntStop,     "Hits with stops, find longest non-Stop region in hit");
+    	   		Out.PrtSpCntMsg2(3, cntGoodHit,  "Good hit", cntGreatHit, "Good coverage ");
+ 
+    	   		Out.PrtSpCntMsgZero(5, cntScov, "Failed seq coverage " + piSeqOlap);
+    	   		Out.PrtSpCntMsgZero(5, cntHcov, "Failed hit coverage " + piHitOlap);
+    	   		Out.PrtSpCntMsgZero(3, cntStop, "Hits with stops, find longest non-Stop region in hit");
     	   		Out.PrtSpCntMsgZero(3, cntBadMulti, "Ignore poor hit with multiframes ");
     	   	 	Out.PrtSpMsg(2, "Complete load");
        }
@@ -340,68 +338,68 @@ public class DoORF {
 		long startTime = Out.getTime();
 		Out.PrtSpMsg(2,"Save all best ORFs to the database");
         try {  
-        	    PreparedStatement ps = mDB.prepareStatement(
-    					"update contig SET gc_ratio=?, " +
-    					"o_coding_start=?, o_coding_end=?, o_frame=?, " +
-    					"o_coding_has_begin=?, o_coding_has_end=?,  " +
-    					"p_eq_o_frame=?, o_len=?, o_markov=?," +
-    					"notes=?, cnt_ns=? where CTGID=?"); 
-        		
-        	    mDB.openTransaction();
-        	    int cntLoop=0, cntSave=0;
-        	 	for (int i=0; i<seqData.length; i++) {
-        	 		ps.setDouble(1, seqData[i].gcRatio);
-        	 		ps.setInt(11, seqData[i].cntNs);
-        	 		ps.setInt(12, seqData[i].seqID);
-        	 		
-        	 		if (seqData[i].orfStart==0 && seqData[i].orfEnd==0) {
-        	 			ps.setInt(2, 0);
-        	 			ps.setInt(3, 0);
-        	 			ps.setInt(4, 0);
-        	 			ps.setInt(5, 0);
-        	 			ps.setInt(6, 0);
-        	 			ps.setInt(7, 0);
-        	 			ps.setInt(8, 0);
-        	 			ps.setDouble(9, 0.0);
-        	 			ps.setString(10, seqData[i].remark);
-        	 		}
-        	 		else {
-        	 			if (seqData[i].orfFrame <-3 || seqData[i].orfFrame>3 || seqData[i].orfStart<0 || seqData[i].orfEnd<0)
-        	 				ErrorReport.die("Internal error: " + seqData[i].seqID + " f:" + 
-        	 						seqData[i].orfFrame + " s:" + seqData[i].orfStart  + " e:" + seqData[i].orfEnd);
-        	 			
-        	 			int hb = (seqData[i].hasStart) ? 1 : 0;
+    	    PreparedStatement ps = mDB.prepareStatement(
+					"update contig SET gc_ratio=?, " +
+					"o_coding_start=?, o_coding_end=?, o_frame=?, " +
+					"o_coding_has_begin=?, o_coding_has_end=?,  " +
+					"p_eq_o_frame=?, o_len=?, o_markov=?," +
+					"notes=?, cnt_ns=? where CTGID=?"); 
+    		
+    	    mDB.openTransaction();
+    	    int cntLoop=0, cntSave=0;
+    	 	for (int i=0; i<seqData.length; i++) {
+    	 		ps.setDouble(1, seqData[i].gcRatio);
+    	 		ps.setInt(11, seqData[i].cntNs);
+    	 		ps.setInt(12, seqData[i].seqID);
+    	 		
+    	 		if (seqData[i].orfStart==0 && seqData[i].orfEnd==0) {
+    	 			ps.setInt(2, 0);
+    	 			ps.setInt(3, 0);
+    	 			ps.setInt(4, 0);
+    	 			ps.setInt(5, 0);
+    	 			ps.setInt(6, 0);
+    	 			ps.setInt(7, 0);
+    	 			ps.setInt(8, 0);
+    	 			ps.setDouble(9, 0.0);
+    	 			ps.setString(10, seqData[i].remark);
+    	 		}
+    	 		else {
+    	 			if (seqData[i].orfFrame <-3 || seqData[i].orfFrame>3 || seqData[i].orfStart<0 || seqData[i].orfEnd<0)
+    	 				ErrorReport.die("Internal error: " + seqData[i].seqID + " f:" + 
+    	 						seqData[i].orfFrame + " s:" + seqData[i].orfStart  + " e:" + seqData[i].orfEnd);
+    	 			
+    	 			int hb = (seqData[i].hasStart) ? 1 : 0;
       	            int he = (seqData[i].hasEnd) ? 1 : 0; 
       	            int anno = (seqData[i].orfHasHit) ? 1 : 0;
-      	        		ps.setInt(2, seqData[i].orfStart);
-        	 			ps.setInt(3, seqData[i].orfEnd);
-        	 			ps.setInt(4, seqData[i].orfFrame);
-        	 			ps.setInt(5, hb);
-        	 			ps.setInt(6, he);
-        	 			ps.setInt(7, anno);
-        	 			ps.setInt(8, seqData[i].orfEnd-seqData[i].orfStart+1);
-        	 			ps.setDouble(9, seqData[i].dMKscore);
-        	 			ps.setString(10, seqData[i].remark);
-        	 		}
-        	 		ps.addBatch(); 
-        	 		if (cntSave ==  100) {
-        	 			cntSave=0;
-        	 			Out.r("Save " + cntLoop);
-        	 			ps.executeBatch();
-        	 		}
-        	 		cntLoop++; cntSave++;
-        	 	}
-        	 	if (cntSave>0) ps.executeBatch();
-        	 	ps.close();
-        	    mDB.closeTransaction();
-        	    
-        	    
-        	 	// saved for seqFramePanel display
-        	 	Out.PrtSpMsg(2,"Save " + saveORFsForDB.size() + " all frame ORFs to the database");
-        	    PreparedStatement ps2 = mDB.prepareStatement(
-     					"insert tuple_orfs SET CTGid=?, value=?");
-        	    mDB.openTransaction();
-        		cntLoop=cntSave=0;
+  	        		ps.setInt(2, seqData[i].orfStart);
+    	 			ps.setInt(3, seqData[i].orfEnd);
+    	 			ps.setInt(4, seqData[i].orfFrame);
+    	 			ps.setInt(5, hb);
+    	 			ps.setInt(6, he);
+    	 			ps.setInt(7, anno);
+    	 			ps.setInt(8, seqData[i].orfEnd-seqData[i].orfStart+1);
+    	 			ps.setDouble(9, seqData[i].dMKscore);
+    	 			ps.setString(10, seqData[i].remark);
+    	 		}
+    	 		ps.addBatch(); 
+    	 		if (cntSave ==  1000) {
+    	 			cntSave=0;
+    	 			Out.r("Save " + cntLoop);
+    	 			ps.executeBatch();
+    	 		}
+    	 		cntLoop++; cntSave++;
+    	 	}
+    	 	if (cntSave>0) ps.executeBatch();
+    	 	ps.close();
+    	    mDB.closeTransaction();
+    	    
+    	 	// saved for seqFramePanel display
+    	 	Out.PrtSpMsg(3,"Save " + saveORFsForDB.size() + " all frame ORFs to the database");
+    	    PreparedStatement ps2 = mDB.prepareStatement(
+ 					"insert tuple_orfs SET CTGid=?, value=?");
+    	    mDB.openTransaction();
+    		cntLoop=cntSave=0;
+        		
      		for (String key : saveORFsForDB) {
      			String [] tok = key.split("X");
      			int seqID = 0;
@@ -479,9 +477,8 @@ public class DoORF {
 		private void forAllSeq () 
 	    {
 	        try {  
-	        		long startTime = Out.getTime();
-	        		Out.prt("");
-	        		Out.PrtSpMsg(2, "Start ORF computation");
+	        	long startTime = Out.getTime();
+	        	Out.PrtSpMsg(2, "Start ORF computation");
 				if (!prtObj.openFiles()) return;
 				int numSeq = seqData.length, cntLoop=0;
 				
@@ -489,8 +486,8 @@ public class DoORF {
 				for (int nn=0; nn<numSeq; nn++) { 
 	                curSeqObj = seqData[nn];
 	               
-	        			OrfData bestOrf = forThisSeq(); 
-	        			if (bestOrf==null) continue; // happens if there is an error 
+	        		OrfData bestOrf = forThisSeq(); 
+	        		if (bestOrf==null) continue; // happens if there is an error 
 	        			
 			        curSeqObj.orfFrame = bestOrf.oFrame;
 			        curSeqObj.orfStart = bestOrf.oStart;
@@ -504,9 +501,9 @@ public class DoORF {
 			        if (bestOrf.oFrame!=NO_RF && bestOrf.oEnd>0) { 
 			         	curSeqObj.addRemark(bestOrf.remark);
 			        	
-				        	prtObj.statsORFcompute(bestOrf); // Add Globals.RMK_ORF_NOTLONG - keep this order
-				        	prtObj.writeFilesForBestORF(bestOrf);
-				        	prtObj.writeAllGoodFramesForORF(); // uses bestPerFrameORFs
+			        	prtObj.statsORFcompute(bestOrf); // Add Globals.RMK_ORF_NOTLONG - keep this order
+			        	prtObj.writeFilesForBestORF(bestOrf);
+			        	prtObj.writeAllGoodFramesForORF(); // uses bestPerFrameORFs
 				        	
 				        	// Keep in sorted Order
 						for (OrfData o : bestPerFrameORFs) {
@@ -527,7 +524,6 @@ public class DoORF {
 	                cntLoop++;
 	            }
 				Out.PrtSpMsgTimeMem(2, "Complete ORF computation", startTime);
-				Out.Print("");
 	        } 
 	        catch (Exception err) {ErrorReport.reportError(err, "Annotator - process remaining");}
 	    }
@@ -910,14 +906,15 @@ public class DoORF {
 				Out.PrtError("NO ORFs!!!!!!!!");
 				return;
 			}
-			Out.PrtSpMsg(2, "----------------------------------------------------------------------");
+			// CAS314 there was too much output - reduced it
+			if (debug) Out.PrtSpMsg(2, "----------------------------------------------------------------------");//###
 			
 			int nCtg = seqData.length;
 			double pp =  ( ( ((double) cntHasORF/(double)nCtg) * 100.0));
 			String xx = String.format(" (%4.1f%s) ",pp, "%");
 			// 'selected ORFs:' is searched for in Overview - don't change
 			String overview = "Total ORFs: " + perCntText(cntHasORF, nCtg);
-			Out.PrtSpMsg(2, overview);
+			Out.PrtSpMsg(2, overview);												//prt
 			
 			// table for overview; 3 column, text followed by number
 			int [] justify =   {1,  0,  1,  0,  1,  0};
@@ -949,24 +946,24 @@ public class DoORF {
 	        String msg = Out.makeTable(nCol, r+1, null, justify, rows);
 	        String [] lines = msg.split("\n");
 			for (int i=0; i<lines.length; i++) {
-				Out.PrtSpMsg(2, lines[i]);
+				if (debug) Out.PrtSpMsg(2, lines[i]);				//xxx
 				overview += lines[i] + "\n";
 			}
-	        	Out.PrtSpMsg(3, "");
+	        if (debug) Out.PrtSpMsg(3, "");							//xxx
 	        	
 	        // Not part of overview, just print to stdout and anno.log
-        		int h=nCtg;
+        	int h=nCtg;
 	        	
-	        	r=0; c=0;
-	        	rows[r][c] = "Additional ORF info";  rows[r++][c+1] = "";
-	        	rows[r][c] = "Markov Good Frame";    rows[r++][c+1] = perCntText(cntTestGoodMK,h);
+	        r=0; c=0;
+	        rows[r][c] = "Additional ORF info";  rows[r++][c+1] = "";
+	        rows[r][c] = "Markov Good Frame";    rows[r++][c+1] = perCntText(cntTestGoodMK,h);
 	        rows[r][c] = "ORF=Hit";  			rows[r++][c+1] = perCntText(cntTestORFeq, h);
 	        rows[r][c] = "ORF>Hit";  			rows[r++][c+1] = perCntText(cntTestORFgt,h);
 	        rows[r][c] = "ORF~Hit";  			rows[r++][c+1] = perCntText(cntTestORFappr,h);       
 	        rows[r][c] = "ORF>Hit & HasEnds";    rows[r++][c+1] = perCntText(cntTestORFgtEnds,h);
 	        rows[r][c] = "ORF=Hit & HasEnds";    rows[r++][c+1] = perCntText(cntTestORFeqEnds,h);
 	  
-	        	r=0; c=2;
+	        r=0; c=2;
 	        h=cntTestHasHit;
 	        rows[r][c] = "   For seqs with hit";  	rows[r++][c+1] = Out.df(h);
 	        rows[r][c] = "   Longest & Markov";		rows[r++][c+1] = perCntText(cntTestHitLongBestMK,h);
@@ -976,7 +973,7 @@ public class DoORF {
 	        rows[r][c] = "   Has Start & Stop";  	rows[r++][c+1] = perCntText(cntTestHitHasEnds,h);	
 	        rows[r][c] = "   Not hit frame";  	    rows[r++][c+1] = Out.df(cntTestHitneORF);
 	        
-	        	r=0; c=4;
+	        r=0; c=4;
 	        h=cntTestGTHit;
 	        rows[r][c] = "   Hit w/good coverage";  	rows[r++][c+1] = Out.df(h);
 	        rows[r][c] = "   Longest & Markov";		rows[r++][c+1] = perCntText(cntTestGTHitLongBestMK,h);
@@ -988,7 +985,10 @@ public class DoORF {
 	        	 
 	        msg = Out.makeTable(nCol, r+1, null, justify, rows);
 	        lines = msg.split("\n");
-			for (int i=0; i<lines.length; i++) Out.PrtSpMsg(2, lines[i]);
+			for (int i=0; i<lines.length; i++) {
+				if (debug) Out.PrtSpMsg(2, lines[i]); //###
+				else 	   Out.logOnly(2, lines[i]); 	 //prt to log only - not in overview - everything else is
+			}
 	        
 			Out.PrtSpCntMsgZero(1, cntTestGTHitneORF, "Good coverage hit was not used for ORF frame");
 			String x="";
@@ -999,7 +999,7 @@ public class DoORF {
 					x+=String.format(" %d%s",  (i-3), xx);
 				}
 			}
-			Out.PrtSpMsg(2,"   Frame:" + x);
+			Out.PrtSpMsg(2,"   Frame:" + x);			//prt
 			
 			// Save to database
 			try {
@@ -1011,11 +1011,11 @@ public class DoORF {
 	 		}
 	 		catch (Exception e) {ErrorReport.prtReport(e, "Adding ORF information to db");}
 			
-			Out.PrtSpMsg(2, "----------------------------------------------------------------------");
+			if (debug) Out.PrtSpMsg(2, "----------------------------------------------------------------------"); //xxx
+			Out.PrtSpMsg(2, "Wrote " + writeGoodAA + " ORFs to " + orfAllAAfname + " and " + orfFrameFname);	//prt
+			if (!debug) Out.prtSp(2, "Additional information in log file " + Globals.annoFile);
 			
-			try {
-				Out.prt("");
-				Out.PrtSpMsg(2, "Wrote " + writeGoodAA + " ORFs to " + orfAllAAfname + " and " + orfFrameFname);
+			try {	
 				fh_allFrame.close(); 
 				fh_bestFrame.close();
 				fh_orfAll.close(); 
@@ -1027,7 +1027,7 @@ public class DoORF {
 		}
 		private boolean openFiles() {
 			try {
-				Out.PrtSpMsg(2, "Writing ORF information to database and files in " + 
+				Out.PrtSpMsg(3, "Writing ORF information to database and files in " + 
 							FileHelpers.removeCurrentPath(orfPath));
 				String dbname = runSTCWMain.getProjName();
 				if (dbname.startsWith(Globals.STCW)) dbname = dbname.substring(Globals.STCW.length());
@@ -1181,7 +1181,6 @@ public class DoORF {
 			else if (!o.hasATG && !o.hasStop) return "Partial";
 			else return "Complete";
 		}
-
 		
 		private String perCntText(int cnt, int nCtg)  {
 		 	String px;
@@ -1229,7 +1228,7 @@ public class DoORF {
 				orfOverviewLegend += msg[i] + Globals.tcwDelim;
 			}
 			String tmp = fileHeader.replace("###", "      ###");
-			Out.PrtSpMsg(0, tmp);
+			if (debug) Out.PrtSpMsg(0, tmp);	//###
 		}
 	}
 	/**************** Data structure ***********************/
@@ -1316,18 +1315,6 @@ public class DoORF {
 			//int end = (hasEnd) ? orfEnd-3 : orfEnd; // include stop codon
 			return s.substring(orfStart-1, orfEnd);
 		}
-		/**
-		private String getUTR5() {
-			if (orfEnd==0) return "";
-			String s = (orfFrame<0) ? getSeqRev() : seq;
-			return s.substring(0, orfStart);
-		}
-		private String getUTR3() {
-			if (orfEnd==0) return "";
-			String s = (orfFrame<0) ? getSeqRev() : seq;
-			return s.substring(orfEnd);
-		}
-		**/
 	}
 	
 	/****************************************************
@@ -1514,7 +1501,7 @@ public class DoORF {
 		}
 	
 		public String prtFinal() {
-			Out.PrtSpMsg(3, "                                                     ");
+			if (debug) Out.PrtSpMsg(3, "                                                     "); //###
 			
 			// table for overview; 3 column, text followed by number
 			int [] justify =   {0,  0,  0, 0,  0, 0, 0, 0, 0, 0};
@@ -1572,7 +1559,7 @@ public class DoORF {
 			String msg = Out.makeTable(nCol, r+1, null, justify, rows);
 	        String [] lines = msg.split("\n");
 			for (int i=0; i<lines.length; i++) {
-				Out.PrtSpMsg(2, lines[i]);
+				if (debug) Out.PrtSpMsg(2, lines[i]);	//xxx
 				overview += lines[i] + "\n";
 			}
 			
@@ -1647,7 +1634,7 @@ public class DoORF {
 				o.dCDscore = scoreObj.dScore();
 			}
 			catch (Exception e) {
-				Out.prt(curSeqObj.name + " f:" + o.oFrame + " os:" +  o.oStart + " oe:" + o.oEnd  
+				Out.prtToErr(curSeqObj.name + " f:" + o.oFrame + " os:" +  o.oStart + " oe:" + o.oEnd  
 						+ " ol:" + o.oLen + " sl:" + curSeqObj.seq.length());
 				ErrorReport.prtReport(e, "Compute ORF scores"); 
 				System.exit(-1);
@@ -1662,7 +1649,7 @@ public class DoORF {
 			for (int i=0; i<seqLen-3; i+=3) {
 				String c = seq.substring(i, i+3);
 				if (!c.contains("n")) {
-					if (!trCodonCntMap.containsKey(c)) Out.prt("No codon  '" + c + "'");
+					if (!trCodonCntMap.containsKey(c)) Out.prtToErr("No codon  '" + c + "'");
 					else {
 						trCodonCntMap.put(c,  trCodonCntMap.get(c)+1);
 						trainCodons++;
@@ -1723,14 +1710,12 @@ public class DoORF {
 				prtObj.orfOverviewLegend += msg + Globals.tcwDelim;
 				return;
 			}
-			Out.PrtSpCntMsg(3, totalSeqForTrain, "Sequences used for training ");
-			Out.PrtSpCntkMsg(3, trainHex, "Bases used for training");
+			Out.PrtSpCntkMsg2(3, (long) totalSeqForTrain, "Seqs used", trainHex, "Bases used"); // CAS314
+			
 			if (totalIgnoreSTOPs>0) {
 				String msg = (bTrainFromFile) ? "Sequences with in-frame Stops" : "Sequences with Stops within hits";
 				Out.PrtSpCntMsg(3, totalIgnoreSTOPs, msg + " - ignored");
 			}
-			if (totalIgnoreEval>0)
-				Out.PrtSpCntMsg(3, totalIgnoreEval, "");
 	 		
 			computeCodonLNwriteFile();
 			computeMarkovLLRwriteFile();
@@ -1824,7 +1809,7 @@ public class DoORF {
 					
 					String [] tok = key.split("-");
 					if (tok.length!=2) {
-						Out.prt(key);
+						Out.prtToErr(key);
 						continue;
 					}
 					String kmer = tok[0];
@@ -1980,7 +1965,7 @@ public class DoORF {
 				Out.PrtSpCntMsgZero(3, cntDup, "skipped sequences");
 			 }
 			 catch (Exception e) {
-				 Out.prt(seqData[idx].name + " start: " + seqData[idx].seqHitStart + " end: "  + seqData[idx].seqHitEnd);
+				 Out.prtToErr(seqData[idx].name + " start: " + seqData[idx].seqHitStart + " end: "  + seqData[idx].seqHitEnd);
 				 ErrorReport.die(e, "Training Sequence Data");
 			 }
 		 }
@@ -2099,7 +2084,7 @@ public class DoORF {
 				}
 				bTrainFromFile=true;
 			}
-			if (bTrainFromFile) Out.prt("Use file for training");
+			if (bTrainFromFile) Out.prtToErr("Use file for training");
 			return true;
 		}
 		private void addOne(String key, TreeMap <String, Integer> x) {
@@ -2115,7 +2100,7 @@ public class DoORF {
 		private HashMap <String, Double>  trCodonLNmap = new HashMap <String, Double> ();
 		private HashMap <String, Integer> trCodonCntMap = new HashMap <String, Integer> ();
 		private long trainCodons=0, trainHex=0;
-		private int totalSeqForTrain=0, totalIgnoreSTOPs=0, totalIgnoreEval=0, cntDup=0;
+		private int totalSeqForTrain=0, totalIgnoreSTOPs=0,  cntDup=0;
 	} // end Train
 	/**********************************************************************/
 	private boolean isFileName(String file) {

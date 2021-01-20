@@ -7,8 +7,10 @@ import java.text.DecimalFormat;
 // shared by sTCW and mTCW
 // They both have their own database/Globals.java
 public class Globalx {
-	public static final String strRelDate = "(30-Dec-20)"; 
-	public static final String strTCWver = "3.1.3"; 
+	public static boolean debug = false; // changed in STCWMain or MTCWMain from command line 
+	
+	public static final String strRelDate = "(20-Jan-21)"; 
+	public static final String strTCWver = "3.1.4"; 
 	public static final String URL = "http://www.agcol.arizona.edu ";
 	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate;
 	public static final String error="***";
@@ -55,6 +57,11 @@ public class Globalx {
 	public static final char   noNTch  = 'n';
 	public static final String noAAstr = "X";
 	public static final char   noAAch  = 'X';
+	public static final char   assmGapCh = '*'; // CAS314 separate from stopCh as its CAP gap ch
+	public static final String assmGap = "*";   // CAS314 - this was being replaced with '', causing problems
+	public static final String typeAA = "AA";	// CAS314 add 3 types
+	public static final String typeNT = "NT";
+	public static final String typeORF = "ORF";
 	
 	public static final String CSV_DELIM = "\t";
 	public static final String CSV_SUFFIX = ".tsv"; 
@@ -118,6 +125,8 @@ public class Globalx {
 	public static final Color aaEqZero	= new Color(255, 173, 190); // light red
 	public static final Color aaGtZero 	= Color.blue; 	
 	
+	static public final int OVERHANG=5; // overhang for trim
+		
 	// General
 	public static final Color BGCOLOR = Color.WHITE;
 	public static final Color FUNCTIONCOLOR = new Color(215, 229, 243); // replace with no color

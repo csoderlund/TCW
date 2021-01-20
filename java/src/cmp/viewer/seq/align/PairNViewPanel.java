@@ -89,7 +89,7 @@ public class PairNViewPanel extends JPanel {
 		theRow.add(new JLabel("View:")); theRow.add(Box.createHorizontalStrut(1));
 		theRow.add(btnViewType);         theRow.add(Box.createHorizontalStrut(5));
 		
-		dotBox = Static.createCheckBox("Dot", true); // CAS312 new
+		dotBox = Static.createCheckBox("Dot", false); // CAS312 new
 		dotBox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				refreshPanels();

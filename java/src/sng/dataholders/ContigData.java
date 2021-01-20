@@ -731,7 +731,7 @@ public class ContigData implements Comparable<ContigData>, Serializable {
 		baseInfo = new SNPData[getTotalBaseWidth()];
 		listSNPs = new Vector<SNPData>();
 		int nSequenceType = SNPData.TYPE_DNA;
-		if (!getSequenceAt(0).isDNA())
+		if (!getSequenceAt(0).isNT())
 			nSequenceType = SNPData.TYPE_AMINO_ACIDS;
 
 		// Pass 1: Count character frequencies at each consensus base

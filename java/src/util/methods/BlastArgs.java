@@ -14,7 +14,6 @@ package util.methods;
  *      protein:    getFormatp(String database)
  *      nucleotide: getFormatn(String database)
  *      
-
  * diamond: used for nucleotide against protein database
  * 
  * CAS303 any support for old blast is gone. Only blast+ works
@@ -31,19 +30,25 @@ import util.database.Globalx;
 
 public class BlastArgs {  
 	public static final String [] validSearchPgms = {"blast", "diamond"};
+	static public final String defPgm = "diamond";
 	
 	// This is the only place that default arguments need to be changed for sTCW.cfg
-	// CAS303 add max_hsps 1.
-    private static final String blastxOpt =  "-evalue 1e-05 -max_hsps 1";
-    private static final String blastnOpt =  "-evalue 1e-20 -max_hsps 1"; // uses megablast by default
-    private static final String tblastxOpt = "-evalue 1e-10 -max_hsps 1";
-    private static final String blastpOpt =  "-evalue 1e-05 -max_hsps 1 -max_target_seqs 25"; // default is 500
-    private static final String blastpOptMTCW = blastpOpt + " -soft_masking true -use_sw_tback"; 
+	// CAS303 add max_hsps 1. CAS314 make all have evalue 1e05, too confusing otherwise
+    private static final String blastnOpt =  
+    		"-evalue 1e-05 -max_hsps 1  -max_target_seqs 25"; // nt->nt (Pairs)
+    private static final String tblastxOpt = 
+    		"-evalue 1e-05 -max_hsps 1  -max_target_seqs 25"; // trans nt->nt (Pairs)
+    private static final String blastOpt =  
+    		"-evalue 1e-05 -max_hsps 1 -max_target_seqs 25"; //  (Same args for all AnnoDB)
+    // left off -max_target_seqs as doesn't seem necessary, and so it all fits in textbox 
+    private static final String blastpOptORF = "-evalue 1e-05 -max_hsps 1 -soft_masking true -use_sw_tback"; 
     
     // default diamond is --evalue 1e-03; which is ~equivalent with blast 1e-10
     // don't compress as the other search programs don't
-    private static final String diamondOpt =     "--masking 0 --max-hsps 1 --top 20";
-    private static final String diamondOptMTCW = "--masking 0 --max-hsps 1 --sensitive --query-cover 25 --subject-cover 25";
+    private static final String diamondOpt = "--max-hsps 1";
+    // CAS314 private static final String diamondOpt =     "--masking 0 --max-hsps 1 --top 20";
+    // used for MTCW comparing ORFs and STCW self comparing ORFS
+    private static final String diamondOptORF = "--max-hsps 1 --sensitive";
    
     // kludge because mTCW calls HOSTCfg 4x on startup; stops it printing over and over
     private static boolean hasChecked=false, bBlastExt=true; 
@@ -119,8 +124,8 @@ public class BlastArgs {
 	}
     public static boolean isDiamond() {return isDiamond;}
     public static String getDiamondPath() { return diamondPath;}
-    public static String getDiamondOpDefaults() { return diamondOpt;}
-    public static String getDiamondOpDefaultsMTCW() { return diamondOptMTCW;}
+    public static String getDiamondArgsDB() { return diamondOpt;}
+    public static String getDiamondArgsORF() { return diamondOptORF;}
     public static String getDiamondFormat(String database, String outfile) {
 		return diamondPath + " makedb --in " + database + " -d " + outfile;
     }
@@ -173,7 +178,6 @@ public class BlastArgs {
         blastpEx =  p + "blastp"; 
         blastnEx =  p + "blastn"; 
         tblastxEx = p + "tblastx";
-        tblastnEx = p + "tblastn"; // used in BlastTab, which use getBlastPath + "tblastn"; so this isn't used directly
         blastPath = p;
         
         return true;
@@ -190,17 +194,15 @@ public class BlastArgs {
     public static String getFormatp(String database) { return formatp + database;}   
     public static String getFormatn(String database) { return formatn + database;}
     
-    public static String getBlastxOptions() 	{return blastxOpt; }
-    public static String getBlastpOptions() 	{return blastpOpt; }
-    public static String getBlastpOptionsMTCW() {return blastpOptMTCW; } 
-    public static String getBlastnOptions()    	{return blastnOpt;} 
-    public static String getTblastxOptions() 	{return tblastxOpt;}
+    public static String getBlastArgsDB() 	{return blastOpt; } 
+    public static String getBlastArgsORF() {return blastpOptORF; } 
+    public static String getBlastnArgs()    {return blastnOpt;}  // blast nt->nt
+    public static String getTblastxArgs() 	{return tblastxOpt;} // translated blast nt->nt
     
     public static String getBlastxExec()  {return blastxEx;}
     public static String getBlastnExec()  {return blastnEx;}
     public static String getBlastpExec()  {return blastpEx;}
     public static String getTblastxExec() {return tblastxEx;}
-    public static String getTblastnExec() {return tblastnEx;}
     public static boolean isBlastExt() {return bBlastExt;}
     /*********************************************************************
      * mTCW no CPU, no diamond
@@ -212,7 +214,7 @@ public class BlastArgs {
     } 
   
     public static String getBlastpCmdMTCW(String query, String database, String outfile, boolean tabular) {
-        return blastpEx  + " " + getBlastpOptionsMTCW() + " " + 
+        return blastpEx  + " " + getBlastArgsORF() + " " + 
         			getBlastArgs(query, database, outfile, tabular);  
     }
     /****************************************************************
@@ -290,38 +292,37 @@ public class BlastArgs {
     	}
     }
    
-    public static String getSearch() {
-    		if (isDiamond) return "diamond";
-    		if (isBlast) return "blast";
-    		Out.die("No valid search program");
-    		return "";
-    }
-    public static String getParams(String pgm) {
+    public static String getArgsDB(String pgm, String action) { // CAS314 was just checking pgm, needed action for blast
     	if (pgm.equals("diamond")) return diamondOpt;
-		if (pgm.equals("blastx")) return blastxOpt;
-		if (pgm.equals("blastn")) return blastnOpt;	
-		return blastpOpt;
+		if (action.equals("blastn")) return blastnOpt;	
+		if (action.equals("tblastx")) return tblastxOpt;
+		return blastOpt;
+    }
+    public static String getArgsORF(String pgm) { 
+    	if (pgm.equals("diamond")) return diamondOptORF;
+		return blastpOptORF;
     }
     public static boolean isNucleotide(String line) {
-    		int nt=0, bad=0, len = line.length(); 
+    	int nt=0, bad=0, len = line.length(); 
 		for (int i = 0; i<len; i++) {
 			char c = line.charAt(i);
 			if (AAStatistics.isDNALetter(c) || c=='n' || c=='N') nt++; 
-			else if (c==Globalx.gapCh || c=='*' || c==' ') nt++;
 			else bad++;
 		}
 		if (nt==len) return true;
-		else if (bad<= 5&& len>30) return true;
+		else if (bad <= 5 && len>30) return true;
 		else return false;
     }
     public static boolean isProtein(String line) {
-    		int bad=0, pr=0, nt=0, len=line.length(); 
+    	int bad=0, pr=0, nt=0, len=line.length(); 
 		for (int i = 0; i<len; i++) {
 			char c = line.charAt(i);
-			if (AAStatistics.isDNALetter(c) || c=='n' || c=='N') nt++;
-			if (AAStatistics.isAcidLetter(c)) pr++;
-			else if (c==Globalx.gapCh || c=='*' ||  c==' ') pr++;
-			else bad++;
+			// CAS314 a little rewrite
+			boolean bn = (AAStatistics.isDNALetter(c) || c=='n' || c=='N');
+			boolean bx = (AAStatistics.isAcidLetter(c));
+			if (bn) nt++;
+			if (bx) pr++;
+			if (!bn || !bx) bad++;
 		}
 		if (nt==len) return false; 
 		if (pr==len) return true;
@@ -340,7 +341,7 @@ public class BlastArgs {
 	    String                err = "   " +  pgm + ": "+ path + " does not exist";
 		if (!f.isDirectory()) err = "   " +  pgm + ": " + path + " is not a valid directory";
 		
-		if (prt && !hasChecked) Out.PrtError(err);
+		if (prt && !hasChecked) Out.PrtWarn(err);
     	return false;
     }
     private static boolean fileExec(String pgm, String file, boolean prt) {
@@ -362,6 +363,6 @@ public class BlastArgs {
     private static boolean isBlast=false, isDiamond=false;
     private static String diamondPath="", blastPath="";
     private static String formatp, formatn, format;
-    private static String blastxEx, blastpEx, blastnEx, tblastxEx, tblastnEx;
+    private static String blastxEx, blastpEx, blastnEx, tblastxEx;
     private static Vector <String> searchPgms = new Vector <String> ();
 }

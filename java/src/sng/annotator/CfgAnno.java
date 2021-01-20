@@ -1,16 +1,18 @@
 package sng.annotator;
 
 import java.io.File;
-
-
 import sng.amanager.FileTextField;
 import sng.database.Globals;
 import util.methods.BlastArgs;
 import util.methods.ErrorReport;
-import util.methods.FileHelpers;
 import util.methods.Out;
 import util.methods.TCWprops;
 
+/***********************************************
+ * runSingleTCW creates sTCW.cfg
+ * execAnno uses this file to read the sTCW.cfg 
+ * It sends the appropriate parameters to the class executing the function.
+ */
 public class CfgAnno {
 
 	private static final String sTCWcfg = Globals.STCWCFG;
@@ -97,58 +99,64 @@ public class CfgAnno {
 	}
 	
 	private void cfgSelfblastParams() {		
-		try {			
+		try {		// changed in v314 - not backward compatible	
+			// Default args are all set here.
 			int pairs = 			Integer.parseInt(mProps.getAnnoProperty("Anno_pairs_limit"));
-			String selfBlastFile =  mProps.getAnnoProperty("Anno_unitrans_selfblast");
-			String tselfBlastFile = mProps.getAnnoProperty("Anno_unitrans_tselfblast");
-			String selfBlastArgs = 	mProps.getAnnoProperty("Anno_selfblast_args");
-			String tselfBlastArgs = mProps.getAnnoProperty("Anno_tselfblast_args");
+			String blastnRun =  	mProps.getAnnoProperty("Anno_pairs_blastn");
+			String blastnArgs = 	mProps.getAnnoProperty("Anno_pairs_blastn_args");
+			String tblastxRun = 	mProps.getAnnoProperty("Anno_pairs_tblastx");
+			String tblastxArgs = 	mProps.getAnnoProperty("Anno_pairs_tblastx_args");
+			String blastpRun = 		mProps.getAnnoProperty("Anno_pairs_blastp");
+			String blastpArgs = 	mProps.getAnnoProperty("Anno_pairs_blastp_args");
+			String blastpPgm = 		mProps.getAnnoProperty("Anno_pairs_blastp_pgm");
 			
-			// a '-' or -1 indicates that the keyword was not present
-			annoObj.setMaxDPpairs(pairs);
-			if (selfBlastFile.equals("-") && tselfBlastFile.equals("-")) return;
+			boolean p=false, n=false, x=false;
 			
-			if (mProps.getAnnoIsNotDefault("Anno_pairs_limit")) 
-				Out.PrtSpMsg(1,"Pairs limit = " + pairs); 
-		
-			// SELFBLAST 
-			// - indicates no keyword, no keyword, no self blast
-			if (!selfBlastFile.equals("-")) { 
-				if (!selfBlastFile.equals("")) {
-					Out.PrtSpMsg(1,"Use selfblast file = " + selfBlastFile);
-					String file = getValidPathForFile(selfBlastFile);
-					if (file==null) Out.PrtWarn("Cannot find file '" + selfBlastFile + "' - ignoring");
-					else blastObj.setSelfBlastFile(file);
-				}
-				else if (!selfBlastArgs.equals("")) { 
-					Out.PrtSpMsg(1,"Run selfblast with parameters = " + selfBlastArgs);
-					blastObj.setSelfBlastArgs(selfBlastArgs);
-				}
-				else {
-					Out.PrtSpMsg(1,"Run selfblast with default parameters");
-					blastObj.setSelfBlastArgs(BlastArgs.getBlastnOptions());
-				}
+			if (blastnRun.equals("1")) {
+				n=true;
+				Out.PrtSpMsg(1,"Run blastn");
+				
+				if (!Globals.hasVal(blastnArgs)) blastnArgs = BlastArgs.getBlastnArgs();
+				else Out.PrtSpMsg(1,"Blastn parameters = " + blastnArgs);
+				
+				blastObj.setSelfBlastnArgs(n, blastnArgs);
 			}
 			
-			if (!tselfBlastFile.equals("-")) { 
-				if (!tselfBlastFile.equals("")) {
-					Out.PrtSpMsg(1,"Use translated selfblast file = " + tselfBlastFile);
-					String file = getValidPathForFile(tselfBlastFile);
-					if (file==null) Out.PrtWarn("Cannot find file '" + tselfBlastFile + "' - ignoring");
-					else blastObj.setTSelfBlastFile(file);
+			if (tblastxRun.equals("1")) {
+				x=true;
+				Out.PrtSpMsg(1,"Run tblastx");
+				
+				if (!Globals.hasVal(tblastxArgs)) tblastxArgs = BlastArgs.getTblastxArgs();
+				else Out.PrtSpMsg(1,"Tblastx parameters = " + tblastxArgs);	
+				
+				blastObj.setSelfTblastxArgs(x,tblastxArgs);
+			}
+		
+			if (blastpRun.equals("1")) {
+				p=true;
+				Out.PrtSpMsg(1,"Run blastp ");
+				if (Globals.hasVal(blastpPgm)) {
+					Out.PrtSpMsg(1,"Blastp program = " + blastpPgm);
+					blastObj.setSelfBlastpPgm(blastpPgm);
 				}
-				else if (!tselfBlastArgs.equals("")) { 
-					Out.PrtSpMsg(1,"Run translated selfblast with parameters = " + tselfBlastArgs);
-					blastObj.setTSelfBlastArgs(tselfBlastArgs);
+				if (!Globals.hasVal(blastpArgs)) {
+					blastpArgs = (blastpPgm.equalsIgnoreCase("blast")) ?
+							BlastArgs.getBlastArgsORF() :  
+							BlastArgs.getDiamondArgsORF();
 				}
-				else {
-					Out.PrtSpMsg(1,"Run translated selfblast with default parameters");
-					blastObj.setTSelfBlastArgs(BlastArgs.getBlastpOptions());
-				}
+				else Out.PrtSpMsg(1,"Blastp parameters = " + blastpArgs);
+				blastObj.setSelfBlastpArgs(p, blastpArgs);
+			}
+			
+			if (p || n || x) {
+				annoObj.setMaxDPpairs(pairs);
+				Out.PrtSpMsg(1,"Pairs limit = " + pairs);
+				if (pairs==0) Out.PrtWarn("Search will be run, but no pairs added");
 			}
 		}
 		catch (Exception e) {ErrorReport.reportError(e, "Error getting Selfblast parameters");}		
 	}
+	
 	private void cfgORFParams() {
 		try {
 			boolean bAlt=false;
@@ -166,7 +174,7 @@ public class CfgAnno {
 		
 			int trSet	 =		argInt("Anno_ORF_train_min_set", "ORF minimal training set");
 			String cdsFile = mProps.getAnnoProperty("Anno_ORF_train_CDS_file");
-			if (!cdsFile.equals("-1")&&!cdsFile.equals("")) {
+			if (Globals.hasVal(cdsFile)) {
 				Out.PrtSpMsg(1,"ORF Training CDS file = " + cdsFile);
 			}
 			orfObj.setParams(bAlt, hitEval, hitSim, diffLen, trSet, cdsFile);
@@ -190,21 +198,16 @@ public class CfgAnno {
 				Out.PrtSpMsg(1,"min_bitscore = " + bit);
 			}
 			
-			// if no number at end
-			boolean rc = cfgAddDB(0, "Anno_uniprot_blast", "Anno_uniprot_fasta", 
-					"Anno_uniprot_args", "Anno_uniprot_taxo", "Anno_DBdate", "Anno_search_pgm", null);
-			if (!rc) return false;
-			
 			for (int i=1; i < Globals.numDB; i++) {
 				String n = Integer.toString(i);
-				String b = "Anno_unitrans_DBblast_" + n;
+				String b = "Anno_DBtab_" + n;
 				String f = "Anno_DBfasta_" + n;
 				String a = "Anno_DBargs_" + n;
 				String t = "Anno_DBtaxo_" + n;
 				String d = "Anno_DBdate_" + n;
 				String p = "Anno_DBsearch_pgm_" + n;
 
-				rc = cfgAddDB(i, b, f, a, t, d, "Anno_DBdate", p);
+				boolean rc = cfgAddDB(i, b, f, a, t, d, "Anno_DBdate", p);
 				if (!rc) return false;
 			}
 			return true;
@@ -235,75 +238,74 @@ public class CfgAnno {
 		return d;
 	}
 	
-	private boolean cfgAddDB (int index, String mblast, String mfasta, String margs, 
-			String mtaxo, String mdate,  String mdefdate, String mpgm) {
+	private boolean cfgAddDB (int index, String kTabFile, String kdbFile, String kargs, 
+			String ktaxo, String kdate,  String kdefdate, String kpgm) {
 		try {
-			String tabFile =   mProps.getAnnoProperty(mblast);	
-			String dbFile = 		mProps.getAnnoProperty(mfasta); 
-			if (!keyExist(tabFile) && !keyExist(dbFile)) return true;
+			String vtabFile =   mProps.getAnnoProperty(kTabFile);	
+			String vdbFile =    mProps.getAnnoProperty(kdbFile); 
+			if (!Globals.hasVal(vtabFile) && !Globals.hasVal(vdbFile)) return true;
 				
-			String args =    mProps.getAnnoProperty(margs);
-			String taxo =	 mProps.getAnnoProperty(mtaxo);
-			String DBdate =  mProps.getAnnoProperty(mdate);
+			String vargs =      mProps.getAnnoProperty(kargs);
+			String vtaxo =	   	mProps.getAnnoProperty(ktaxo);
+			String vdbDate =    mProps.getAnnoProperty(kdate);
+			String vpgm = 		mProps.getAnnoProperty(kpgm);
 			
-			String searchPgm = mProps.getAnnoProperty(mpgm);
-			if (mblast!=null) mblast = mblast.replace("Anno_unitrans_", "");
-			if (mfasta!=null) mfasta = mfasta.replace("Anno_", "");
-			if (margs!=null) margs = margs.replace("Anno_", "");
-			if (mtaxo!=null) mtaxo = mtaxo.replace("Anno_", "");
-			if (mdate!=null) mdate = mdate.replace("Anno_", "");
-			if (mpgm!=null) mpgm = mpgm.replace("Anno_", "");
+			if (kTabFile!=null) kTabFile = kTabFile.replace("Anno_", "");
+			if (kdbFile!=null)  kdbFile = kdbFile.replace("Anno_", "");
+			if (kargs!=null) 	kargs = kargs.replace("Anno_", "");
+			if (ktaxo!=null) 	ktaxo = ktaxo.replace("Anno_", "");
+			if (kdate!=null) 	kdate = kdate.replace("Anno_", "");
+			if (kpgm!=null) 	kpgm = kpgm.replace("Anno_", "");
 			
 			Out.PrtSpMsg(1,"DB#" + index);
 			
 			// hits tabular file provided
-			if (keyExist(tabFile)) { // supplied file
-				Out.PrtSpMsg(1,"  " + mblast + " = " + tabFile);
-				tabFile = fileObj.pathToOpen(tabFile, FileTextField.PROJ);
-				if (tabFile==null) return false;
+			if (Globals.hasVal(vtabFile)) { // supplied file
+				Out.PrtSpMsg(1,"  " + kTabFile + " = " + vtabFile);
+				vtabFile = fileObj.pathToOpen(vtabFile, FileTextField.PROJ);
+				if (vtabFile==null) return false;
 				
-				if (!keyExist(dbFile)) 
+				if (!Globals.hasVal(vdbFile)) 
 					Out.PrtWarn("No database fasta file supplied; DB entries will not have descriptions or sequences"); 
 			}
 			
 			// DBfasta file
-			if (keyExist(dbFile)) { 
-				Out.PrtSpMsg(2,mfasta + " = " + dbFile);
-				dbFile = fileObj.pathToOpen(dbFile, FileTextField.ANNO);
-				if (dbFile==null) return false;
+			if (Globals.hasVal(vdbFile)) { 
+				Out.PrtSpMsg(2,kdbFile + " = " + vdbFile);
+				vdbFile = fileObj.pathToOpen(vdbFile, FileTextField.ANNO);
 				
-				if (!args.equals("-")) 
-				    Out.PrtSpMsg(2, margs + " = " + args);
+				if (vdbFile==null) return false;	// ignore any other keywords
 			}
+			if (Globals.hasVal(vpgm))   Out.PrtSpMsg(2, kpgm  + " = " + vpgm);
+			
+			// Default args are set in DoBlast, because need to know type of DB
+			if (Globals.hasVal(vargs))  Out.PrtSpMsg(2, kargs + " = " + vargs);
 			
 			// taxo
-			if (!taxo.equals("-")) Out.PrtSpMsg(2, mtaxo + " = " + taxo);
-			else taxo = defaultTaxo;
+			if (Globals.hasVal(vtaxo)) 	Out.PrtSpMsg(2, ktaxo + " = " + vtaxo);
+			else vtaxo = defaultTaxo;
 			
 			// DBfasta date
-			if (keyExist(DBdate)) Out.PrtSpMsg(2, mdate + "=" + DBdate);
+			if (Globals.hasVal(vdbDate)) Out.PrtSpMsg(2, kdate + " = " + vdbDate);
 			else {
-				if (mdefdate != null) DBdate =  mProps.getAnnoProperty(mdefdate);
-				if (!keyExist(DBdate)) DBdate = null;
+				if (kdefdate != null) vdbDate =  mProps.getAnnoProperty(kdefdate);
+				if (!Globals.hasVal(vdbDate)) vdbDate = null;
 			}
-			if (DBdate != null) {
-				if (!goodDate(DBdate)) Out.die("The date " + DBdate + " is not formated yyyy-mm-dd (e.g. 2011-12-31)");
+			if (vdbDate != null) {
+				if (!goodDate(vdbDate)) Out.die("The date " + vdbDate + " is not formated yyyy-mm-dd (e.g. 2011-12-31)");
 			}
 			
-			blastObj.makeDB(index, tabFile,dbFile, args, taxo, DBdate, searchPgm);
+			blastObj.makeDB(index, vtabFile,vdbFile, vargs, vtaxo, vdbDate, vpgm);
 			return true;
 		}
 		catch (Exception e) {
-			String s = "Getting parameter: #" + index + " " + mblast + " " + mfasta + " " + margs;
+			String s = "Getting parameter: #" + index + " " + kTabFile + " " + kdbFile + " " + kargs;
 			ErrorReport.reportError(e, s);
 			return false;
 		}
 	}
 	
-	private boolean keyExist(String x) {
-		if (x != null && !x.equals("-") && !x.equals("")) return true;
-		else return false;
-	}
+	
 	private boolean goodDate (String dt) { // yyyy-mm-dd
 		int f = dt.indexOf("-");
 		int l = dt.lastIndexOf("-");
@@ -322,17 +324,7 @@ public class CfgAnno {
 	
 		return true;
 	}
-	private String getValidPathForFile(String file) {
-		String absFile = file;
-		if (FileHelpers.fileExists(absFile)) return absFile;
-		
-		if (!absFile.startsWith("/")) absFile = "/" + absFile;
-		absFile = runSTCWMain.getCurProjPath() + absFile;
-
-		if (FileHelpers.fileExists(absFile)) return absFile;
-		
-		return null;
-	}	
+	
 	private TCWprops mProps;
 	private FileTextField fileObj = null;
 	private DoBlast blastObj = null;

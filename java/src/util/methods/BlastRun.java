@@ -21,8 +21,10 @@ public class BlastRun {
 		if (!runFormatDB(pgm, dbFile, isAAdb)) return false;
 		
 		String searchCmd="";
-		if (pgm.equals("diamond")) 
+		if (pgm.equals("diamond")) {
 			searchCmd = BlastArgs.getDiamondCmd(inFile, dbFile, tabFile, action, args, ncpu);
+			if (!args.contains("--quiet")) searchCmd += " --quiet"; // CAS314 diamond is no longer quite by default
+		}
 		else if (pgm.equals("blast"))  
 			searchCmd = BlastArgs.getBlastCmd(inFile, dbFile, tabFile, action, args, ncpu);
 		else {

@@ -52,7 +52,7 @@ public class LegendPanel extends JPanel
 		else {
 			g2.drawString("Foreground:", x, y+=25);
 			drawKey(0, g2,  Globalx.ntMisMatch,   "Mismatch", 	x+20, y+=15);
-			drawKey(0, g2, BaseAlignPanel.lowQuality, "Poor Quality Region (phred < 20)", x+20, y+=15);
+			drawKey(0, g2, ContigAlignPanel.lowQuality, "Poor Quality Region (phred < 20)", x+20, y+=15);
 			drawKey(0, g2, Globalx.anyGap, 	  "Gap (column of gaps may occur if buried not shown)", 	x+20, y+=15);
 			drawKey(0, g2, Globalx.anyHang, 	  "N or extended end", x+20, y+=15);
 			

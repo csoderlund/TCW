@@ -6,8 +6,9 @@ import util.database.Globalx;
 import util.methods.Out;
 
 public class ScoreAA {
-	private final char noAACh = Share.noAACh;	
-	private final String noNTStr = Share.noNTStr;
+	private final char noAACh 		= Globalx.noAAch;	
+	private final String noNTStr 	= Globalx.noNTstr;
+	private final String gapStr 	= Globalx.gapStr;
 	private final static char gapCh = Globalx.gapCh;
 	
 	public String aaMatch(String alignSeq1, String alignSeq2) {
@@ -87,7 +88,7 @@ public class ScoreAA {
 	 */
 	public char codonToAA(String codon) {
 		char c=noAACh;
-		if (codon.contains(Share.gapStr)) return c;
+		if (codon.contains(gapStr)) return c;
 		if (codon.contains(noNTStr)) return c;
 		
 		if (codon.equals("ttt") || codon.equals("ttc")) return AMINO_Phe; 

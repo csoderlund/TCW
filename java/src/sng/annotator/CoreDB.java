@@ -21,7 +21,6 @@ import sng.dataholders.ContigData;
 import sng.dataholders.SequenceData;
 import sng.viewer.panels.align.AlignData;
 import util.database.DBConn;
-import util.database.Globalx;
 import util.methods.*;
 
 public class CoreDB {
@@ -78,6 +77,7 @@ public class CoreDB {
 	   
 	    	username = rs.getString("username");
 	    	projectpath = rs.getString("projectpath");
+	    	if (projectpath.contains("/./")) projectpath = projectpath.replace("/./", "/"); // CAS314
 	    	assemblydate = rs.getString("assemblydate");
 	    	try {
 	    		annotationdate = rs.getString("annotationdate");
@@ -112,13 +112,15 @@ public class CoreDB {
 					annoDate = rs.getString(2);
 				}		
 			}
-	    	Out.PrtSpMsg(1, "sTCW ID:      " + strAssemblyID);
-	    	Out.PrtSpMsg(1, "Create:       " + assemblydate);
-	    	Out.PrtSpMsg(1, "User Name:    " + username);
-	    	Out.PrtSpMsg(1, "Project Path: " + projectpath);
-	    	isAAtcw = mDB.tableColumnExists("assem_msg", "peptide");
-	    	if (isAAtcw) Out.PrtSpMsg(1,"Protein sequence sTCW database");
-	    	Out.PrtSpMsg(1,anno);
+			isAAtcw = mDB.tableColumnExists("assem_msg", "peptide");
+	    	String type = (isAAtcw) ? "AA-sTCW" : "NT-sTCW";
+	    	
+	    	Out.PrtSpMsg(1, "sTCW ID:  " + strAssemblyID);
+	    	Out.PrtSpMsg(1, "Database: " + type);
+	    	Out.PrtSpMsg(1, "Create:   " + assemblydate);
+	    	Out.PrtSpMsg(1, "User:     " + username);
+	    	Out.PrtSpMsg(1, "Path:     " + projectpath);
+	    	Out.PrtSpMsg(1, anno);
 	    
 	    	if (doAnno && bAnnoExists) { 
 	    		Out.PrtSpMsg(1,"");
@@ -258,34 +260,64 @@ public class CoreDB {
        }
        return null;
     }   
-    public int writeSeqFile(int uniBlastType,  File f) 
+    public int writeSeqFile(File f) 
  	{
  		try {
  			BufferedWriter file = new BufferedWriter(new FileWriter(f));
  		
- 	        ResultSet rs = mDB.executeQuery("select contigid,consensus,numclones from contig" );
+ 	        ResultSet rs = mDB.executeQuery("select contigid,consensus from contig" );
 
  	        int cnt=0;
  			while (rs.next())
  			{
- 				String ctgid = rs.getString("contigid");
- 				String CCS = rs.getString("consensus");
- 				int numClones = rs.getInt("numclones");
+ 				String ctgid = rs.getString(1);
  				
- 				if ( uniBlastType==0 ||
- 					(uniBlastType==1 && numClones > 1 ) ||
- 					(uniBlastType==2 && numClones ==1 )) 
- 				{
- 					CCS = CCS.toUpperCase();
- 					file.append(">" + ctgid + "\n" + CCS.replace(Globalx.stopStr,"") + "\n"); 
- 					cnt++;
- 				}				
+ 				String CCS = rs.getString(2);
+ 				
+ 				file.append(">" + ctgid + "\n" + CCS + "\n"); 
+ 				cnt++;				
  			}
+ 			rs.close();
  			file.close();
  			return cnt;
  		}
- 		catch (Exception e)
-         {
+ 		catch (Exception e){
+             ErrorReport.prtReport(e,"Error writing to " + f.getAbsoluteFile());
+             return -1;
+         }
+ 	}
+    /***********************************************************
+     * Write ORFs for DoBlast for Similar Pairs CAS314
+     * sng.util.MainTable also writes ORF file, but from a table of sequences
+     */
+    public int writeOrfFile(File f) 
+ 	{
+ 		try {
+ 			BufferedWriter file = new BufferedWriter(new FileWriter(f));
+ 		
+ 	        ResultSet rs = mDB.executeQuery("SELECT contigid, o_frame, o_coding_start, o_coding_end, consensus FROM contig" );
+
+ 	        int cnt=0;
+ 			while (rs.next())
+ 			{
+ 				String name = rs.getString(1);
+ 				int fr = rs.getInt(2);
+                if (fr == 0) continue;
+                
+                int start = rs.getInt(3);
+                int end = rs.getInt(4);
+  
+                String strSeq = rs.getString(5);
+                String orf = SequenceData.getORFtrans(name, strSeq, fr, start, end);
+             	
+                file.append(">" + name + " AAlen=" + orf.length() + " frame=" + fr + "\n" + orf + "\n");	
+                cnt++;
+ 			}
+ 			rs.close();
+ 			file.close();
+ 			return cnt;
+ 		}
+ 		catch (Exception e){
              ErrorReport.prtReport(e,"Error writing to " + f.getAbsoluteFile());
              return -1;
          }
@@ -380,15 +412,36 @@ public class CoreDB {
          }         
          return count;
      }
- 
-   
+     /************************************************************************
+      * Update hit_type CAS314
+      */
+    public int loadPairsFromDB(String delim, HashMap <String, String> pairTypeMap) {
+ 		try {
+ 			ResultSet rs = mDB.executeQuery("SELECT contig1, contig2, hit_type FROM pja_pairwise ");
+ 			while (rs.next()) {
+ 				pairTypeMap.put(rs.getString(1) + delim + rs.getString(2), rs.getString(3));
+ 			}
+ 			return pairTypeMap.size();
+ 		}
+ 		catch (Exception e) {ErrorReport.prtReport(e, "loading pairs from DB"); return -1;}
+ 	}
+    public void savePairsType(String delim, HashMap <String, String> pairTypeMap) {
+ 		try {
+ 			for (String key : pairTypeMap.keySet()) {
+ 				String [] tok = key.split(delim);
+ 				String type = pairTypeMap.get(key);
+ 				mDB.executeUpdate("update pja_pairwise set hit_type='" + type + "' " +
+ 				" where contig1='" + tok[0] + "' and contig2='" + tok[1] + "'");
+ 			}
+ 		}
+ 		catch (Exception e) {ErrorReport.prtReport(e, "saving pairs from DB"); return;}
+ 	}
     public void saveAllCtgPairwiseCnts(HashMap <String, Integer> map) 
     {
         String strQ = null;
  
         try {
-		    for ( String ctgName : map.keySet() )
-	        {
+		    for ( String ctgName : map.keySet() ) {
 				int cnt = map.get(ctgName);
 				strQ = "UPDATE contig SET cnt_pairwise = "   + String.valueOf(cnt) +
 	        		" WHERE contigid = '" + ctgName + "' ";
@@ -399,21 +452,22 @@ public class CoreDB {
 		catch (Exception e) {ErrorReport.prtReport(e, "cannot save contig pairwise counts to database");}
     }
     // CoreAnno - compute pairs
-    public void savePairAlignments ( Vector<AlignData> alignList ) throws Exception
-    {
+    public void savePairAlignments(Vector<AlignData> alignList, boolean isAAstcw) {
+    	if (isAAstcw) savePairAlignAA(alignList);
+    	else savePairAlignNT(alignList);
+    }
+    private void savePairAlignNT ( Vector<AlignData> alignList ) {
         if ( alignList.isEmpty() )return;
       
-        try
-        {
+        try {
         	PreparedStatement ps = mDB.prepareStatement("INSERT into pja_pairwise set " +
-                "AID=?, contig1=?, contig2=?, coding_frame1=?, coding_frame2=?, " +
+                "AID=?, contig1=?, contig2=?, align_frame1=?, align_frame2=?, " +  
                 "NT_olp_ratio=?, NT_olp_score=?, NT_olp_len=?, " +
                 "AA_olp_ratio=?, AA_olp_score=?, AA_olp_len=?, " +
-                "in_self_blast_set=?, in_uniprot_set=?, in_translated_self_blast=?," +
-                "shared_hitID=?, e_value=?, percent_id=?, alignment_len=?, " +
+                "shared_hitID=?, hit_type=?, e_value=?, percent_id=?, alignment_len=?, " +
                 "ctg1_start=?, ctg1_end=?, ctg2_start=?, ctg2_end=? ");
             mDB.openTransaction();
-            for (  AlignData alignObj : alignList )
+            for (AlignData alignObj : alignList)
             {
             	ps.setInt(1, 1);
                 ps.setString(2, alignObj.getName1());					// contig1
@@ -425,7 +479,7 @@ public class CoreDB {
                 ps.setInt(7, alignObj.getOLPmatch());
                 ps.setInt(8, alignObj.getOLPlen());				
                 
-                AlignData aaObj = alignObj.getAApwData();
+                AlignData aaObj = alignObj.getAApwData(); // DP results, always has AA results?
                 if (aaObj==null) {
                 	ps.setDouble(9, 0.0);
 	                ps.setInt(10, 0);
@@ -437,26 +491,73 @@ public class CoreDB {
 	                ps.setInt(11, aaObj.getOLPlen());	
                 }
                 BlastHitData hitData = alignObj.getHitData();
-                ps.setBoolean(12, hitData.getIsSelf());
-                ps.setBoolean(13, hitData.getIsShared());
-                ps.setBoolean(14, hitData.getIsTself());
+                ps.setString(12, hitData.getSharedHitID());
+                String type = hitData.getPairHitType();
+                if (type.length()>=40) {
+                	Out.PrtWarn("Hit Type too long: '" + type + "' for " + alignObj.getName1() + ", " + alignObj.getName2());
+                	type = type.substring(0, 39);
+                }
+                ps.setString(13, type); // CAS314 was 3 tinyints
                
-                ps.setString(15, hitData.getSharedHitID());
-                ps.setDouble(16, hitData.getEVal() ); 
-                ps.setInt(17, (int) hitData.getPercentID());
-                ps.setInt(18, hitData.getAlignLen());
+                ps.setDouble(14, hitData.getEVal() ); 
+                ps.setInt(15, (int) hitData.getPercentID());
+                ps.setInt(16, hitData.getAlignLen());
  
-                ps.setInt(19, hitData.getCtgStart());
-                ps.setInt(20, hitData.getCtgEnd());
-                ps.setInt(21, hitData.getHitStart());
-                ps.setInt(22, hitData.getHitEnd());
+                ps.setInt(17, hitData.getCtgStart());
+                ps.setInt(18, hitData.getCtgEnd());
+                ps.setInt(19, hitData.getHitStart());
+                ps.setInt(20, hitData.getHitEnd());
                 ps.execute();
             }
             mDB.closeTransaction();
         }
         catch (Exception e) {ErrorReport.prtReport(e, "cannot save pairwise data");} 	
     }
+    private void savePairAlignAA ( Vector<AlignData> alignList ) { // CAS314
+        if ( alignList.isEmpty() )return;
+      
+        try {
+        	PreparedStatement ps = mDB.prepareStatement("INSERT into pja_pairwise set " +
+                "AID=?, contig1=?, contig2=?," +
+                "AA_olp_ratio=?, AA_olp_score=?, AA_olp_len=?, " +
+                "shared_hitID=?, hit_type=?, e_value=?, percent_id=?, alignment_len=?, " +
+                "ctg1_start=?, ctg1_end=?, ctg2_start=?, ctg2_end=? ");
+            mDB.openTransaction();
+            for (AlignData aaObj : alignList) {
+            	int i=1;
+            	ps.setInt(i++, 1);
+                ps.setString(i++, aaObj.getName1());					// contig1
+                ps.setString(i++, aaObj.getName2());
+               
+                ps.setDouble(i++, aaObj.getOLPratio());
+                ps.setInt(i++, aaObj.getOLPmatch());
+                ps.setInt(i++, aaObj.getOLPlen());				
+                	
+                BlastHitData hitData = aaObj.getHitData();
+                ps.setString(i++, hitData.getSharedHitID());
+                ps.setString(i++, hitData.getPairHitType()); // CAS314 was 3 tinyints
+               
+                ps.setDouble(i++, hitData.getEVal() ); 
+                ps.setInt(i++, (int) hitData.getPercentID());
+                ps.setInt(i++, hitData.getAlignLen());
  
+                ps.setInt(i++, hitData.getCtgStart());
+                ps.setInt(i++, hitData.getCtgEnd());
+                ps.setInt(i++, hitData.getHitStart());
+                ps.setInt(i++, hitData.getHitEnd());
+                ps.execute();
+            }
+            mDB.closeTransaction();
+        }
+        catch (Exception e) {ErrorReport.prtReport(e, "cannot save pairwise data");} 	
+    }
+    public void savePairMsg (String msg) { // CAS314
+    	try {
+    		if (mDB.tableColumnExists("assem_msg", "pair_msg"))
+    			mDB.executeUpdate("update assem_msg set pair_msg='" + msg + "'");
+    	}
+    	catch (Exception e) {ErrorReport.prtReport(e, "Saving pair overview results");} 	
+    }
     public boolean setAnnotationDate() 
 	{
 		try {
@@ -517,12 +618,13 @@ public class CoreDB {
            curContig.setContigID( ctgName);
            curContig.setCTGID( rset.getInt(5) );
            
-           String seqString = ( getStringFromReader (rset.getCharacterStream( 1 ) ) ).trim();       
+           String seqString = (getStringFromReader(rset.getCharacterStream(1))).trim();       
            SequenceData consensus = new SequenceData ("consensus");
            
            consensus.setName( ctgName );
-           consensus.setSequence ( seqString );
-           // CAS313 consensus.setSequence ( SequenceData.normalizeBases( seqString, '*', Globals.gapCh ) );
+           // CAS313 consensus.setSequence ( SequenceData.normalizeBases( seqString, '*', Globals.gapCh ) ); 
+           consensus.setSequence (seqString );
+           
            curContig.setSeqData( consensus );
            curContig.setConsensusBases(consensus.getLength());
            curContig.setNumSequences( Integer.parseInt(rset.getString(3)) ); 

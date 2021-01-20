@@ -18,6 +18,7 @@ import java.lang.Comparable;
 import java.io.*;
 
 import sng.annotator.LineParser;
+import util.database.Globalx;
 import util.methods.ErrorReport;
 
 public class BlastHitData implements Serializable, Comparable <BlastHitData> 
@@ -55,9 +56,9 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 		boolean rc=false;
 		String err="";
 		
-		if (hitStart > maxCoord || hitEnd > maxCoord || ctgStart > maxCoord || ctgEnd > maxCoord) {
+		if (hitStart > maxCoord || hitEnd > maxCoord || seqStart > maxCoord || seqEnd > maxCoord) {
 			err = "Database entry: coordinates exceed limit of " + maxCoord + " -- ignoring " +
-			 "\n   " + contigID + " " + hitID + " " + ctgStart + " " + ctgEnd + " " + hitStart + " " + hitEnd;
+			 "\n   " + contigID + " " + hitID + " " + seqStart + " " + seqEnd + " " + hitStart + " " + hitEnd;
 			rc = true;
 		}
 		// XXX Heuristic for blast files; 32-bit on 64-bit machine causes this error
@@ -76,17 +77,16 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 		}catch (Exception e){ErrorReport.prtReport(e, "Print ignored hit");}
 		return true;		  
 	}
-	// LoadFromDB.loadBlastHitData for Basic AnnoDB
-	// 
+	// View: LoadFromDB.loadBlastHitData for Basic AnnoDB
 	public BlastHitData(String name, boolean isProtein, int start, int end, String msg) {
 		descForAlign = msg;
 		contigID = name;
-		hitIsAA = isProtein;
-		ctgStart = start;
-		ctgEnd = end;
+		isAAhit = isProtein;
+		seqStart = start;
+		seqEnd = end;
 	}
 	
-	// read blast file
+	// Annotator: read blast file for both DoUniprot and CoreAnno via DoBlast to load file
 	public BlastHitData (boolean isProtein, String line) {
 		String[] tokens = line.split("\t");
 		if (tokens.length < 12) {
@@ -99,8 +99,8 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 		alignLen = Integer.parseInt(tokens[3]);
 		mismatches = Integer.parseInt(tokens[4]);
 		gapOpen = Integer.parseInt(tokens[5]);
-		ctgStart = Integer.parseInt(tokens[6]);
-		ctgEnd = Integer.parseInt(tokens[7]);
+		seqStart = Integer.parseInt(tokens[6]);
+		seqEnd = Integer.parseInt(tokens[7]);
 		hitStart = Integer.parseInt(tokens[8]);
 		hitEnd = Integer.parseInt(tokens[9]);
 		eVal = Double.parseDouble(tokens[10]);
@@ -112,21 +112,19 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 			dbType = lp.getDBtype();
 		}
 		else {
-			if (parseWarnings < 20)
-				ErrorReport.reportError("Cannot parse: "  + line);
+			if (parseWarnings < 20) ErrorReport.reportError("Cannot parse: "  + line);
 			parseWarnings++;
-			if (parseWarnings == 20)
-				ErrorReport.reportError("No further warnings shown");
+			if (parseWarnings == 20) ErrorReport.reportError("No further warnings shown");
 			hitID = null;
 			return;
 		}
 		// this length problem is reported in DoUniProt
 		if (hitID.length() > 30) hitID = hitID.substring(0,30);
-		hitIsAA = isProtein;	
-		if (ctgEnd<=0) ctgEnd+=3; 	
-		if (ctgStart > ctgEnd) ctg_orient = -1;		
+		isAAhit = isProtein;	
+		if (seqEnd<=0) seqEnd+=3; 	
+		if (seqStart > seqEnd) ctg_orient = -1;		
 	}
-	// called from database routine: pairsTable.LoadPairFromDB, seqDetail.LoadFromDB
+	// View: called from database routine: pairsTable.LoadPairFromDB, seqDetail.LoadFromDB
 	public BlastHitData (int type, String line) {			
 		String[] tokens = line.split("\t");
 	
@@ -141,20 +139,18 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 			simPercent = Double.parseDouble(tokens[3]);
 			alignLen = Integer.parseInt(tokens[4]);
 			
-			ctgStart = Integer.parseInt(tokens[5]);
-			ctgEnd = Integer.parseInt(tokens[6]);
+			seqStart = Integer.parseInt(tokens[5]);
+			seqEnd = Integer.parseInt(tokens[6]);
 			hitStart = Integer.parseInt(tokens[7]);
 			hitEnd = Integer.parseInt(tokens[8]);
 			nFrame1 = Integer.parseInt(tokens[9]);
 			nFrame2 = Integer.parseInt(tokens[10]);
 	
-			//sharedHit = tokens[11];
-			int b = Integer.parseInt(tokens[12]);
-			int x = Integer.parseInt(tokens[13]);
-			if (b==1) isSelf=true;
-			if (x==1) isTself = true;
-			hitIsAA = false;	
-			if (ctgStart > ctgEnd) ctg_orient = -1;
+			sharedHitID = tokens[11];
+			pairHitType = (tokens.length>=13) ? tokens[12] : "Unk"; // Types: AA, NT, ORF 
+			if (pairHitType.startsWith(Globalx.typeAA) || pairHitType.startsWith(Globalx.typeORF)) isAAhit=true;	
+			
+			if (seqStart > seqEnd) ctg_orient = -1;
 			return;
 		}	
 		
@@ -164,15 +160,15 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 			hitID = tokens[1];
 			simPercent = Double.parseDouble(tokens[2]);
 			alignLen = Integer.parseInt(tokens[3]);
-			ctgStart = Integer.parseInt(tokens[4]);
-			ctgEnd = Integer.parseInt(tokens[5]);
+			seqStart = Integer.parseInt(tokens[4]);
+			seqEnd = Integer.parseInt(tokens[5]);
 			hitStart = Integer.parseInt(tokens[6]);
 			hitEnd = Integer.parseInt(tokens[7]);
 			eVal = Double.parseDouble(tokens[8]);
 			bitScore = Float.parseFloat(tokens[9]);
 			
 			int x = Integer.parseInt(tokens[11]);
-			if (x==1) hitIsAA = true; 
+			if (x==1) isAAhit = true; 
 			blastRank = Integer.parseInt(tokens[12]);
 			filtered = Integer.parseInt(tokens[13]);
 			
@@ -181,48 +177,46 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 			dbTaxo = tokens[15];
 			
 			rank = Integer.parseInt(tokens[18]); // filter_best+filter_ovbest+filter_gobest
-			if (ctgStart > ctgEnd) ctg_orient = -1;
+			if (seqStart > seqEnd) ctg_orient = -1;
 			return;
 		}	
 	}
-	
-	// sorting blast hits for pairwise comparison
+	/******************************************************************************/
+	// sorting blast hits for pairwise comparison  CAS314 sort on bitscore only
 	public int compareTo(BlastHitData b) {
-		if (this.eVal < b.eVal) return -1;
-		if (this.eVal == b.eVal && this.bitScore > b.bitScore) return -1;
-		if (this.eVal == b.eVal && this.bitScore == b.bitScore) return 0;
-		return 1;
+		if (this.bitScore > b.bitScore) return -1;
+		if (this.bitScore < b.bitScore) return 1;
+		return 0;
 	}
 
 	/**
-	 *  for Seq-seq pair (see below) - formatted in 3 different places
+	 * GetDescription for AlignData
+	 *  1. for Similar pairs  - formatted in 3 different places
 	 */
 	public String getHitBlast(boolean isNT) {
-		if (isNT && isTself) return "";   // hit from tblastx
-		if (!isNT && !isTself) return ""; // hit from megablast
+		if (isNT && isAAhit) return "";   // hit from tblastx
+		if (!isNT && !isAAhit) return ""; // hit from AA->
 		String e = String.format("%.1E", eVal);
 		if (eVal==0.0) e = "0.0";
 		
-		return "Hit: " + e + ", " + (int) (simPercent+0.5)  +  "%, Align " + alignLen;
+		return String.format("Pair Hit: %s, %d%s, Align %d", e, (int) (simPercent+0.5), "%", alignLen);
 	}
 	/**********************************
-	 *  Constructed in: (same as getHitBlast above)
+	 *  2. Constructed in: 
 	 *    Seq-Hit: seqDetail.SeqDetailPanel.getHitMsg  for Sequence  Detail
 	 *    Seq-Hit: seqDetail.LoadFromDB.loadBlastHitData for Basic AnnoDB
 	*****/
 	public String getHitBlast() { 
 		return descForAlign;
 	}
-	
 	public String getHitBlast(int len1, int len2) { 
 		String e = String.format("%.1E", eVal);
 		if (eVal==0.0) e = "0.0";
 		String x = " " + e + " " + (int) (simPercent+0.5)  +  "% AL: " + alignLen;
-		x += "  ( " + ctgStart + " " + ctgEnd +  " " + len1 + " )";
+		x += "  ( " + seqStart + " " + seqEnd +  " " + len1 + " )";
 		x += "  ( " + hitStart + " " + hitEnd +  " " + len2  + " )";
 		return x;
 	}
-	
 	// annotator.DoUniProt
     public void setPID ( int p ) {  /*PID = p;*/ }  // never used
     public void setCTGID (int p) {CTGID = p;}
@@ -242,14 +236,14 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
     // Contig
     public String getContigID() { return contigID;}  
     public int getCTGID() { return CTGID;} 
-    public int getCtgStart( ) { return ctgStart; }    
-    public int getCtgEnd ( ) { return ctgEnd; }   
+    public int getCtgStart( ) { return seqStart; }    
+    public int getCtgEnd ( ) { return seqEnd; }   
     public int getCtgOrient ( ) { return ctg_orient; }
     public int getMisMatches() { return mismatches;}
     public int getGapOpen() { return gapOpen;}
     
 	// DB hit or ctg2 hit
-    public boolean isAAhit () { return hitIsAA;}
+    public boolean isAAhit () { return isAAhit;}
     public String  getHitID ( ) { return hitID; }
     public int getHitStart() { return hitStart; }
     public int getHitEnd() { return hitEnd; }   
@@ -276,9 +270,9 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 	public int getFrame1() { return nFrame1;}
 	public int getFrame2() { return nFrame2;}
 	
-	// pairwise: nucleotide coordinates even though tblastx was used
+	// pairwise: nucleotide coordinates
 	public int getFrame1(int ntlen) {
-		return calcFrame(ntlen, ctgStart, ctgEnd);
+		return calcFrame(ntlen, seqStart, seqEnd);
 	}
 	public int getFrame2(int ntlen) {
 		return calcFrame(ntlen, hitStart, hitEnd);
@@ -290,27 +284,34 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 			start = len - start + 1;
 			orient = -1;
 		}
-		frame = start % 3;
-		if (frame==0) frame = 3;
-		if (orient<0) frame = -frame;
+		if (isAAhit) {
+			frame = start % 3;
+			if (frame==0) frame = 3;
+			if (orient<0) frame = -frame;
+		}
+		else { // CAS314
+			frame = (orient<0) ? -1 : 1;
+		}
 		return frame;
 	}
-	public void setIsHit (boolean b) {isDB = b;}
-	public void setIsSelf (boolean b) {isSelf = b;};
-	public void setIsTself (boolean b) {isTself = b;}
+	
 	public void setSharedHitID(String s) { sharedHitID = s;}
-	public boolean getIsHit () {return isDB;}
-	public boolean getIsSelf () {return isSelf;};
-	public boolean getIsTself () {return isTself;}	
+	
+	public void setPairHitType(String type) { // typeAA, typeORF, typeNT
+		if (pairHitType.equals("")) pairHitType = type;
+		else if (!pairHitType.contains(type)) pairHitType += "::" + type;
+	}
+	
 	public boolean getIsShared () {return (sharedHitID!="");}	
-	public String getSharedHitID() { return sharedHitID;}
+	public String getSharedHitID() { return sharedHitID;} // annoDB hits
+	public String getPairHitType() {return pairHitType;} // pair hits
 		
 	public void clear(){
 		contigID=hitID=dbType=sharedHitID="";
 		simPercent=eVal=0.0;
-		alignLen=mismatches=gapOpen=ctgStart=ctgEnd=hitStart=hitEnd=0;
+		alignLen=mismatches=gapOpen=seqStart=seqEnd=hitStart=hitEnd=0;
 		blastRank=rank=ctg_orient=filtered=0;
-		isDB=isSelf=isTself=false;	
+		pairHitType = sharedHitID = "";	
 	}
 	 
 	// from database or computed
@@ -325,12 +326,9 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
     public String hitID = "";
 	private double simPercent; // stored in database as integer in field percent_id
 	private int alignLen;
-	private int mismatches;
-	private int gapOpen;
-	private int ctgStart;	// coordinates start at 1
-	private int ctgEnd;
-	private int hitStart;
-	private int hitEnd;
+	private int mismatches, gapOpen;
+	private int seqStart, seqEnd;	// coordinates start at 1
+	private int hitStart, hitEnd;
 	private float bitScore;
 	private double eVal;
 	
@@ -338,16 +336,15 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 	private int blastRank = 0;
 	private int rank=0;
 	private int ctg_orient = 1;
-	private boolean hitIsAA = false;
+	private boolean isAAhit = false;
 	private String descForAlign="";
 	
 	// specific for DB hits
 	private String dbType = ""; 		// blast file or sequence type
-	private String dbTaxo = ""; 		// from PAVE parameter	
-	private int filtered=0;			// computed in DoUniProt
+	private String dbTaxo = ""; 		// from TCW parameter	
+	private int filtered=0;				// computed in DoUniProt
 
 	// pairwise alignments
-	private boolean isDB=false, isSelf=false, isTself=false;
-	private String sharedHitID = "";
+	private String sharedHitID = "", pairHitType="";
 	private static final long serialVersionUID = 1;
 }

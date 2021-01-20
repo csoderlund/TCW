@@ -11,16 +11,11 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.PrintWriter;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -41,6 +36,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import sng.viewer.STCWFrame;
+import sng.util.ExportFile;
 import util.database.Globalx;
 import util.methods.ErrorReport;
 import util.methods.Out;
@@ -232,7 +228,7 @@ public class BasicTablePanel extends JPanel {
 						dArr[c++] = (Double) theTable.getValueAt(x, y);
 					}
 					else { 
-						Out.prt("BasicTablePanel: class? " + (String) theTable.getValueAt(x, y) + " " + dtype);
+						Out.prtToErr("BasicTablePanel: class? " + (String) theTable.getValueAt(x, y) + " " + dtype);
 					}
 				}
 				double [] results = Stats.averages(colName, dArr, false);
@@ -279,43 +275,12 @@ public class BasicTablePanel extends JPanel {
 		String prefix = (type.equals("Seq")) ? "BasicSeqTableColumns" : "HitTableColumns";
 		String fileName = prefix + Globalx.CSV_SUFFIX;
 		
-		PrintWriter pw = getTextToFile(fileName);
+		PrintWriter pw = ExportFile.getWriter(type + "Table", fileName, theMainFrame);
 		if (pw!=null) {
 			theTableModel.exportTableColumns(prefix, pw); 
 		}
 	}
-	private PrintWriter getTextToFile(String fileName) {
-		PrintWriter pw = null;
-		final JFileChooser fc = new JFileChooser(theMainFrame.lastSaveFilePath);
-		fc.setSelectedFile(new File(fileName));
 	
-		if (fc.showSaveDialog(theMainFrame) == JFileChooser.APPROVE_OPTION) {
-			final File f = fc.getSelectedFile();
-			final File d = f.getParentFile();
-			if (!d.canWrite()) { 
-				JOptionPane.showMessageDialog(null, 
-						"You do not have permission to write to " + d.getName(), 
-						"Warning", JOptionPane.PLAIN_MESSAGE);
-			}
-			else {
-				int writeOption = JOptionPane.YES_OPTION;
-				if (f.exists()) {
-					writeOption = JOptionPane.showConfirmDialog(theMainFrame,
-						    "The file already exists, overwrite it?", "Save to File",
-						    JOptionPane.YES_NO_OPTION);
-				}
-				if (writeOption == JOptionPane.YES_OPTION) {
-					theMainFrame.setLastPath(f.getPath());
-					try {
-				    		Out.prt("Writing to file " + f.getPath());
-				    		pw = new PrintWriter(new BufferedWriter(new FileWriter(f)));
-					}
-					catch(Exception e) { ErrorReport.prtReport(e, "Writing to file " + f.getPath());}
-				}
-			}
-		}
-		return pw;
-	}
 	public void tableResizeColumns() {
 		if(theTable.getRowCount() > 0) theTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		else theTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
@@ -410,14 +375,14 @@ public class BasicTablePanel extends JPanel {
          * if relIndex=3 from columns shown in table, absIndex=5 for index into 
          */
         private int getMappedColumn(int tableIndex) {
-	        	int iTable = 0;
-	        	int absIndex = -1;
-	        	
-	        	for(int iAbs=0; iAbs<colIsVisList.length && absIndex < 0; iAbs++) {
-	        		if(colIsVisList[iAbs] && (tableIndex == iTable)) absIndex = iAbs;
-	        		if(colIsVisList[iAbs]) iTable++;
-	        	}
-	        	return absIndex;
+        	int iTable = 0;
+        	int absIndex = -1;
+        	
+        	for(int iAbs=0; iAbs<colIsVisList.length && absIndex < 0; iAbs++) {
+        		if(colIsVisList[iAbs] && (tableIndex == iTable)) absIndex = iAbs;
+        		if(colIsVisList[iAbs]) iTable++;
+        	}
+        	return absIndex;
         }        
   	  	public class ColumnListener extends MouseAdapter {
 		    protected JTable table;
@@ -466,10 +431,11 @@ public class BasicTablePanel extends JPanel {
 			
 			int colCnt = getColumnCount();
 			int rowCnt = getRowCount();
-			Out.prt(1, "Processing " + rowCnt + " rows and " + colCnt + " columns");
+			Out.prtSp(0, "Processing " + rowCnt + " rows and " + colCnt + " columns");
 			
 			int x, y;
 			
+			pw.print("#"); // CAS314
 			for(y=0; y<colCnt; y++) {
 				if (y>0) line += delim;
 				line += getColumnName(y).replaceAll("\\s", "-"); 
@@ -489,7 +455,7 @@ public class BasicTablePanel extends JPanel {
 				if (x%1000==0) Out.r("Wrote " + x); 
 			}
 			pw.close();
-			Out.prt(1, "Finish export of " + getRowCount() + " rows");
+			Out.prtSp(0, "Complete writing " + getRowCount() + " rows");
 		}
         private String [] colNamesList = null;
 		private boolean [] colIsVisList = null;		

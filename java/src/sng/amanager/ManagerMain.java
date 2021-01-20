@@ -1,13 +1,10 @@
 package sng.amanager;
 
-import sng.database.Globals;
 import sng.database.Version;
-import util.database.Globalx;
 import util.database.HostsCfg;
-import util.methods.FileHelpers;
+import util.database.Globalx;
 
 public class ManagerMain {
-	static public boolean verbose=false;
 	
 	public static void main(String[] args) {
 		System.out.println("\n----- runSingleTCW v" + Version.strTCWver + " " + 
@@ -19,15 +16,15 @@ public class ManagerMain {
 			System.exit(0);
 		}
 		if (hasArg(args, "-d")) {
-			verbose=true;
-			System.out.println("Running in verbose mode");
+			Globalx.debug=true;
+			System.out.println("Running in global debug mode");
 		}
 		if (hasArg(args, "-v")) {
 			System.out.println("Check MySQL variables and search paths");
 			new HostsCfg(true);
 			System.exit(0);
 		}
-		FileHelpers.mergeDir(Globals.OLDLIBDIR, Globalx.PROJDIR, true); 
+		//FileHelpers.mergeDir(Globals.OLDLIBDIR, Globalx.PROJDIR, true); CAS314 don't need anymore
 		
 		ManagerFrame mf = new ManagerFrame();
 		mf.setVisible(true);

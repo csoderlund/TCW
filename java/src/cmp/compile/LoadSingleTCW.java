@@ -310,9 +310,9 @@ public class LoadSingleTCW {
 				int totalExp = rs.getInt(6);  // totalexp
 				int totalExpN = rs.getInt(7); // totalexpN
 				
-				int frame = rs.getInt(8)	; // o_frame
-				int start = rs.getInt(9); // o_coding_start
-				int end = rs.getInt(10);     // o_coding_end
+				int frame = rs.getInt(8); 	// o_frame
+				int start = rs.getInt(9); 	// o_coding_start
+				int end = rs.getInt(10);    // o_coding_end
 				
     			nAlign += (long) numAlign;
         		nExp   += (long) totalExp;  		
@@ -331,8 +331,9 @@ public class LoadSingleTCW {
         		}
         		else {
         			ntSeq = seqTmp.toLowerCase();
-        			ntSeq = ntSeq.replace("*", "n"); // TCW assembly can leave '*' in string
+        			//ntSeq = ntSeq.replace(Globalx.assmGap, Globalx.noNTstr); // CAS314 not anymore ->TCW assembly can leave '*' in string
         			if (frame<0)  ntSeq = getRevCompl(ntSeq);
+        			
         			// create AA seq
         			int cntStop=0;
         			char c=' ';
@@ -340,9 +341,10 @@ public class LoadSingleTCW {
         				String codon = ntSeq.substring(i, i+3);
         				c = aaChr.codonToAA(codon); // CAS313 changed from AAstatistics
         				aaSeq += c;
-        				if (c=='*') cntStop++;
+        				
+        				if (c==Globalx.stopCh) cntStop++;
         			}
-        			if (c=='*') cntStop--; // stop codon
+        			if (c==Globalx.stopCh) cntStop--; // stop codon
         			if (cntStop>0) Out.PrtWarn(seqName + " has stop " + nSeq + " codons in translation");
         		}
         		ps2.setInt(1, seqCnt);
@@ -437,6 +439,7 @@ public class LoadSingleTCW {
      	} // end loop through databases
  		
  		Out.PrtSpMsg(2, "Total");
+ 		
  		Out.PrtSpCntMsgTimeMem(3, seqMap.size(), "Sequences ", startTime);
      	return true;
 	}catch (Exception e) {ErrorReport.prtReport(e, "Creating sequence table");return false;

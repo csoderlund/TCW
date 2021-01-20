@@ -831,7 +831,7 @@ public class Pairwise {
 		  // Pearson Correlation Coefficient: verified with on-line http://www.endmemo.com/statistics/cc.php
 	    private double getCorrelation(int ix, int iy, Double [] xVect, Double [] yVect) {
 	    		if (xVect==null || yVect==null) {
-	    			Out.debug(ix + "," + iy + " null xVect or yVect ");
+	    			Out.bug(ix + "," + iy + " null xVect or yVect ");
 	    			return 0;
 	    		}
 	        double sumX=0.0, sumY=0.0, sumXY = 0.0, powX=0.0, powY=0.0;

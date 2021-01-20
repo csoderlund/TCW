@@ -150,7 +150,7 @@ public class EditBlastPanel extends JPanel {
 		row.add(Static.createLabel("Parameters"));
 		row.add(Box.createHorizontalStrut(5));
 		
-		msg = (tp==AA) ? getSearchArgs(cmbSearchPgms[AA].getSelectedItem()) : BlastArgs.getBlastnOptions();
+		msg = (tp==AA) ? BlastArgs.getDiamondArgsORF() : BlastArgs.getBlastArgsORF();
 		txtParams[tp] = Static.createTextField(msg, 25);
 		row.add(Box.createHorizontalStrut(5));
 		row.add(txtParams[tp]);
@@ -162,8 +162,8 @@ public class EditBlastPanel extends JPanel {
 	}
 
 	private String getSearchArgs(String selected) {
-		if (selected.equals("blast")) return BlastArgs.getBlastpOptionsMTCW();
-		else if (selected.equals("diamond")) return BlastArgs.getDiamondOpDefaultsMTCW();
+		if (selected.equals("blast")) return BlastArgs.getBlastArgsORF();
+		else if (selected.equals("diamond")) return BlastArgs.getDiamondArgsORF();
 		else return "";
 	}
 	

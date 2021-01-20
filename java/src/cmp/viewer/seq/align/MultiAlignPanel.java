@@ -186,9 +186,11 @@ public class MultiAlignPanel extends BaseAlignPanel {
 		if (isDNA) line2="Nucleotide - no scores";
 		
 	// popup
-		UserPrompt pObj = new UserPrompt(theMainFrame, title);
+		UserPrompt pObj = new UserPrompt(theMainFrame, "MSA_Col_Scores");
 		pObj.setVisible(true);
-		if (!pObj.cont()) return;
+		String dir = System.getProperty("user.dir")+ "/" + Globalx.ALIGNDIR;
+		String fileName = title.replace(" ","_"); // no ':' allowed either
+		if (!pObj.getAction(dir, fileName)) return;
 			
 	// create vector
 		Vector <String> lines = new Vector <String> ();

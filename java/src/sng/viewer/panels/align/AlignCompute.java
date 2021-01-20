@@ -9,12 +9,13 @@ package sng.viewer.panels.align;
 
 import java.lang.Math;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.TreeSet;
 import java.util.HashMap;
 import java.util.Vector;
 
-import sng.dataholders.*;
+import sng.dataholders.BlastHitData;
+import sng.dataholders.ContigData;
+import sng.dataholders.SequenceData;
+import sng.dataholders.MultiCtgData;
 import sng.viewer.panels.seqDetail.SeqDetailPanel;
 import util.align.AlignPairOrig;
 import util.database.Globalx;
@@ -24,20 +25,22 @@ import util.methods.Out;
 
 public class AlignCompute 
 {
-	static boolean debug = false;
-	
 	public static final short frameResult=1; 
 	public static final short bestResult=2; // not currently used
 	public static final short allResult=3;
 	public static final short orientResult=4;
+	public static final short pairResult=5;
 	
 	/**************** STATIC ALIGNMENT METHODS *******************************/
 	/********************************************
 	 * BasicHitFilterPanel: Set of DB hit - sequence pairs to align
 	 */
 	static public Vector<AlignData> DBhitsAlignDisplay(
-			Vector <String> seqList, Vector <String> hitList, Vector <BlastHitData> blastList,
-			HashMap <String, ContigData> seqObj,HashMap <String, SequenceData> hitObj, 
+			Vector <String> seqList, 
+			Vector <String> hitList, 
+			Vector <BlastHitData> blastList,
+			HashMap <String, ContigData> seqObj,
+			HashMap <String, SequenceData> hitObj, 
 			short type, boolean isP)  
 	{
 		 dpAlgoObj = new AlignPairOrig ();
@@ -46,7 +49,7 @@ public class AlignCompute
 		 isAAsTCW = isP;
 		
 		 for (int i=0; i<seqList.size(); i++) {
-			 ContigData ctgData = seqObj.get(seqList.get(i));
+			 ContigData   ctgData = seqObj.get(seqList.get(i));
 			 SequenceData seqData = hitObj.get(hitList.get(i));
 			 seqData.setBlastHitData(blastList.get(i));
 			 hitAlign(ctgData, seqData);
@@ -54,28 +57,25 @@ public class AlignCompute
 		 return alignList;
 	}
 	 /***********************************************
-	 *XXX				Sequence to DB hits 
+	 *XXX	Sequence to DB hits - SeqTopRowTab for SeqDetails
      ***********************************************/
     /*******************************************************
      * align selected or align selected all (i.e. all frames)
      * type is best or all_frames
      */
 	static public Vector<AlignData> DBhitsAlignDisplay (
-			String [] selected, MultiCtgData listData, short type, boolean isP, 
+			String [] selected, 
+			ContigData ctgData1, 
+			short type, boolean isP, 
 			SeqDetailPanel seqPanel) throws Exception 
 	{
        dpAlgoObj = new AlignPairOrig ();
        alignList = new Vector<AlignData> ();
        typeResult = type;
        isAAsTCW = isP;
-        
-        // just one contig in set
-  	   TreeSet<String> contigSet = listData.getContigIDSet(); 
-  	   Iterator<String> it = contigSet.iterator();
-       ContigData ctgData1 = listData.findContig( it.next() );	
-		
+       
        for (String hitName : selected) {
-	   		String seq = seqPanel.getHitSeq(hitName);
+	   		String seq =    seqPanel.getHitSeq(hitName);
 	   		String dbtype = seqPanel.getHitType(hitName);
 	   		
 	   		SequenceData seqData = new SequenceData(dbtype);
@@ -105,14 +105,14 @@ public class AlignCompute
 		ctgDataI = ctgData;
 		ctgDataII = null;
 		
-		SequenceData seq1 = ctgData.getSeqData(); // for proteins
+		SequenceData   seq1 = ctgData.getSeqData(); // for proteins
 		if (!isAAsTCW) seq1 = seq1.newSeqDataNoGap();
 		
 		SequenceData seq2 = seqData.newSeqDataNoQual();
 		BlastHitData hitData = seqData.getBlastHitData();
 		
 		if (!hitData.isAAhit()) {	// database is nt and hit is nt
-			seq2.setIsDNA(); 
+			seq2.setIsNT(); 
 			if (typeResult==frameResult) typeResult=bestResult;
 			hitAlignNT(seq1, seq2, 1, 0, hitData);
 		}
@@ -230,19 +230,48 @@ public class AlignCompute
 	}
 		
     /************************************************************************
-     * XXX Making pair code separate so don't mess up hit code
-     */				
-     /*************************************************************************
-     * CoreAnno.doHomologyTests: pairwise Nucleotide against nucleotide alignment
+     * CoreAnno.doHomologyTests: 
      *************************************************************************/
 	static public AlignData pairAlignCore ( AlignPairOrig dpAlgo, 
-			ContigData ctgData1,  ContigData ctgData2, BlastHitData hitData,
-			short type)
+			ContigData ctgData1,  ContigData ctgData2, BlastHitData pairHitData, boolean isAAstcw)
+	{	
+		if (isAAstcw) 	return pairAlignCoreAA(dpAlgo, ctgData1, ctgData2, pairHitData, pairResult);	
+		else 			return pairAlignCoreNT(dpAlgo, ctgData1, ctgData2, pairHitData, bestResult);
+	}
+	 /************************************************************************
+     * AA-sTCW
+     *************************************************************************/
+	static private AlignData pairAlignCoreAA ( AlignPairOrig dpAlgo, 
+			ContigData ctgData1,  ContigData ctgData2, BlastHitData pairHitData, short type)
 	{	
 		dpAlgoObj = dpAlgo;
         alignList = new Vector<AlignData> ();
 
-		ctgDataI = ctgData1;
+		ctgDataI =  ctgData1;
+		ctgDataII = ctgData2;
+		typeResult = type;
+		
+		SequenceData aaSeq1 = ctgData1.getSeqData();
+		SequenceData aaSeq2 = ctgData2.getSeqData();
+		aaSeq1.setIsAA(); // CAS314
+		aaSeq2.setIsAA();
+		
+		AlignData aaObj = alignAAdoDP (aaSeq1, aaSeq2, 0, 0, pairHitData);
+		
+		return aaObj;
+	}
+	/************************************************************************
+     * NT-sTCW
+     * CAS314 - rewrote so DP frame is always ORF frame or pair hit frame.
+     * 	too confusing in viewSTCW if its neither - and just means its ambiguous
+     *************************************************************************/
+	static private AlignData pairAlignCoreNT ( AlignPairOrig dpAlgo, 
+			ContigData ctgData1,  ContigData ctgData2, BlastHitData pairHitData, short type)
+	{	
+		dpAlgoObj = dpAlgo;
+        alignList = new Vector<AlignData> ();
+
+		ctgDataI =  ctgData1;
 		ctgDataII = ctgData2;
 		typeResult = type;
 		
@@ -251,71 +280,73 @@ public class AlignCompute
 		AlignData ntObj=null, aaObj=null;
 		boolean isGood=false;
 		
-		// ORF frame
-		int f1=ctgData1.getFrame(), f2=ctgData2.getFrame();
-		aaObj = alignAAdoDP (ntSeq1, ntSeq2, f1, f2, hitData);
+	// The ORF frames may not be the same as the Pair Hit frame; only use HIT if better than ORF  
+		int orf_F1=ctgData1.getFrame();
+		int orf_F2=ctgData2.getFrame(); 
+		
+		int hit_F1 = pairHitData.getFrame1(ntSeq1.getLength()); // Pair Hit frame  1/-1 for NT
+		int hit_F2 = pairHitData.getFrame2(ntSeq2.getLength());
+		
+		boolean isSameFr  = (orf_F1==hit_F1 && orf_F2==hit_F2);
+		boolean isSameOr  = (isSameOrient(hit_F1, orf_F1) && isSameOrient(hit_F1, orf_F1));
+		boolean isAAhit   = pairHitData.isAAhit();
+		
+		aaObj = alignAAdoDP (ntSeq1, ntSeq2, orf_F1, orf_F2, pairHitData);				// ALIGN ORF frame
 		if (isGoodEnough(aaObj)) isGood = true;
 
-		// tblastx frames
-		int tf1=0, tf2=0;
-		if (!isGood && hitData.getIsTself()) {
-			tf1 = hitData.getFrame1(ntSeq1.getLength());
-			tf2 = hitData.getFrame2(ntSeq2.getLength());
+	// AA hit with different frames
+		if (!isGood && isAAhit && !isSameFr) {
+			AlignData fObj = alignAAdoDP (ntSeq1, ntSeq2, hit_F1, hit_F2, pairHitData); // ALIGN AA Hit frame
+			if (isGoodEnough(fObj)) {
+				isGood = true;
+				aaObj=fObj;
+			}	
+			else if (cmpAlignData(fObj, aaObj)) aaObj = fObj; 
+		}
+		
+	// Align NT in the selected aaObj orientation - if NT hit, then ORF orientation
+		ntObj = alignNTdoDP (ntSeq1, ntSeq2, aaObj.getFrame1(), aaObj.getFrame2(), pairHitData); // ALIGN NT
+		
+	// Return 
+		// (1) is GOOD regardless of AA or NT
+		// (2) is AA hit - use either ORF or hit
+		// (3) is NT hit - same orientation as ORF - use it even if not good
+		if (isGood || isAAhit || (!isAAhit && isSameOr)) { 
+			ntObj.setAApwData(aaObj); // AA attached to NT AlignData object
+			return ntObj;
+		}
+		
+	// NT only hit, ORF frame bad, NT not same orientation as ORF
+		cnt6tries++; 
+		if (Globalx.debug) {
+			String msg = String.format("(this %d %d; sim %3.1f; stops %d; len %d) (ORF %d %d, Hit %d %d) %s %s",   
+				aaObj.getFrame1(), aaObj.getFrame2(), aaObj.getOLPsim(), aaObj.getOLPstops(), aaObj.getOLPlen(),
+				orf_F1, orf_F2, hit_F1, hit_F2, ctgDataI.getContigID(), ctgDataII.getContigID());
+			Out.debug("Try #" + cnt6tries + msg + "                    ");
+		}
+		for ( int i = 3; i >= -3; i-- ) {
+			if (i==0 || !isSameOrient(hit_F1, i)) continue;
 			
-			if (tf1!=f1 || tf2!=f2) {
-				AlignData fObj = alignAAdoDP (ntSeq1, ntSeq2, tf1, tf2, hitData);
-				if (isGoodEnough(fObj)) {
-					isGood = true;
-					aaObj=fObj;
-				}	
-				else if (cmpAlignData(fObj, aaObj)) aaObj = fObj; 
+			for ( int j = 3; j >= -3; j-- ) {
+				if (j==0 || !isSameOrient(hit_F2, j)) continue;
+				if (i==orf_F1  && j==orf_F2)continue;
+				
+				AlignData aa = alignAAdoDP (ntSeq1, ntSeq2, i, j, pairHitData);	
+				if (cmpAlignData(aa, aaObj)) aaObj = aa;
 			}
 		}
-		ntObj = alignNTdoDP (ntSeq1, ntSeq2, aaObj.getFrame1(), aaObj.getFrame2(), hitData);
-		int nf1 = aaObj.getFrame1(), nf2 = aaObj.getFrame2();
-		
-		if (!isGood) {
-			if (ntObj.getOLPsim()<95) {
-				AlignData nObj = alignNTdoDP (ntSeq1, ntSeq2, nf1, -nf2, hitData);
-				if (ntObj.getOLPsim()<nObj.getOLPsim()) {
-					ntObj = nObj;
-					nf2 = -nf2;
-				}
-				else isGood=true;
-			}
+		if (Globalx.debug) {
+			String msg = String.format("(this %d %d; sim %3.1f; stops %d; len %d)",   
+					aaObj.getFrame1(), aaObj.getFrame2(), aaObj.getOLPsim(), aaObj.getOLPstops(), aaObj.getOLPlen());
+			Out.debug("    #" + cnt6tries + msg + "                    ");
 		}
-		// find best orientation 
-		if (!isGood) { 
-			boolean orient = isSameOrient(nf1, nf2);
-			cnt36++;
-			if (debug) {
-				String msg = String.format(" (sim %3.1f; stops %d)",   
-					aaObj.getOLPsim(), aaObj.getOLPstops());
-				System.err.print("   Try #" + cnt36 + msg + " " + aaObj.getName1() + " " + aaObj.getName2());
-			}
-			for ( int i = 3; i >= -3; i-- )
-	    			for ( int j = 3; j >= -3; j-- )
-	    			{
-	    				if (i==0   || j==0)   continue;
-	    				if (i==f1  && j==f2)  continue;
-	    				if (i==tf1 && j==tf2) continue;
-	    				boolean o = isSameOrient(i, j);
-	    				if (o!=orient) continue;
-	    				
-	    				AlignData aa = alignAAdoDP (ntSeq1, ntSeq2, i, j, hitData);	
-	    				if (cmpAlignData(aa, aaObj)) aaObj = aa;
-	    			}
-			if (debug) {
-				String msg = String.format(" (sim %3.1f; stops %d)",   aaObj.getOLPsim(), aaObj.getOLPstops());
-				System.err.print("   finish #" + cnt36 + msg + "                    \n");
-			}
-		}
-		if (ntObj!=null && aaObj!=null) ntObj.setAApwData(aaObj);
-		
-		clear(false);
+	
+		ntObj.setAApwData(aaObj);
 		return ntObj;
 	}
-	private static int cnt36=0;
+	public static void setCnt6() {cnt6tries=0;}
+	public static int getCnt6() {return cnt6tries;}
+	private static int cnt6tries=0;
 	private static boolean isSameOrient(int f1, int f2) {
 		if (f1>0 && f2>0) return true;
 		if (f1<0 && f2<0) return true;
@@ -334,6 +365,8 @@ public class AlignCompute
 	}
     /*************************************************************************
      * PairTopRowTab: display pairwise contigs
+     * Get sequence and ORF frame from ctgData
+     * Get blast hit values and hit frame from hitData
      *************************************************************************/
 	static public Vector<AlignData> pairAlignDisplay ( 
 	    		MultiCtgData pairCtgObj, short type ) throws Exception
@@ -350,7 +383,7 @@ public class AlignCompute
     	    SequenceData ntSeq2 = ctgDataII.getSeqData().newSeqDataNoGap();
 	    			
             BlastHitData hitData = pairCtgObj.getPairHit(); // Blast and CoreAnno values from database
-		 	int f1 = hitData.getFrame1(); 
+		 	int f1 = hitData.getFrame1();  
  			int f2 = hitData.getFrame2(); 
  		
 		 	AlignData alignObj;
@@ -387,6 +420,35 @@ public class AlignCompute
         				if (alignObj != null) alignList.add(alignObj);
         			}
             }
+	        clear(true);
+	        return alignList;
+		}
+		catch (Exception e) {crash(e, "multiple pairwise align");}
+		return null;
+	 }
+	 /*************************************************************************
+     * PairTopRowTab: display pairwise contigs for AA-STCW CAS314
+     *************************************************************************/
+	static public Vector<AlignData> pairAlignDisplayAA (MultiCtgData pairCtgObj) throws Exception
+	{
+		try {
+	        dpAlgoObj = new AlignPairOrig ();
+	        alignList = new Vector<AlignData> ();
+	        typeResult = pairResult;
+	   
+	        ctgDataI = pairCtgObj.getContigAt(0);	
+      		SequenceData aaSeq1 = ctgDataI.getSeqData().newSeqDataNoGap();
+      		aaSeq1.setIsAA();
+      		
+    	    ctgDataII = pairCtgObj.getContigAt(1);
+    	    SequenceData aaSeq2 = ctgDataII.getSeqData().newSeqDataNoGap();
+    	    aaSeq2.setIsAA();
+    	    
+            BlastHitData hitData = pairCtgObj.getPairHit(); // Blast and CoreAnno values from database
+		 	
+		 	AlignData alignObj = alignAAdoDP (aaSeq1, aaSeq2, 0, 0, hitData);
+        	if (alignObj != null) alignList.add(alignObj);
+            
 	        clear(true);
 	        return alignList;
 		}
@@ -447,12 +509,12 @@ public class AlignCompute
 			}
 			for (int j = 0; j<dbSeqList2.size(); j++)
 			{
-	            	SequenceData dbSeqData2 = dbSeqList2.get(j);
-	            	String hitname2 = dbSeqData2.getName();
-	            	if (sharedHitName.equals(hitname2)) {
-	                hitAlign (ctgData2, dbSeqData2);
-	                	break;
-	            	}
+            	SequenceData dbSeqData2 = dbSeqList2.get(j);
+            	String hitname2 = dbSeqData2.getName();
+            	if (sharedHitName.equals(hitname2)) {
+            		hitAlign (ctgData2, dbSeqData2);
+                	break;
+            	}
 			}
 		}	
 	    clear(true);
@@ -480,12 +542,10 @@ public class AlignCompute
 				return null;	
 		String seq1 = dpAlgoObj.getHorzResult(Globalx.gapCh); 
 		String seq2 = dpAlgoObj.getVertResult(Globalx.gapCh);
-		ntSeq1.buildDPalignedSeq( seq1 );
-		ntSeq2.buildDPalignedSeq( seq2 );
-
+	
 		AlignData curAlign = new AlignData ( 
 				dpAlgoObj, ctgDataI, ctgDataII, 
-				ntSeq1, ntSeq2, 0, 0, hitData, isAAsTCW, seq1, seq2);
+				ntSeq1, ntSeq2, f1, f2, hitData, isAAsTCW, seq1, seq2);
 
 		return curAlign;
 	} 
@@ -510,9 +570,6 @@ public class AlignCompute
 			// Builds the alignment string with trailing and internal gaps
 			String seq1 = dpAlgoObj.getHorzResult(Globalx.gapCh); 
 			String seq2 = dpAlgoObj.getVertResult(Globalx.gapCh); 
-			// Changes sequence to add gaps within, but no trailing
-			aaSeq1.buildDPalignedSeq( seq1 );
-			aaSeq2.buildDPalignedSeq( seq2 );	
 			
 			return new AlignData ( 
 					dpAlgoObj, ctgDataI, ctgDataII, 
@@ -524,14 +581,14 @@ public class AlignCompute
     // heuristics - true: cur better than best, false: keep best
     static private boolean cmpAlignData(AlignData cur, AlignData best) 
     {
-    		if (best==null) return true;
-    		if (cur==null) return false;
-    		double sim1 = cur.getOLPsim();
-    		double sim2 = best.getOLPsim();
-    		if (sim1>sim2) return true;
-    		if (sim1<sim2) return false;
-    		if (cur.getOLPstops() > best.getOLPstops()) return true;
-    		return false;
+		if (best==null) return true;
+		if (cur==null) return false;
+		double sim1 = cur.getOLPsim();
+		double sim2 = best.getOLPsim();
+		if (sim1>sim2) return true;
+		if (sim1<sim2) return false;
+		if (cur.getOLPstops() > best.getOLPstops()) return true;
+		return false;
     } 
 
     static private void crash(Exception err, String msg) {
@@ -543,7 +600,7 @@ public class AlignCompute
  	final static boolean isNT=true;
  	static int typeResult=frameResult; 
  	static AlignPairOrig dpAlgoObj;
- 	static ContigData ctgDataI=null, ctgDataII=null;
+ 	static ContigData ctgDataI=null, ctgDataII=null; // ctgDataII != null for runSTCW.pairwise
  	static private boolean isAAsTCW = false;
  	
  	// results

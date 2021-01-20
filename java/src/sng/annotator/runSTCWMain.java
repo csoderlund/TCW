@@ -30,7 +30,6 @@ public class runSTCWMain
 	private static final String ProjDirName = Globalx.PROJDIR + "/";
 	
 	// command line parameters
-	public static boolean debug = false;
 	public static boolean doRecalcORF=false;
 	public static boolean bDelAnno = false; // set to delete annotation
 	
@@ -104,7 +103,7 @@ public class runSTCWMain
 			if (mDB==null) ErrorReport.die("Error creating database connection for " + stcwDB);
 			
 			Schema s = new Schema(mDB);
-			if (!s.current()) s.update();
+			s.update(); // CAS314 was checking ifCurrent(), but then cannot 'force' update for testing
 						
 			sqlObj = new CoreDB(mDB, bdoAnno, stcwDB, stcwID);
 			sqlObj.setIsAAtcw();
@@ -114,7 +113,7 @@ public class runSTCWMain
 		
 		annoObj.setMainObj(uniObj, blastObj, sqlObj, mDB);
 		uniObj.setMainObj(annoObj, blastObj, mDB);
-		blastObj.setMainObj(uniObj, annoObj, sqlObj);		
+		blastObj.setMainObj(uniObj, annoObj, sqlObj, stcwID);		
 		
 		/** 5. all checks **/
 		try
@@ -260,8 +259,8 @@ public class runSTCWMain
 			noPrompt=true;
 		}
 		if(hasOption(args, "-d")) {
-			Out.prt("Addional information will be printed");
-			debug = true;
+			Out.prt("Set global debug on");
+			Globalx.debug = true;
 		}
 		// only one of the following
 		if(hasOption(args, "-o")) { 

@@ -121,14 +121,14 @@ public class ContigViewPanel extends JPanel implements ClipboardOwner
 		mainPanel.setVisible( false );
 		
 		// Add each panel to the parent panel
-		baseAlignPanelsVec = new Vector <BaseAlignPanel> ();
+		basePanelsVec = new Vector <ContigBasePanel> ();
 		
 		Iterator <ContigAlignPanel> iter = ctgPanels.iterator();
 		while ( iter.hasNext() )
 		{
-			BaseAlignPanel curPanel = (BaseAlignPanel) iter.next ();
+			ContigBasePanel curPanel = (ContigBasePanel) iter.next ();
 			mainPanel.add( curPanel );
-			baseAlignPanelsVec.add( curPanel );
+			basePanelsVec.add( curPanel );
 		}
 
 		mainPanel.add( Box.createVerticalStrut(30) );
@@ -306,7 +306,7 @@ public class ContigViewPanel extends JPanel implements ClipboardOwner
 	private Vector<String> getSeqIDs ( ) {
 		Vector<String> out = new Vector<String>();
 		
-		for (BaseAlignPanel curPanel : baseAlignPanelsVec) {	
+		for (ContigBasePanel curPanel : basePanelsVec) {	
 			out.addAll(curPanel.getSeqIDs());
 		}	
 		return out;
@@ -317,7 +317,7 @@ public class ContigViewPanel extends JPanel implements ClipboardOwner
 	}
 	
 	private void setSelectedClones(String strNamePattern)  {
-		for (BaseAlignPanel curPanel : baseAlignPanelsVec)
+		for (ContigBasePanel curPanel : basePanelsVec)
 			curPanel.selectMatchSeqs(strNamePattern);
 	}
 	
@@ -328,9 +328,9 @@ public class ContigViewPanel extends JPanel implements ClipboardOwner
 			
 			// Have each contig panel add its selected ESTs to the set
 			TreeSet<String> selectedESTs = new TreeSet<String> ();
-			Iterator<BaseAlignPanel> iter = baseAlignPanelsVec.iterator();		
+			Iterator<ContigBasePanel> iter = basePanelsVec.iterator();		
 			while ( iter.hasNext() ) {
-				BaseAlignPanel curPanel = iter.next();
+				ContigBasePanel curPanel = iter.next();
 				curPanel.addSelectedSeqsToSet ( selectedESTs );			
 			}
 			
@@ -359,35 +359,35 @@ public class ContigViewPanel extends JPanel implements ClipboardOwner
 	}
 	
 	private void setShowSNPs ( boolean bShowSNPS ){		
-		Iterator<BaseAlignPanel> iter = baseAlignPanelsVec.iterator();
+		Iterator<ContigBasePanel> iter = basePanelsVec.iterator();
 		while ( iter.hasNext() ) {
 			ContigAlignPanel curPanel = (ContigAlignPanel)iter.next ();
 			curPanel.setShowSNPs ( bShowSNPS );
 		}
 	}
 	public void setShowBuriedAllPanels () {	
-		Iterator<BaseAlignPanel> iter = baseAlignPanelsVec.iterator();
+		Iterator<ContigBasePanel> iter = basePanelsVec.iterator();
 		while ( iter.hasNext() ) {
 			ContigAlignPanel curPanel = (ContigAlignPanel)iter.next ();
 			curPanel.setShowBuried ( menuShowBuried.getSelectedIndex() );
 		}
 	}
 	private void selectAll ( ) {
-		Iterator<BaseAlignPanel> iter = baseAlignPanelsVec.iterator();
+		Iterator<ContigBasePanel> iter = basePanelsVec.iterator();
 		while ( iter.hasNext() ) {
-			BaseAlignPanel curPanel = iter.next();
+			ContigBasePanel curPanel = iter.next();
 			curPanel.selectAll();
 		}		
 	}
 	private void selectNone ( ) {
-		Iterator<BaseAlignPanel> iter = baseAlignPanelsVec.iterator();
+		Iterator<ContigBasePanel> iter = basePanelsVec.iterator();
 		while ( iter.hasNext() ) {
-			BaseAlignPanel curPanel = iter.next();
+			ContigBasePanel curPanel = iter.next();
 			curPanel.selectNone();
 		}	
 	}
 	private void changeSortOrder ( int nNewOrder ) {
-		Iterator<BaseAlignPanel> iter = baseAlignPanelsVec.iterator();
+		Iterator<ContigBasePanel> iter = basePanelsVec.iterator();
 		while ( iter.hasNext() ) {
 			ContigAlignPanel curPanel = (ContigAlignPanel)iter.next ();
 			curPanel.changeSortOrder ( nNewOrder );
@@ -401,11 +401,11 @@ public class ContigViewPanel extends JPanel implements ClipboardOwner
 		int viewY = (int) (e.getY() + scroller.getViewport().getViewPosition().getY());
 		
 		// Go through  all the panels and see which one was clicked on:
-		Iterator<BaseAlignPanel> iter = baseAlignPanelsVec.iterator();
+		Iterator<ContigBasePanel> iter = basePanelsVec.iterator();
 		while ( iter.hasNext() )
 		{
 			// Get the panel and convert to panel relative coordinates
-			BaseAlignPanel curPanel = iter.next();
+			ContigBasePanel curPanel = iter.next();
 			int nPanelX = viewX - curPanel.getX();
 			int nPanelY = viewY - curPanel.getY();
 			
@@ -426,10 +426,10 @@ public class ContigViewPanel extends JPanel implements ClipboardOwner
 		int nCurBasesPer;
 		
 		// Notify all sub-panels
-		Iterator<BaseAlignPanel> iter = baseAlignPanelsVec.iterator();
+		Iterator<ContigBasePanel> iter = basePanelsVec.iterator();
 		while ( iter.hasNext() )
 		{
-			BaseAlignPanel curPanel = iter.next ();
+			ContigBasePanel curPanel = iter.next ();
 			nCurAvailable = nViewPortWidth - (int)curPanel.getGraphicalDeadWidth();
 			nCurBasesPer = (int) Math.ceil( curPanel.getTotalBases () / (double)nCurAvailable );
 			nOptBasesPer = Math.max( nOptBasesPer, nCurBasesPer );
@@ -442,35 +442,35 @@ public class ContigViewPanel extends JPanel implements ClipboardOwner
 	
 	private void changeBasesPerPixel ( int n ) throws Exception {
 		// Notify all sub-panels
-		Iterator<BaseAlignPanel> iter = baseAlignPanelsVec.iterator();
+		Iterator<ContigBasePanel> iter = basePanelsVec.iterator();
 		while ( iter.hasNext() ) {
-			BaseAlignPanel curPanel = iter.next ();
+			ContigBasePanel curPanel = iter.next ();
 			curPanel.setZoom ( n );
 		}		
 		scroller.getViewport().getView().setVisible( true );
 	}
 	
 	private void toggleViewType ( ) {
-		if ( nViewType == BaseAlignPanel.GRAPHICMODE )
-			nViewType = BaseAlignPanel.TEXTMODE;
+		if ( nViewType == ContigBasePanel.GRAPHICMODE )
+			nViewType = ContigBasePanel.TEXTMODE;
 		else
-			nViewType = BaseAlignPanel.GRAPHICMODE;
+			nViewType = ContigBasePanel.GRAPHICMODE;
 		
 		setViewType();
 	}
 	
 	private void setViewType (){
 		// Notify all sub-panels
-		Iterator<BaseAlignPanel> iter = baseAlignPanelsVec.iterator();
+		Iterator<ContigBasePanel> iter = basePanelsVec.iterator();
 
-		if ( nViewType == BaseAlignPanel.GRAPHICMODE )
+		if ( nViewType == ContigBasePanel.GRAPHICMODE )
 		{
 			btnViewType.setText( "Line" );
 			menuZoom.setEnabled ( true );
 			while ( iter.hasNext() )
 			{
-				BaseAlignPanel curPanel = iter.next ();
-				curPanel.setDrawMode (BaseAlignPanel.GRAPHICMODE);	
+				ContigBasePanel curPanel = iter.next ();
+				curPanel.setDrawMode (ContigBasePanel.GRAPHICMODE);	
 			}
 		}
 		else
@@ -479,8 +479,8 @@ public class ContigViewPanel extends JPanel implements ClipboardOwner
 			menuZoom.setEnabled ( false );
 			while ( iter.hasNext() )
 			{
-				BaseAlignPanel curPanel = iter.next ();
-				curPanel.setDrawMode (BaseAlignPanel.TEXTMODE);	
+				ContigBasePanel curPanel = iter.next ();
+				curPanel.setDrawMode (ContigBasePanel.TEXTMODE);	
 			}
 		}		
 		scroller.setViewportView( scroller.getViewport().getView() );		
@@ -496,11 +496,11 @@ public class ContigViewPanel extends JPanel implements ClipboardOwner
 	
 	// All (bases vs graphics)
     private JButton btnViewType = null;
-    private int nViewType = BaseAlignPanel.GRAPHICMODE;
+    private int nViewType = ContigBasePanel.GRAPHICMODE;
 	private JComboBox <MenuMapper> menuZoom = null;
 	
 	private JScrollPane scroller = null;
-	private Vector<BaseAlignPanel> baseAlignPanelsVec = null;
+	private Vector<ContigBasePanel> basePanelsVec = null;
     
 	static final private int GAP_WIDTH = 10, nTopGap = GAP_WIDTH, nBottomGap = GAP_WIDTH / 2, nSideGaps = GAP_WIDTH; 
     private static final long serialVersionUID = 1;	

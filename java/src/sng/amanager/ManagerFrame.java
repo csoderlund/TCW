@@ -230,6 +230,7 @@ public class ManagerFrame extends JFrame {
 						rCmd.actionLoadLibrary();
 						dbExists=tcwDBexists();
 						updateUI();
+						tcwDBselectLoadStatus(); // CAS314 was not getting isAA
 					}
 				});
 				buildThread.setPriority(Thread.MIN_PRIORITY);
@@ -248,7 +249,7 @@ public class ManagerFrame extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {	
 				boolean bSkip = chkSkipAssembly.isSelected(); 
 				curManData.setSkipAssembly(bSkip);				// and added !
-				if (!bSkip) curManData.setUseTransNames(false); // CAS304 CAS311 was (b) BUG
+				if (!bSkip) curManData.setUseTransNames(false); // CAS304 CAS311 was (bSkip) BUG
 				updateUI();
 			}
 		});
@@ -427,7 +428,7 @@ public class ManagerFrame extends JFrame {
 		btnEditAnnoOptions.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				nFrameMode = FRAME_MODE_ANNO_DB_OPTIONS;
-				pnlAnnoDBOptions.setOptions(curManData, hostsObj,isAAtcw);
+				pnlAnnoDBOptions.updateAnnoOptions(curManData, hostsObj,isAAtcw);
 				mainPanel.setVisible(false);
 				pnlAnnoDBOptions.setVisible(true);	
 			}
@@ -1285,11 +1286,11 @@ public class ManagerFrame extends JFrame {
 			int dbid = mDB.executeInteger("select DBID from pja_databases where path='" + annoFile + "'");
 			if (dbid<=0) {
 				UserPrompt.showWarn("Inconsistency with annoDB FASTA file -- cannot change taxonomy");
-				Out.prt("AnnoDB: " + annoFile);
-				Out.prt("AnnoDB in database:");
+				Out.prtToErr("AnnoDB: " + annoFile);
+				Out.prtToErr("AnnoDB in database:");
 				ResultSet rs = mDB.executeQuery("select dbtype, taxonomy, path from pja_databases");
 				while(rs.next()) {
-					Out.prt(String.format("%5s %15s %s", rs.getString(1), rs.getString(2), rs.getString(3)));
+					Out.prtToErr(String.format("%5s %15s %s", rs.getString(1), rs.getString(2), rs.getString(3)));
 				}
 				mDB.close();
 				return false;
@@ -1529,8 +1530,7 @@ public class ManagerFrame extends JFrame {
 		for(int x=0; x<curManData.getNumAnnoDBs(); x++) {
 			ManagerData.AnnodbData annoObj = curManData.getAnnoDBAt(x);
 			if (annoObj == null) {
-				if (ManagerMain.verbose)
-					System.err.println("TCW error in annoDB table " + x);
+				Out.debug("ManagerFrame: TCW error in annoDB table " + x);
 				continue;
 			}
 			String [] temp = new String[3];

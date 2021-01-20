@@ -96,8 +96,8 @@ public final class Globals {
 	
 	public static class Search {
 		public static final String BLASTDIR = Globalx.BLASTDIR; // searchResults
-		public static final String ALL_AA_FASTA = "combineAA.fasta";
-		public static final String ALL_NT_FASTA = "combineNT.fasta";
+		public static final String ALL_AA_FASTA = "combineAA.fa";
+		public static final String ALL_NT_FASTA = "combineNT.fa";
 		public static final String BLAST_AA_TAB = "hitsAA.tab";
 		public static final String BLAST_NT_TAB = "hitsNT.tab";
 	}

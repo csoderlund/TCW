@@ -13,9 +13,6 @@ public class Globals {
 	public final static String loadFile = "load.log";
 	public final static String assmFile = "inst.log";
 	
-	public static final String OLDLIBDIR = 	"libraries/";
-	public final static String seqFile = "sequences.fa"; // write sequences for blasting
-	
 	public static final String STCWCFG = "sTCW.cfg";
 	public static final String LIBCFG =  "LIB.cfg";
 	public static final String STCW = 	Globalx.STCW; // database prefix
@@ -52,14 +49,14 @@ public class Globals {
 	public static final String ROW_DELIMITER = "\t";
 	
 	// For sequence remark column - all assigned in DoORF except MultiFrame, which is assigned in DoUniProt
-	static public final String RMK_MultiFrame = 		"Multi-frame";
+	static public final String RMK_MultiFrame = 	"Multi-frame";
 	static public final String RMK_HIT_hitSTOP = 	"StopsIn";
 	static public final String RMK_ORF_exact =     	"ORF=Hit";
-	static public final String RMK_ORF_gtHit =  		"ORF>Hit";
+	static public final String RMK_ORF_gtHit =  	"ORF>Hit";
 	static public final String RMK_ORF_ltHit = 		"ORF<Hit"; 
 	static public final String RMK_ORF_appxHit =  	"ORF~Hit";
 	static public final String RMK_ORF_NOTLONG = 	"ORF!LG";
-	static public final String RMK_ORF_NOTMarkovBest3 = 	"ORFmk!b!g"; // !best !good
+	static public final String RMK_ORF_NOTMarkovBest3 = "ORFmk!b!g"; // !best !good
 	static public final String RMK_ORF_NOTMarkovBest =   "ORFmk!b";  // !b is good
 	static public final String RMK_ORF_NOTMarkov3 =      "ORFmk!g";  // is best !good
 	static public final String RMK_ORF_NOTHit = 		"ORF!Hit";
@@ -76,6 +73,8 @@ public class Globals {
 	static public final String pSP_PREF = "0";
 	static public final String pRM_ECO = "1";
 	
-	// view options
-	static public final int OVERHANG=15;
+	public static boolean hasVal(String val) {
+		if (val==null || val.trim().equals("")|| val.trim().equals("-")  ) return false;
+		return true;
+	}
 }

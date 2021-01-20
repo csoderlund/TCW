@@ -27,6 +27,8 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
@@ -65,8 +67,8 @@ public class BlastTab extends Tab
 		
 		// blastn default is megablast, so do can use same defaults 
 		int cpu=1;
-		blastDefaults = BlastArgs.getBlastxOptions()  + " -num_threads " + cpu;
-		dmndDefaults =  BlastArgs.getDiamondOpDefaults() + " --threads " + cpu;
+		blastDefaults = BlastArgs.getBlastArgsDB()  + " -num_threads " + cpu;
+		dmndDefaults =  BlastArgs.getDiamondArgsDB() + " --threads " + cpu;
 		
 		// added after Blast is performed
 		btnViewContig = Static.createButton("View Selected Sequence", false, Globals.FUNCTIONCOLOR);
@@ -811,8 +813,8 @@ public class BlastTab extends Tab
 		dmndCheck.setSelected(true);  setEnableSearch(false, true);
 		aaSeqCheck.setSelected(true); setEnableDB(false, true, false);
 		
-		blastDefaults = BlastArgs.getBlastxOptions()  + " -num_threads 1";
-		dmndDefaults =  BlastArgs.getDiamondOpDefaults() + " --threads 1";
+		blastDefaults = BlastArgs.getBlastArgsDB()  + " -num_threads 1";
+		dmndDefaults =  BlastArgs.getDiamondArgsDB() + " --threads 1";
 		
 		txtParams.setText(dmndDefaults); 
 	}
@@ -821,6 +823,14 @@ public class BlastTab extends Tab
 			JFileChooser fc = new JFileChooser();
 			fc.setCurrentDirectory(new File(Globalx.ANNODIR));
 
+			// CAS314
+			FileFilter ff=new FileNameExtensionFilter("Fasta file (.fa, .fasta ...)", "fa","fasta","fna", "ffn", "faa", "frn");
+			fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
+			fc.addChoosableFileFilter(ff);
+			fc.setFileFilter(ff);								//st ff as default selection
+			fc.setFileSelectionMode(JFileChooser.FILES_ONLY);	//user must select a file not folder
+			fc.setMultiSelectionEnabled(false);					//disabled selection of multiple files
+			
 			if(fc.showOpenDialog(theParentFrame) == JFileChooser.APPROVE_OPTION) {
 				String fname = fc.getSelectedFile().getCanonicalPath();
 				dbSelectName = fname;

@@ -334,7 +334,9 @@ public class BasicSeqTab extends Tab {
 	}
 	
 	public void tableSort (boolean sortAsc, int mode) {
-		Collections.sort(seqObjList, new SeqDataComparator(sortAsc, mode));		  	  			
+		try {// CAS314 Comparison method violates its general contract!
+			Collections.sort(seqObjList, new SeqDataComparator(sortAsc, mode));		
+		} catch (Exception e) {}
 	}
 	public int getNumRow() {
 		return seqObjList.size();

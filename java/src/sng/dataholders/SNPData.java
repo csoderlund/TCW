@@ -5,7 +5,7 @@ import java.util.Vector;
 import java.util.Comparator;
 import java.util.Collections;
 
-import sng.database.Globals;
+import util.database.Globalx;
 
 
 
@@ -38,9 +38,9 @@ public class SNPData implements Serializable
         return getNonGapCount ( ) - charCounts [ chConsensusBase ];
     }
     
-    public int getGapCount ( ) { return charCounts [Globals.gapCh]; };
+    public int getGapCount ( ) { return charCounts [Globalx.gapCh]; };
     
-    public int getNonGapCount ( ) { return nTotal - charCounts [Globals.gapCh]; }
+    public int getNonGapCount ( ) { return nTotal - charCounts [Globalx.gapCh]; }
     
     public int getTotalCount ( ) { return nTotal; };
     
@@ -83,9 +83,9 @@ public class SNPData implements Serializable
 			nMin = Math.min ( nMin, charCounts ['C'] );
 			++nQualifiers;
 		}
-		if ( maybeInDel ( thresholds ) && charCounts [Globals.gapCh] >= thresholds.getSNPMinRedundancy() )
+		if ( maybeInDel ( thresholds ) && charCounts [Globalx.gapCh] >= thresholds.getSNPMinRedundancy() )
 		{
-			nMin = Math.min ( nMin, charCounts [Globals.gapCh] );
+			nMin = Math.min ( nMin, charCounts [Globalx.gapCh] );
 			++nQualifiers;
 		}
 		
@@ -153,7 +153,7 @@ public class SNPData implements Serializable
 	
     public boolean maybeInDel ( SNPthresholds thresholds )
 	{
-		return charCounts [Globals.gapCh] >= thresholds.getInDelMinRedundancy() &&
+		return charCounts [Globalx.gapCh] >= thresholds.getInDelMinRedundancy() &&
 					( charCounts ['A'] >= thresholds.getInDelMinRedundancy() || 
 							charCounts ['T'] >= thresholds.getInDelMinRedundancy() ||
 								charCounts ['G'] >= thresholds.getInDelMinRedundancy() ||
@@ -202,8 +202,8 @@ public class SNPData implements Serializable
     		String [] tempSet = counts[x].split(":");
     		char charVal = tempSet[0].trim().charAt(0);
     		int count = Integer.parseInt(tempSet[1].trim());
-    		if(charVal == '-')
-    			charCounts[Globals.gapCh] = count;
+    		if(charVal == Globalx.gapCh)
+    			charCounts[Globalx.gapCh] = count;
     		else
     			charCounts[charVal] = count;
     		nTotal += count;

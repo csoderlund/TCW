@@ -8,7 +8,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
 import java.net.InetAddress;
 import java.sql.Connection;
 import java.util.Iterator;
@@ -55,7 +54,6 @@ import sng.viewer.panels.seqTable.SeqTableTab;
 import sng.viewer.panels.seqTable.FieldSeqTab;
 import sng.viewer.panels.seqTable.SeqQueryTab;
 import util.database.DBConn;
-import util.database.Globalx;
 import util.database.HostsCfg;
 import util.methods.ErrorReport;
 import util.methods.Converters;
@@ -97,13 +95,6 @@ public class STCWFrame extends JFrame {
 	
 	private void initialize() {
 		Out.prt("Initialize...");
-		
-		lastSaveFilePath = System.getProperty("user.dir") + "/" + Globalx.EXPORTDIR;
-		File nDir = new File(lastSaveFilePath);
-		if (!nDir.exists()) {
-			if (nDir.mkdir()) Out.prt("Create " + lastSaveFilePath);
-			else lastSaveFilePath = System.getProperty("user.dir");
-		}
 		
 		// Add shutdown handler to remove cache files
 		MyShutdown sh = new MyShutdown();
@@ -162,16 +153,6 @@ public class STCWFrame extends JFrame {
 		//contentPane.add(tabbedPane);
 
 		++nFrames;
-	}
-	// all viewSingle panels call this to set the selected path, so can be used on next file chooser
-	public void setLastPath(String path) {
-		try {
-			int last = path.lastIndexOf("/");
-			lastSaveFilePath = path.substring(0, last);
-			if (!new File(lastSaveFilePath).isDirectory())
-				lastSaveFilePath=System.getProperty("user.dir"); 
-		}
-		catch (Exception e) {ErrorReport.prtReport(e, "setting last path");}
 	}
 	
 	/********************************************************************
@@ -1010,8 +991,6 @@ public class STCWFrame extends JFrame {
 	private ResultsSummaryTab resultsContigTab = null;
 	private ResultsSummaryTab resultsPairTab = null;
 	private BlastTab blastTab  = null;
-	
-	public String lastSaveFilePath = ""; // All panels use this as the path, and set it if changed
 	
 	private Preferences prefsRoot=null; // set once and pass to anyone who needs it
 	private MetaData metaData = null;

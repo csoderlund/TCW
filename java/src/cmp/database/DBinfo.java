@@ -560,7 +560,7 @@ public class DBinfo {
 		for (int i=0; i<nMethods; i++) {
 			if (methodPrefix[i].equals(name)) return methodID[i];
 		}
-		Out.debug("No method with name " + name);
+		Out.bug("No method with name " + name);
 		return 0;
 	}
 	public String [] getMethodPrefix() { return methodPrefix;}

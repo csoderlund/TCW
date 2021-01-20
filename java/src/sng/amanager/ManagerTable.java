@@ -12,6 +12,8 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 
+import util.methods.Out;
+
 public class ManagerTable extends JTable {
 	private static final long serialVersionUID = -3339710873853787507L;
 	
@@ -135,8 +137,7 @@ public class ManagerTable extends JTable {
 		
 		public boolean isLoadedAt(int row) {
 			if (row>=theRows.length) {
-				if (ManagerMain.verbose)
-					System.err.println("*** Synchronization error -- ignore");
+				Out.debug("*** ManagerTable: Synchronization error -- ignore");
 				return false; 
 			}
 			return theRows[row].bLoaded;

@@ -18,6 +18,7 @@ import java.util.Vector;
 import sng.database.Globals;
 import util.align.AAStatistics;
 import util.database.Globalx;
+import util.methods.BlastArgs;
 import util.methods.Out;
 
 public class SequenceData implements Serializable {
@@ -26,21 +27,21 @@ public class SequenceData implements Serializable {
 	public static final int bestCodingCutoff = 500;
 
 	static final private int INVALID_SEQUENCE = 1;
-	static final private int DNA_SEQUENCE = 2;
-	static final private int PROTEIN_SEQUENCE = 3;
+	static final private int NT_SEQUENCE = 2;
+	static final private int AA_SEQUENCE = 3;
 	
 	public SequenceData(String type) {subType = type;}
 	
 	/* For debugging */
 	public String getDescription() {
 		String s = getName();
-		if (isDNA()) s += " NT ";
-		else if (nSequenceType == INVALID_SEQUENCE) s += " Invalid ";
-		else {
-			s += " AA ";
-			if (hitData == null) s += " no hit data ";
-			else s += "cstart " + hitData.getCtgStart() + " ";
-		}
+		if (isNT()) s += " NT ";
+		else		 s += " AA ";		
+		if (nSequenceType == INVALID_SEQUENCE) s += " Invalid ";
+		
+		if (hitData == null) s += " no hit data ";
+		else s += "cstart " + hitData.getCtgStart() + " ";
+		
 		s += " subtype " + subType;
 		s += " NumBases " + getNumBases();
 		s += " Frame " + getFrame() + " LowIndex " + getLowIndex() + " HighIndex " + getHighIndex();
@@ -49,8 +50,10 @@ public class SequenceData implements Serializable {
 		return s;
 	}
 	
-	public boolean isDNA() { return nSequenceType == DNA_SEQUENCE; }
-	public void setIsDNA() { nSequenceType = DNA_SEQUENCE;}
+	public boolean isNT() { return nSequenceType == NT_SEQUENCE; }
+	public void setIsNT() { nSequenceType = NT_SEQUENCE;}
+	public boolean isAA() { return nSequenceType == AA_SEQUENCE; } // CAS314 add
+	public void setIsAA() { nSequenceType = AA_SEQUENCE;}
 	
 	public String getName() { return strName;}
 	public void setName(String str) {strName = str;}
@@ -98,7 +101,7 @@ public class SequenceData implements Serializable {
 	
 	public static String getORFtrans(String name, String seq, int frame, int start, int end) {
 		String strSeq =  getTranslatedORF(name, seq, frame, start, end);
-		if (strSeq!=null) return strSeq.replace(Globalx.stopStr, ""); // calling routine does not allow '*'
+		
 		return strSeq; 
 	}
 	public static String getTranslatedORF(String name, String strSeq, int frame, int start, int end) {
@@ -173,6 +176,7 @@ public class SequenceData implements Serializable {
 	 *  to indicate its offset for drawing. This changed the objects strSequence
 	 *  through insertGapAt and changes the left and right position (it ends up
 	 *  the same as strDPseq without the leading/trailing gapCh
+	 *  CAS314 this was not necessary and is probably obsolete
 	 */
 	public void buildDPalignedSeq(String strDPseq) {
 		int j = 0;
@@ -184,10 +188,12 @@ public class SequenceData implements Serializable {
 
 		int i = getLowIndex();
 		while (i <= getHighIndex() && j < strDPseq.length()) {
-			if (strDPseq.charAt(j) == Globals.gapCh && getBaseAt(i) != Globals.gapCh)
+			char c = strDPseq.charAt(j);
+			char b = getBaseAt(i);
+			if (c == Globals.gapCh && b != Globals.gapCh) 
 				insertGapAt(i);
-			else if (strDPseq.charAt(j) != getBaseAt(i))
-				throw new RuntimeException("Failed to match gap strings.\n" + strDPseq);
+			else if (c != b)
+				Out.bug("Failed to match gap strings.\n" + strDPseq);
 
 			++i;
 			++j;
@@ -197,9 +203,7 @@ public class SequenceData implements Serializable {
 		while (j <= (strDPseq.length() - 1) && strDPseq.charAt(j) == Globals.gapCh)
 			++j;
 
-		if (i <= getHighIndex())
-			throw new RuntimeException(
-					"Failed to consume whole non-gap string.");
+		if (i <= getHighIndex()) Out.bug("Failed to consume whole non-gap string.");
 	}
 
 	/**************** Create new sequenceData *************************************/
@@ -211,18 +215,7 @@ public class SequenceData implements Serializable {
 		
 		// For annoDB hits, can be nucleotide. The info 
 		// is in the database, but can't get it set right in this mess
-		int cnt=0, len = strSequence.length(); 
-		for (int i=0; i< len && i<30; i++) {
-			if (strSequence.charAt(i) == 'a') cnt++;
-			else if (strSequence.charAt(i) == 'A') cnt++;
-			else if (strSequence.charAt(i) == 'c')cnt++;
-			else if (strSequence.charAt(i) == 'C')cnt++;
-			else if (strSequence.charAt(i) == 't')cnt++;
-			else if (strSequence.charAt(i) == 'T')cnt++;
-			else if (strSequence.charAt(i) == 'g')cnt++;
-			else if (strSequence.charAt(i) == 'G')cnt++;
-		}
-		if (cnt > 20) seq.setIsDNA();
+		if (BlastArgs.isNucleotide(strSequence)) seq.setIsNT();
 
 		if (ntSeqData != null)
 			seq.ntSeqData = ntSeqData.newSeqDataNoQual();
@@ -236,11 +229,8 @@ public class SequenceData implements Serializable {
 		return seq;
 	}
 	public SequenceData newSeqDataRevComp() {
-		if (!isDNA()) {
-			System.out.println("Sequence type is " + nSequenceType);
-			throw new RuntimeException(
-					"Cannot complement a sequence that is not DNA.");
-		}
+		if (!isNT()) Out.bug("Cannot complement a sequence that is not DNA.");
+			
 		SequenceData rcSeq = new SequenceData("copy RevComp");
 		rcSeq.copyNonSequenceData(this);
 		
@@ -264,7 +254,7 @@ public class SequenceData implements Serializable {
 		DBfiltered = copyFrom.DBfiltered;
 	}
 	/**
-	 * PairswiseAlignmentData: to align gapless
+	 * AlignData: to align gapless
 	 * ContigPanel: create EST objects, followed by appendToFASTAFiles to enter seq and qual
 	 * Called from other places to returns sequence
 	 */
@@ -284,10 +274,9 @@ public class SequenceData implements Serializable {
 		String strBefore, strAfter;
 
 		for (int i = newSequence.length() - 1; i >= 0; --i) {
-			if (newSequence.charAt(i) == Globals.gapCh) {
-				if (newQualities != null
-						&& newQualities.get(i).intValue() != 0)
-					throw new RuntimeException("Bad quality value");
+			if (newSequence.charAt(i) == Globalx.gapCh) {
+				if (newQualities != null && newQualities.get(i).intValue() != 0)
+					Out.bug("Bad quality value for " + strName);
 
 				// Remove gap from sequence
 				strBefore = newSequence.substring(0, i);
@@ -298,8 +287,7 @@ public class SequenceData implements Serializable {
 				newSequence = strBefore + strAfter;
 
 				// Remove gap from qualities
-				if (newQualities != null)
-					newQualities.remove(i);
+				if (newQualities != null) newQualities.remove(i);
 			}
 		}
 
@@ -313,7 +301,7 @@ public class SequenceData implements Serializable {
 		returnSequence.setComplement(false);
 		returnSequence.setSequence(newSequence);
 		returnSequence.setQualities(newQualities, false);
-		returnSequence.setIsDNA();
+		returnSequence.setIsNT();
 		return returnSequence;
 	}
 	
@@ -356,7 +344,7 @@ public class SequenceData implements Serializable {
 		// Save the AA sequence data and Sync up left position of the nucleotide sequence
 		aaSeqData.ntSeqData.setLeftPos(aaSeqData.ntSeqData.nLeftPos); 
 		aaSeqData.setSequence(newSequence);
-		aaSeqData.nSequenceType = SequenceData.PROTEIN_SEQUENCE; 
+		aaSeqData.nSequenceType = SequenceData.AA_SEQUENCE; 
 		return aaSeqData;
 	}
 	
@@ -388,26 +376,20 @@ public class SequenceData implements Serializable {
 		}
 	}
 	private void sanityCheck() {
-		if (strSequence != null && qualities != null
-				&& strSequence.length() != qualities.size())
-			throw new RuntimeException(
-					"The number of bases in the sequence and number of quality values "
-							+ "for " + strName + " don't match up.\n" +
-									" " + strSequence.length() + " " + qualities.size() + "\n");
+		if (strSequence != null && qualities != null && strSequence.length() != qualities.size())
+			Out.bug("The number of bases in the sequence and number of quality values for " + strName + 
+					" do not match (" + strSequence.length() + ", " + qualities.size() + ")\n");
 
 		// Determine the sequence type
 		nSequenceType = INVALID_SEQUENCE;
 		if (!(strSequence==null || strSequence.length()==0)) {
-			nSequenceType = DNA_SEQUENCE;
+			nSequenceType = NT_SEQUENCE;
 			for (int i = 0; i < strSequence.length(); ++i) {
-				if (nSequenceType == DNA_SEQUENCE
-						&& !SequenceData.isDNALetter(strSequence.charAt(i)))
-					nSequenceType = PROTEIN_SEQUENCE;
-				if (nSequenceType == PROTEIN_SEQUENCE
-						&& !AAStatistics.isAcidLetter(strSequence.charAt(i))) {
+				if (nSequenceType == NT_SEQUENCE && !SequenceData.isDNALetter(strSequence.charAt(i)))
+					nSequenceType = AA_SEQUENCE;
+				if (nSequenceType == AA_SEQUENCE && !AAStatistics.isAcidLetter(strSequence.charAt(i))) {
 					nSequenceType = INVALID_SEQUENCE;
-					throw new RuntimeException("Invalid sequence letter of "
-							+ strSequence.charAt(i));
+					Out.bug("Invalid sequence letter of "+ strSequence.charAt(i));
 				}
 			}
 		}
@@ -463,22 +445,19 @@ public class SequenceData implements Serializable {
 			nFrame = Math.abs(nFrame);
 	}
 
-	public void padAndSetQualities(Vector<Integer> inQualities) {
-		// Insert a gap in the quality list everywhere there is one in the sequence
+	// Insert a gap in the quality list everywhere there is one in the sequence
+	public void padAndSetQualities(Vector<Integer> inQualities) {	
 		qualities = padQualityList(strSequence, inQualities);
 		sanityCheck();
 	}
-	
-	public void compAndSet(String strInSeq, Vector<Integer> inQualities,
-			boolean bInComplement) {
-		// Save the sequence and qualities
+	// Save the sequence and qualities
+	public void compAndSet(String strInSeq, Vector<Integer> inQualities, boolean bInComplement) {
 		setSequence(strInSeq);
 		qualities = inQualities;
 
 		// If the sequence is a complement reverse it and its quality array
 		if (bInComplement) {
 			strSequence = getSequenceReverseComplement(strSequence);
-			if (debug) System.out.println("compAndSet");
 
 			if (qualities != null) {
 				Vector<Integer> newQualities = new Vector<Integer>(qualities);
@@ -499,7 +478,7 @@ public class SequenceData implements Serializable {
 	 * correctly for amino acid sequences.
 	 */
 	public int convertDNAToLocalIndex(int orfCoord) {
-		if (!isDNA()) {
+		if (!isNT()) {
 			// Use the nucleotide sequence since it may have frame-shift corrections
 			if (ntSeqData == null) return 0; 
 				
@@ -519,8 +498,7 @@ public class SequenceData implements Serializable {
 
 			// Sanity
 			if (orfCoord < 0) {
-				System.err.println("Internal Error: Invalid index of " + orfCoord
-						+ ".  Valid range is [" + 1 + "," + seqLen + "] " + strName);
+				Out.bug("Invalid index of " + orfCoord + ".  Valid range is [" + 1 + "," + seqLen + "] " + strName);
 				return 1;
 			}
 			
@@ -579,7 +557,7 @@ public class SequenceData implements Serializable {
 	public int getNumNonGapBases() {return nNonGapBases;}
 
 	private char getBaseAt(int n) {
-		if (strSequence == null || strSequence.length() <= (n + nOffsetVal)) return '-';
+		if (strSequence == null || strSequence.length() <= (n + nOffsetVal)) return Globalx.gapCh;
 		return strSequence.charAt(n + nOffsetVal);
 	}
 	// MainAlignPanel
@@ -643,10 +621,8 @@ public class SequenceData implements Serializable {
 	public void insertGapAt(int nPos) {
 		char chBase = Globals.gapCh;
 
-		if (isDNA() && !isDNALetter(chBase))
-			throw new RuntimeException("Invalid base of " + chBase);
-		else if (!isDNA() && !AAStatistics.isAcidLetter(chBase))
-			throw new RuntimeException("Invalid base of " + chBase);
+		if (isNT() && !isDNALetter(chBase)) Out.bug("Invalid base of " + chBase);
+		else if (!isNT() && !AAStatistics.isAcidLetter(chBase)) Out.bug("Invalid base of " + chBase);
 		boolean isGap = (chBase == Globals.gapCh);
 
 		// Ignore insertion after the end of the sequence for gaps; for all others always append
@@ -654,10 +630,9 @@ public class SequenceData implements Serializable {
 		if (nPos <= getHighIndex() || !isGap) {
 			if (nPos < nLeftPos) {
 				if (isGap)
-					// Gap is before the aligned sequence, just adjust the start position
-					setLeftPos(nLeftPos + 1);
+					setLeftPos(nLeftPos + 1);// Gap is before the aligned sequence, just adjust the start position
 				else
-					throw new RuntimeException("Invalid index of " + nPos);
+					Out.bug("Invalid index of " + nPos);
 			} else {
 				int nAdjIdx = nPos + nOffsetVal;
 
@@ -689,7 +664,7 @@ public class SequenceData implements Serializable {
 	}
 
 	private int getNucleotideIndex(int nPos) {
-		if (isDNA())
+		if (isNT())
 			throw new RuntimeException("This method is only for amino acid sequences.");
 		return (nPos - 1) * 3 + 1;
 	}
@@ -700,7 +675,7 @@ public class SequenceData implements Serializable {
 		if (inQualities.size()==1) {
 			int q = inQualities.get(0);
 			for (int i=1; i<strInSeq.length(); i++) {
-				if (strInSeq.charAt(i) == Globals.gapCh)
+				if (strInSeq.charAt(i) == Globalx.gapCh)
 					inQualities.add(i, 0);
 				else
 					inQualities.add(i, q);
@@ -712,7 +687,7 @@ public class SequenceData implements Serializable {
 
 			// Insert a gap in the quality list everywhere there is one in the sequence
 			for (int i = 0; i < strInSeq.length(); ++i)
-				if (strInSeq.charAt(i) == Globals.gapCh)
+				if (strInSeq.charAt(i) == Globalx.gapCh)
 					inQualities.add(i, 0);
 		}
 		return inQualities;

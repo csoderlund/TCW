@@ -22,10 +22,13 @@ after "Hit:" are from the search program results.
 The 1:N (N&gt;1) compresses the mismatches. The N:1 (N&gt;1) puts a space between adjacent mismatches, and 
 increases the width of the mismatch vertical line.
 
+<p><b>Trim</b> Removes the overhangs (i.e. the ends where one sequence is longer than the other). 
+
 <p><b>UTR</b> Highlights the UTRs in yellow (nucleotide databases only). 
-<br><i>Caveats:</i> The UTRs are not displayed if the RF is not the selected frame (this happens if there are hits
-in multiple frames). The UTR is not displayed for nucleotide hits. This is not
-available for "Selected hit(s) in all frames".
+<br><i>Caveats:</i> 
+(1) This is turned off with the <b>Trim</b> mode since the UTR often covers the overhang.  
+(2) The UTR is not displayed for nucleotide hits. 
+(3) This is not available for "Selected hit(s) in all frames".
 
 <p><b>Hit</b> Highlights the region from the start to end using the sequence hit coordinates; if the
 sequence is nucleotide, they are 

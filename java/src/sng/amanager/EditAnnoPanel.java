@@ -12,6 +12,7 @@ import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
@@ -31,9 +32,10 @@ public class EditAnnoPanel extends JPanel {
 	private static final int COLUMN_WIDTH = 200;
 	private static final int TAB_WIDTH = 20;
 	private static final int COL_MINUS_TAB = COLUMN_WIDTH-TAB_WIDTH;
-	private static final int FIELD_WIDTH_SHORT = 15;
+	private static final int FIELD_WIDTH_SHORT = 10;
 	private static final int FIELD_WIDTH = 30;
 	
+	// Created once on startup
 	public EditAnnoPanel(ManagerFrame parentFrame) {
 		theParentFrame = parentFrame;
 		
@@ -65,21 +67,11 @@ public class EditAnnoPanel extends JPanel {
 		cmbSearchPgms = new ButtonComboBox();
 		cmbSearchPgms.setBackground(Globals.BGCOLOR);
 		Vector <String> pgm = BlastArgs.getSearchPgms();
-		if (pgm.size()==0) {
-			Out.die("singleTCW needs a search program to continue.");
-		}
-		else if (pgm.size()==1) {
-			cmbSearchPgms.addItem(pgm.get(0));
-			cmbSearchPgms.setSelectedIndex(0);
-		}
-		else {
-			for (String p: pgm) cmbSearchPgms.addItem(p);
-			cmbSearchPgms.setSelectedIndex(0); 
-		}
+		for (String p: pgm) cmbSearchPgms.addItem(p);
+		cmbSearchPgms.setSelectedIndex(0); 
 		
 		lblParams = new JLabel("Parameters");
 		txtParams = new JTextField(FIELD_WIDTH);
-		setParamDefaults();
 		
 		cmbSearchPgms.setMaximumSize(cmbSearchPgms.getPreferredSize());
 		cmbSearchPgms.addActionListener(new ActionListener() {
@@ -87,6 +79,7 @@ public class EditAnnoPanel extends JPanel {
 				setParamDefaults();
 			}
 		});
+		setParamDefaults();
 		
 		btnUseExistingHitFile = new JRadioButton("Use Existing Hit Tabular File");
 		btnUseExistingHitFile.setBackground(Globals.BGCOLOR);
@@ -96,16 +89,15 @@ public class EditAnnoPanel extends JPanel {
 			}
 		});
 		lblTabularFile = new JLabel("Hit Tabular File");
-		txtTabularFile = new FileTextField(theParentFrame, FileTextField.PROJ, FileTextField.TAB);
+		txtTabularFile = new FileTextField(theParentFrame, FileTextField.BLAST, FileTextField.TAB);
 		
 		lblDate = new JLabel("Date of annoDB download");
 		txtDate = Static.createTextField("",FIELD_WIDTH_SHORT);
 		
-		btnKeep = new JButton("Keep");
+		JButton btnKeep = new JButton("Keep");
 		btnKeep.setBackground(Globals.BGCOLOR);
 		btnKeep.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (!dataIsValid()) return;
 				if (!keep()) return;
 				
 				setVisible(false);
@@ -117,7 +109,15 @@ public class EditAnnoPanel extends JPanel {
 			}
 		});
 		
-		btnDiscard = new JButton("Cancel");
+		JButton btnResetDefaults = new JButton("Reset To Default");
+		btnResetDefaults.setBackground(Globals.BGCOLOR);
+		btnResetDefaults.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				setDefaults();
+			}
+		});
+		
+		JButton btnDiscard = new JButton("Cancel");
 		btnDiscard.setBackground(Globals.BGCOLOR);
 		btnDiscard.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -132,7 +132,7 @@ public class EditAnnoPanel extends JPanel {
 			}
 		});
 		
-		btnHelp = new JButton("Help");
+		JButton btnHelp = new JButton("Help");
 		btnHelp.setBackground(Globals.HELPCOLOR);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -222,6 +222,8 @@ public class EditAnnoPanel extends JPanel {
 		buttonPanel.add(Box.createHorizontalStrut(10));
 		buttonPanel.add(btnDiscard);
 		buttonPanel.add(Box.createHorizontalStrut(10));
+		buttonPanel.add(btnResetDefaults);
+		buttonPanel.add(Box.createHorizontalStrut(10));
 		buttonPanel.add(btnHelp);
 		
 		row.add(Box.createHorizontalGlue());
@@ -234,13 +236,14 @@ public class EditAnnoPanel extends JPanel {
 		add(pnlMain);
 		setVisible(false);
 	}
-	public void updateAnnoDBEditUI(int index, boolean b) {
+	// add new or edit selected; index is for new or selected
+	public void updateAnnoDBEditUI(int index, boolean b) { // b=true is add, else edit
 		nCurrentAnnoIndex = index;
 		bAdd = b;
 		ManagerData curManData = theParentFrame.getCurManData();
-		ManagerData.AnnodbData annoObj = curManData.getAnnoDBAt(index);
+		ManagerData.AnnodbData annoObj = curManData.getAnnoDBAt(index); // selected DB line
 		
-		boolean isLoaded=annoObj.isLoaded();
+		boolean isLoaded=annoObj.isLoaded(); // added to db already (should be edit mode)
 		setLoaded(isLoaded);
 		
 		txtTaxonomy.setText(annoObj.getTaxo());
@@ -250,28 +253,55 @@ public class EditAnnoPanel extends JPanel {
 		txtDBfasta.setText(annoObj.getFastaDB());
 		txtDate.setText(annoObj.getDate());
 		
-		setSearchPgm(annoObj.getSearchPgm());
-		String args = annoObj.getParams();
-		if (args.equals("-")) setParamDefaults(); 
-		else txtParams.setText(annoObj.getParams());
+		boolean set = cmbSearchPgms.setSelectedItem(annoObj.getSearchPgm());
+		if (!set) cmbSearchPgms.setSelectedIndex(0);
+		
+		txtParams.setText(annoObj.getParams());
+		if (cmbSearchPgms.getSelectedItem().equals("diamond")) {
+			saveDiaArgs = annoObj.getParams();
+			saveBlaArgs = BlastArgs.getBlastArgsDB(); 
+		}
+		else {
+			saveBlaArgs = annoObj.getParams();
+			saveDiaArgs = BlastArgs.getDiamondArgsDB();
+		}
 		
 		if (bAdd) enableFields(true);
 		else {
 			if (!isLoaded) { 
-				String file = annoObj.getTabularFile();
-				if (file == null || file.equals("")) enableFields(true);
+				String tabfile = annoObj.getTabularFile();
+				if (!Globals.hasVal(tabfile)) enableFields(true);
 				else enableFields(false);
 			}
 		}
 	}
 	private boolean keep() {
+		String tax = txtTaxonomy.getText().trim();
+		if (tax.equals("")) return rcMsg("Enter taxonomy string");
+		else {
+			if (!theParentFrame.isValidID(tax)) 
+				return rcMsg("Taxonomy string " + tax + " must be letters, digits or '_' (underscore)");
+		}
+		if (btnUseExistingHitFile.isSelected() && btnUseExistingHitFile.isEnabled()) {
+			if (txtDBfasta.getText().trim().equals("")) 
+				return rcMsg("Missing information -- Enter annoDB FASTA file");
+					
+			if (txtTabularFile.getText().trim().equals("")) 
+				return rcMsg("Missing information -- Enter hit tabular file");
+		}
+		else if (btnGenHitFile.isSelected() && btnGenHitFile.isEnabled()) {
+			if (txtDBfasta.getText().trim().equals("")) 
+				return rcMsg("Missing information -- Enter annoDB FASTA file");	
+		}
+		if (txtParams.getText().equals(""))
+			return rcMsg("Missing information -- Params cannot be blank"); // CAS314 add	
+	
 		ManagerData curManData = theParentFrame.getCurManData();
 		ManagerData.AnnodbData annoObj = curManData.getAnnoDBAt(nCurrentAnnoIndex);
 		
 		String file = txtDBfasta.getText();
 		if (bAdd && curManData.hasAnnoFile(file)) return false; 
 		
-		String tax = txtTaxonomy.getText();
 		if (bIsLoaded && !curTaxonomy.equals(tax)) {
 			if (UserPrompt.showConfirm("Edit annoDB", "Changed taxonomy from " + curTaxonomy + " to " + tax)) {
 				if (!theParentFrame.tcwDBupdateTaxonomyForLoadedAnnoDB(tax, curTaxonomy))
@@ -279,14 +309,18 @@ public class EditAnnoPanel extends JPanel {
 			}
 			else tax = curTaxonomy;
 		}
-		annoObj.setTaxo(tax);
-		
+		annoObj.setTaxo(tax);	
+	
 		annoObj.setFastaDB(file);
 		annoObj.setDate(txtDate.getText());
 		annoObj.setSearchPgm(cmbSearchPgms.getSelectedItem());
 		annoObj.setParams(txtParams.getText());
 		annoObj.setTabularFile(txtTabularFile.getText());
 		return true;
+	}
+	private boolean rcMsg(String msg) {
+		JOptionPane.showMessageDialog(this, msg, "Error", JOptionPane.PLAIN_MESSAGE);
+		return false;
 	}
 	private void enableFields(boolean gen) {
 		boolean g=gen, e=!gen;
@@ -304,57 +338,20 @@ public class EditAnnoPanel extends JPanel {
 		if (e==false) txtTabularFile.setText("");
 	}
 	
-	private boolean dataIsValid()
-	{
-		boolean valid = true;
-		String tax = txtTaxonomy.getText().trim();
-		if (tax.equals(""))
-		{
-			UserPrompt.showError("Enter taxonomy string");
-			valid = false;
-		}
-		else {
-			if (!theParentFrame.isValidID(tax)) {
-				UserPrompt.showError("Taxonomy string " + tax + " must be letters, digits or '_' (underscore)");
-				valid = false;
-			}
-		}
-		if (btnUseExistingHitFile.isSelected() && btnUseExistingHitFile.isEnabled()) 
-		{
-			if (txtDBfasta.getText().trim().equals(""))
-			{
-				if (!UserPrompt.showConfirm("AnnoDB",
-						"Missing information -- Enter annoDB FASTA file"))
-					valid = false;
-			}
-			if (txtTabularFile.getText().trim().equals(""))
-			{
-				UserPrompt.showError("Missing information -- Enter hit tabular file");
-				valid = false;
-			}
-		}
-		else if (btnGenHitFile.isSelected() && btnGenHitFile.isEnabled())
-		{
-			if (txtDBfasta.getText().trim().equals(""))
-			{
-				UserPrompt.showError("Missing information -- Enter annoDB FASTA file");
-				valid = false;
-			}	
-		}
-		return valid;
-	}
-	
 	private void setParamDefaults () {
 		String selected = cmbSearchPgms.getSelectedItem();
-		if (selected.equals("blast")) txtParams.setText(BlastArgs.getBlastxOptions());
-		else if (selected.equals("diamond")) txtParams.setText(BlastArgs.getDiamondOpDefaults());
-		else txtParams.setText("");
+		
+		if (selected.equals("blast")) {
+			saveDiaArgs = txtParams.getText();
+			txtParams.setText(saveBlaArgs);
+		}
+		else if (selected.equals("diamond")) {
+			saveBlaArgs = txtParams.getText();
+			txtParams.setText(saveDiaArgs);
+		}
+		else Out.bug("Illegal search program: " + selected);
 	}
-	public void setSearchPgm(String pgm) {
-		boolean set = cmbSearchPgms.setSelectedItem(pgm);
-		if (!set) cmbSearchPgms.setSelectedIndex(0);
-	}
-
+	
 	private void setLoaded(boolean loaded) { 
 		bIsLoaded = loaded; 
 		
@@ -373,7 +370,13 @@ public class EditAnnoPanel extends JPanel {
 		lblTabularFile.setEnabled(!bIsLoaded);
 		txtTabularFile.setEnabled(!bIsLoaded);	
 	}
-		
+	private void setDefaults() {// CAS314 add
+		btnGenHitFile.setSelected(true);
+		cmbSearchPgms.setSelectedIndex(0);
+		saveDiaArgs=BlastArgs.getDiamondArgsDB();
+		saveBlaArgs=BlastArgs.getBlastArgsDB();
+		txtParams.setText(saveDiaArgs);
+	}
 	/****************************************************
 	 * EditAnnoPanel private variables
 	 */
@@ -399,9 +402,10 @@ public class EditAnnoPanel extends JPanel {
 	private JLabel lblDate = null;
 	private JTextField txtDate = null;
 	
-	private JButton btnKeep = null, btnDiscard = null, btnHelp = null;
 	private boolean bIsLoaded = false;
 	private boolean bAdd = true;
 	private int nCurrentAnnoIndex = -1;
 	private String curTaxonomy="";
+	
+	private String saveDiaArgs="", saveBlaArgs=""; 
 }

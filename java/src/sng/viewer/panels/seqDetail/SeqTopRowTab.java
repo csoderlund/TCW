@@ -59,8 +59,10 @@ public class SeqTopRowTab extends Tab {
 	static final private int ALIGN_SELECTED_ALL = 3;
 	
 	public SeqTopRowTab ( STCWFrame theFrame,
-                			MultiCtgData listData, Tab parentTab, int recordNum,
-                			int [] prevSettings)
+           MultiCtgData listData, // One ContigData with name only; except if CAP3 was run
+           Tab parentTab, 
+           int recordNum,
+           int [] prevSettings)
 	{
 		super(theFrame, parentTab);
 		prevDisplaySettings = prevSettings;
@@ -448,14 +450,14 @@ public class SeqTopRowTab extends Tab {
 				switch ( alignType)
 				{						
 				case ALIGN_BEST_SEQUENCES:
-					String [] x = checkNewAlign(displayedHits1, true);
+					String [] x = checkNewAlign(alignedHits1, true);
 					if (x!=null) { // new list
-						hitSelectedPanel=null;
-						displayedHits1 = x;
+						hitBestPanel=null; // CAS314 said hitSelectedPanel
+						alignedHits1 = x;
 					}
 					if (hitBestPanel==null) {
 						Vector<AlignData> hitbest =  
-								AlignCompute.DBhitsAlignDisplay(displayedHits1, ctgFullData, 
+								AlignCompute.DBhitsAlignDisplay(alignedHits1, ctgFullData.getContig(), 
 										AlignCompute.frameResult, metaData.isAAsTCW(), detailPanel );
 						hitBestPanel = PairViewPanel.createPairAlignPanel (true, false, hitbest );
 					}
@@ -463,14 +465,14 @@ public class SeqTopRowTab extends Tab {
 					
 					break;
 				case ALIGN_SELECTED:
-					x = checkNewAlign(displayedHits1, false);
+					x = checkNewAlign(alignedHits1, false);
 					if (x!=null) { // new list
 						hitSelectedPanel=null;
-						displayedHits1 = x;
+						alignedHits1 = x;
 					}
 					if ( hitSelectedPanel == null ) {
 						Vector<AlignData> hitSL =  
-							AlignCompute.DBhitsAlignDisplay(displayedHits1, ctgFullData, 
+							AlignCompute.DBhitsAlignDisplay(alignedHits1, ctgFullData.getContig(), 
 									AlignCompute.frameResult, metaData.isAAsTCW(), detailPanel);
 						hitSelectedPanel = PairViewPanel.createPairAlignPanel (true,false, hitSL );
 					}
@@ -478,14 +480,14 @@ public class SeqTopRowTab extends Tab {
 					
 					break;
 				case ALIGN_SELECTED_ALL:
-					x = checkNewAlign(displayedHits2, false);
+					x = checkNewAlign(alignedHits2, false);
 					if (x!=null) { // new list
 						hitAllFramePanel=null;
-						displayedHits2 = x;
+						alignedHits2 = x;
 					}
 					if (hitAllFramePanel==null) {
 						Vector<AlignData> hitSLA =  // selected hits in all frames
-							AlignCompute.DBhitsAlignDisplay(displayedHits2, ctgFullData,  
+							AlignCompute.DBhitsAlignDisplay(alignedHits2, ctgFullData.getContig(),  
 									AlignCompute.allResult, metaData.isAAsTCW(), detailPanel );
 						hitAllFramePanel = PairViewPanel.createPairAlignPanel (true, true, hitSLA );
 					}
@@ -590,7 +592,7 @@ public class SeqTopRowTab extends Tab {
 	private String [] checkNewAlign(String [] viewed, boolean isBest) {
 		String [] cur;
 		if (isBest) cur = detailPanel.getBestHits();
-		else cur = detailPanel.getSelectedHits();
+		else        cur = detailPanel.getSelectedHits();
 		if (viewed == null) return cur;
 		if (viewed.length != cur.length) return cur;
 		
@@ -643,8 +645,8 @@ public class SeqTopRowTab extends Tab {
 	private MultiCtgData ctgNameData = null;
 	private MultiCtgData ctgFullData = null;
 
-	private String [] displayedHits1 = null;
-	private String [] displayedHits2 = null;
+	private String [] alignedHits1 = null; // Best or Selected Aligned Hits - used to determine whether its changed
+	private String [] alignedHits2 = null; // Selected Hits for all frames -  ditto
 	private String goHit = null;
 	
 	/**********************************************************/

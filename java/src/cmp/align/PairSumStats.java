@@ -360,7 +360,7 @@ public class PairSumStats {
 			if (utr5Pair.contains("###")) {
 				String [] gapUTR5 = utr5Pair.split("###");
 				if (gapUTR5.length<2) {
-					Out.debug(String.format("%s pair #%d   ids %d,%d    %s","TCW error on uncompress for 5UTR", 
+					Out.bug(String.format("%s pair #%d   ids %d,%d    %s","TCW error on uncompress for 5UTR", 
 							pairid, seqid1, seqid2, utr5Pair));
 					Out.die("Cannot go on");
 				}
@@ -368,7 +368,7 @@ public class PairSumStats {
 				full2 = Share.uncompress(gapUTR5[1], utr5_2seq);
 				
 				if (full1.length() != full2.length()) {
-					Out.debug(String.format("%s  pair #%d   ids %d,%d    lens %d,%d  gap %s,%s",
+					Out.bug(String.format("%s  pair #%d   ids %d,%d    lens %d,%d  gap %s,%s",
 							"TCW error on uncompress for 5UTR", pairid,
 							seqid1, seqid2, full1.length(), full2.length(),gapUTR5[0],gapUTR5[1]));
 					utr5Obj.clear();
@@ -383,7 +383,7 @@ public class PairSumStats {
 				full2 = Share.uncompress(gapUTR3[1], utr3_2seq);
 				
 				if (full1.length() != full2.length()) {
-					Out.debug(String.format("%s pair #%d   ids %d,%d    lens %d,%d  gap %s,%s",
+					Out.bug(String.format("%s pair #%d   ids %d,%d    lens %d,%d  gap %s,%s",
 							"TCW error on uncompress for 3UTR", pairid,
 							seqid1, seqid2, full1.length(), full2.length(), gapUTR3[0],gapUTR3[1]));
 					utr3Obj.clear();

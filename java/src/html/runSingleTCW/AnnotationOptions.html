@@ -78,62 +78,68 @@
 	<li> Train with CDS file:  This should be a fasta file of coding sequences. 
 	</ol>
 	*The Markov score was computed according to Hass et al. (2013) Nature Protocols 8:1494-1512 for Transcoder.
+</ul>
+<h4>Train with CDS file</h4>
+This option allows you to supply a file of nucleotide coding sequences in FASTA format to be used to train.
+As they are coding sequences, the sequences must be in frame.
+
 <br><br>NOTE: If the best hits are mostly from a nucleotide database, this does not work.
 	</ul>
 	
 	
-	<h3>SIMILAR SEQUENCES: (nucleotide sequences only)</h3>
-		The sequences in the databases will be 
-		blasted against each other using megablast and/or tblastx. Then, TCW will use
-		dynamic programming on the top <i>Pairs limit</i> pairs based on the blast E-value.
+	<h3>SIMILAR PAIRS:</h3>
+		The sequences in the databases will be compared against each. Then, TCW will use
+		dynamic programming on the top <i>Pairs limit</i> pairs based on the best bitscores.
 		The results are entered into the database and can be queried with <tt>viewSingleTCW</tt>.
-		<p>Instead of running dynamic programming using all 6 frames (36 possibilities), 
-		TCW uses the following heuristics:
-		<ol>
-		<li>Use assigned frames for the amino acid alignment.
-		<li>If the results of 1 are not good and tblastx was run, use tblastx frame.
-		<li>If 1 and 2 have poor alignment, check the nucleotide alignment in both orientation;
-		if the current orientation is the best, keep it and the best amino acid alignment from a 1 and 2.
-		<li>Try all 18 frames using the best orientation from the nucleotide alignment of 3.
-		</ol>
-		Basically, getting the nucleotide alignment right is most important for determining
-		similar sequences. <b>This is not threaded, so can take a while</b>: 
-		(1) If the sequences are well-annotated, the ORF prediction is typically good
-		and this is less likely to try the 18 frames, 
-		(2) set the Pairs Limit to just what you think will be of interest
-		to you, and (3) be prepared to run this overnight if your database
-		has many sequences.
-		
-		<p>If no options are selected, this step will be skipped.
-		<p>
+
+		<p>At least one of the following should be selected, where only the last one
+		is relevant for AA-STCW databases.
 		<table border=0 cellspacing=5 cellpadding=3>
 		<tr>
-			<td valign="top" colspan=2><i>Nucleotide Self Blast (megablast or blastn)</i></td>
+			<td valign="top" colspan=2><code>Blastn</code> (NT-NT)</td>
 		</tr>
 		<tr>
-			<td nowrap>&nbsp;&nbsp;&nbsp;&nbsp;1. Execute</t>
-			<td>TCW executes blasts with the provided parameters</td>
+			<td nowrap>&nbsp;&nbsp;&nbsp;&nbsp;</t>
+			<td>TCW executes blastn with the provided parameters</td>
+		</tr>
+		
+		<tr>
+			<td valign="top" colspan=2><code>Tblastx</code> (6-frame)</td>
 		</tr>
 		<tr>
-			<td nowrap valign="top">&nbsp;&nbsp;&nbsp;&nbsp;2. Use existing</td>
-			<td>The filename of a megablast selfblast file in tabular (-m8, -outfmt 6) format </td>
+			<td nowrap valign="top">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			<td>TCW executes tblastx with the provided parameters</td>
+		</tr>
+		
+		<tr>
+			<td valign="top" colspan=2><code>Blastp</code> (AA or translated ORFs)</td>
 		</tr>
 		<tr>
-			<td valign="top" colspan=2><i>Translated Self Blast (tblastx)</i></td>
+			<td nowrap valign="top">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			<td>TCW executes blasts with the provided parameters and selected 
+			program (<code>diamond</code> or <code>blast</code>)
 		</tr>
+		
 		<tr>
-			<td nowrap valign="top">&nbsp;&nbsp;&nbsp;&nbsp;1. Execute</td>
-			<td>TCW executes blasts with the provided parameters</td>
-		</tr>
-		<tr>
-			<td nowrap valign="top">&nbsp;&nbsp;&nbsp;&nbsp;2. Use existing</td>
-			<td>The filename of a tblastx selfblast file in tabular (-m8, -outfmt 6) format</td>
-		</tr>
-		<tr>
-			<td>Pairs limit</td>
+			<td colspan=2>Pairs limit</td>
+			<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 			<td>Limits the number of pairs produced</td>
 		</tr>
 	</table>
-	If TCW executes the blasts, the results will be in the project's hitResults directory.
+	If a pair hit file exists, the user will be prompts on whether to use the existing file or re-run
+	the search.
+	<p>The "Params" text boxes cannot be blank. <i>TCW does NOT check the correctness of parameters set by the user.</i>
+	
+	<p><i>Providing Pair hit files (self-hit)</i>
+	<p>The files are all in the project's <tt>/hitResults</tt> directory, names as follows:
+	<table cellspacing=5 >
+	<tr><td><code>blastn</code><td>&nbsp;&nbsp;&nbsp;&nbsp;&lt;<tt>stcwID&gt;_self_blastp.tab</tt>
+	<tr><td><code>tblastx</code><td>&nbsp;&nbsp;&nbsp;&nbsp;&lt;<tt>stcwID&gt;_self_tblastx.tab</tt>
+	<tr><td><code>blastp</code><td>&nbsp;&nbsp;&nbsp;&nbsp;&lt;<tt>stcwID&gt;_self_blastp.tab</tt> or <tt>&lt;stcwID&gt;_self_blastp.dmnd.tab</tt>
+	</table>
+	<br>
+	A self-hit file can be entered under any of these names, then select the associated checkbox
+	in the interface; the user will be prompts on whether to use the existing file or re-run
+	the search.
 </body>
 </html>

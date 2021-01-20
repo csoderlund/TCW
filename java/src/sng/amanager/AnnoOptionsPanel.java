@@ -1,13 +1,5 @@
 package sng.amanager;
 
-/****************************************************
- * Options button on Main Panel opens this window.
- * 1. GO
- * 2. ORFs
- * 3. Similarity
- * It gets all values from sTCW.cfg from ManagerData, which has already loaded it.
- * It writes changes to ManagerData, which subsequently writes to sTCW.cfg
- */
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -22,19 +14,15 @@ import javax.swing.JOptionPane;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
-
 
 import sng.database.Globals;
 import sng.runAS.DoGO;
@@ -48,285 +36,29 @@ import util.ui.UserPrompt;
 import util.database.HostsCfg;
 import util.database.DBConn;
 
+/****************************************************
+ * Options button on Main Panel opens this window.
+ * 1. GO
+ * 2. ORFs
+ * 3. Similarity
+ * It gets all values from sTCW.cfg from ManagerData, which has already loaded it.
+ * It writes changes to ManagerData, which subsequently writes to sTCW.cfg
+ */
+
 public class AnnoOptionsPanel extends JPanel {
 	private static final long serialVersionUID = -6606995633515724156L;
 	/*************************************************
 	 * annotation options panel that replaces main window
 	 */
-	private static final int BLAST_ARGS_TEXTFIELD_WIDTH = 30;
+	private static final int BLASTARGS_TEXT_WIDTH = 25;
 	private static final int NUM_LG_FIELD_WIDTH = 4;
 	private static final int NUM_SM_FIELD_WIDTH = 2;
 	private static final int INDENT_RADIO = 25;
 	
 	public AnnoOptionsPanel(ManagerFrame parentFrame) {
 		theParentFrame = parentFrame;
-		createAnnoDBOptionPanel();
-	}
-	/**********************************************
-	 * The panel is created before its known if it proteins, so we can only disable
-	 */
-	public void setOptions(ManagerData cd, HostsCfg cf, boolean isP) {
-		curManData = cd;
-		hostsObj = cf;
-		isProteinDB=isP;
-		setDefaults();
 		
-		// GO
-		Vector<String> goList = findGODBs();
-		cmbGODB.removeAllItems();
-		cmbGODB.addItems(goList);				
-		
-		String godb = curManData.getGODB();
-		if(goList.contains(godb)) {
-			cmbGODB.setSelectedIndex(goList.indexOf(godb));
-			
-			String slim = curManData.getSlimSubset();
-			if (!slim.equals("")) {
-				findSetSlims(slim);
-				setGOSlim(true, false);
-			}
-			else {
-				String file = curManData.getSlimFile();
-				if (!file.equals("")) {
-					txtSlimOBOFile.setText(file);
-					setGOSlim(false, true);
-				}
-			}
-		}
-		else {
-			cmbGODB.setSelectedIndex(0);
-			setGOSlim(false, false);
-			if (!godb.equals("")) { 
-				Out.PrtWarn("No GO database " + godb);
-				curManData.setGODB("");
-			}
-		}
-		
-		if (isProteinDB) return; /*******************************/
-		
-		String file="";
-		ManagerData.AnnoData annoObj = curManData.getAnnoObj();
-		
-		// Best Anno
-		if (annoObj.getSPpref().equals("1")) chkSPpref.setSelected(true);
-		else chkSPpref.setSelected(false);
-		
-		if (annoObj.getRmECO().equals("1")) chkRmECO.setSelected(true);
-		else chkRmECO.setSelected(false);
-		
-		// ORF
-		
-		if (annoObj.getORFaltStart().equals("1")) chkAltStart.setSelected(true);
-		else chkAltStart.setSelected(false);
-		
-		txtHitEval.setText(annoObj.getORFhitEval());
-		txtHitSim.setText(annoObj.getORFhitSim());
-		
-		txtLenDiff.setText(annoObj.getORFlenDiff());
-		
-		txtTrainMinSet.setText(annoObj.getORFtrainMinSet());
-		setTrain(true, false, false);
-		
-		file = annoObj.getORFtrainCDSfile();
-		if (file !=null && !file.equals("") && !file.equals("-1")) {
-			txtTrainCDSfile.setText(file);
-			setTrain(false, true, false);
-		}
-		
-		// Similarity; file=null not set; file="" runblast; file=xxx use file
-		file = annoObj.getSelfBlast();
-		if(file==null) {
-			chkNTself.setSelected(false);
-			setSim(false, false);
-		}
-		else {
-			chkNTself.setSelected(true);
-			if (file.equals("")) {
-				setSim(true, false);
-				String opt = annoObj.getSelfBlastParams();
-				if (opt!=null && !opt.equals("")) txtNTargs.setText(opt);
-			}
-			else {
-				setSim(false, true);
-				txtNTfile.setText(file);
-			}
-		}
-		file = annoObj.getTSelfBlast();
-		if(file==null) {
-			chkAAself.setSelected(false);
-			setTSim(false, false);
-		}
-		else {
-			chkAAself.setSelected(true);
-			if (file.equals("")) {
-				setTSim(true, false);
-				String opt = annoObj.getTSelfBlastParams();
-				if (!opt.equals("")) txtAAargs.setText(opt);
-			}
-			else {
-				setTSim(false, true);
-				txtAAfile.setText(file);
-			}
-		}
-		txtPairsLimit.setText("" + annoObj.getPairsLimit()); 
-	}
-	private void setDefaults() {
-		chkSPpref.setSelected(false);
-		cmbGODB.setSelectedIndex(0);
-		cmbSlimSubset.setSelectedIndex(0);
-	
-		// ORF
-		chkAltStart.setEnabled(!isProteinDB);
-		txtHitEval.setEnabled(!isProteinDB);
-		txtHitSim.setEnabled(!isProteinDB);
-		
-		txtLenDiff.setEnabled(!isProteinDB);
-		
-		chkTrainHit.setEnabled(!isProteinDB);
-		chkTrainCDSfile.setEnabled(!isProteinDB);
-		
-		txtTrainCDSfile.setEnabled(!isProteinDB);
-		
-		// Sim
-		chkNTexec.setEnabled(!isProteinDB);
-		chkNTfile.setEnabled(!isProteinDB);
-		txtNTfile.setEnabled(!isProteinDB);
-		txtNTargs.setEnabled(!isProteinDB);
-		
-		chkAAexec.setEnabled(!isProteinDB);
-		chkAAfile.setEnabled(!isProteinDB);
-		txtAAfile.setEnabled(!isProteinDB);
-		txtAAargs.setEnabled(!isProteinDB);
-		txtPairsLimit.setEnabled(!isProteinDB);
-		
-		if (isProteinDB) return; /***************/
-		
-		// ORF - getProperty returns default
-		if (mProps==null) mProps = new TCWprops(TCWprops.PropType.Annotate);
-		
-		String bAlt = mProps.getProperty("Anno_ORF_alt_start");
-		boolean check = (bAlt.equals("1")) ? true : false;
-		chkAltStart.setSelected(check);
-		
-		chkTrainHit.setEnabled(true);
-		txtHitEval.setText(mProps.getProperty("Anno_ORF_hit_evalue")); 
-		txtHitSim.setText(mProps.getProperty("Anno_ORF_hit_sim")); 
-		
-		txtLenDiff.setText(mProps.getProperty("Anno_ORF_len_diff")); 
-		
-		txtTrainMinSet.setText(mProps.getProperty("Anno_ORF_train_min_set")); 
-		txtTrainCDSfile.setText(""); 
-		
-		// Sim
-		chkNTself.setSelected(false);  setSim(true, false);
-		chkAAself.setSelected(false); setTSim(true, false);
-		txtPairsLimit.setText(curManData.getAnnoObj().getPairsLimit() + "");
-		txtNTargs.setText(BlastArgs.getBlastnOptions());
-		txtAAargs.setText(BlastArgs.getTblastxOptions());
-	}
-	private boolean keep() {
-		curManData.setGODB("");	
-		curManData.setSlimSubset("");
-		curManData.setSlimFile("");
-		if(cmbGODB.getSelectedIndex() != 0) {
-			curManData.setGODB(cmbGODB.getSelectedItem().trim());
-			
-			if (chkSlimSubset.isSelected() && cmbSlimSubset.getSelectedIndex()!=0) 
-				curManData.setSlimSubset(cmbSlimSubset.getSelectedItem());
-			else 
-				if (chkSlimOBOFile.isSelected() && txtSlimOBOFile.getText().trim()!="") 
-					curManData.setSlimFile(txtSlimOBOFile.getText());
-		}
-		
-		String x;
-		ManagerData.AnnoData annoObj = curManData.getAnnoObj();
-		
-		if (chkSPpref.isSelected()) annoObj.setSPpref("1");
-		else annoObj.setSPpref("0");
-		
-		if (chkRmECO.isSelected()) annoObj.setRmECO("1"); 
-		else annoObj.setRmECO("0");
-		
-		
-		if (chkAltStart.isSelected()) annoObj.setORFaltStart("1");
-		else annoObj.setORFaltStart("0");
-		
-		x = txtHitEval.getText();
-		if (Static.isDouble("Hit E-value", x)) annoObj.setORFhitEval(x);
-		else return false;
-		
-		x = txtHitSim.getText();
-		if (Static.isInteger("Hit %Similarity", x)) annoObj.setORFhitSim(x);
-		else return false;
-		
-		x = txtLenDiff.getText();
-		if (Static.isDouble("Length Difference", x)) annoObj.setORFlenDiff(x);
-		else return false;
-			
-		x = txtTrainMinSet.getText();
-		if (Static.isInteger("Minimum number of sequences used for training", x)) annoObj.setORFtrainMinSet(x);
-		else return false;
-		
-		if (!chkTrainCDSfile.isSelected()) annoObj.setORFtrainCDSfile("");
-		else annoObj.setORFtrainCDSfile(txtTrainCDSfile.getText());
-		
-		// Similarity
-		// fileName of "" means run blast, fileName of null means no similarity
-		boolean bSelf=false;
-		annoObj.setSelfBlast(null);
-		annoObj.setSelfBlastParams(null);
-		if (chkNTself.isSelected()) {
-			if(chkNTexec.isSelected()) {
-				annoObj.setSelfBlast("");
-				annoObj.setSelfBlastParams(txtNTargs.getText().replace('\n', ' '));
-				bSelf=true;
-			}
-			else if (chkNTfile.isSelected()) {
-				annoObj.setSelfBlast(txtNTfile.getText());
-				annoObj.setSelfBlastParams("");
-				bSelf=true;
-			}
-		}
-		annoObj.setTSelfBlast(null);
-		annoObj.setTSelfBlastParams(null);
-		if (chkAAself.isSelected()) {
-			if(chkAAexec.isSelected()) {
-				annoObj.setTSelfBlast("");
-				annoObj.setTSelfBlastParams(txtAAargs.getText().replace('\n', ' '));
-				bSelf=true;
-			}
-			else if (chkAAfile.isSelected()) {
-				annoObj.setTSelfBlast(txtAAfile.getText());
-				annoObj.setTSelfBlastParams("");
-				bSelf=true;
-			}
-		}
-		if (bSelf) {
-			x = txtPairsLimit.getText();
-			int limit=0;
-			if(x.length() > 0) {
-				try {
-					limit = Integer.parseInt(x);
-					annoObj.setPairsLimit(limit);
-				}
-				catch(Exception err) {
-					JOptionPane.showMessageDialog(this,  "Incorrect pairs limit " + x, "Incorrect parameter", JOptionPane.PLAIN_MESSAGE);
-					return false;
-				}
-			}
-			if (limit==0) {
-				JOptionPane.showMessageDialog(this,  
-						"Cannot have 'Pairs limit' = 0 when a self blast option is selected.\n" +
-						"Either set a Pairs limit or uncheck all circles under SIMILAR SEQUENCES.", 
-						"Incorrect parameter", JOptionPane.PLAIN_MESSAGE);
-				return false;
-			}
-		}
-		return true;
-	}
-	
-	private void createAnnoDBOptionPanel() {
-		try {
+		try { // created before we know what type sTCW is
 		pnlAnnoDBOptions = new JPanel();
 		pnlAnnoDBOptions.setLayout(new BoxLayout(pnlAnnoDBOptions, BoxLayout.PAGE_AXIS));
 		pnlAnnoDBOptions.setBackground(Globals.BGCOLOR);
@@ -349,8 +81,8 @@ public class AnnoOptionsPanel extends JPanel {
 		innerPanel.add(Box.createVerticalStrut(20));
 		
 		createAnnoPanel(innerPanel);
-		if (!isProteinDB) createOrfPanel(innerPanel);
-		if (!isProteinDB) createSimPanel(innerPanel);
+		createOrfPanel(innerPanel);
+		createSelfPanel(innerPanel);
 		
 		innerPanel.setMaximumSize(innerPanel.getPreferredSize());
 		innerPanel.setMinimumSize(innerPanel.getPreferredSize());
@@ -437,13 +169,15 @@ public class AnnoOptionsPanel extends JPanel {
 		
 		// Rule 1
 		row = Static.createRowPanel();		
-		row.add(new JLabel("Rule 1: Use best hit frame if E-value <="));
+		ntJLabel[0] = new JLabel("Rule 1: Use best hit frame if E-value <=");
+		row.add(ntJLabel[0]);
 		row.add(Box.createHorizontalStrut(1));
 		txtHitEval  = Static.createTextField("0", NUM_LG_FIELD_WIDTH);
 		row.add(txtHitEval);
 		row.add(Box.createHorizontalStrut(1));
 		
-		row.add(new JLabel(" or %HitSim>="));
+		ntJLabel[1] = new JLabel(" or %HitSim>=");
+		row.add(ntJLabel[1]);
 		row.add(Box.createHorizontalStrut(1));
 		txtHitSim  = Static.createTextField("0", NUM_LG_FIELD_WIDTH);
 		row.add(txtHitSim);
@@ -452,8 +186,9 @@ public class AnnoOptionsPanel extends JPanel {
 		innerPanel.add(Box.createVerticalStrut(5));
 		
 		// Rule 2
-		row = Static.createRowPanel();		
-		row.add(new JLabel("Rule 2: Else use longest ORF frame if the log length ratio >"));
+		row = Static.createRowPanel();	
+		ntJLabel[2] = new JLabel("Rule 2: Else use longest ORF frame if the log length ratio >");
+		row.add(ntJLabel[2]);
 		row.add(Box.createHorizontalStrut(1));
 		txtLenDiff = Static.createTextField("0", NUM_SM_FIELD_WIDTH);
 		row.add(txtLenDiff);
@@ -462,7 +197,8 @@ public class AnnoOptionsPanel extends JPanel {
 		
 		// Training
 		row = Static.createRowPanel();
-		row.add(new JLabel("Rule 3: Else use the best Markov score"));
+		ntJLabel[3] = new JLabel("Rule 3: Else use the best Markov score");
+		row.add(ntJLabel[3]);
 		innerPanel.add(row);
 		innerPanel.add(Box.createVerticalStrut(5));
 		
@@ -481,7 +217,8 @@ public class AnnoOptionsPanel extends JPanel {
 		
 		
 		row.add(Box.createHorizontalStrut(5));
-		row.add(new JLabel("Minimum Set"));
+		ntJLabel[4] = new JLabel("Minimum Set");
+		row.add(ntJLabel[4]);
 		row.add(Box.createHorizontalStrut(1));
 		txtTrainMinSet  = Static.createTextField("0", NUM_SM_FIELD_WIDTH);
 		row.add(txtTrainMinSet);
@@ -520,118 +257,76 @@ public class AnnoOptionsPanel extends JPanel {
 		innerPanel.add(Box.createVerticalStrut(10));
 	}
 	// Similarity
-	private void createSimPanel(JPanel innerPanel) {
-		innerPanel.add(new JLabel("SIMILAR SEQUENCES:"));
+	private void createSelfPanel(JPanel innerPanel) {
+		innerPanel.add(new JLabel("SIMILAR PAIRS: (see Help to supply blast tab files)"));
 		innerPanel.add(Box.createVerticalStrut(10));
 
+		// BlastN
 		JPanel row = Static.createRowPanel();
-		chkNTself = Static.createCheckBox("Nucleotide Self Blast (Megablast or blastn)", false);
-		chkNTself.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				setSim(chkNTexec.isSelected(), false);
-			}	
-		});
-		row.add(chkNTself);
+		chkSelfN = Static.createCheckBox("BlastN (NT-NT)", false);
+		row.add(chkSelfN);
 		innerPanel.add(row);
 		innerPanel.add(Box.createVerticalStrut(5));
 		
 		row = Static.createRowPanel();	
 		row.add(Box.createHorizontalStrut(INDENT_RADIO));
-		chkNTexec = new JRadioButton("Execute", true);
-		chkNTexec.setBackground(Globals.BGCOLOR);
-		chkNTexec.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				setSim(chkNTexec.isSelected(), false);
-			}	
-		});
-		row.add(chkNTexec);
-		
-		txtNTargs = new JTextArea(1, BLAST_ARGS_TEXTFIELD_WIDTH);
-		txtNTargs.setText(BlastArgs.getBlastnOptions());
-		txtNTargs.setLineWrap(true);
-		txtNTargs.setWrapStyleWord(true);
-		JScrollPane tempPane = new JScrollPane(txtNTargs);
-		row.add(tempPane);	
+		ntJLabel[5] = new JLabel("Params ");
+		row.add(ntJLabel[5]);
+		txtSelfNargs = new JTextField(BLASTARGS_TEXT_WIDTH);
+		row.add(txtSelfNargs);	
 		
 		innerPanel.add(row);
-		innerPanel.add(Box.createVerticalStrut(5));
-		
-		row = Static.createRowPanel();
-		row.add(Box.createHorizontalStrut(INDENT_RADIO));
-		chkNTfile = new JRadioButton("Or use existing file", false);
-		chkNTfile.setBackground(Globals.BGCOLOR);
-		chkNTfile.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				setSim(false, chkNTfile.isSelected());
-			}	
-		});
-		row.add(chkNTfile);
-		row.add(Box.createHorizontalStrut(5));
-		txtNTfile = new FileTextField(theParentFrame, FileTextField.PROJ, FileTextField.TAB);
-		txtNTfile.setMaximumSize(txtNTfile.getPreferredSize());
-		row.add(txtNTfile);
-		
-		innerPanel.add(row);
-		innerPanel.add(Box.createVerticalStrut(10));
-			
-		ButtonGroup g1 = new ButtonGroup();
-		g1.add(chkNTexec);
-		g1.add(chkNTfile);
+		innerPanel.add(Box.createVerticalStrut(15));
 		
 		/// Tblast
 		row = Static.createRowPanel();
-		chkAAself = Static.createCheckBox("Translated Self Blast (tblastx)", false);
-		chkAAself.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				setTSim(chkAAexec.isSelected(), false);
-			}	
-		});
-		row.add(chkAAself);
+		chkSelfX = Static.createCheckBox("Tblastx (6-frame)", false);
+		row.add(chkSelfX);
 		innerPanel.add(row);
 		innerPanel.add(Box.createVerticalStrut(5));
 		
 		row = Static.createRowPanel();	
 		row.add(Box.createHorizontalStrut(INDENT_RADIO));
-		chkAAexec = new JRadioButton("Execute", true);
-		chkAAexec.setBackground(Globals.BGCOLOR);
-		chkAAexec.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				setTSim(chkAAexec.isSelected(), false);
-			}	
-		});
-		row.add(chkAAexec);
+		row.add(ntJLabel[5]);
+		txtSelfXargs = new JTextField(BLASTARGS_TEXT_WIDTH);
+		row.add(txtSelfXargs);	
+		innerPanel.add(row);
+		innerPanel.add(Box.createVerticalStrut(15));
 		
-		txtAAargs = new JTextArea(1, BLAST_ARGS_TEXTFIELD_WIDTH);
-		txtAAargs.setText(BlastArgs.getTblastxOptions());
-		txtAAargs.setLineWrap(true);
-		txtAAargs.setWrapStyleWord(true);
-		tempPane = new JScrollPane(txtAAargs);
-		row.add(tempPane);	
+		// Blastp for AA-ORFs or AA-stcw CAS314 add
+		row = Static.createRowPanel();
+		chkSelfP = Static.createCheckBox("BlastP (AA-AA: AA-ORFs or AAsTCW)", false);
+		row.add(chkSelfP);
 		innerPanel.add(row);
 		innerPanel.add(Box.createVerticalStrut(5));
 		
-		row = Static.createRowPanel();
+		row = Static.createRowPanel();	
 		row.add(Box.createHorizontalStrut(INDENT_RADIO));
-		chkAAfile = new JRadioButton("Or use existing file", false);
-		chkAAfile.setBackground(Globals.BGCOLOR);
-		chkAAfile.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				setTSim(false, chkAAfile.isSelected());
-			}	
+		row.add(new JLabel("Search program: "));
+		cmbSearchPgms = new ButtonComboBox();
+		cmbSearchPgms.setBackground(Globals.BGCOLOR);
+		Vector <String> pgm = BlastArgs.getSearchPgms();
+		for (String p: pgm) cmbSearchPgms.addItem(p);
+		cmbSearchPgms.setSelectedIndex(0); // diamond
+		cmbSearchPgms.setMaximumSize(cmbSearchPgms.getPreferredSize());
+		cmbSearchPgms.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				setParamDefaults();
+			}
 		});
-		row.add(chkAAfile);
-		row.add(Box.createHorizontalStrut(5));
-		txtAAfile = new FileTextField(theParentFrame, FileTextField.PROJ, FileTextField.TAB);
-		txtAAfile.setMaximumSize(txtAAfile.getPreferredSize());
-		row.add(txtAAfile);
-		
-		ButtonGroup g2 = new ButtonGroup();
-		g2.add(chkAAexec);
-		g2.add(chkAAfile);
-		
+		row.add(cmbSearchPgms);
 		
 		innerPanel.add(row);
-		innerPanel.add(Box.createVerticalStrut(10));
+		innerPanel.add(Box.createVerticalStrut(5));
+		
+		row = Static.createRowPanel();	
+		row.add(Box.createHorizontalStrut(INDENT_RADIO));
+		row.add(new JLabel("Params "));
+		txtSelfPargs = new JTextField(BLASTARGS_TEXT_WIDTH);
+		row.add(txtSelfPargs);	
+		
+		innerPanel.add(row);
+		innerPanel.add(Box.createVerticalStrut(15));
 		
 		row = Static.createRowPanel();
 		txtPairsLimit  = Static.createTextField("0", NUM_LG_FIELD_WIDTH);
@@ -737,9 +432,7 @@ public class AnnoOptionsPanel extends JPanel {
 			}
 			rset.close();						
 		}
-		catch(Exception e) {
-			ErrorReport.prtReport(e, "Error getting GO databases");
-		}
+		catch(Exception e) {ErrorReport.prtReport(e, "Error getting GO databases");}
 		return retVal;
 	}
 	private void findSetSlims(String slim) {
@@ -782,7 +475,6 @@ public class AnnoOptionsPanel extends JPanel {
 		txtTrainCDSfile.setEnabled(bCDS);
 	}
 	private void setGOSlim(boolean x, boolean y) {
-		
 		if (x==true || y==true) {
 			chkSlimSubset.setEnabled(true);
 			cmbSlimSubset.setEnabled(x);
@@ -802,28 +494,251 @@ public class AnnoOptionsPanel extends JPanel {
 			chkSlimOBOFile.setSelected(false);
 		}
 	}
-	private void setSim(boolean isArg, boolean isFile) {
-		boolean doS = chkNTself.isSelected();
-		txtNTargs.setEnabled(isArg  && doS);
-		txtNTfile.setEnabled(isFile && doS);
+	private void setParamDefaults () {
+		String pgm = cmbSearchPgms.getSelectedItem();
 		
-		if (doS) txtPairsLimit.setEnabled(true);
-		else if (!chkAAself.isSelected()) txtPairsLimit.setEnabled(false);
+		if (pgm.equals("blast")) {
+			 saveDiaArgs = txtSelfPargs.getText();
+			 txtSelfPargs.setText(saveBlaArgs);
+		}
+		else if (pgm.equals("diamond")) {
+			saveBlaArgs = txtSelfPargs.getText();
+			txtSelfPargs.setText(saveDiaArgs);
+		}
+		else Out.bug("Illegal search program: " + pgm);
 	}
-	private void setTSim(boolean isArg, boolean isFile) {
-		boolean doT = chkAAself.isSelected();
-		txtAAargs.setEnabled(isArg  && doT);
-		txtAAfile.setEnabled(isFile && doT);
+	/******************************************************************************/
+	public void updateAnnoOptions(ManagerData cd, HostsCfg cf, boolean isP) {
+		curManData = cd;
+		hostsObj = cf;
+		isAAdb=isP;
+		setDefaults();
 		
-		if (doT) txtPairsLimit.setEnabled(true);
-		else if (!chkNTself.isSelected()) txtPairsLimit.setEnabled(false);
+		// GO
+		Vector<String> goList = findGODBs();
+		cmbGODB.removeAllItems();
+		cmbGODB.addItems(goList);				
+		
+		String godb = curManData.getGODB();
+		if(goList.contains(godb)) {
+			cmbGODB.setSelectedIndex(goList.indexOf(godb));
+			
+			String slim = curManData.getSlimSubset();
+			if (!slim.equals("")) {
+				findSetSlims(slim);
+				setGOSlim(true, false);
+			}
+			else {
+				String file = curManData.getSlimFile();
+				if (!file.equals("")) {
+					txtSlimOBOFile.setText(file);
+					setGOSlim(false, true);
+				}
+			}
+		}
+		else {
+			cmbGODB.setSelectedIndex(0);
+			setGOSlim(false, false);
+			if (!godb.equals("")) { 
+				Out.PrtWarn("No GO database " + godb);
+				curManData.setGODB("");
+			}
+		}
+		
+		String file="";
+		ManagerData.AnnoData annoObj = curManData.getAnnoObj();
+		
+		// Best Anno
+		if (annoObj.getSPpref().equals("1")) chkSPpref.setSelected(true);
+		else chkSPpref.setSelected(false);
+		
+		if (annoObj.getRmECO().equals("1")) chkRmECO.setSelected(true);
+		else chkRmECO.setSelected(false);
+		
+		// Similarity; 
+		chkSelfN.setSelected(annoObj.getSelfBlastn());
+		chkSelfX.setSelected(annoObj.getSelfTblastx());
+		chkSelfP.setSelected(annoObj.getSelfBlastp());
+		
+		txtSelfNargs.setText(annoObj.getSelfBlastnParams());
+		txtSelfXargs.setText(annoObj.getSelfTblastxParams());
+		txtSelfPargs.setText(annoObj.getSelfBlastpParams());
+		
+		boolean set = cmbSearchPgms.setSelectedItem(annoObj.getSelfBlastpPgm());
+		if (!set) cmbSearchPgms.setSelectedIndex(0);
+		
+		if (cmbSearchPgms.getSelectedItem().equals("diamond")) {
+			saveDiaArgs = annoObj.getSelfBlastpParams();
+			saveBlaArgs = BlastArgs.getBlastArgsORF();
+		}
+		else {
+			saveBlaArgs = annoObj.getSelfBlastpParams();
+			saveDiaArgs = BlastArgs.getDiamondArgsORF();
+		}	
+		
+		txtPairsLimit.setText("" + annoObj.getPairsLimit()); 
+		
+		// ORF
+		if (isAAdb) return; /*******************************/
+		if (annoObj.getORFaltStart().equals("1")) chkAltStart.setSelected(true);
+		else chkAltStart.setSelected(false);
+		
+		txtHitEval.setText(annoObj.getORFhitEval());
+		txtHitSim.setText(annoObj.getORFhitSim());
+		
+		txtLenDiff.setText(annoObj.getORFlenDiff());
+		
+		txtTrainMinSet.setText(annoObj.getORFtrainMinSet());
+		setTrain(true, false, false);
+		
+		file = annoObj.getORFtrainCDSfile();
+		if (file !=null && !file.equals("") && !file.equals("-1")) {
+			txtTrainCDSfile.setText(file);
+			setTrain(false, true, false);
+		}
 	}
 	
+	private boolean keep() {
+		curManData.setGODB("");	
+		curManData.setSlimSubset("");
+		curManData.setSlimFile("");
+		if(cmbGODB.getSelectedIndex() != 0) {
+			curManData.setGODB(cmbGODB.getSelectedItem().trim());
+			
+			if (chkSlimSubset.isSelected() && cmbSlimSubset.getSelectedIndex()!=0) 
+				curManData.setSlimSubset(cmbSlimSubset.getSelectedItem());
+			else 
+				if (chkSlimOBOFile.isSelected() && txtSlimOBOFile.getText().trim()!="") 
+					curManData.setSlimFile(txtSlimOBOFile.getText());
+		}
+		
+		String x;
+		ManagerData.AnnoData annoObj = curManData.getAnnoObj();
+		
+		if (chkSPpref.isSelected()) annoObj.setSPpref("1");
+		else annoObj.setSPpref("0");
+		
+		if (chkRmECO.isSelected()) annoObj.setRmECO("1"); 
+		else annoObj.setRmECO("0");
+		
+		if (chkAltStart.isSelected()) annoObj.setORFaltStart("1");
+		else annoObj.setORFaltStart("0");
+		
+		x = txtHitEval.getText();
+		if (Static.isDouble("Hit E-value", x)) annoObj.setORFhitEval(x);
+		else rcMsg("Hit E-value", "Must be double '" + x + "'");
+		
+		x = txtHitSim.getText();
+		if (Static.isInteger("Hit %Similarity", x)) annoObj.setORFhitSim(x);
+		else return rcMsg("Hit %Similarity", "Must be integer '" + x + "'");
+		
+		x = txtLenDiff.getText();
+		if (Static.isDouble("Length Difference", x)) annoObj.setORFlenDiff(x);
+		else return rcMsg("Length Difference", "Must be double '" + x + "'");
+			
+		x = txtTrainMinSet.getText();
+		if (Static.isInteger("Minimum number of sequences used for training", x)) annoObj.setORFtrainMinSet(x);
+		else return rcMsg("Minimum Set", "Must be integer '" + x + "'");
+		
+		if (!chkTrainCDSfile.isSelected()) annoObj.setORFtrainCDSfile("");
+		else annoObj.setORFtrainCDSfile(txtTrainCDSfile.getText());
+		
+		// Similarity
+		if (chkSelfN.isSelected() && txtSelfNargs.getText().length()==0) 
+			return rcMsg("BlastN Params", "Cannot be blank");
+		annoObj.setSelfBlastn(chkSelfN.isSelected());
+		annoObj.setSelfBlastnParams(txtSelfNargs.getText());
+		
+		if (chkSelfX.isSelected() && txtSelfXargs.getText().length()==0) 
+			return rcMsg("TBlastX Params", "Cannot be blank");
+		annoObj.setSelfTblastx(chkSelfX.isSelected());
+		annoObj.setSelfTblastxParams(txtSelfXargs.getText());
+		
+		if (chkSelfP.isSelected() && txtSelfPargs.getText().length()==0) 
+			return rcMsg("BlastP Params", "Cannot be blank");
+		annoObj.setSelfBlastp(chkSelfP.isSelected());
+		annoObj.setSelfBlastpParams(txtSelfPargs.getText());
+		annoObj.setSelfBlastpPgm(cmbSearchPgms.getSelectedItem());
+		
+		if (chkSelfN.isSelected() || chkSelfX.isSelected() || chkSelfP.isSelected()) {
+			x = txtPairsLimit.getText();
+			int limit=0;
+			if(x.length() > 0) {
+				try {
+					limit = Integer.parseInt(x);
+					annoObj.setPairsLimit(limit);
+				}
+				catch (Exception e) {return rcMsg("Pair Limit", "Must be integer '" + x + "'");}
+			}
+			if (limit==0) return rcMsg("Pair Limit",
+				"Cannot have 'Pairs limit' = 0 when a self blast option is selected.\n" +
+				"Either set a Pairs limit or uncheck all circles under SIMILAR PAIRS.");
+		}
+		return true;
+	}
+	private boolean rcMsg(String title, String msg) {
+		JOptionPane.showMessageDialog(this,title + "\n" + msg, "Error", JOptionPane.PLAIN_MESSAGE);
+		return false;
+	}
+	private void setDefaults() {
+		chkSPpref.setSelected(false);
+		cmbGODB.setSelectedIndex(0);
+		cmbSlimSubset.setSelectedIndex(0);
+		
+		boolean bNTdb = !isAAdb; // everthing is disabled
+		if (mProps==null) mProps = new TCWprops(TCWprops.PropType.Annotate);
+		
+		// ORF
+		chkAltStart.setEnabled(bNTdb);
+		txtHitEval.setEnabled(bNTdb);
+		txtHitSim.setEnabled(bNTdb);
+		
+		txtLenDiff.setEnabled(bNTdb);
+		
+		chkTrainHit.setEnabled(bNTdb);
+		chkTrainCDSfile.setEnabled(bNTdb);
+		
+		txtTrainCDSfile.setEnabled(bNTdb);
+		
+		// Sim
+		chkSelfN.setSelected(false);  						chkSelfN.setEnabled(bNTdb);
+		txtSelfNargs.setText(BlastArgs.getBlastnArgs());	txtSelfNargs.setEnabled(bNTdb); 
+		
+		chkSelfX.setSelected(false);  						chkSelfX.setEnabled(bNTdb);
+		txtSelfXargs.setText(BlastArgs.getTblastxArgs());	txtSelfXargs.setEnabled(bNTdb);
+		
+		chkSelfP.setSelected(false);  						chkSelfP.setEnabled(true);
+		cmbSearchPgms.setSelectedIndex(0); 					// before set save
+		saveDiaArgs = BlastArgs.getDiamondArgsORF();
+		saveBlaArgs = BlastArgs.getBlastArgsORF();
+		txtSelfPargs.setText(saveDiaArgs);					txtSelfPargs.setEnabled(true);
+		
+		txtPairsLimit.setText(mProps.getProperty("Anno_pairs_limit"));
+		
+		for (int i=0; i<6; i++) ntJLabel[i].setEnabled(bNTdb);
+		
+		if (isAAdb) return; /***************/
+		
+		// ORF - getProperty returns default
+		String bAlt = mProps.getProperty("Anno_ORF_alt_start");
+		boolean check = (bAlt.equals("1")) ? true : false;
+		chkAltStart.setSelected(check);
+		
+		chkTrainHit.setEnabled(true);
+		txtHitEval.setText(mProps.getProperty("Anno_ORF_hit_evalue")); 
+		txtHitSim.setText(mProps.getProperty("Anno_ORF_hit_sim")); 
+		
+		txtLenDiff.setText(mProps.getProperty("Anno_ORF_len_diff")); 
+		
+		txtTrainMinSet.setText(mProps.getProperty("Anno_ORF_train_min_set")); 
+		txtTrainCDSfile.setText(""); 
+	}
+	/***********************************************************************/
 	private TCWprops mProps=null;
 	private HostsCfg hostsObj = null;
 	private ManagerData curManData = null;
 	private ManagerFrame theParentFrame=null;
-	private boolean isProteinDB=false;
+	private boolean isAAdb=false;
 	
 	//Anno controls
 	private JPanel pnlAnnoDBOptions = null;
@@ -851,14 +766,11 @@ public class AnnoOptionsPanel extends JPanel {
 	private FileTextField txtTrainCDSfile = null;
 	
 	// Similarity
-	private JCheckBox     chkNTself = null;
-	private JRadioButton  chkNTexec = null, chkNTfile = null;
-	private JTextArea     txtNTargs = null;
-	private FileTextField txtNTfile = null;
-	
-	private JCheckBox     chkAAself=null;
-	private JRadioButton  chkAAexec = null, chkAAfile = null;
-	private JTextArea     txtAAargs = null; 
-	private FileTextField txtAAfile = null;
+	private JCheckBox     chkSelfN = null, chkSelfX=null, chkSelfP=null;
+	private JTextField     txtSelfNargs = null, txtSelfXargs = null, txtSelfPargs = null; // CAS314 was JTextArea
+	private ButtonComboBox cmbSearchPgms = null;
 	private JTextField    txtPairsLimit = null;
+	
+	private String saveDiaArgs="", saveBlaArgs="";
+	private JLabel [] ntJLabel = new JLabel [10];
 }

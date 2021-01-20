@@ -72,11 +72,11 @@ public class PairNAlignPanel extends BaseAlignPanel
 		
 		boolean isFirst=true;
 		super.drawName( g2, seq1Label, dPAD + nInsetGap, dSeq1Top );
-		drawSequence  ( g2, seq1Label, alignSeq1, dSeq1Top, dSeq1Bottom , nStart1, nStop1, isFirst, isDNA, isPair);
+		drawSequence  ( g2, seq1Label, alignSeq1, dSeq1Top, dSeq1Bottom , nTrimStart1, nTrimStop1, isFirst, isDNA, isPair);
 		
 		isFirst=false;
 		super.drawName( g2, seq2Label, dPAD + nInsetGap, dSeq2Top );
-		drawSequence ( g2, seq2Label, alignSeq2, dSeq2Top, dSeq2Bottom, nStart2, nStop2, isFirst, isDNA , isPair);
+		drawSequence ( g2, seq2Label, alignSeq2, dSeq2Top, dSeq2Bottom, nTrimStart2, nTrimStop2, isFirst, isDNA , isPair);
 	}
 	public Dimension getMaximumSize() {
 		return new Dimension ( Integer.MAX_VALUE, (int)getPreferredSize ().getHeight() );
@@ -93,8 +93,8 @@ public class PairNAlignPanel extends BaseAlignPanel
 		else        return alignSeq1.charAt( nPos );
 	}
 	protected boolean isEndGap(boolean bFirst, int nPos) {
-		if( bFirst && (nPos < nStart2 || nPos > nStop2)) return true;
-		if(!bFirst && (nPos < nStart1 || nPos > nStop1)) return true;
+		if( bFirst && (nPos < nTrimStart2 || nPos > nTrimStop2)) return true;
+		if(!bFirst && (nPos < nTrimStart1 || nPos > nTrimStop1)) return true;
 		return false;
 	}
 	
@@ -147,16 +147,16 @@ public class PairNAlignPanel extends BaseAlignPanel
 	private void init() {
 	try {
 		alignSeq1 = alignDataObj.getAlignFullSeq1(); 
-		for(nStart1=0; nStart1 < alignSeq1.length() && alignSeq1.charAt(nStart1) == gapCh; nStart1++);
-		for(nStop1=alignSeq1.length() - 1; nStop1 >= 0 && alignSeq1.charAt(nStop1) == gapCh; nStop1--);
+		for(nTrimStart1=0; nTrimStart1 < alignSeq1.length() && alignSeq1.charAt(nTrimStart1) == gapCh; nTrimStart1++);
+		for(nTrimStop1=alignSeq1.length() - 1; nTrimStop1 >= 0 && alignSeq1.charAt(nTrimStop1) == gapCh; nTrimStop1--);
 		
 		alignSeq2 = alignDataObj.getAlignFullSeq2(); 
-		for(nStart2=0; nStart2 < alignSeq2.length() && alignSeq2.charAt(nStart2) == gapCh; nStart2++);
-		for(nStop2=alignSeq2.length() - 1; nStop2 >= 0 && alignSeq2.charAt(nStop2) == gapCh; nStop2--);
+		for(nTrimStart2=0; nTrimStart2 < alignSeq2.length() && alignSeq2.charAt(nTrimStart2) == gapCh; nTrimStart2++);
+		for(nTrimStop2=alignSeq2.length() - 1; nTrimStop2 >= 0 && alignSeq2.charAt(nTrimStop2) == gapCh; nTrimStop2--);
 		
 		super.setIndexRange ( 0, Math.max(alignSeq1.length(), alignSeq2.length()) );
 		
-		super.setTrimRange(Math.max(nStart1, nStart2), Math.min(nStop1, nStop2)); // CAS313 add
+		super.setTrimRange(Math.max(nTrimStart1, nTrimStart2), Math.min(nTrimStop1, nTrimStop2)); // CAS313 add
 	
 		seq1Label = alignDataObj.getSeqID1();
 		seq2Label = alignDataObj.getSeqID2();
@@ -186,7 +186,7 @@ public class PairNAlignPanel extends BaseAlignPanel
 	/****************************************************************************/
 	private PairAlignData alignDataObj=null;
 	private String alignSeq1 = "", alignSeq2 = "";
-	private int nStart1 = 0, nStop1 = 0, nStart2 = 0, nStop2 = 0;
+	private int nTrimStart1 = 0, nTrimStop1 = 0, nTrimStart2 = 0, nTrimStop2 = 0; 
 	private String seq1Label = "", seq2Label = "";
 	private boolean isDNA = true;
 //	private Vector<String> description = null;

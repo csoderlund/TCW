@@ -38,12 +38,15 @@ import util.ui.UIHelpers;
 import util.ui.UserPrompt;
 import util.align.AAStatistics;
 import util.database.DBConn;
+
 /********************************************************************
  * from ContigOverview (i.e. View Selected Sequence)
  * Show sequence by frame
  */
 public class SeqFramePanel extends JPanel {
 	private static final long serialVersionUID = 9005938171358335556L;
+	
+	private static final String helpFile = Globals.helpDir + "ContigFramePanel.html";
 	private String HASMARK="'";
 	private int yTop = 10, xLeft = 10, codonCol=20, rowHeight=15, seqNumLength=5, imageHeight=400;
 	private boolean isProtein=false;
@@ -221,8 +224,7 @@ public class SeqFramePanel extends JPanel {
 		btnHelp.setBackground(Globals.HELPCOLOR);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(getInstance(),"Sequence Frame", 
-						"html/viewSingleTCW/ContigFramePanel.html");
+				UserPrompt.displayHTMLResourceHelp(getInstance(),"Sequence Frame", helpFile);
 			}
 		});
 		toolPanel.add(btnHelp);
@@ -490,8 +492,8 @@ public class SeqFramePanel extends JPanel {
 			drawOrf.rEnd = sequence.length();
 			return;
 		}
-		sequence = ctgData.getSeqData().getSequence().toLowerCase();
-		seqRev = ctgData.getSeqData().getSeqRevComp().toLowerCase();
+		sequence = 	ctgData.getSeqData().getSequence().toLowerCase();
+		seqRev = 	ctgData.getSeqData().getSeqRevComp().toLowerCase();
 		seqLen = sequence.length();
 		
 		initTupleMap();
@@ -560,17 +562,19 @@ public class SeqFramePanel extends JPanel {
 			else orfFrame=0;
 			DBConn dbc = theMainFrame.getNewDBC();
 			
+			Vector <OrfData> oList = new Vector <OrfData> ();
+			
 			if (dbc.tableExist("tuple_orfs")) {
 				int CTGid = ctgData.getCTGID();
 				
-				ResultSet rs = dbc.executeQuery("SELECT value FROM tuple_orfs" +
-						" where CTGid=" + CTGid);
+				ResultSet rs = dbc.executeQuery("SELECT value FROM tuple_orfs where CTGid=" + CTGid);
 				while(rs.next ())
 				{
 					String value = rs.getString(1);
 					String [] tok = value.split(":");
 					OrfData o = new OrfData();
-					ORFs.add(o);
+					oList.add(o);
+					
 					o.frame = Integer.parseInt(tok[0]);
 					o.nStart = Integer.parseInt(tok[1]);
 					o.nEnd = Integer.parseInt(tok[2]);
@@ -587,11 +591,11 @@ public class SeqFramePanel extends JPanel {
 				}
 				rs.close(); dbc.close();
 				
-				if (ORFs.size()!=6) {
+				if (oList.size()!=6) {
 					for (int i=3; i>=-3; i--) {
 						if (i==0) continue;
 						boolean found=false;
-						for (OrfData o : ORFs) {
+						for (OrfData o : oList) {
 							if (o.frame==i) {
 								found=true;
 								break;
@@ -599,19 +603,19 @@ public class SeqFramePanel extends JPanel {
 						}
 						if (!found) {
 							OrfData o = new OrfData();
-							ORFs.add(o);
+							oList.add(o);
 							o.frame = i;
 						}
 					}
 				}
 			}
-			else { // no tuples
+			else { // should always be in database now
 				dbc.close();
 				
 				for (int i=3; i>=-3; i--) {
 					if (i==0) continue;
 					OrfData o = new OrfData();
-					ORFs.add(o);
+					oList.add(o);
 					o.frame = i;
 					if (orfFrame==i) {
 						best = o;
@@ -621,6 +625,16 @@ public class SeqFramePanel extends JPanel {
 					else {
 						o.nStart = Math.abs(i);
 						o.nEnd = seqLen;
+					}
+				}
+			}
+			// CAS314 order correctly
+			for (int i=3; i>=-3; i--) {
+				if (i==0) continue;
+				for (OrfData o : oList) {
+					if (o.frame==i) {
+						ORFs.add(o);
+						break;
 					}
 				}
 			}

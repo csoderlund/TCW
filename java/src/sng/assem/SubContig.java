@@ -403,7 +403,7 @@ public class SubContig
 	public void validate() throws Exception
 	{
 		int nqvals = mQual.split("\\s+").length;
-		int slen = mCCS.replace("*", "").length();
+		int slen = mCCS.replace(Globalx.assmGap, "").length();
 		if (nqvals != slen)
 		{
 			throw(new Exception("Invalid contig, seq len " + slen + " qual len " + nqvals));
@@ -602,7 +602,7 @@ public class SubContig
 		while (rs.next())
 		{
 			w.write(">" + rs.getString("clone.cloneid") + "\n");
-			w.write(rs.getString("clone.sequence").replace("*","") + "\n");
+			w.write(rs.getString("clone.sequence").replace(Globalx.assmGap,"") + "\n");
 			qw.write(">" + rs.getString("clone.cloneid") + "\n");
 			qw.write(rs.getString("clone.quality") + "\n");
 			numWritten++;
@@ -972,7 +972,7 @@ public class SubContig
 		
 		PreparedStatement ps = db.prepareStatement("update contclone set leftpos=?,gaps=?,ngaps=?,extras=?,orient=?,pct_aligned=? where cid=? and ctgid=" + mID);
 		
-		String ccs = mCCS.replace("*", "").toUpperCase(); // get rid of the pads added by cap3, but keep the n's, which can be from joining l/r contigs!!
+		String ccs = mCCS.replace(Globalx.assmGap, "").toUpperCase(); // get rid of the pads added by cap3, but keep the n's, which can be from joining l/r contigs!!
 		
 		if (mCCS.length() > 10000)
 		{
@@ -1215,7 +1215,7 @@ public class SubContig
 			}
 		}
 	
-		String ccsUnStarred = mCCS.replace("*","").toUpperCase(); // keep the n's though
+		String ccsUnStarred = mCCS.replace(Globalx.assmGap,"").toUpperCase(); // keep the n's though
 		for (int i = 0; i < ccsUnStarred.length(); i++)
 		{
 			ccsArray[i] = ccsUnStarred.charAt(i);
