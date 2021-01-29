@@ -9,7 +9,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -95,21 +94,34 @@ public class FileTextField extends JPanel  {
 				try {
 					JFileChooser fc = new JFileChooser();
 					fc.setCurrentDirectory(getPath());
-
-					// CAS314 add file extension
-					FileFilter ff=null;
-					if (fileType==FASTA)
-						ff=new FileNameExtensionFilter("Fasta file (.fa, .fasta ...)", "fa","fasta","fna", "ffn", "faa", "frn");
-					else if (fileType==TAB) 
-						ff=new FileNameExtensionFilter("Hit tab file (.tab)", "tab");
-					if (ff!=null) {
-						fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
-						fc.addChoosableFileFilter(ff);//ff added to filechooser
-						fc.setFileFilter(ff);	//st ff as default selection
-					}
 					fc.setFileSelectionMode(JFileChooser.FILES_ONLY);//user must select a file not folder
-					fc.setMultiSelectionEnabled(false);//disabled selection of multiple files
-					// complete CAS314 add
+					fc.setMultiSelectionEnabled(false);				//disabled selection of multiple files
+					if (fileType==FASTA || fileType==TAB) 
+						fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
+					
+					if (fileType==TAB) { // CAS314
+						FileFilter ff=new FileNameExtensionFilter("Hit tab file (.tab)", "tab");
+						fc.addChoosableFileFilter(ff);	//ff added to filechooser
+						fc.setFileFilter(ff);			//set ff as default selection
+					}
+					else if (fileType==FASTA) { // CAS315 fa.gz does not work with the above, need custom.
+						fc.addChoosableFileFilter(new FileFilter() {
+						    public String getDescription() {
+						        return "FASTA (see Help)";
+						    }
+						    public boolean accept(File f) {
+						        if (f.isDirectory()) {
+						            return true;
+						        } else {
+						        	String fName = f.getName().toLowerCase();
+						        	for (String x : Globalx.fastaFile) {
+							            if (fName.endsWith(x)) return true;
+						        	}
+						            return false;
+						        }
+						    }
+						});
+					}
 					
 					if(fc.showOpenDialog(getInstance()) == JFileChooser.APPROVE_OPTION) {
 						String file = fc.getSelectedFile().getPath();
@@ -118,9 +130,7 @@ public class FileTextField extends JPanel  {
 						txtValue.setText(pathMakeRelative(file));
 					}
 				}
-				catch(Exception e) {
-					ErrorReport.prtReport(e, "Error finding file");
-				}		
+				catch(Exception e) {ErrorReport.prtReport(e, "Error finding file");}		
 			}});
 		
 		add(txtValue);
@@ -359,7 +369,7 @@ public class FileTextField extends JPanel  {
 		boolean good=true;
 		try {
 			Out.PrtWarn("TCW does not check consistency between GO database and OBO file\n");
-			BufferedReader in = new BufferedReader ( new FileReader (file)); 
+			BufferedReader in = FileHelpers.openGZIP(file);
 			String line, name="";
 			int gonum=0;
 			boolean first=false;

@@ -67,7 +67,8 @@ public class DoUPdat {
 	private final DecimalFormat df = new DecimalFormat("#,###,###");
 	
 	public boolean fasta(String prefix, String upDir, String inFile, String outFile) {
-		Out.PrtSpMsg(2, "Make FASTA from " + (upDir+inFile));
+		String datSize = FileHelpers.getFileSize(upDir+inFile); // CAS315 add size
+		Out.PrtSpMsg(2, "Make FASTA from " + (upDir+inFile) + " " + datSize);
 		errPath = upDir + errFile;
 		Matcher x;
 		String line="";
@@ -81,68 +82,71 @@ public class DoUPdat {
 			String id="",ac="", de="",os="", gn="";
 			int cnt=0, cntSeq=0;
 	        while ((line = in.readLine()) != null) {
-	        	 	if (line.startsWith("//")) {
-	        	 		inSeq=false;
-	        	 		ac=id=de=os=gn="";
-	        	 		if (cntSeq==0) {
-	        	 			prtParseErr("Missing sequence: " + " ID=" + id + " AC=" + ac + " DE=" + de + " OS="+os);
-	        	 		}
-	        	 	}
-	        	 	else if (inSeq) {
-	        	 		line = line.replace(" ", "");
-	        	 		out.write(line + "\n");
-	        	 		cntSeq++;
-	        	 	}
-	        	 	else if (line.startsWith("SQ")) {
-	        	 		checkOK(ac,id,de,os); // print even if error
-	        	 		if (id!="") {
-	        	 			String desc = ">" + prefix + "|" + ac + "|" + id + " " + de + " OS=" + os + " GN=" + gn;
-	        	 			out.write(desc+"\n");
-	        	 			inSeq=true;
-	        	 			cntSeq=0;
-	        	 		}
-	        	 	}
-	        	 	else if (id=="" && line.startsWith("ID")) {
-	        	 		if (inSeq) {
-	        	 			prtParseErr("Sequence not terminated: " + " ID=" + id + " AC=" + ac + " DE=" + de + " OS="+os);
-	        	 			inSeq=false;
-	        	 		}
-	        	 		x = patID.matcher(line);
-	        	 		if (x.find()) id = x.group(1);
-	    				else System.out.println("Invalid line: " + line);
-	        	 		
-	        	 		cnt++;
-	     	        if (cnt%10000==0) System.out.print("      Wrote " + cnt + "\r");
-	        	 	}
-	        	 	else if (ac =="" && line.startsWith("AC")) {
-	        	 		x = patAC.matcher(line);
-	        	 		if (x.find()) ac = x.group(1);
-	        	 	}
-	        	 	else if (de == "" && line.startsWith("DE")) {
-	        	 		x = patDE.matcher(line);
-	        	 		if (x.find()) de = x.group(1);
-	        	 	}
-	        	 	else if (os=="" && line.startsWith("OS")) {
-	        	 		x = patOS.matcher(line);
-	        	 		if (x.find()) os = x.group(1); // can match successfully to nothing
-	        	 		if (os.equals("")) {
-	        	 			os = line.substring(3).trim();
-	        	 			if (os.endsWith(".")) os = os.substring(0, os.length()-1);
-	        	 		}
-	        	 	}  
-	        	 	else if (gn=="" && line.startsWith("GN")) {
-	        	 		x = patGN.matcher(line);
-	        	 		if (x.find()) gn = x.group(1);
-	        	 	} 
+        	 	if (line.startsWith("//")) {
+        	 		inSeq=false;
+        	 		ac=id=de=os=gn="";
+        	 		if (cntSeq==0) {
+        	 			prtParseErr("Missing sequence: " + " ID=" + id + " AC=" + ac + " DE=" + de + " OS="+os);
+        	 		}
+        	 	}
+        	 	else if (inSeq) {
+        	 		line = line.replace(" ", "");
+        	 		out.write(line + "\n");
+        	 		cntSeq++;
+        	 	}
+        	 	else if (line.startsWith("SQ")) {
+        	 		checkOK(ac,id,de,os); // print even if error
+        	 		if (id!="") {
+        	 			String desc = ">" + prefix + "|" + ac + "|" + id + " " + de + " OS=" + os + " GN=" + gn;
+        	 			out.write(desc+"\n");
+        	 			inSeq=true;
+        	 			cntSeq=0;
+        	 		}
+        	 	}
+        	 	else if (id=="" && line.startsWith("ID")) {
+        	 		if (inSeq) {
+        	 			prtParseErr("Sequence not terminated: " + " ID=" + id + " AC=" + ac + " DE=" + de + " OS="+os);
+        	 			inSeq=false;
+        	 		}
+        	 		x = patID.matcher(line);
+        	 		if (x.find()) id = x.group(1);
+    				else Out.PrtErr("Invalid line: " + line);
+        	 		
+        	 		cnt++;
+        	 		if (cnt%10000==0) Out.r("Wrote " + cnt);
+        	 	}
+        	 	else if (ac =="" && line.startsWith("AC")) {
+        	 		x = patAC.matcher(line);
+        	 		if (x.find()) ac = x.group(1);
+        	 	}
+        	 	else if (de == "" && line.startsWith("DE")) {
+        	 		x = patDE.matcher(line);
+        	 		if (x.find()) de = x.group(1);
+        	 	}
+        	 	else if (os=="" && line.startsWith("OS")) {
+        	 		x = patOS.matcher(line);
+        	 		if (x.find()) os = x.group(1); // can match successfully to nothing
+        	 		if (os.equals("")) {
+        	 			os = line.substring(3).trim();
+        	 			if (os.endsWith(".")) os = os.substring(0, os.length()-1);
+        	 		}
+        	 	}  
+        	 	else if (gn=="" && line.startsWith("GN")) {
+        	 		x = patGN.matcher(line);
+        	 		if (x.find()) gn = x.group(1);
+        	 	} 
 	         }
 	         in.close(); out.close();
-	         if (id!="") Out.PrtWarn("Incomplete file. Entry not complete: " + id);
+	         if (id!="")   Out.PrtWarn("Incomplete file. Entry not complete: " + id);
 	         if (cntErr>0) Out.PrtWarn("Parse errors " + cntErr + " see " + errPath);
-	         Out.PrtSpMsgTimeMem(3, df.format(cnt) + " written to " + outFile, time);
+	         
+	         String faSize = FileHelpers.getFileSize(upDir+outFile);
+	         Out.PrtSpMsgTime(3, df.format(cnt) + " written to " + outFile + " " + faSize, time);
+	         
 	         return true;
 		}
 		catch (Exception e) {
-			System.err.println("*****Check your space, you may have run out.");
+			Out.PrtErr("Check your space, you may have run out.");
 			ErrorReport.reportError("Failed on: " + line);
 			ErrorReport.reportError(e, "Making FASTA " + inFile); 
 			return false;
@@ -155,7 +159,7 @@ public class DoUPdat {
 			pWriter.close();
 			cntErr++;
 		} catch (Exception e1) {
-			System.err.println("An error has occurred writing to file " + errPath);
+			Out.PrtErr("An error has occurred writing to file " + errPath);
 		}
 	}
 	
@@ -200,19 +204,18 @@ public class DoUPdat {
 			long cnt1=0;
 	        while ((line = in.readLine()) != null) {
 	            if (line.startsWith("//")) {
-	            	 	ps.setString(1, id);
-	            	 	ps.setString(2, acc);
-	            	 	ps.setString(3, go);
-	            		ps.setString(4, pfam);
-	            		ps.setString(5, kegg);
-	            		ps.setString(6, ec);
-	            		ps.setString(7, ip);
-	            		err = id + "\n" + go + "\n"+  pfam + "\n"+ kegg + "\n"+ ec + "\n"+ ip;
+            	 	ps.setString(1, id);
+            	 	ps.setString(2, acc);
+            	 	ps.setString(3, go);
+            		ps.setString(4, pfam);
+            		ps.setString(5, kegg);
+            		ps.setString(6, ec);
+            		ps.setString(7, ip);
+            		err = id + "\n" + go + "\n"+  pfam + "\n"+ kegg + "\n"+ ec + "\n"+ ip;
 	 				ps.addBatch();
 	 				cnt++;cnt1++;
-	 	            if (cnt == 1000) 
-	 				{
-	 	     	        System.out.print("      Load " + cnt1 + "\r");
+	 	            if (cnt == 1000) {
+	 	     	        Out.r("Load " + cnt1);
 	 					ps.executeBatch();
 	 					cnt=0;
 	 				}
@@ -222,89 +225,89 @@ public class DoUPdat {
 	            }
 	            if (inSeq) {continue;}
 	            
-	        	 	if (line.startsWith("SQ")) {inSeq=true; continue;}
-	        	 	
-	        	 	if (id=="" && line.startsWith("ID")) {
-	        	 		x = patID.matcher(line);
-	        	 		if (x.find()) id = x.group(1);
-	    				else System.out.println("Invalid line: " + line);
-	        	 		continue;
-	        	 	}
-	        	 	if (acc =="" && line.startsWith("AC")) {
-	        	 		x = patAC.matcher(line);
-	        	 		if (x.find()) acc = x.group(1);
-	        	 		continue;
-	        	 	}
-	        	 	x = patEC.matcher(line);
-	        	 	if (x.find()) {
-        	 			x = patECfull.matcher(line);
-        	 			if (x.find()) {
-        	 				ec = x.group(1);
-        	 				cntEC++;
+        	 	if (line.startsWith("SQ")) {inSeq=true; continue;}
+        	 	
+        	 	if (id=="" && line.startsWith("ID")) {
+        	 		x = patID.matcher(line);
+        	 		if (x.find()) id = x.group(1);
+    				else System.out.println("Invalid line: " + line);
+        	 		continue;
+        	 	}
+        	 	if (acc =="" && line.startsWith("AC")) {
+        	 		x = patAC.matcher(line);
+        	 		if (x.find()) acc = x.group(1);
+        	 		continue;
+        	 	}
+        	 	x = patEC.matcher(line);
+        	 	if (x.find()) {
+    	 			x = patECfull.matcher(line);
+    	 			if (x.find()) {
+    	 				ec = x.group(1);
+    	 				cntEC++;
+    	 			}
+    	 			else Out.bug("EC: " + line);
+    	 			continue;
+        	 	}
+        	 	x = patGO.matcher(line);
+        	 	if (x.find()) { 
+        	 		x = patGOec.matcher(line);
+        	 		if (x.find()) {
+        	 			String gonum = x.group(1);
+        	 			String goec = x.group(2);
+        	 			if (!ecHash.contains(goec)) { 
+        	 				if (!badEC.containsKey(goec)) {
+        	 					Out.PrtWarn("Unknown EC: " + line);
+        	 					badEC.put(goec, 1);
+        	 				}
+        	 				else badEC.put(goec, badEC.get(goec)+1);
+        	 				
+        	 				if (!allbadEC.containsKey(goec)) allbadEC.put(goec, 1);
+        	 				else allbadEC.put(goec, allbadEC.get(goec)+1);
+        	 		
+        	 				goec = "UNK";
         	 			}
-        	 			else System.out.println("EC: " + line);
+        	 			
+        	 			String gx = gonum + ":" + goec;
+        	 			if (go=="") go=gx;
+        	 			else go+= ";"+gx;
+        	 			cntGO++;
         	 			continue;
-	        	 	}
-	        	 	x = patGO.matcher(line);
-	        	 	if (x.find()) { 
-	        	 		x = patGOec.matcher(line);
-	        	 		if (x.find()) {
-	        	 			String gonum = x.group(1);
-	        	 			String goec = x.group(2);
-	        	 			if (!ecHash.contains(goec)) { 
-	        	 				if (!badEC.containsKey(goec)) {
-	        	 					Out.PrtWarn("Unknown EC: " + line);
-	        	 					badEC.put(goec, 1);
-	        	 				}
-	        	 				else badEC.put(goec, badEC.get(goec)+1);
-	        	 				
-	        	 				if (!allbadEC.containsKey(goec)) allbadEC.put(goec, 1);
-	        	 				else allbadEC.put(goec, allbadEC.get(goec)+1);
+        	 		}
+        	 		x = patGOnoec.matcher(line);
+        	 		if (x.find()) {
+        	 			String gx = x.group(1) + ":" + "UNK";
+        	 			if (go=="") go=gx;
+        	 			else go+= ";"+gx;
+        	 			cntGO++;
+        	 		}
+        	 		else Out.PrtErr("Fail: " + line);
+        	 		continue;
+        	 	}
+        	 	if (line.startsWith("DR")) { 
+        	 		x = patPF.matcher(line);
+        	 		if (x.find()) {
+        	 			if (pfam=="") pfam=x.group(1);
+        	 			else pfam+= ";"+x.group(1);
+        	 			cntPF++;
+        	 			continue;
+        	 		}
+        	 		
+        	 		x = patKG.matcher(line);
+        	 		if (x.find()) {
+        	 			if (kegg=="") kegg=x.group(1);
+        	 			else kegg+= ";" + x.group(1);
+        	 			cntKG++;
+        	 			continue;
+        	 		}
 	        	 		
-	        	 				goec = "UNK";
-	        	 			}
-	        	 			
-	        	 			String gx = gonum + ":" + goec;
-	        	 			if (go=="") go=gx;
-	        	 			else go+= ";"+gx;
-	        	 			cntGO++;
-	        	 			continue;
-	        	 		}
-	        	 		x = patGOnoec.matcher(line);
-	        	 		if (x.find()) {
-	        	 			String gx = x.group(1) + ":" + "UNK";
-	        	 			if (go=="") go=gx;
-	        	 			else go+= ";"+gx;
-	        	 			cntGO++;
-	        	 		}
-	        	 		else System.out.print("Fail: " + line);
-	        	 		continue;
-	        	 	}
-	        	 	if (line.startsWith("DR")) { 
-	        	 		x = patPF.matcher(line);
-	        	 		if (x.find()) {
-	        	 			if (pfam=="") pfam=x.group(1);
-	        	 			else pfam+= ";"+x.group(1);
-	        	 			cntPF++;
-	        	 			continue;
-	        	 		}
-	        	 		
-	        	 		x = patKG.matcher(line);
-	        	 		if (x.find()) {
-	        	 			if (kegg=="") kegg=x.group(1);
-	        	 			else kegg+= ";" + x.group(1);
-	        	 			cntKG++;
-	        	 			continue;
-	        	 		}
-		        	 		
-	        	 		x = patIP.matcher(line);
-	        	 		if (x.find()) {
-	        	 			if (ip=="") ip=x.group(1);
-	        	 			else ip+= ";"+x.group(1);
-	        	 			cntIP++;
-	        	 			continue;
-	        	 		}
-	        	 	}
+        	 		x = patIP.matcher(line);
+        	 		if (x.find()) {
+        	 			if (ip=="") ip=x.group(1);
+        	 			else ip+= ";"+x.group(1);
+        	 			cntIP++;
+        	 			continue;
+        	 		}
+        	 	}
 	         }
 	         if (cnt>0) ps.executeBatch();
 	         in.close(); ps.close();
@@ -315,16 +318,16 @@ public class DoUPdat {
 	        if (id!="") Out.PrtWarn("Incomplete -- did not add " + id);
 	         
 	        if (badEC.size()>0) { 
-	        		String xx="";
+	        	String xx="";
 		 		for (String ecx : badEC.keySet()) xx += " " + ecx + ":" + badEC.get(ecx);
 		 		Out.PrtSpMsg(4, "Unknown ECs: " + xx);
 		 	}
 	       
-	        Out.PrtSpMsgTimeMem(4, df.format(cnt1) + " UniProts ", time);
+	        Out.PrtSpMsgTime(4, df.format(cnt1) + " UniProts ", time);
 	        return true;
 		}
 		catch (Exception e) {
-			System.out.println("Error inserting:\n" + err);
+			Out.PrtErr("Inserting:\n" + err);
 			ErrorReport.reportError(e, "Processing " + file);}
 		return false;
 	}

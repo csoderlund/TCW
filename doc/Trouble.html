@@ -8,23 +8,52 @@
 <!------------- Trouble -------------------->
 <a name=trouble></a>
 <h2>Troubleshooting</h2>
-Content:
+<u>Content:</u>
 <ul>
-<li><a href=#mysql>MySQL slow</a>
+<li><a href=#mysql>MySQL suggested settings</a>
 <li><a href=#db>MySQL connection errors</a>
 <li><a href=#mem>Out of memory</a>
-<li><a href=#ext>Ext executable problems</a>
-<li><a href=#run>singleTCW errors</a>
+<li><a href=#ext>External executable problems</a>
+<li><a href=#run>Error Reports</a>
 </ul>
 
 <!---------------------------------------------------------!>
 <hr>
-<h2>MySQL suggested settings</h2>
-
 <a name="mysql">
-<h3>Slow to load sequence and annotation</h3>
+<h2>MySQL suggested settings</h2>
+<table cellspacing=3 cellpadding=2 border=1 rules=all>
+	<tr>
+		<td align=left valign=top><tt>max_allowed_packet</td>
+		<td>
+This should be at least 500M if possible (the units are bytes). 
+		</td>
+	</tr>	
+	<tr>
+		<td align=left valign=top><tt>local_infile</td>
+		<td>
+Set to 1. 
+		</td>
+	</tr>	
+</table>
+<br>For all TCW software, the mySQL variable <tt>max_allowed_packet</tt> must be a reasonable
+size. To check the value, either:
+<pre>./runSingle -v</pre>
+or, start mysql and type:
+<pre>show variables like "max_allowed_packet"; </pre>
+To change this variable, start mysql and type:
+<pre>set global max_allowed_packet=1073741824;</pre>
 
-Two MySQL settings are especially important for SyMAP performance (and generally for InnoDB table
+For <code>runAS</code>, the following is necessary:
+<pre>
+set global local_infile=1
+</pre>
+Testing TCW on MacOS Catalina with MySQL v8.0.17: 
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the above two seem to be the only important ones.
+<br>Testing TCW on Linux x86.64 (Centos 7) with MariaDB v10.4.12:
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; may be more sensitive, as discussed in next section.
+
+<h3>MariaDB</h3>
+Two MySQL settings are especially important for assembly performance (and generally for InnoDB table
 performance). 
 <p>
 <table cellspacing=3 cellpadding=2 border=1 rules=all>
@@ -56,56 +85,21 @@ set global innodb_flush_log_at_trx_commit=0;
 Alternatively, You can set these in the MySQL configuration file <tt>my.cnf</tt> and restart MySQL. 
 Note that <tt>my.cnf</tt> is typically located at <tt>/etc/my.cnf</tt>, on both Linux and Mac.
 
-<p>Different machines and MySQL installations can produce different results with these variables.
-If the SyMAP demo-seq to demo-seq2 load and synteny computations seem slow, 
-try different combinations of these two variables to see what performs the fastest inserts.
-
-<a name="slow">
-<h3>Slow queries</h3>
-<table cellspacing=3 cellpadding=2 border=1 rules=all>
-	<tr>
-		<td align=left valign=top><tt>max_allowed_packet</td>
-		<td>
-This should be at least 500M if possible (the units are bytes). 
-		</td>
-	</tr>	
-</table>
-<p>
-To check the value, start mysql and type:
-<pre>show variables like "max_allowed_packet"; </pre>
-To change this variable, then type:
-<pre>set global max_allowed_packet=1073741824;</pre>
-
-
-<h3>runAS</h3>
-The following is necessary for <code>runAS</code> to create the TCW-GO database.
-<table cellspacing=3 cellpadding=2 border=1 rules=all>
-	<tr>
-		<td align=left valign=top><tt>local_infile</td>
-		<td>
-Set to 1. 
-		</td>
-	</tr>	
-</table>
-<p>To change the variable in MySQL:
-
-<pre>
-set global local_infile=1
-</pre>
-
-<p><a href="#top">Return to top</a><br>
 <a name="db">
+<table width='100%'><tr><td align='left' >
 <h2>MySQL connection errors</h2>
-
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a></td></tr></table>
+	
 If TCW cannot connect to the database, generally the problem is the access privileges of the DB_user
- in the HOSTS.cfg (firewalls are another common problem, as discussed in the next section). 
-MySQL privileges are very specific and must exactly match the hostname in HOSTS.cfg. 
+ in the HOSTS.cfg (firewalls are another common problem - talk to your system administrator). 
+
+<p>MySQL privileges are very specific and must exactly match the hostname in HOSTS.cfg. 
 <br> For example, if DB_host = localhost, DB_user=user, then privileges must be granted to 'user@localhost'.
 Sometimes you may need equivalent variants, e.g. if localhost has IP 74.125.239.17 
 and domain my.domain.org, you may also need 'user@74.125.239.17' and 'user@my.domain.org'. 
 <p>
-Privilege problems are easiest to debug by running the 'mysql' command line client.<br>
-Run
+Privilege problems are easiest to debug by running the 'mysql' command line client.
+Run:
 <div class="codesec"><pre>
 mysql -u &lt;DB_user&gt; -p -h &lt;DB_host&gt;
 </div></pre> 
@@ -118,39 +112,44 @@ to be corrected. If it succeeds, then try to add and drop a test database:
 If this fails you can still run TCW, but you will need an administrator to create
 the TCW database since <tt>runSingleTCW</tt> cannot do it. 
 
-<p><a href="#top">Return to top</a><br>
-<a name=memset></a>
+<a name=mem></a>
+<table width='100%'><tr><td align='left' >
 <h2>Out of memory</h2>
-<p>Java applications must specify their memory usage in advance, so it is very 
-important to set it high enough. The setting is adjusted by editing the appropriate launch script,
-by increasing the "-Xmx" parameter value on the java command line.   
-<p>
-If you run out of memory while annotating, edit the <tt>execAnno</tt> script, and load
-your annotation using <tt>./execAnno &lt;project&gt;</tt>.
-<p>
-If you run out during assembly, edit the <tt>execAssm.pl</tt> script, and run the
-assembly using <tt>perl execAssm &lt;project&gt;</tt>.     
-<p>
-If you run out during initial project loading, edit the <tt>execLoadLib.pl</tt> script, and load
- using <tt>perl execLoadLib.pl &lt;project&gt;</tt>.     
-<p>
-Other phases such as viewing or DE computation are unlikely to run out of memory, but their memory 
-can also be increased through the appropriate launch scripts <tt>runDE</tt> and <tt>viewSingleTCW</tt>.
-<p>
-If a user of the web applet runs out of memory, they will need to close their browser and increase
-applet memory through the Java Preferences manager. On Macs this is found under
-<tt>Applications/Utilities/Java Preferences</tt>
-<br>
-and on Windows it is on the Control Panel. On Linux, find the executable called "ControlPanel" 
-by following links from the browser plugin directory (typically <tt>~/.mozilla/firefox/plugins</tt>
-to find the java installation directory, and look in its <tt>bin</tt> directory. 
-<p>
-Once you have the Control Panel open, look for a panel where you can enter the runtime parameters
-for java applets, and add "-Xmx1024m", for 1Gb (which should be plenty). 
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a></td></tr></table>
 
-<p><a href="#top">Return to top</a><br>
+Java applications must specify their memory usage in advance, so it is very 
+important to set it high enough. 
+The setting is adjusted by editing the appropriate launch script,
+by increasing the "-Xmx" parameter value on the java command line.   
+
+<p>
+If you run out during initial project loading, 
+edit the <tt>execLoadLib</tt> script to increase
+the numeric value of "-Xmx8192m", and load
+ using <tt>./execLoadLib &lt;project&gt;</tt>. 
+ <p>
+If you run out during instantiation/assembly, 
+edit the <tt>execAssm</tt> script to increase
+the numeric value of "-Xmx8192m" , and run the
+instantiation using <tt>./execAssm &lt;project&gt;</tt>.  
+<p>
+If you run out of memory while annotating, 
+edit the <tt>execAnno</tt> script to increase
+the numeric value of "-Xmx8192m", and add
+your annotation using <tt>./execAnno &lt;project&gt;</tt>.
+   
+<p>
+If you run out of memory with 
+<tt>runDE</tt>, <tt>viewSingleTCW</tt>,  <tt>runMultiTCW</tt>, or <tt>viewMultiTCW</tt>,
+edit the respective script to increase
+the numeric value of "-Xmx8192m" and re-run.
+
 <a name=ext></a>
-<h2>Ext executable problems</h2>
+<table width='100%'><tr><td align='left' >
+<h2>External executable problems</h2>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a></td></tr></table>
+
+These program are in the TCW subdirectories <tt>/Ext/linux</tt> and <tt>/Ext/mac</tt>.
 <h3>Not executable</h3>
 If on startup, you get a message like:
 <pre>
@@ -164,41 +163,38 @@ executables and scripts in the directory permission to execute.
 you will either get popup that states "xxx cannot be opened because developer cannot be verified", or
 the program will just fail. See <a href=./Mac-OSX.html#ext class="ext" target="_blank">MacOS</a>.
 
-
 <h3>External program fails</h3>
 Generally, the command is written to the terminal by TCW. Copy and paste it at the command line. By executing it like
-this, you will see all the external programs messages.
-<p>If this does not work, try executing it in the <tt>/Ext</tt> directory.
-<p>See <a href=./Install.html#replace  class="ext" target="_blank">Install Replace Executable</a>.
-<p><a href="#top">Return to top</a><br>
+this, you will see all the external programs messages, which generally elucidates the
+problem.
+<p>If this does not work, try executing it in the <tt>/Ext</tt> directory, 
+which may indicate the problem. 
+<p>It may be necessary to compile the program for your machine and replace the existing
+executable, in which case, see <a href=./Install.html#replace  class="ext" target="_blank">Install Replace Executable</a>.
 
 <a name=run></a>
-<h2>SingleTCW errors</h2>
-<code>runSingleTCW</code> and <code>viewSingleTCW</code>:
-If errors occur in either of these two programs, a message is written to the terminal
-and the Java stack-trace is written to the file <tt>sTCW.error.log</tt>. This can 
-be sent to us so we can help you trouble shoot the problem, that is, if the 
-message to the terminal is not sufficient to indicate how to fix the problem. NOTE:
-errors are appended to this file, so if an error keeps re-occurring without getting
-fixed, the file can get quite large.
+<table width='100%'><tr><td align='left' >
+<h2>Errors reports</h2>
+</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a></td></tr></table>
 
-<p><code>runSingleTCW</code>:
-If the information on this window does not look right, remove
-<tt>/libraries/&lt;project&gt;/LIB.cfg</tt> to start over. You can try fixing the problem
-by editing this file, but its necessary to format it correctly.
-<p>If you have many sequences (e.g. transcripts) in the database and/or many annoDBs (databases to blast against),
-this can take a lot of memory. Running <tt>Exec Annotate Sequences</tt> from <tt>runSingleTCW</tt>
-sets the memory to 4096, which may not be 
-enough; in this case, once <tt>runSingleTCW</tt> is ready to annotate your database, exit and run from the command line:
-<pre>
-	./execAnno &lt;project&gt;
-</pre>
-You can increase the memory size in the <tt>execAnno</tt> script.
-
-<a name=asm></a>
-<h3>Assembly errors</h3>
-See <a href=./stcw/AssemGuide.html#trouble  class="ext" target="_blank">Assembly trouble shooting</a>.
+<table border=1 cellspacing=3 cellpadding=2>
+<tr><th>Program<th>Error file<th>Log file
+<tr><td colspan=3><tt>RunSingleTCW</tt>
+<tr><td>&nbsp;&nbsp;&nbsp;Build Database<td>sTCW.error1.log<td>projects/&lt;name&gt;/logs/load.log
+<tr><td>&nbsp;&nbsp;&nbsp;Instantiate<td>sTCW.error1.log<td>projects/&lt;name&gt;/logs/inst.log
+<tr><td>&nbsp;&nbsp;&nbsp;Annotate<td>sTCW.error.log<td>projects/&lt;name&gt;/logs/anno.log
+<tr><td colspan=3>Everything else
+<tr><td><tt>runAS</tt><td>sTCW.error.log<td>projects/DBfasta/logs
+<tr><td><tt>runDE</tt><td>sTCW.error.log<td>-
+<tr><td><tt>viewSingleTCW</tt><td>sTCW.error.log<td>-
+<tr><td><tt>runMultiTCW</tt><td>mTCW.error.log<td>projcmp/&lt;name&gt;/logs
+<tr><td><tt>viewMultiTCW</tt><td>sTCW.error.log<td>-
+</table>
 <p>
+The error log file may indicate the problem, otherwise, 
+email it to <tt>tcw at agcol.arizona.edu</tt>.
+
+
 <p><a href="#top">Return to top</a><br>
 <!--#include virtual="./ssi/end.html" -->
 

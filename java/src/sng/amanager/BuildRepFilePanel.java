@@ -10,7 +10,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -34,6 +33,8 @@ import javax.swing.table.AbstractTableModel;
 
 import util.database.Globalx;
 import util.methods.ErrorReport;
+import util.methods.FileHelpers;
+import util.methods.Out;
 import util.methods.Static;
 import util.ui.UserPrompt;
 
@@ -236,7 +237,7 @@ public class BuildRepFilePanel extends JPanel {
 	// read directory of files and enter into table for Generate Counts
 	private void addFilesFromDir(String dirStr) {
 		try {
-			System.err.println("Loading files from " +dirStr);
+			Out.PrtCntMsg(0, "Loading files from " +dirStr);
 			File dir = new File(dirStr);
 			File[] files = dir.listFiles();
 			
@@ -247,7 +248,7 @@ public class BuildRepFilePanel extends JPanel {
 				String fullname = dirStr + "/" + name;
 				
 				if (!checkCountFile(fullname)) {
-					System.err.println("Ignoring " + name);
+					Out.PrtWarn("Ignoring " + name);
 					continue;
 				}
 				addNameFile(name, fullname);
@@ -279,11 +280,11 @@ public class BuildRepFilePanel extends JPanel {
 			File f = new File (file);
 			if (f.isDirectory()) return false;
 			if (!f.canRead()) {
-				System.err.println("Unreadeable " + file);
+				Out.PrtErr("Unreadeable " + file);
 				return false;
 			}
 			
-			BufferedReader br = new BufferedReader(new FileReader(file));
+			BufferedReader br = FileHelpers.openGZIP(f.getAbsolutePath()); // CAS315
 			String line;
 			while((line = br.readLine())!= null) {
 				if (line.startsWith("#")) continue;
@@ -315,11 +316,11 @@ public class BuildRepFilePanel extends JPanel {
 			return;
 		}			
 		try {
-	         System.out.println("Generating combined the count file - this takes a while");
+	         Out.PrtSpMsg(0, "Generating combined the count file - this takes a while");
 	         
 	  // get all seqIDs from sequence file to make sure they correspond to read count files		
 	         ArrayList <String> seqIDs = new ArrayList<String> ();
-			BufferedReader br = new BufferedReader(new FileReader(seqFilePath));
+			BufferedReader br = FileHelpers.openGZIP(seqFilePath);
 			String line = br.readLine();
 			while(line != null) {
 				if(line.startsWith(">")) {
@@ -330,7 +331,7 @@ public class BuildRepFilePanel extends JPanel {
 			br.close();
 			
 			Collections.sort(seqIDs);		
-			System.out.println("   Sequences in file: " + seqIDs.size());
+			Out.prtSpCnt(1, seqIDs.size(), "Sequences in file" );
 			
 			Vector<long []> theCounts = new Vector<long []> ();
 			FileTextField fileObj = new FileTextField(theManagerFrame,
@@ -339,14 +340,14 @@ public class BuildRepFilePanel extends JPanel {
 	// read through files
 			for(int x=0; x<fileList.size(); x++) {
 				String filename = fileList.get(x);				
-				System.out.println("   Reading " + removeLib(filename));
+				Out.prt("   Reading " + removeLib(filename));
 				
 				long [] theDECounts = new long[seqIDs.size()];
 				for(int y=0; y<theDECounts.length; y++)
 					theDECounts[y] = 0;
 				
 				String fname = fileObj.pathToOpen(filename, FileTextField.LIB);
-				br = new BufferedReader(new FileReader(fname));
+				br = FileHelpers.openGZIP(fname);
 				line = br.readLine();
 				int lineCount = 0;
 				while(line != null) {
@@ -364,7 +365,7 @@ public class BuildRepFilePanel extends JPanel {
 						count = Long.parseLong(vals[1]);
 					}
 					catch (Exception e) {
-						System.err.println("Incorrect line: " + line);
+						Out.PrtErr("Incorrect line: " + line);
 						UserPrompt.showError("Invalid file (see terminal)\n   " + filename);
 						br.close();
 						return;
@@ -372,7 +373,7 @@ public class BuildRepFilePanel extends JPanel {
 					
 					int index = Collections.binarySearch(seqIDs, seqID);						
 					if (index < 0) {
-						System.err.println(seqID + " not in sequence file ");
+						Out.PrtErr(seqID + " not in sequence file ");
 						UserPrompt.showError("Invalid file (see terminal)\n   " + filename);
 						br.close();
 						return;
@@ -382,11 +383,11 @@ public class BuildRepFilePanel extends JPanel {
 					line = br.readLine();
 				}
 				br.close();
-				System.out.println("      Lines read: " + lineCount + "        ");
+				Out.prtSpCnt(1, lineCount, "Lines read        ");
 				theCounts.add(theDECounts);
 			}
 			String outFileName = LIBDIR + theManagerFrame.getProjectName() + "/" + DEFAULT_COMBINED_FILE;
-			System.out.println("Writing file " + outFileName);
+			Out.PrtSpMsg(1, "Writing file " + outFileName);
 			PrintWriter out = new PrintWriter(new FileWriter(new File(outFileName)));
 			
 			out.print("Sequence  ");

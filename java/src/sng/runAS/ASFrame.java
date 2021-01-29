@@ -50,6 +50,11 @@ public class ASFrame extends JDialog implements WindowListener{
 	private final String goDir = rootDir + "/GO_tmp";
 	private final String goPreDB = DoGO.goPreDB;
 	
+	private final String cfgPrefix = "./projects/AnnoDBs_"; // UniProt_date is added
+	private final String cfgSuffix = ".cfg"; // CAS315 added
+	
+	private final String helpDir = "html/runAS/ASFrame.html";
+	
 	private final String demoSuffix = "demo";
 	
 	private final int LABEL_WIDTH = 55;
@@ -309,35 +314,24 @@ public class ASFrame extends JDialog implements WindowListener{
 		row.add(bc);
 		panel.add(row);
 		
-		row.add(Box.createHorizontalStrut(10));
+		row.add(Box.createHorizontalStrut(35));
 		
-		JButton ba = new JButton("TCW.anno");
+		JButton ba = new JButton("AnnoDBs.cfg");
 		ba.setEnabled(true);
 		ba.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				runAnno();
+				runWriteAnno();
 			}
 		});
 		row.add(ba);
-		row.add(Box.createHorizontalStrut(10));
-		
-		final JButton btnRM = new JButton("README");
-	    btnRM.setBackground(Globalx.HELPCOLOR);
-	    btnRM.setOpaque(true);
-	    btnRM.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				UserPrompt.displayHTMLResourceHelp(getInstance(), "RunAS README", "html/runAS/README.html");
-			}
-	    });
-		row.add(btnRM);
-		row.add(Box.createHorizontalStrut(10));
+		row.add(Box.createHorizontalStrut(35));
 		
 		final JButton btnHelp = new JButton("Help");
 	    btnHelp.setBackground(Globalx.HELPCOLOR);
 	    btnHelp.setOpaque(true);
 	    btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				UserPrompt.displayHTMLResourceHelp(getInstance(), "RunAS Help", "html/runAS/ASFrame.html");
+				UserPrompt.displayHTMLResourceHelp(getInstance(), "RunAS Help", helpDir );
 			}
 	    });
 		row.add(btnHelp);
@@ -411,6 +405,7 @@ public class ASFrame extends JDialog implements WindowListener{
 		
 		runCheck();
 	}
+	/******************************************************************/
 	private void runFull() {
 		runCheck();
 		String upPath = txtUPdir.getText();
@@ -427,12 +422,30 @@ public class ASFrame extends JDialog implements WindowListener{
 		}
 		String msg="";
 		if (sp) {
-			if (spDat.containsKey(subset)) msg="Create Full SwissProt Fasta\n";
+			boolean e = false;
+			if (spDat.containsKey(subset)) {
+				e = true;
+				msg="Full SwissProt download exists\nCreate Full SwissProt Subset files\n";
+				if (spFasta.containsKey(subset)) 
+					msg += "SP fullSubset files exists - they will be overwritten\n"; // CAS315
+			}
 			else msg= "Download Full SwissProt\n";
+			
+			int n = (e) ? spFasta.size()-1 : spFasta.size();
+			msg += n + " Taxonomic files to remove entries from Full\n\n"; // CAS315
 		}
 		if (tr) {
-			if (trDat.containsKey(subset)) msg="Create Full Trembl Fasta\n";
+			boolean e = false;
+			if (trDat.containsKey(subset)) {
+				e = true;
+				msg="Full TrEMBl download exists\nCreate Full Trembl Subset files\n";
+				if (trFasta.containsKey(subset)) 
+					msg += "TR fullSubset files exists - they will be overwritten\n";
+			}
 			else msg+= "Download Full TrEMBL (file is VERY LARGE)\n";
+			
+			int n = (e) ? trFasta.size()-1 : trFasta.size();
+			msg += n + " Taxonomic files to remove entries from Full\n\n";
 		}
 		int ret = JOptionPane.showOptionDialog(this, msg + "Continue?",
 			"Full UniProt subsets", JOptionPane.YES_NO_OPTION, 
@@ -442,6 +455,7 @@ public class ASFrame extends JDialog implements WindowListener{
 		upObj.xFull(sp, tr, spDat.containsKey(subset), trDat.containsKey(subset), upPath);
 		runCheck();
 	}
+	/******************************************************************/
 	private void runGO() {
 		runCheck();
 		String goPath = txtGOdir.getText();
@@ -492,16 +506,17 @@ public class ASFrame extends JDialog implements WindowListener{
 		goObj.run(txtUPdir.getText(), goPath, txtGOdb.getText(), hasGOfile);
 		runCheck();
 	}
-	//JPAVE_DBtaxo_1 = plants
-	//JPAVE_DBfasta_1 = demo5/sp_plants/uniprot_sprot_plants.fasta
-	private void runAnno() {
+	/******************************************************************/
+	// Write Anno_Update_date.cfg
+	private void runWriteAnno() {
 		try {
 			runCheck();
 			String upDir = txtUPdir.getText();
 			
-			String file = "./projects/TCW.anno." + upDir.substring(upDir.lastIndexOf("/")+1);
+			String file = cfgPrefix + upDir.substring(upDir.lastIndexOf("/")+1) + cfgSuffix; 
 			BufferedWriter out = new BufferedWriter(new FileWriter(file, false));
-			Out.PrtSpMsg(2, "Write " + file);
+			Out.PrtSpMsg(0,"");
+			Out.PrtSpMsg(0, "Write " + file);
 			String go = txtGOdb.getText();
 			if (!go.equals("")) out.write("Anno_GO_DB = " + txtGOdb.getText() + "\n\n"); 
 			
@@ -525,7 +540,7 @@ public class ASFrame extends JDialog implements WindowListener{
 			}
 			
 			out.close();
-			Out.PrtSpMsg(3, (nFile-1) + " entries written");
+			Out.PrtSpMsg(1, (nFile-1) + " entries written");
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Error creating TCW.anno file");}
 	}
@@ -562,11 +577,11 @@ public class ASFrame extends JDialog implements WindowListener{
 			}
 			int rc = goObj.checkGODB(txtGOdb.getText());
 			if (rc>0) {
-				if (rc==2) lblGOdb.setBackground(fastaColor);
+				if (rc==2) 		lblGOdb.setBackground(fastaColor);
 				else if (rc==1) lblGOdb.setBackground(Color.pink);
 			}
-			// UP dir
 			
+			// UP dir
 			File dir = new File(upDir);
 			if (dir.exists()) lblUPdir.setBackground(fastaColor);
 			else return;
@@ -580,7 +595,7 @@ public class ASFrame extends JDialog implements WindowListener{
 				File [] xfiles = d.listFiles();
 				for (File f : xfiles) {
 					String fileName=f.getName();
-					boolean isFasta = fileName.endsWith(".fasta");
+					boolean isFasta = fileName.endsWith(".fasta") || fileName.endsWith(".fasta.gz"); // CAS315
 					boolean isDat = (fileName.endsWith(".dat") || fileName.endsWith(".dat.gz"));
 					if (isFasta || isDat) {
 						runCheckAdd(dirName, fileName, isFasta);
@@ -593,7 +608,7 @@ public class ASFrame extends JDialog implements WindowListener{
 	private void runCheckAdd(String dirName, String file, boolean isFasta) {
 		String [] tok = dirName.split(("_"));
 		if (tok[0].equals("sp")) {
-			if (tok[1].equals(subset)) {
+			if (tok[1].equals(subset)) { // Full
 				if (isFasta) {
 					spFasta.put(subset, file);
 					cbFullSwiss.setBackground(fastaColor);
@@ -605,7 +620,7 @@ public class ASFrame extends JDialog implements WindowListener{
 				return;
 			}
 			
-			for (int i=0; i<upTaxo.length; i++) {
+			for (int i=0; i<upTaxo.length; i++) { // Tax
 				if (tok[1].equals(upTaxo[i])) {
 					if (isFasta) {
 						spFasta.put(tok[1], file);
@@ -620,7 +635,7 @@ public class ASFrame extends JDialog implements WindowListener{
 			}
 		}
 		if (tok[0].equals("tr")) {
-			if (tok[1].equals(subset)) {
+			if (tok[1].equals(subset)) { // Full
 				if (isFasta) {
 					trFasta.put(subset, file);
 					cbFullTrembl.setBackground(fastaColor);
@@ -632,7 +647,7 @@ public class ASFrame extends JDialog implements WindowListener{
 				return;
 			}
 			
-			for (int i=0; i<upTaxo.length; i++) {
+			for (int i=0; i<upTaxo.length; i++) { // Tax
 				if (tok[1].equals(upTaxo[i])) {
 					if (isFasta) {
 						trFasta.put(tok[1], file);
@@ -703,7 +718,7 @@ public class ASFrame extends JDialog implements WindowListener{
 	private JTextField txtGOdir = new JTextField();
 	private JLabel lblUPdir, lblGOdir;
 
-	// Full uniprot
+	// Full uniprot - correct set as of Jan-2021
 	private String [] upTaxo = {"archaea","bacteria","fungi", 
 			"human","invertebrates", "mammals","plants",
 			"rodents", "vertebrates", "viruses"};

@@ -6,7 +6,6 @@ package sng.annotator;
  * Changes since v1.3.9 -- see DoGO.
  */
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.DecimalFormat;
@@ -26,6 +25,7 @@ import util.database.DBConn;
 import util.database.Globalx;
 import util.database.HostsCfg;
 import util.methods.ErrorReport;
+import util.methods.FileHelpers;
 import util.methods.Out;
 
 public class GO 
@@ -600,7 +600,7 @@ public class GO
 		try {
 			long time = Out.getTime();
 
-			BufferedReader in = new BufferedReader ( new FileReader (path)); 
+			BufferedReader in = FileHelpers.openGZIP(path); // CAS315
 			HashMap <Integer, String> goSlims = new HashMap <Integer, String> ();
 			String line, name="";
 			int gonum=0;

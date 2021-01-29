@@ -1979,7 +1979,7 @@ public class DoORF {
 				File f = FileHelpers.getFile(projPath, file);
 				if (f==null || !f.exists()) Out.die("Cannot open " +  file);
 				
-				BufferedReader reader = new BufferedReader (new FileReader (f));
+				BufferedReader reader = FileHelpers.openGZIP(f.getAbsolutePath());
 				String line, seq="";
 				int cnt=0;
 				String name="";

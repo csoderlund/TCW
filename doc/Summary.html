@@ -22,22 +22,22 @@ Select a program name to view the graphical interface of the Demo Project.
 	<ul>
 	<li>Downloads the UniProt taxonomic and/or full SwissProt and TrEMBL .dat files
 	<li>Create fasta files from .dat files for searching against TCW sequences
-	<li>Download GO mysql database and augment it with UniProt information about GO, KEGG, Pfam, and InterPro
+	<li>Download the GO mysql database and augment it with UniProt information about GO, KEGG, Pfam, and InterPro
 	</ul>
 	Note: <code>runSingleTCW</code> can take as input other databases such as Genbank nr, 
 	but these results will not have associated GO annotations.
 	<p>
-	<li><a href=img/runSingleTCW.png><code>runSingleTCW</code></a> -- builds a single-species TCW database
+	<li><a href=img/runSingleTCW.png><code>runSingleTCW</code></a> -- builds a single-species TCW database (sTCWdb)
 	   <ul>
-	   <li> Input: sequences and optional counts, where <i><b>any</b></i> of the following are valid:
+	   <li> Input: sequences and optional counts, where <i><b>any</b></i> of the following are valid (
+	   the first three are NT-sTCWdbs and the last is a AA-sTCWdb):
 		<ol>
 		<li>Load RNA-seq transcripts and count data with optional replicates.
-		<li>Load protein sequences and spectra (count) data with optional replicates.
 		<li>Load sequences with location information (e.g. predicted genes).
 		<li>Assemble up to ~1M sequences, such as: transcript sets, 
 		paired-end Sanger ESTs, or a mix of transcripts and ESTs. 
+		<li>Load protein sequences and spectra (count) data with optional replicates.
 		</ol>
-	
 	   <li> Annotation:
 		<ol>
 		<li>Annotate sequences with one or more nucleotide or protein databases (called annoDBs). 
@@ -45,7 +45,7 @@ Select a program name to view the graphical interface of the Demo Project.
 		the super-fast
 		<code>DIAMOND</code> or the standard <code>BLAST</code>.
 		<li>If UniProt is used, GO annotations along with EC, KEGG and Pfam identifiers are extracted 
-		from the GO database and entered into the sTCW database. The GO database is set up with the <code>runAS</code> program.
+		from the GO database and entered into the sTCWdb (The GO database is set up with the <code>runAS</code>).
 		<li>Compute ORFS and GC content.
 		</ol>
 	   <li> All data and results are stored in a MySQL database. 
@@ -54,7 +54,7 @@ Select a program name to view the graphical interface of the Demo Project.
 	<li><a href=img/runDE.png><code>runDE</code></a> -- run Differential Expression analysis
 	   <ul><li>An interface to several R packages (<code>EdgeR, DESeq</code>) for calculating differential
 			of sequences. Additionally, it can execute a user-provided R script for DE calculation.
-		<li>If UniProt is used and GO entered, the <code>GOseq</code> R program can be used to compute differential GO terms.
+		<li>If the sTCWdb contains GOs, the <code>GOseq</code> R program can be used to compute differential GO terms.
 	   </ul>
 	<br>
 	<li><a href=img/viewSingleTCW.png><code>viewSingleTCW</code></a> -- view a single-species TCW database
@@ -66,23 +66,24 @@ Select a program name to view the graphical interface of the Demo Project.
 	
 	<i>multiTCW contains two major programs</i>:
 	<ol>
-	<li><a href=img/runMultiTCW.png><code>runMultiTCW</code></a> -- builds a multi-species comparison TCW database
-		<ul><li>Builds a database from multiple singleTCW databases (tested with up to 5).
+	<li><a href=img/runMultiTCW.png><code>runMultiTCW</code></a> -- builds a multi-species comparison TCW database (mTCWdb)
+		<ul><li>Builds a database from multiple sTCWdbs, which can be NT-sTCWdbs, AA-sTCWdbs
+		or a mix. This has been tested with up to 5 input sTCWdbs.
 		<li>Runs <code>DIAMOND</code> or <code>BLAST</code> to compare the sequences from the input TCWs. Add the resulting pairs to the database.
 	 	<li>Clusters the pairs into ortholog groups. They can be clustered with 
 	 	TCW Closure, TCW BBH (best bi-directional), TCW shared hit, <code>OrthoMCL</code>, and/or user-supplied clusters can be uploaded. 
 		Multiple ortholog clustering can be in the database for query.
-		<li>If the input is from DNA singleTCW projects, coding statistics are calculated. Additionally,
+		<li>If the input is from two or more NT-sTCWdbs, coding statistics are calculated. Additionally,
 		alignment files are output for input to <code>KaKs_calculator</code>, and the results of running
 		the KaKs_calculator are input to <code>runMultiTCW</code>.
-		<li>The clusters MSA are scored with Trident.
+		<li>MSA (multiple sequence alignments) are computed for each cluster and scored with Trident.
 	 	</ul>
 	 <br>
 	 <li><a href=img/viewMultiTCW.png><code>viewMultiTCW</code></a> -- view a multi-species TCW database
 	 	<ul><li>Query and view the results. The results can be filtered on various attributes. A cluster
 	 	can be viewed graphically with the results of <code>MAFFT</code> or <code>MUSCLE</code> 
-	 	multiple sequence alignment (MSA) or pairwise alignment
-	 	(e.g. <a href=img/viewMultiMSA.png>MSA</a> 
+	 	MSA or pairwise alignment
+	 	(e.g. see graphical views <a href=img/viewMultiMSA.png>MSA</a> 
 	 	and <a href=img/viewMultiPair.png>Pair</a>, respectively).
 	 	</ul>
 	</ol>
@@ -143,7 +144,7 @@ The "Mb" numbers are maximum memory (when available), and are approximate.
 	</small>
 	
 	<h3>multiTCW</h3>
-	Using the same two computers as above, the mTCW database was build from a dataset of 
+	Using the same two computers as above, the mTCW database was built from a dataset of 
 	28,392 and another of 26,685 sequences. Both datasets were annotated with SP-plants, TR-plants, and SP-full,
 	where the Mac versions were downloaded May2020 and the Linux on Oct2020.
 	<table border=1 cellpadding=3>

@@ -32,6 +32,7 @@ import sng.database.Globals;
 import sng.database.Schema;
 import util.database.DBConn;
 import util.methods.ErrorReport;
+import util.methods.FileHelpers;
 import util.ui.UserPrompt;
 import util.methods.Out;
 import util.methods.Static;
@@ -64,7 +65,7 @@ public class AddRemarkPanel extends JPanel {
 			int maxNum=-1;
 			String prefix="";
 			String line;
-			BufferedReader file = new BufferedReader(new FileReader(fileName));
+			BufferedReader file = FileHelpers.openGZIP(fileName);
 			while((line = file.readLine()) != null) {
 				line.replace("\n","").trim();
 				if (line.equals("")) continue;
@@ -128,7 +129,7 @@ public class AddRemarkPanel extends JPanel {
 			 * Read file
 			 */
 			int add=0, bad1=0, notfound=0;
-			file = new BufferedReader(new FileReader(fileName));
+			file = FileHelpers.openGZIP(fileName);
 			while((line = file.readLine()) != null) {
 				line.replace("\n","").trim();
 				if (line.equals("")) continue;
@@ -238,7 +239,7 @@ public class AddRemarkPanel extends JPanel {
 				return;
 			}
 				
-			BufferedReader file = new BufferedReader(new FileReader(fileName));
+			BufferedReader file = FileHelpers.openGZIP(fileName); // CAS315
 			String line;
 			int cnt=0, add=0, append=0, bad1=0, notfound=0;
 			

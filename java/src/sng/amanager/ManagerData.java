@@ -19,6 +19,7 @@ import util.database.Globalx;
 import util.database.HostsCfg;
 import util.methods.BlastArgs;
 import util.methods.ErrorReport;
+import util.methods.FileHelpers;
 import util.methods.Static;
 import util.methods.TCWprops;
 import util.methods.Out;
@@ -236,7 +237,7 @@ public class ManagerData {
 	 */
 	public  String [] readLibCountsFromFile(File sourceFile) {
 		try {
-			BufferedReader projReader = new BufferedReader(new FileReader(sourceFile));
+			BufferedReader projReader = FileHelpers.openGZIP(sourceFile.getAbsolutePath()); // CAS315
 			String line = "";
 			
 			String [] repNames = null;
@@ -1460,6 +1461,7 @@ public class ManagerData {
 							found = getAnnoDBAt(y).getFastaDB().equals(tempAnnos[x].getFastaDB());
 					}
 					if(!found) {
+						tempAnnos[x].setDefaults(); // CAS315
 						annoObjList.add(tempAnnos[x]);
 					}
 				}

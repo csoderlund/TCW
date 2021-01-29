@@ -7,10 +7,31 @@
 
 <p>
 <font color="#000000" face="Verdana, Arial, Helvetica, sans-serif" size="2"> 
+
 <p><b><big><u>TCW Version 3.1</u></b></big>
+<p><b>v3.1.5  28-Jan-21</b>
+<ul>
+<li>Compressed files allowed (i.e. suffix .gz)
+<ul>
+<li>runAS - reading .fasta files and .dat files 
+<li>runSingleTCW - reading .fasta files, .qual files and expression files 
+<li>All File Choosers popups that restrict selected files to FASTA file now allows the ".gz" suffix on it.
+The accepted suffixes are "fa","fasta","fna", "ffn", "faa", "frn","fa.gz","fasta.gz","fna.gz", "ffn.gz", "faa.gz", "frn.gz".
+</ul>
+<li><code>runAS</code>: 
+<ol>
+<li>The <tt>AnnoDB.cfg</tt> button (previous <tt>TCW.anno</tt>) now creates a file with the suffix ".cfg". 
+<li>File sizes are included on the trace output. 
+</ol>
+<li><code>runSingleTCW</code>: 
+<ol>
+<li>The  File Chooser for "Import AnnoDBs" restricts files to those with
+the ".cfg" suffix, which works for the <tt>AnnoDB_UniProt_&lt;date&gt;.cfg</tt> and <tt>sTCW.cfg</tt> files.
+</ul>
+
 <p><b>v3.1.4  20-Jan-21</b>
 <br>This release deals mainly with the singleTCW "Similar Pairs" option and updating with the latest DIAMOND.
-<p>Changes that will effect existing sTCWdbs: 
+<p>Changes that will effect existing sTCWdﬂbs: 
 <ol>
 <li>Schema changes for sTCWdb, which will be updated the
 first time the sTCWdb is used. 

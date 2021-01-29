@@ -330,8 +330,8 @@ public class EditTransLibPanel extends JPanel {
 		// The expression level file(s) were just defined, so need to read 
 		if(bAddTransLib) { 
             if(x.getCountFile().length() > 0) {
-            		String outFileName = x.getCountFile();
-            		if (!outFileName.startsWith("/")) outFileName = LIBDIR + curManData.getProjectName() + "/" + x.getCountFile();
+            	String outFileName = x.getCountFile();
+            	if (!outFileName.startsWith("/")) outFileName = LIBDIR + curManData.getProjectName() + "/" + x.getCountFile();
                 File temp = new File(outFileName);
             
                 String [] countLibs = curManData.readLibCountsFromFile(temp);

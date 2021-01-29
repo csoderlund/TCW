@@ -3,7 +3,6 @@ package sng.assem;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.Date;
 import java.sql.ResultSet;
@@ -38,6 +37,7 @@ import util.methods.*;
 //      there is still lots of dead code and the DEBUG option crashes
 // CAS304 moved Skip Assembly stuff to AssemSkip, moved more stuff to checkAssmStuff.
 //		execAssem.pl changed to execAssem, so printUsage is used from here for 'execAssem'
+// CAs315 made all BufferReaders use openZip
 
 public class AssemMain
 {
@@ -909,7 +909,7 @@ public class AssemMain
 	{
 		// first count the fasta entries
 		File qFile = new File(dir,name);
-		BufferedReader reader = new BufferedReader(new FileReader(qFile));
+		BufferedReader reader = FileHelpers.openGZIP(qFile.getAbsolutePath()); // CAS315
 		String line;
 		int nEntries = 0;
 		while ((line = reader.readLine()) != null)
@@ -938,7 +938,7 @@ public class AssemMain
 		
 		Log.msg("Splitting " + nEntries  + " sequences from " + qFile.getAbsolutePath() + " into " + nParts + " parts",LogLevel.Detail);
 		String prevLine = "";
-		reader = new BufferedReader(new FileReader(qFile));
+		reader = FileHelpers.openGZIP(qFile.getAbsolutePath());
 		for (int p = 0; p < nParts; p++)
 		{
 			String pName = name + "." + p;
@@ -1139,7 +1139,7 @@ public class AssemMain
 			if (f == null) continue;
 			Log.msg("reading " + f.getAbsolutePath(),LogLevel.Detail);
 		
-			BufferedReader r = new BufferedReader(new FileReader(f));
+			BufferedReader r = FileHelpers.openGZIP(f.getAbsolutePath());
 	
 			while (null != (line = r.readLine()))
 			{
@@ -1372,7 +1372,7 @@ public class AssemMain
 			Utils.singleLineMsg("Reading pair alignment results");
 			Log.msg("reading " + f.getAbsolutePath(),LogLevel.Detail);
 	
-			BufferedReader r = new BufferedReader(new FileReader(f));
+			BufferedReader r = FileHelpers.openGZIP(f.getAbsolutePath());
 			String line;
 			
 			while (null != (line = r.readLine()))
@@ -1586,7 +1586,7 @@ public class AssemMain
 			File f = blastFiles[i];
 			if (f == null) continue;
 			Log.msg("reading " + f.getAbsolutePath(), LogLevel.Detail);
-			BufferedReader r = new BufferedReader(new FileReader(f));
+			BufferedReader r = FileHelpers.openGZIP(f.getAbsolutePath());
 			String line;
 	
 			while (null != (line = r.readLine()))
@@ -4286,7 +4286,7 @@ public class AssemMain
 			File f = blastFiles[i];
 			if (f == null) continue;
 			
-			BufferedReader reader = new BufferedReader(new FileReader(f));
+			BufferedReader reader = FileHelpers.openGZIP(f.getAbsolutePath());
 			
 			while (reader.ready())
 			{

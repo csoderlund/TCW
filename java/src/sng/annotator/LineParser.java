@@ -4,10 +4,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.HashSet;
 
-
-
 import sng.dataholders.BlastHitData;
 import util.methods.ErrorReport;
+import util.methods.Out;
 
 /********************************************************
  * Static methods to parse the > fasta line, a blast tabular line,
@@ -99,8 +98,7 @@ public class LineParser {
 		if (line.indexOf("|") == -1) {
 			strHitID = line;
 			if (strHitID.length()>maxHitNameLen) {
-				System.err.println("Fatal error: Hit Id > " + maxHitNameLen + " " + strHitID);
-				System.exit(-1);
+				Out.die("Hit Id > " + maxHitNameLen + " " + strHitID);
 			}
 			return true;
 		}
@@ -122,12 +120,10 @@ public class LineParser {
 			strHitID = e[3];
 		}
 		else {
-			System.err.println("Fatal error: Do not recognize format: " + str);
-			System.exit(-1);
+			Out.die("Do not recognize format: " + str);
 		}
 		if (strHitID.length()>maxHitNameLen) {
-			System.err.println("Fatal error: Hit Id > " + maxHitNameLen + " " + strHitID);
-			System.exit(-1);
+			Out.die("Hit Id > " + maxHitNameLen + " " + strHitID);
 		}
 		return true;
 	}
@@ -143,8 +139,8 @@ public class LineParser {
 		else if (line.startsWith("gi|")) 					 rc = matchRefSeq(line); // old nr.gz
 		else {
 			if (line.indexOf("\u0001")!=-1) { 
-				String [] tok = line.split("\u0001"); 		// This is for nr.gz, which has long lines 
-				if (tok.length>1) line = tok[0];				// So only pattern match on first description
+				String [] tok = line.split("\u0001"); 	// This is for nr.gz, which has long lines 
+				if (tok.length>1) line = tok[0];		// So only pattern match on first description
 			}
 			rc = matchGeneral(line);
 		}
@@ -158,7 +154,7 @@ public class LineParser {
 					badSpecies.add(s);
 				}
 				else if (badSpeciesLen==100) {
-					System.err.println("Over 100 species length >" + maxSpeciesLen + " -- stop saving to hitsWarning file");
+					Out.PrtWarn("Over 100 species length >" + maxSpeciesLen + " -- stop saving to hitsWarning file");
 					badSpecies.clear();
 				}
 				badSpeciesLen++;
@@ -173,7 +169,7 @@ public class LineParser {
 							"-- truncating :" + d + "...");
 					badDesc.add(d);
 				} else if (badDescriptLen==100) {
-					System.err.println("Over 100 descriptions length >" + maxDescriptLen + " -- stop saving to hitsWarning file");
+					Out.PrtWarn("Over 100 descriptions length >" + maxDescriptLen + " -- stop saving to hitsWarning file");
 					badDesc.clear();
 				}
 				badDescriptLen++;

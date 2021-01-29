@@ -1,4 +1,5 @@
 #!/bin/sh
-echo "++++runAS -- memory set at 81920m for full set 
-echo "          -- you may reduce if not using uniprot_trembl_bacteria and creating a trembl_fullSubset
+echo "++++runAS -- memory set at 81920m for full set" 
+echo "          -- you may reduce if not using uniprot_trembl_bacteria or uniprot_trembl (full UniProt)"
+echo ""
 java -Xmx81920m -Djava.library.path=$JPATH -classpath java/jars/stcw.jar sng.runAS.ASMain $@ 

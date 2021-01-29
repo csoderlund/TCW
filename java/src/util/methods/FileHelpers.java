@@ -31,17 +31,25 @@ public class FileHelpers
 		if (isMac()) return Globalx.macDir;
 		return Globalx.lintelDir;
 	}
-	static public String getSize(long fileSize) {
+	static public String getFileSize(String fileName) {// CAS315
+		try {
+			File logFile = new File (fileName);
+			long fileSize = logFile.length();
+			return getSize(fileSize);
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "Get file size"); return "";}
+	}
+	static public String getSize(long fileSize) { // CAS315 change %.0f to %.1f
 		String size="";
 		
 		if (fileSize>=1000000000) {
-			size = String.format("%.0fGb", (float) ((double)fileSize)/1000000000.0);
+			size = String.format("%.1fGb", (float) ((double)fileSize)/1000000000.0);
 		}
 		else if (fileSize>=1000000) {
-			size = String.format("%.0fMb", (float) ((double)fileSize)/1000000.0);
+			size = String.format("%.1fMb", (float) ((double)fileSize)/1000000.0);
 		}
 		else if (fileSize>=1000) {
-			size = String.format("%.0fkb", (float) ((double)fileSize)/1000.0);
+			size = String.format("%.1fkb", (float) ((double)fileSize)/1000.0);
 		}
 		else size = String.format("%db", (int) fileSize);
 		

@@ -139,8 +139,8 @@ Other annotation databases can also be used, but TCW provides GO support with Un
 	<tr><td><i>Software</td><td><i>Source</td><td><i>Additional info</i></td></tr>
 
 	<tr><td  class='emph'>R</td><td><a href="http://www.r-project.org/" class="ext" target="_blank">R Project</a></td>
-		<td>Used for the TCW <code>runDE</code> to compute differential expression. 
-		See <a href="stcw/DiffExp.html" class="ext" target="_blank">DiffExp</a> for more information.</td></tr>
+		<td>Used for the TCW <code>runDE</code> to compute differential expression (DE). 
+		</td></tr>
 	</tr>
 	
 	<tr><td  class='emph'>Perl and DBD::mysql</td>
@@ -158,7 +158,7 @@ If the supplied jri package does not work when running <code>runDE</code>, start
 <pre>
 	>install.packages("rJava")
 </pre>
-<u>Step 2.</u> Edit the <tt>runDE</tt> script, uncomment the correct path:
+<u>Step 2.</u> Edit the <tt>runDE</tt> script, uncomment the correct path or change to the correct path:
 <pre>
 	#JPATH=/usr/lib64/R/library/rJava/jri
 	#JPATH=Ext/linux/jri
@@ -203,16 +203,15 @@ You do not need to do anything to use the supplied packages. They are in the rel
 			<td><a href="http://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download" class="ext" target="_blank">
 			blast.ncbi.nlm.nih.gov/</a></td>
 			<td><code>runSingleTCW</code>: Assembly and annotation. 
-				<br><code>viewSingleTCW</code>: Comparing a sequence against a database. 
-				<br><code>runMultiTCW</code>: Comparing sequences.
+				<br><code>viewSingleTCW</code>: Comparing a sequence against others. 
+				<br><code>runMultiTCW</code>: Comparing all sequences against themselves.
 				<br><code>viewMultiTCW</code>: Comparing a sequence against others.
 			</td></tr>
-		<tr><td class='emph'><code>DIAMOND</code></td><td>v0.9.22.123
+		<tr><td class='emph'><code>DIAMOND</code></td><td>v2.0.6.144
 			<td><a href=http://ab.inf.uni-tuebingen.de/software/diamond class="ext" target="_blank">
 			ab.inf.uni-tuebingen.de<br>/software/diamond</a>
 			<td><code>runSingleTCW</code>: Annotation. 
-				<br><code>viewSingleTCW</code>: Comparing a sequence against a database. 
-				<br><code>runMultiTCW</code>: Comparing sequences.
+				<br>The rest are the same as for Blast.
 			</td></tr>
 		<tr><td colspan=4><i>Supplied packages for singleTCW</i></td>
 		<tr>
@@ -232,7 +231,7 @@ You do not need to do anything to use the supplied packages. They are in the rel
 			<td class='emph'><code>OrthoMCL</code><sup>1</sup></td><td>2.0.3</td>
 			<td><a href="http://orthomcl.org" class="ext" target="_blank">
 			orthomcl.org</a></td>
-         	<td>One of three available methods for clustering</td>
+         	<td>One of four available methods for clustering</td>
 		</tr>
          <tr>
 			<td class='emph'><code>MCL</code></td><td>10-201</td>
@@ -288,7 +287,7 @@ as these work. If your using MacOS 10.10 to 10.14, try them from the command lin
 software and compile them on your own machine. 
 You will need to replace the existing executables in the <tt>/Ext/linux</tt> or <tt>/Ext/mac</tt> directory.
 
-<p>The only external source code supplied is <code>MstatX</code> because a file had to be changed to work.
+<p>The only external source code supplied is <code>MstatX</code> because a file had to be changed for it to work.
 
 <h4>Blast and Diamond</h4>
 There are three options for the search programs, where the following are ordered according to precedence:

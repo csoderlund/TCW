@@ -47,7 +47,8 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import sng.annotator.CoreDB;
 import sng.annotator.runSTCWMain;
@@ -332,7 +333,14 @@ public class ManagerFrame extends JFrame {
 				try {
 					JFileChooser fc = new JFileChooser();
 					fc.setCurrentDirectory(new File(PROJDIR)); 
-
+					// CAS315 add
+					FileFilter ff=new FileNameExtensionFilter("AnnoDBs or sTCW.cfg", "cfg");;
+					fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
+					fc.addChoosableFileFilter(ff);//ff added to filechooser
+					fc.setFileFilter(ff);	//st ff as default selection
+					fc.setFileSelectionMode(JFileChooser.FILES_ONLY);//user must select a file not folder
+					fc.setMultiSelectionEnabled(false);//disabled selection of multiple files
+					
 					if(fc.showOpenDialog(getInstance()) == JFileChooser.APPROVE_OPTION) {
 						curManData.importAnnoDBs(fc.getSelectedFile());
 					}

@@ -2,7 +2,7 @@ package sng.assem;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 import java.util.Enumeration;
@@ -18,6 +18,7 @@ import sng.assem.enums.LogLevel;
 import sng.assem.enums.RF;
 import sng.database.Globals;
 import util.database.DBConn;
+import util.methods.FileHelpers;
 
 /*******************************************************
  * There is an Library object for each library in LIB.cfg (libid or transLib)
@@ -31,6 +32,7 @@ import util.database.DBConn;
  * 		adding or updating libraries
  * 		allowing multiple sequence files for one library
  * 		there use to be a 'prefix' to disambiguate lib names, but that was discontinued.
+ * CAS315 made all file readers read gzipped
  */
 public class Library
 {
@@ -229,7 +231,7 @@ public class Library
 		
 		setTypeAAorNT(); // read file for type
 		
-		BufferedReader reader = new BufferedReader(new FileReader(mSeqFile));
+		BufferedReader reader = FileHelpers.openGZIP(mSeqFile.getAbsolutePath());
 		
 		int wNSeqTooShort = 0,  wNNonStand = 0, wNBadName = 0;
 		int eNDups = 0, eNBadHeader = 0,  eNLongName = 0, eNBad=0;
@@ -399,7 +401,7 @@ public class Library
 	/******* Determine sequence file type ***************/
 	private void setTypeAAorNT() {
 		try {
-			BufferedReader seqFH = new BufferedReader ( new FileReader ( mSeqFile) );
+			BufferedReader seqFH = FileHelpers.openGZIP(mSeqFile.getAbsolutePath() );
 			String line;
 			int cntAAseq=0, cntNTseq=0; 
 			boolean found=false;
@@ -474,7 +476,7 @@ public class Library
 						+ "sequence,quality,sense,length,mate_CID,source)"
 						+ " values(?,?,?,?,?,?,?,?,0," + mProp.getProperty("ctglib") + ")"); // WN not sure why setting source like this
 
-		BufferedReader reader = new BufferedReader(new FileReader(mSeqFile));
+		BufferedReader reader = FileHelpers.openGZIP(mSeqFile.getAbsolutePath()); // CAS315
 
 		Clone curSeq = null;
 		
@@ -625,7 +627,7 @@ public class Library
 		String line, msg;
 		int n = 0;
 		
-		BufferedReader reader = new BufferedReader(new FileReader(mQualFile));
+		BufferedReader reader = FileHelpers.openGZIP(mQualFile.getAbsolutePath());
 		while ((line = reader.readLine()) != null)
 		{
 			line = line.trim();
@@ -723,7 +725,7 @@ public class Library
 		
 		Log.indentMsg("Loading " + mQualFile.getName(), LogLevel.Basic);
 		
-		BufferedReader reader = new BufferedReader(new FileReader(mQualFile));
+		BufferedReader reader = FileHelpers.openGZIP(mQualFile.getAbsolutePath());
 
 		PreparedStatement ps = mDB.prepareStatement("update clone set quality=? where CID=?");
 		
@@ -827,7 +829,7 @@ public class Library
 		}
 		
 	// Header line	of reps	
-		BufferedReader bwExp = new BufferedReader(new FileReader(mExpFile));
+		BufferedReader bwExp = FileHelpers.openGZIP(mExpFile.getAbsolutePath()); // CAS315
 		String line = bwExp.readLine();
 		String[] libTok = line.split("\\s+");
 		
@@ -977,7 +979,7 @@ public class Library
 		
 		
 	// Parse first line
-		BufferedReader bwExp = new BufferedReader(new FileReader(mExpFile));
+		BufferedReader bwExp = FileHelpers.openGZIP(mExpFile.getAbsolutePath());
 		String line = bwExp.readLine(); // do not trim, may start with \t that would get removed
 		String[] repTok = line.split("\\s+");
 		

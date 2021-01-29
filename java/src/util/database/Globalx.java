@@ -9,8 +9,8 @@ import java.text.DecimalFormat;
 public class Globalx {
 	public static boolean debug = false; // changed in STCWMain or MTCWMain from command line 
 	
-	public static final String strRelDate = "(20-Jan-21)"; 
-	public static final String strTCWver = "3.1.4"; 
+	public static final String strRelDate = "(28-Jan-21)"; 
+	public static final String strTCWver = "3.1.5"; // when everything is updated, make 3.2
 	public static final String URL = "http://www.agcol.arizona.edu ";
 	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate;
 	public static final String error="***";
@@ -46,6 +46,9 @@ public class Globalx {
 	public static final String HITDIR =   	"ResultHits"; // viewSingle: sequences are written and blasts occur
 	public static final String ALIGNDIR = 	"ResultAlign"; // viewMulti: results of multi align 
 	public static final String EXPORTDIR= 	"ResultExport";
+	
+	public static final String [] fastaFile = new String [] 
+			{"fa","fa.gz", "fasta", "fasta.gz",  "fna", "ffn", "faa", "frn", "fna.gz", "ffn.gz", "faa.gz", "frn.gz"};
 	
 	public static final String gapStr  = "-";
 	public static final char   gapCh   = '-';

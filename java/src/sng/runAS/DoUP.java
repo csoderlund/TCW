@@ -5,7 +5,6 @@ package sng.runAS;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
 import java.text.DecimalFormat;
 import java.util.Vector;
 import java.util.Arrays;
@@ -90,36 +89,36 @@ public class DoUP {
 	/*******************************************************
 	 * XXX Full
 	 */
-	public void xFull(boolean bsp, boolean btr, boolean bspDat, boolean btrDat, String dir) {
+	public void xFull(boolean isSP, boolean isTR, boolean hasSPdat, boolean hasTRdat, String dir) {
 		Out.PrtDateMsg("\nStart Full UniProt");
 		targetUpDir = dir;
 		long startTime = Out.getTime();
 		
-		if (!mkDirFull(bsp, btr)) return;
+		if (!mkDirFull(isSP, isTR)) return;
 		
-		if (bsp && !bspDat) {
+		if (isSP && !hasSPdat) {
 			Out.PrtSpDateMsg(1, "Download SwissProt");
 			if (!runDownload(sp, spPre, "", subset)) return;	
 		}
-		if (btr && !btrDat) {
+		if (isTR && !hasTRdat) {
 			Out.PrtSpDateMsg(1, "Download TrEMBL");
 			if (!runDownload(tr, trPre, "", subset)) return;	
 		}
 		Out.PrtSpDateMsg(1, "Create subset files");
 		DoUPdat datObj = new DoUPdat(frameObj);
-		if (bsp) {
+		if (isSP) {
 			if (!fullCreateSubset(sp,spPre)) return;
 			
 			if (!datObj.fasta(sp, mkNameDir(sp, subset), 
 					mkNameDat(spPre, subset), mkNameFasta(spPre, subset))) return;
 		}
-		if (btr) {
+		if (isTR) {
 			if (!fullCreateSubset(tr,trPre)) return;
 			
 			if (!datObj.fasta( tr,mkNameDir(tr, subset), 
 					mkNameDat(trPre, subset), mkNameFasta(trPre, subset))) return;
 		}
-		Out.PrtSpMsgTimeMem(0, "Complete Full UniProt", startTime);
+		Out.PrtSpMsgTime(0, "Complete Full UniProt", startTime);
 	}
 	
 	/*********************************************
@@ -174,7 +173,8 @@ public class DoUP {
 					
 					File [] xfiles = d.listFiles();
 					for (File f : xfiles) {
-						if (f.getName().endsWith(".fasta")) {
+						String fName = f.getName();
+						if (fName.endsWith(".fasta") || fName.endsWith(".fasta.gz")) {
 							if (fullReadTaxo(f, x)) break;
 							else return false;
 						}
@@ -187,7 +187,7 @@ public class DoUP {
 				}
 			}
 			Out.PrtSpCntMsg(4, index, "IDs will not be written to subset");
-			Out.PrtSpMsgTimeMem(3, "Complete making list", startTime);
+			Out.PrtSpMsgTime(3, "Complete making list", startTime);
 			return true;
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Error reading file");}
@@ -195,15 +195,16 @@ public class DoUP {
 		return false;
 	}
 	// " >sp|Q6V4H0|10HGO_CATRO 8-hyxxxxxxxxxx xxxxxxxx xxxxxx";
-	private boolean fullReadTaxo(File f, int action) {
+	private boolean fullReadTaxo(File f, int action) { 
 		String line="";
-		int cnt=0;
+		int cnt=0, cntErr=0;
 		Matcher x;
+		String fn = f.getName();
 		
 		try {		
-			BufferedReader in = new BufferedReader ( new FileReader (f));
-			String fn = f.getName();
-			
+			BufferedReader in = FileHelpers.openGZIP(f.getAbsolutePath()); // CAS315
+			if (in==null) Out.die("Cannot continue");
+		
 			while ((line = in.readLine()) != null) {
 				if (!line.startsWith(">")) continue;
 				line = line.trim();
@@ -213,28 +214,30 @@ public class DoUP {
 				else {
 					String [] tok = x.group(1).split("\\|");
 					if (tok.length!=3) {
-						System.err.println("Invalid identifier: " +  x.group(1));
+						Out.PrtErr("Invalid identifier: " +  x.group(1));
+						cntErr++;
+						if (cntErr>3) Out.die("A problem with file " + fn); // CAS315
 						continue;
 					}
 					if (tok[2].length()>30) {
-						System.err.println("Identifier too long: " +  tok[2]);
-						System.err.println("Line: " +  line);
+						Out.PrtErr("Identifier too long: " +  tok[2]);
+						Out.prt("Line: " +  line);
 						continue;
 					}
 					if (action==1) taxoIDs[index] = tok[2];
 					tok = null; 
 					index++;
-					if (cnt%100000==0) System.err.print("read " + cnt + " in " + fn + "\r");
+					if (cnt%100000==0) Out.r("read " + cnt + " in " + fn);
 				}
 			}
 			in.close();
 			System.err.print("                                                     \r");
-			if (action==0) Out.PrtSpCntMsg(4, cnt, "IDs in " + f.getName());
+			if (action==0) Out.PrtSpCntMsg(4, cnt, "IDs in " + fn);
 		
 			return true;
 		}
 		catch (Exception e) {
-			String msg = "Reading #" + cnt + " " + f.getName() + "                 \n" + 
+			String msg = "Reading #" + cnt + " " + fn + "                 \n" + 
 					"Error parsing: " + line;
 			ErrorReport.prtReport(e, msg);
 		}
@@ -280,7 +283,7 @@ public class DoUP {
 				if (cnt%5000==0) System.err.print(cnt1 + " wrote from " + cnt + "\r");
 			}
 			String p = Static.perText(cnt1, cnt);
-			Out.PrtSpMsgTimeMem(4,  df.format(cnt1) + " wrote from " +  df.format(cnt) + " " + p, startTime);
+			Out.PrtSpMsgTime(4,  df.format(cnt1) + " wrote from " +  df.format(cnt) + " " + p, startTime);
 			in.close(); out.close();
 			return true;
 		}

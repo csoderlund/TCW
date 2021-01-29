@@ -30,7 +30,6 @@ import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
@@ -776,13 +775,28 @@ public class BlastTab extends JPanel
 			JFileChooser fc = new JFileChooser();
 			fc.setCurrentDirectory(new File(Globalx.ANNODIR));
 			// CAS314
-			FileFilter ff=new FileNameExtensionFilter("Fasta file (.fa, .fasta ...)", "fa","fasta","fna", "ffn", "faa", "frn");
 			fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
-			fc.addChoosableFileFilter(ff);
-			fc.setFileFilter(ff);								//st ff as default selection
 			fc.setFileSelectionMode(JFileChooser.FILES_ONLY);	//user must select a file not folder
 			fc.setMultiSelectionEnabled(false);					//disabled selection of multiple files
 			
+			// CAS315 added .gz; needed custom filter to do this
+			fc.addChoosableFileFilter(new FileFilter() {
+			    public String getDescription() {
+			        return "FASTA (see Help)";
+			    }
+			    public boolean accept(File f) {
+			        if (f.isDirectory()) {
+			            return true;
+			        } else {
+			        	String fName = f.getName().toLowerCase();
+			        	for (String x : Globalx.fastaFile) {
+				            if (fName.endsWith(x)) return true;
+			        	}
+			            return false;
+			        }
+			    }
+			});
+						
 			if(fc.showOpenDialog(theParentFrame) == JFileChooser.APPROVE_OPTION) {
 				String fname = fc.getSelectedFile().getCanonicalPath();
 				dbSelectName = fname;
