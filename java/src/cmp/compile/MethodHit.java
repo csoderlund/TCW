@@ -24,11 +24,13 @@ import util.methods.Static;
 import util.methods.BestAnno;
 
 public class MethodHit {
+	private final static String iDELIM = Globals.Methods.inDELIM;
+	
 	private boolean debug=false;
 	private String groupFile = Globals.Methods.Hit.TYPE_NAME;
 	private String hitName = Globals.Methods.Hit.TYPE_NAME;
 	private String [] hitTypes = {"HitID", "Description"}; 
-	private int covCutoff, simCutoff;
+	
 	private final int DES_IDX = 1;
 	 
 	private int grpNum=0;
@@ -70,26 +72,25 @@ public class MethodHit {
 		
 		MethodPanel theMethod = panel.getMethodPanel();
 		prefix = theMethod.getMethodPrefixAt(idx);						// Groups should be prefixed with this
-		String [] settings = theMethod.getSettingsAt(idx).split(":");
+		String [] settings = theMethod.getSettingsAt(idx).split(iDELIM);
 		
 		if (settings.length<4) {
 			Out.PrtWarn("Incorrect number of parameters: using defaults");
 		}
 		else {
-			nHitType = Static.getInteger(settings[1].trim());
-			if (nHitType<0 || nHitType>1) nHitType=1;
-	
+			nHitType =  Static.getInteger(settings[1].trim());
 			covCutoff = Static.getInteger(settings[2].trim());
-			if (covCutoff<0) covCutoff=0;
-			
 			simCutoff = Static.getInteger(settings[3].trim());
-			if (simCutoff<0) simCutoff=0;
 			
 			if (settings.length>=4) {
 				int n = Static.getInteger(settings[4].trim());
 				bAllHits = (n==1) ? false : true;
 			}
 		}
+		if (covCutoff<0) covCutoff=Static.getInteger(Globals.Methods.Hit.COVERAGE_CUTOFF);
+		if (simCutoff<0) simCutoff=Static.getInteger(Globals.Methods.Hit.SIMILARITY);
+		if (nHitType<0 || nHitType>1) nHitType = Globals.Methods.Hit.TYPE_TOGGLE;
+		
 		String root = cmpPanel.getCurProjMethodDir() +  groupFile + "." + prefix + "_" + nHitType;
 		groupFile = root;
 		
@@ -498,8 +499,11 @@ public class MethodHit {
 	 private CompilePanel cmpPanel;	// get all parameters from this
 	
 	 private boolean bSuccess = true;
-	 private boolean bAllHits = true;
-	 private int nHitType=1;
+	 
 	 private String prefix;
 	 private int GRPid=-1;
+	 
+	 private boolean bAllHits = true; 	// default = all seqs must have hit
+	 private int nHitType = -1; 		// default 1 for description
+	 private int covCutoff = -1, simCutoff = -1;
 }

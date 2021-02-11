@@ -20,7 +20,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.sql.ResultSet;
 import java.util.HashSet;
@@ -34,7 +33,6 @@ import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -48,13 +46,17 @@ import sng.database.Globals;
 import sng.database.MetaData;
 import sng.util.Tab;
 import sng.viewer.STCWFrame;
-import util.ui.ButtonComboBox;
-import util.ui.UserPrompt;
+
+import util.database.DBConn;
+import util.database.Globalx;
+import util.file.FileC;
+import util.file.FileRead;
 import util.methods.ErrorReport;
 import util.methods.Out;
 import util.methods.Static;
-import util.database.DBConn;
-import util.database.Globalx;
+
+import util.ui.ButtonComboBox;
+import util.ui.UserPrompt;
 
 public class BasicGOFilterTab extends Tab {
 	private static final long serialVersionUID = 5545816581105885864L;
@@ -328,14 +330,14 @@ public class BasicGOFilterTab extends Tab {
 		}));
 		tablepopup.addSeparator();
 		
-		tablepopup.add(new JMenuItem(new AbstractAction("Export Table ("+Globalx.CSV_SUFFIX+")") {
+		tablepopup.add(new JMenuItem(new AbstractAction("Export Table ("+Globalx.TSV_SUFFIX+")") {
 			private static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent e) {
 				try {
 					btnTable.setEnabled(false);
 					enabledFunctions(false);
 					
-					goTablePanel.exportTable(0);
+					goTablePanel.exportTable(btnTable, 0);
 					
 					enabledFunctions(true);
 					btnTable.setEnabled(true);
@@ -343,14 +345,14 @@ public class BasicGOFilterTab extends Tab {
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error export table", null);}
 			}
 		}));
-		tablepopup.add(new JMenuItem(new AbstractAction("Export SeqID with GOs ("+Globalx.CSV_SUFFIX+")") {
+		tablepopup.add(new JMenuItem(new AbstractAction("Export SeqID with GOs ("+Globalx.TSV_SUFFIX+")") {
 			private static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent e) {
 				try {
 					btnTable.setEnabled(false);
 					enabledFunctions(false);
 					
-					goTablePanel.exportTable(1);
+					goTablePanel.exportTable(btnTable, 1);
 					
 					enabledFunctions(true);
 					btnTable.setEnabled(true);
@@ -358,14 +360,14 @@ public class BasicGOFilterTab extends Tab {
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error export table", null);}
 			}
 		}));
-		tablepopup.add(new JMenuItem(new AbstractAction("Export/Merge #Seq ("+Globalx.CSV_SUFFIX+")") {
+		tablepopup.add(new JMenuItem(new AbstractAction("Export/Merge #Seq ("+Globalx.TSV_SUFFIX+")") {
 			private static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent e) {
 				try {
 					btnTable.setEnabled(false);
 					enabledFunctions(false);
 					
-					goTablePanel.exportTable(2);
+					goTablePanel.exportTable(btnTable, 2);
 					
 					enabledFunctions(true);
 					btnTable.setEnabled(true);
@@ -384,7 +386,7 @@ public class BasicGOFilterTab extends Tab {
 					btnTable.setEnabled(false); 
 					enabledFunctions(false);
 					
-					goTablePanel.showExportAllPaths(GOtree.ALL_ANCESTORS);
+					goTablePanel.showExportAllPaths(btnTable, GOtree.ALL_ANCESTORS);
 					
 					enabledFunctions(true);
 					btnTable.setEnabled(true);
@@ -399,7 +401,7 @@ public class BasicGOFilterTab extends Tab {
 					btnTable.setEnabled(false); 
 					enabledFunctions(false);
 					
-					goTablePanel.showExportAllPaths(GOtree.LONGEST_PATHS);
+					goTablePanel.showExportAllPaths(btnTable,GOtree.LONGEST_PATHS);
 					
 					enabledFunctions(true);
 					btnTable.setEnabled(true);
@@ -415,7 +417,7 @@ public class BasicGOFilterTab extends Tab {
 					btnTable.setEnabled(false); 
 					enabledFunctions(false);
 					
-					goTablePanel.showExportAllPaths(GOtree.ALL_PATHS);
+					goTablePanel.showExportAllPaths(btnTable, GOtree.ALL_PATHS);
 					
 					enabledFunctions(true);
 					btnTable.setEnabled(true);
@@ -524,10 +526,9 @@ public class BasicGOFilterTab extends Tab {
 		btnFindFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-					JFileChooser fc = new JFileChooser();
-					fc.setCurrentDirectory(new File("."));
-					if(fc.showOpenDialog(getInstance()) == JFileChooser.APPROVE_OPTION) {
-						loadFile(fc.getSelectedFile().getPath());
+					FileRead fr = new FileRead("GO", FileC.bNoVer, FileC.bNoPrt); // CAS316
+					if (fr.run(btnFindFile, "GO File", FileC.dUSER, FileC.fTXT)) {
+						loadFile(fr.getRelativeFile());
 					}
 				}
 				catch(Exception e) {ErrorReport.prtReport(e, "Error finding file");}

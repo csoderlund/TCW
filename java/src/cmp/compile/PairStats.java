@@ -16,9 +16,9 @@ import cmp.database.Globals;
 import cmp.align.*;
 
 import util.database.DBConn;
+import util.file.FileHelpers;
 import util.methods.ErrorReport;
 import util.methods.Out;
-import util.methods.FileHelpers;
 
 public class PairStats {
 	private final int MIN_ALIGN = 20; // not write to KaKs file

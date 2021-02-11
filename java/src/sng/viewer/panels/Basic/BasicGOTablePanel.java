@@ -52,10 +52,11 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
-import sng.util.ExportFile;
 import sng.viewer.STCWFrame;
 import util.database.DBConn;
 import util.database.Globalx;
+import util.file.FileC;
+import util.file.FileWrite;
 import util.methods.ErrorReport;
 import util.methods.Static;
 import util.methods.Out;
@@ -1000,8 +1001,8 @@ public class BasicGOTablePanel {
 		theQuery += " FROM go_info ";
 		return theQuery;
 	}
-	public void exportTable(int type) {
-		new ExportGO().run(type);
+	public void exportTable(Component btnC, int type) {
+		new ExportGO().run(btnC, type);
 	}
 	public String makeCopyTableString(String delim) {
  		StringBuilder retVal = new StringBuilder();
@@ -1086,7 +1087,7 @@ public class BasicGOTablePanel {
 	}
 
 	/*********** GO list ****************/
-	public void showExportAllPaths(int type) {
+	public void showExportAllPaths(Component c, int type) {
 		try {	
 			TreeSet <Integer> goMap = new TreeSet <Integer>  ();
 			for (Object [] o : theResults) {
@@ -1099,7 +1100,7 @@ public class BasicGOTablePanel {
 				msg += 		 "The table can get big and slow to produce (if really large >5 minutes).";
 				if (!UserPrompt.showContinue(">100 Paths", msg)) return;
 			}
-			new GOtree(theMainFrame).popupExportAll(type, goMap);
+			new GOtree(theMainFrame).popupExportAll(c, type, goMap);
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Show Paths for Selected");}
 	}
@@ -1168,30 +1169,34 @@ public class BasicGOTablePanel {
 		private final String filePrefix="GOtable";
 		public ExportGO() {}
 		
-		public boolean run(int type) {
+		public boolean run(Component btnC, int type) {
 			tcwid = theMainFrame.getdbID();
 			String msg, title, file;
+			int wtype=FileC.wAPPEND;
 			if (type==0) {
 				msg="Append";
 				title=" columns of table ";
-				file = filePrefix+"Columns" + Globalx.CSV_SUFFIX;
+				file = filePrefix+"Columns" + FileC.TSV_SUFFIX;
 			}
 			else if (type==1){
 				msg="Append";
 				title= " SeqIDs with GOs ";
-				file = filePrefix+"BySeq"+ Globalx.CSV_SUFFIX;
+				file = filePrefix+"BySeq"+ FileC.TSV_SUFFIX;
 			}
 			else if (type==2) {
+				wtype=FileC.wMERGE;
 				msg="Merge";
 				title = " #Seqs Column ";
-				file = filePrefix+"NSeqs"+ Globalx.CSV_SUFFIX;
+				file = filePrefix+"NSeqs"+ FileC.TSV_SUFFIX;
 			}
 			else return false;
 			
-			File out = ExportFile.getFileHandle(msg, file, theMainFrame);
+			FileWrite fw = new FileWrite(FileC.bNoVer, FileC.bDoPrt);
+			File out = fw.run(btnC, file, FileC.fTSV, wtype);
+			
 			if (out==null) return false;
 				
-			boolean bAppend = ExportFile.isAppend();
+			boolean bAppend = fw.isAppend();
 			if (bAppend) Out.PrtSpMsg(0, msg + title +  out.getAbsolutePath());
 			else         Out.PrtSpMsg(0, "Write " + title +  out.getAbsolutePath());
 			
@@ -1216,7 +1221,7 @@ public class BasicGOTablePanel {
 				for(int x=0; x<theTableModel.getColumnCount()-1; x++) {
 					String colName = theTableModel.getColumnName(x).replaceAll("\\s", "-"); 
 					line.append(colName);
-					line.append(Globalx.CSV_DELIM);
+					line.append(Globalx.TSV_DELIM);
 				}	
 				line.append(theTableModel.getColumnName(theTableModel.getColumnCount()-1));
 				pw.println(line.toString());
@@ -1231,7 +1236,7 @@ public class BasicGOTablePanel {
 						else val = "";
 						
 						line.append(val);
-						line.append(Globalx.CSV_DELIM);
+						line.append(Globalx.TSV_DELIM);
 					}
 					if(theTableModel.getValueAt(x, y) != null) 
 						val = theTableModel.getValueAt(x, y).toString();

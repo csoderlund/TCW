@@ -147,7 +147,7 @@ public class BasicSeqTab extends Tab {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
 				try {
-					theTablePanel.tableExportToFile("Seq");
+					theTablePanel.tableExportToFile(btnTable, "Seq");
 				} catch (Exception er) {ErrorReport.reportError(er, "Error export table"); }
 			}
 		}));

@@ -16,7 +16,8 @@ import cmp.database.Globals;
 
 public class MethodClosurePanel extends JPanel {
 	private static final long serialVersionUID = 109004697047687473L;	
-	private final static String xDELIM = Globals.Methods.METHODS_DELIM;
+	private final static String xDELIM = Globals.Methods.outDELIM;
+	private final static String iDELIM = Globals.Methods.inDELIM;
 	private String [] abbrev = {"AA", "NT"}; // also in MethodClosure.java and BBH 
 	private String [] covTypes = {"Either", "Both"};
 	
@@ -34,7 +35,7 @@ public class MethodClosurePanel extends JPanel {
 		lblPrefix = new JLabel("Prefix");
 		row.add(lblPrefix);
 		row.add(Box.createHorizontalStrut(width - lblPrefix.getPreferredSize().width));
-		txtPrefix = Static.createTextField("", 3);
+		txtPrefix = Static.createTextField("", 4);
 		row.add(txtPrefix);
 		row.add(Box.createHorizontalStrut(5));
 		JLabel req = new JLabel(EditMethodPanel.LBLPREFIX);
@@ -93,15 +94,17 @@ public class MethodClosurePanel extends JPanel {
 	}
 	
 	public String getSettings() {
-		int x = (aaButton.isSelected()) ? 0 : 1;
-		return  xDELIM + ":" + 
-				txtCovCutoff.getText() + ":" + covLenMode.getSelectedIndex() + ":" +
-				txtSimCutoff.getText() +":"
-				+ x + ":" + xDELIM;
+		int isNT = (aaButton.isSelected()) ? 0 : 1;
+		return  xDELIM 						+ iDELIM + 
+				txtCovCutoff.getText() 		+ iDELIM + 
+				covLenMode.getSelectedIndex() + iDELIM +
+				txtSimCutoff.getText() 		+ iDELIM +
+				isNT 						+ iDELIM + 
+				xDELIM;
 	}
 	
 	public void setSettings(String settings) {
-		String [] theSettings = settings.split(":");
+		String [] theSettings = settings.split(iDELIM);
 		if (theSettings.length<3) return; // earlier versions
 		
 		txtCovCutoff.setText(theSettings[1]);

@@ -27,6 +27,7 @@ import java.util.Vector;
 
 import util.align.AAStatistics;
 import util.database.Globalx;
+import util.file.FileHelpers;
 
 public class BlastArgs {  
 	public static final String [] validSearchPgms = {"blast", "diamond"};

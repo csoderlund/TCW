@@ -22,9 +22,12 @@ import util.methods.Static;
 import util.methods.Out;
 
 public class MethodClosure {
+	 private final static String iDELIM = Globals.Methods.inDELIM;
+	
+	 private final String [] covTypes = {"Either", "Both"};
+	 private final String [] strType = {"Amino acid", "Nucleotide"};
+	 
 	 private String groupFile =  Globals.Methods.Closure.TYPE_NAME;
-	 private String [] covTypes = {"Either", "Both"};
-	 private String [] strType = {"Amino acid", "Nucleotide"};
 	 
 	 public boolean run(int idx, DBConn db, CompilePanel panel) {
 		 
@@ -54,24 +57,23 @@ public class MethodClosure {
 		cmpPanel = panel;
 		
 		MethodPanel theMethod = panel.getMethodPanel();
-		String [] settings = theMethod.getSettingsAt(idx).split(":");
+		prefix = theMethod.getMethodPrefixAt(idx);			// Groups should be prefixed with this
+		
+		String [] settings = theMethod.getSettingsAt(idx).split(iDELIM);
 
-		prefix = theMethod.getMethodPrefixAt(idx);						// Groups should be prefixed with this
-		covCutoff = Static.getInteger(settings[1].trim());
-		if (covCutoff<0) covCutoff=0;
-		covMode = Static.getInteger(settings[2].trim());
-		if (covMode>covTypes.length) {
-			Out.PrtError("Coverage length types " + covMode + " must be <" + covTypes.length);
-			return false;
+		if (settings.length<5) {
+			Out.PrtError("Incorrect parameters: '" + theMethod.getSettingsAt(idx) + "' - using defaults");
 		}
-		simCutoff = Static.getInteger(settings[3].trim());
-		if (simCutoff<0) simCutoff=0;
-		int x = Static.getInteger(settings[4].trim());
-		type = x;
-		if (x!=0 && x!=1) {
-			Out.PrtError("Bad type " + x + " must be 0 or 1");
-			return false;
+		else {
+			covCutoff = Static.getInteger(settings[1].trim());
+			covMode = 	Static.getInteger(settings[2].trim());
+			simCutoff = Static.getInteger(settings[3].trim());
+			type = 		Static.getInteger(settings[4].trim());
 		}
+		if (covCutoff<0) covCutoff=Static.getInteger(Globals.Methods.Closure.COVERAGE_CUTOFF);
+		if (simCutoff<0) simCutoff=Static.getInteger(Globals.Methods.Closure.SIMILARITY);
+		if (covMode<0 || covMode>covTypes.length)  covMode=Globals.Methods.Closure.COV_TOGGLE;
+		if (type!=0 && type!=1) type = 0;
 		
 		String root = cmpPanel.getCurProjMethodDir() + groupFile + "." + prefix + "_" + covCutoff + "-" + simCutoff;
 		groupFile = root;
@@ -316,9 +318,9 @@ public class MethodClosure {
 	 private CompilePanel cmpPanel;	// get all parameters from this
 	
 	 private boolean bSuccess = true;
-	 private int type, covMode;
+	 private int type=-1, covMode=-1;
 	 private String prefix;
-	 private int covCutoff, simCutoff;
+	 private int covCutoff=-1, simCutoff = -1;
 	
 	 private HashMap <Integer, String> asmMap = new HashMap <Integer, String> ();
 	 private HashMap <String, Seq>     seqMap = new HashMap <String, Seq> ();

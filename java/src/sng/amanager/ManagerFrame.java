@@ -1,16 +1,5 @@
 package sng.amanager;
 
-/**************************************************
- * This file contains the following (in this order)
- * 1 Creates the main window
- * 2 Panels that make up main window
- * 3 routine for main window
- * 4 Panels that replace main window (Assembly Options, Annotation Options, Annotation Add/Edit)
- * 5 routines to transfer information to the Manager data
- *  		other panels are in their own files
- * 6 Database routines - each routine creates its own connection
- * 7 other assorted routines and classes
- */
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -35,7 +24,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -47,8 +35,6 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import sng.annotator.CoreDB;
 import sng.annotator.runSTCWMain;
@@ -58,21 +44,34 @@ import sng.database.Version;
 import util.database.DBConn;
 import util.database.Globalx;
 import util.database.HostsCfg;
+import util.file.FileC;
+import util.file.FileRead;
+import util.file.FileHelpers;
 import util.methods.ErrorReport;
 import util.methods.Out;
 import util.methods.Static;
-import util.methods.FileHelpers;
 import util.methods.TCWprops;
 import util.ui.ButtonComboBox;
 import util.ui.UIHelpers;
 import util.ui.UserPrompt;
 
+/**************************************************
+ * This file contains the following (in this order)
+ * 1 Creates the main window
+ * 2 Panels that make up main window
+ * 3 routine for main window
+ * 4 Panels that replace main window (Assembly Options, Annotation Options, Annotation Add/Edit)
+ * 5 routines to transfer information to the Manager data
+ *  		other panels are in their own files
+ * 6 Database routines - each routine creates its own connection
+ * 7 other assorted routines and classes
+ */
+
 public class ManagerFrame extends JFrame {
 	private static final long serialVersionUID = 7879962219972222820L;
-	private static final String HTML = "html/runSingleTCW/ManagerHelp.html";
+	private static final String HTML = Globals.helpDir + "/ManagerHelp.html";
 	private static final String COPYPROJ = "Cp"; // suffix
 	
-	public static final String LIBDIR = Globalx.PROJDIR + "/"; 
 	public static final String PROJDIR = Globalx.PROJDIR  + "/";
 	public static final String ANNODIR = Globalx.ANNODIR  + "/";
 	public static final String STCW = Globalx.STCW;
@@ -331,24 +330,13 @@ public class ManagerFrame extends JFrame {
 		btnImportAnnot.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					JFileChooser fc = new JFileChooser();
-					fc.setCurrentDirectory(new File(PROJDIR)); 
-					// CAS315 add
-					FileFilter ff=new FileNameExtensionFilter("AnnoDBs or sTCW.cfg", "cfg");;
-					fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
-					fc.addChoosableFileFilter(ff);//ff added to filechooser
-					fc.setFileFilter(ff);	//st ff as default selection
-					fc.setFileSelectionMode(JFileChooser.FILES_ONLY);//user must select a file not folder
-					fc.setMultiSelectionEnabled(false);//disabled selection of multiple files
-					
-					if(fc.showOpenDialog(getInstance()) == JFileChooser.APPROVE_OPTION) {
-						curManData.importAnnoDBs(fc.getSelectedFile());
+					FileRead fc = new FileRead(projDirName, FileC.bDoVer, FileC.bDoPrt);
+					if (fc.run(btnImportAnnot, "Import AnnoDBs", FileC.dPROJTOP, FileC.fCFG)) { 
+						curManData.importAnnoDBs(fc.getRemoveFixedPath());
 					}
 					updateUI();
 				}
-				catch(Exception err) {
-					ErrorReport.reportError(err, "Error running annotation");
-				}
+				catch(Exception err) {ErrorReport.reportError(err, "Error Import AnnoDBs");}
 			}
 		});
 		btnImportAnnot.setMargin(new Insets(0, 0, 0, 0));
@@ -472,7 +460,6 @@ public class ManagerFrame extends JFrame {
 		btnAddRemark = Static.createButton("Add Remarks or Locations", true, Globals.MENUCOLOR);
 		btnAddRemark.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				pnlRemark.setStartingDir(new File(LIBDIR + curManData.getProjectName()));
 				pnlRemark.reset();
 				nFrameMode = FRAME_MODE_REMARKS;
 				pnlRemark.setVisible(true);
@@ -530,6 +517,7 @@ public class ManagerFrame extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				if(cmbProjects.getSelectedIndex() > 0) {
 					updateCurManData(cmbProjects.getSelectedIndex());
+					FileC.resetLastDir();
 				}
 				else {
 					curManData = null;
@@ -614,7 +602,7 @@ public class ManagerFrame extends JFrame {
 		txtdbID.addCaretListener(new CaretListener() {
 			public void caretUpdate(CaretEvent arg0) {
 				if(curManData != null)
-					curManData.setdbID(txtdbID.getText());
+					curManData.setProjID(txtdbID.getText());
 			}
 		});
 		leftPanel.add(addRow("singleTCW ID", txtdbID));
@@ -624,7 +612,7 @@ public class ManagerFrame extends JFrame {
 		txtdbName.addCaretListener(new CaretListener() {
 			public void caretUpdate(CaretEvent e) {
 				if(curManData != null)
-					curManData.setdbName(txtdbName.getText());
+					curManData.setTCWdb(txtdbName.getText());
 			}
 		});
 		leftPanel.add(addRow("sTCW Database", txtdbName));
@@ -663,7 +651,7 @@ public class ManagerFrame extends JFrame {
 	public void setMainPanelVisible(boolean visible) {
 		mainPanel.setVisible(visible);
 	}
-	public String getProjectName() { return projectName;}
+	public String getProjDir() { return projDirName;}
 	
 	public void setFrameMode(int mode) { nFrameMode = mode; }
 	
@@ -884,21 +872,21 @@ public class ManagerFrame extends JFrame {
 	
 		sPaneAnnoDB = new JScrollPane();
 		sPaneAnnoDB.setViewportView(annoDBTable);
-	    	annoDBTable.getTableHeader().setBackground(Color.WHITE);
-	    	sPaneAnnoDB.setColumnHeaderView(annoDBTable.getTableHeader());
-	    	sPaneAnnoDB.setAlignmentX(Component.LEFT_ALIGNMENT);
-	    	
-	    	sPaneAnnoDB.getViewport().setBackground(Color.WHITE);
-	    	sPaneAnnoDB.getHorizontalScrollBar().setBackground(Color.WHITE);
-	    	sPaneAnnoDB.getVerticalScrollBar().setBackground(Color.WHITE);
-	    	sPaneAnnoDB.getHorizontalScrollBar().setForeground(Color.WHITE);
-	    	sPaneAnnoDB.getVerticalScrollBar().setForeground(Color.WHITE);
-			
-	    	sPaneAnnoDB.getViewport().setMaximumSize(new Dimension(TWIDTH, THEIGHT));
-	    	sPaneAnnoDB.getViewport().setPreferredSize(new Dimension(TWIDTH, THEIGHT));
-	    	sPaneAnnoDB.getViewport().setMinimumSize(new Dimension(TWIDTH, THEIGHT));
-	    	pnlAnnoDB.add(sPaneAnnoDB);
-	    	pnlAnnoDB.add(Box.createHorizontalStrut(5));
+    	annoDBTable.getTableHeader().setBackground(Color.WHITE);
+    	sPaneAnnoDB.setColumnHeaderView(annoDBTable.getTableHeader());
+    	sPaneAnnoDB.setAlignmentX(Component.LEFT_ALIGNMENT);
+    	
+    	sPaneAnnoDB.getViewport().setBackground(Color.WHITE);
+    	sPaneAnnoDB.getHorizontalScrollBar().setBackground(Color.WHITE);
+    	sPaneAnnoDB.getVerticalScrollBar().setBackground(Color.WHITE);
+    	sPaneAnnoDB.getHorizontalScrollBar().setForeground(Color.WHITE);
+    	sPaneAnnoDB.getVerticalScrollBar().setForeground(Color.WHITE);
+		
+    	sPaneAnnoDB.getViewport().setMaximumSize(new Dimension(TWIDTH, THEIGHT));
+    	sPaneAnnoDB.getViewport().setPreferredSize(new Dimension(TWIDTH, THEIGHT));
+    	sPaneAnnoDB.getViewport().setMinimumSize(new Dimension(TWIDTH, THEIGHT));
+    	pnlAnnoDB.add(sPaneAnnoDB);
+    	pnlAnnoDB.add(Box.createHorizontalStrut(5));
 		
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.PAGE_AXIS));
@@ -1023,8 +1011,8 @@ public class ManagerFrame extends JFrame {
 		}
 
 		try {
-			curManData.setdbID(txtdbID.getText());
-			curManData.setdbName(txtdbName.getText());
+			curManData.setProjID(txtdbID.getText());
+			curManData.setTCWdb(txtdbName.getText());
 			String cpu = txtNumCPUs.getText();
 			if(cpu.length() > 0) curManData.setNumCPUs(Integer.parseInt(cpu));
 			else curManData.setNumCPUs(1);
@@ -1052,7 +1040,7 @@ public class ManagerFrame extends JFrame {
 				UserPrompt.showWarn("Directory exists '" + PROJDIR + nProj + "' -- abort copy");
 				return false;
 			}
-			String [] ignore = {Globalx.ORFDIR, Globalx.logDir, Globalx.BLASTDIR};
+			String [] ignore = {Globalx.pORFDIR, Globalx.pLOGDIR, Globalx.pHITDIR};
 			if (!FileHelpers.copyDir(new File(PROJDIR + oProj), new File(PROJDIR + nProj), ignore)) {
 				UserPrompt.showError("Could not create copied '" + PROJDIR + nProj + "'");
 				return false;
@@ -1064,7 +1052,7 @@ public class ManagerFrame extends JFrame {
 			txtdbName.setText(nfullDB);
 			cmbProjects.addItem(nProj);
 			cmbProjects.setSelectedItem(nProj);
-			projectName = nProj;
+			projDirName = nProj;
 			updateCurManData(cmbProjects.getSelectedIndex());
 			
 			updateUI();
@@ -1088,7 +1076,7 @@ public class ManagerFrame extends JFrame {
 				cmbProjects.addItem(result);
 				cmbProjects.setSelectedItem(result);
 				
-				projectName = result;
+				projDirName = result;
 				updateCurManData(cmbProjects.getSelectedIndex());
 				
 				chkSkipAssembly.setSelected(true);
@@ -1154,7 +1142,7 @@ public class ManagerFrame extends JFrame {
 			if(!dbExists) {
 				val = "Database does not exist";
 				UserPrompt.displayInfoMonoSpace(getInstance(), "Overview for " + 
-						curManData.getProjectName(), val.split("\n"), false, true);
+						curManData.getProjDir(), val.split("\n"), false, true);
 				return;
 			}
 			
@@ -1190,7 +1178,7 @@ public class ManagerFrame extends JFrame {
 			if (val==null) val = "Empty database -- delete and restart.";
 			
 			UserPrompt.displayInfoMonoSpace(getInstance(), "Overview for " + 
-					curManData.getProjectName(), val.split("\n"), false, true);
+					curManData.getProjDir(), val.split("\n"), false, true);
 		}
 		catch(Exception e) {
 			ErrorReport.prtReport(e, "Error getting project overview");
@@ -1333,23 +1321,21 @@ public class ManagerFrame extends JFrame {
 	 */
 	private String [] getLibraryList(boolean first) {
 		try {
-			
-			File dir = new File(LIBDIR);
-			if (!dir.exists()) 
-			{
-			    System.err.println("Creating directory " + LIBDIR);
+			File dir = new File(PROJDIR);
+			if (!dir.exists()) {
+			    System.err.println("Creating directory " + PROJDIR);
 			    boolean result = dir.mkdir();  
-			    if(!result) System.err.println("Error: could not create /" + LIBDIR + " Check permissions"); 
-			    File d2 = new File(PROJDIR);
-			    if (!d2.exists())
-				{
-				    System.err.println("Creating directory /" + PROJDIR);
-				    result = d2.mkdir();  
-				    if(!result) System.err.println("Error: could not create /" + PROJDIR + ". Check permissions"); 
-				}
-			    return new String [0];
+			    if(!result) {
+			    	System.err.println("Error: could not create /" + PROJDIR + " Check permissions"); 
+			    	return new String [0];
+			    }
+			    // CAS316 was under creating new project
+				File userFile = new File(PROJDIR + Globalx.USERDIR);
+				Out.PrtSpMsg(1,"Creating: " + userFile.getAbsolutePath());
+				Out.PrtSpMsg(2, "This is not a project directory - it is for the user's miscellaneous files");
+				userFile.mkdir();
 			}
-			if (first) System.err.println("Reading projects from directory '" + LIBDIR + "'");
+			if (first) System.err.println("Reading projects from directory '" + PROJDIR + "'");
 		
 			Vector<String> dirs = new Vector<String> ();
 			String [] files = dir.list();
@@ -1358,7 +1344,7 @@ public class ManagerFrame extends JFrame {
 				if (files[x].equals(Globalx.HTMLDIR)) continue;
 				if (files[x].equals(Globalx.USERDIR)) continue;
 				
-				File temp = new File(LIBDIR + files[x]);
+				File temp = new File(PROJDIR + files[x]);
 				if(temp.exists() && temp.isDirectory() && !temp.isHidden())
 					dirs.add(files[x]);
 			}
@@ -1380,9 +1366,9 @@ public class ManagerFrame extends JFrame {
 		if (curManData!=null) curManData.clear();
 		pnlTransLibEdit.clearCountFileList();
 		
-		projectName = cmbProjects.getSelectedItem();
+		projDirName = cmbProjects.getSelectedItem();
 		
-		curManData = new ManagerData(this, projectName, hostsObj);
+		curManData = new ManagerData(this, projDirName, hostsObj);
 		if (curManData==null) ErrorReport.die("TCW error: remove LIB.cfg and start again");
 		
 		boolean b = tcwDBexists();
@@ -1405,7 +1391,6 @@ public class ManagerFrame extends JFrame {
 	 */
 	public void updateUI() {
 		try {
-			
 			boolean isProjectSelected = (curManData != null);
 			if(!isProjectSelected) {
 				lblGODB.setText("");
@@ -1425,7 +1410,7 @@ public class ManagerFrame extends JFrame {
 		catch (Exception e) {ErrorReport.prtReport(e,"Updating interface");}
 	}
 	public void updateMain(boolean bEnable) {
-		txtdbID.setText(curManData.getAssemblyID());
+		txtdbID.setText(curManData.getProjID());
 		txtdbName.setText(curManData.getTCWdb());
 		
 		int cpus = curManData.getNumCPUs();
@@ -1672,8 +1657,8 @@ public class ManagerFrame extends JFrame {
         		setTitle("Remove.... ");
     		
         		boolean b1 = tcwDBexists();
-        		String blastDir = PROJDIR + curManData.getProjectName() +  "/" + Globalx.BLASTDIR; 
-     		boolean b2 = (new File(blastDir)).exists() ? true : false;
+        		String blastDir = PROJDIR + curManData.getProjDir() +  "/" + Globalx.pHITDIR; 
+        		boolean b2 = (new File(blastDir)).exists() ? true : false;
      			
         		JPanel selectPanel = Static.createPagePanel();
         		
@@ -1682,20 +1667,20 @@ public class ManagerFrame extends JFrame {
 	    		selectPanel.add(Box.createVerticalStrut(5));
 	    		
 	    		btnDB = Static.createCheckBox("sTCW database", false, dbExists);
-	        selectPanel.add(btnDB);
-	        selectPanel.add(Box.createVerticalStrut(5));
-	        selectPanel.add(new JSeparator());
-        		
-            btnBlast = Static.createCheckBox("Hit files from disk (" + Globalx.BLASTDIR + ")", 
-            		false, b2);
-            selectPanel.add(btnBlast);
-	        selectPanel.add(Box.createVerticalStrut(5));
+		        selectPanel.add(btnDB);
+		        selectPanel.add(Box.createVerticalStrut(5));
+		        selectPanel.add(new JSeparator());
+	        		
+	            btnBlast = Static.createCheckBox("Hit files from disk (" + Globalx.pHITDIR + ")", 
+	            		false, b2);
+	            selectPanel.add(btnBlast);
+		        selectPanel.add(Box.createVerticalStrut(5));
         	
         		btnAll = Static.createCheckBox("All files from disk for this sTCW project", false, true);
         		selectPanel.add(btnAll);		
-         	selectPanel.add(Box.createVerticalStrut(5));
+        		selectPanel.add(Box.createVerticalStrut(5));
                     		
-         	JPanel buttonPanel = Static.createRowPanel();
+        		JPanel buttonPanel = Static.createRowPanel();
         		btnOK = new JButton("OK");
         		btnOK.addActionListener(new ActionListener() {
     				public void actionPerformed(ActionEvent e) {
@@ -1721,7 +1706,7 @@ public class ManagerFrame extends JFrame {
         		buttonPanel.setMaximumSize(buttonPanel.getPreferredSize());
 	    		nMode = CANCEL;
 
-           	JPanel mainPanel = Static.createPagePanel();
+	    		JPanel mainPanel = Static.createPagePanel();
         		mainPanel.add(selectPanel);
         		mainPanel.add(Box.createVerticalStrut(15));
         		mainPanel.add(buttonPanel);
@@ -1753,8 +1738,7 @@ public class ManagerFrame extends JFrame {
         		catch(Exception e) {ErrorReport.prtReport(e, "Deleting annotation");}
         	}
         	private void removeDB() {
-        		try
-        		{
+        		try {
         			if(!dbExists) {
         				System.err.println("Database " + curManData.getTCWdb() + " does not exist");
         				return;
@@ -1778,7 +1762,7 @@ public class ManagerFrame extends JFrame {
         	private void removeBlast() {
         		try
         		{
-    				String blastDir = PROJDIR + curManData.getProjectName() +  "/" + Globalx.BLASTDIR; 
+    				String blastDir = PROJDIR + curManData.getProjDir() +  "/" + Globalx.pHITDIR; 
     				if(!(new File(blastDir)).exists()) {
     					System.out.println("Hit directory does not exist for this project");
         				return;
@@ -1790,31 +1774,31 @@ public class ManagerFrame extends JFrame {
         			if (rc) System.out.println("Hit files removed successfully");
     				else System.out.println("Hit file remove failed");
         		} 
-        		catch (Exception e){ErrorReport.reportError(e, "Cannot delete hit files for " + projectName);}
+        		catch (Exception e){ErrorReport.reportError(e, "Cannot delete hit files for " + projDirName);}
         	}
         	private void removeProject() {
-        		String msg = "Remove sTCW project '" + curManData.getProjectName() + "' from disk";
+        		String msg = "Remove sTCW project '" + curManData.getProjDir() + "' from disk";
         		if (!UserPrompt.showConfirm("runSingleTCW", msg)) return;
     			
-			try {
-				File fProj = new File(PROJDIR + curManData.getProjectName());
-				 
-				boolean rc = FileHelpers.deleteDirTrace(fProj);
-				if (rc) System.out.println("Project removed successfully");
-				else System.out.println("Project remove failed");
-
-				refreshProjectList();
-				
-				if (curManData!=null) {
-					curManData.clear(); 
-					curManData = null;
+				try {
+					File fProj = new File(PROJDIR + curManData.getProjDir());
+					 
+					boolean rc = FileHelpers.deleteDirTrace(fProj);
+					if (rc) System.out.println("Project removed successfully");
+					else System.out.println("Project remove failed");
+	
+					refreshProjectList();
+					
+					if (curManData!=null) {
+						curManData.clear(); 
+						curManData = null;
+					}
+					transTable.resetData();
+					countTable.resetData();
+					annoDBTable.resetData();
+					
+					updateUI();
 				}
-				transTable.resetData();
-				countTable.resetData();
-				annoDBTable.resetData();
-				
-				updateUI();
-			}
 			catch(Exception e) {ErrorReport.prtReport(e, "Error removing project");}
         	}
         	 	
@@ -1939,7 +1923,7 @@ public class ManagerFrame extends JFrame {
 	private boolean dbExists=false;	
 	private int nFrameMode = FRAME_MODE_MAIN;
 	
-	private String projectName=null;
+	private String projDirName=null; // may not be the same as the singleTCW ID; name only
 	private String host="";
 	private ManagerData curManData = null;
 	private HostsCfg hostsObj = null;

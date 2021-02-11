@@ -29,7 +29,7 @@ public class DoGO {
 	private final String subset = DoUP.subset;
 	private final String goURL = "http://archive.geneontology.org/";
 	public static String goDailyFile = "go_daily-termdb-tables.tar.gz";
-	public static String goPreDB = "go_";
+	public static String goPreDB = Globalx.goPreDB;
 
 	// test stuff -- so read file on disk instead of over network for testing
 	private boolean test=ASMain.test;

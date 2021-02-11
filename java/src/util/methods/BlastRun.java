@@ -3,6 +3,9 @@ package util.methods;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+
+import util.file.FileC;
+import util.file.FileHelpers;
 /**********************************************
  * blastp - aa to aa
  * blastn - nt to nt
@@ -18,15 +21,19 @@ public class BlastRun {
 	static public boolean run(int ncpu, String pgm, String action, String args, 
 			boolean isAAdb, String dbFile, boolean isAAseq, String inFile, String tabFile) {
 		
-		if (!runFormatDB(pgm, dbFile, isAAdb)) return false;
+		String xDbFile = 	FileC.removeRootPath(dbFile);// CAS316
+		String xInFile = 	FileC.removeRootPath(inFile);
+		String xTabFile = 	FileC.removeRootPath(tabFile);
+		
+		if (!runFormatDB(pgm, xDbFile, isAAdb)) return false;
 		
 		String searchCmd="";
 		if (pgm.equals("diamond")) {
-			searchCmd = BlastArgs.getDiamondCmd(inFile, dbFile, tabFile, action, args, ncpu);
+			searchCmd = BlastArgs.getDiamondCmd(xInFile, xDbFile, xTabFile, action, args, ncpu);
 			if (!args.contains("--quiet")) searchCmd += " --quiet"; // CAS314 diamond is no longer quite by default
 		}
 		else if (pgm.equals("blast"))  
-			searchCmd = BlastArgs.getBlastCmd(inFile, dbFile, tabFile, action, args, ncpu);
+			searchCmd = BlastArgs.getBlastCmd(xInFile, xDbFile, xTabFile, action, args, ncpu);
 		else {
 			Out.PrtError("Command '" + pgm + "'  not a valid option" );
 			return false;

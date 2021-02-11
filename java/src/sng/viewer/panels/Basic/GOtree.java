@@ -6,6 +6,7 @@ package sng.viewer.panels.Basic;
  */
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.Component;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -28,10 +29,11 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 
-import sng.util.ExportFile;
 import sng.viewer.STCWFrame;
 import util.database.DBConn;
 import util.database.Globalx;
+import util.file.FileC;
+import util.file.FileWrite;
 import util.methods.ErrorReport;
 import util.methods.Out;
 import util.methods.Static;
@@ -83,6 +85,7 @@ public class GOtree {
 		final JButton showButton = show; // Show button from parent frame gets diabled/enabled
 		final BasicGOTablePanel goTabPanelObj = goTabObj;
 		final int type=RELATED;
+		final Component btnC = (Component) show;
 		
 		Thread thread = new Thread(new Runnable() {
 			public void run() {
@@ -94,7 +97,7 @@ public class GOtree {
 					
 					SelDialog actObj = new SelDialog(true, label, type);
 					actObj.setVisible(true);
-					if (actObj.getSelection()==0) {
+					if (actObj.getSelection(btnC)==0) {
 						showButton.setEnabled(true);
 						return;
 					}
@@ -120,6 +123,7 @@ public class GOtree {
 		final String descr = desc;
 		final int type = searchtype;
 		final JButton showButton = show; // Show button from parent frame gets diabled/enabled
+		final Component btnC = (Component) show;
 		
 		Thread thread = new Thread(new Runnable() {
 			public void run() {
@@ -136,7 +140,7 @@ public class GOtree {
 					
 					SelDialog actObj = new SelDialog(bGOnames, label, type);
 					actObj.setVisible(true);
-					if (actObj.getSelection()==0) {
+					if (actObj.getSelection(btnC)==0) {
 						showButton.setEnabled(true);
 						return;
 					}
@@ -280,8 +284,7 @@ public class GOtree {
 	}
 	/**************** GO Ancestors *****************/ 
 	private Vector <String> showGoAncByLevelList(int gonum, String godesc) {
-		try {
-																		
+		try {															
 			DBConn mDB = theMainFrame.getNewDBC();
 			setTypes(mDB);
 			
@@ -334,8 +337,7 @@ public class GOtree {
 	}
 	// Ancestor sorted by distance
 	private Vector <String> showGoAncByDistList(int gonum, String godesc) {
-		try {
-																		
+		try {													
 			DBConn mDB = theMainFrame.getNewDBC();
 			setTypes(mDB);
 			
@@ -1012,24 +1014,24 @@ public class GOtree {
 		public SelDialog(boolean bGOnames, String msg, int type) {
 			this.fileName = msg;
 			this.type = type;
-        		setModal(true);
-        		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        		setTitle(msg);
-        		
-        		JRadioButton btnPop = Static.createRadioButton("Show information in popup", true);
-        		btnPop.addActionListener(new ActionListener() {
-    				public void actionPerformed(ActionEvent arg0) {
-    					nMode = 1;
-    				}
-    			});
-        	
-        		JRadioButton btnName =  Static.createRadioButton("Export names to file", false);
-	        	btnName.addActionListener(new ActionListener() {
-    				public void actionPerformed(ActionEvent arg0) {
-    					nMode = 2;
-    				}
-    			});
-        		JRadioButton btnAll = Static.createRadioButton("Export all information to file", false);
+    		setModal(true);
+    		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+    		setTitle(msg);
+    		
+    		JRadioButton btnPop = Static.createRadioButton("Show information in popup", true);
+    		btnPop.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					nMode = 1;
+				}
+			});
+    	
+    		JRadioButton btnName =  Static.createRadioButton("Export names to file", false);
+        	btnName.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					nMode = 2;
+				}
+			});
+    		JRadioButton btnAll = Static.createRadioButton("Export all information to file", false);
             btnAll.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent arg0) {
                     nMode = 3;
@@ -1042,66 +1044,61 @@ public class GOtree {
 					setVisible(false);
 				}
 			});
-        		JButton btnCancel = Static.createButton("Cancel", true);
-        		btnCancel.addActionListener(new ActionListener() {
-    				public void actionPerformed(ActionEvent e) {
-    					nMode=0;
-    					setVisible(false);
-    				}
-    			});
-        		
-        		btnOK.setPreferredSize(btnCancel.getPreferredSize());
-        		btnOK.setMaximumSize(btnCancel.getPreferredSize());
-        		btnOK.setMinimumSize(btnCancel.getPreferredSize());
-        		
-        		ButtonGroup grp = new ButtonGroup();
-        		grp.add(btnPop);
-        		grp.add(btnName);
+    		JButton btnCancel = Static.createButton("Cancel", true);
+    		btnCancel.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					nMode=0;
+					setVisible(false);
+				}
+			});
+    		
+    		btnOK.setPreferredSize(btnCancel.getPreferredSize());
+    		btnOK.setMaximumSize(btnCancel.getPreferredSize());
+    		btnOK.setMinimumSize(btnCancel.getPreferredSize());
+    		
+    		ButtonGroup grp = new ButtonGroup();
+    		grp.add(btnPop);
+    		grp.add(btnName);
 	        grp.add(btnAll); 
 	          
-	    		JPanel selectPanel = Static.createPagePanel();
-	    		selectPanel.add(btnPop);
-	    		selectPanel.add(new JSeparator());
-	    		selectPanel.add(Box.createVerticalStrut(5));
-	    		if (bGOnames) selectPanel.add(btnName);
-	    		selectPanel.add(Box.createVerticalStrut(5));
-	    		selectPanel.add(btnAll);
-	        	selectPanel.add(Box.createVerticalStrut(5));
-	        
-        		JPanel buttonPanel = Static.createRowPanel();
-        		buttonPanel.add(btnOK);
-        		buttonPanel.add(Box.createHorizontalStrut(20));
-        		buttonPanel.add(btnCancel);
-        		buttonPanel.setMaximumSize(buttonPanel.getPreferredSize());
+    		JPanel selectPanel = Static.createPagePanel();
+    		selectPanel.add(btnPop);
+    		selectPanel.add(new JSeparator());
+    		selectPanel.add(Box.createVerticalStrut(5));
+    		if (bGOnames) selectPanel.add(btnName);
+    		selectPanel.add(Box.createVerticalStrut(5));
+    		selectPanel.add(btnAll);
+        	selectPanel.add(Box.createVerticalStrut(5));
+        
+    		JPanel buttonPanel = Static.createRowPanel();
+    		buttonPanel.add(btnOK);
+    		buttonPanel.add(Box.createHorizontalStrut(20));
+    		buttonPanel.add(btnCancel);
+    		buttonPanel.setMaximumSize(buttonPanel.getPreferredSize());
   
            	JPanel mainPanel = Static.createPagePanel();
-        		mainPanel.add(selectPanel);
-        		mainPanel.add(Box.createVerticalStrut(15));
-        		mainPanel.add(buttonPanel);
-        		
-        		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        		add(mainPanel);
-        		
-        		pack();
-        		this.setResizable(false);
-        		UIHelpers.centerScreen(this);
-        	}
-		public int getSelection() {
+    		mainPanel.add(selectPanel);
+    		mainPanel.add(Box.createVerticalStrut(15));
+    		mainPanel.add(buttonPanel);
+    		
+    		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+    		add(mainPanel);
+    		
+    		pack();
+    		this.setResizable(false);
+    		UIHelpers.centerScreen(this);
+    	}
+		private int getSelection(Component btnC) {
 			try {
 				if (nMode==2 || nMode==3) {
 					String f = fileName.replace(":","_"); // linux filenames can not have ':'
-					String fName = (nMode==2) ? f+"_names" : f+"_lines";
-					if (type==PATHS) fName += ".html";
-					else fName += ".txt";
 					
-					if (nMode==2) {
-						exportFH = ExportFile.getFileHandle(fName, theMainFrame);
-						if (exportFH==null) nMode=0;
-					}
-					else if (nMode==3) {
-						exportFH = ExportFile.getFileHandle(fName, theMainFrame);
-						if (exportFH==null) nMode=0;
-					}
+					String fName = (nMode==2) ? f+"_names" : f+"_lines";
+					int ftype = (type==PATHS) ? FileC.fHTML : FileC.fTSV;
+
+					FileWrite fw = new FileWrite(FileC.bNoVer, FileC.bDoPrt); // XXX CAS316
+					exportFH = fw.run(btnC, fName,  ftype, FileC.wAPPEND);
+					if (exportFH==null) nMode=0;
 				}
 				if (nMode==0) Out.prt("Cancel operation");
 				
@@ -1164,16 +1161,17 @@ public class GOtree {
 	/**************************************************************
 	 * XXX  GO annotation: Table... methods
 	 */
-	public void popupExportAll(int type, TreeSet <Integer> gos) {
+	public void popupExportAll(Component c, int type, TreeSet <Integer> gos) {
 		final  TreeSet <Integer> goMap = gos;
 		final int showType=type;
+		final Component btnC = c;
 		Thread thread = new Thread(new Runnable() {
 			public void run() {
 				try {		
 					AllDialog allObj = new AllDialog(showType);
 					allObj.setVisible(true);
 					
-					if (allObj.getSelection()) allObj.doAction(goMap);
+					if (allObj.getSelection(btnC)) allObj.doAction(goMap);
 				}
 				catch (Exception e) {ErrorReport.prtReport(e, "GO query failed");}
 			}
@@ -1211,72 +1209,72 @@ private class AllDialog extends JDialog {
 		
 		Out.Print("Starting " + msg);
 		
-    		setModal(true);
-    		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-    		setTitle(msg);
+		setModal(true);
+		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		setTitle(msg);
+		
+		JPanel selectPanel = Static.createPagePanel();
+		
+		JRadioButton btnDesc = Static.createRadioButton("GO Descriptions", true);
+		btnDesc.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				nInfo = INFO_DESC;
+			}
+		});
+	
+		JRadioButton btnTerm =  Static.createRadioButton("GO terms", false);
+    	btnTerm.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				nInfo = INFO_TERM;
+			}
+		});
+    	ButtonGroup grp2 = new ButtonGroup();
+		grp2.add(btnDesc);
+		grp2.add(btnTerm);
     		
-    		JPanel selectPanel = Static.createPagePanel();
-    		
-    		JRadioButton btnDesc = Static.createRadioButton("GO Descriptions", true);
-    		btnDesc.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent arg0) {
-					nInfo = INFO_DESC;
-				}
-			});
-    	
-    		JRadioButton btnTerm =  Static.createRadioButton("GO terms", false);
-        	btnTerm.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent arg0) {
-					nInfo = INFO_TERM;
-				}
-			});
-        	ButtonGroup grp2 = new ButtonGroup();
-    		grp2.add(btnDesc);
-    		grp2.add(btnTerm);
-    		
-    		if (nType==ALL_PATHS || nType==LONGEST_PATHS) {
-    			selectPanel.add(btnDesc); selectPanel.add(Box.createHorizontalStrut(10));
-    			selectPanel.add(btnTerm);
-    			selectPanel.add(new JSeparator());
-    		}
-    	
-    		JRadioButton btnPop = Static.createRadioButton("Show in popup", true);
-    		btnPop.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent arg0) {
-					nMode = MODE_POP;
-					nOut= (nType==ALL_ANCESTORS) ? OUT_TXT : OUT_HTML;
-				}
-			});
-    		
-    		JRadioButton btnTsv =  Static.createRadioButton("Export to file (.tsv)", false);
-        	btnTsv.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent arg0) {
-					nMode = MODE_WRITE;
-					nOut = OUT_TSV;
-				}
-			});
-        	JRadioButton btnHtml =  Static.createRadioButton("Export to file (.html)", false);
-        	btnHtml.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent arg0) {
-					nMode = MODE_WRITE;
-					nOut = OUT_HTML;
-				}
-			});
-    		  
-        	ButtonGroup grp1 = new ButtonGroup();
-    		grp1.add(btnPop);
-    		grp1.add(btnTsv);
-    		grp1.add(btnHtml);
-       
-    		selectPanel.add(btnPop);
-    		selectPanel.add(Box.createVerticalStrut(5));
-    		selectPanel.add(btnTsv);
-    		selectPanel.add(Box.createVerticalStrut(5));
-    		
-    		if (nType==ALL_PATHS || nType==LONGEST_PATHS) {
-    			selectPanel.add(btnHtml);
-    			selectPanel.add(Box.createVerticalStrut(5));
-    		}
+		if (nType==ALL_PATHS || nType==LONGEST_PATHS) {
+			selectPanel.add(btnDesc); selectPanel.add(Box.createHorizontalStrut(10));
+			selectPanel.add(btnTerm);
+			selectPanel.add(new JSeparator());
+		}
+	
+		JRadioButton btnPop = Static.createRadioButton("Show in popup", true);
+		btnPop.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				nMode = MODE_POP;
+				nOut= (nType==ALL_ANCESTORS) ? OUT_TXT : OUT_HTML;
+			}
+		});
+		
+		JRadioButton btnTsv =  Static.createRadioButton("Export to file (.tsv)", false);
+    	btnTsv.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				nMode = MODE_WRITE;
+				nOut = OUT_TSV;
+			}
+		});
+    	JRadioButton btnHtml =  Static.createRadioButton("Export to file (.html)", false);
+    	btnHtml.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				nMode = MODE_WRITE;
+				nOut = OUT_HTML;
+			}
+		});
+		  
+    	ButtonGroup grp1 = new ButtonGroup();
+		grp1.add(btnPop);
+		grp1.add(btnTsv);
+		grp1.add(btnHtml);
+   
+		selectPanel.add(btnPop);
+		selectPanel.add(Box.createVerticalStrut(5));
+		selectPanel.add(btnTsv);
+		selectPanel.add(Box.createVerticalStrut(5));
+		
+		if (nType==ALL_PATHS || nType==LONGEST_PATHS) {
+			selectPanel.add(btnHtml);
+			selectPanel.add(Box.createVerticalStrut(5));
+		}
     		
         JButton btnOK = Static.createButton("OK", true);
 			btnOK.addActionListener(new ActionListener() {
@@ -1284,45 +1282,47 @@ private class AllDialog extends JDialog {
 				setVisible(false);
 			}
 		});
-    		JButton btnCancel = Static.createButton("Cancel", true);
-    		btnCancel.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					nMode=MODE_CANCEL;
-					setVisible(false);
-				}
-			});
-    		
-    		btnOK.setPreferredSize(btnCancel.getPreferredSize());
-    		btnOK.setMaximumSize(btnCancel.getPreferredSize());
-    		btnOK.setMinimumSize(btnCancel.getPreferredSize());
-    		
-    		JPanel buttonPanel = Static.createRowPanel();
-    		buttonPanel.add(btnOK);
-    		buttonPanel.add(Box.createHorizontalStrut(20));
-    		buttonPanel.add(btnCancel);
-    		buttonPanel.setMaximumSize(buttonPanel.getPreferredSize());
+		JButton btnCancel = Static.createButton("Cancel", true);
+		btnCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				nMode=MODE_CANCEL;
+				setVisible(false);
+			}
+		});
+		
+		btnOK.setPreferredSize(btnCancel.getPreferredSize());
+		btnOK.setMaximumSize(btnCancel.getPreferredSize());
+		btnOK.setMinimumSize(btnCancel.getPreferredSize());
+		
+		JPanel buttonPanel = Static.createRowPanel();
+		buttonPanel.add(btnOK);
+		buttonPanel.add(Box.createHorizontalStrut(20));
+		buttonPanel.add(btnCancel);
+		buttonPanel.setMaximumSize(buttonPanel.getPreferredSize());
 
        	JPanel mainPanel = Static.createPagePanel();
-    		mainPanel.add(selectPanel);
-    		mainPanel.add(Box.createVerticalStrut(15));
-    		mainPanel.add(buttonPanel);
-    		
-    		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-    		add(mainPanel);
-    		
-    		pack();
-    		this.setResizable(false);
-    		UIHelpers.centerScreen(this);
-    	}
-	public boolean getSelection() {
+		mainPanel.add(selectPanel);
+		mainPanel.add(Box.createVerticalStrut(15));
+		mainPanel.add(buttonPanel);
+		
+		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+		add(mainPanel);
+		
+		pack();
+		this.setResizable(false);
+		UIHelpers.centerScreen(this);
+	}
+	private boolean getSelection(Component btnC) {
 		try {
 			if (nMode==MODE_CANCEL) {
 				Out.prt("Cancel operation");
 				return false;
 			}
 			if (nMode==MODE_WRITE) {
-				fName += (nOut==OUT_TSV) ? Globalx.CSV_SUFFIX : ".html";
-				exportFH = ExportFile.getFileHandle(fName, theMainFrame);	
+				FileWrite fw = new FileWrite(FileC.bNoVer, FileC.bDoPrt); // XXX CAS314
+				int ftype = (nOut==OUT_TSV) ? FileC.fTSV : FileC.fHTML;
+				
+				exportFH = fw.run(btnC, fName, ftype, FileC.wONLY);
 				if (exportFH==null) {
 					Out.prt("Cancel file");
 					return false;
@@ -1340,8 +1340,8 @@ private class AllDialog extends JDialog {
 			if (nType==ALL_ANCESTORS) {
 				lines = goAllAncestors(goMap);
 			}
-			else  { 
-				if (nOut==OUT_HTML) lines=goPathsHtml(goMap);
+			else  { // ALl paths
+				if (nOut==OUT_HTML) lines=goPathsHTML(goMap);
 				else                lines=goPathsTsv(goMap);
 			}
 			if (lines==null) {
@@ -1427,7 +1427,7 @@ private class AllDialog extends JDialog {
 			
 			Collections.sort(goList);
 			
-			String delim = (nMode==MODE_POP) ? " "  : Globalx.CSV_DELIM; 
+			String delim = (nMode==MODE_POP) ? " "  : FileC.TSV_DELIM; 
 			String format = "%-11s" + delim + "%6s" + delim +"%-5s" + delim + "%s";
 			lines.add(String.format(format, "GO term", "Domain", "Level", "Description"));
 			
@@ -1444,7 +1444,7 @@ private class AllDialog extends JDialog {
 		return null;
 	}
 	// pathCreate and output as HTML
-	private Vector <String> goPathsHtml(TreeSet <Integer> goMap) {
+	private Vector <String> goPathsHTML(TreeSet <Integer> goMap) {
 		try {
 			int [] stat = pathCreate(goMap);
 			
@@ -1496,7 +1496,7 @@ private class AllDialog extends JDialog {
 			Vector <String> lines = new Vector <String> ();
 			
 			String line = "";
-			for (int i=1; i<=maxLevel; i++) line += "Level" + i + Globalx.CSV_DELIM;
+			for (int i=1; i<=maxLevel; i++) line += "Level" + i + FileC.TSV_DELIM;
 			lines.add(line);
 			
 			for (int [] row : prtPaths) { 
@@ -1532,14 +1532,18 @@ private class AllDialog extends JDialog {
 				go_allPaths(mDB, gonum);	
 			}
 			stat[0] = allPaths.size(); // ancestors and children
+			Out.r("All Paths " + allPaths.size());
 			
 			if (nType==LONGEST_PATHS) {
 				go_MergeAllPaths();
 				stat[1] = allPaths.size();
+				
+				Out.r("Merged Paths " + allPaths.size());
 			}
 			
 			go_allGOs(mDB); 					// allGOs<GOterm> - add desc and levels
 			
+			Out.r("Add levels ");
 			for (int gonum : goMap) {
 				if (allGOs.containsKey(gonum)) {
 					GOterm gt = allGOs.get(gonum);
@@ -1548,8 +1552,10 @@ private class AllDialog extends JDialog {
 			}
 			mDB.close();
 		
+			Out.r("Sort ");
 			pathSort();
 			
+			Out.r("Create output ");
 			return stat;
 		} 
 		catch(Exception e) {ErrorReport.prtReport(e, "Create Paths");}

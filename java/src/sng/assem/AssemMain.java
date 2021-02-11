@@ -27,6 +27,7 @@ import sng.database.Version;
 import util.database.DBConn;
 import util.database.Globalx;
 import util.database.HostsCfg;
+import util.file.FileHelpers;
 import util.methods.*;
 
 // The breakup between constructor, main() and run() is so
@@ -155,7 +156,7 @@ public class AssemMain
 		if (mIDStr==null) Log.die("Missing SingleID in sTCW.cfg ");	
 		if (!Utils.validName(mIDStr))Log.die("Invalid SingleID " + mIDStr + ": may contain letters, numbers, underscores");	
 		
-		mLogDir = new File(mProjDir,Globalx.logDir);
+		mLogDir = new File(mProjDir,Globalx.pLOGDIR);
 		Utils.checkCreateDir(mLogDir);
 		
 		File logfile = new File(mLogDir, Globals.assmFile); 

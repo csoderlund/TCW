@@ -3,26 +3,32 @@ package cmp.compile.panels;
  * User defined file to load
  */
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import util.methods.Static;
-
 import cmp.database.Globals;
+import util.methods.Static;
+import util.file.FileC;
+import util.file.FileRead;
 
 public class MethodLoadPanel extends JPanel {
 	private static final long serialVersionUID = 2272315161653860174L;
-	private final static String xDELIM = Globals.Methods.METHODS_DELIM;
+	private final static String xDELIM = Globals.Methods.outDELIM;
+	private final static String iDELIM = Globals.Methods.inDELIM;
 
 	public MethodLoadPanel(CompilePanel parentPanel) {
 		theParentPanel = parentPanel;
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setAlignmentX(Component.LEFT_ALIGNMENT);
 		setBackground(Globals.BGCOLOR);
-		int width = Globals.Methods.WIDTH;
+		int width = 70;
 		add(Box.createVerticalStrut(20));
 	
 		// prefix
@@ -31,7 +37,7 @@ public class MethodLoadPanel extends JPanel {
 		row.add(lblPrefix);
 		row.add(Box.createHorizontalStrut(width - lblPrefix.getPreferredSize().width));
 		
-		txtPrefix = Static.createTextField("", 3);
+		txtPrefix = Static.createTextField("", 4);
 		row.add(txtPrefix);
 		
 		row.add(Box.createHorizontalStrut(5));
@@ -46,8 +52,21 @@ public class MethodLoadPanel extends JPanel {
 		row.add(lblFile);
 		row.add(Box.createHorizontalStrut(width - lblFile.getPreferredSize().width));
 		
-		txtFile = new FileSelectTextField(theParentPanel, FileSelectTextField.ORTHO);
-		row.add(txtFile);
+		txtFile = Static.createTextField("", 25);
+		row.add(txtFile);		
+		row.add(Box.createHorizontalStrut(5));
+		
+		btnFile = new JButton("...");
+		btnFile.addActionListener(new ActionListener()  {
+			public void actionPerformed(ActionEvent arg0) {
+				String projName = theParentPanel.getProjectName();
+				FileRead fc = new FileRead(projName, FileC.bDoVer, FileC.bDoPrt);
+				if (fc.run(btnFile, "User Defined File", FileC.dCMP, FileC.fANY)) { 
+					txtFile.setText(fc.getRemoveFixedPath());
+				}
+			}
+		});
+		row.add(btnFile);	
 		add(row);
 		
 		add(Box.createVerticalStrut(10));
@@ -56,7 +75,7 @@ public class MethodLoadPanel extends JPanel {
 	}
 	
 	public String getSettings() {
-		return   xDELIM + ":" + txtFile.getText() + ":" + xDELIM;
+		return   xDELIM + iDELIM + txtFile.getText() + iDELIM + xDELIM;
 	}
 	
 	public void setSettings(String settings) {
@@ -91,7 +110,8 @@ public class MethodLoadPanel extends JPanel {
 	private JTextField txtPrefix = null;
 	
 	private JLabel lblFile = null;
-	private FileSelectTextField txtFile = null;
+	private JTextField txtFile = null;
+	private JButton btnFile = null;
 
 	public void setLoaded(boolean bLoaded) {
 		lblPrefix.setEnabled(!bLoaded);

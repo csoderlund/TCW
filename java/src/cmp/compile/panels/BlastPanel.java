@@ -1,8 +1,8 @@
 package cmp.compile.panels;
 
 /**************************************************************
- * This defines the Blast panel for the Main window
- * It also has the action for RunBlast and executes it.
+ * This defines the Compare Sequence panel for the Main window
+ * It also has the action for RunSearch and executes it.
  * EditBlastPanel defines the Setting panel. 
  */
 import java.awt.Component;
@@ -25,7 +25,7 @@ import cmp.database.DBinfo;
 import cmp.database.Globals;
 
 import util.database.DBConn;
-import util.methods.FileHelpers;
+import util.file.FileHelpers;
 import util.methods.Static;
 import util.methods.ErrorReport;
 import util.methods.Out;
@@ -208,7 +208,6 @@ public class BlastPanel extends JPanel {
 		}
 		
 		// only hit this code if database exists so we know where there is an AAdb
-		btnBlastSettings.setEnabled(true);
 		txtCPUs.setEnabled(true);
 		DBinfo dbinfo = theCompilePanel.getDBInfo();
 		boolean bNoNT = dbinfo.nNTdb()==0;
@@ -246,7 +245,7 @@ public class BlastPanel extends JPanel {
 			if (!hasPairs) lblPairsSummary.setText("Pairs need to be added");
 			else lblPairsSummary.setText("Pairs exist in database");
 			btnAddPairs.setEnabled(!hasPairs);
-			btnBlastSettings.setEnabled(!hasPairs); 
+			// CAS316 - btnBlastSettings.setEnabled(!hasPairs); 
 			txtCPUs.setEnabled(!hasPairs);
 		}
 	}
@@ -299,7 +298,7 @@ public class BlastPanel extends JPanel {
 	{
 		String projDir = theCompilePanel.getCurProjRelDir();
 		if (!projDir.endsWith("/")) projDir += "/"; 
-		return "./" + projDir + Globals.Search.BLASTDIR;
+		return  projDir + Globals.Search.BLASTDIR;
 	}	
 	/***************************************************/
 	public void update(boolean dbExists) {
@@ -323,7 +322,7 @@ public class BlastPanel extends JPanel {
 		lblBlastSummary.setText("No project selected");
 		lblPairsSummary.setText("");
 		
-		btnBlastSettings.setEnabled(false);
+		btnBlastSettings.setEnabled(true);
 		btnRunBlast.setEnabled(false);
 		btnAddPairs.setEnabled(false);
 	}

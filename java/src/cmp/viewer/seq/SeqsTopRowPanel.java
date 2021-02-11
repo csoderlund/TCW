@@ -543,28 +543,28 @@ public class SeqsTopRowPanel extends JPanel  {
  		popup.add(new JMenuItem(new AbstractAction("Export table (" + Globalx.CSV_SUFFIX + ")") {
  			private static final long serialVersionUID = 4692812516440639008L;
  			public void actionPerformed(ActionEvent e) {
- 				new TableUtil(theViewerFrame).exportTableTab(theSeqTable.getTable(), Globals.bSEQ);
+ 				new TableUtil(theViewerFrame).exportTableTab(btnTable, theSeqTable.getTable(), Globals.bSEQ);
  			}
  		}));
  		
  		popup.add(new JMenuItem(new AbstractAction("Export AA sequences (" + Globalx.FASTA_SUFFIX + ")") {
  			private static final long serialVersionUID = 4692812516440639008L;
  			public void actionPerformed(ActionEvent e) {
- 				new TableUtil(theViewerFrame).exportSeqFa(theSeqTable.getTableSQLid(), FieldData.AASEQ_SQL, false);
+ 				new TableUtil(theViewerFrame).exportSeqFa(btnTable,theSeqTable.getTableSQLid(), FieldData.AASEQ_SQL, false);
  			}
  		}));
  		if (hasNTdbOnly) {
 	 		popup.add(new JMenuItem(new AbstractAction("Export CDS sequences (" + Globalx.FASTA_SUFFIX + ")") {
 	 			private static final long serialVersionUID = 4692812516440639008L;
 	 			public void actionPerformed(ActionEvent e) {
-	 				new TableUtil(theViewerFrame).exportSeqFa(theSeqTable.getTableSQLid(), FieldData.NTSEQ_SQL, true);
+	 				new TableUtil(theViewerFrame).exportSeqFa(btnTable,theSeqTable.getTableSQLid(), FieldData.NTSEQ_SQL, true);
 	 			}
 	 		}));
  		
 	 		popup.add(new JMenuItem(new AbstractAction("Export NT sequences (" + Globalx.FASTA_SUFFIX + ")") {
 	 			private static final long serialVersionUID = 4692812516440639008L;
 	 			public void actionPerformed(ActionEvent e) {
-	 				new TableUtil(theViewerFrame).exportSeqFa(theSeqTable.getTableSQLid(), FieldData.NTSEQ_SQL, false);
+	 				new TableUtil(theViewerFrame).exportSeqFa(btnTable,theSeqTable.getTableSQLid(), FieldData.NTSEQ_SQL, false);
 	 			}
 	 		}));
  		}
@@ -574,7 +574,7 @@ public class SeqsTopRowPanel extends JPanel  {
 	 		popup.add(new JMenuItem(new AbstractAction("Export all GOs (" + Globalx.CSV_SUFFIX + ")...") {
 	 			private static final long serialVersionUID = 4692812516440639008L;
 	 			public void actionPerformed(ActionEvent e) {
-	 				new TableUtil(theViewerFrame).exportSeqGO(theSeqTable.getTableData(), strSummary);
+	 				new TableUtil(theViewerFrame).exportSeqGO(btnTable,theSeqTable.getTableData(), strSummary);
 	 			}
 	 		}));
  		}

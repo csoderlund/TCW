@@ -22,9 +22,9 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 
 import util.database.DBConn;
+import util.file.FileHelpers;
 import util.methods.ErrorReport;
 import util.methods.Static;
-import util.methods.FileHelpers;
 import util.methods.Out;
 import util.ui.ButtonComboBox;
 import util.ui.UIHelpers;

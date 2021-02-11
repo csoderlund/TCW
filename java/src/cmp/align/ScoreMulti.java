@@ -17,8 +17,8 @@ import cmp.database.Globals;
 import cmp.viewer.MTCWMain;
 
 import util.database.Globalx;
+import util.file.FileHelpers;
 import util.methods.ErrorReport;
-import util.methods.FileHelpers;
 import util.methods.Out;
 import util.methods.RunCmd;
 import util.methods.Static;

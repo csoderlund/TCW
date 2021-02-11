@@ -17,9 +17,9 @@ import java.util.Vector;
 import javax.swing.JFrame;
 
 import util.database.Globalx;
+import util.file.FileOrPop;
 import util.methods.ErrorReport;
 import util.methods.Out;
-import util.ui.UserPrompt;
 import cmp.align.*;
 import cmp.database.Globals;
 
@@ -186,9 +186,9 @@ public class MultiAlignPanel extends BaseAlignPanel {
 		if (isDNA) line2="Nucleotide - no scores";
 		
 	// popup
-		UserPrompt pObj = new UserPrompt(theMainFrame, "MSA_Col_Scores");
+		FileOrPop pObj = new FileOrPop(theMainFrame, "MSA_Col_Scores");
 		pObj.setVisible(true);
-		String dir = System.getProperty("user.dir")+ "/" + Globalx.ALIGNDIR;
+		String dir = System.getProperty("user.dir")+ "/" + Globalx.rALIGNDIR;
 		String fileName = title.replace(" ","_"); // no ':' allowed either
 		if (!pObj.getAction(dir, fileName)) return;
 			

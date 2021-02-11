@@ -14,12 +14,14 @@ import cmp.compile.panels.MethodPanel;
 import cmp.compile.panels.RunCmd;
 import cmp.database.Globals;
 import util.database.DBConn;
+import util.file.FileHelpers;
 import util.methods.ErrorReport;
 import util.methods.TCWprops;
-import util.methods.FileHelpers;
 import util.methods.Out;
+import util.methods.Static;
 
 public class MethodOrthoMCL {
+	private final static String iDELIM = Globals.Methods.inDELIM;
 	 String groupFile = "orthoMCL";  			// name of orthoMCL final output, usually orthoMCL
 	
 	 public boolean run(int idx, DBConn db, CompilePanel panel) {
@@ -221,10 +223,13 @@ public class MethodOrthoMCL {
 	}
 	private boolean setParams(int idx, DBConn db, CompilePanel panel) {
 		MethodPanel theMethod = panel.getMethodPanel();
-		String [] settings = theMethod.getSettingsAt(idx).split(":");
+		String [] settings = theMethod.getSettingsAt(idx).split(iDELIM);
 
 		prefix = theMethod.getMethodPrefixAt(idx);		// Groups should be prefixed with this
-		inflation = settings[1];					// mcl parameter
+		
+		if (settings.length<2) 	inflation = Globals.Methods.OrthoMCL.INFLATION;
+		else 					inflation = settings[1];					// mcl parameter
+		
 		cmpDBC = db;
 		cmpPanel = panel;
 		blastFile = cmpPanel.getBlastPanel().getBlastFileForMethods(0);

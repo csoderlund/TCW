@@ -13,8 +13,8 @@ import javax.swing.JPanel;
 
 import util.database.DBConn;
 import util.database.Globalx;
+import util.file.FileHelpers;
 import util.methods.ErrorReport;
-import util.methods.FileHelpers;
 import util.methods.Out;
 import util.methods.Static;
 import util.ui.UserPrompt;

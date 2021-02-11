@@ -15,7 +15,8 @@ import util.methods.Static;
 
 public class MethodHitPanel  extends JPanel {
 	private static final long serialVersionUID = 1L;
-	private final static String xDELIM = Globals.Methods.METHODS_DELIM;
+	private final static String xDELIM = Globals.Methods.outDELIM;
+	private final static String iDELIM = Globals.Methods.inDELIM;
 	private String [] hitTypes = {"HitID", "Description"}; 
 	
 	public MethodHitPanel(CompilePanel parentPanel) {
@@ -31,7 +32,7 @@ public class MethodHitPanel  extends JPanel {
 		row.add(lblPrefix);
 		row.add(Box.createHorizontalStrut(width - lblPrefix.getPreferredSize().width));
 		
-		txtPrefix = Static.createTextField("", 3);
+		txtPrefix = Static.createTextField("", 4);
 		row.add(txtPrefix);
 		row.add(Box.createHorizontalStrut(5));
 		
@@ -132,19 +133,19 @@ public class MethodHitPanel  extends JPanel {
 	public String getComment() {  
 		int sim = Static.getInteger(txtSimCutoff.getText());
 		int cov = Static.getInteger(txtCovCutoff.getText());
-		String yn = (hitButton.isSelected()) ? "; Hits" : "";
+		String yn = (hitButton.isSelected()) ? "; All" : "; Any";
 		
 		String com = "Sim " + sim + "; Cov " + cov + yn ; 
 		int x = (descButton.isSelected()) ? 1 : 0;
 		return  com + "; " + hitTypes[x];
 	}
 	public String getSettings() {
-		int x = (descButton.isSelected()) ? 1 : 0;
+		int isDesc = (descButton.isSelected()) ? 1 : 0;
 		int sim = Static.getInteger(txtSimCutoff.getText());
 		int cov = Static.getInteger(txtCovCutoff.getText());
-		int yn = (hitButton.isSelected()) ? 0 : 1;
+		int isAll = (hitButton.isSelected()) ? 0 : 1;
 		
-		return  xDELIM + ":" + x + ":" + cov + ":" + sim + ":" + yn + ":" + xDELIM ;
+		return  xDELIM + iDELIM + isDesc + iDELIM + cov + iDELIM + sim + iDELIM + isAll + iDELIM + xDELIM ;
 	}
 		
 	public void setSettings(String settings) {

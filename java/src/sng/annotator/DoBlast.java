@@ -7,9 +7,11 @@ import java.util.ArrayList;
 import sng.database.Globals;
 import sng.dataholders.BlastHitData;
 import util.database.Globalx;
+import util.file.FileC;
+import util.file.FileHelpers;
+import util.file.FileVerify;
 import util.methods.BlastRun;
 import util.methods.ErrorReport;
-import util.methods.FileHelpers;
 import util.methods.TimeHelpers;
 import util.methods.BlastArgs;
 import util.methods.Out;
@@ -46,11 +48,12 @@ public class DoBlast {
 	
 	
 	/*********************************************************
+	 * runSTCWMain - called first
 	 * Checks all supplied files and sets dbType, isProtein and add Blast program type to ARGs
 	 * Checks for tab blast files and ask user whether to use the existing file
 	 */
 	public boolean testFilesAndcreateOutFiles() {
-		Out.Print("\nChecking annoDB fasta");
+		Out.Print("\nChecking annoDB files");
 		
 		if (!testDatabaseTable()) return false; // check to see if the databases have been processed before
 	
@@ -60,11 +63,11 @@ public class DoBlast {
 		doDBblast = false;  
 		boolean doDBload = false;
 		
-		// check user supplied tab files and dbfile. Also sets dbType. 
+	// AnnoDB check user supplied tab files and dbfile. Also sets dbType. 
 		for (int i=0; i < dbInfo.size(); i++) {
 			if (dbInfo.get(i).doBlast) { // Blast options selected
 				if (!Globals.hasVal(dbInfo.get(i).DBfastaFile))
-					Out.die("TCW error: fasta name must exist for DB#" + i);
+					Out.die("FASTA file name must exist for DB#" + i);
 				
 				// fasta file
 				boolean found=false;
@@ -97,8 +100,7 @@ public class DoBlast {
 				boolean b = false;
 				if (testExistFile(dbInfo.get(i).tabularFile)) {
 					if (testTabularFile(label, dbInfo.get(i).tabularFile, i, DOPROMPT)) {
-						Out.PrtSpMsg(1, label + " Load file " + 
-								FileHelpers.removeCurrentPath(dbInfo.get(i).tabularFile));
+						Out.PrtSpMsg(1, label + " Load file " + FileHelpers.removeRootPath(dbInfo.get(i).tabularFile));
 						b = true;
 					}
 				}
@@ -118,15 +120,15 @@ public class DoBlast {
 			}
 		}
 	
-		// Similarity (tab file is named here and used in runSelfBlast, fastaFile is name again in runSelfBlast)
-		String fastaFile = FileHelpers.removeCurrentPath(allFilePrefix + seqNTFile);
+	// Similarity (tab file is named here and used in runSelfBlast, fastaFile is name again in runSelfBlast)
+		String fastaFile = FileHelpers.removeRootPath(allFilePrefix + seqNTFile);
 		if (doSelfBlastn) Out.PrtSpMsg(1, "Pairs blastn: " + fastaFile);
 		
 		if (doSelfTblastx) Out.PrtSpMsg(1, "Pairs tblastx: " + fastaFile);
 		
 		if (doSelfBlastp) {
 			fastaFile = (isAAstcw) ? allFilePrefix + seqAAFile : allFilePrefix + orfFile;
-			fastaFile = FileHelpers.removeCurrentPath(fastaFile);
+			fastaFile = FileHelpers.removeRootPath(fastaFile);
 			
 			Out.PrtSpMsg(1, "Pairs " + selfBlastpPgm + ": " + fastaFile);
 		}
@@ -213,13 +215,12 @@ public class DoBlast {
 				cntRun++;
 			}
 		}
-		if (cntUse>0) Out.PrtSpMsg(1,"Run Search: " + cntRun + "  Use existing: " + cntUse);
-		else Out.PrtSpMsg(1,"Run Search: " + cntRun);
+
 		if (cntErr>0) {
 			Out.PrtError("Failed checking tab files\n");
 			return false;
 		}
-		Out.PrtSpMsg(0,"Complete check files \n");
+		Out.PrtSpMsg(0, "Check complete:   Run Search " + cntRun + "   Use existing " + cntUse + "\n");
 		return true;
 	}
 		
@@ -245,16 +246,16 @@ public class DoBlast {
 			String msg = "At least one hit tab file exists for selected set. ";
 			String [] x = new String [4]; 
 			x[0]="u"; x[1]="p"; x[3]="e";
-			msg += "\n   Use current tab files [u], prompt on each tab file [p], exit[e]: ";
-			Out.prtToErr("");
+			msg += "\n Use current tab files [u], prompt on each tab file [p], exit[e]: ";
 			
-			String ans = runSTCWMain.promptQuestion(msg, x, 0);
+			String ans = runSTCWMain.promptQuestion(msg, x, 0); // Has its own NoPrompt, so may just return 'u'
 			if (ans.equals("e")) Out.die("User terminated");
 			if (ans.equals("u")) noPrompt=true;
-			else noPrompt=false;
-			
+			else {
+				noPrompt=false;
+				Out.prtToErr("");
+			}
 			checkForPrompt=true;
-			Out.prtToErr("");
 		}
 		
 		String msg="", msgS="Pairs";
@@ -262,7 +263,6 @@ public class DoBlast {
 		if (ix == -1) 		{msg = "Pairs blastn";}
 		else if (ix == -2)  {msg = "Pairs tblastx";}
 		else if (ix == -3)  {msg = "Pairs blastp";}
-		
 		else {
 			msg =  "DB#" + (ix+1) + " " + dbInfo.get(ix).DBfastaNoPath;
 			msgS = "DB#" + (ix+1);
@@ -275,11 +275,11 @@ public class DoBlast {
 		boolean ans=true;
 		
 		if (noPrompt) {
-			Out.PrtSpMsg(1, msgS + " load:  " + FileHelpers.removeCurrentPath(file) + "; Date: " + s);
+			Out.PrtSpMsg(1, msgS + " load:  " + FileHelpers.removeRootPath(file) + "; Date: " + s);
 		}
 		else {
 			Out.PrtSpMsg(1, msg);
-			Out.PrtSpMsg(2, "Output exists:  " + FileHelpers.removeCurrentPath(file) + "; Date: " + s);
+			Out.PrtSpMsg(2, "Output exists:  " + FileHelpers.removeRootPath(file) + "; Date: " + s);
 			ans = runSTCWMain.yesNo("Load this existing file [y] or perform new search [n] ");
 			if (ans && ix >= 0) ans = testFastaLtBlastDates(ix, true);
 		}
@@ -301,8 +301,8 @@ public class DoBlast {
 		String sf = TimeHelpers.longDate(fastaDate);
 		String sb = TimeHelpers.longDate(blastDate);
 		String msg = "Date for DBfasta file is greater than blast output file\n" +
-				"DBfasta: " + sf + " " + FileHelpers.removeCurrentPath(fasta) + "\n" +
-				"Output : " + sb + " " + FileHelpers.removeCurrentPath(blast);
+				"DBfasta: " + sf + " " + FileHelpers.removeRootPath(fasta) + "\n" +
+				"Output : " + sb + " " + FileHelpers.removeRootPath(blast);
 	
 		if (!prompt) return false;
 		
@@ -312,42 +312,14 @@ public class DoBlast {
 		return false;
 	}
 	
-    private boolean testTabularFile (String msg, String blastFile, int ix, boolean prompt) 
-	{
+    private boolean testTabularFile (String msg, String blastFile, int ix, boolean prompt) {
 		try {
-			// Get the first non-empty line
-			BufferedReader reader = FileHelpers.openGZIP(blastFile);
-			if (reader==null) return false;
-			
-			String line = reader.readLine();
-			if (line != null) {
-				line = line.trim();
-				while ( line != null 
-						&& (line.length() == 0 || line.charAt(0) == '#') )
-							line = reader.readLine().trim();
-			}
-			reader.close();
-			
-			boolean ans;
-			if ( line == null ) {
-				if (!prompt) return false;
-				ans = runSTCWMain.yesNo(msg + " file " + blastFile + " is empty.  Continue anyway?");
-				if (ans) return true;
-				else return false;
-			}
-
-	    	String[] tokens = line.split("\t");
-	    	if (tokens == null || tokens.length < 11) {
-				if (prompt) {
-					ans = runSTCWMain.yesNo(" file " + blastFile + " is not -m 8 format. Continue anyway?");
-					if (ans) return true;
-				}
-				return false;
-	    	}
-			
 			if (ix == -1) return true; // not selfblast file
 			
-			// see if type is UniProt	
+			if (!verObj.verify(FileC.bNoPrt, blastFile, FileC.fTAB)) return false; // CAS316 use FileVerify
+			
+			String line = verObj.getLine();
+			
 			LineParser lp = new LineParser();
 			if (!lp.parseLine(line)) {
 				Out.PrtError("Cannot parse hit file: " + blastFile + "\n   Line:" + line);
@@ -357,8 +329,7 @@ public class DoBlast {
 			
 			if (!dbInfo.get(ix).dbType.equals("")) {// already added by testDBfile
 				if (!dbInfo.get(ix).dbType.equals(type)) {
-					if (prompt) 
-						Out.PrtError("DB and hit file are different types:" +
+					if (prompt) Out.PrtError("DB and hit file are different types:" +
 								"\n   " + type + ":" + blastFile + 
 								"\n   "	+ dbInfo.get(ix).dbType + ":" + dbInfo.get(ix).DBfastaFile);
 					return false;
@@ -370,7 +341,7 @@ public class DoBlast {
 			return true;
 		} 
 		catch ( Exception err ) {
-			ErrorReport.reportError(err, "Annotator - loading  Blast file");
+			ErrorReport.reportError(err, "Annotator - loading Hit Tab file");
 			return false;
 		} 
 	}
@@ -378,56 +349,31 @@ public class DoBlast {
 	public boolean testDBfastaFileAndSetSearchPgm (int ix) {
 		boolean dosearch =	  	dbInfo.get(ix).doBlast;
 		String fileName = 		dbInfo.get(ix).DBfastaFile;
-		String prtFileName = FileHelpers.removeCurrentPath(fileName);
+		String prtFileName = FileHelpers.removeRootPath(fileName);
 		boolean isZIP = (fileName.endsWith(".gz")) ? true : false;
 		
 		try {
-		// First line - parse 
-			BufferedReader reader = FileHelpers.openGZIP(fileName);
-			if (reader==null) return false;
+		// verify file and type
+			if (!verObj.verify(FileC.bNoPrt, fileName, FileC.fFASTA)) return false;
 			
-			String line1 = reader.readLine();
+			String line1 = verObj.getLine();
+			boolean isAA = verObj.isProtein();
+			
 			LineParser lp = new LineParser ();
-			
-			if (line1 != null) {
-				line1 = line1.trim();
-				while ( line1 != null && (line1.length() == 0 || line1.charAt(0) == '#') )
-					line1 = reader.readLine().trim();
-			}
-			if ( line1 == null ) { // must come after checking for a file of empty lines
-				Out.PrtErr(prtFileName + ": the file " + prtFileName + " is empty." );
-				reader.close();
-				return false;
-			}	
-			if (!line1.startsWith(">")) {
-				Out.PrtErr(prtFileName + ": fasta files should have '>' in column 0 of first non-blank line. ");
-				reader.close();
-				return false;
-			}
 			if (! lp.parseLine(line1)) {
 				Out.PrtErr(prtFileName + ": cannot parse DBfasta file\n   Line:" + line1);
 				return false;
 			}
 				
-		// second line - is NT or AA
-			String line2 = reader.readLine().trim();
-			reader.close();
-			if (line2 == null) {
-				Out.PrtErr( "The file " + prtFileName + " is incorrect." );
-				reader.close();
-				return false;
-			}
 			String dbtype =  lp.getDBtype();
 			String linetype = "pr";
 			if (!dbtype.equals("sp") && !dbtype.equals("tr")) {
-				if (BlastArgs.isNucleotide(line2)) linetype="nt"; 
+				if (!isAA) linetype="nt"; 
 			}
 			if (dbtype.equals("")) dbtype=linetype;
 			
-			boolean isAAstcw=sqlObj.isAAtcw();
-			String action="";
-			
 		// determine action
+			String action="";
 			if (dbtype.equals("sp") || dbtype.equals("tr") || linetype.equals("pr")) {
 				dbInfo.get(ix).isAAdb = true;
 				if (isAAstcw) 	action = "blastp"; // AA-AA
@@ -509,7 +455,7 @@ public class DoBlast {
 						paths.get(i).equals(dbInfo.get(j).DBfastaFile)) 
 					{
 						String str = "DB#" + dbInfo.get(j).dbNum + " The database " + 
-								FileHelpers.removeCurrentPath(paths.get(i)) + 
+								FileHelpers.removeRootPath(paths.get(i)) + 
 							"\n      has been processed previously. Continue?";
 						boolean ans = runSTCWMain.yesNo(str);
 						if (ans==false) return false;
@@ -610,7 +556,7 @@ public class DoBlast {
 	private boolean runDBblast(int ix)
 	{
 		if (!BlastArgs.searchPgmExists()) {
-			System.err.println("Error: No blast program detected or identified in HOSTS.cfg");
+			Out.PrtErr("No search program detected or identified in HOSTS.cfg");
 			return false;
 		}
 		// creates file of sequences on the first call to this
@@ -658,7 +604,7 @@ public class DoBlast {
 			orfFilePath = allFilePrefix + orfFile;
 			if (FileHelpers.fileExists(orfFilePath)) return true;
 			
-			Out.PrtSpMsg(3, "Create translated ORF file: " + FileHelpers.removeCurrentPath(orfFilePath));
+			Out.PrtSpMsg(3, "Create translated ORF file: " + FileHelpers.removeRootPath(orfFilePath));
 			
 			cnt = sqlObj.writeOrfFile(new File(orfFilePath)); 
 		}
@@ -666,7 +612,7 @@ public class DoBlast {
 			seqFilePath = (sqlObj.isAAtcw()) ? allFilePrefix + seqAAFile : allFilePrefix + seqNTFile;
 			if (FileHelpers.fileExists(seqFilePath)) return true;
 			
-			Out.PrtSpMsg(3, "Create sequence file: " + FileHelpers.removeCurrentPath(seqFilePath));
+			Out.PrtSpMsg(3, "Create sequence file: " + FileHelpers.removeRootPath(seqFilePath));
 		
 			cnt = sqlObj.writeSeqFile(new File(seqFilePath)); 
 		}
@@ -814,30 +760,6 @@ public class DoBlast {
 		DB d = new DB(ix, blast, fasta, args, taxo, dbdate, pgm);
 		dbInfo.add(d);
 	}
-	private CoreDB sqlObj = null;
-	private boolean isAAstcw = false;
-	
-	private String allFilePrefix = null; // hitResults/<dbID> - check for complete blasts
-	private String seqBlastDir = null;
-	private String seqFilePath = null;	
-	private String orfFilePath = null;
-	
-	public boolean doSelfBlastn = false, bExecBlastn = false;
-    private String selfBlastnFile = null;
-    private String selfBlastnArgs = null;
-	
-	public boolean doSelfTblastx = false, bExecTblastx = false;
-	private String selfTblastxFile = null; // blast output file
-	private String selfTblastxArgs = null;
-	
-	public boolean doSelfBlastp = false, bExecBlastp = false;
-	private String selfBlastpFile = null; // blast output file
-	private String selfBlastpArgs = null;
-	private String selfBlastpPgm = null;
-			
-	private boolean doDBblast = false;
-	private ArrayList<DB> dbInfo = new ArrayList<DB>();
-	
 	private class DB {
 		DB (int ix, String blast, String fasta, String args,  String taxo,  
 				String dbdate,  String pgm) {
@@ -868,4 +790,24 @@ public class DoBlast {
 		
 		long fileSize=0;
 	}
+	private CoreDB sqlObj = null;
+	private boolean isAAstcw = false;
+	
+	private String allFilePrefix = null; // hitResults/<dbID> - check for complete blasts
+	private String seqBlastDir = null, seqFilePath = null, orfFilePath = null;
+	
+	public boolean doSelfBlastn = false, bExecBlastn = false;
+    private String selfBlastnFile = null, selfBlastnArgs = null;
+	
+	public boolean doSelfTblastx = false, bExecTblastx = false;
+	private String selfTblastxArgs = null, selfTblastxFile = null; // blast output file
+	
+	public boolean doSelfBlastp = false, bExecBlastp = false;
+	private String selfBlastpFile = null; // blast output file
+	private String selfBlastpArgs = null, selfBlastpPgm = null;
+			
+	private boolean doDBblast = false;
+	private ArrayList<DB> dbInfo = new ArrayList<DB>();
+	
+	private FileVerify verObj = new FileVerify();
 }

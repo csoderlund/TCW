@@ -12,9 +12,9 @@ import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 
 import util.database.HostsCfg;
+import util.file.FileHelpers;
 import util.database.Globalx;
 import util.methods.ErrorReport;
-import util.methods.FileHelpers;
 import util.methods.Out;
 import util.methods.TCWprops;
 import util.ui.UIHelpers;

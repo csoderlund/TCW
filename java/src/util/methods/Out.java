@@ -11,6 +11,7 @@ import java.util.Vector;
 
 import util.align.AAStatistics;
 import util.database.Globalx;
+import util.file.FileHelpers;
 
 public class Out {
 	static boolean debug=true;
@@ -33,7 +34,7 @@ public class Out {
 			System.err.println("TCW error: previous log file not closed");
 			logFileObj.close();
 		}
-		String dir = Globalx.logDir;
+		String dir = Globalx.pLOGDIR;
 		String logPath = path +  "/" + dir;
 
 		// Make sure log directory exists
@@ -49,7 +50,7 @@ public class Out {
 	    	
 		// Create log file
 		logFileAbsName = logPath + "/" + file;
-		logFileRelName = FileHelpers.removeCurrentPath(logFileAbsName);
+		logFileRelName = FileHelpers.removeRootPath(logFileAbsName);
 		File logFile = new File (logFileAbsName);
 		long fileSize = logFile.length();
 		
@@ -790,32 +791,10 @@ public class Out {
 	
 	// if projcmp is prefix and /usr/tcw/projcmp/ex is path, return /projcmp/ex
 	static public String mkPathRelative(String prefix, String filePath) {
-	
-		if (filePath.contains(prefix))
-		{
+		if (filePath.contains(prefix)) {
 			int index = filePath.indexOf(prefix);
 			return filePath.substring(index);
 		}
 		else return filePath;
-	}
-	static public String getProjectDir() {
-		try {
-			String projDir = Globalx.PROJDIR + "/";
-			String s = Globalx.PROJDIR + "/";
-			File f = new File(s);
-			if (f.exists()) {
-				return new File(".").getCanonicalPath();
-			}
-			s = "../" + projDir;
-			f = new File(s);
-			if (f.exists()) {
-				return new File("../").getCanonicalPath();
-			}
-			Out.PrtError("Cannot find project directory " + projDir);
-			return null;
-		}
-		catch (Exception e) {
-			return null;
-		}
 	}
 }

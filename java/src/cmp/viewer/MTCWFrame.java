@@ -46,9 +46,9 @@ import cmp.viewer.table.FieldData;
 
 import util.database.DBConn;
 import util.database.HostsCfg;
+import util.file.FileHelpers;
 import cmp.database.Version;
 import util.methods.ErrorReport;
-import util.methods.FileHelpers;
 import util.methods.Out;
 import util.methods.Static;
 import util.methods.TCWprops;

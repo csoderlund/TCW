@@ -1,8 +1,5 @@
 package sng.amanager;
 
-/***
- * Sequence Dataset Add/Edit 
- */
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -18,16 +15,21 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.event.CaretEvent;
-import javax.swing.event.CaretListener;
 
 import sng.database.Globals;
 import util.database.Globalx;
+import util.file.FileC;
+import util.file.FileRead;
 import util.ui.UserPrompt;
+
+/***
+ * Sequence Dataset Add/Edit 
+ * CAS316 change from FileTextField to FileChooser
+ */
 
 public class EditTransLibPanel extends JPanel {
 	private static final long serialVersionUID = -2386563315902142612L;
-	private final String LIBDIR = Globalx.PROJDIR + "/";
+	private final String PROJDIR = Globalx.PROJDIR + "/";
 	
 	public static final String [] TRANS_LIB_SYMBOLS = { "SeqID", "Sequence File", 
 		 "Count File", "Quality File", "   5' suffix", "   3' suffix"};
@@ -41,7 +43,7 @@ public class EditTransLibPanel extends JPanel {
 	private static final int TEXTFIELD_WIDTH = 30;
 
 	public EditTransLibPanel(ManagerFrame parentFrame) {
-		theParentFrame = parentFrame;
+		theManFrame = parentFrame;
 		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		createTransReadPanel();
@@ -54,47 +56,134 @@ public class EditTransLibPanel extends JPanel {
 		setVisible(false);
 	}
 	public void setEditTransVisible() { 
-		theParentFrame.setFrameMode(ManagerFrame.FRAME_MODE_TRANS_LIB_EDIT);
+		theManFrame.setFrameMode(ManagerFrame.FRAME_MODE_TRANS_LIB_EDIT);
 		pnlBuildCountFile.setVisible(false);
 		pnlMainPanel.setVisible(true);
 	}
 	private void createTransReadPanel() {
 		pnlMainPanel = createPagePanel(false);
+		pnlMainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 		
+		JPanel row = createRowPanel();
 		JLabel title = new JLabel("Add or Edit a Sequence Dataset");
 		title.setFont(pnlMainPanel.getFont().deriveFont(Font.BOLD, 18));
-		JPanel row = createRowPanel();
 		row.add(Box.createHorizontalGlue());
 		row.add(title);
 		row.add(Box.createHorizontalGlue());
 		pnlMainPanel.add(row);
 		pnlMainPanel.add(Box.createVerticalStrut(20));
 		
+		row = createRowPanel();
 		lblTransLibID = new JLabel(TRANS_LIB_SYMBOLS[0]); // Trans/Read ID
 		tfTransLibID = createTextField(TEXTFIELD_WIDTH_SHORT);		
-
+		row.add(lblTransLibID);
+		if (lblTransLibID.getPreferredSize().width < COLUMN_LABEL_WIDTH)
+			row.add(Box.createHorizontalStrut(COLUMN_LABEL_WIDTH - lblTransLibID.getPreferredSize().width));
+		row.add(tfTransLibID);
+		row.add(Box.createHorizontalStrut(10));
+		row.add(new JLabel("- Required  (Less than 8 characters, no spaces)"));
+		pnlMainPanel.add(row);
+		pnlMainPanel.add(Box.createVerticalStrut(10));
+		
+		row = createRowPanel();
 		lblSeqFile = new JLabel(TRANS_LIB_SYMBOLS[1]); // Sequence file
-		tfSeqFile = new FileTextField(theParentFrame, FileTextField.LIB, FileTextField.FASTA);
-		tfSeqFile.addCaretListener(new CaretListener() {
-			public void caretUpdate(CaretEvent arg0) {
-				String title = tfAttr[0].getText();
-				if (title==null || title.equals("")) {
-					title = tfSeqFile.getText();
-					if (!title.equals("")) { // CAS304
-						title = title.substring(title.lastIndexOf("/")+1);
-						title = title.substring(0, title.indexOf("."));
-						tfAttr[0].setText(title);
+		tfSeqFile = createTextField(TEXTFIELD_WIDTH);
+		row.add(tfSeqFile);
+		row.add(Box.createHorizontalStrut(1));
+		btnSeqFile = new JButton("...");
+		btnSeqFile.addActionListener(new ActionListener()  {
+			public void actionPerformed(ActionEvent arg0) {
+				FileRead fc = new FileRead(projDirName, FileC.bDoVer, FileC.bDoPrt);
+				if (fc.run(btnSeqFile, "Seq File", FileC.dPROJ, FileC.fFASTA)) { // CAS316 was in-file choooser
+					tfSeqFile.setText(fc.getRemoveFixedPath());
+					
+					String title = tfAttr[0].getText();
+					if (title==null || title.equals("")) {
+						title = tfSeqFile.getText();
+						if (!title.equals("")) { // CAS304
+							title = title.substring(title.lastIndexOf("/")+1);
+							title = title.substring(0, title.indexOf("."));
+							tfAttr[0].setText(title);
+						}
 					}
 				}
 			}
 		});
-
-		lblCountFile = new JLabel(TRANS_LIB_SYMBOLS[2]); 
-		tfCountFile = new FileTextField(theParentFrame, FileTextField.LIB, FileTextField.COUNT);
-
-		lblQualFile = new JLabel(TRANS_LIB_SYMBOLS[3]); 
-		tfQualFile = new FileTextField(theParentFrame, FileTextField.LIB, FileTextField.QUAL);
+		row.add(lblSeqFile);
+		if(lblSeqFile.getPreferredSize().width < COLUMN_LABEL_WIDTH)
+			row.add(Box.createHorizontalStrut(COLUMN_LABEL_WIDTH - lblSeqFile.getPreferredSize().width));
+		row.add(tfSeqFile);  row.add(Box.createHorizontalStrut(1));
+		row.add(btnSeqFile); row.add(Box.createHorizontalStrut(10));
+		row.add(new JLabel("- Required"));
+		pnlMainPanel.add(row);
+		pnlMainPanel.add(Box.createVerticalStrut(20));
 		
+		row = createRowPanel();
+		lblCountFile = new JLabel(TRANS_LIB_SYMBOLS[2]); 	// Count file
+		tfCountFile = createTextField(TEXTFIELD_WIDTH);
+		btnCountFile = new JButton("...");
+		btnCountFile.addActionListener(new ActionListener()  {
+			public void actionPerformed(ActionEvent arg0) {
+				FileRead fc = new FileRead(projDirName, FileC.bDoVer, FileC.bDoPrt);
+				if (fc.run(btnCountFile, "Count File", FileC.dPROJ, FileC.fTXT)) { 
+					tfCountFile.setText(fc.getRemoveFixedPath());
+				}
+			}
+		});
+		row.add(lblCountFile);
+		if(lblCountFile.getPreferredSize().width < COLUMN_LABEL_WIDTH)
+			row.add(Box.createHorizontalStrut(COLUMN_LABEL_WIDTH - lblCountFile.getPreferredSize().width));
+		row.add(tfCountFile);row.add(Box.createHorizontalStrut(1));
+		row.add(btnCountFile); 
+		pnlMainPanel.add(row);
+		pnlMainPanel.add(Box.createVerticalStrut(5));
+		
+		row = createRowPanel();
+		btnGenCountFile = new JButton("Build from multiple count files");
+		btnGenCountFile.setBackground(Globalx.MENUCOLOR);
+		btnGenCountFile.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if(tfSeqFile.getText().length() > 0) {
+					theManFrame.setFrameMode(ManagerFrame.FRAME_MODE_BUILD_REPS);
+					String file = tfSeqFile.getText();
+					if (!file.contains("/")) 
+						file = PROJDIR + theManFrame.getProjDir() +"/"+file;
+					pnlBuildCountFile.setSeqFile(file);
+					pnlMainPanel.setVisible(false);
+					pnlBuildCountFile.setVisible(true); // see GenerateFileSelector in this file 
+				}
+				else
+					JOptionPane.showMessageDialog(theManFrame, "Please enter Sequence File first", 
+							"Build count file", JOptionPane.PLAIN_MESSAGE);
+			}
+		});
+		row.add(Box.createHorizontalStrut(COLUMN_LABEL_WIDTH));
+		row.add(new JLabel("or")); row.add(Box.createHorizontalStrut(5));
+		row.add(btnGenCountFile);
+		pnlMainPanel.add(row);
+		pnlMainPanel.add(Box.createVerticalStrut(20));
+
+		row = createRowPanel();
+		lblQualFile = new JLabel(TRANS_LIB_SYMBOLS[3]); 	// Qual file
+		tfQualFile = createTextField(TEXTFIELD_WIDTH);
+		btnQualFile = new JButton("...");
+		btnQualFile.addActionListener(new ActionListener()  {
+			public void actionPerformed(ActionEvent arg0) {
+				FileRead fc = new FileRead(projDirName, FileC.bDoVer, FileC.bDoPrt);
+				if (fc.run(btnCountFile, "Qual File", FileC.dPROJ, FileC.fQUAL)) { 
+					tfQualFile.setText(fc.getRemoveFixedPath());
+				}
+			}
+		});
+		row.add(lblQualFile);
+		if(lblQualFile.getPreferredSize().width < COLUMN_LABEL_WIDTH)
+			row.add(Box.createHorizontalStrut(COLUMN_LABEL_WIDTH - lblQualFile.getPreferredSize().width));
+		row.add(tfQualFile);row.add(Box.createHorizontalStrut(1));
+		row.add(btnQualFile); 
+		pnlMainPanel.add(row);
+		pnlMainPanel.add(Box.createVerticalStrut(10));
+		
+		row = createRowPanel();					// 5' 3'
 		lbl5pSuffix = new JLabel(TRANS_LIB_SYMBOLS[4]);
 		tf5pSuffix = createTextField(4);
 		
@@ -108,71 +197,6 @@ public class EditTransLibPanel extends JPanel {
 			lblAttr[x] = new JLabel(ATTRIBUTE_SYMBOLS[x]);
 			tfAttr[x] = createTextField(TEXTFIELD_WIDTH);
 		}
-		
-		btnGenCountFile = new JButton("Build from multiple count files");
-		btnGenCountFile.setBackground(Globalx.MENUCOLOR);
-		btnGenCountFile.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				if(tfSeqFile.getText().length() > 0) {
-					theParentFrame.setFrameMode(ManagerFrame.FRAME_MODE_BUILD_REPS);
-					String file = tfSeqFile.getText();
-					if (!file.contains("/")) 
-						file = LIBDIR + theParentFrame.getProjectName() +"/"+file;
-					pnlBuildCountFile.setSeqFile(file);
-					pnlMainPanel.setVisible(false);
-					pnlBuildCountFile.setVisible(true); // see GenerateFileSelector in this file 
-				}
-				else
-					JOptionPane.showMessageDialog(theParentFrame, "Please enter Sequence File first", 
-							"Build count file", JOptionPane.PLAIN_MESSAGE);
-			}
-		});
-		
-		row = createRowPanel();
-		row.add(lblTransLibID);
-		if(lblTransLibID.getPreferredSize().width < COLUMN_LABEL_WIDTH)
-			row.add(Box.createHorizontalStrut(COLUMN_LABEL_WIDTH - 
-					lblTransLibID.getPreferredSize().width));
-		row.add(tfTransLibID);
-		row.add(Box.createHorizontalStrut(10));
-		row.add(new JLabel("- Required  (Less than 8 characters, no spaces)"));
-		pnlMainPanel.add(row);
-		pnlMainPanel.add(Box.createVerticalStrut(10));
-
-		row = createRowPanel();
-		row.add(lblSeqFile);
-		if(lblSeqFile.getPreferredSize().width < COLUMN_LABEL_WIDTH)
-			row.add(Box.createHorizontalStrut(COLUMN_LABEL_WIDTH - lblSeqFile.getPreferredSize().width));
-		row.add(tfSeqFile);
-		row.add(Box.createHorizontalStrut(10));
-		row.add(new JLabel("- Required"));
-		pnlMainPanel.add(row);
-		pnlMainPanel.add(Box.createVerticalStrut(20));
-
-		row = createRowPanel();
-		row.add(lblCountFile);
-		if(lblCountFile.getPreferredSize().width < COLUMN_LABEL_WIDTH)
-			row.add(Box.createHorizontalStrut(COLUMN_LABEL_WIDTH - lblCountFile.getPreferredSize().width));
-		row.add(tfCountFile);
-		pnlMainPanel.add(row);
-		pnlMainPanel.add(Box.createVerticalStrut(5));
-		
-		row = createRowPanel();
-		row.add(Box.createHorizontalStrut(COLUMN_LABEL_WIDTH));
-		row.add(new JLabel("or")); row.add(Box.createHorizontalStrut(5));
-		row.add(btnGenCountFile);
-		pnlMainPanel.add(row);
-		pnlMainPanel.add(Box.createVerticalStrut(20));
-
-		row = createRowPanel();
-		row.add(lblQualFile);
-		if(lblQualFile.getPreferredSize().width < COLUMN_LABEL_WIDTH)
-			row.add(Box.createHorizontalStrut(COLUMN_LABEL_WIDTH - lblQualFile.getPreferredSize().width));
-		row.add(tfQualFile);
-		pnlMainPanel.add(row);
-		pnlMainPanel.add(Box.createVerticalStrut(10));
-		
-		row = createRowPanel();
 		JLabel lbl = new JLabel("Sanger ESTs ");
 		row.add(lbl);
 		if(lbl.getPreferredSize().width < COLUMN_LABEL_WIDTH)
@@ -184,9 +208,9 @@ public class EditTransLibPanel extends JPanel {
 		row.add(tf3pSuffix);  row.add(Box.createHorizontalStrut(10)); 
 		row.add(new JLabel("(Defaults .f and .r)"));
 		pnlMainPanel.add(row);
+		pnlMainPanel.add(Box.createVerticalStrut(25));
 		
-		pnlMainPanel.add(Box.createVerticalStrut(20));
-		
+	// Attributes
 		pnlMainPanel.add(new JLabel("ATTRIBUTES:"));
 		pnlMainPanel.add(Box.createVerticalStrut(10));
 		
@@ -201,9 +225,8 @@ public class EditTransLibPanel extends JPanel {
 			if(x< (lblAttr.length - 1))
 				pnlMainPanel.add(Box.createVerticalStrut(10));
 		}
-		
-		pnlMainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
+	// Row of buttons
 		btnKeep = new JButton("Keep");
 		btnKeep.setBackground(Globalx.BGCOLOR);
 		btnKeep.addActionListener(new ActionListener() {
@@ -216,13 +239,13 @@ public class EditTransLibPanel extends JPanel {
 					return;
 				}
 				
-				if(updateKeepThisUI()) {
-					theParentFrame.tcwDBupdateLibAttributes(0);
+				if(keep()) {
+					theManFrame.tcwDBupdateLibAttributes(0);
 					setVisible(false);
-					theParentFrame.setMainPanelVisible(true);
-					theParentFrame.updateUI();
-					theParentFrame.saveProject();
-					theParentFrame.setFrameMode(ManagerFrame.FRAME_MODE_MAIN);
+					theManFrame.setMainPanelVisible(true);
+					theManFrame.updateUI();
+					theManFrame.saveProject();
+					theManFrame.setFrameMode(ManagerFrame.FRAME_MODE_MAIN);
 				}				
 			}
 		});
@@ -230,29 +253,27 @@ public class EditTransLibPanel extends JPanel {
 		btnDiscard.setBackground(Globalx.BGCOLOR);
 		btnDiscard.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(theParentFrame.isAddTransLib()) {
-					theParentFrame.clearCurrentTransLib();
-					theParentFrame.updateUI();
+				if(theManFrame.isAddTransLib()) {
+					theManFrame.clearCurrentTransLib();
+					theManFrame.updateUI();
 				}
 				setVisible(false); 
-				theParentFrame.setMainPanelVisible(true);				
-				theParentFrame.setFrameMode(ManagerFrame.FRAME_MODE_MAIN);
+				theManFrame.setMainPanelVisible(true);				
+				theManFrame.setFrameMode(ManagerFrame.FRAME_MODE_MAIN);
 			}
 		});
 		btnHelp = new JButton("Help");
 		btnHelp.setBackground(Globalx.HELPCOLOR);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(theParentFrame, "Sequence Dataset Help", "html/runSingleTCW/EditTransLibPanel.html");
+				UserPrompt.displayHTMLResourceHelp(theManFrame, "Sequence Dataset Help", "html/runSingleTCW/EditTransLibPanel.html");
 			}
 		});
 
 		JPanel buttonRow = createRowPanel();
 		buttonRow.setAlignmentX(Component.CENTER_ALIGNMENT);
-		buttonRow.add(btnKeep);
-		buttonRow.add(Box.createHorizontalStrut(15));
-		buttonRow.add(btnDiscard);
-		buttonRow.add(Box.createHorizontalStrut(15));
+		buttonRow.add(btnKeep);		buttonRow.add(Box.createHorizontalStrut(15));
+		buttonRow.add(btnDiscard);	buttonRow.add(Box.createHorizontalStrut(15));
 		buttonRow.add(btnHelp);
 		buttonRow.setMaximumSize(buttonRow.getPreferredSize());
 		buttonRow.setMinimumSize(buttonRow.getPreferredSize());
@@ -279,7 +300,10 @@ public class EditTransLibPanel extends JPanel {
 	public void updateTransLibEditUI(int index, boolean dbExists, boolean bAdd) {
 		nCurTransLibIndex = index;
 		bAddTransLib = bAdd;
-		ManagerData curManData = theParentFrame.getCurManData();
+		
+		ManagerData curManData = theManFrame.getCurManData();
+		projDirName = theManFrame.getProjDir();
+		
 		ManagerData.SeqData x = curManData.getTransLibraryAt(index);
 		strOldTransLibID = x.getSeqID();
 		tfTransLibID.setText(x.getSeqID());
@@ -315,8 +339,8 @@ public class EditTransLibPanel extends JPanel {
 	/**********************************************
 	 * Keep
 	 */
-	private boolean updateKeepThisUI() {
-		ManagerData curManData = theParentFrame.getCurManData();
+	private boolean keep() {
+		ManagerData curManData = theManFrame.getCurManData();
 		String transID = tfTransLibID.getText();		
 	
 		ManagerData.SeqData x = curManData.getTransLibraryAt(nCurTransLibIndex);
@@ -331,7 +355,8 @@ public class EditTransLibPanel extends JPanel {
 		if(bAddTransLib) { 
             if(x.getCountFile().length() > 0) {
             	String outFileName = x.getCountFile();
-            	if (!outFileName.startsWith("/")) outFileName = LIBDIR + curManData.getProjectName() + "/" + x.getCountFile();
+            	if (!outFileName.startsWith("/")) 
+            		outFileName = PROJDIR + curManData.getProjDir() + "/" + x.getCountFile();
                 File temp = new File(outFileName);
             
                 String [] countLibs = curManData.readLibCountsFromFile(temp);
@@ -379,7 +404,7 @@ public class EditTransLibPanel extends JPanel {
 		return true;
 	}
 	public boolean transIDduplicate() {
-		ManagerData curManData = theParentFrame.getCurManData();
+		ManagerData curManData = theManFrame.getCurManData();
 		String transID = tfTransLibID.getText();
 
 		for(int x=0; x<curManData.getNumSeqLibs(); x++) {
@@ -425,7 +450,7 @@ public class EditTransLibPanel extends JPanel {
 	/****************************************************
 	 * private variables
 	 */
-	private ManagerFrame theParentFrame = null;
+	private ManagerFrame theManFrame = null;
 	
 	private JPanel pnlMainPanel = null;
 	
@@ -433,13 +458,16 @@ public class EditTransLibPanel extends JPanel {
 	private JTextField tfTransLibID = null;
 	
 	private JLabel lblSeqFile = null;
-	private FileTextField tfSeqFile = null;	
+	private JButton btnSeqFile = null;
+	private JTextField tfSeqFile = null;
 	
 	private JLabel lblQualFile = null;
-	private FileTextField tfQualFile = null;	
+	private JButton btnQualFile = null;	
+	private JTextField tfQualFile = null;
 	
 	private JLabel lblCountFile = null;
-	private FileTextField tfCountFile = null;
+	private JButton btnCountFile = null;
+	private JTextField tfCountFile = null;
 	
 	private JLabel lbl5pSuffix = null;
 	private JTextField tf5pSuffix = null;
@@ -452,12 +480,11 @@ public class EditTransLibPanel extends JPanel {
 	
 	private JButton btnGenCountFile = null;
 
-	private JButton btnKeep = null;
-	private JButton btnDiscard = null;
-	private JButton btnHelp = null;
+	private JButton btnKeep = null, btnDiscard = null, btnHelp = null;
 	
 	private BuildRepFilePanel pnlBuildCountFile = null;
 	private String strOldTransLibID = "";
 	private int nCurTransLibIndex = -1;
 	private boolean bAddTransLib=false;
+	private String projDirName=null;
 }

@@ -46,7 +46,7 @@ public class RunCmd {
 			final String MAXMEM = MAX_MEM;
 			
 			final String classPath = JAR + ":" + JAR_DIR + "/mysql-connector-java-5.0.5-bin.jar";
-			final String cmd = "java -Xmx" + MAXMEM + "m -cp " + classPath + " sng.assem.LoadLibMain " + curManData.getProjectName();
+			final String cmd = "java -Xmx" + MAXMEM + "m -cp " + classPath + " sng.assem.LoadLibMain " + curManData.getProjDir();
 
 			Process pr = Runtime.getRuntime().exec(cmd);
 			
@@ -129,7 +129,7 @@ public class RunCmd {
 			final String JAR = JAR_DIR + "/stcw.jar";
 			
 			final String classPath = JAR;
-			final String cmd = "java -Xmx" + maxMem + "m -cp " + classPath + " sng.assem.AssemMain " + curManData.getProjectName();
+			final String cmd = "java -Xmx" + maxMem + "m -cp " + classPath + " sng.assem.AssemMain " + curManData.getProjDir();
 
 			Process pr = Runtime.getRuntime().exec(cmd);
 			pr.getOutputStream().flush();
@@ -170,9 +170,9 @@ public class RunCmd {
 			final String classPath = "java/jars/stcw.jar";
 			final String MAXMEM = MAX_MEM;
 			final String cmd = "java -Xmx" + MAXMEM + "m -cp " + classPath + 
-					" sng.annotator.runSTCWMain " + curManData.getProjectName();
+					" sng.annotator.runSTCWMain " + curManData.getProjDir();
 			final String cmdn = "java -Xmx" + MAXMEM + "m -cp " + classPath + 
-					" sng.annotator.runSTCWMain " + curManData.getProjectName() + " -n";
+					" sng.annotator.runSTCWMain " + curManData.getProjDir() + " -n";
 			Process pr;
 			
 			if (prompt) pr = Runtime.getRuntime().exec(cmd);
@@ -209,7 +209,7 @@ public class RunCmd {
 			final String MAXMEM = MAX_MEM;
 			final String classPath = JAR;
 			final String cmd = "java -Xmx" + MAXMEM + "m -cp " + classPath + " sng.annotator.runSTCWMain " + 
-					curManData.getProjectName() + " " + opt;
+					curManData.getProjDir() + " " + opt;
 			Process pr = Runtime.getRuntime().exec(cmd);
 			pr.getOutputStream().flush();
 			OutputHandler oh = new OutputHandler(pr.getErrorStream());
@@ -233,7 +233,7 @@ public class RunCmd {
 	public void actionView() {
 		try {
 			ManagerData curManData = theParentFrame.getCurManData();
-			String target = curManData.getTCWdb() + ":" + curManData.getAssemblyID();
+			String target = curManData.getTCWdb() + ":" + curManData.getProjID();
 			String host = hostsObj.host();
 			if(!host.equals("localhost")) target = host + ":" + target;
 			
@@ -245,7 +245,7 @@ public class RunCmd {
 				+ target;
 
 			System.err.println("Launching viewSingleTCW for " + 
-					host + ":" + curManData.getTCWdb() + ":" + curManData.getAssemblyID());
+					host + ":" + curManData.getTCWdb() + ":" + curManData.getProjID());
 			Process pr = Runtime.getRuntime().exec(cmd);
 			pr.getOutputStream().flush();
 			OutputHandler oh = new OutputHandler(pr.getErrorStream());
@@ -271,7 +271,7 @@ public class RunCmd {
 			final String cmd = "java " + jriPath + " -Xmx" + MAXMEM + "m -cp " + classPath + " sng.runDE.QRMain " 
 					+ curManData.getTCWdb();
 			System.err.println("Launching DE for " + 
-					host + ":" + curManData.getTCWdb() + ":" + curManData.getAssemblyID());
+					host + ":" + curManData.getTCWdb() + ":" + curManData.getProjID());
 			String rHome = System.getenv("R_HOME");
 			if (rHome == null)
 			{

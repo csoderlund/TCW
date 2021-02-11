@@ -29,7 +29,6 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
@@ -43,14 +42,16 @@ import util.methods.Static;
 import util.methods.Out;
 import util.database.DBConn;
 import util.database.Globalx;
+import util.file.FileC;
+import util.file.FileRead;
 
 public class BlastTab extends JPanel
 {
 	private static final long serialVersionUID = 653192706293635582L;
 	private static final String helpHTML = Globals.helpDir + "BlastTab.html";
 	
-	private final String RESULTS0 = ".results" + Globalx.TEXT_SUFFIX;
-	private final String RESULTS6 = ".results" + Globalx.CSV_SUFFIX;;
+	private final String RESULTS0 = ".results" + FileC.TEXT_SUFFIX;
+	private final String RESULTS6 = ".results" + FileC.TSV_SUFFIX;;
 	private final String dbSELECT = "Select protein database";
 	private final int nCOL=47;
 	private final int nWIDTH=520;
@@ -183,7 +184,11 @@ public class BlastTab extends JPanel
 		btnDBfind = Static.createButton("...", false);
 		btnDBfind.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-					setSelectedDBfile();		
+				FileRead fc = new FileRead("FindHit", FileC.bDoVer, FileC.bNoPrt); // CAS316
+				if (fc.run(btnDBfind, "AA-DB", FileC.dANNO, FileC.fFASTA)) { 
+					dbSelectName = fc.getRelativeFile();
+					txtDBname.setText(FileC.removePath(dbSelectName));
+				}			
 		}});
 		row.add(btnDBfind); row.add(Box.createHorizontalStrut(2));	
 		
@@ -323,15 +328,22 @@ public class BlastTab extends JPanel
 	 * AA query
 	 * 		AAseqs, AAdb		diamond or blast
 	 */
-	private void runSearch() throws Exception
-	{		
+	private void runSearch() throws Exception{		
+		if (dmndCheck.isSelected() && !BlastArgs.isDiamond()) { // CAS316
+			showErr("Diamond executable not available");
+			return;
+		}
+		if (blastCheck.isSelected() && !BlastArgs.isBlast()) {
+			showErr("Blast executable not available");
+			return;
+		}
 		String pgm = (dmndCheck.isSelected()) ? "Diamond" : "Blast";
 		if (blastPathPanel != null) blastPathPanel.removeAll();
 		resultSection.removeAll();
 		pnlRealMain.revalidate();
 		resultTable = null;
 
-		baseDir = new File(Globalx.HITDIR); 
+		baseDir = new File(Globalx.rHITDIR); 
 		if(!baseDir.exists()) baseDir.mkdir();
 		
 	// Create database
@@ -384,6 +396,10 @@ public class BlastTab extends JPanel
 		String seqPath = 	new File(dbFileName).getAbsolutePath();
 		String queryPath = 	queryFile.getAbsolutePath();
 		String outPath = 	outFile.getAbsolutePath();
+		
+		seqPath = 	FileC.removeRootPath(seqPath); // CAS316
+		queryPath = FileC.removeRootPath(queryPath);
+		outPath = 	FileC.removeRootPath(outPath);
 		
 		isSubjAA = (ntSeqCheck.isSelected()) ? isAAonly : true;
 	
@@ -770,45 +786,6 @@ public class BlastTab extends JPanel
 		
 		txtParams.setText(dmndDefaults); 
 	}
-	private void setSelectedDBfile() {
-		try {
-			JFileChooser fc = new JFileChooser();
-			fc.setCurrentDirectory(new File(Globalx.ANNODIR));
-			// CAS314
-			fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
-			fc.setFileSelectionMode(JFileChooser.FILES_ONLY);	//user must select a file not folder
-			fc.setMultiSelectionEnabled(false);					//disabled selection of multiple files
-			
-			// CAS315 added .gz; needed custom filter to do this
-			fc.addChoosableFileFilter(new FileFilter() {
-			    public String getDescription() {
-			        return "FASTA (see Help)";
-			    }
-			    public boolean accept(File f) {
-			        if (f.isDirectory()) {
-			            return true;
-			        } else {
-			        	String fName = f.getName().toLowerCase();
-			        	for (String x : Globalx.fastaFile) {
-				            if (fName.endsWith(x)) return true;
-			        	}
-			            return false;
-			        }
-			    }
-			});
-						
-			if(fc.showOpenDialog(theParentFrame) == JFileChooser.APPROVE_OPTION) {
-				String fname = fc.getSelectedFile().getCanonicalPath();
-				dbSelectName = fname;
-				String cur = System.getProperty("user.dir");
-				if(fname.contains(cur)) fname = fname.replace(cur, "");
-				if (fname.length()>65) fname = fname.substring(fname.lastIndexOf("/"));
-				txtDBname.setText(fname);
-			}
-		}
-		catch(Exception e) {ErrorReport.prtReport(e, "Error finding file");
-		}		
-	}
 	
 	private void deleteFiles(File dir)
 	{
@@ -880,18 +857,15 @@ public class BlastTab extends JPanel
 			btnFindFile.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					try {
-						JFileChooser fc = new JFileChooser();
-						fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-						if(fc.showOpenDialog(theParentFrame) == JFileChooser.APPROVE_OPTION) {
-							txtValue.setText(fc.getSelectedFile().getPath());
-						}
+						String projName = theParentFrame.getDBName();
+						FileRead fc = new FileRead(projName, FileC.bDoVer, FileC.bNoPrt); // CAS316
+						if (fc.run(btnDBfind, "AA-DB",  FileC.dANNO, FileC.fFASTA)) { 
+							dbSelectName = fc.getRelativeFile();
+							txtDBname.setText(FileC.removePath(dbSelectName));
+						}	
 					}
-					catch(Exception e) {
-						ErrorReport.prtReport(e, "Error finding file");
-					}
-					
-				}});
+					catch(Exception e) {ErrorReport.prtReport(e, "Error finding file");}
+			}});
 			
 			add(txtValue);
 			add(btnFindFile);

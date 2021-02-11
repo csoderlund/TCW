@@ -186,7 +186,7 @@ public class HitTablePanel  extends JPanel {
  		popup.add(new JMenuItem(new AbstractAction("Export table (" + Globalx.CSV_SUFFIX + ")") {
  			private static final long serialVersionUID = 4692812516440639008L;
  			public void actionPerformed(ActionEvent e) {
- 				new TableUtil(theViewerFrame).exportTableTab(theTable, Globals.bHIT);
+ 				new TableUtil(theViewerFrame).exportTableTab(btnTable, theTable, Globals.bHIT);
  			}
  		}));
  		

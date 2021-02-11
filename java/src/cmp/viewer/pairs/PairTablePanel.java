@@ -280,28 +280,28 @@ public class PairTablePanel extends JPanel {
  		popup.add(new JMenuItem(new AbstractAction("Export table (" + Globalx.CSV_SUFFIX + ")") {
  			private static final long serialVersionUID = 4692812516440639008L;
  			public void actionPerformed(ActionEvent e) {
- 				new TableUtil(theViewerFrame).exportTableTab(theTable, Globals.bPAIR);
+ 				new TableUtil(theViewerFrame).exportTableTab(btnTable, theTable, Globals.bPAIR);
  			}
  		}));
  		
  		popup.add(new JMenuItem(new AbstractAction("Export both AA sequences of pairs (" + Globalx.FASTA_SUFFIX + ")") { 
  			private static final long serialVersionUID = 4692812516440639008L;
  			public void actionPerformed(ActionEvent e) {
- 				new TableUtil(theViewerFrame).exportPairSeqFa(theTableData, 0, FieldData.AASEQ_SQL);
+ 				new TableUtil(theViewerFrame).exportPairSeqFa(btnTable,theTableData, 0, FieldData.AASEQ_SQL);
  			}
  		}));
  		if (!hasAAdb) {
 	 		popup.add(new JMenuItem(new AbstractAction("Export both NT sequences of pairs ("+ Globalx.FASTA_SUFFIX + ")") { 
 	 			private static final long serialVersionUID = 4692812516440639008L;
 	 			public void actionPerformed(ActionEvent e) {
-	 				new TableUtil(theViewerFrame).exportPairSeqFa(theTableData, 0, FieldData.NTSEQ_SQL);
+	 				new TableUtil(theViewerFrame).exportPairSeqFa(btnTable,theTableData, 0, FieldData.NTSEQ_SQL);
 	 			}
 	 		}));
  		}
  		popup.add(new JMenuItem(new AbstractAction("Export 1st AA sequence of pairs (" + Globalx.FASTA_SUFFIX + ")") { 
  			private static final long serialVersionUID = 4692812516440639008L;
  			public void actionPerformed(ActionEvent e) {
- 				new TableUtil(theViewerFrame).exportPairSeqFa(theTableData, 1, FieldData.AASEQ_SQL);
+ 				new TableUtil(theViewerFrame).exportPairSeqFa(btnTable,theTableData, 1, FieldData.AASEQ_SQL);
  			}
  		}));
  		
@@ -309,7 +309,7 @@ public class PairTablePanel extends JPanel {
 	 		popup.add(new JMenuItem(new AbstractAction("Export 1st NT sequence of pairs (" + Globalx.FASTA_SUFFIX + ")") { 
 	 			private static final long serialVersionUID = 4692812516440639008L;
 	 			public void actionPerformed(ActionEvent e) {
-	 				new TableUtil(theViewerFrame).exportPairSeqFa(theTableData, 1, FieldData.NTSEQ_SQL);
+	 				new TableUtil(theViewerFrame).exportPairSeqFa(btnTable,theTableData, 1, FieldData.NTSEQ_SQL);
 	 			}
 	 		}));
  		}
@@ -319,7 +319,7 @@ public class PairTablePanel extends JPanel {
 	 		popup.add(new JMenuItem(new AbstractAction("Export Pairs GOs (" + Globalx.CSV_SUFFIX + ")...") { 
 	 			private static final long serialVersionUID = 4692812516440639008L;
 	 			public void actionPerformed(ActionEvent e) {
-	 				new TableUtil(theViewerFrame).exportPairGO(theTableData, strQuerySummary);
+	 				new TableUtil(theViewerFrame).exportPairGO(btnTable,theTableData, strQuerySummary);
 	 			}
 	 		}));
  		}

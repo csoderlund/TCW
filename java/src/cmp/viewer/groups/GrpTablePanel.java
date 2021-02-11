@@ -142,7 +142,7 @@ public class GrpTablePanel extends JPanel {
  		});
  		
         createBtnTable();
-        topRow.add(btnTableExportCopy);
+        topRow.add(btnTable);
         topRow.add(Box.createHorizontalGlue());
         
         btnHelp = Static.createButton("Help", true, Globals.HELPCOLOR);
@@ -266,52 +266,52 @@ public class GrpTablePanel extends JPanel {
   			}
   		}));
         popup.addSeparator();
-  		popup.add(new JMenuItem(new AbstractAction("Export table (" + Globalx.FASTA_SUFFIX + ")") {
+  		popup.add(new JMenuItem(new AbstractAction("Export table (" + Globalx.TSV_SUFFIX + ")") {
   			private static final long serialVersionUID = 4692812516440639008L;
   			public void actionPerformed(ActionEvent e) {
-  				new TableUtil(theViewerFrame).exportTableTab(theTable, Globals.bGRP);
+  				new TableUtil(theViewerFrame).exportTableTab(btnTable, theTable, Globals.bGRP);
   			}
   		}));
   		popup.add(new JMenuItem(new AbstractAction("Export all cluster AA sequences (" + Globalx.FASTA_SUFFIX + ")") { 
   			private static final long serialVersionUID = 4692812516440639008L;
   			public void actionPerformed(ActionEvent e) {
-  				new TableUtil(theViewerFrame).exportGrpSeqFa(theTableData, FieldData.AASEQ_SQL);
+  				new TableUtil(theViewerFrame).exportGrpSeqFa(btnTable,theTableData, FieldData.AASEQ_SQL);
   			}
   		}));
   		if (!hasAAdb) {
 	  		popup.add(new JMenuItem(new AbstractAction("Export all cluster NT sequences (" + Globalx.FASTA_SUFFIX + ")") { 
 	  			private static final long serialVersionUID = 4692812516440639008L;
 	  			public void actionPerformed(ActionEvent e) {
-	  				new TableUtil(theViewerFrame).exportGrpSeqFa(theTableData, FieldData.NTSEQ_SQL);
+	  				new TableUtil(theViewerFrame).exportGrpSeqFa(btnTable,theTableData, FieldData.NTSEQ_SQL);
 	  			}
 	  		}));
   		}
   		if (hasGOs) {
   			popup.addSeparator();
-	  		popup.add(new JMenuItem(new AbstractAction("Export cluster GOs (" + Globalx.CSV_SUFFIX + ")...") { 
+	  		popup.add(new JMenuItem(new AbstractAction("Export cluster GOs (" + Globalx.TSV_SUFFIX + ")...") { 
 	  			private static final long serialVersionUID = 4692812516440639008L;
 	  			public void actionPerformed(ActionEvent e) {
-	  				new TableUtil(theViewerFrame).exportGrpGO(theTableData, strQuerySummary);
+	  				new TableUtil(theViewerFrame).exportGrpGO(btnTable,theTableData, strQuerySummary);
 	  			}
 	  		}));
   		}
   		if (hasCounts) { // CAS305
   			popup.addSeparator();
-	  		popup.add(new JMenuItem(new AbstractAction("Export cluster counts (" + Globalx.CSV_SUFFIX + ")...") { 
+	  		popup.add(new JMenuItem(new AbstractAction("Export cluster counts (" + Globalx.TSV_SUFFIX + ")...") { 
 	  			private static final long serialVersionUID = 4692812516440639008L;
 	  			public void actionPerformed(ActionEvent e) {
-	  				new TableUtil(theViewerFrame).exportGrpCounts(theTableData, strQuerySummary, true);
+	  				new TableUtil(theViewerFrame).exportGrpCounts(btnTable,theTableData, strQuerySummary, true);
 	  			}
 	  		}));
-	  		popup.add(new JMenuItem(new AbstractAction("Export cluster TPM (" + Globalx.CSV_SUFFIX + ")...") { 
+	  		popup.add(new JMenuItem(new AbstractAction("Export cluster TPM (" + Globalx.TSV_SUFFIX + ")...") { 
 	  			private static final long serialVersionUID = 4692812516440639008L;
 	  			public void actionPerformed(ActionEvent e) {
-	  				new TableUtil(theViewerFrame).exportGrpCounts(theTableData, strQuerySummary, false);
+	  				new TableUtil(theViewerFrame).exportGrpCounts(btnTable,theTableData, strQuerySummary, false);
 	  			}
 	  		}));
   		}
-  		btnTableExportCopy = Static.createButton("Table...", true);
- 		btnTableExportCopy.addMouseListener(new MouseAdapter() {
+  		btnTable = Static.createButton("Table...", true);
+ 		btnTable.addMouseListener(new MouseAdapter() {
  	         public void mousePressed(MouseEvent e) {
  	              popup.show(e.getComponent(), e.getX(), e.getY());
  	         }
@@ -1003,7 +1003,7 @@ public class GrpTablePanel extends JPanel {
     private JTextField txtStatus = null;
    
     //Function buttons
-    private JButton btnTableExportCopy = null, btnCopy=null;
+    private JButton btnTable = null, btnCopy=null;
     private JButton btnClearSelection = null;
     private JButton btnHelp = null;
     private JButton btnNextRow = null, btnPrevRow = null;

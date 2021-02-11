@@ -12,7 +12,6 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -25,7 +24,6 @@ import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -36,6 +34,8 @@ import javax.swing.JTextField;
 import sng.database.Globals;
 import sng.viewer.STCWFrame;
 import util.database.DBConn;
+import util.file.FileC;
+import util.file.FileRead;
 import util.methods.ErrorReport;
 import util.methods.Static;
 
@@ -158,10 +158,9 @@ public class BasicSeqFilterPanel extends JPanel {
 			btnFindFile.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					try {
-						JFileChooser fc = new JFileChooser();
-						fc.setCurrentDirectory(new File("."));
-						if(fc.showOpenDialog(getInstance()) == JFileChooser.APPROVE_OPTION) {
-							loadFile(fc.getSelectedFile().getPath());
+						FileRead fr = new FileRead("Seq", FileC.bNoVer, FileC.bNoPrt); // CAS316
+						if (fr.run(btnFindFile, "Seq File", FileC.dUSER, FileC.fTXT)) {
+							loadFile(fr.getRelativeFile());
 						}
 					}
 					catch(Exception e) {ErrorReport.prtReport(e, "Error finding file");}
@@ -252,7 +251,6 @@ public class BasicSeqFilterPanel extends JPanel {
 			}
 			catch(Exception e) {ErrorReport.prtReport(e, "Error loading file");}
 		}
-		private STCWFrame getInstance() {return theMainFrame;}
 		
 		public String getSearchCol() {
 			if (radSeqID.isSelected()) return "contig.contigid";

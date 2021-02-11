@@ -324,20 +324,20 @@ public class SeqTableTab extends Tab
 				try {
 					btnTable.setEnabled(false);
 					if(saveMode == EXPORT_TABLE) {
-						contigTable.saveToFileTabDelim(filePrefix+"Columns" + Globalx.CSV_SUFFIX, getParentFrame());
+						contigTable.saveToFileTabDelim(btnTable, filePrefix+"Columns", getParentFrame());
 					}
 					else if(saveMode == EXPORT_SEQS) {
-                        contigTable.saveToFasta(filePrefix+"Seqs"+ Globalx.FASTA_SUFFIX, getParentFrame());
+                        contigTable.saveToFasta(btnTable, filePrefix+"Seqs", getParentFrame());
                     }
                     else if(saveMode == EXPORT_ORF) {
-                        contigTable.saveORFToFasta(filePrefix+"ORFs"+ Globalx.FASTA_SUFFIX, getParentFrame());
+                        contigTable.saveORFToFasta(btnTable, filePrefix+"ORFs", getParentFrame());
                     }
                     else if(saveMode == EXPORT_COUNTS) {
-						contigTable.saveToFileCounts(filePrefix+"Reps" + Globalx.CSV_SUFFIX, getParentFrame(),
+						contigTable.saveToFileCounts(btnTable, filePrefix+"Reps", getParentFrame(),
 						   getParentFrame().getQueryContigTab().getAllLibraryNames()); 
 					}
                     else if(saveMode == EXPORT_SeqGO) { 
-						contigTable.saveGOFromBest(filePrefix+"BestGO.txt", getParentFrame()); 
+						contigTable.saveGOFromBest(btnTable, filePrefix+"BestGO", getParentFrame()); 
 					}
 					btnTable.setEnabled(true);
 				}
@@ -357,7 +357,7 @@ public class SeqTableTab extends Tab
 				try {
 					btnTable.setEnabled(false);
 					
-                    contigTable.saveHitsToFasta(eh.getHitFile(), getParentFrame(), eh.getHitSQL()); 
+                    contigTable.saveHitsToFasta(btnTable, eh.getHitFile(), getParentFrame(), eh.getHitSQL()); 
 					
                     btnTable.setEnabled(true);
 				}
@@ -377,7 +377,7 @@ public class SeqTableTab extends Tab
 				try {
 					btnTable.setEnabled(false);
 					
-                    contigTable.saveGOtoFile(et.getGOfile(), getParentFrame(),
+                    contigTable.saveGOtoFile(btnTable, et.getGOfile(), getParentFrame(),
                     		et.getGOLevel(), et.getGOEval(), et.getTermType()); 
 					
                     btnTable.setEnabled(true);

@@ -18,7 +18,7 @@
 				<ul>
 				<li>The annoDB is named by its DBtype + Taxonomy, e.g. "SP-plants".
 				
-				<li><u>DBtype</u>: If the annotation file uses definition lines like
+				<li><b><i>DBtype</i></b>: If the annotation file uses definition lines like
 				">sp|Q6V4H0|10HGO_CATRO", then the two letters before the "|" is used as the DBtype, 
 				e.g. "SP" for SwissProt, "TR" for TrEMBL.
 				Otherwise, the DBtype is "PR" for proteins files and "NT" for nucleotide files.
@@ -32,8 +32,11 @@
 		</tr>
 			<td valign="top" nowrap>annoDB FASTA File</td>
 			<td>
+			
+			A FASTA file with any of the following suffixes: .fa, .fasta, .fna, .ffn, .faa, .frn.
+			It is valid to have the compress ".gz" added to any of these suffixes. If your file has
+			a different suffix, use the <b>File Format:</b> "All Files".
 			<ul>
-			<li>A FASTA file with any of the following suffixes: .fa, .fasta, .fna, .ffn, .faa, .frn.
 			<li>For "Generate Hit Tabular File", the sequences will be searched against this file.
 			<li>For both the "Generate" and the "Use Existing" options, this file is used to extract
 			the description and species information.
@@ -57,7 +60,7 @@
 		
 		<tr>
 			<td valign="top" nowrap>&nbsp;&nbsp;&nbsp;&nbsp;Parameters</td>
-			<td>Add or change the search parameters. This can not be blank.
+			<td>Add or change the search parameters; do not leave this blank.
 			TCW will automatically add the number of CPUs and output file name.
 			<br>See the documentation for the search program for explanation of their parameters. 
 			<i><b>TCW does not check the correctness of changed parameters.</b></i> 
@@ -69,7 +72,9 @@
 			 
 		<tr>
 			<td valign="top" nowrap>&nbsp;&nbsp;&nbsp;&nbsp;Hit Tabular File</td>
-			<td>User supplied tabular file of search results that correspond to the "annoDB FASTA file".</td>
+			<td>User supplied tabular file of search results that correspond to the "annoDB FASTA file".
+			The file should end with ".tab".
+			</td>
 		</tr>
 		
 	</table>

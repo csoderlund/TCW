@@ -17,9 +17,13 @@ but they can be elsewhere.
 		</tr>
 		<tr>
 			<td valign="top">Sequence File</td>
-			<td>The fasta sequence file for this dataset, where each ">" must have a unique 
+			<td>The FASTA sequence file for this dataset, where each ">" must have a unique 
 			identifier for the sequence. If the file is not in the "/project" project directory, 
-			provide its full path.</td>
+			provide its full path.
+			<br><br>Suffix: The FASTA file may have any of the following suffixes: .fa, .fasta, .fna, .ffn, .faa, .frn.
+			It is valid to have the compress ".gz" added to any of these suffixes. If your file has
+			a different suffix, use the <b>File Format:</b> "All Files".
+			</td>
 		</tr>
 		
 		<tr>
@@ -28,8 +32,11 @@ but they can be elsewhere.
 			The first row contains the column headings "SeqName" followed by the replicate names; the 
 			rest of the rows contain the sequence name followed by the counts (see the UserGuide 
 			for more detail).
-			<br>The file is read for the column names when "Keep" is selected, and the Count Table 
+			<br><br>Suffix: The file should have the suffix ".txt".  If your file has
+			a different suffix, use the <b>File Format:</b> "All Files".
+			<br><br>The file is read for the column names when "Keep" is selected, and the Count Table 
 			on the main window has a row added for each condition.
+			
 		</td>
 		</tr>
 		<tr>
@@ -42,7 +49,8 @@ but they can be elsewhere.
 		<tr><td>&nbsp;</td></tr>
 		<tr>
 			<td valign="top">Quality File</td>
-			<td>Optional fasta quality file for the sequence file.</td>
+			<td>Optional fasta quality file for the sequence file.
+			</td>
 		</tr>
 		<tr><td>&nbsp;</td></tr>
 		

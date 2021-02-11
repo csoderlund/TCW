@@ -32,9 +32,10 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
 import util.database.Globalx;
-import util.methods.ErrorReport;
-import util.methods.FileHelpers;
+import util.file.FileC;
+import util.file.FileHelpers;
 import util.methods.Out;
+import util.methods.ErrorReport;
 import util.methods.Static;
 import util.ui.UserPrompt;
 
@@ -54,7 +55,7 @@ public class BuildRepFilePanel extends JPanel {
 	}
 	public void setSeqFile(String name) {
 		seqFilePath = name;
-		currentDir = new File(LIBDIR + theManagerFrame.getProjectName()); 
+		currentDir = new File(LIBDIR + theManagerFrame.getProjDir()); 
 	}
 	
 	private void buildGenerateFilePanel() { 
@@ -101,10 +102,10 @@ public class BuildRepFilePanel extends JPanel {
 		btnAddDir = Static.createButton("Add Directory of Files", true);
 		btnAddDir.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				String lastDir = FileTextField.getLastDir();
+				String lastDir = FileC.getLastDir();
 				if (lastDir!=null) currentDir= new File(lastDir);
 				else if(currentDir == null)
-					currentDir = new File(LIBDIR + theManagerFrame.getProjectName());
+					currentDir = new File(LIBDIR + theManagerFrame.getProjDir());
 				
 				JFileChooser fc = new JFileChooser(currentDir);
 				fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -130,7 +131,7 @@ public class BuildRepFilePanel extends JPanel {
 		btnAddFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if(currentDir == null)
-					currentDir = new File(LIBDIR + theManagerFrame.getProjectName());
+					currentDir = new File(LIBDIR + theManagerFrame.getProjDir());
 				
 				JFileChooser fc = new JFileChooser(currentDir);
 				int retVal = fc.showOpenDialog(theParentFrame);
@@ -334,8 +335,7 @@ public class BuildRepFilePanel extends JPanel {
 			Out.prtSpCnt(1, seqIDs.size(), "Sequences in file" );
 			
 			Vector<long []> theCounts = new Vector<long []> ();
-			FileTextField fileObj = new FileTextField(theManagerFrame,
-					theManagerFrame.getProjectName());
+			String projDir = theManagerFrame.getProjDir();
 			
 	// read through files
 			for(int x=0; x<fileList.size(); x++) {
@@ -346,7 +346,7 @@ public class BuildRepFilePanel extends JPanel {
 				for(int y=0; y<theDECounts.length; y++)
 					theDECounts[y] = 0;
 				
-				String fname = fileObj.pathToOpen(filename, FileTextField.LIB);
+				String fname = FileC.addFixedPath(projDir, filename, FileC.dPROJ);
 				br = FileHelpers.openGZIP(fname);
 				line = br.readLine();
 				int lineCount = 0;
@@ -386,7 +386,7 @@ public class BuildRepFilePanel extends JPanel {
 				Out.prtSpCnt(1, lineCount, "Lines read        ");
 				theCounts.add(theDECounts);
 			}
-			String outFileName = LIBDIR + theManagerFrame.getProjectName() + "/" + DEFAULT_COMBINED_FILE;
+			String outFileName = LIBDIR + theManagerFrame.getProjDir() + "/" + DEFAULT_COMBINED_FILE;
 			Out.PrtSpMsg(1, "Writing file " + outFileName);
 			PrintWriter out = new PrintWriter(new FileWriter(new File(outFileName)));
 			
@@ -413,7 +413,7 @@ public class BuildRepFilePanel extends JPanel {
 		}
 	}
 	public String removeLib(String path) {
-		String libPath = LIBDIR + theManagerFrame.getProjectName();
+		String libPath = LIBDIR + theManagerFrame.getProjDir();
 		int index = path.indexOf(libPath);
 		if(index >= 0) return path.substring(index + libPath.length() + 1);
 		else return path;

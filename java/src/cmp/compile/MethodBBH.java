@@ -26,6 +26,8 @@ import cmp.compile.panels.MethodPanel;
 import cmp.database.Globals;
 
 public class MethodBBH {
+	private final static String iDELIM = Globals.Methods.inDELIM;
+	
 	 private String groupFile = Globals.Methods.BestRecip.TYPE_NAME;
 	 private String [] covTypes = {"Either", "Both"};
 	 private String [] strType = {"Amino acid", "Nucleotide"};
@@ -331,27 +333,34 @@ public class MethodBBH {
 	/*******************************************************************/
 	private boolean setParams(int idx, DBConn db, CompilePanel panel) {
 		MethodPanel theMethod = panel.getMethodPanel();
-		String [] settings = theMethod.getSettingsAt(idx).split(":");
-		if (settings.length<5) {
-			Out.PrtError("Incorrect parameters: " + theMethod.getSettingsAt(idx));
-			return false;
-		}
 		prefix = theMethod.getMethodPrefixAt(idx);	// Groups should be prefixed with this
 		
-		covCutoff = Static.getInteger(settings[1].trim());
-		if (covCutoff<0) covCutoff=0;
-		covMode = 		Static.getInteger(settings[2].trim());
-		simCutoff = 	Static.getInteger(settings[3].trim());
-		if (simCutoff<0) simCutoff=0;
-		type = 			Static.getInteger(settings[4].trim());
-		String dbs =    settings[5].trim();
+		String [] settings = theMethod.getSettingsAt(idx).split(iDELIM);
+		String dbs = "???";
 		
-		if (dbs.contains(",")) {							//Selected by User: Rule 2
-			String [] list = dbs.split(",");
-			for (int i=0; i<list.length; i++)
-				selectSTCW.add(list[i]);
-			bSetSelected=true;
+		if (settings.length<5) {
+			Out.PrtError("Incorrect parameters: '" + theMethod.getSettingsAt(idx) + "' - using defaults");
 		}
+		else {
+			covCutoff = Static.getInteger(settings[1].trim());
+			covMode = 	Static.getInteger(settings[2].trim());
+			simCutoff = Static.getInteger(settings[3].trim());
+			type = 		Static.getInteger(settings[4].trim());
+			
+			dbs =    settings[5].trim();
+			
+			if (dbs.contains(",")) {							//Selected by User: Rule 2
+				String [] list = dbs.split(",");
+				for (int i=0; i<list.length; i++)
+					selectSTCW.add(list[i]);
+				bSetSelected=true;
+			}
+		}
+		// Set defaults 
+		if (covCutoff<0) covCutoff=Static.getInteger(Globals.Methods.BestRecip.COVERAGE_CUTOFF);
+		if (simCutoff<0) simCutoff=Static.getInteger(Globals.Methods.BestRecip.SIMILARITY);
+		if (covMode<0 || covMode>covTypes.length)  covMode=Globals.Methods.BestRecip.COV_TOGGLE;
+		if (type!=0 && type!=1) type = 0;
 		if (selectSTCW.size()==0) {						// No selection: Rule 1
 			String [] list = panel.getDBInfo().getASM();
 			for (int i=0; i<list.length; i++)
@@ -360,25 +369,16 @@ public class MethodBBH {
 			dbs = "All pairs of sTCWs";
 		}
 		
-		if (covMode>covTypes.length) {
-			Out.PrtError("Coverage length types " + covMode + " must be <" + covTypes.length);
-			return false;
-		}
-		if (type!=0 && type!=1) {
-			Out.PrtError("Bad type " + type + " must be 0 or 1");
-			return false;
-		}
-		
+		// finish and print
 		mDB = db;
 		cmpPanel = panel;
 		
-		String root  = cmpPanel.getCurProjMethodDir() +  groupFile + 
-				"." + prefix + "_" + covCutoff + "-" + simCutoff;
+		String root  = cmpPanel.getCurProjMethodDir() +  groupFile + "." + prefix + "_" + covCutoff + "-" + simCutoff;
 		groupFile = root;
 		
 		Out.PrtSpMsg(1, "Prefix:     " + prefix);
-		Out.PrtSpMsg(1, "Coverage:   " + (int) covCutoff + " (" + covTypes[covMode] + ")");
-		Out.PrtSpMsg(1, "Similarity: " + (int) simCutoff);
+		Out.PrtSpMsg(1, "Coverage:   " + covCutoff + " (" + covTypes[covMode] + ")");
+		Out.PrtSpMsg(1, "Similarity: " + simCutoff);
 		Out.PrtSpMsg(1, "STCWdb:     " + dbs);
 		Out.PrtSpMsg(1, "");
 		
@@ -467,8 +467,8 @@ public class MethodBBH {
 	
 	 boolean bSuccess=true;
 	 private String prefix;
-	 private double covCutoff, simCutoff;
-	 private int type, covMode;
+	 private int covCutoff = -1, simCutoff=-1;
+	 private int type=-1, covMode=-1;
 	
 	private boolean bSetSelected=false;
 	private int nSTCW=0;

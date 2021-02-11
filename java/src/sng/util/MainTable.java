@@ -6,6 +6,7 @@ package sng.util;
  * All Copy/Export routines are in this file.
  */
 import java.awt.event.ActionListener;
+import java.awt.Component;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.util.HashMap;
@@ -16,6 +17,8 @@ import sng.dataholders.SequenceData;
 import sng.viewer.STCWFrame;
 import util.database.DBConn;
 import util.database.Globalx;
+import util.file.FileC;
+import util.file.FileWrite;
 import util.methods.ErrorReport;
 import util.methods.Out;
 import util.methods.Static;
@@ -157,10 +160,11 @@ public class MainTable extends MainTableSort {
     catch (Exception err) {ErrorReport.reportError(err, "Internal error copying table");}
     return target.toString();
     }
-    public boolean saveToFileTabDelim(String fileName, STCWFrame frame) {
-        String delim = Globalx.CSV_DELIM;
+    public boolean saveToFileTabDelim(Component btnC, String fileName, STCWFrame frame) {
+        String delim = FileC.TSV_DELIM;
         try {
-            PrintWriter pw = ExportFile.getWriter("Columns", fileName, frame);
+        	// String title, String defFile, int fileType, int wrType
+        	PrintWriter pw = fwObj.getWriter(btnC, "Seq Columns", fileName, FileC.fTSV, FileC.wAPPEND);
             if (pw==null) return false;
            
             int rowCnt = getRowCount();
@@ -202,9 +206,9 @@ public class MainTable extends MainTableSort {
      * save sequences to fasta file
      * get seqID (contigid) from interface table and read sequence from database
      */
-    public boolean saveToFasta(String fileName, STCWFrame frame) {
+    public boolean saveToFasta(Component btnC, String fileName, STCWFrame frame) {
         try {
-        	PrintWriter pw = ExportFile.getWriter("Sequences", fileName,frame);
+        	PrintWriter pw = fwObj.getWriter(btnC, "Sequences", fileName, FileC.fFASTA, FileC.wAPPEND);
         	if (pw==null) return false;
              
         	int rowCnt = getRowCount(); 
@@ -246,13 +250,13 @@ public class MainTable extends MainTableSort {
      * save sequences to fasta file
      * get seqID (contigid) from interface table and read sequence from database
      */
-    public boolean saveHitsToFasta(String fileName, STCWFrame frame, String filter) {
+    public boolean saveHitsToFasta(Component btnC, String fileName, STCWFrame frame, String filter) {
         try {
-        	 PrintWriter pw = ExportFile.getWriter("Hits", fileName,frame);
-             if (pw==null) return false;
+        	PrintWriter pw = fwObj.getWriter(btnC, "Hits", fileName, FileC.fFASTA, FileC.wAPPEND);
+            if (pw==null) return false;
              
-             int rowCnt = getRowCount(); 
-             Out.prt("Processing " + rowCnt + " sequences....");
+            int rowCnt = getRowCount(); 
+            Out.prt("Processing " + rowCnt + " sequences....");
              
             int seqIdx = getColumnModel().getColumnIndex("Seq ID");
             String [] seqIDs = new String [getRowCount()];
@@ -322,11 +326,10 @@ public class MainTable extends MainTableSort {
      * save ORF to file
      * this wasn't working on MAC, getting null values
      */
-    public boolean saveORFToFasta(String fileName, STCWFrame frame) {
-        
+    public boolean saveORFToFasta(Component btnC, String fileName, STCWFrame frame) {
         String query="";
         try {
-    		PrintWriter pw = ExportFile.getWriter("ORFs", fileName, frame);
+        	PrintWriter pw = fwObj.getWriter(btnC, "ORFs", fileName, FileC.fFASTA, FileC.wAPPEND);
     		if (pw==null) return false;
     		
     		int rowCount = getRowCount();
@@ -379,11 +382,11 @@ public class MainTable extends MainTableSort {
     /******************************************************
      * write file of counts with replicates
      */
-    public boolean saveToFileCounts(String fileName, STCWFrame frame, String [] libraries) {
-    	String delim = Globalx.CSV_DELIM;
+    public boolean saveToFileCounts(Component btnC, String fileName, STCWFrame frame, String [] libraries) {
+    	String delim = FileC.TSV_DELIM;
         	
     	try {
-    		PrintWriter expPW = ExportFile.getWriter("Counts", fileName, frame);
+    		PrintWriter expPW = fwObj.getWriter(btnC, "Replicates", fileName, FileC.fTSV, FileC.wAPPEND);
     		if (expPW==null) return false;
     		
     		int rowCnt = getRowCount();
@@ -470,10 +473,10 @@ public class MainTable extends MainTableSort {
     /*****************************************************
      * Save direct GOs from Best GO hit for sequences in table.
      */
-    public boolean saveGOFromBest(String fileName, STCWFrame frame) {
-    	 	String query="";
+    public boolean saveGOFromBest(Component btnC, String fileName, STCWFrame frame) {
+    	 String query="";
          try {
-         	PrintWriter pw = ExportFile.getWriter("SeqGOs", fileName, frame);
+        	PrintWriter pw = fwObj.getWriter(btnC, "Seq GOs", fileName, FileC.fTXT, FileC.wAPPEND);
          	if (pw==null) return false;
          		
          	int rowCount = getRowCount();
@@ -548,12 +551,11 @@ public class MainTable extends MainTableSort {
     * 2. For each contig that has GOs, get from pja_unitrans_go (direct and indirect) 
     * 	 and go_info (level=y) and e-value<x
      */
-    public boolean saveGOtoFile(String fileName, STCWFrame frame, String level, String eval, String type)
+    public boolean saveGOtoFile(Component btnC, String fileName, STCWFrame frame, String level, String eval, String type)
     {
-		try
-		{
-			String delim = Globalx.CSV_DELIM;
-			PrintWriter pw = ExportFile.getWriter("GOs ", fileName, frame);
+		try {
+			String delim = FileC.TSV_DELIM;
+			PrintWriter pw = fwObj.getWriter(btnC, "Seq GOs", fileName, FileC.fTSV, FileC.wAPPEND);
 			if (pw==null) return false;
 			
 			String msg = "   using Level: " + level + ", E-value: " + eval;
@@ -565,12 +567,12 @@ public class MainTable extends MainTableSort {
 			 
     	// Step 1: get all assigned and inherited GOs
     			
-    			// get Seq Names from display table 
+    		// get Seq Names from display table 
 	        int seqIdx = getColumnModel().getColumnIndex("Seq ID");
 	    		String [] seqNames = new String [getRowCount()];
 	        
 	        for (int row = 0;  row < rowCnt;  row++) {
-	        		seqNames[row]= (String) getValueAt(row, seqIdx);
+	        	seqNames[row]= (String) getValueAt(row, seqIdx);
 	        }
 	       
 	       // get SeqID for database for fast query in main loop
@@ -594,9 +596,9 @@ public class MainTable extends MainTableSort {
 	        
 	        	// find the GOs from these contigs
 	       int cntGoSeqPairs=0, cnt=0;
-	 	   for (String name : seqNames) 
-	 	   {
+	 	   for (String name : seqNames)  {
 	 	        if (!seqIdMap.containsKey(name)) continue;
+	 	        
 	 	        int seqid = seqIdMap.get(name);
 	 	        String query =  select + " where ug.CTGID=" + seqid + " " + where; 
                 	
@@ -633,8 +635,8 @@ public class MainTable extends MainTableSort {
 	        Out.prtSp(1,"Start writing....                    "); 
 	        pw.write("### #Seqs: " + rowCnt + "   #GOs: " + goCntMap.size() + "   #GO-seq pairs: " + cntGoSeqPairs + "\n");
 	        pw.write("GO" + delim + " #Seqs" + delim  + "Level" + delim  + " Term_type" + delim +  "Description");
-	        if (pcols.size() >0)
-	        {   int x = prefix.length();
+	        if (pcols.size() >0) {   
+	        	int x = prefix.length();
 		        pw.write(delim);
 		        for (String p : pcols)
 		        		pw.write(p.substring(x) + delim); 
@@ -642,11 +644,9 @@ public class MainTable extends MainTableSort {
 	        }
 	        pw.write("\n");
 	        int nrows = 0;
-	        for (int gonum : goCntMap.keySet())
-	        {
+	        for (int gonum : goCntMap.keySet()) {
 	        	rs = mdb.executeQuery(query + gonum);
-	        	if (rs.first())
-	        	{
+	        	if (rs.first()) {
 	        		StringBuffer sb = new StringBuffer();
 	        		sb.append(String.format(GO_FORMAT,gonum));
 	        		sb.append(delim + String.format("%5d", goCntMap.get(gonum))); // count
@@ -670,13 +670,15 @@ public class MainTable extends MainTableSort {
 	        rs.close(); mdb.close();
 	        Out.PrtSpMsg(0, "Complete writing " + nrows + " rows  to " + fileName);
 	        return true;
-	    	}
-	    	catch(Exception e){ ErrorReport.prtReport(e, "Writing GO file");}
-    		return false;
+	    }
+	    catch(Exception e){ ErrorReport.prtReport(e, "Writing GO file");}
+    	return false;
     }
     
     private String formatD(Double d) {
     	if (d>=0.001) return String.format("%4.3f", d);
 	 	else return String.format("%.1e", d);
 	}
+    
+    private FileWrite fwObj = new FileWrite(FileC.bNoVer, FileC.bNoPrt);
  }

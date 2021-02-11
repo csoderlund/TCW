@@ -13,6 +13,7 @@ import java.io.FileReader;
 
 import sng.database.Globals; // cmp does not access anything that accesses this, otherwise, would crash
 import util.database.Globalx;
+import util.file.FileHelpers;
 
 /**
  * Parse and store the sTCW.cfg and LIB.cfg properties. 
@@ -192,22 +193,20 @@ public class TCWprops
  
 			mProps.setProperty("Anno_GO_DB", ""); 
 			mProps.setProperty("Anno_SLIM_SUBSET", ""); 
-			mProps.setProperty("Anno_SLIM_OBOFILE", ""); 
+			mProps.setProperty("Anno_SLIM_OBOFile", ""); 
 			break;		
 		
 		case Cmp: // cmp.compile.panels/CompilePanel.java
 			mProps.setProperty("MTCW_db", "");
 			mProps.setProperty("MTCW_host", "");
 			
-			mProps.setProperty("MTCW_search_file", "");
-			mProps.setProperty("MTCW_DBsearch_pgm", ""); 
-			mProps.setProperty("MTCW_search_params", "");
-			mProps.setProperty("MTCW_blast_filter", "");
+			// CAS316 AA is always run, but can change search program and parameters
+			mProps.setProperty("MTCW_DBsearch_pgm", "diamond"); 
+			mProps.setProperty("MTCW_search_params", "");	// set to defaults
 			
+			// NT is optional, and always uses blastn
 			mProps.setProperty("MTCW_run_blastn", "1");
-			mProps.setProperty("MTCW_blastn_file", "");
-			mProps.setProperty("MTCW_blastn_params", "");
-			mProps.setProperty("MTCW_blastn_filter", "");
+			mProps.setProperty("MTCW_blastn_params", "");	// set to defaults
 			
 			mProps.setProperty("MTCW_GO_DB", "go_demo");
 			

@@ -13,8 +13,9 @@ import java.sql.PreparedStatement;
 import java.util.regex.Pattern;
 import java.util.Vector;
 
+import util.file.FileHelpers;
 import util.methods.ErrorReport;
-import util.methods.FileHelpers;
+import util.methods.Out;
 
 // WARNING: Does not work for nested queries (because it uses one Statement for all queries). 
 // To do a query within the read loop of a previous
@@ -690,7 +691,6 @@ public class DBConn
         String dbstr = createDBstr(host, null);
        
         try {
-        	int cntFlag=0;
         	Connection con;
         	Statement st;
         	
@@ -698,65 +698,60 @@ public class DBConn
         		con = DriverManager.getConnection(dbstr, user, pass);
         		st = con.createStatement();
         	}
-        	catch (SQLException e)
-            {	
+        	catch (SQLException e)  {	
             	ErrorReport.prtReport(e, "Check MySQL database");
                 System.err.println("Cannot connect to MySQL on host=" + host + " user=" + user);
                 System.err.println(dbstr);
                 System.err.println(e.getMessage()); 
                 return false;
             }
+        	// CAS316 made better output based on recent tests
+        	
+        	ResultSet rs = st.executeQuery("SHOW VARIABLES LIKE 'version'");
+        	if (rs.next()) {
+				String s = rs.getString(2);
+				Out.PrtSpMsg(0,"MySQL Version=" + s);
+        	}
 			
-            ResultSet rs = st.executeQuery("show variables like 'max_allowed_packet'");
+            rs = st.executeQuery("show variables like 'max_allowed_packet'");
 			if (rs.next()) {
 				long packet = rs.getLong(2);
 				
-				System.err.println("   max_allowed_packet=" + packet);
-				if (packet<=1048576) {
-					cntFlag++;
-					System.err.println("     Suggest: SET GLOBAL max_allowed_packet=1073741824;");
-				}
+				Out.PrtSpMsg(1, "max_allowed_packet=" + packet);
+				if (packet<=1048576) 
+					Out.PrtSpMsg(1, "Suggest: SET GLOBAL max_allowed_packet=1073741824;");
 			}
 			
+			Out.PrtSpMsg(1, "For some configuration, the following is necessary for runAS:");
+			rs = st.executeQuery("show variables like 'local_infile'");
+			if (rs.next()) {
+				String s = rs.getString(2);
+				Out.PrtSpMsg(2,"local_infile=" + s);
+				if (s.contentEquals("no")) 
+					Out.PrtSpMsg(2, "Suggest: SET GLOBAL local_infile = 1;");
+			}
+			
+			Out.PrtSpMsg(1, "For runSingle assembly on MariaDB:");
 			rs = st.executeQuery("show variables like 'innodb_buffer_pool_size'");
 			if (rs.next()) {
 				long packet = rs.getLong(2);
 				
-				System.err.println("   innodb_buffer_pool_size=" + packet);
-				if (packet< 134217728) {
-					cntFlag++;
-					System.err.println("   Suggest: SET GLOBAL innodb_buffer_pool_size=1073741824;");
-				}
+				Out.PrtSpMsg(2, "innodb_buffer_pool_size=" + packet);
+				if (packet< 134217728) 
+					Out.PrtSpMsg(2,"Suggest: SET GLOBAL innodb_buffer_pool_size=1073741824;");
 			}
 			
 			rs = st.executeQuery("show variables like 'innodb_flush_log_at_trx_commit'");
 			if (rs.next()) {
 				int b = rs.getInt(2);
-				System.err.println("   innodb_flush_log_at_trx_commit=" + b);
-				if (b==1) {
-					cntFlag++;
-					System.err.println("   Suggest: SET GLOBAL innodb_flush_log_at_trx_commit=0");
-				}
+				Out.PrtSpMsg(2,"innodb_flush_log_at_trx_commit=" + b);
+				if (b==1) 
+					Out.PrtSpMsg(2,"Suggest: SET GLOBAL innodb_flush_log_at_trx_commit=0");
 			}
-			
-			rs = st.executeQuery("show variables like 'local_infile'");
-			if (rs.next()) {
-				String s = rs.getString(2);
-				System.err.println("   local_infile=" + s);
-				if (s.contentEquals("no")) {
-					cntFlag++;
-					System.err.println("   Suggest: SET GLOBAL local_infile = 1;");
-					System.err.println("   For some configuration, this is necessary for runAS");
-				}
-			}
-			
-			if (cntFlag>0) System.err.println("  MySQL variables suggested changes: " + cntFlag);
-			else System.err.println("  MySQL variables are okay ");
             con.close();
             ret = true;
         }
-        catch (SQLException e)
-        {	
+        catch (SQLException e) {	
         	ErrorReport.prtReport(e, "Check MySQL variables");
             System.err.println(e.getMessage()); 
         }

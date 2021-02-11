@@ -16,7 +16,7 @@ import sng.database.Version;
 import util.database.DBConn;
 import util.database.Globalx;
 import util.database.HostsCfg;
-import util.methods.FileHelpers;
+import util.file.FileHelpers;
 import util.methods.TCWprops;
 import util.methods.Out;
 import util.methods.ErrorReport;
@@ -102,7 +102,7 @@ public class LoadLibMain
 	
 	private static void setLog() {
 		try {
-			File logDir =  new File(mLibDir, Globalx.logDir);
+			File logDir =  new File(mLibDir, Globalx.pLOGDIR);
 			if (!logDir.exists()) {
 				System.err.println("Creating project log directory ...");
 				if (!logDir.mkdir())  {

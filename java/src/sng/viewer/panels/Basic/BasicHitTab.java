@@ -205,7 +205,7 @@ public class BasicHitTab extends Tab {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
 				try {
-					theTablePanel.tableExportToFile("Hit");
+					theTablePanel.tableExportToFile(btnTable, "Hit");
 				} catch (Exception er) {ErrorReport.reportError(er, "Error copying table");
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error copying table", null);}
 			}

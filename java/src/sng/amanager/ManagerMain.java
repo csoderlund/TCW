@@ -20,7 +20,7 @@ public class ManagerMain {
 			System.out.println("Running in global debug mode");
 		}
 		if (hasArg(args, "-v")) {
-			System.out.println("Check MySQL variables and search paths");
+			System.out.println("Check variables and search paths");
 			new HostsCfg(true);
 			System.exit(0);
 		}

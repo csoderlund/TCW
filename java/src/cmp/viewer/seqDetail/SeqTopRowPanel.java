@@ -379,6 +379,7 @@ public class SeqTopRowPanel extends JPanel {
 		upperPanel.removeAll();
 		lowerPanel.removeAll();
 		theFramePanel=null;
+		theGOPanel = null; // CAS316
 		
 		nParentRow = rowNum;
 		setVisible(false);

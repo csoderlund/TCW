@@ -18,7 +18,7 @@ import sng.assem.enums.LogLevel;
 import sng.assem.enums.RF;
 import sng.database.Globals;
 import util.database.DBConn;
-import util.methods.FileHelpers;
+import util.file.FileHelpers;
 
 /*******************************************************
  * There is an Library object for each library in LIB.cfg (libid or transLib)

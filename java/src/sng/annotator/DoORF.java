@@ -33,7 +33,6 @@ package sng.annotator;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -48,13 +47,13 @@ import sng.database.Version;
 import sng.dataholders.SequenceData;
 import util.database.DBConn;
 import util.database.Globalx;
+import util.file.FileHelpers;
 import util.methods.ErrorReport;
-import util.methods.FileHelpers;
 import util.methods.Markov;
 import util.methods.Out;
 
 public class DoORF {
-	private final String orfDir = Globalx.ORFDIR;
+	private final String orfDir = Globalx.pORFDIR;
 	private final boolean debug = Globalx.debug;
 	
 	// set from CoreMain (-r {n} {-t}) when only ORFs are executed
@@ -1028,7 +1027,7 @@ public class DoORF {
 		private boolean openFiles() {
 			try {
 				Out.PrtSpMsg(3, "Writing ORF information to database and files in " + 
-							FileHelpers.removeCurrentPath(orfPath));
+							FileHelpers.removeRootPath(orfPath));
 				String dbname = runSTCWMain.getProjName();
 				if (dbname.startsWith(Globals.STCW)) dbname = dbname.substring(Globals.STCW.length());
 				
@@ -1214,7 +1213,7 @@ public class DoORF {
 			msg[idx++] += "Rule 3: Use best Markov score";
 			
 			if (!pCdsFileName.equals("-1")) {
-				String file = FileHelpers.removeCurrentPath(pCdsFileName);
+				String file = FileHelpers.removeRootPath(pCdsFileName);
 			    msg[idx++] += "        Train with sequences from CDS file: " + file;
 				bTrainFromFile=true;
 			}
@@ -1740,7 +1739,7 @@ public class DoORF {
 			try {
 				String path = orfPath + "/" + codonScoreFname;
 				Out.PrtSpMsg(3, "Compute Codon frequency and write to " + 
-						FileHelpers.removeCurrentPath(path));
+						FileHelpers.removeRootPath(path));
 				
 				BufferedWriter statsFile = new BufferedWriter(new FileWriter(path));
 				statsFile.write("## TCW Codon Usage\n");
@@ -1794,7 +1793,7 @@ public class DoORF {
 			try {
 				String path = orfPath + "/" + markovScoreFname;
 				Out.PrtSpMsg(3, "Compute Markov loglikelihood and write to " + 
-						FileHelpers.removeCurrentPath(path));
+						FileHelpers.removeRootPath(path));
 				
 				BufferedWriter hexFile = new BufferedWriter(new FileWriter(path));
 				hexFile.write("#TCW generated\n");
@@ -1932,7 +1931,7 @@ public class DoORF {
 			 int idx=0, cnt=0;
 			 try {
 				 String fastaHitPath = orfPath + "/" + hitRegionFname;
-				 Out.PrtSpMsg(3, "Train and write hit regions to " + FileHelpers.removeCurrentPath(fastaHitPath));
+				 Out.PrtSpMsg(3, "Train and write hit regions to " + FileHelpers.removeRootPath(fastaHitPath));
 				 BufferedWriter hitFile = new BufferedWriter(new FileWriter(fastaHitPath));
 					
 				 for (idx=0; idx<seqData.length; idx++) {

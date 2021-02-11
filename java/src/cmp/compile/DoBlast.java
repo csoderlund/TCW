@@ -5,9 +5,9 @@ package cmp.compile;
  */
 import java.io.*;
 
+import util.file.FileHelpers;
 import util.methods.BlastRun;
 import util.methods.ErrorReport;
-import util.methods.FileHelpers;
 import util.methods.Out;
 import cmp.compile.panels.CompilePanel;
 import cmp.database.Globals;

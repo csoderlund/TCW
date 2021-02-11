@@ -21,11 +21,12 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
-import javax.swing.event.CaretEvent;
-import javax.swing.event.CaretListener;
 
-import sng.database.Globals;
-import sng.runAS.DoGO;
+import util.database.HostsCfg;
+import util.database.DBConn;
+import util.database.Globalx;
+import util.file.FileC;
+import util.file.FileRead;
 import util.methods.BlastArgs;
 import util.methods.ErrorReport;
 import util.methods.Out;
@@ -33,8 +34,6 @@ import util.methods.Static;
 import util.methods.TCWprops;
 import util.ui.ButtonComboBox;
 import util.ui.UserPrompt;
-import util.database.HostsCfg;
-import util.database.DBConn;
 
 /****************************************************
  * Options button on Main Panel opens this window.
@@ -56,18 +55,18 @@ public class AnnoOptionsPanel extends JPanel {
 	private static final int INDENT_RADIO = 25;
 	
 	public AnnoOptionsPanel(ManagerFrame parentFrame) {
-		theParentFrame = parentFrame;
+		theManFrame = parentFrame;
 		
 		try { // created before we know what type sTCW is
 		pnlAnnoDBOptions = new JPanel();
 		pnlAnnoDBOptions.setLayout(new BoxLayout(pnlAnnoDBOptions, BoxLayout.PAGE_AXIS));
-		pnlAnnoDBOptions.setBackground(Globals.BGCOLOR);
+		pnlAnnoDBOptions.setBackground(Globalx.BGCOLOR);
 		pnlAnnoDBOptions.setAlignmentX(Component.LEFT_ALIGNMENT);
 		pnlAnnoDBOptions.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		
 		JPanel innerPanel = new JPanel();
 		innerPanel.setLayout(new BoxLayout(innerPanel, BoxLayout.PAGE_AXIS));
-		innerPanel.setBackground(Globals.BGCOLOR);
+		innerPanel.setBackground(Globalx.BGCOLOR);
 		innerPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
 		JPanel row = Static.createRowPanel();
@@ -91,7 +90,7 @@ public class AnnoOptionsPanel extends JPanel {
 		
 		// buttons
 		JButton btnResetDefaults = new JButton("Reset To Default");
-		btnResetDefaults.setBackground(Globals.BGCOLOR);
+		btnResetDefaults.setBackground(Globalx.BGCOLOR);
 		btnResetDefaults.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				setDefaults();
@@ -99,34 +98,34 @@ public class AnnoOptionsPanel extends JPanel {
 		});
 
 		JButton btnKeep = new JButton("Keep");
-		btnKeep.setBackground(Globals.BGCOLOR);
+		btnKeep.setBackground(Globalx.BGCOLOR);
 		btnKeep.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (keep()) {
 					setVisible(false);
-					theParentFrame.setMainPanelVisible(true);
-					theParentFrame.updateUI();
-					theParentFrame.saveProject();
-					theParentFrame.setFrameMode(ManagerFrame.FRAME_MODE_MAIN);
+					theManFrame.setMainPanelVisible(true);
+					theManFrame.updateUI();
+					theManFrame.saveProject();
+					theManFrame.setFrameMode(ManagerFrame.FRAME_MODE_MAIN);
 				}
 			}
 		});
 		
 		JButton btnDiscard = new JButton("Cancel");
-		btnDiscard.setBackground(Globals.BGCOLOR);
+		btnDiscard.setBackground(Globalx.BGCOLOR);
 		btnDiscard.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				setVisible(false);
-				theParentFrame.setMainPanelVisible(true);
-				theParentFrame.setFrameMode(ManagerFrame.FRAME_MODE_MAIN);
+				theManFrame.setMainPanelVisible(true);
+				theManFrame.setFrameMode(ManagerFrame.FRAME_MODE_MAIN);
 			}
 		});
 		
 		JButton btnHelp = new JButton("Help");
-		btnHelp.setBackground(Globals.HELPCOLOR);
+		btnHelp.setBackground(Globalx.HELPCOLOR);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				UserPrompt.displayHTMLResourceHelp(theParentFrame, 
+				UserPrompt.displayHTMLResourceHelp(theManFrame, 
 						"Annotation Options Help", "html/runSingleTCW/AnnotationOptions.html");
 			}
 		});
@@ -134,7 +133,7 @@ public class AnnoOptionsPanel extends JPanel {
 		JPanel buttonRow = new JPanel();
 		buttonRow.setLayout(new BoxLayout(buttonRow, BoxLayout.LINE_AXIS));
 		buttonRow.setAlignmentX(Component.CENTER_ALIGNMENT);
-		buttonRow.setBackground(Globals.BGCOLOR);
+		buttonRow.setBackground(Globalx.BGCOLOR);
 				
 		buttonRow.add(btnKeep);
 		buttonRow.add(Box.createHorizontalStrut(15));
@@ -149,7 +148,7 @@ public class AnnoOptionsPanel extends JPanel {
 		
 		pnlAnnoDBOptions.add(buttonRow);
 		
-		setBackground(Globals.BGCOLOR);
+		setBackground(Globalx.BGCOLOR);
 		add(pnlAnnoDBOptions);
 		setVisible(false);
 		}
@@ -162,7 +161,7 @@ public class AnnoOptionsPanel extends JPanel {
 		
 		JPanel row = Static.createRowPanel();
 		chkAltStart = new JCheckBox("Use Alternative starts");
-		chkAltStart.setBackground(Globals.BGCOLOR);
+		chkAltStart.setBackground(Globalx.BGCOLOR);
 		row.add(chkAltStart);
 		innerPanel.add(row);
 		innerPanel.add(Box.createVerticalStrut(5));
@@ -206,10 +205,10 @@ public class AnnoOptionsPanel extends JPanel {
 		row.add(Box.createHorizontalStrut(INDENT_RADIO));
 		
 		chkTrainHit = new JRadioButton("Train with Best Hits (Rule 1)");
-		chkTrainHit.setBackground(Globals.BGCOLOR);
+		chkTrainHit.setBackground(Globalx.BGCOLOR);
 		chkTrainHit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				setTrain(true, false, false);
+				setTrain(true, false);
 			}	
 		});
 		row.add(chkTrainHit);
@@ -226,30 +225,38 @@ public class AnnoOptionsPanel extends JPanel {
 		innerPanel.add(row);
 		innerPanel.add(Box.createVerticalStrut(5));
 		
-		// 1.2
+		// 1.2 Train from CDS
 		row = Static.createRowPanel();
 		row.add(Box.createHorizontalStrut(INDENT_RADIO));
 		chkTrainCDSfile = new JRadioButton("Train with CDS file");
-		chkTrainCDSfile.setBackground(Globals.BGCOLOR);
+		chkTrainCDSfile.setBackground(Globalx.BGCOLOR);
 		chkTrainCDSfile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				setTrain(false, true, false);
+				setTrain(false, true);
 			}	
 		});
-		row.add(chkTrainCDSfile);
+		row.add(chkTrainCDSfile);						row.add(Box.createHorizontalStrut(5));
 
-		txtTrainCDSfile = new FileTextField(theParentFrame, FileTextField.PROJ, FileTextField.FASTA);
-		txtTrainCDSfile.setMaximumSize(txtTrainCDSfile.getPreferredSize());
-		txtTrainCDSfile.addCaretListener(new CaretListener() {
-			public void caretUpdate(CaretEvent arg0) {
-				if(txtTrainCDSfile.getText().length() > 0) {
-					setTrain(false, true, false);
-					if (txtTrainCDSfile.isProtein()) 
+		txtTrainCDSfile = Static.createTextField("", 25);
+		row.add(txtTrainCDSfile);						row.add(Box.createHorizontalStrut(5));
+		
+		btnTrainCDSfile = new JButton("...");
+		btnTrainCDSfile.addActionListener(new ActionListener()  {
+			public void actionPerformed(ActionEvent arg0) {
+				String projName = theManFrame.getProjDir();
+				FileRead fc = new FileRead(projName, FileC.bDoVer, FileC.bDoPrt);
+				
+				if (fc.run(btnTrainCDSfile, "CDS", FileC.dPROJ, FileC.fFASTA)) { 
+					if (fc.isProtein())
 						UserPrompt.showError("CDS file appears to be protein. It needs to be nucleotide.");
+					else {
+						txtTrainCDSfile.setText(fc.getRemoveFixedPath());
+						setTrain(false, true);
+					}
 				}
 			}
 		});
-		row.add(txtTrainCDSfile);
+		row.add(btnTrainCDSfile);
 		innerPanel.add(row);
 		innerPanel.add(Box.createVerticalStrut(5));
 		
@@ -304,7 +311,7 @@ public class AnnoOptionsPanel extends JPanel {
 		row.add(Box.createHorizontalStrut(INDENT_RADIO));
 		row.add(new JLabel("Search program: "));
 		cmbSearchPgms = new ButtonComboBox();
-		cmbSearchPgms.setBackground(Globals.BGCOLOR);
+		cmbSearchPgms.setBackground(Globalx.BGCOLOR);
 		Vector <String> pgm = BlastArgs.getSearchPgms();
 		for (String p: pgm) cmbSearchPgms.addItem(p);
 		cmbSearchPgms.setSelectedIndex(0); // diamond
@@ -360,7 +367,7 @@ public class AnnoOptionsPanel extends JPanel {
 		
 		cmbGODB = new ButtonComboBox();
 		cmbGODB.addItem("         None         ");
-		cmbGODB.setBackground(Globals.BGCOLOR);
+		cmbGODB.setBackground(Globalx.BGCOLOR);
 		cmbGODB.setMaximumSize(cmbGODB.getPreferredSize());
 		cmbGODB.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -377,8 +384,9 @@ public class AnnoOptionsPanel extends JPanel {
 		
 		row = Static.createRowPanel();
 		
+		// Slims from GO
 		chkSlimSubset = new JRadioButton("Slims from GO database");
-		chkSlimSubset.setBackground(Globals.BGCOLOR);
+		chkSlimSubset.setBackground(Globalx.BGCOLOR);
 		chkSlimSubset.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				setGOSlim(true, false);
@@ -391,25 +399,39 @@ public class AnnoOptionsPanel extends JPanel {
 		
 		cmbSlimSubset = new ButtonComboBox();
 		cmbSlimSubset.addItem("         None         ");
-		cmbSlimSubset.setBackground(Globals.BGCOLOR);
+		cmbSlimSubset.setBackground(Globalx.BGCOLOR);
 		cmbSlimSubset.setMaximumSize(cmbSlimSubset.getPreferredSize());
 		cmbSlimSubset.setEnabled(false);
 		row.add(cmbSlimSubset);
 		innerPanel.add(row);
 		innerPanel.add(Box.createVerticalStrut(5));
 		
+		// Slims from file
 		row = Static.createRowPanel();
 		chkSlimOBOFile = new JRadioButton("Slims from OBO File");
-		chkSlimOBOFile.setBackground(Globals.BGCOLOR);
+		chkSlimOBOFile.setBackground(Globalx.BGCOLOR);
 		chkSlimOBOFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				setGOSlim(false, true);
 			}	
 		});
 		row.add(chkSlimOBOFile);
-		txtSlimOBOFile = new FileTextField(theParentFrame, FileTextField.PROJ, FileTextField.OBO);
-		txtSlimOBOFile.setMaximumSize(txtSlimOBOFile.getPreferredSize());
-		row.add(txtSlimOBOFile);
+		
+		txtSlimOBOFile = Static.createTextField("", 25);
+		row.add(txtSlimOBOFile);						row.add(Box.createHorizontalStrut(5));
+		
+		btnSlimOBOFile = new JButton("...");
+		btnSlimOBOFile.addActionListener(new ActionListener()  {
+			public void actionPerformed(ActionEvent arg0) {
+				String projName = theManFrame.getProjDir();
+				FileRead fc = new FileRead(projName, FileC.bDoVer, FileC.bDoPrt);
+				
+				if (fc.run(btnSlimOBOFile, "Slim OBO", FileC.dPROJ, FileC.fOBO)) { 
+					txtSlimOBOFile.setText(fc.getRemoveFixedPath());	
+				}
+			}
+		});
+		row.add(btnSlimOBOFile);						
 		
 		innerPanel.add(row);
 		innerPanel.add(new JSeparator());
@@ -426,7 +448,7 @@ public class AnnoOptionsPanel extends JPanel {
 			Statement st = con.createStatement();
 				
 			
-			ResultSet rset = st.executeQuery("show databases LIKE '" + DoGO.goPreDB + "%'");
+			ResultSet rset = st.executeQuery("show databases LIKE '" + Globalx.goPreDB + "%'");
 			while(rset.next()) {
 				retVal.add(rset.getString(1));
 			}
@@ -468,11 +490,12 @@ public class AnnoOptionsPanel extends JPanel {
 		}
 	}
 	
-	private void setTrain(boolean bHits, boolean bCDS, boolean bUsage) {
+	private void setTrain(boolean bHits, boolean bCDS) {
 		chkTrainHit.setSelected(bHits);
 		
 		chkTrainCDSfile.setSelected(bCDS);
 		txtTrainCDSfile.setEnabled(bCDS);
+		btnTrainCDSfile.setEnabled(bCDS);
 	}
 	private void setGOSlim(boolean x, boolean y) {
 		if (x==true || y==true) {
@@ -482,7 +505,8 @@ public class AnnoOptionsPanel extends JPanel {
 			
 			chkSlimOBOFile.setEnabled(true);
 			txtSlimOBOFile.setEnabled(y);
-			chkSlimOBOFile.setSelected(y);
+			btnSlimOBOFile.setEnabled(y);
+			chkSlimOBOFile.setSelected(y);	
 		}
 		else {
 			chkSlimSubset.setEnabled(false);
@@ -491,7 +515,9 @@ public class AnnoOptionsPanel extends JPanel {
 			
 			chkSlimOBOFile.setEnabled(false);
 			txtSlimOBOFile.setEnabled(false);
+			btnSlimOBOFile.setEnabled(false);
 			chkSlimOBOFile.setSelected(false);
+			
 		}
 	}
 	private void setParamDefaults () {
@@ -589,12 +615,12 @@ public class AnnoOptionsPanel extends JPanel {
 		txtLenDiff.setText(annoObj.getORFlenDiff());
 		
 		txtTrainMinSet.setText(annoObj.getORFtrainMinSet());
-		setTrain(true, false, false);
+		setTrain(true, false);
 		
 		file = annoObj.getORFtrainCDSfile();
 		if (file !=null && !file.equals("") && !file.equals("-1")) {
 			txtTrainCDSfile.setText(file);
-			setTrain(false, true, false);
+			setTrain(false, true);
 		}
 	}
 	
@@ -737,7 +763,7 @@ public class AnnoOptionsPanel extends JPanel {
 	private TCWprops mProps=null;
 	private HostsCfg hostsObj = null;
 	private ManagerData curManData = null;
-	private ManagerFrame theParentFrame=null;
+	private ManagerFrame theManFrame=null;
 	private boolean isAAdb=false;
 	
 	//Anno controls
@@ -754,7 +780,8 @@ public class AnnoOptionsPanel extends JPanel {
 	private ButtonComboBox cmbSlimSubset = null;
 	
 	private JRadioButton chkSlimOBOFile=null;
-	private FileTextField txtSlimOBOFile = null;
+	private JTextField txtSlimOBOFile = null;
+	private JButton   btnSlimOBOFile = null;
 	
 	// ORF
 	private JCheckBox chkAltStart = null;
@@ -763,7 +790,9 @@ public class AnnoOptionsPanel extends JPanel {
 	
 	private JRadioButton  chkTrainHit=null, chkTrainCDSfile=null;
 	private JTextField 	  txtTrainMinSet=null;
-	private FileTextField txtTrainCDSfile = null;
+	
+	private JTextField txtTrainCDSfile = null;
+	private JButton btnTrainCDSfile = null;
 	
 	// Similarity
 	private JCheckBox     chkSelfN = null, chkSelfX=null, chkSelfP=null;

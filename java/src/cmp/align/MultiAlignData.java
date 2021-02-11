@@ -37,7 +37,7 @@ public class MultiAlignData {
 	private int    nMSTATX=0;
 	
 	private final int    SEQUENCE_LINE_LENGTH = 80;
-	private final String BASEDIR =  Globalx.ALIGNDIR;
+	private final String BASEDIR =  Globalx.rALIGNDIR;
 	
 	private final String inFileName =     	"inSeq.fa";
 	private final String outFileName =    	"outAln.fa";

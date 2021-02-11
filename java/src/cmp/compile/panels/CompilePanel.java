@@ -300,7 +300,6 @@ public class CompilePanel extends JPanel {
 			Out.Print("\nLoading " + Out.mkPathRelative(Globals.PROJECTDIR, cfg.getAbsolutePath()));
 			
 			TCWprops props = new TCWprops(TCWprops.PropType.Cmp); 
-			mTCWcfgClear(props);
 			props.loadMTCWcfg(cfg);	
 			
 			mTCWcfgReadFile(props);
@@ -352,29 +351,19 @@ public class CompilePanel extends JPanel {
 			
 			// aa selfblast
 			int tp = Globals.AA;
-			String aa = props.getProperty("MTCW_search_file").trim();
-			if (!aa.equals("")) {
-				editPanel.cfgSetBlast(tp, aa);
+			String aa = props.getProperty("MTCW_DBsearch_pgm").trim();
+			if (!aa.equals("")) editPanel.cfgSetPgm(tp, aa);
 				
-				aa = props.getProperty("MTCW_DBsearch_pgm").trim();
-				if (!aa.equals("")) editPanel.cfgSetPgm(tp, aa);
-				
-				aa = props.getProperty("MTCW_search_params").trim(); // Must be after cfgSetPgm
-				if (!aa.equals("")) editPanel.cfgSetParams(tp, aa);
-			}
+			aa = props.getProperty("MTCW_search_params").trim(); // Must be after cfgSetPgm
+			if (!aa.equals("")) editPanel.cfgSetParams(tp, aa);
 			
 			// nt selfblast
 			tp = Globals.NT;
 			String runBlastNT = props.getProperty("MTCW_run_blastn"); 
 			if (runBlastNT.equals("0")) editPanel.cfgFileNoBlastN();
-			else {
-				String nt = props.getProperty("MTCW_blastn_file").trim();
-				if (!nt.equals("")) {
-					editPanel.cfgSetBlast(tp, nt);
-						
-					nt = props.getProperty("MTCW_blastn_params").trim();
-					if (!nt.equals("")) editPanel.cfgSetParams(tp, nt);
-				}
+			else {		
+				String nt = props.getProperty("MTCW_blastn_params").trim();
+				if (!nt.equals("")) editPanel.cfgSetParams(tp, nt);
 			}
 		// updates Method panel
 			String method = "";
@@ -405,55 +394,12 @@ public class CompilePanel extends JPanel {
 		catch(Exception e) {return "";}
 	}
 	
-	private void mTCWcfgClear(TCWprops props) {
-		try {
-			if(props.containsKey("MTCW_db")) props.setProperty("MTCW_db", "");
-			if(props.containsKey("MTCW_host")) props.setProperty("MTCW_host", "");
-			if(props.containsKey("MTCW_blast_file")) props.setProperty("MTCW_blast_file", "");
-			if(props.containsKey("MTCW_blast_params")) props.setProperty("MTCW_blast_params", "");
-			if(props.containsKey("MTCW_blast_filter")) props.setProperty("MTCW_blast_filter", "");
-			if(props.containsKey("MTCW_blastn_file")) props.setProperty("MTCW_blastn_file", "");
-			if(props.containsKey("MTCW_blastn_params")) props.setProperty("MTCW_blastn_params", "");
-			if(props.containsKey("MTCW_blastn_filter")) props.setProperty("MTCW_blastn_filter", "");
-			
-			boolean doneRead = false;
-			for(int x=1; !doneRead; x++) {
-				if(props.containsKey("CLST_method_name"+x)) {
-					props.setProperty("CLST_method_name"+x, "");
-					props.setProperty("CLST_method_type"+x, "");
-					props.setProperty("CLST_method_prefix"+x, "");
-					props.setProperty("CLST_file"+x, "");
-					props.setProperty("CLST_comment"+x, "");
-					props.setProperty("CLST_settings"+x, "");
-				}
-				else
-					doneRead = true;
-			}
-			
-			doneRead = false;
-			for(int x=1; !doneRead; x++) {
-				if(props.containsKey("STCW_db"+x)) {
-					props.setProperty("STCW_db"+x, "-");
-					props.setProperty("STCW_assem"+x, "");
-					props.setProperty("STCW_host"+x, "");
-					props.setProperty("STCW_AAFile"+x, "");
-					props.setProperty("STCW_remark"+x, "");
-				}
-				else
-					doneRead = true;
-			}
-		} catch(Exception e) {ErrorReport.reportError(e);}
-	}	
 	public boolean mTCWcfgNew() {
 		try {
 			File cfg = mTCWcfgGetFile(false);
-			if (cfg==null) return false;
 			
 			PrintWriter out = new PrintWriter(cfg.getAbsoluteFile());
 			out.print("MTCW_db = " + pnlProject.getDBName() + "\n");
-			
-			//String file = pnlBlast.getDefaultBlastDirRelPath() + "/" + Globals.CompilePanel.BLAST_AA_TAB;
-			out.print("MTCW_blast_file = \n");
 			out.close();
 			
 			return true;
@@ -463,39 +409,31 @@ public class CompilePanel extends JPanel {
 	public boolean mTCWcfgSave() {
 		try{
 			File cfg = mTCWcfgGetFile(false);	
-			if (cfg==null) return false;
-			
-			// I added the copy because I think I lose mTCW.cfg sometimes somehow.
-			// FileHelpers.copyFile(cfg, new File (cfg.getAbsoluteFile()+"~"));
 			
 			PrintWriter out = new PrintWriter(cfg.getAbsoluteFile());
 			out.print("MTCW_db = " + pnlProject.getDBName() + "\n");
 			
+			// CAS316 added # comments and only prints what is different from default
+			out.print("\n# Search\n");
 			EditBlastPanel editPanel = pnlBlast.getEditPanel();
 			int tp = Globals.AA;
-			if (editPanel.isBlast(tp)) { // always on
-				out.print("\n");
-				// Always print search program 
-				out.print("MTCW_DBsearch_pgm = " + editPanel.getSearchPgm(tp) + "\n");
-				String file = editPanel.getBlastFileToProcess(tp);
-				out.print("MTCW_search_file = " + file + "\n");
+			if (editPanel.isBlast(tp)) { // always on 
+				String pgm = editPanel.getSearchPgm(tp);
+				if (!pgm.contentEquals("diamond"))
+					out.print("MTCW_DBsearch_pgm = " + pgm + "\n");
 				
-				if(!editPanel.getBlastParams(tp).equals(BlastArgs.getBlastArgsDB()))
-					out.print("MTCW_search_params = " + editPanel.getBlastParams(tp) + "\n");	
+				String args = editPanel.getBlastParams(tp);
+				if(!args.equals(BlastArgs.getArgsORF(pgm)))
+					out.print("MTCW_search_params = " + args + "\n");	
 			}
-			
 			tp = Globals.NT;
 			if (editPanel.isBlast(tp)) {
-				out.print("\n");
-				String file = editPanel.getBlastFileToProcess(tp);
-				out.print("MTCW_blastn_file = " + file + "\n");
-				
 				if(!editPanel.getBlastParams(tp).equals(BlastArgs.getBlastnArgs()))
 					out.print("MTCW_blastn_params = " + editPanel.getBlastParams(tp) + "\n");
 			}
 			else out.print("MTCW_run_blastn = 0\n");
 			
-			out.print("\n");
+			out.print("\n# sTCWdbs\n");
 			out.flush();
 			int id = 1;
 			for(int x=0; x<pnlSpecies.getNumRows(); x++) {
@@ -508,6 +446,7 @@ public class CompilePanel extends JPanel {
 			}
 			out.flush();
 			
+			out.print("\n# Methods\n");
 			id = 1;
 			for(int x=0; x<pnlMethod.getNumRows(); x++) {
 				out.print("CLST_method_type" + id + " = " + pnlMethod.getMethodTypeAt(x) + "\n");
@@ -578,7 +517,7 @@ public class CompilePanel extends JPanel {
 		return temp.getAbsolutePath();
 	}
 	public String getCurProjRelDir() { 
-		return Globals.PROJECTDIR + "/" + pnlProject.getCurProjName() + "/";
+		return Globals.PROJECTDIR + "/" + pnlProject.getCurProjName() + "/"; // CAS316 removed ./
 	}
 	public String getCurProjMethodDir() { 
 		try { // its made on startup, but just to be sure it wasn't removed.

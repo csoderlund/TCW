@@ -24,6 +24,8 @@ import util.methods.Out;
 import util.methods.BestAnno;
 
 public class MethodLoad {
+	private final static String iDELIM = Globals.Methods.inDELIM;
+	
 	private static int debug=0; // >0 state out many records to output before dieing
 	private static final String uniqueID = Globals.uniqueID;
 	private static final String errorID = "Error";
@@ -39,7 +41,12 @@ public class MethodLoad {
 		Out.PrtDateMsg("\nStart execution of " + Globals.Methods.UserDef.TYPE_NAME);
 		
 		methodPanel = panel.getMethodPanel();
-		String [] settings = methodPanel.getSettingsAt(idx).split(":");	
+		String [] settings = methodPanel.getSettingsAt(idx).split(iDELIM);
+		
+		if (settings.length<2) {
+			Out.PrtErr("User defined: must have a file to load in mTCW.cfg parameters");
+			return false;
+		}
 		groupFile = settings[1];
 		cmpPanel = panel;
 		prefix = methodPanel.getMethodPrefixAt(idx);

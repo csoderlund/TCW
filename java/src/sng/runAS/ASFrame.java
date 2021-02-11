@@ -45,13 +45,13 @@ public class ASFrame extends JDialog implements WindowListener{
 	private boolean isDemo = ASMain.isDemo; // upDir: demo5, GO Date: 2016-03-01, goDB: go_demo 
 	
 	private final String subset = DoUP.subset;
-	private final String rootDir = "./projects/DBfasta";
-	private final String upDir = rootDir + "/UniProt_";
-	private final String goDir = rootDir + "/GO_tmp";
-	private final String goPreDB = DoGO.goPreDB;
+	private final String rootDir = Globalx.ANNODIR; // projects/DBfasta
+	private final String upDir =   rootDir + "/UniProt_";
+	private final String goDir =   rootDir + "/GO_tmp";
+	private final String goPreDB = Globalx.goPreDB;
 	
-	private final String cfgPrefix = "./projects/AnnoDBs_"; // UniProt_date is added
-	private final String cfgSuffix = ".cfg"; // CAS315 added
+	private final String cfgPrefix = Globalx.PROJDIR +  "/AnnoDBs_"; // UniProt_date is added; CAS316 remove ./
+	private final String cfgSuffix = Globalx.CFG; // CAS315 added
 	
 	private final String helpDir = "html/runAS/ASFrame.html";
 	

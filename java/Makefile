@@ -35,6 +35,7 @@ JAVA_FILES=	./src/sng/runDE/*.java \
            	./src/cmp/viewer/table/*.java	\
            	./src/util/align/*.java \
            	./src/util/database/*.java \
+           	./src/util/file/*.java \
            	./src/util/methods/*.java \
            	./src/util/ui/*.java
 	   		

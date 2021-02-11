@@ -70,8 +70,6 @@ public final class Globals {
 	
 	// Compile and viw: Cutoff for Pearson's Correlation Coefficient for perPCC
 	public static final double PCCcutoff = 0.8;
-	
-	
 
 	public static class Ext { 
 		public final static int MUSCLE = 0;
@@ -95,7 +93,7 @@ public final class Globals {
 	}
 	
 	public static class Search {
-		public static final String BLASTDIR = Globalx.BLASTDIR; // searchResults
+		public static final String BLASTDIR 	= Globalx.pHITDIR; // hitResults
 		public static final String ALL_AA_FASTA = "combineAA.fa";
 		public static final String ALL_NT_FASTA = "combineNT.fa";
 		public static final String BLAST_AA_TAB = "hitsAA.tab";
@@ -104,7 +102,8 @@ public final class Globals {
 	
 	public static class Methods {
 		public static final String METHODDIR = "Methods";
-		public final static String METHODS_DELIM = "x";
+		public final static String outDELIM = "x";
+		public final static String inDELIM = ":";
 		public static final int WIDTH = 110;
 		
 		public static class BestRecip {	// also AA/NT; Change both/either default to both

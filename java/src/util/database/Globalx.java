@@ -9,8 +9,8 @@ import java.text.DecimalFormat;
 public class Globalx {
 	public static boolean debug = false; // changed in STCWMain or MTCWMain from command line 
 	
-	public static final String strRelDate = "(28-Jan-21)"; 
-	public static final String strTCWver = "3.1.5"; // when everything is updated, make 3.2
+	public static final String strRelDate = "(11-Feb-21)"; 
+	public static final String strTCWver = "3.1.6"; 
 	public static final String URL = "http://www.agcol.arizona.edu ";
 	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate;
 	public static final String error="***";
@@ -24,28 +24,29 @@ public class Globalx {
 	public static final String HOSTS = 		"HOSTS.cfg";
 	public static final String STCW 	= 	"sTCW_"; 
 	public static final String MTCW 	= 	"mTCW_"; 
-	
+	public static final String CFG		= 	".cfg";
+	public static final String goPreDB = "go_";
+
 	// on MAC, directory names are case in-sensitive
-	public static final String LIBDIR 	= "projects"; // 11/18/18 libraries directory merged with projects
-	public static final String PROJDIR 	= "projects";
+	public static final String PROJDIR 	= "projects";// 11/18/18 libraries directory merged with projects
 	public static final String CMPDIR 	= "projcmp";
-	public static final String RDIR 	= "R-scripts";
+	public static final String RSCRIPTSDIR 	= "R-scripts";
 	
 	// Under projects directory
 	public static final String ANNOSUBDIR =  "DBfasta";
 	public static final String ANNODIR 	= 	 PROJDIR + "/DBfasta";
-	public static final String USERDIR = 	"Userfiles";   // under projects directory for user
+	public static final String USERDIR = 	"Userfiles";   
 	public static final String HTMLDIR = 	"OverviewHTML";
 	
 	// for specific project
-	public final static String logDir  	=   "logs";
-	public static final String BLASTDIR = 	"hitResults";  // runSingle: results from annotation; runMulti: self-blast
-	public static final String ORFDIR = 	"orfFiles";
+	public final static String pLOGDIR =   "logs";
+	public static final String pHITDIR = 	"hitResults";  // runSingle: results from annotation; runMulti: self-blast
+	public static final String pORFDIR = 	"orfFiles";
 	
 	// TCW directory for viewSingle and viewMulti to put results the user can view
-	public static final String HITDIR =   	"ResultHits"; // viewSingle: sequences are written and blasts occur
-	public static final String ALIGNDIR = 	"ResultAlign"; // viewMulti: results of multi align 
-	public static final String EXPORTDIR= 	"ResultExport";
+	public static final String rHITDIR =   	"ResultHits"; // viewSingle: sequences are written and blasts occur
+	public static final String rALIGNDIR = 	"ResultAlign"; // viewMulti: results of multi align 
+	public static final String rEXPORTDIR= 	"ResultExport";
 	
 	public static final String [] fastaFile = new String [] 
 			{"fa","fa.gz", "fasta", "fasta.gz",  "fna", "ffn", "faa", "frn", "fna.gz", "ffn.gz", "faa.gz", "frn.gz"};
@@ -66,8 +67,11 @@ public class Globalx {
 	public static final String typeNT = "NT";
 	public static final String typeORF = "ORF";
 	
+	// for writing files - repeated in FileC
 	public static final String CSV_DELIM = "\t";
 	public static final String CSV_SUFFIX = ".tsv"; 
+	public static final String TSV_DELIM = "\t";
+	public static final String TSV_SUFFIX = ".tsv"; 
 	public static final String FASTA_SUFFIX = ".fa";
 	public static final String TEXT_SUFFIX = ".txt";
 	
@@ -114,8 +118,8 @@ public class Globalx {
 	public static final String blosumLt = "Substitution<0";
 	public static final String AA_POS ="+"; // aa pos sub
 	public static final String AA_NEG =" "; // aa neg sub
-	public static final char  cAA_POS ='+'; // aa pos sub
-	public static final char  cAA_NEG =' '; // aa neg sub
+	public static final char   cAA_POS ='+'; // aa pos sub
+	public static final char   cAA_NEG =' '; // aa neg sub
 	
 	public static final Color anyHang 	= new Color(180, 180, 180); // mediumGray
 	public static final Color anyUnk	= Color.cyan;

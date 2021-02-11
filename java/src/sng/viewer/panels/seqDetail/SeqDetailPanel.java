@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import util.database.Globalx;
+import util.file.FileHelpers;
 import sng.database.Globals;
 import sng.database.MetaData;
 import sng.dataholders.CodingRegion;
@@ -37,11 +38,11 @@ import sng.dataholders.ContigData;
 import sng.dataholders.MultiCtgData;
 import sng.dataholders.SequenceData;
 import sng.viewer.STCWFrame;
-import sng.util.ExportFile;
+import util.file.FileC;
+import util.file.FileWrite;
 import util.methods.ErrorReport;
 import util.methods.Static;
 import util.methods.Out;
-import util.methods.FileHelpers;
 import util.ui.MenuMapper;
 import util.ui.MultilineTextPanel;
 import util.ui.UIHelpers;
@@ -229,7 +230,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		copypopup.add(new JMenuItem(new AbstractAction("Sequence") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
-				saveTextToClipboard(getUnitransString());
+				saveTextToClipboard(getSequence());
 			}
 		}));
 		
@@ -298,7 +299,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		exportpopup.add(new JMenuItem(new AbstractAction("Sequence (fasta)") {
 			private static final long serialVersionUID = -4657464918724936018L;
 			public void actionPerformed(ActionEvent e) {
-				ExportFile.saveTextToFile(getUnitransString(), "Seq" + Globalx.FASTA_SUFFIX, theMainFrame);
+				fwObj.writeText(btnExport, "Seqs", "Seq", FileC.fFASTA, FileC.wAPPEND, getSequence());
 			}			
 		}));
 		
@@ -306,7 +307,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 			exportpopup.add(new JMenuItem(new AbstractAction("Aligned reads (fasta)") {
 				private static final long serialVersionUID = -8613746472039641395L;
 				public void actionPerformed(ActionEvent e) {
-					ExportFile.saveTextToFile(getAlignedReads(), "Reads" + Globalx.FASTA_SUFFIX, theMainFrame);
+					fwObj.writeText(btnExport, "Reads", "Reads", FileC.fFASTA, FileC.wAPPEND, getAlignedReads());
 				}
 			}));
 		}
@@ -314,12 +315,12 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 			exportpopup.add(new JMenuItem(new AbstractAction("DB hits (fasta)") {
 				private static final long serialVersionUID = 424842778593736605L;
 				public void actionPerformed(ActionEvent arg0) {
-					ExportFile.saveTextToFile(getAllDBHitsString(), "DBhits" + Globalx.FASTA_SUFFIX, theMainFrame);
+					fwObj.writeText(btnExport, "DB hits", "DBhits", FileC.fFASTA, FileC.wAPPEND, getAllDBHitsString());
 				}
 			}));
 		}
-		JButton jbExport = Static.createButton("Export...", true);
-		jbExport.addMouseListener(new MouseAdapter() {
+		btnExport = Static.createButton("Export...", true);
+		btnExport.addMouseListener(new MouseAdapter() {
 	            public void mousePressed(MouseEvent e) {
 	                exportpopup.show(e.getComponent(), e.getX(), e.getY());
 	            }
@@ -341,7 +342,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		
 		toolPanel.add( Box.createHorizontalStrut(40) );
 		toolPanel.add( jbCopy );					toolPanel.add( Box.createHorizontalStrut(5) );
-		toolPanel.add( jbExport );				toolPanel.add( Box.createHorizontalStrut(20) );
+		toolPanel.add( btnExport );				toolPanel.add( Box.createHorizontalStrut(20) );
 		
 		toolPanel.add( Box.createHorizontalGlue() );
 		toolPanel.add( btnHelp );				toolPanel.add( Box.createHorizontalStrut(5) );
@@ -926,7 +927,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 	/*****************************************************
 	 * Export functions
 	 */
-	private String getUnitransString() {
+	private String getSequence() {
 		String retVal = ">" + ctgData.getContigID() + "  len=" + 
 			ctgData.getSeqData().getLength() + "\n";
 		retVal += ctgData.getSeqData().getSequence() + "\n";
@@ -1318,10 +1319,13 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 	private JComboBox <MenuMapper> menuLib = null;
 	private JComboBox <MenuMapper> menuHit = null;
 	
+	private JButton btnExport = null;
+	
 	private STCWFrame theMainFrame = null; 
 	private MetaData metaData = null;
 	
 	private String [][] rows = null;
 	private HitTableModel theModel = null;
 	private String norm="RPKM"; // CAS304
+	private FileWrite fwObj = new FileWrite(FileC.bNoVer, FileC.bNoPrt); // CAS316
 }

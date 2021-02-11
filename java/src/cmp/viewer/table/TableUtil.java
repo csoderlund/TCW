@@ -34,7 +34,6 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JRadioButton;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -51,6 +50,8 @@ import cmp.database.Globals;
 import cmp.viewer.MTCWFrame;
 import util.database.DBConn;
 import util.database.Globalx;
+import util.file.FileC;
+import util.file.FileWrite;
 import util.methods.BlastArgs;
 import util.methods.ErrorReport;
 import util.methods.Out;
@@ -61,11 +62,9 @@ import util.ui.UIHelpers;
 import util.ui.UserPrompt;
 
 public class TableUtil {
-	private final String delim=Globalx.CSV_DELIM;
-	private final String tabSuf = Globals.CSV_SUFFIX;
-	private final String faSuf = Globals.FASTA_SUFFIX;
+	private final String delim =  FileC.TSV_DELIM;
 	
-	private static final String BLASTDIR = Globalx.HITDIR; 
+	private static final String BLASTDIR = Globalx.rHITDIR; 
 	private static final String ID_SQL = FieldData.SEQ_SQLID; 
 	private static final String ID1_SQL = FieldData.ID1_SQLID; 
 	private static final String ID2_SQL = FieldData.ID2_SQLID; 
@@ -160,7 +159,7 @@ public class TableUtil {
 	}
 	    
 	// works for all three tables
-	public void exportTableTab(SortTable theTable, int typeTable) {
+	public void exportTableTab(Component btnTable, SortTable theTable, int typeTable) {
 	try {
 		String prefix="UNK";
 		if (typeTable==Globals.bGRP) prefix = GrpPrefix;
@@ -168,7 +167,7 @@ public class TableUtil {
 		else if (typeTable==Globals.bSEQ) prefix = SeqPrefix;
 		else if (typeTable==Globals.bHIT) prefix = HitPrefix;
 		
-		BufferedWriter outFH = getWriter(prefix + tabSuf);
+		BufferedWriter outFH = fwObj.getBWriter(btnTable, prefix, prefix, FileC.fTSV, FileC.wAPPEND);
 		if (outFH==null) return; // user cancels
 		
 		// print header line
@@ -208,11 +207,11 @@ public class TableUtil {
 	/******************************************************************
 	 * Export sequences from cluster table
 	 */
-	 public void exportGrpSeqFa(TableData theTableData, String column) {
+	 public void exportGrpSeqFa(Component btnTable, TableData theTableData, String column) {
 		try { 
 			int n = theTableData.getNumRows();
-			String name = column + n + "Clusters" + faSuf;
-			BufferedWriter out = getWriter(name);
+			String name = column + n + "Clusters";
+			BufferedWriter out = fwObj.getBWriter(btnTable, name, name, FileC.fFASTA, FileC.wAPPEND);
 			if (out==null) return;
 			
 			int SQLidx = theTableData.getColumnHeaderIndex(GRP_SQL);
@@ -251,15 +250,15 @@ public class TableUtil {
 	/******************************************************************
 	 * export both pairs of sequences from the pair table
 	 */
-	 public void exportPairSeqFa(TableData theTableData, int pair, String column) {//pair=0 both, 1=first, 2=second
+	 public void exportPairSeqFa(Component btnTable, TableData theTableData, int pair, String column) {//pair=0 both, 1=first, 2=second
 		try { 
 			String file, msg;
 			String msg2= column;
-			if (pair==0)      {file = msg2 + "Pair.fa";  msg="both " + msg2 + " pairs";}
-			else if (pair==1) {file = msg2 + "1st.fa";   msg="1st " + msg2 + " pairs";}
-			else              {file = msg2 + "2nd.fa";   msg="2nd " + msg2 + " pairs";}
+			if (pair==0)      {file = msg2 + "Pair";  msg="both " + msg2 + " pairs";}
+			else if (pair==1) {file = msg2 + "1st";   msg="1st " + msg2 + " pairs";}
+			else              {file = msg2 + "2nd";   msg="2nd " + msg2 + " pairs";}
 			
-			BufferedWriter out = getWriter(file);
+			BufferedWriter out = fwObj.getBWriter(btnTable, msg, file, FileC.fFASTA, FileC.wAPPEND);
 			if (out==null) return;
 			
 			int IDidx1 = theTableData.getColumnHeaderIndex(ID1_SQL);
@@ -305,10 +304,10 @@ public class TableUtil {
 	 /******************************************************************
 	  * Export sequences from sequence table
 	  */
-	 public void exportSeqFa(int [] seqID, String column, boolean isCDS) {
+	 public void exportSeqFa(Component btnTable, int [] seqID, String column, boolean isCDS) {
 		try { 
 			String fname = (isCDS) ? "cdsSeq" : column;
-			BufferedWriter out = getWriter(fname + faSuf);
+			BufferedWriter out = fwObj.getBWriter(btnTable, fname, fname, FileC.fFASTA, FileC.wAPPEND);
 			if (out==null) return;
 			
 			DBConn dbc = theViewerFrame.getDBConnection();	
@@ -338,10 +337,10 @@ public class TableUtil {
 	  * Export counts or TPM per cluster
 	  * CAS305
 	  */
-	 public void exportGrpCounts(TableData theTableData, String summary, boolean bdoCnt) {
+	 public void exportGrpCounts(Component btnTable, TableData theTableData, String summary, boolean bdoCnt) {
 		try { 
 			String fname = (bdoCnt) ? "ClusSeqCounts" : "ClusSeqTPM";
-			BufferedWriter out = getWriter(fname + tabSuf);
+			BufferedWriter out = fwObj.getBWriter(btnTable, fname, fname, FileC.fTSV, FileC.wAPPEND);;
 			if (out==null) return;
 			
 			int nRows = theTableData.getNumRows();
@@ -391,7 +390,7 @@ public class TableUtil {
 	 * XXX Export GOs - Export all cluster GOs 
 	 * Get all sequences for the Cluster
 	 */
-	public void exportGrpGO(TableData theTableData, String summary) {
+	public void exportGrpGO(Component btnTable, TableData theTableData, String summary) {
 	try {
 		int n = theTableData.getNumRows();
 		int idx1 = theTableData.getColumnHeaderIndex(GRP_SQL);
@@ -410,12 +409,12 @@ public class TableUtil {
 			}
 		}
 		if (rs!=null) rs.close(); dbc.close();
-		exportGO(grpID, seqID, n, "Cluster", summary, GrpPrefix); 
+		exportGO(btnTable, grpID, seqID, n, "Cluster", summary, GrpPrefix); 
 	}
 	catch (Exception e) {ErrorReport.reportError(e, "Export GO for clusters");}
 	}
 	// Pairs table - Export GOs for all sequences in Pairs 
-	public void exportPairGO(TableData theTableData, String summary) {
+	public void exportPairGO(Component btnTable, TableData theTableData, String summary) {
 	try {
 		int n = theTableData.getNumRows();
 		int idx1 = theTableData.getColumnHeaderIndex(ID1_SQL);
@@ -429,12 +428,12 @@ public class TableUtil {
 			seqID.add(id1); grpID.add(i);
 			seqID.add(id2); grpID.add(i);
 		}
-		exportGO(grpID, seqID, n, "Pairs", summary, PairPrefix);
+		exportGO(btnTable, grpID, seqID, n, "Pairs", summary, PairPrefix);
 	}
 	catch (Exception e) {ErrorReport.reportError(e, "Export GO for pairs");}	
 	}
 	// "Export all GOs for sequences "
-	public void exportSeqGO(TableData theTableData, String summary) {
+	public void exportSeqGO(Component btnTable, TableData theTableData, String summary) {
 		try {
 			int n = theTableData.getNumRows();
 			int idx = theTableData.getColumnHeaderIndex(ID_SQL);
@@ -445,7 +444,7 @@ public class TableUtil {
 				seqID.add(id);
 				grpID.add(i);
 			}
-			exportGO(grpID, seqID, n, "Seqs", summary, SeqPrefix);
+			exportGO(btnTable, grpID, seqID, n, "Seqs", summary, SeqPrefix);
 		}
 		catch (Exception e) {ErrorReport.reportError(e, "Export GO for sequences");}	
 	}
@@ -454,7 +453,7 @@ public class TableUtil {
 	 * grpid and seqid correspond, a grpID for each seqid
 	 * Percentage is based on #Seqs, #Pairs, #Groups (numSet)
 	 */
-	private void exportGO(Vector <Integer> grpList, Vector <Integer> seqList, 
+	private void exportGO(Component btnTable, Vector <Integer> grpList, Vector <Integer> seqList, 
 			int numSet, String label, String summary, String filePrefix) {
 		try {
 			final ExportGO et = new ExportGO();
@@ -464,7 +463,7 @@ public class TableUtil {
 			
 		// Get file name
 			String fileName = et.getGOfile(filePrefix);
-			BufferedWriter outBW = getWriter(fileName);
+			BufferedWriter outBW = fwObj.getBWriter(btnTable, fileName, fileName, FileC.fTSV, FileC.wAPPEND);;
 			if (outBW==null) return;
 						
 		// Get parameters
@@ -818,7 +817,7 @@ public class TableUtil {
     		else if (isGOCnt()) file += "_cnt";
     		else file += "_desc";
     		
-    		return file + Globalx.CSV_SUFFIX;
+    		return file;
 		}
 		private ButtonComboBox cmbTermTypes = null;
 	    private JTextField txtGOlevel = null, txtGOEval = null, txtGOCnt = null;
@@ -875,59 +874,6 @@ public class TableUtil {
 
 		return retVal.toString();
 	}
-	/*********************************************************************/
-	private static String lastSaveFilePath=null;
-	private BufferedWriter getWriter(String dName) {
- 		try {
- 			if (lastSaveFilePath==null) 
- 				lastSaveFilePath = System.getProperty("user.dir") + "/" + Globalx.EXPORTDIR;
- 			File nDir = new File(lastSaveFilePath);
- 			if (!nDir.exists()) {
- 				if (nDir.mkdir()) Out.prt("Create " + lastSaveFilePath);
- 				else {
- 					Out.PrtWarn("Cannot create " + lastSaveFilePath);
- 					lastSaveFilePath = System.getProperty("user.dir") + "/" + Globalx.EXPORTDIR;
- 				}
- 			}
- 			
-			JFileChooser fc = new JFileChooser(lastSaveFilePath);	
-			fc.setSelectedFile(new File(dName));
-			if (fc.showSaveDialog(theViewerFrame) != JFileChooser.APPROVE_OPTION) return null;
-			if (fc.getSelectedFile() == null) return null;
-			
-			File f = fc.getSelectedFile();
-			String filePath = f.getPath();
-			final File d = f.getParentFile();
-			if (!d.canWrite()) { 
-				JOptionPane.showMessageDialog(null, 
-						"You do not have permission to write to directory " + d.getName(), "Warning", JOptionPane.PLAIN_MESSAGE);
-				return null;
-			}
-			lastSaveFilePath = d.getAbsolutePath();
-			if (lastSaveFilePath.equals(System.getProperty("user.dir"))) lastSaveFilePath=null;
-			
-			boolean append=false;
-			String msg="Writing to ";
-			
-			if (f.exists()) {
-				Object[] options = {"Cancel", "Overwrite", "Append"};
-				int n = JOptionPane.showOptionDialog(theViewerFrame,
-				    "File exists: " + filePath, "File exists",
-				    JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE,
-				    null, options, options[2]);
-				if (n==0) return null;
-				
-				if (n==2) {
-					msg="Appending to ";
-					append=true;
-				}
-			}
-			Out.prt(msg + filePath + " ...");
- 			return new BufferedWriter(new FileWriter(f, append));
- 		} 
- 		catch (Exception e) {ErrorReport.prtReport(e, "Error: cannot write file");}
- 		return null;
-	 }
 	 /*********************************************************************/
 	
 	 public void runBlast(String name, String seq, boolean tabular) {
@@ -1144,4 +1090,5 @@ public class TableUtil {
 	}
 	
 	private MTCWFrame theViewerFrame = null;
+	private FileWrite fwObj = new FileWrite(FileC.bNoVer, FileC.bNoPrt);
 }

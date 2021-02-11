@@ -9,6 +9,31 @@
 <font color="#000000" face="Verdana, Arial, Helvetica, sans-serif" size="2"> 
 
 <p><b><big><u>TCW Version 3.1</u></b></big>
+<p><b>v3.1.6  11-Feb-21</b>
+
+<ul>
+<li>File Chooser
+<ul>
+<li>Only shows files with the expected file extension. However, the <b>File Format:</b> drop-down
+can be changed to "All Files" in order to select any file.
+<li>Always goes to the default directory. If the user changes to a different directory, the
+File Chooser will use that directory the next time it is used for the session.
+<li>When any file is read, its basic file structure is verified.
+</ul>
+<li>Little fixes:
+<ul>
+<li>runMulti: (1) Removed obsolete parameters. 
+(2) The 'blastn' defaults had an extra incorrect parameter (introduced in v3.1.6). (3) The
+Search "Setting" button now stays active even after search is done (so can see parameters).
+<li>viewMulti: Seq Detail: if the GOs were displayed, and then Next was used, the same GOs for
+the previous page were displayed.
+</ul>
+<li>Software 
+<ul><li>All methods (both for single and multi TCW) now use the File Chooser in the "util.file" class, with the
+exception of the <code>runAS</code> and sTCW "Count file generator".
+</ul>
+</ul>
+
 <p><b>v3.1.5  28-Jan-21</b>
 <ul>
 <li>Compressed files allowed (i.e. suffix .gz)

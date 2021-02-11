@@ -210,7 +210,7 @@ public class PairTableTab extends Tab
 				try {
 					btnTable.setEnabled(false);
 					
-					pairTable.saveToFileTabDelim("PairTableColumns" + Globalx.CSV_SUFFIX, getParentFrame());
+					pairTable.saveToFileTabDelim(btnTable, "PairTableColumns", getParentFrame());
 	       
 					btnTable.setEnabled(true);
 				}

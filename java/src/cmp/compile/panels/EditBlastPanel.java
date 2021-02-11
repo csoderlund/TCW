@@ -73,8 +73,7 @@ public class EditBlastPanel extends JPanel {
 		btnHelp.setBackground(Globals.HELPCOLOR);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(theCompilePanel.getParentFrame(), 
-						"Edit Search Settings", helpHTML);
+				UserPrompt.displayHTMLResourceHelp(theCompilePanel.getParentFrame(), "Edit Search Settings", helpHTML);
 			}
 		});
 	
@@ -108,6 +107,7 @@ public class EditBlastPanel extends JPanel {
 			row.add(new JLabel(msg)); 
 		}
 		else row.add(chkBlast[tp]);
+		
 		row.add(Box.createHorizontalStrut(3));
 		lblBlastExists[tp] = new JLabel("");
 		row.add(lblBlastExists[tp]);
@@ -124,7 +124,8 @@ public class EditBlastPanel extends JPanel {
 		
 		cmbSearchPgms[tp] = new ButtonComboBox ();
 		Vector <String> pgm = BlastArgs.getSearchPgms();
-		for (String p: pgm) cmbSearchPgms[tp].addItem(p);
+		for (String p: pgm) 
+			cmbSearchPgms[tp].addItem(p);
 		cmbSearchPgms[tp].setSelectedIndex(0); 
 
 		cmbSearchPgms[tp].setMaximumSize(cmbSearchPgms[tp].getPreferredSize());
@@ -150,7 +151,8 @@ public class EditBlastPanel extends JPanel {
 		row.add(Static.createLabel("Parameters"));
 		row.add(Box.createHorizontalStrut(5));
 		
-		msg = (tp==AA) ? BlastArgs.getDiamondArgsORF() : BlastArgs.getBlastArgsORF();
+		msg = (tp==AA) 	? BlastArgs.getDiamondArgsORF() 
+						: BlastArgs.getBlastnArgs(); 		// CAS316 was wrong in 315
 		txtParams[tp] = Static.createTextField(msg, 25);
 		row.add(Box.createHorizontalStrut(5));
 		row.add(txtParams[tp]);
@@ -248,15 +250,17 @@ public class EditBlastPanel extends JPanel {
 		String projPath = theCompilePanel.getBlastPanel().getDefaultBlastDirRelPath();
 		
 		for (int tp=0; tp<2; tp++) {
-			if (tp==0) fullBlastPath[tp] = projPath + "/"  + BLAST_AA_TAB;
-			else fullBlastPath[tp] = projPath + "/"  + BLAST_NT_TAB;
+			if (tp==0) 	fullBlastPath[tp] = projPath + "/"  + BLAST_AA_TAB;
+			else 		fullBlastPath[tp] = projPath + "/"  + BLAST_NT_TAB;
 			
 			lblBlastFile[tp].setText(fullBlastPath[tp]);
+			
 			boolean exists =  new File(fullBlastPath[tp]).exists();
 			blastExists[tp] = exists;
+			
 			String msg = (exists) ? fexists : "";
 			lblBlastExists[tp].setText(msg);
-			
+		
 			chkBlast[tp].setSelected(true);
 		}
 		updatePanel(); 
@@ -302,11 +306,11 @@ public class EditBlastPanel extends JPanel {
 	}
 	private void save() {
 		for (int i=0; i<2; i++) {
-			schkBlast[i] = chkBlast[i].isSelected();
-			slblBlastFile[i]=lblBlastFile[i].getText();
-			slblBlastExists[i]=lblBlastExists[i].getText();
-			stxtParams[i]=txtParams[i].getText();
-			scmbSearchPgms[i] = cmbSearchPgms[i].getSelectedItem();
+			schkBlast[i] 		= chkBlast[i].isSelected();
+			slblBlastFile[i]	= lblBlastFile[i].getText();
+			slblBlastExists[i]	= lblBlastExists[i].getText();
+			stxtParams[i]		= txtParams[i].getText();
+			scmbSearchPgms[i] 	= cmbSearchPgms[i].getSelectedItem();
 		}
 	}
 	private void restore() {

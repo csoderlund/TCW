@@ -5,21 +5,22 @@ package sng.viewer.panels;
  * Diamond can run blastx or blastp mode
  */
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+
 import java.sql.*;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -27,7 +28,6 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.filechooser.FileFilter;
 
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
@@ -37,21 +37,24 @@ import sng.database.MetaData;
 import sng.dataholders.SequenceData;
 import sng.util.Tab;
 import sng.viewer.STCWFrame;
+
+import util.file.FileRead;
+import util.file.FileC;
 import util.methods.BlastArgs;
-import util.ui.UserPrompt;
 import util.methods.ErrorReport;
 import util.methods.Static;
 import util.methods.Out;
 import util.database.DBConn;
 import util.database.Globalx;
+import util.ui.UserPrompt;
 
 public class BlastTab extends Tab
 {
 	private static final long serialVersionUID = 653192706293635582L;
 	private static final String helpHTML = Globals.helpDir + "BlastTab.html";
 	
-	private final String RESULTS0 = ".results" + Globalx.TEXT_SUFFIX;
-	private final String RESULTS6 = ".results" + Globalx.CSV_SUFFIX;;
+	private final String RESULTS0 = ".results" + FileC.TEXT_SUFFIX;
+	private final String RESULTS6 = ".results" + FileC.TSV_SUFFIX;;
 	private final String dbSELECT = "Select protein database";
 	private final int nCOL=47;
 	private final int nWIDTH=520;
@@ -62,7 +65,7 @@ public class BlastTab extends Tab
 		super(parentFrame, null);
 		setBackground(Color.white);
 		metaData = md;
-		theParentFrame = parentFrame;
+		theViewFrame = parentFrame;
 		isNTsTCW = metaData.isNTsTCW();
 		
 		// blastn default is megablast, so do can use same defaults 
@@ -94,7 +97,7 @@ public class BlastTab extends Tab
         JButton btnHelp = Static.createButton("Help", true, Globals.HELPCOLOR);
         btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				UserPrompt.displayHTMLResourceHelp(theParentFrame, "Find Hits", helpHTML);
+				UserPrompt.displayHTMLResourceHelp(theViewFrame, "Find Hits", helpHTML);
 			}
 		});	
 		row.add(btnHelp);
@@ -185,7 +188,12 @@ public class BlastTab extends Tab
 		btnDBfind = Static.createButton("...", false);
 		btnDBfind.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-					setSelectedDBfile();		
+				
+				FileRead fc = new FileRead("FindHit", FileC.bDoVer, FileC.bNoPrt); // CAS316
+				if (fc.run(btnDBfind, "AA-DB",  FileC.dANNO, FileC.fFASTA)) { 
+					dbSelectName = fc.getRelativeFile();
+					txtDBname.setText(FileC.removePath(dbSelectName));
+				}		
 		}});
 		row.add(btnDBfind); row.add(Box.createHorizontalStrut(2));	
 		
@@ -276,17 +284,6 @@ public class BlastTab extends Tab
 		cntlPanel.add(row);
 		cntlPanel.add(Box.createVerticalStrut(10));
 		
-		inputBlastPath = new FileTextField(30);
-		if (!BlastArgs.foundABlast())
-		{
-			blastPathPanel = Static.createPagePanel();
-			row = Static.createRowPanel();
-			row.add(new JLabel("BLAST program directory: "));
-			row.add(inputBlastPath);
-			blastPathPanel.add(row);
-			blastPathPanel.add(Box.createVerticalStrut(10));
-			cntlPanel.add(blastPathPanel);
-		}
 		row = Static.createRowPanel();
 		createStatusBar();
 		row.add(txtStatus);
@@ -320,17 +317,26 @@ public class BlastTab extends Tab
 	 */
 	private void runSearch() throws Exception
 	{		
+		if (dmndCheck.isSelected() && !BlastArgs.isDiamond()) { // CAS316
+			showErr("Diamond executable not available");
+			return;
+		}
+		if (blastCheck.isSelected() && !BlastArgs.isBlast()) {
+			showErr("Blast executable not available");
+			return;
+		}
 		String pgm = (dmndCheck.isSelected()) ? "Diamond" : "Blast";
+		
 		if (blastPathPanel != null) blastPathPanel.removeAll();
 		resultSection.removeAll();
 		pnlRealMain.revalidate();
 		resultTable = null;
 
-		baseDir = new File(Globalx.HITDIR); 
+		baseDir = new File(Globalx.rHITDIR); 
 		if(!baseDir.exists()) baseDir.mkdir();
 		
 	// Create database
-		String ID = theParentFrame.getdbID();
+		String ID = theViewFrame.getdbID();
 		createSubjectDB(ID);
 		if (dbFileName==null || dbFileName.equals("")) {
 			showErr("Cannot create search database file");
@@ -381,6 +387,10 @@ public class BlastTab extends Tab
 		String seqPath = 	new File(dbFileName).getAbsolutePath();
 		String queryPath = 	queryFile.getAbsolutePath();
 		String outPath = 	outFile.getAbsolutePath();
+		
+		seqPath = 	FileC.removeRootPath(seqPath); // CAS316
+		queryPath = FileC.removeRootPath(queryPath);
+		outPath = 	FileC.removeRootPath(outPath);
 		
 		isSubjAA = (ntSeqCheck.isSelected()) ? false : true;
 	
@@ -442,8 +452,8 @@ public class BlastTab extends Tab
 		boolean bHaveDB=false;
 		int cnt=0;
 		
-		if (seqSet.size()==0) { // get all contigIDs for showSeqDetail (need for AAdb)
-			DBConn mDB = theParentFrame.getNewDBC();
+		if (seqSet.size()==0) { // get all seqIDs for showSeqDetail (need for AAdb)
+			DBConn mDB = theViewFrame.getNewDBC();
 			ResultSet rs = mDB.executeQuery("select contigID from contig");
 			while (rs.next()) seqSet.add(rs.getString(1)); // For View Sequence
 			rs.close(); mDB.close();
@@ -459,7 +469,7 @@ public class BlastTab extends Tab
 			
 			// Write file of sequences
 			Out.prt("Create " + dbFileName);
-			DBConn mDB = theParentFrame.getNewDBC();
+			DBConn mDB = theViewFrame.getNewDBC();
 			int nclones = mDB.executeCount("select count(*) from contig");		
 			showStatus("Writing " + nclones + "  sequences to file ....");
 			
@@ -491,7 +501,7 @@ public class BlastTab extends Tab
 			
 			// Write file of ORF sequences
 			Out.prt("Create " + dbFileName);
-			DBConn mDB = theParentFrame.getNewDBC();
+			DBConn mDB = theViewFrame.getNewDBC();
 			int nclones = mDB.executeCount("select count(*) from contig");		
 			showStatus("Writing " + nclones + "  translated ORFs to file ....");
 			
@@ -530,7 +540,7 @@ public class BlastTab extends Tab
 			
 			// Write file of ORF sequences
 			Out.prt("Create " + dbFileName);
-			DBConn mDB = theParentFrame.getNewDBC();
+			DBConn mDB = theViewFrame.getNewDBC();
 			int nclones = mDB.executeCount("select count(*) from contig");		
 			showStatus("Writing " + nclones + "  AA sequences to file ....");
 			
@@ -818,48 +828,8 @@ public class BlastTab extends Tab
 		
 		txtParams.setText(dmndDefaults); 
 	}
-	private void setSelectedDBfile() {
-		try {
-			JFileChooser fc = new JFileChooser();
-			fc.setCurrentDirectory(new File(Globalx.ANNODIR));
-
-			// CAS314
-			fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
-			fc.setFileSelectionMode(JFileChooser.FILES_ONLY);	//user must select a file not folder
-			fc.setMultiSelectionEnabled(false);					//disabled selection of multiple files
-			
-			// CAS315 added .gz; needed custom filter to do this
-			fc.addChoosableFileFilter(new FileFilter() {
-			    public String getDescription() {
-			        return "FASTA (see Help)";
-			    }
-			    public boolean accept(File f) {
-			        if (f.isDirectory()) {
-			            return true;
-			        } else {
-			        	String fName = f.getName().toLowerCase();
-			        	for (String x : Globalx.fastaFile) {
-				            if (fName.endsWith(x)) return true;
-			        	}
-			            return false;
-			        }
-			    }
-			});
-			if(fc.showOpenDialog(theParentFrame) == JFileChooser.APPROVE_OPTION) {
-				String fname = fc.getSelectedFile().getCanonicalPath();
-				dbSelectName = fname;
-				String cur = System.getProperty("user.dir");
-				if(fname.contains(cur)) fname = fname.replace(cur, "");
-				if (fname.length()>65) fname = fname.substring(fname.lastIndexOf("/"));
-				txtDBname.setText(fname);
-			}
-		}
-		catch(Exception e) {ErrorReport.prtReport(e, "Error finding file");
-		}		
-	}
 	
-	private void deleteFiles(File dir)
-	{
+	private void deleteFiles(File dir){
 		int cnt=0, cntResults=0;
 		String [] suffix = {
 				".phr", ".pin", ".psq", ".nhr", ".nhr", ".nin", ".nsq", 
@@ -881,25 +851,23 @@ public class BlastTab extends Tab
 		}
 		showStatus("Search files deleted: " + cnt + "     Result files not deleted: " + cntResults);
 	}
-	private void showSeqDetailTab ( )
-	{
-		if (resultTable != null)
-		{
-			int nRow = resultTable.getSelectedRow();
-			
-			if (nRow < 0)return;
-			
-			String qName = resultTable.getValueAt(nRow, 0).toString();
-			String sName = resultTable.getValueAt(nRow, 1).toString();
-			String strName="";
-			if (seqSet.contains(sName)) strName = sName; // CAS305 switched s and q
-			else if (seqSet.contains(qName)) strName = qName;
-			else {
-				showStatus("Neither query or subject is a STCW seqID");
-				return;
-			}
-			theParentFrame.addContigPage(strName, this, nRow);
+	private void showSeqDetailTab ( ) {
+		if (resultTable == null) return;
+		
+		int nRow = resultTable.getSelectedRow();
+		
+		if (nRow < 0)return;
+		
+		String qName = resultTable.getValueAt(nRow, 0).toString();
+		String sName = resultTable.getValueAt(nRow, 1).toString();
+		String strName="";
+		if (seqSet.contains(sName)) strName = sName; // CAS305 switched s and q
+		else if (seqSet.contains(qName)) strName = qName;
+		else {
+			showStatus("Neither query or subject is a STCW seqID");
+			return;
 		}
+		theViewFrame.addContigPage(strName, this, nRow);
 	}
 	private void showErr(String err)
 	{
@@ -911,54 +879,7 @@ public class BlastTab extends Tab
 		if (traceCheck.isSelected()) Out.prt(msg);
 		txtStatus.setText(msg);
 	}
-	private class FileTextField extends JPanel {
-		private static final long serialVersionUID = 2509867678940815100L;
-		public FileTextField(int size) {
-			setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-			setAlignmentX(Component.LEFT_ALIGNMENT);
-			setBackground(Globals.BGCOLOR);
-			
-			txtValue = new JTextField(size);
-			Dimension dTxt = txtValue.getPreferredSize(); 
-			txtValue.setMaximumSize(dTxt);
-			txtValue.setMinimumSize(dTxt);
-			
-			btnFindFile = new JButton("...");
-			btnFindFile.setBackground(Globals.BGCOLOR);
-			Dimension dBtn = new Dimension();
-			dBtn.width = btnFindFile.getPreferredSize().width;
-			dBtn.height = dTxt.height;
-			
-			btnFindFile.setMaximumSize(dBtn);
-			btnFindFile.setMinimumSize(dBtn);
-			btnFindFile.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent arg0) {
-					try {
-						JFileChooser fc = new JFileChooser();
-						fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-						if(fc.showOpenDialog(theParentFrame) == JFileChooser.APPROVE_OPTION) {
-							txtValue.setText(fc.getSelectedFile().getPath());
-						}
-					}
-					catch(Exception e) {
-						ErrorReport.prtReport(e, "Error finding file");
-					}
-					
-				}});
-			
-			add(txtValue);
-			add(btnFindFile);
-		}
-		
-		public void setEnabled(boolean enabled) { 
-			txtValue.setEnabled(enabled);
-			btnFindFile.setEnabled(enabled);
-		}
-		
-		private JTextField txtValue = null;
-		private JButton btnFindFile = null;
-	}
+	
 	/**
      * resizes the columns in a JTable based on the data in that table. data
      * scanned is limited to the first 25 rows.
@@ -1028,11 +949,9 @@ public class BlastTab extends Tab
 	private JRadioButton tabCheck = null, longCheck = null;
 	private JCheckBox traceCheck = null;
 	
-	private FileTextField inputBlastPath = null;
 	private JPanel blastPathPanel = null;
 	
-	private JPanel resultSection = null;
-	private JPanel resultRow = null;
+	private JPanel resultSection = null, resultRow = null;
 	
 	private JTable resultTable = null;
 	
@@ -1041,7 +960,7 @@ public class BlastTab extends Tab
 	
 	private File outFile = null;
 	private MetaData metaData = null;
-	private STCWFrame theParentFrame = null;
+	private STCWFrame theViewFrame = null;
 	private String blastDefaults="", dmndDefaults="", dbFileName="", dbSelectName="";
 	private boolean isNTsTCW=false, isSubjAA=false, isQueryAA=false;
 	private HashSet <String> seqSet = new HashSet <String> ();

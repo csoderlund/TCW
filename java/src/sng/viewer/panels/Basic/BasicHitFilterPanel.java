@@ -10,7 +10,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.sql.ResultSet;
 import java.text.DecimalFormat;
@@ -33,7 +32,6 @@ import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -56,6 +54,8 @@ import sng.viewer.panels.align.AlignData;
 import sng.viewer.panels.align.PairViewPanel;
 import sng.viewer.panels.seqDetail.LoadFromDB;
 import util.database.DBConn;
+import util.file.FileC;
+import util.file.FileRead;
 import util.methods.ErrorReport;
 import util.methods.Out;
 import util.methods.Static;
@@ -290,10 +290,9 @@ public class BasicHitFilterPanel extends JPanel {
 			btnFindFile.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					try {
-						JFileChooser fc = new JFileChooser();
-						fc.setCurrentDirectory(new File("."));
-						if(fc.showOpenDialog(getInstance()) == JFileChooser.APPROVE_OPTION) {
-							loadFile(fc.getSelectedFile().getPath());
+						FileRead fr = new FileRead("Hit", FileC.bNoVer, FileC.bNoPrt); // CAS316
+						if (fr.run(btnFindFile, "Hit File", FileC.dUSER, FileC.fTXT)) {
+							loadFile(fr.getRelativeFile());
 						}
 					}
 					catch(Exception e) {ErrorReport.prtReport(e, "Error finding file");}
@@ -579,7 +578,7 @@ public class BasicHitFilterPanel extends JPanel {
 			}
 			catch(Exception e) {ErrorReport.prtReport(e, "Error loading file");}
 		}
-		private STCWFrame getInstance() {return theMainFrame;}
+		
 		private double getEvalLimit() { 
 			if (!chkUseEval.isSelected()) return -1;
 			

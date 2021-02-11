@@ -11,10 +11,11 @@ import java.io.InputStreamReader;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import util.file.FileHelpers;
 import util.methods.BlastArgs;
 import util.methods.ErrorReport;
+import util.methods.Out;
 import util.methods.TCWprops;
-import util.methods.FileHelpers;
 
 public class HostsCfg 
 {
@@ -47,11 +48,13 @@ public class HostsCfg
 	public HostsCfg(boolean chkVar) { // value doesn't matter
 		if (!theHost.contentEquals("")) return; // already run
 		
-		try
-		{
+		try {
+			String version = System.getProperty("java.version");
+			Out.PrtSpMsg(0, "Java version " + version);
+			Out.PrtSpMsg(0,"");
+			
 			File f = new File(HOSTS);
-			if (!f.isFile())
-			{
+			if (!f.isFile()) {
 				System.err.println("Cannot find " + HOSTS);
 				System.exit(0);
 			}
@@ -59,7 +62,11 @@ public class HostsCfg
 			loadHOSTFile(f);
 			
 			DBConn.checkVariables(theHost, theUser, thePass, true);
+			
+			Out.PrtSpMsg(0,"");
 			getSearchPath(true);
+			
+			Out.PrtSpMsg(0, "Check complete");
 		}
 		catch(Exception e){ErrorReport.die("Error reading HOSTS.cfg!!");}
 	}

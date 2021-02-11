@@ -15,22 +15,21 @@ import java.util.Vector;
 
 
 import cmp.database.Globals;
-
-import sng.amanager.FileTextField;
 import sng.database.MetaData;
 import sng.database.Schema;
 import sng.database.Version;
-import sng.runAS.DoGO;
 import util.database.DBConn;
 import util.database.Globalx;
 import util.database.HostsCfg;
+import util.file.FileC;
+import util.file.FileHelpers;
+import util.file.FileVerify;
 import util.methods.ErrorReport;
-import util.methods.FileHelpers;
 import util.methods.Out;
 
-public class GO 
+public class DoGOs 
 {
-	public GO(CoreDB sqlObj, String godbName, String slimSubset, String slimOBOFile)
+	public DoGOs(CoreDB sqlObj, String godbName, String slimSubset, String slimOBOFile)
 	{
 		try
 		{
@@ -93,11 +92,8 @@ public class GO
 				return false;
 			}
 			if (!goFixed(goDB)) {
-				Out.PrtSpMsg(2, "Modify " + godbName);
-				Out.PrtSpMsg(3,"This only executes the first time " + godbName + " is accessed");
-				Out.PrtSpMsg(4,"Approximate time 10 minutes");
-				DoGO goObj = new DoGO();
-				goObj.modifyGOdb(goDB, godbName);
+				Out.PrtSpMsg(2, "GO database not modified for TCW - runAS");
+				return false;
 			}
 			
 /** Create Tables **/
@@ -593,9 +589,12 @@ public class GO
 	}
 	private void loadSlimOBOFile(String slimOBOFile) {
 		Out.PrtSpMsg(2, "Add Slim OBO File " + slimOBOFile);
-		FileTextField txtField = new FileTextField(runSTCWMain.getProjName(), FileTextField.OBO);
-		String path = txtField.pathToOpen(slimOBOFile, FileTextField.PROJ);
-		if (!txtField.verify(path)) return;
+		
+		String projDirName = runSTCWMain.getProjName();
+		String path = FileC.addFixedPath(projDirName, slimOBOFile, FileC.dPROJ);
+		
+		FileVerify verFileObj = new FileVerify();
+		if (!verFileObj.verify(FileC.bNoPrt, path, FileC.fOBO)) return;
 		
 		try {
 			long time = Out.getTime();

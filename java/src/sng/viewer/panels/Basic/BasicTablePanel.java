@@ -36,8 +36,9 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import sng.viewer.STCWFrame;
-import sng.util.ExportFile;
 import util.database.Globalx;
+import util.file.FileC;
+import util.file.FileWrite;
 import util.methods.ErrorReport;
 import util.methods.Out;
 import util.methods.Static;
@@ -52,14 +53,12 @@ public class BasicTablePanel extends JPanel {
 	private final Color selectColor = Globalx.selectColor;
 	
 	public BasicTablePanel (STCWFrame mf, BasicHitTab t, String [] col, boolean [] b) {
-		theMainFrame = mf;
 		hitTab = t;
 		setColumns(col, b);
 		
 		createBasicTable();
 	}
 	public BasicTablePanel (STCWFrame mf, BasicSeqTab t, String [] col, boolean [] b) {
-		theMainFrame = mf;
 		seqTab = t;
 		setColumns(col, b);
 		
@@ -271,11 +270,12 @@ public class BasicTablePanel extends JPanel {
 		}
 		return retVal.toString();
 	}
-	public void tableExportToFile(String type) {
+	public void tableExportToFile(Component btnC, String type) {
 		String prefix = (type.equals("Seq")) ? "BasicSeqTableColumns" : "HitTableColumns";
 		String fileName = prefix + Globalx.CSV_SUFFIX;
 		
-		PrintWriter pw = ExportFile.getWriter(type + "Table", fileName, theMainFrame);
+		FileWrite fw = new FileWrite(FileC.bNoVer, FileC.bNoPrt);
+		PrintWriter pw = fw.getWriter(btnC, "table", fileName, FileC.fTSV, FileC.wAPPEND);
 		if (pw!=null) {
 			theTableModel.exportTableColumns(prefix, pw); 
 		}
@@ -613,7 +613,6 @@ public class BasicTablePanel extends JPanel {
 	private JScrollPane tableScroll = null;
 	private JTextField txtStatus = null;
 	
-	private STCWFrame theMainFrame=null;
 	private BasicHitTab hitTab=null;
 	private BasicSeqTab seqTab=null;
 }

@@ -1,4 +1,4 @@
-package util.methods;
+package util.file;
 
 import java.nio.channels.*;
 import java.util.ArrayList;
@@ -10,6 +10,8 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import util.database.Globalx;
+import util.methods.ErrorReport;
+import util.methods.Out;
 
 import java.text.SimpleDateFormat;
 
@@ -334,29 +336,30 @@ public class FileHelpers
     /************************************************************
      * String ops on paths
      */
-    public static boolean isAbsolutePath(String filepath)
-    {
-	    	if (filepath == null) return false;
-	    	File f = new File(filepath);
-	    	return f.isAbsolute();
+    public static boolean isAbsolutePath(String filepath){
+    	if (filepath == null) return false;
+    	File f = new File(filepath);
+    	return f.isAbsolute();
     }
     
-    public static String addAbsolutePath(String absPath, String filepath)
-    {
-    		if (filepath == null) return null;
-    		File f = new File(filepath);
-    		if (f.isAbsolute() || filepath.equals(""))
-    			return filepath;
-    	
-    		return absPath + "/" + filepath;
-    }
+    public static String addAbsolutePath(String absPath, String filepath){
+		if (filepath == null) return null;
+		File f = new File(filepath);
+		if (f.isAbsolute() || filepath.equals(""))
+			return filepath;
 	
-	public static String removeCurrentPath(String file) {
+		return absPath + "/" + filepath;
+    }
+    /******************************************************
+     * Remove part/all of prefix path
+     */ 
+	public static String removeRootPath(String file) { // Uses in many annotater routines
 		String path="";
 		try {
 			if (file==null || file=="") return "";
 			String cur = System.getProperty("user.dir");
 			path = file.replace(cur, "");
+			if (path.startsWith("/")) path = path.substring(1); // CAS316 
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "removing current path from " + file); }
 		return path;
@@ -398,131 +401,31 @@ public class FileHelpers
 			else ErrorReport.die("Do not recognize file suffix: " + file);
 		}
 		catch (Exception e) {
-			String f = removeCurrentPath(file);
+			String f = removeRootPath(file);
 	    		Out.PrtError("Cannot open file " + f); 
 	    }
 		return null;
 	}
-	/**************************************************************
-	 * Written to update directory structure
-	 */
-	// Written to merge /libraries with /projects
-	static public boolean mergeDir(String src, String dest, boolean trace) { 
-		try {
-			// check top directories
-			if (!src.endsWith("/")) src += "/";
-			if (!dest.endsWith("/")) dest += "/";
-			
-			File srcDir = new File(src);
-			if (!srcDir.exists()) return true;
 	
-			if (!srcDir.isDirectory()) {
-				Out.PrtWarn(src + " is not a directory");
-				return true;
-			}
-			Out.prt("");
-			Out.prt("TCW v2.10: The " + src + " directory is now merged with " + dest);
-			Out.prt("All files in " + src + " projects should be in their corresponding directory of " + dest); 
-			boolean rc = Out.yesNo("Can TCW merge the directories for you");
-			if (!rc) {
-				Out.prt("You must merge " + src + " with " + dest);
-				return false;
-			}
-			
-			File destDir = new File(dest);
-			if (!destDir.isDirectory()) {
-				Out.PrtWarn(dest + " is a file - cannot move " + src + " to it");
-				return true;
-			}
-			if (!destDir.exists()) {
-				Out.prt(src + " renamed to " + dest);
-				srcDir.renameTo(destDir);
-				return true;
-			}
-			
-			// move src/* to dest/*
-			int cntCantMove=0, cntMove=0;
-			for (File srcSub : srcDir.listFiles())
-			{
-				String srcSubName = srcSub.getName();
-				if (srcSubName.equals(".") || srcSubName.equals("..")) continue;
-				if (!srcSub.isDirectory()) {
-					Out.PrtWarn(srcSub.getAbsoluteFile() + " is not a directory -- cannot move");
-					cntCantMove++;
-					continue;
-				}
-				File destSub = new File(dest + srcSubName);
-				if (destSub.exists() && !destSub.isDirectory()) {
-					Out.PrtWarn(destSub.getAbsoluteFile() + " is not a directory -- cannot move file to it");
-					cntCantMove++;
-					continue;
-				}
-				
-				if (!destSub.exists()) {
-					if (trace) Out.prt(srcSub.getAbsoluteFile() + " move whole directory ");
-					srcSub.renameTo(destSub);
-					cntMove++;
-					continue;
-				}
-				
-				// copy all src/x/* to dest/x 
-				if (trace) Out.prt(srcSub.getAbsoluteFile() + " move contents ");
-				
-				int cntX=0;
-				for (File srcFile : srcSub.listFiles())
-				{
-					String fname = srcFile.getName();
-					if (fname.equals(".") || fname.equals("..")) continue;
-					
-					File destFile = new File(dest + "/" + srcSubName + "/" + fname);
-					
-					if (!destFile.exists()) {
-						//if (trace) Out.prt("       move  " + fname);
-						srcFile.renameTo(destFile);
-						cntMove++;
-					}
-					else {
-						Out.PrtWarn(destFile.getAbsoluteFile() + " exists -- cannot move");
-						cntX++;
-					}
-				}
-				if (cntX==0) Out.prt(srcSub.getAbsoluteFile() + " is empty -- can delete");
-				else cntCantMove++;
-			}
-			
-			File dir = new File(srcDir.getName() + "OLD");
-			Out.prt(src + " renamed to " + dir.getName());
-			srcDir.renameTo(dir);
-			Out.PrtCntMsg(cntCantMove, " could not be moved");
-			Out.PrtCntMsg(cntMove, " moved");
-			Out.PrtSpMsg(0, "Complete move");
-			
-			return true;
-		}
-		catch (Exception e){e.printStackTrace(); return false;}
-	}
 	// CAS303 Move external_osx to ext/mac and external to ext/lintel
 	static public boolean makeExt() {
 		try {
 			String newDir = getExtDir(); // ext/mac or ext/lintel
 			if (existDir(newDir)) return true;
 			
-			Out.Print("Directory does not exist: " + newDir + "; move old external to /ext");
-			Out.Print("OS: " + getOsArch());
+			Out.PrtWarn("Directory does not exist: " + newDir);
 			
 			String oldDir = (isMac()) ? "external_osx" : "external";
+			if (!existDir(oldDir)) return false;
 			
-			if (!existDir(oldDir)) {
-				Out.Print("Directory does not exist: " + oldDir);
-				Out.die("Cannot create TCW v3.0.3 ext directory; see SystemGuide.html");
-			}
+			Out.Print("OS: " + getOsArch());
 			Out.Print("/external     should be renamed /Ext/linux");
 			Out.Print("/external_osx should be renamed /Ext/mac");
 			if (!FileHelpers.yesNo("Do you want TCW to move the directories?")) return false;
 			
 			if (!createDir(Globalx.extDir)) {
 				Out.Print("Cannot create directory: " + Globalx.extDir);
-				Out.die("Cannot create TCW v3.0.3 ext directory; see SystemGuide.html");
+				Out.PrtError("Cannot create TCW ext directory; see SystemGuide.html");
 			}
 			if (existDir("external_osx")) {
 				File from = new File("external_osx");
@@ -531,7 +434,7 @@ public class FileHelpers
 				boolean success = from.renameTo(to);
 				if (!success) {
 					deleteDir(Globalx.extDir);
-					Out.die("Cannot rename external_osx to " + Globalx.macDir);
+					Out.PrtError("Cannot rename external_osx to " + Globalx.macDir);
 				}
 				else Out.Print("Rename external_osx to " + Globalx.macDir);
 			}
@@ -542,15 +445,14 @@ public class FileHelpers
 				boolean success = from.renameTo(to);
 				if (!success) {
 					deleteDir(Globalx.extDir);
-					Out.die("Cannot rename external_osx to " + Globalx.lintelDir);
+					Out.PrtError("Cannot rename external_osx to " + Globalx.lintelDir);
 				}
 				else Out.Print("Rename external_osx to " + Globalx.lintelDir);
 			}
 			return true;
 		}
 		catch (Exception e){
-			deleteDir(Globalx.extDir);
-			ErrorReport.die(e, "Cannot create /ext; see SystemGuide.html"); 
+			ErrorReport.prtReport(e, "Cannot move /external to /Ext");
 			return false;
 		}
 	}

@@ -12,7 +12,8 @@ import util.methods.Static;
 
 public class MethodOrthoMCLPanel extends JPanel {
 	private static final long serialVersionUID = -721309318079790889L;
-	private final static String xDELIM = Globals.Methods.METHODS_DELIM;
+	private final static String xDELIM = Globals.Methods.outDELIM;
+	private final static String iDELIM = Globals.Methods.inDELIM;
 
 	public MethodOrthoMCLPanel(CompilePanel parentPanel) {
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -29,7 +30,7 @@ public class MethodOrthoMCLPanel extends JPanel {
 		row.add(lblPrefix);
 		row.add(Box.createHorizontalStrut(width - lblPrefix.getPreferredSize().width));
 		
-		txtPrefix = Static.createTextField("", 3);
+		txtPrefix = Static.createTextField("", 4);
 		row.add(txtPrefix);
 		row.add(Box.createHorizontalStrut(5));
 		
@@ -58,7 +59,7 @@ public class MethodOrthoMCLPanel extends JPanel {
 	}
 		
 	public String getSettings() {
-		return  xDELIM + ":" + txtInflation.getText() + ":" + xDELIM;
+		return  xDELIM + iDELIM + txtInflation.getText() + iDELIM + xDELIM;
 	}
 		
 	public void setSettings(String settings) {

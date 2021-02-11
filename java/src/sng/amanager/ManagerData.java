@@ -17,9 +17,10 @@ import sng.database.Version;
 import util.database.DBConn;
 import util.database.Globalx;
 import util.database.HostsCfg;
+import util.file.FileC;
+import util.file.FileHelpers;
 import util.methods.BlastArgs;
 import util.methods.ErrorReport;
-import util.methods.FileHelpers;
 import util.methods.Static;
 import util.methods.TCWprops;
 import util.methods.Out;
@@ -46,13 +47,12 @@ public class ManagerData {
 	private final static String LIBCFG = Globals.LIBCFG;
 	
 	public ManagerData(ManagerFrame pf, String projectName, HostsCfg h) {
-		theParentFrame = pf;
-		strProject = projectName;
+		theManFrame = pf;
+		strProjDir = projectName;
 		hostObj = h;
-		fileObj = new FileTextField(theParentFrame, projectName);
 		
 		TCWprops.newDB();
-		validateProjectFiles(strProject);
+		validateProjectFiles(strProjDir);
 		readLIBcfg_sTCWcfg();
 	}
 	/***************************************************
@@ -65,11 +65,6 @@ public class ManagerData {
 			if(!projFile.exists()) {
 				Out.PrtSpMsg(1,"Creating: " + projFile.getAbsolutePath());
 				projFile.mkdir();
-				
-				File userFile = new File(PROJDIR + Globalx.USERDIR);
-				Out.PrtSpMsg(1,"Creating: " + userFile.getAbsolutePath());
-				Out.PrtSpMsg(2, "This is not a project directory - it is for the user's miscellaneous files");
-				userFile.mkdir();
 			}
 		    String db = projectName;
 	        if (!db.startsWith(STCW)) db = STCW + db;		
@@ -104,20 +99,20 @@ public class ManagerData {
 	 * save LIB.cfg and sTCW.cfg
 	 */
 	public boolean saveCopyCfg(String id, String db, String proj) {
-		String savProj = strProject;
+		String savProj = strProjDir;
 		String savDB = strTCWdb;
-		String savID = strAssemblyID;
+		String savID = strProjID;
 		
-		strProject = proj;
+		strProjDir = proj;
 		strTCWdb = db;
-		strAssemblyID = id;
+		strProjID = id;
 		
 		boolean rc1 = libObj.saveLIBcfg();
 		boolean rc2 = stcwObj.saveSTCWcfg();
 		
-		strProject = savProj;
+		strProjDir = savProj;
 		strTCWdb = savDB;
-		strAssemblyID = savID;
+		strProjID = savID;
 		return rc1 && rc2;
 	}
 	
@@ -173,16 +168,16 @@ public class ManagerData {
 	 */
 	public boolean readLIBcfg_sTCWcfg() {
 		try {
-			System.err.println("Loading " + strProject);
+			System.err.println("Loading " + strProjDir);
 			cntErrors=0;
-			File libFile = new File(LIBDIR + strProject + "/" + LIBCFG);
+			File libFile = new File(LIBDIR + strProjDir + "/" + LIBCFG);
 			if (!libFile.exists()) {
-				UserPrompt.showWarn("File does not exist: " + LIBDIR + strProject + "/LIB.cfg");
+				UserPrompt.showWarn("File does not exist: " + LIBDIR + strProjDir + "/LIB.cfg");
 			    return false;
 			}
-			File projFile = new File(PROJDIR + strProject + "/" + STCWCFG);
+			File projFile = new File(PROJDIR + strProjDir + "/" + STCWCFG);
 			if(!projFile.exists()) {
-				UserPrompt.showWarn("File does not exist: " + PROJDIR + strProject + "/sTCW.cfg");
+				UserPrompt.showWarn("File does not exist: " + PROJDIR + strProjDir + "/sTCW.cfg");
 	            return false;
 			}	
 			
@@ -195,17 +190,17 @@ public class ManagerData {
 		catch (Exception e) {ErrorReport.prtReport(e, "Reading project data");}
 		return false;
 	}
-	public void importAnnoDBs(File source) {
-		stcwObj.importAnnoDBs(source);
+	public void importAnnoDBs(String source) {
+		stcwObj.importAnnoDBs(new File(source));
 		stcwObj.saveSTCWcfg(); 
 	}
-	private String setFile(String path, int p, int t) {
-		String f = fileObj.pathToOpen(path, p);
+	private String checkFile(String path, int pathType, int fileType) {
+		String f = FileC.addFixedPath(strProjDir, path, pathType);
 		if (f==null) {
 			cntErrors++;
 			return path;
 		}
-		return fileObj.pathMakeRelative(path);
+		return FileC.removeFixedPath(strProjDir, path, pathType);
 	}
 	
 	 //if file not there, read rep labels from database
@@ -264,9 +259,9 @@ public class ManagerData {
 			projReader.close();
 			
 			for (int i=0; i<repNames.length; i++) {
-				if (strAssemblyID.equals(repNames[i])) { 
+				if (strProjID.equals(repNames[i])) { 
 					JOptionPane.showMessageDialog(null, 
-							"singleTCW ID cannot be the same as a condition: '" + strAssemblyID + "'", 
+							"singleTCW ID cannot be the same as a condition: '" + strProjID + "'", 
 							"Warning", JOptionPane.PLAIN_MESSAGE);
 				}
 			}
@@ -358,7 +353,17 @@ public class ManagerData {
     }
     // EditAnnoPanel called on Keep - return true cancels the keep
     public boolean hasAnnoFile(String file) {
-    		String xfile = removeCurPath(file, true);
+    		if (file==null || file.contentEquals("")) return false;
+    		
+    		String xfile = file;
+			String cur = System.getProperty("user.dir");
+			int index = file.indexOf(cur);
+			if(index == 0) {
+				xfile = file.substring(index + cur.length());
+				if (xfile.startsWith("/")) xfile = xfile.substring(1);
+			}
+			if (xfile.startsWith(ANNODIR)) xfile = xfile.replace(ANNODIR, "");
+    		
     		for (AnnodbData annoObj: annoObjList) {
     			if (xfile.equals(annoObj.strFastaDB)) {
     				if (UserPrompt.showConfirm("AnnoDB",
@@ -368,24 +373,7 @@ public class ManagerData {
     		}
     		return false;
     }
-    private String removeCurPath(String path, boolean isAnno) {
-		if (path==null || path=="") return path;
-		try {
-			String d = path;
-			String cur = System.getProperty("user.dir");
-			int index = path.indexOf(cur);
-			if(index == 0) {
-				d = path.substring(index + cur.length());
-				if (d.startsWith("/")) d = d.substring(1);
-			}
-			if (isAnno) {
-				if (path.startsWith(ANNODIR))
-					path = path.replace(ANNODIR, "");
-			}
-		}
-		catch (Exception e) {ErrorReport.prtReport(e, "removing current path from " + path); }
-		return path;
-	}
+   
 	public int getNumCountLibs() { return countObjList.size(); }
 	public int getNumSeqLibs() { return seqObjList.size(); }	
 	public String [] getSeqID() { 
@@ -463,10 +451,10 @@ public class ManagerData {
 	
 	public SeqData getTransLibraryAt(int pos) { return seqObjList.get(pos); }
 	
-	public void setdbID(String id) { strAssemblyID = id; }
-	public String getAssemblyID() { return strAssemblyID; }
+	public void setProjID(String id) { strProjID = id; }
+	public String getProjID() { return strProjID; }
 	
-	public void setdbName(String db) { strTCWdb = db; }
+	public void setTCWdb(String db) { strTCWdb = db; }
 	public String getTCWdb() { return strTCWdb; }
 
 	public void setNumCPUs(int CPUs) { nCPUs = CPUs; }
@@ -482,8 +470,8 @@ public class ManagerData {
 	public void setSlimFile(String x) { strSlimFile = x.trim(); }
 	public String getSlimFile() { return strSlimFile; }
 	
-	public void setProjectName(String name) { strProject = name; }
-	public String getProjectName() { return strProject; }
+	public void setProjDir(String name) { strProjDir = name; }
+	public String getProjDir() 			{ return strProjDir; }
 	
 	public boolean isLibraryLoaded() { return bLibLoaded; }
 	public void setLibraryLoaded(boolean loaded) { bLibLoaded = loaded; }
@@ -887,20 +875,20 @@ public class ManagerData {
 						tmpSeqObjList.add(seqObj);
 					}
 					if (seqObj==null) {
-						System.err.println("Incorrect line in LIB.cfg -- " + line);
+						Out.PrtWarn("Incorrect line in LIB.cfg -- " + line);
 						UserPrompt.showError("Incorrect line in LIB.cfg (see terminal)");
 						libReader.close();
 						return;
 					}
 					if (key.equals("reps")) seqObj.repArray =  value.split(",");
 					else if(key.equalsIgnoreCase("seqfile")) {
-						seqObj.strSeqFile = setFile(value, FileTextField.LIB, FileTextField.FASTA);
+						seqObj.strSeqFile = checkFile(value, FileC.dPROJ, FileC.fFASTA);
 					}
 					else if(key.equalsIgnoreCase("expfile")) {
 						seqObj.strCountFile = value; // checked below
 					}
 					else if(key.equalsIgnoreCase("qualfile")) {
-						seqObj.strQualFile = setFile(value, FileTextField.LIB, FileTextField.QUAL);
+						seqObj.strQualFile = checkFile(value, FileC.dPROJ, FileC.fQUAL);
 					}
 					else if(key.equalsIgnoreCase("fiveprimesuf")) seqObj.strFivePrimeSuf = value;
 					else if(key.equalsIgnoreCase("threeprimesuf")) seqObj.strThreePrimeSuf = value;
@@ -912,8 +900,7 @@ public class ManagerData {
 			/** XXX Assign objects to SeqData or CountData, and read count files **/
 				for (SeqData sObj : tmpSeqObjList) {
 					if (sObj.strSeqFile != ""  && sObj.repArray != null) {
-						Out.PrtWarn(sObj.strSeqID + 
-								" has sequence file with following reps in LIB.cfg - ignore reps");
+						Out.PrtWarn(sObj.strSeqID + " has sequence file with following reps in LIB.cfg - ignore reps");
 						cntErrors++;
 					}
 					if (sObj.strSeqFile != "") {
@@ -929,19 +916,16 @@ public class ManagerData {
 				for (SeqData sObj : seqObjList) {
 					if (sObj.strCountFile==null || sObj.strCountFile == "") continue; // ESTs
 					
-					String fileName = fileObj.pathToOpen( sObj.strCountFile, FileTextField.LIB);
+					String fileName = FileC.addFixedPath(strProjDir, sObj.strCountFile, FileC.dPROJ);
 					if (fileName==null || fileName=="") {
 						cntErrors++;
-						//Out.PrtSpMsg(1, "Reading database to confirm sample names ");
 						sObj.repArray = readLibCountsFromDB(sObj.strSeqID);
 						if(sObj.repArray == null) {
-							Out.PrtWarn("No count file: " + sObj.strCountFile +
-									"\n      And no reps in database for " + sObj.strSeqID);
+							Out.PrtWarn("No count file: " + sObj.strCountFile + "\n      And no reps in database for " + sObj.strSeqID);
 							cntErrors++;
 						}
 					}
 					else {
-						//Out.PrtSpMsg(1,"Reading " + sObj.strCountFile + " to confirm sample names");
 						sObj.repArray = readLibCountsFromFile(new File (fileName));
 						if(sObj.repArray == null) {
 							Out.PrtWarn("No counts in file: " + sObj.strCountFile);
@@ -949,6 +933,7 @@ public class ManagerData {
 						}
 					}
 					if(sObj.repArray == null) continue;
+					
 					// check for consistency with LIB.cfg
 					for (int i=0; i< sObj.repArray.length; i++) {
 						String repName = sObj.repArray[i];
@@ -978,7 +963,7 @@ public class ManagerData {
 		}
 		private boolean saveLIBcfg() {
 			try {
-				String libDir = LIBDIR + strProject;
+				String libDir = LIBDIR + strProjDir;
 				File libFile = new File(libDir + "/" + LIBCFG);
 			
 				BufferedWriter out = new BufferedWriter(new FileWriter(libFile));
@@ -1034,12 +1019,12 @@ public class ManagerData {
 	private class STCWmethods {
 		private boolean saveSTCWcfg() {
 			try {
-				File projFile = new File(PROJDIR + strProject + "/" + STCWCFG);
+				File projFile = new File(PROJDIR + strProjDir + "/" + STCWCFG);
 				BufferedWriter out = new BufferedWriter(new FileWriter(projFile));
 				TCWprops theProps = new TCWprops(TCWprops.PropType.Assem);
 				
-				out.write("# " + strProject + " sTCW.cfg " + Version.strTCWver + "\n");
-				out.write("SingleID = " + strAssemblyID + "      # singleTCW ID\n");
+				out.write("# " + strProjDir + " sTCW.cfg " + Version.strTCWver + "\n");
+				out.write("SingleID = " + strProjID + "      # singleTCW ID\n");
 				out.write("STCW_db    = " + strTCWdb +      "      # Database (same as in LIB.cfg)\n");
 				out.write("CPUs = " + getNumCPUs() + "\n\n");
 				
@@ -1250,8 +1235,8 @@ public class ManagerData {
 		private boolean readSTCWkeyVal(String key, String value, AnnodbData [] annoArray) {
 			boolean isSel=true, isAnnoDB=false;
 			
-			if(key.equalsIgnoreCase("SingleID"))strAssemblyID = value;
-			else if(key.equalsIgnoreCase("STCW_db"))	strTCWdb = value;
+			if(key.equalsIgnoreCase("SingleID"))	strProjID = value;
+			else if(key.equalsIgnoreCase("STCW_db"))strTCWdb = value;
 			else if(key.equalsIgnoreCase("CPUs"))	nCPUs = Integer.parseInt(value);
 			
 		// Assembly/Instantiation
@@ -1310,7 +1295,7 @@ public class ManagerData {
 				if (isInteger("Anno_ORF_train_min_set", value)) annoObj.strORFtrainMinSet = value;
 			}
 			else if(key.equalsIgnoreCase("Anno_ORF_train_CDS_file")) {
-				annoObj.strORFtrainCDSfile = setFile(value, FileTextField.PROJ, FileTextField.FASTA);
+				annoObj.strORFtrainCDSfile = checkFile(value, FileC.dPROJ, FileC.fFASTA);
 			}
 			
 		// Similarity CAS314 change keywords - not backward compatible
@@ -1380,7 +1365,7 @@ public class ManagerData {
 				annoArray[index].setSelected(isSel);
 			}
 			else if(key.startsWith("Anno_DBtab_")) { 
-				annoArray[index].strTabularFile = setFile(value, FileTextField.PROJ, FileTextField.TAB);
+				annoArray[index].strTabularFile = checkFile(value, FileC.dPROJ, FileC.fTAB);
 				annoArray[index].setSelected(isSel);
 			}
 			else if(key.startsWith("Anno_DBsearch_pgm_")) { 
@@ -1390,7 +1375,7 @@ public class ManagerData {
 				annoArray[index].setSelected(isSel);
 			}
 			else if(key.startsWith("Anno_DBfasta_")) { 
-				annoArray[index].strFastaDB = setFile(value, FileTextField.ANNO, FileTextField.FASTA);
+				annoArray[index].strFastaDB = checkFile(value, FileC.dANNO, FileC.fFASTA);
 				annoArray[index].setSelected(isSel);
 			}
 			else if(key.startsWith("Anno_DBargs_")) { 
@@ -1487,8 +1472,8 @@ public class ManagerData {
 	private int cntErrors=0;
 	
 	//Common Settings
-	private String strProject = "";
-	private String strAssemblyID = "";
+	private String strProjDir = "";
+	private String strProjID = "";
 	private String strTCWdb = "";
 
 	private int nCPUs = -1;
@@ -1504,6 +1489,6 @@ public class ManagerData {
 	
 	private boolean isAAstcw = false;
 	private HostsCfg hostObj=null;
-	private ManagerFrame theParentFrame=null;
-	private FileTextField fileObj=null;
+	private ManagerFrame theManFrame=null;
+	
 }

@@ -14,8 +14,8 @@ import sng.dataholders.BlastHitData;
 import util.database.DBConn;
 import util.database.Globalx;
 import util.database.HostsCfg;
+import util.file.FileHelpers;
 import util.methods.ErrorReport;
-import util.methods.FileHelpers;
 import util.methods.Out;
 
 /** 
@@ -26,7 +26,7 @@ public class runSTCWMain
 {	
 	public static final String sTCW_VERSION_STRING = "TCW annotation v" + 
 			Globalx.strTCWver + " " + Globalx.strRelDate;;
-	private static String blastDir = Globalx.BLASTDIR;  // seqs are written and search is run
+	private static String blastDir = Globalx.pHITDIR;  // seqs are written and search is run
 	private static final String ProjDirName = Globalx.PROJDIR + "/";
 	
 	// command line parameters
@@ -200,7 +200,7 @@ public class runSTCWMain
 			String msg=null;
 			if (doGO)
 			{
-				new GO(sqlObj,godb, goSlimSubset, goSlimOBOFile); 
+				new DoGOs(sqlObj,godb, goSlimSubset, goSlimOBOFile); 
 			}
 			else if (bdoAnno && sqlObj.existsGOtree()) 
 				msg ="GO annotations exist. Update with 'Exec GO only' if new UniProt annoDBs were added.";	
@@ -409,7 +409,7 @@ public class runSTCWMain
 					return false;
 				}
 				
-				DBConn goDB = GO.connectToGODB(hostsObj.host(),hostsObj.user(),hostsObj.pass(), godbName);
+				DBConn goDB = DoGOs.connectToGODB(hostsObj.host(),hostsObj.user(),hostsObj.pass(), godbName);
 				if (goDB == null)
 				{
 					if (!dieflag) Out.PrtWarn("GO database " + godbName + " is not current; ignoring GO step\n");
@@ -442,9 +442,8 @@ public class runSTCWMain
 	 * Returns paths to various directories and files used by the annotator
 	 ***************************************************************************/
 
-	// Find where /projects is so can execute from jpave directory or one up
-	static private String getTopLevelPath()
-	{
+	// Find where /projects is so can execute from TCW directory or one up
+	static private String getTopLevelPath(){
 		try {
 			String s = ProjDirName;
 			File f = new File(s);
@@ -463,10 +462,7 @@ public class runSTCWMain
 			return null;
 		}
 	}
-	
-	static public String getProjectsPath() {
-		return getTopLevelPath() + "/" + ProjDirName;
-	}		
+			
 	static public String getCurProjPath() {
 		return getTopLevelPath() + "/" + ProjDirName + projName;
 	}

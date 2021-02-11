@@ -1,10 +1,5 @@
 package sng.runDE;
 
-/****************************************
- * Graphical interface for computing DE (runDE)
- * v2.11 - remove built-in DE methods
- * v3.0.3 - change all showOptionDialog(null,.. to showOptionDialog(getInstance(); the null hide window on Java 14.
- */
 import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.File;
@@ -30,7 +25,6 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -55,12 +49,19 @@ import sng.database.Overview;
 import util.database.Globalx;
 import util.database.HostsCfg;
 import util.database.DBConn;
+import util.file.FileC;
+import util.file.FileRead;
 import util.methods.ErrorReport;
 import util.methods.Out;
 import util.methods.Static;
 import util.ui.ButtonComboBox;
 import util.ui.UserPrompt;
 
+/****************************************
+ * Graphical interface for computing DE (runDE)
+ * v2.11 - remove built-in DE methods
+ * v3.0.3 - change all showOptionDialog(null,.. to showOptionDialog(getInstance(); the null hide window on Java 14.
+ */
 public class QRFrame extends JDialog implements WindowListener {
 	private static final long serialVersionUID = 6227242983434722745L;
 	
@@ -69,9 +70,7 @@ public class QRFrame extends JDialog implements WindowListener {
 	public static final String allCols = "All p-value columns";
 	public static final String selCol = "Select p-value column";
 	
-	private final String PDIR = Globalx.PROJDIR;
-	private final String RDIR = Globalx.RDIR;
-	private final String RSCRIPT= RDIR + "/edgeRglm.R";
+	private final String RSCRIPT= Globalx.RSCRIPTSDIR + "/edgeRglm.R";
 	
 	private final String [] SELECTIONS = { "Conditions", "Group 1", "Group 2", "Exclude" };
 	private final int DEFAULT_SELECTION = 2; 
@@ -84,7 +83,7 @@ public class QRFrame extends JDialog implements WindowListener {
 	private final int COLUMN_LABEL_WIDTH = 80;
 	private final int COLUMN_WIDTH = 140;
 	private final int NUMBER_WIDTH = 2;
-	private final int FILE_WIDTH=20;
+	private final int FILE_WIDTH=25;
 	
 	private static Vector<QRFrame> openWindows = null;
 	private static boolean hasChooser=false;
@@ -119,7 +118,6 @@ public class QRFrame extends JDialog implements WindowListener {
 	{
 		hostsObj = h;
 		dbObj = d;
-		parent = this;
 		
 		// if window is launched from viewSingleTCW, this has not been initialized
 		if(openWindows == null) openWindows = new Vector<QRFrame> ();
@@ -127,7 +125,7 @@ public class QRFrame extends JDialog implements WindowListener {
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); 
 		
 		addWindowListener(this);
-		setConnection(dbObj.getdbName()); // opens mDB for this database
+		dbSetConnection(dbObj.getdbName()); // opens mDB for this database
 		
 		qrProcess = new QRProcess(dbObj.getID(), mDB);
 		createMainPanel();
@@ -582,7 +580,7 @@ public class QRFrame extends JDialog implements WindowListener {
 				return false;
 			}
 			// but P_ would be added as prefix??
-			String [] L_Col = getPrefixedColumns("L__");
+			String [] L_Col = dbLoadPrefixedColumns("L__");
 			for (int i=0; i<L_Col.length; i++) {
 				if (L_Col[i].equals(colName)) {
 					if (msg==1)
@@ -603,7 +601,7 @@ public class QRFrame extends JDialog implements WindowListener {
 
 	private boolean colNameUnique(String colName, int msg) {
 		try { 
-			String [] P_Col = getPrefixedColumns(Globals.PVALUE);
+			String [] P_Col = dbLoadPrefixedColumns(Globals.PVALUE);
 		
 			for (int i=0; i<P_Col.length; i++) {
 				if (P_Col[i].equals(colName)) {			
@@ -812,8 +810,10 @@ public class QRFrame extends JDialog implements WindowListener {
 		btnRfile = new JButton("...");
 		btnRfile.addActionListener(new ActionListener()  {
 			public void actionPerformed(ActionEvent arg0) {
-				String fname = fileChooser(RDIR);
-				txtRfile.setText(fname);
+				FileRead fc = new FileRead(projDirName, FileC.bDoVer, FileC.bDoPrt);
+				if (fc.run(btnRfile, "R Script File", FileC.dRSCRIPTS, FileC.fR)) { // CAS316 was in-file chooser
+					txtRfile.setText(fc.getRelativeFile());
+				}
 			}
 		});
 		row.add(btnRfile);
@@ -1052,8 +1052,10 @@ public class QRFrame extends JDialog implements WindowListener {
 		btnPairsFile = new JButton("...");
 		btnPairsFile.addActionListener(new ActionListener()  {
 			public void actionPerformed(ActionEvent arg0) {
-				String fname = fileChooser(PDIR);
-				txtPairsFile.setText(fname);
+				FileRead fc = new FileRead(projDirName, FileC.bDoVer, FileC.bDoPrt);
+				if (fc.run(btnPairsFile, "Pair File",  FileC.dPROJ, FileC.fTXT)) { // CAS316 was in-file choooser
+					txtPairsFile.setText(fc.getRelativeFile());
+				}
 			}
 		});
 		row.add(btnPairsFile);
@@ -1084,8 +1086,10 @@ public class QRFrame extends JDialog implements WindowListener {
 		btnPvalFile = new JButton("...");
 		btnPvalFile.addActionListener(new ActionListener()  {
 			public void actionPerformed(ActionEvent arg0) {
-				String fname = fileChooser(PDIR);
-				txtPvalFile.setText(fname);
+				FileRead fc = new FileRead(projDirName, FileC.bDoVer, FileC.bDoPrt);
+				if (fc.run(btnPvalFile, "P-value File", FileC.dPROJ, FileC.fTXT)) { // CAS316 was in-file choooser
+					txtPvalFile.setText(fc.getRelativeFile());
+				}
 			}
 		});
 		row.add(btnPvalFile);
@@ -1129,7 +1133,7 @@ public class QRFrame extends JDialog implements WindowListener {
 									"Remove column", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 							if (ret == JOptionPane.YES_OPTION)
 							{
-								removeColumn(column);
+								dbRemoveColumn(column);
 							}
 						}
 						else {
@@ -1137,7 +1141,7 @@ public class QRFrame extends JDialog implements WindowListener {
 									"Remove column", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 							if (ret == JOptionPane.YES_OPTION)
 							{
-								removeColumnAll();
+								dbRemoveColumnAll();
 							}
 						}
 						Out.Print("Completed removal ");
@@ -1159,7 +1163,7 @@ public class QRFrame extends JDialog implements WindowListener {
 	private void updateColumnList() {
 		cmbPvalColumns.removeAllItems();
 		cmbPvalColumns.addItem(selCol);
-		String [] vals = getColumnList();
+		String [] vals = dbLoadPvalColumns();
 		for(int x=0; x<vals.length; x++) 
 			vals[x] = vals[x].substring(2); 
 		if(vals.length > 1)					
@@ -1229,7 +1233,7 @@ public class QRFrame extends JDialog implements WindowListener {
 		JButton btnFinishExit = Static.createButton("Update Overview", true);
 		btnFinishExit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				displayOverview(dbObj.getdbName(), mDB);
+				dbOverview(dbObj.getdbName(), mDB);
 			}
 		});
 		row.add(btnFinishExit);
@@ -1238,7 +1242,7 @@ public class QRFrame extends JDialog implements WindowListener {
 		JButton btnClose = Static.createButton("Close", true);
 		btnClose.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				openWindows.remove(this); 
+				openWindows.remove(getInstance()); // CAS316 was 'this'
 				dispose();
 			}
 		});
@@ -1248,7 +1252,7 @@ public class QRFrame extends JDialog implements WindowListener {
 		JButton btnExit = Static.createButton("Exit", true);
 		btnExit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				openWindows.remove(this); 
+				openWindows.remove(getInstance()); // CAS316 was 'this'
 				dispose();
 			
 				if(!hasChooser && (openWindows == null || openWindows.size()<=1)) {
@@ -1329,23 +1333,7 @@ public class QRFrame extends JDialog implements WindowListener {
 		rb.setMinimumSize(rb.getPreferredSize());
 		return rb;
 	}
-	// XXX Get file name for file of group1, group2, colname
-	private String fileChooser(String file) {
-		try { 
-			final JFileChooser fc = new JFileChooser();
-			String current = new java.io.File(".").getCanonicalPath();
-			String start = current + "/" + file; 
-			
-			fc.setCurrentDirectory(new File(start));
-			if(fc.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
-				return fc.getSelectedFile().getAbsolutePath();
-			}
-		}
-		catch (Exception e) {
-			ErrorReport.reportError(e, "Problems getting file");
-		}
-		return null;
-	}
+	
 	/******************************************************
 	 * TCWdb chooser methods
 	 */
@@ -1430,7 +1418,7 @@ public class QRFrame extends JDialog implements WindowListener {
 						DBInfo dbi = (DBInfo) node.getUserObject();
 						String dbName = dbi.getdbName();
 						DBConn dbc = hostsObj.getDBConn(dbName);
-						displayOverview(dbName, dbc);
+						dbOverview(dbName, dbc);
 						dbc.close();
 					}
 					catch(Exception e) {ErrorReport.prtReport(e, "Error getting overview");}
@@ -1511,13 +1499,21 @@ public class QRFrame extends JDialog implements WindowListener {
 	/************************************************************
 	 * XXX Database methods
 	 */
-	private String setConnection(String db) {
+	private String dbSetConnection(String db) {
 		setTitle("runDE " + Globalx.strTCWver + ":   " + db);
 		Out.Print("Opening " + db);
 
 		try {
 			mDB = hostsObj.getDBConn(db);		
-			theLibraryNames = loadLibraryNames();
+			theLibraryNames = dbLoadLibraryNames();
+			
+			String fullPath = mDB.executeString("select projectpath from assembly");
+			if (fullPath==null)
+				Out.bug("Project path is not set in database");
+			else {
+				projDirName = fullPath.substring(fullPath.lastIndexOf('/')+1);
+				Out.PrtSpMsg(1, "Project directory name: " + projDirName);
+			}
 		}
 		catch(Exception e) {
 			ErrorReport.prtReport(e, "Error getting databse information");
@@ -1525,7 +1521,7 @@ public class QRFrame extends JDialog implements WindowListener {
 		}
 		return db;
 	}
-	private String [] getPrefixedColumns(String prefix) {
+	private String [] dbLoadPrefixedColumns(String prefix) {
 	    Vector<String> retval = new Vector<String>();
 	    try {
 			ResultSet rs = mDB.executeQuery("SELECT * FROM contig LIMIT 1");
@@ -1546,7 +1542,7 @@ public class QRFrame extends JDialog implements WindowListener {
         }
 	}
 
-	private String [] loadLibraryNames() {
+	private String [] dbLoadLibraryNames() {
 		try {
 			Vector<String> names = new Vector<String> ();
 			ResultSet rset = mDB.executeQuery("SELECT libid FROM library where ctglib=0");
@@ -1561,7 +1557,7 @@ public class QRFrame extends JDialog implements WindowListener {
 		}		
 		return null;
 	}
-	private void removeColumnAll() {
+	private void dbRemoveColumnAll() {
 		try {
 			int nItems = cmbPvalColumns.getItemCount();
 			Vector<String> columns = new Vector<String>();
@@ -1572,13 +1568,14 @@ public class QRFrame extends JDialog implements WindowListener {
 					columns.add(column);
 				}
 			}
-			for (String name :columns) removeColumn(name);
+			for (String name :columns) dbRemoveColumn(name);
 			
-		 	mDB.executeUpdate("update assem_msg set goDE=''"); 
+			if (mDB.tableColumnExists("assem_msg", "goDE")) // CAS316
+				mDB.executeUpdate("update assem_msg set goDE=''"); 
 		}
 		catch(Exception e) {ErrorReport.prtReport(e, "Error removing column");}
 	}
-	private void removeColumn(String column) {
+	private void dbRemoveColumn(String column) {
 		try {
 			Out.Print("Removing column " + column + "...");
 			column =  pValColPrefix + column;
@@ -1604,7 +1601,7 @@ public class QRFrame extends JDialog implements WindowListener {
 		catch(Exception e) {ErrorReport.prtReport(e, "Error removing column");}
 	}
 	
-	private String [] getColumnList() {
+	private String [] dbLoadPvalColumns() {
 		Vector<String> names = new Vector<String> ();
 		try {
 			ResultSet rset = mDB.executeQuery("SHOW COLUMNS FROM contig");
@@ -1619,7 +1616,7 @@ public class QRFrame extends JDialog implements WindowListener {
 		
 		return names.toArray(new String[0]);
 	}
-	private void displayOverview(String dbName, DBConn dbc) {
+	private void dbOverview(String dbName, DBConn dbc) {
 		try {
 			String val = null;
 			ResultSet rset = dbc.executeQuery("SELECT pja_msg, meta_msg FROM assem_msg");
@@ -1686,7 +1683,6 @@ public class QRFrame extends JDialog implements WindowListener {
 	private QRProcess qrProcess = null;
 
 	private String [] theLibraryNames = null;
-	private QRFrame parent=null;
 
 	private DBConn mDB=null;
 	private HostsCfg hostsObj=null;
@@ -1696,4 +1692,5 @@ public class QRFrame extends JDialog implements WindowListener {
 	private double disp = -1;
 	private int filCPM = -1, filCPMn=-1, filCnt = -1;
 	private String rScriptFile="";
+	private String projDirName=null; // CAS316
 }

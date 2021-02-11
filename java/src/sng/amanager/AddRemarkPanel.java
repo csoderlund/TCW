@@ -1,23 +1,15 @@
 package sng.amanager;
 
-/************************************************
- * Add remark replaces any existing remark
- * Remove remarks removes all
- * Add file of locations
- */
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -25,26 +17,34 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
-
-import sng.assem.Utils;
 import sng.database.Globals;
 import sng.database.Schema;
 import util.database.DBConn;
+import util.file.FileC;
+import util.file.FileRead;
+import util.file.FileHelpers;
 import util.methods.ErrorReport;
-import util.methods.FileHelpers;
-import util.ui.UserPrompt;
 import util.methods.Out;
 import util.methods.Static;
+import util.ui.UserPrompt;
+
+/************************************************
+ * Add remark replaces any existing remark
+ * Remove remarks removes all
+ * Add file of locations
+ */
 
 public class AddRemarkPanel extends JPanel {
 	private static final long serialVersionUID = -2526722262077846590L;
+	private static final String helpDir = Globals.helpDir + "RemarkHelp.html";
 
 	private void addLoc(String fileName) {
 		// pattern is also in Library.java and AssemMain; used when sequence names are locations
 		Pattern mBEDPat = Pattern.compile("(\\S+):(\\d+)-(\\d+)");  // XXX
 		Pattern mGrpPat = Pattern.compile("\\A(\\D+)(\\d+)\\Z");  // beginning (not number) (number) end
-		System.err.println("Reading location file " + fileName);
+		Out.PrtSpMsg(1, "Reading location file " + fileName);
 		
 		String query="";
 		try {
@@ -52,8 +52,8 @@ public class AddRemarkPanel extends JPanel {
 				UserPrompt.showError("Enter filename");
 				return;
 			}
-			FileTextField fileObj = new FileTextField(theParentFrame, theParentFrame.getProjectName());
-			fileName = fileObj.pathToOpen(fileName, FileTextField.LIB);
+
+			fileName = FileC.addFixedPath(projName, fileName, FileC.dPROJ);
 			if (fileName==null) {
 				UserPrompt.showError("Error finding file " + fileName);
 				return;
@@ -73,8 +73,7 @@ public class AddRemarkPanel extends JPanel {
 				String [] tok = line.split("\\s+");
 				String [] grp = tok[1].split(":");
 				Matcher m = mGrpPat.matcher(grp[0]);
-				if (m.find()) 
-				{ 
+				if (m.find()) { 
 					String group = m.group(1).toLowerCase();
 					int num = Integer.parseInt(m.group(2));
 					if (num>maxNum) maxNum=num;
@@ -85,12 +84,12 @@ public class AddRemarkPanel extends JPanel {
 			file.close();
 			if (maxNum == -1) hasNum=false;
 			if (hasNum) 
-				System.out.println("  Found prefix: " + prefix + " max number " + maxNum);
+				Out.PrtSpMsg(2, "Found prefix: " + prefix + " max number " + maxNum);
 			
 			/*******************************************
 			 * Database
 			 */
-			DBConn mDB = theParentFrame.tcwDBConn();
+			DBConn mDB = theManFrame.tcwDBConn();
 			if (mDB==null) {
 				UserPrompt.showError("Cannot open database");
 				Out.PrtError("Cannot open database");
@@ -134,7 +133,7 @@ public class AddRemarkPanel extends JPanel {
 				line.replace("\n","").trim();
 				if (line.equals("")) continue;
 				if (line.startsWith("#")) {
-					System.err.println(line);
+					Out.prt(line);
 					continue;
 				}
 				int CID=0;
@@ -152,8 +151,7 @@ public class AddRemarkPanel extends JPanel {
 				
 				String loc = tok[1];
 				Matcher m = mBEDPat.matcher(loc);
-				if (m.find()) 
-				{ 
+				if (m.find()) { 
 					String group = m.group(1);
 					int start = Integer.parseInt(m.group(2));
 					int end = Integer.parseInt(m.group(3));
@@ -187,8 +185,8 @@ public class AddRemarkPanel extends JPanel {
 			
 			rs.close(); mDB.close();
 			Out.PrtSpMsg(1, "Added " + add + " locations to the database");
-			if (bad1>0) Out.PrtSpMsg(1, "Ignored lines " + bad1);
-			if (notfound>0) Out.PrtSpMsg(1, "No sequence IDs in database " + notfound);
+			Out.PrtSpCntMsgZero(1, bad1, "Ignored lines");
+			Out.PrtSpCntMsgZero(1, notfound, "No sequence IDs in database ");
 		}
 		catch (Exception e) {
 			if (!query.equals("")) System.out.println("Query: " + query);
@@ -204,14 +202,13 @@ public class AddRemarkPanel extends JPanel {
 			Pattern pat = Pattern.compile("(\\S+)\\s+(.*)$"); 
 			Out.PrtSpMsg(1, "Reading remark file " + fileName);
 			
-			FileTextField fileObj = new FileTextField(theParentFrame, theParentFrame.getProjectName());
-			fileName = fileObj.pathToOpen(fileName, FileTextField.LIB);
+			fileName = FileC.addFixedPath(projName, fileName, FileC.dPROJ);
 			if (fileName==null) {
 				UserPrompt.showError("Error finding file " + fileName);
 				Out.PrtError("Error finding file " + fileName);
 				return;
 			}
-			DBConn mDB = theParentFrame.tcwDBConn();
+			DBConn mDB = theManFrame.tcwDBConn();
 			if (mDB==null) {
 				UserPrompt.showError("Cannot open database ");
 				Out.PrtError("Cannot open database");
@@ -228,10 +225,8 @@ public class AddRemarkPanel extends JPanel {
 				ctgMap.put(rs.getString(2), rs.getInt(1));
 				ctgMap2.put(rs.getInt(1), rs.getString(2));
 				String rem = (rs.getString(3) == null ? "" : rs.getString(3).trim());
-				if (!rem.equals(""))
-				{
+				if (!rem.equals("")) 
 					curRems.put(rs.getInt(1),rem);
-				}
 			}
 			if (ctgMap.size()==0) {
 				UserPrompt.showError("No sequences in database -- run Instantiate");
@@ -249,7 +244,7 @@ public class AddRemarkPanel extends JPanel {
 				line = line.replace("\t", " "); // the \t causes it to be shown in next column of view table!
 				if (line.equals("")) continue;
 				if (line.startsWith("#")) {
-					System.err.println(line);
+					Out.prt(line);
 					continue;
 				}
 				cnt++;
@@ -289,14 +284,12 @@ public class AddRemarkPanel extends JPanel {
 						}
 					}
 				}				
-				if (curRems.containsKey(CID))
-				{
+				if (curRems.containsKey(CID)) {
 					value = value + "; " + curRems.get(CID);
 					append++;
 				}
 				else add++;
-				if (value.length() > 250)
-				{
+				if (value.length() > 250) {
 					longRems.add(name);
 					value = value.substring(0, 250);
 				}
@@ -304,7 +297,6 @@ public class AddRemarkPanel extends JPanel {
 			}
 			file.close();
 			
-			Out.PrtSpMsg(1, "Complete reading file");
 			for (int CID : curRems.keySet())
 			{
 				String value = curRems.get(CID);
@@ -319,12 +311,11 @@ public class AddRemarkPanel extends JPanel {
 			}
 			rs.close(); mDB.close();
 			Out.PrtSpMsg(1, "Added " + (add + append) +" remarks to the database");
-			if (bad1>0) Out.PrtSpMsg(1,"Ignored lines " + bad1);
-			if (notfound>0) Out.PrtSpMsg(1,"No sequence IDs in database " + notfound);
-			if (longRems.size() > 0)
-			{
+			Out.PrtSpCntMsgZero(1, bad1, "Ignored lines ");
+			Out.PrtSpCntMsgZero(1, notfound, "No sequence IDs in database " );
+			if (longRems.size() > 0) {
 				Out.PrtSpMsg(1,longRems.size() + " contigs had remarks longer than 250 chars and were truncated:");
-				Out.PrtSpMsg(1,Utils.strVectorJoin(longRems, ","));
+				Out.PrtSpMsg(1,Static.strVectorJoin(longRems, ","));
 			}
 		} catch (Exception e) {
 			ErrorReport.reportError(e, "Reading remark file " + fileName);
@@ -333,7 +324,7 @@ public class AddRemarkPanel extends JPanel {
 	
 	private void removeRemark() {
 		try {
-			DBConn mDB = theParentFrame.tcwDBConn();
+			DBConn mDB = theManFrame.tcwDBConn();
 			if (mDB==null) return;
 			
 			if (!UserPrompt.showConfirm("Remove Remarks", "Remove user remarks")) return;
@@ -348,10 +339,11 @@ public class AddRemarkPanel extends JPanel {
 	}
 	
 	/****************************************************************
-	 * Panel
+	 * Panel 
 	 */
-	public AddRemarkPanel(ManagerFrame parentFrame) {
-		theParentFrame = parentFrame;
+	public AddRemarkPanel(ManagerFrame parentFrame) { 
+		theManFrame = parentFrame;
+		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setBackground(Globals.BGCOLOR);
 		
@@ -365,16 +357,27 @@ public class AddRemarkPanel extends JPanel {
 		add(titleRow);
 		add(Box.createVerticalStrut(50));
 		
+		// Location
 		JPanel locRow = Static.createRowCenterPanel();
-		locRow.add(new JLabel("Location File"));
-		locRow.add(Box.createHorizontalStrut(5));
-		txtLocFile = new FileTextField(theParentFrame, FileTextField.LIB, FileTextField.COUNT);
-		txtLocFile.setAlignmentX(Component.CENTER_ALIGNMENT);
-		locRow.add(txtLocFile);
-		locRow.add(Box.createHorizontalStrut(5));
+		locRow.add(new JLabel("Location File"));	locRow.add(Box.createHorizontalStrut(5));
 		
-		btnLoc = Static.createButton("Add", true);
-		btnLoc.addActionListener(new ActionListener() {
+		txtLocFile = Static.createTextField("", 25);
+		locRow.add(txtLocFile);						locRow.add(Box.createHorizontalStrut(5));
+		
+		btnLocFile = new JButton("...");
+		btnLocFile.addActionListener(new ActionListener()  {
+			public void actionPerformed(ActionEvent arg0) {
+				projName = theManFrame.getProjDir(); // project know when this is selected
+				FileRead fc = new FileRead(projName, FileC.bDoVer, FileC.bDoPrt);
+				if (fc.run(btnLocFile, "Location", FileC.dPROJ, FileC.fTXT)) { 
+					txtLocFile.setText(fc.getRemoveFixedPath());
+				}
+			}
+		});
+		locRow.add(btnLocFile);					locRow.add(Box.createHorizontalStrut(5));
+		
+		btnAddLoc = Static.createButton("Add", true);
+		btnAddLoc.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				String file=txtLocFile.getText().trim();
 				if (!file.equals("")) {
@@ -382,25 +385,36 @@ public class AddRemarkPanel extends JPanel {
 				}
 			}
 		});
-		btnLoc.setEnabled(true);
-		locRow.add(btnLoc);
+		btnAddLoc.setEnabled(true);
+		locRow.add(btnAddLoc);
 		
 		locRow.setMaximumSize(locRow.getPreferredSize());
 		locRow.setMinimumSize(locRow.getPreferredSize());
 		add(locRow);
 		add(Box.createVerticalStrut(20));
 		
+	// Remarks
 		JPanel rmkRow = Static.createRowCenterPanel();
-		rmkRow.add(new JLabel("Remarks File"));
-		rmkRow.add(Box.createHorizontalStrut(5));
+		rmkRow.add(new JLabel("Remarks File"));			rmkRow.add(Box.createHorizontalStrut(5));
 		
-		txtRmkFile = new FileTextField(theParentFrame, FileTextField.LIB, FileTextField.COUNT);
-		txtRmkFile.setAlignmentX(Component.CENTER_ALIGNMENT);
-		rmkRow.add(txtRmkFile);
-		rmkRow.add(Box.createHorizontalStrut(5));
+		txtRmkFile = Static.createTextField("", 25);
+		rmkRow.add(txtRmkFile);							rmkRow.add(Box.createHorizontalStrut(5));
 		
-		btnAdd = Static.createButton("Add", true);
-		btnAdd.addActionListener(new ActionListener() {
+		btnRmkFile = new JButton("...");
+		btnRmkFile.addActionListener(new ActionListener()  {
+			public void actionPerformed(ActionEvent arg0) {
+				projName = theManFrame.getProjDir();
+				FileRead fc = new FileRead(projName, FileC.bDoVer, FileC.bDoPrt);
+				
+				if (fc.run(btnRmkFile, "Remark", FileC.dPROJ, FileC.fTXT)) { 
+					txtRmkFile.setText(fc.getRemoveFixedPath());
+				}
+			}
+		});
+		rmkRow.add(btnRmkFile);							rmkRow.add(Box.createHorizontalStrut(5));
+		
+		btnAddRmk = Static.createButton("Add", true);
+		btnAddRmk.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				String file = txtRmkFile.getText().trim();
 				if (!file.equals("")) {
@@ -408,20 +422,21 @@ public class AddRemarkPanel extends JPanel {
 				}
 			}
 		});
-		rmkRow.add(btnAdd);
+		rmkRow.add(btnAddRmk);
 		
 		rmkRow.setMaximumSize(rmkRow.getPreferredSize());
 		rmkRow.setMinimumSize(rmkRow.getPreferredSize());
 		add(rmkRow);
 		add(Box.createVerticalStrut(20));
 		
+		// button row
 		JPanel buttonRow = Static.createRowCenterPanel();
 		btnClose = Static.createButton("Close", true);
 		btnClose.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				theParentFrame.setFrameMode(ManagerFrame.FRAME_MODE_MAIN);
+				theManFrame.setFrameMode(ManagerFrame.FRAME_MODE_MAIN);
 				setVisible(false);
-				theParentFrame.setMainPanelVisible(true);
+				theManFrame.setMainPanelVisible(true);
 			}
 		});
 		buttonRow.add(btnClose);
@@ -440,8 +455,7 @@ public class AddRemarkPanel extends JPanel {
 		btnHelp.setBackground(Globals.HELPCOLOR);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(theParentFrame, "Remark Help", 
-						"html/runSingleTCW/RemarkHelp.html");
+				UserPrompt.displayHTMLResourceHelp(theManFrame, "Remark Help", helpDir);
 			}
 		});
 		buttonRow.add(btnHelp);
@@ -458,19 +472,12 @@ public class AddRemarkPanel extends JPanel {
 		txtLocFile.setText("");
 	}
 	
-	public void setStartingDir(File dir) {
-		startingDir = dir;
-	}
-	
-	private FileTextField txtRmkFile = null;
-	private FileTextField txtLocFile = null;
-	private JButton btnAdd = null;
-	private JButton btnLoc = null;
+	private JTextField txtRmkFile = null, txtLocFile = null;
+	private JButton btnAddRmk = null, btnAddLoc = null;
+	private JButton btnRmkFile = null, btnLocFile = null;
 
-	private JButton btnRemove = null;
-	private JButton btnClose = null;
-	private JButton btnHelp = null;
+	private JButton btnRemove = null, btnClose = null, btnHelp = null;
 	
-	private ManagerFrame theParentFrame = null;
-	private File startingDir;
+	private ManagerFrame theManFrame = null;
+	private String projName="";
 }

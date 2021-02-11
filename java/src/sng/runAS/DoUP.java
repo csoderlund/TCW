@@ -13,11 +13,11 @@ import java.util.regex.Pattern;
 
 import javax.swing.JOptionPane;
 
+import util.file.FileHelpers;
 import util.methods.ErrorReport;
 import util.methods.Out;
 import util.methods.Static;
 import util.methods.TimeHelpers;
-import util.methods.FileHelpers;
 
 public class DoUP {
 	private final String upTaxURL = 
