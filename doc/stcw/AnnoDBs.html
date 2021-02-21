@@ -254,13 +254,13 @@ under the "UniProt" directory. For example,
 <pre>
 	./TCW/projects/DBfasta/UniProt_Jan2021% ls *
 	sp_archaea:
-	uniprot_sprot_archaea.dat.gz	uniprot_sprot_archaea.fasta.gz		
+	uniprot_sprot_archaea.dat.gz	uniprot_sprot_archaea.fasta.gz
 
 	sp_fullSubset:
-	uniprot_sprot.dat.gz	uniprot_sprot_fullSubset.fasta uniprot_sprot_fullSubset.dat.gz		
+	uniprot_sprot.dat.gz	uniprot_sprot_fullSubset.fasta uniprot_sprot_fullSubset.dat.gz
 
 	sp_viruses:
-	uniprot_sprot_viruses.dat.gz	uniprot_sprot_viruses.fasta.gz		
+	uniprot_sprot_viruses.dat.gz	uniprot_sprot_viruses.fasta.gz
 </pre>
 Note that the sp_fullSubset directory has TWO .dat files, the second one (<tt>uniprot_sprot_fullSubset.dat.gz</tt>) 
 was created with the Taxonomic entries removed and corresponds to the .fasta file
@@ -420,7 +420,6 @@ accepted descriptor line.
 
 <p><b>Description lines</b> 
 
-
 <p>The description line is the ">" line that describes the subsequent sequence in a FASTA file. 
 From it, <code>runSingleTCW</code> extracts: 
 <ul>
@@ -455,9 +454,10 @@ Note, there is no longer a way to detect the database origin within the file, he
 <li>The text from the first space to the first "[" is the description.
 <li>The text within the "[]" is the species.
 </ul>
-In 2016, NCBI changed the format, where the old one should still work.
+As it does not have an "type code", its type will default to "PR". If the taxonomy is given as "nr",
+the abbreviation for this database will be <u>PRnr</u>.
 
-
+<!--------!>
 <p><b>Generic</b> 
 <p>If you have a file other than UniProt or nr, make the descriptor names as follows:
 <pre>
@@ -469,19 +469,33 @@ In 2016, NCBI changed the format, where the old one should still work.
 <li>Everything up to the OS is the description
 <li>Everything after the OS is the species
 </ul>
-<p>For example, the TCW perl script <tt>scripts/formatPlantTFDB.pl</tt> takes as input a file from
-<a href=http://planttfdb.gao-lab.org/download.php class="ext" target="_blank">PlantTFDB</a>, and
-reformat the header lines as follows:
+<p><u>Example 1</u>: The TCW perl script <tt>scripts/formatPlantTFDB.pl</tt> takes as input a file from
+<a href=http://planttfdb.gao-lab.org/download.php class="ext" target="_blank">PlantTFDB</a>, which has header lines
+like:
 <pre>
 	>KFK36254.1 Arabis alpina|G2-like|G2-like family protein
 </pre>
-Converted to:
+and converts them to header lines:
 <pre>
 	>tf|G2_like_1 G2-like family protein {KFK36254.1} OS=Arabis alpina
 </pre>
-The type will be <u>tf</u>. If the taxonomy entered into <code>runSingleTCW</code> is <u>plants</u>,
-the abbreviation for this database will be <u>tfPla</u>.
+The type will be "TF"". If the taxonomy entered into <code>runSingleTCW</code> is "plants"",
+the abbreviation for this database will be <u>TFpla</u>.
 
+
+<p><u>Example 2</u>: The TCW python script <tt>scripts/formatNCBIrna.py</tt> takes as input an RNA file from NCBI,
+which has header lines like:
+<pre>
+	>XM_002436391.2 PREDICTED: Sorghum bicolor GDP-mannose 4,6 dehydratase 1 (LOC8069086), mRNA
+</pre>
+and converts them to header lines:
+<pre>
+	>XM_002436391.2 GDP-mannose 4,6 dehydratase 1 (LOC8069086), mRNA OS=Sorghum bicolor
+</pre>
+As this does not have a type code at the beginning, its type will default to "NT". If the taxonomy is entered as "sb",
+the abbreviation for this database will be <u>NTsb</u>. The script can be modified to add a type code.
+
+<!---------------------------------------------------------!>
 <a name=runstcw></a>
 <table width='100%'><tr><td align='left'>
 <h2>Entering AnnoDBs and GOs into <code>runSingleTCW</code></h2>

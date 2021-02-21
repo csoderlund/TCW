@@ -166,7 +166,7 @@ public class  FileC {
 		else if (pathType==dPROJ)   	d = PROJDIR + projName; 
 		else if (pathType==dPROJHIT)  	d = PROJDIR + projName + "/" + Globalx.pHITDIR + "/"; // CAS314
 		
-		else if (pathType==dUSER)   	d = PROJDIR + "/" + Globalx.USERDIR;
+		else if (pathType==dUSER)   	d = PROJDIR + Globalx.USERDIR; // CAS317 remove extra "/"
 		else if (pathType==dANNO)   	d = ANNODIR;
 		
 		else if (pathType==dCMP)   		d = CMPDIR + projName;

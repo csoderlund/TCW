@@ -9,6 +9,59 @@
 <font color="#000000" face="Verdana, Arial, Helvetica, sans-serif" size="2"> 
 
 <p><b><big><u>TCW Version 3.1</u></b></big>
+<br>Version 3.1 releases are about tidying things up, without any major new features.
+
+<p><b>v3.1.7  21-Feb-21</b>
+<br>Update existing sTCW databases for this release: it is a good idea to reload the hits
+to make the database consistent with the interface (e.g. Best Bitscore has replace Best Eval).
+
+<ul>
+<li><code>runSingleTCW</code>
+<ul>
+<li>Best and Rank:
+<table border=0 cellpadding=5>
+<tr><td valign=top><tt>Best Bits</tt><td> The <tt>Best Eval</tt> (best e-value) has been replaced with <tt>Best Bits</tt>. The <tt>Best Bits</tt> hit has the best bitscore of the
+set of hits for the sequence. This is much better than using the e-value, which depends on the database size.
+<tr><td valign=top><tt>Best Anno</tt><td> (1) It used to be the case that the e-value of the candidate best anno hit 
+had to be reasonable close to the <tt>Best Eval</tt> e-value. It no longer checks the e-value or bitscore.
+<br>(2) The rules for determining an un-informative hit have been slightly changed, e.g. "unnamed protein product" has been added to the un-informative list, which is found in nr.gz.
+<tr><td valign=top><tt>Best with GO</tt><td> Is now the highest bitscore hit with GOs.
+<tr><td valign=top><tt>Rank</tt><td>Is assigned based on the hit list for an given sequence and annoDB being sorted on the bitscore,
+then further sorted on the e-value when the bitscore is tied. It was the case that TCW used the input order,
+which where the e-value takes precedence over the bitscore.
+</table>
+
+<li><tt>hitWarnings.log</tt>: Only problems with hits that are found in the tab file are recorded to this file (use to be for all entries).
+The <tt>demoTra</tt> example <tt>TwoOsSeqs.fa</tt> sequence file has hits to NR entries that are too long and
+have been truncated, hence, written to the <tt>hitWarnings.log</tt> file.
+</ul>
+
+<li><code>viewSingleTCW</code>
+<ul>
+<li>Sequence Filter: (1) Filter has been added for bitscore. 
+(2) Filter has been added on <tt>Best Eval != Best Anno</tt> and <tt>GO!=Bits&GO!=Anno</tt>.
+<li>Sequence Detail: (1) In the hits table, the bitscore has been moved before the e-value to make
+it obvious that the sort is on the bitscore before the e-value. (2) A <tt>Copy.. Selected Hit Description</tt> 
+has been added. 
+</ul>
+
+<li>Demo files
+<ul>
+<li><tt>UniProt_demo</tt> has been updated to Jan-2021 along with the associated GO file.
+<li><tt>Other_demo</tt> has been added, specifically for demoTra. It has examples
+of NCBI protein nr.gz, PlantTFDB-all_TF_pep.fas, and NCBI RNA Sorghum bicolor sequences.
+<li>demoTra - A README explains the various input files,
+as this project has examples of most input files.
+</ul>
+
+<li><tt>/scripts</tt>
+<ul>
+<li>A new python script called <tt>formatNCBIrna.py</tt> that formats the header lines
+of a NCBI RNA file for use with TCW.
+</ul>
+</ul>
+</ul>
+
 <p><b>v3.1.6  11-Feb-21</b>
 
 <ul>
@@ -20,7 +73,7 @@ can be changed to "All Files" in order to select any file.
 File Chooser will use that directory the next time it is used for the session.
 <li>When any file is read, its basic file structure is verified.
 </ul>
-<li>Little fixes:
+<li>Little fixes
 <ul>
 <li>runMulti: (1) Removed obsolete parameters. 
 (2) The 'blastn' defaults had an extra incorrect parameter (introduced in v3.1.6). (3) The
@@ -43,7 +96,7 @@ exception of the <code>runAS</code> and sTCW "Count file generator".
 <li>All File Choosers popups that restrict selected files to FASTA file now allows the ".gz" suffix on it.
 The accepted suffixes are "fa","fasta","fna", "ffn", "faa", "frn","fa.gz","fasta.gz","fna.gz", "ffn.gz", "faa.gz", "frn.gz".
 </ul>
-<li><code>runAS</code>: 
+<li><code>runAS</code>
 <ol>
 <li>The <tt>AnnoDB.cfg</tt> button (previous <tt>TCW.anno</tt>) now creates a file with the suffix ".cfg". 
 <li>File sizes are included on the trace output. 

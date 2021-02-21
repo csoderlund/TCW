@@ -53,13 +53,12 @@ the DE computation returned an NA.
 The first set of values are from the AnnoDB file. The second set is from the Search
 file (i.e. produced by <tt>Blast</tt> or <tt>Diamond</tt>). The last set (if present)
 are from the UniProt .dat file.
-<p>
-<i>Best E-value</i>:
-The hit with the best e-value and bitscore.
-<p><i>Best Annotation</i>: See Help for the Basic annoDB hits.
-<p><i>Best with GO</i>: (if the database has GO annotation)
-The best e-value hit with an assigned GO term.
-
+<table border=0 cellpadding=5>
+<tr><td>Best Bitscore: <td>The hit with the best bitscore. See Instructions for more information.
+<tr><td nowrap>Best Annotation: <td>The hit with the best annotation. See Instructions for more information.
+<tr><td valign=top>Best with GO</i>:<td> (if the database has GO annotation)
+The best hit with at least one assigned GO term.
+</table>
 <h3>SNPs and ORFs</h3>
 
 Note that SNPs are only available if the  assembly was performed within TCW. 

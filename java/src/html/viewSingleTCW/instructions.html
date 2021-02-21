@@ -3,21 +3,41 @@
 <body style="padding:10px;width:550px;">
 <h2>Instructions</h2>
 Terminology:
-<ul>
-<li><i>Sequence:</i> The input may be TCW-assembled transcripts, transcript sequences, proteins or genes.
-<li><i>Conditions:</i>A condition may be a tissue type, treatment, etc.  
-<li><i>AnnoDB:</i> A database in FASTA format against which the sTCW sequences were searched against
+<table border=0 cellpadding=5>
+<tr><td valign=top><i>Sequence</i><td>The input may be TCW-assembled transcripts, transcript sequences, proteins or genes.
+<tr><td valign=top><i>Conditions</i><td>A condition may be a tissue type, treatment, etc.  
+<tr><td valign=top><i>AnnoDB</i><td>A database in FASTA format against which the sTCW sequences were searched against
 for annotation. The search used  <tt>Blast</tt> or <tt>Diamond</tt>.
-<li><i>DB hit:</i> An alignment of an entry from an annoDB (e.g. UniProt) to an sequence. A given
+
+<tr><td valign=top><i>DB hit</i><td>An alignment of an entry from an annoDB (e.g. UniProt) to an sequence. A given
 sequence can <i>hit</i> an annoDB multiple times (have alignments to multiple entries) and
 it can hit multiple different annoDBs (have alignments in more than one annoDB). 
-<li><i>Best Eval:</i> The hit with the best search e-value.
-<li><i>Best Anno:</i> From a list sorted on e-value, the first one with informative
-annotation, which is any description that does not contain 
-phrases such as "uncharacterized protein" (see 'Select Columns' Help for a more complete
-description).
-</ul>
 
+<tr><td colspan=2><u>The following are characterizations assigned to DB hits</u>
+<tr><td valign=top><i>Best Bits (BS/BITS)</i><td>The hit with the best bitscore. 
+If there is a tie, a SP (SwissProt) or TR (TrEMBL) takes precedence.
+If there is still a tie, the best e-value takes precedence.
+
+<tr><td valign=top><i>Best Anno (AN/ANNO)</i><td>The hit with the best
+bitscore from the list of informative descriptions, where an informative description
+is one that does not contain phrases such as  "uncharacterized protein". 
+It also looks for names such as "Os02g0768200 protein", though this means it sometimes 
+gets it wrong, e.g "B1 protein" is detected as non-informative as it has the general composition of a name.
+
+<br><br>Special Case: The database may having been built with the "SwissProt precedence" option set, in which
+case, this will be stated at the end of the <b>Overview</b>. When this is selected, a SwissProt hit will be selected
+if its bitscore is sufficiently close the non-SP best annotation.
+
+<tr><td valign=top><i>Best with GO (WG)</i><td>From a list sorted on bitscore, the first one with at least one GO term assigned.
+
+<tr><td valign=top><i>Rank</i><td>The rank is assigned based on the bitscore sort followed by the 
+e-value sort, i.e. when the bitscore is tied, the order is
+based on the e-value.
+Note that the <tt>Blast</tt> and <tt>Diamond</tt> default order is the e-value sort followed by the
+bitscore. 
+</table>
+NOTE: The bitscore takes precedence over the e-value since the e-value takes into account the size of the database, wherease
+the bitscore will be the same regardless of the size of the database.
 <hr>
 Detailed Help is provided on each page; the following provides an overview
 of what is available.

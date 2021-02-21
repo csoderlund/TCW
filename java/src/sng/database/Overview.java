@@ -572,7 +572,7 @@ public class Overview {
 	    	   	Out.prtSpCnt(1, hitSeq[dbid], "Seqs with hits for DB#" + dbid + "             ");
 	     	}
 	   /* Loop through annoDBs creating table */
-	        String [] dfields =  {"ANNODB",  "ONLY", "EVAL", "ANNO", "UNIQUE", "TOTAL", "AVG", "HIT-SEQ (#SEQ)", "BEST  AVG", "COVER", "COVER"};
+	        String [] dfields =  {"ANNODB",  "ONLY", "BITS", "ANNO", "UNIQUE", "TOTAL", "AVG", "HIT-SEQ (#SEQ)", "BEST  AVG", "COVER", "COVER"};
 	        String [] dfields2 = {"",          "",     "", "",  "",        "",     "%SIM",   "",                 "HIT  %SIM", ">="+COVER1, ">="+COVER2};
 	        int [] djust = {1,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	        
@@ -631,7 +631,7 @@ public class Overview {
     	 	lines.add("   Top " + NSPECIES + " species from total: "+ dff.format(nSpecies));
     	 	Out.prtSpCnt(1, nSpecies, "Species");
     	 	
-    	    String [] sfields = {"SPECIES (25 char)", " EVAL", " ANNO", "TOTAL", "","SPECIES", " EVAL", " ANNO", "TOTAL"};
+    	    String [] sfields = {"SPECIES (25 char)", " BITS", " ANNO", "TOTAL", "","SPECIES", " BITS", " ANNO", "TOTAL"};
             int nGrp = 4;
         	    int nCol = sfields.length;
             int nRow = (int) ((float)(NSPECIES/2)+1.0);
@@ -813,8 +813,8 @@ public class Overview {
         lines.add("   annoDB:");
         lines.add("      ANNODB    is DBTYPE-TAXO, which is the DBtype and taxonomy");
         lines.add("      ONLY      #Seqs that hit the annoDB and no others");
-        lines.add("      EVAL      #Seqs with the best E-value from the annoDB");
-        lines.add("      ANNO      #Seqs with the best annotation from the annoDB ");
+        lines.add("      BITS      #Seqs with the overall best bitscore from the annoDB");
+        lines.add("      ANNO      #Seqs with the overall best annotation from the annoDB ");
         lines.add("      UNIQUE    #Unique hits to the annoDB");
         lines.add("      TOTAL     #Total seq-hit pairs for the annoDB");
         lines.add("      AVG %SIM  Average percent similarity of the total seq-hit pairs");
@@ -851,6 +851,8 @@ public class Overview {
 	        lines.add("   Similar pairs: " + nPairs);
 	        
         	String msg = mDB.executeString( "SELECT pair_msg from assem_msg"); // CAS314
+        	if (msg==null || msg.contentEquals("")) return true; // CAS317
+        	
         	String [] tok = msg.split("::");
         	int cntAA=0, cntNT=0, cntORF=0;
         	

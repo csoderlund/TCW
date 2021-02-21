@@ -32,7 +32,7 @@ public class UIfieldBestHit extends JPanel implements ActionListener  {
 		// header row
 		JPanel row = Static.createRowPanel();
 		row.add(Box.createHorizontalStrut(6));
-		row.add(new JLabel("EV")); row.add(Box.createHorizontalStrut(8));
+		row.add(new JLabel("BS")); row.add(Box.createHorizontalStrut(8));
 		row.add(new JLabel("AN")); row.add(Box.createHorizontalStrut(8));
 		if (hasGOs) row.add(new JLabel("WG")) ;
 		add(row);
@@ -94,13 +94,13 @@ public class UIfieldBestHit extends JPanel implements ActionListener  {
 	
 	private String [] names = {
 			"Hit ID", "Description", "Species", "DB type", "Taxo", "E-value",
-			"BitScore", "%Sim", "Align", "SeqStart", "SeqEnd", "%SeqCov",
+			"Bitscore", "%Sim", "Align", "SeqStart", "SeqEnd", "%SeqCov",
 			"HitStart", "HitEnd", "%HitCov",
 			"GO", "InterPro", "KEGG", "Pfam", "EC"};
 	private String [] desc = {
 			"Identifier", "Description", "Species", 
 			"Type (e.g. SP (SwissProt) or TR (TrEMBL))", "Taxonomy of the database", 
-			"E-value", "Bit Score", "Percent similarity", "Alignment length (amino acid)", 
+			"E-value", "Bit score", "Percent similarity", "Alignment length (amino acid)", 
 			"Start of the match to the sequence", "End of the match to the sequence", 
 			"Percent coverage of sequence",
 			"Start of the match to the hit", "End of the match to the hit", 

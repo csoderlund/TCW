@@ -9,8 +9,8 @@ import java.text.DecimalFormat;
 public class Globalx {
 	public static boolean debug = false; // changed in STCWMain or MTCWMain from command line 
 	
-	public static final String strRelDate = "(11-Feb-21)"; 
-	public static final String strTCWver = "3.1.6"; 
+	public static final String strRelDate = "(21-Feb-21)"; 
+	public static final String strTCWver = "3.1.7"; 
 	public static final String URL = "http://www.agcol.arizona.edu ";
 	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate;
 	public static final String error="***";
@@ -50,6 +50,9 @@ public class Globalx {
 	
 	public static final String [] fastaFile = new String [] 
 			{"fa","fa.gz", "fasta", "fasta.gz",  "fna", "ffn", "faa", "frn", "fna.gz", "ffn.gz", "faa.gz", "frn.gz"};
+	
+	public static String SP="sp", TR="tr"; // UniProt   CAS317 these were hardcoded everywhere
+	public static String PR="pr", NT="nt"; // Other		ditto (NT and AA is still hardcoded...)
 	
 	public static final String gapStr  = "-";
 	public static final char   gapCh   = '-';

@@ -68,7 +68,7 @@ public class BasicGOFilterTab extends Tab {
 	private static final Color BGCOLOR = Globals.BGCOLOR;
 	
 	private static final int LABEL_CHK_WIDTH1 = 50;
-	private static final int LABEL_WIDTH2 = 55;
+	private static final int LABEL_WIDTH2 = 57;
 	private static final String GO_FORMAT = Globalx.GO_FORMAT;
 	
 	private static final String deColLabel = "Select";
@@ -557,7 +557,7 @@ public class BasicGOFilterTab extends Tab {
 		useGrp.add(radUseSearch);
 		useGrp.add(radUseFilter);
 		
-		lblSeqHit = createLabel("Seq-hit:", LABEL_WIDTH2);
+		lblSeqHit = createLabel("Seq-hit:", LABEL_WIDTH2); // CAS317 label was partial on linux
 		row2.add(lblSeqHit);
 		
 		// [x] E-value [    ]
@@ -568,45 +568,45 @@ public class BasicGOFilterTab extends Tab {
   		    	  	txtEvalVal.setEnabled(enable);
   		      }
   		 });
-    		txtEvalVal = Static.createTextField(DEF_EVAL, 5, false);
-    		row2.add(chkUseEval);
-    		row2.add(txtEvalVal);
-    		row2.add(Box.createHorizontalStrut(30));
-    		
-    		// [x] #Seqs [    ]
-    		chkUseNSeq = Static.createCheckBox("#Seqs>=", false);
-    		chkUseNSeq.addActionListener(new ActionListener() {
-  		      public void actionPerformed(ActionEvent ae) {
-  		    	  	boolean enable = chkUseNSeq.isSelected();
-		    	  	txtNSeqVal.setEnabled(enable);
-  		      }
+		txtEvalVal = Static.createTextField(DEF_EVAL, 5, false);
+		row2.add(chkUseEval);
+		row2.add(txtEvalVal);
+		row2.add(Box.createHorizontalStrut(30));
+		
+		// [x] #Seqs [    ]
+		chkUseNSeq = Static.createCheckBox("#Seqs>=", false);
+		chkUseNSeq.addActionListener(new ActionListener() {
+	      public void actionPerformed(ActionEvent ae) {
+	    	  	boolean enable = chkUseNSeq.isSelected();
+	    	  	txtNSeqVal.setEnabled(enable);
+	      }
   		 });
-    		txtNSeqVal = Static.createTextField("2", 3, false);
-    		row2.add(chkUseNSeq);
-    		row2.add(txtNSeqVal);
-    		row2.add(Box.createHorizontalStrut(30));
-    		
-    		// [x] [Evidence Codes] 
-    		if (ecColumnNames.length>0) {
-    			chkUseEC = Static.createCheckBox("", false);
-	        	chkUseEC.addActionListener(new ActionListener() {
-	    			public void actionPerformed(ActionEvent e) {
-	    				btnEC.setEnabled(chkUseEC.isSelected());
-	    			}
-	    		});   
-			
-	    		createECPanel();
-	    		btnEC = Static.createButton("Evidence Codes", false, Globals.MENUCOLOR);
-	    		btnEC.addActionListener(new ActionListener() {
-	    			public void actionPerformed(ActionEvent arg0) {
-	    				evidCodePanel.setVisible(true);
-	    				mainPanel.setVisible(false);
-	    			}
-	    		});
-	    		row2.add(chkUseEC);
-	    		row2.add(btnEC);
-    		}
-    		filterPanel.add(row2);
+		txtNSeqVal = Static.createTextField("2", 3, false);
+		row2.add(chkUseNSeq);
+		row2.add(txtNSeqVal);
+		row2.add(Box.createHorizontalStrut(30));
+		
+		// [x] [Evidence Codes] 
+		if (ecColumnNames.length>0) {
+			chkUseEC = Static.createCheckBox("", false);
+        	chkUseEC.addActionListener(new ActionListener() {
+    			public void actionPerformed(ActionEvent e) {
+    				btnEC.setEnabled(chkUseEC.isSelected());
+    			}
+    		});   
+		
+    		createECPanel();
+    		btnEC = Static.createButton("Evidence Codes", false, Globals.MENUCOLOR);
+    		btnEC.addActionListener(new ActionListener() {
+    			public void actionPerformed(ActionEvent arg0) {
+    				evidCodePanel.setVisible(true);
+    				mainPanel.setVisible(false);
+    			}
+    		});
+    		row2.add(chkUseEC);
+    		row2.add(btnEC);
+		}
+		filterPanel.add(row2);
 	}
 	private void createFilterRow3Level() {
 		JPanel row3 = Static.createRowPanel();
@@ -624,7 +624,7 @@ public class BasicGOFilterTab extends Tab {
 		cmbTermTypes.setMinimumSize(cmbTermTypes.getPreferredSize());
 		cmbTermTypes.setBackground(Globals.BGCOLOR);
 		row3.add(cmbTermTypes);
-		row3.add(Box.createHorizontalStrut(30));
+		row3.add(Box.createHorizontalStrut(15));
 		
 		// Specific []
 		boolean enable = false;
@@ -647,7 +647,7 @@ public class BasicGOFilterTab extends Tab {
 		row3.add(chkLevelSpecific);
 		row3.add(lblSpecific);
 		row3.add(txtLevelSpecific);
-		row3.add(Box.createHorizontalStrut(30));
+		row3.add(Box.createHorizontalStrut(15));
 		
 		/// Range [] to []
 		enable=true;
@@ -682,12 +682,9 @@ public class BasicGOFilterTab extends Tab {
 		
 		row3.add(chkLevelRange);
 		row3.add(lblRange);
-		row3.add(txtLevelMin);
-		row3.add(Box.createHorizontalStrut(2));
-		row3.add(lblTo);
-		row3.add(Box.createHorizontalStrut(2));
-		row3.add(txtLevelMax);
-		row3.add(Box.createHorizontalStrut(30));
+		row3.add(txtLevelMin); 	row3.add(Box.createHorizontalStrut(2));
+		row3.add(lblTo);		row3.add(Box.createHorizontalStrut(2));
+		row3.add(txtLevelMax);	row3.add(Box.createHorizontalStrut(15));
 		
 		// Slim
 		enable=false;
@@ -695,13 +692,14 @@ public class BasicGOFilterTab extends Tab {
 		chkSlims = Static.createCheckBox("", enable);
 		chkSlims.addActionListener(new ActionListener() {
 		     public void actionPerformed(ActionEvent ae) {
-		    	 	lblSlims.setEnabled(chkSlims.isSelected());
+		    	 lblSlims.setEnabled(chkSlims.isSelected());
 		     }
 		});
 		if (theParentFrame.getMetaData().hasSlims()) {
 			row3.add(chkSlims);
 			row3.add(lblSlims);
 		}
+		else row3.add(Box.createHorizontalStrut(lblSlims.getWidth()+chkSlims.getWidth()));
 			
 		if (deColumnNames.size()==0) {
 			row3.add(Box.createHorizontalGlue());
@@ -1539,7 +1537,7 @@ public class BasicGOFilterTab extends Tab {
 		}
 		catch(Exception e) {ErrorReport.prtReport(e, "Error loading file");}
 	}
-	private STCWFrame getInstance() {return theParentFrame;}
+	
 	private boolean badLevel(String num) {
 		try {
 			int x = Integer.parseInt(num);

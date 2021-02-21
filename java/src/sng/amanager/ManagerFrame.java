@@ -69,7 +69,7 @@ import util.ui.UserPrompt;
 
 public class ManagerFrame extends JFrame {
 	private static final long serialVersionUID = 7879962219972222820L;
-	private static final String HTML = Globals.helpDir + "/ManagerHelp.html";
+	private static final String HTML = Globals.helpRunDir + "ManagerHelp.html";
 	private static final String COPYPROJ = "Cp"; // suffix
 	
 	public static final String PROJDIR = Globalx.PROJDIR  + "/";

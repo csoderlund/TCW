@@ -31,7 +31,7 @@ import util.ui.UserPrompt;
 public class EditAnnoPanel extends JPanel {
 	private static final long serialVersionUID = 4830755874697242929L;
 	
-	private static String helpHTML =  Globals.helpDir + "/EditAnnoDBPanel.html";
+	private static String helpHTML =  Globals.helpRunDir + "EditAnnoDBPanel.html";
 	private static final int COLUMN_WIDTH = 200;
 	private static final int TAB_WIDTH = 20;
 	private static final int COL_MINUS_TAB = COLUMN_WIDTH-TAB_WIDTH;

@@ -19,6 +19,7 @@ import sng.database.Globals;
 import sng.dataholders.BlastHitData;
 import sng.dataholders.ContigData;
 import util.database.DBConn;
+import util.database.Globalx;
 import util.file.FileHelpers;
 import util.methods.ErrorReport;
 import util.methods.Out;
@@ -34,9 +35,9 @@ public class DoUniProt
 	private final int maxHitSeq = 32000;
 	private final String badHitFile = BlastHitData.badHits;
 	private final int maxHitsPerAnno = 25;
-	private final double useSP = 0.80;
-	private final double useEV = 0.10;
-	private final double DLOW = 1E-308; // 1E-180 for 32-bit - not checked
+	private final double useSP = 0.7;
+	
+	private final String SP = Globalx.SP, TR=Globalx.TR, NT=Globalx.NT;
 	
 	public DoUniProt () {}
 
@@ -46,17 +47,15 @@ public class DoUniProt
 	}
 	
 	 /**
-     * called from CoreAnno.run to annotate all contigs with protein or DNA
+     * called from CoreAnno.run to annotate all sequences with hits
      * 1. updates pja_db_unitrans_hits with hits that pass sTCW.cfg filters
      * 2. updates pja_db_unique_hits with new hits and/or new annotation
      * 		that is, even if no hits are found in the hit file, 
      * 		the fasta file will still be read for annotation
      * 		this is for the case where it was not done to start with
      * 3. update pja_database by adding the given DB
-     * 
      **/
-	public boolean processAllDBhitFiles(boolean isAA, TreeMap<String, Integer> seqs) 
-	{
+	public boolean processAllDBhitFiles(boolean isAA, TreeMap<String, Integer> seqs) {
 		if (bUseSP) Out.PrtSpMsg(1, "Best Anno - SwissProt preference");
 		if (bRmECO) Out.PrtSpMsg(1, "Remove {ECO...} from UniProt descripts");
 		else Out.PrtSpMsg(1, "Do NOT remove {ECO...} from UniProt descripts");
@@ -75,7 +74,7 @@ public class DoUniProt
 	 	if (!pRC) return false;  
 	 	
 	 	// final things
-	 	if (annoSeqMap.size() > 0) {
+	 	if (annoSeqSet.size() > 0) {
 	 		CoreDB.updateAnnoVer(mDB);
 	 		Step3_saveSpeciesSQLTable();
 	 	}
@@ -97,7 +96,7 @@ public class DoUniProt
 	 				LineParser.maxDescriptLen + ": truncated -- see file " + badHitFile);
 	 	
 	 	Out.PrtSpMsgTime(1, 
-	 			"Finished " + annoSeqMap.size() + " annotated  " + (seqMap.size()-annoSeqMap.size()) + " unannotated",
+	 			"Finished " + annoSeqSet.size() + " annotated  " + (seqMap.size()-annoSeqSet.size()) + " unannotated",
 	 			totalTime);
 	 	Out.PrtSpMsg(1," ");
 	 	cleanup();
@@ -108,14 +107,13 @@ public class DoUniProt
 	/**********************************************************
 	 * Read all files, add hits, annoDB and unique hit information to db
 	 */
-    private int Step1_processAllHitFiles() 
-    {	   
+    private int Step1_processAllHitFiles() {	   
 	    int total = 0;
 	    int nFiles = hitObj.numDB();
     	
 		try {
 			Out.PrtSpMsg(1, "Annotate sequences with sequence hits from " + nFiles + " DB file(s)");
-			hitsInDB = loadUniqueHitSet();
+			hitsInDB = s1_loadUniqueHitSet();
 	    	
 	    	for (int i=0; i< nFiles; i++) {  
 	    		// Run search if necessary or get existing hit file
@@ -208,7 +206,7 @@ public class DoUniProt
 					
 					if (! curSeqName.equals("")) { // process previous
 						if (curHitDataForSeq.size() > 0) {// may have had bad hit
-							addHitDataForCtgToDB(); 
+							s1_saveHitDataForSeq(); 
 							curHitDataForSeq.clear();
 						}
 					}
@@ -267,7 +265,7 @@ public class DoUniProt
 	    	//-----------------------------------------------------------//
 	    	if (! curSeqName.equals("")) { // process last contig
 	    			if (curHitDataForSeq.size() > 0) {// may have had bad hit
-					addHitDataForCtgToDB(); 
+					s1_saveHitDataForSeq(); 
 					curHitDataForSeq.clear();
 				}
 	    	}
@@ -296,12 +294,13 @@ public class DoUniProt
         return true;
     }
  
-    // gathered all hits in hitDataForCtg. Save each hit. 
-    private void addHitDataForCtgToDB()
-    {
+    // gathered all hits in hitDataForCtg per sequence per annoDB. Save each hit. 
+    private void s1_saveHitDataForSeq() {
 	    try {
 	    	int seqLen = curSeqData.getConsensusBases();
 				
+	    	Collections.sort(curHitDataForSeq); // CAS317 was blast (eval/bitsore) order, make TCW (bitscore/eval) order
+	    	
 	    	PreparedStatement ps = mDB.prepareStatement("INSERT INTO pja_db_unitrans_hits " + 
 			  "(CTGID, AID, DUHID, contigid, uniprot_id, percent_id, alignment_len," +
 			  "mismatches, gap_open, ctg_start, ctg_end, prot_start, prot_end, " +
@@ -359,7 +358,7 @@ public class DoUniProt
        		// XXX CAS304
        		String name = curSeqData.getContigID();
        		int id = seqMap.get(name);
-		    if (!annoSeqMap.containsKey(id)) annoSeqMap.put(id, "");
+		    if (!annoSeqSet.contains(id)) annoSeqSet.add(id);
 	    }
         catch ( Exception err ) {
         		pRC=false;
@@ -421,7 +420,7 @@ public class DoUniProt
 	    	while (!hitsAddToDB.isEmpty()) {
 	    		String hitID = hitsAddToDB.iterator().next();
 	    		
-			saveDBhitUnique(DBID, isAAannoDB, dbType, dbTaxo, hitID, "", "", "", "", 0);
+			s1_saveDBhitUnique(DBID, isAAannoDB, dbType, dbTaxo, hitID, "", "", "", "", 0);
 			hitsInDB.add(hitID); // so do not get divide by zero error
 	    		hitsAddToDB.remove(hitID); 
 	    	}
@@ -473,7 +472,7 @@ public class DoUniProt
 				// Add previous 
 				if (addHit) {
 					String desc = (bRmECO) ? BestAnno.rmECO(lp.getDescription()) : lp.getDescription();
-					saveDBhitUnique(DBID, isAAannoDB, dbType, dbTaxo, hitID, 
+					s1_saveDBhitUnique(DBID, isAAannoDB, dbType, dbTaxo, hitID, 
 						lp.getOtherID(), desc, lp.getSpecies(), hitSeq, 0);
 					cnt_add++;
 				}
@@ -506,7 +505,7 @@ public class DoUniProt
 			// add last
 			if (addHit) { 
 				String desc = (bRmECO) ? BestAnno.rmECO(lp.getDescription()) : lp.getDescription(); // CAS305
-				saveDBhitUnique(DBID, isAAannoDB, dbType, dbTaxo, lp.getHitID(), lp.getOtherID(), 
+				s1_saveDBhitUnique(DBID, isAAannoDB, dbType, dbTaxo, lp.getHitID(), lp.getOtherID(), 
 					desc, lp.getSpecies(), hitSeq, 0);
 				cnt_add++;
 			}
@@ -518,9 +517,8 @@ public class DoUniProt
 				Out.PrtError("The annoDB fasta file does not correspond to the hit tab file -- or the headers lines are weird");
 			}
 			else if (!hitsAddToDB.isEmpty()) {
-				Out.PrtWarn(hitsAddToDB.size() + 
-					" HitIds in tab file not found in DB fasta file (happens with nr.gz due to irregular naming)");
-				if (hitsAddToDB.size()>10) Out.PrtSpMsg(1, "Writing first 10 to annotator.log");
+				Out.PrtWarn(hitsAddToDB.size() + " HitIds in tab file not found in DB fasta file");
+				if (hitsAddToDB.size()>10) Out.PrtSpMsg(1, "Writing first 10....");
 				int i=0;
 				for (String name : hitsAddToDB) {
 					Out.PrtSpMsg(1, "HitID: '" + name + "'");
@@ -557,7 +555,7 @@ public class DoUniProt
 			return false;
 		}
     }
-    private void saveDBhitUnique(int DBID, boolean isProtein, String dbtype, String dbtaxo, 
+    private void s1_saveDBhitUnique(int DBID, boolean isProtein, String dbtype, String dbtaxo, 
     		String hitID, String otherID, String description, String species, String sequence, int cntUni) 
     			throws Exception
     {    
@@ -613,7 +611,7 @@ public class DoUniProt
     private void Step2_processAllHitsPerSeq() {  
 		int cntPrt=0, cntAll=0, cntTotalDiffFrame=0, countSP=0;
 		long startTime = Out.getTime();
-    	Out.PrtSpMsg(2,"Process all hits for " + annoSeqMap.size() + " sequences ");
+    	Out.PrtSpMsg(2,"Process all hits for " + annoSeqSet.size() + " sequences ");
     	LineParser lp = new LineParser();
     	CtgData ctgData = new CtgData ();
     	ArrayList <HitData> hitList;
@@ -626,7 +624,7 @@ public class DoUniProt
 			mDB.renew();
 
 		/** go through all contigs that have annoDB hits */
-			for (int CTGid : annoSeqMap.keySet()) { // contigs with DB hits   
+			for (int CTGid : annoSeqSet) { // seqs with DB hits   
     			ctgData.CTGid=CTGid;	
     			cntPrt++; cntAll++;
     			if(cntPrt==COMMIT) {
@@ -638,13 +636,13 @@ public class DoUniProt
 				int cntTop=0, cntSwiss=0, cntTrembl=0, cntNT=0, cntAA=0;
 				int cntDiffFrame=0;
 			
-				HitData bestAnno = null, bestEval = null, bestSP = null, bestAA = null;
+				HitData bestAnno = null, bestBit = null, bestSP = null, firstAA = null;
   			    
-  			    hitList = loadHitDataForCtg(CTGid);
+  			    hitList = s2_loadHitDataForSeq(CTGid);
   			    if (hitList==null || hitList.size()==0) continue; 
   			    Collections.sort(hitList);
 				  				
-		/** XXX go through all hits for the current contig -- sorted on bitscore, goodDesc, and rank */
+		/** XXX go through all hits for the current seq -- sorted on bitscore, goodDesc, and rank */
     			for (int h=0; h < hitList.size(); h++) {
     				HitData hitData = hitList.get(h);
     			    olapList.add(new Olap(hitData));
@@ -652,20 +650,20 @@ public class DoUniProt
     			/* get best description and best hit */
     			    String hitType = hitData.dbtype;
     		       
-		    		if (bestEval == null) { 
-            			bestEval = hitData;
+		    		if (bestBit == null) { 
+            			bestBit = hitData;
         			}  
-		    		else if (hitData.frame!=bestEval.frame) cntDiffFrame++;
+		    		else if (hitData.frame!=bestBit.frame) cntDiffFrame++;
 		    		
 		    		if (hitData.isGood) {
         		    	if (bestAnno==null && hitData.isAA) {
         		    		bestAnno=hitData;
     		        	}  
-        		    	if (bestSP==null && hitData.dbtype.equals("sp")) {// keep bestSP - decide below which to keep
+        		    	if (bestSP==null && hitData.dbtype.equals(SP)) {// keep bestSP - decide below which to keep
         		    		bestSP=hitData;
     		        	}   
 		    		}
-		    		if (bestAA==null && hitData.isAA) bestAA=hitData; // special case if Best Eval is NT, and no good AA
+		    		if (firstAA==null && hitData.isAA) firstAA=hitData; // special case if Best Eval is NT, and no good AA
 		    		
     		     /* compute flags */
     				int dbid = hitData.DBid;
@@ -673,7 +671,7 @@ public class DoUniProt
     					saveDBID = dbid;
     					cntTop=0;
     				}
-    				// filter 2 is top three hits for annoDB - not used
+    				// filter 2 top annoDB - not used. best per annodb uses rank
     				if (cntTop < 3) { 
     					cntTop++;
     					hitData.filter |= 2;
@@ -691,69 +689,63 @@ public class DoUniProt
     					hitData.filter |= 8;
     				}
         			   			
-    				if (hitType.equals("sp")) cntSwiss++;
-    				else if (hitType.equals("tr")) cntTrembl++;
-    				else if (hitData.isAAhit==1) cntAA++; 
-    				else cntNT++;
+    				if (hitType.equals(SP)) 		cntSwiss++;
+    				else if (hitType.equals(TR)) 	cntTrembl++;
+    				else if (hitData.isAA) 			cntAA++; 
+    				else 							cntNT++;
     				String anno = hitData.dbtaxo + hitData.dbtype;
     				if (!annoSet.contains(anno)) annoSet.add(anno);
     			} 
         	/* end loop through hits for this contig */
         		
-        	// XXX finish BestAnno setting reading frame for ORF finding
-    			if (bestEval!=null) {
-    				
-        			if (bestEval.isAAhit==1) // obsolete? 
-        				annoSeqMap.put(CTGid, bestEval.frame + ":" + 
-        					bestEval.ctgStart + ":" + bestEval.ctgEnd + ":" + bestEval.eVal);
-        			
-        			ctgData.pFrame=bestEval.frame;
+        	// XXX 
+    			if (bestBit!=null) {
+        			ctgData.pFrame=bestBit.frame;
         			
         			if (bestAnno==null) {// there is no isGood
-        				if (!bestEval.isAA && bestAA!=null) bestAnno=bestAA;
-        				else bestAnno=bestEval; 
+        				if (!bestBit.isAA && firstAA!=null) bestAnno=firstAA; // regardless of E-value; need for ORF finding
+        				else bestAnno=bestBit; 
         			}
-    				
-        			double an = (bestAnno.eVal==0.0) ? DLOW : bestAnno.eVal;
-        			if (bestAnno!=bestEval) {
-	    				double ev = (bestEval.eVal==0.0) ? DLOW : bestEval.eVal;
-	    				double eexp = Math.exp(Math.log(ev) * useEV);
-	    				
-		    			if (an>eexp && bestEval.isAA) {// use BestEval is too much difference
-		    				bestAnno=bestEval; 
-		    			}
-        			}
-	    			if (bUseSP) { // use SP if close
-    					if (bestSP!=null && bestAnno!=bestSP) {
-    		    			double sp = (bestSP.eVal==0.0)   ? DLOW : bestSP.eVal;
-    		    			double eexp = Math.exp(Math.log(an) * useSP);
-    		    			
-    		    			if (sp<=eexp) {
-    		    				bestAnno=bestSP; 
-    		    				countSP++;
-    		    			}
-        				}
-    				}
+        			else { 
+        				/** CAS317 any anno could be interesting
+	        			if (bestAnno!=bestBit && bestBit.isAA) {
+		    				double bDiff = bestBit.bitScore * useAN;
+			    			if (bestAnno.bitScore < bDiff) bestAnno=bestBit; 
+	        			}
+	        			**/
+	        			if (bUseSP) { // use SP if not much worse than BestAnno
+	    					if (bestSP!=null && bestAnno!=bestSP) {
+	    		    			double aDiff = bestAnno.bitScore * useSP; 
+	    		    			
+	    		    			if (bestSP.bitScore >= aDiff) {
+	    		    				bestAnno=bestSP; 
+	    		    				countSP++;
+	    		    			}
+	        				}
+	    				}
+        			}	
     			}
     		       	      			
     			// rank is based on the order of input from the hit file
     			// the bestAnno and bestEval are set to rank 1 so show in the view contigs
     			bestAnno.filter = bestAnno.filter | 32;
     			bestAnno.rank = 1; 
-    			bestEval.filter = bestEval.filter | 16;
-    			bestEval.rank = 1; 
-		       	ctgData.annoPID = bestAnno.Pid;
-		       	ctgData.evalPID = bestEval.Pid;
-		       	ctgData.bestmatchid = bestEval.hitName;
     			
-    			ctgData.cnt_gene = geneSet.size();
-    			ctgData.cnt_species = specSet.size();
-    			ctgData.cnt_overlap = setFilterOlap(olapList);
-    			ctgData.cnt_annodb = annoSet.size();
-    			ctgData.cnt_swiss = cntSwiss;
-    			ctgData.cnt_trembl = cntTrembl;
-    			ctgData.cnt_nt = cntNT;
-    			ctgData.cnt_pr = cntAA;    
+    			bestBit.filter = bestBit.filter | 16;
+    			bestBit.rank = 1; 
+    			
+		       	ctgData.annoPID = bestAnno.Pid;
+		       	ctgData.evalPID = bestBit.Pid;
+		       	ctgData.bestmatchid = bestBit.hitName;
+    			
+    			ctgData.cnt_gene = 		geneSet.size();
+    			ctgData.cnt_species = 	specSet.size();
+    			ctgData.cnt_overlap = 	s2_setFilterOlap(olapList);
+    			ctgData.cnt_annodb = 	annoSet.size();
+    			ctgData.cnt_swiss = 	cntSwiss;
+    			ctgData.cnt_trembl = 	cntTrembl;
+    			ctgData.cnt_nt = 		cntNT;
+    			ctgData.cnt_pr = 		cntAA;    
     			
     			if (cntDiffFrame>0) {
     				ctgData.remark = Globals.RMK_MultiFrame;
@@ -762,17 +754,18 @@ public class DoUniProt
     			else ctgData.remark="";
     			
     			// save annoDB filters as to whether it is a best hit, etc
-    			saveDBhitFilterForCtgHits(hitList);
+    			s2_saveDBhitFilterForSeqHits(hitList);
     			
-    			// saves contig filters, PID, PIDov, and compute protein ORF    	       	
-	    		    saveDBHitCntsForCtg(ctgData);
+    			// saves seq filters, PID, PIDov, and compute protein ORF    	       	
+	    		 s2_saveDBHitCntsForSeq(ctgData);
     			
     			geneSet.clear(); specSet.clear(); olapList.clear(); 
     			annoSet.clear(); hitList.clear();
     		}// end loop through contig list
         		
     		// finished setting all filters   CAS303 changed rank to best_rank for mySQL v8
-    		mDB.executeUpdate("update pja_db_unitrans_hits set best_rank=(filter_best+filter_ovbest)");
+			// CAS317 added +gobest - add anno and GOs, then other DBs - GOs still good, but not this
+    		mDB.executeUpdate("update pja_db_unitrans_hits set best_rank=(filter_best+filter_ovbest+filter_gobest)");
     		
     		System.err.print("                                                           \r");
     		Out.PrtSpCntMsgZero(2, countSP, "replaced bestAnno with best SwissProt");
@@ -786,8 +779,7 @@ public class DoUniProt
         }
     }
 
-    private int setFilterOlap(ArrayList <Olap> olapList) {
-    			
+    private int s2_setFilterOlap(ArrayList <Olap> olapList) {
 		for (int h=0; h < olapList.size(); h++) {
 		   Olap o1 = olapList.get(h);
 		   if (o1.isOlap==false) continue;
@@ -803,8 +795,8 @@ public class DoUniProt
 			   if (o1.frame!=o2.frame) continue; 
 			   
 			   // o1 is better eval than o2 so if same coords, make o2 contained
-			   if      (isContained(comp1, o2, o1)) o2.isOlap=false;
-			   else if (isContained(comp1, o1, o2)) {o1.isOlap=false; break;}
+			   if      (s2_isContained(comp1, o2, o1)) o2.isOlap=false;
+			   else if (s2_isContained(comp1, o1, o2)) {o1.isOlap=false; break;}
 		   }
 		}
 		// change filter
@@ -821,15 +813,14 @@ public class DoUniProt
 	   	return cnt;
     }
  // is o1 contained in o2 
- 	private boolean isContained(int comp, Olap o1, Olap o2) {
+ 	private boolean s2_isContained(int comp, Olap o1, Olap o2) {
  		if (comp==0 && o1.start >= o2.start-flank && o1.end <= o2.end+flank) 
  			return true;
  		if (comp==1 && o1.end   >= o2.end-flank   && o1.start <= o2.start+flank) 
  			return true;
  		return false;
  	}
-    private void saveDBhitFilterForCtgHits(	ArrayList <HitData> hitList) 
-    {
+    private void s2_saveDBhitFilterForSeqHits(	ArrayList <HitData> hitList) {
 		try {  
 			PreparedStatement ps = mDB.prepareStatement(
     				"UPDATE pja_db_unitrans_hits SET " +
@@ -844,10 +835,10 @@ public class DoUniProt
         		int filtered = hitData.filter;
         		if ((filtered & 16) != 0) best  = 1;
         		if ((filtered & 32) != 0) bestov  = 1;
-        		if ((filtered & 1) != 0) olap  = 1;
-        		if ((filtered & 2) != 0) top3  = 1;
-        		if ((filtered & 4) != 0) species  = 1;
-        		if ((filtered & 8) != 0) gene  = 1;
+        		if ((filtered & 1) != 0)  olap  = 1;
+        		if ((filtered & 2) != 0)  top3  = 1;
+        		if ((filtered & 4) != 0)  species  = 1;
+        		if ((filtered & 8) != 0)  gene  = 1;
     	
         		ps.setInt(1, filtered);
         		ps.setInt(2, best);
@@ -864,8 +855,7 @@ public class DoUniProt
        	}
     	catch (Exception e) {ErrorReport.die(e, "Error on sequence hits ");}
     }
-    private void saveDBHitCntsForCtg(CtgData ctg) 
-    {
+    private void s2_saveDBHitCntsForSeq(CtgData ctg) {
 		try {   
 			PreparedStatement ps = mDB.prepareStatement("UPDATE contig SET " +
     				"  PIDov = ?, PID =?, bestmatchid =?, cnt_overlap = ?, cnt_gene =? " +
@@ -930,16 +920,13 @@ public class DoUniProt
 	   
 	    	ResultSet rs=null;
 	    	String sql = "select " +
-	    		" pja_db_unique_hits.DBID,  pja_db_unique_hits.species, " +
-		    " pja_db_unitrans_hits.filter_best, pja_db_unitrans_hits.filter_ovbest " +
-			" from pja_db_unitrans_hits " +
-			" join pja_db_unique_hits  " +
-			" WHERE pja_db_unitrans_hits.DUHID = pja_db_unique_hits.DUHID ";			
+	    			" uh.DBID,  uh.species,  sh.filter_best, sh.filter_ovbest " +
+	    			" from pja_db_unitrans_hits as sh" +
+	    			" join pja_db_unique_hits   as uh " +
+	    			" WHERE sh.DUHID = uh.DUHID ";			
 	    	    
 	    	for (int ctgid=minSeq, cntid=0; ctgid<=maxSeq; ctgid++, cntid++) {
-    	    	rs = mDB.executeQuery(sql + " and CTGID=" + ctgid + 
-    	    				" order by pja_db_unique_hits.DBID"); 
-    	    		
+    	    	rs = mDB.executeQuery(sql + " and CTGID=" + ctgid + " order by uh.DBID"); 
 	    		cntPrt++; 
 	    		if (cntPrt == COMMIT) {
 	    			Out.rp(cnt + " hits, processed sequences ", cntid, nSeqs);
@@ -990,11 +977,12 @@ public class DoUniProt
     		Out.PrtSpCntkMsg(4, cnt, " total hits                                        ");
     		Out.PrtSpCntkMsg(4, nSpe, " total species");
     		
+    		Out.PrtSpMsg(3, "Insert species counts into database");
     		mDB.openTransaction();
     		PreparedStatement ps = mDB.prepareStatement("insert pja_db_species set " +
 					"AID = 1, species = ?, count = ?, nBestHits = ?,nOVBestHits = ?");
     		cnt=0; cntPrt=0;
-    		Out.PrtSpMsg(3, "Insert species counts into database");
+    		
     		for ( String spec : speciesMap.keySet() ) {
     			Species spObj = speciesMap.get(spec);
     			cnt++; cntPrt++;
@@ -1010,9 +998,9 @@ public class DoUniProt
     		}
     		ps.close();
     		mDB.closeTransaction();
-    		Out.PrtSpMsg(3, "Insert species totals per database");
     		
     		// These are only used in Overview 
+    		Out.PrtSpMsg(3, "Insert species totals per database");
     		mDB.executeUpdate("update pja_databases set nBestHits=0, nOVBestHits=0, nOnlyDB=0");
     		for (int i=0; i< maxDB; i++) {
     			mDB.executeUpdate("update pja_databases set " +
@@ -1026,37 +1014,31 @@ public class DoUniProt
 		}
        	catch (Exception e) {
        		pRC = false;
-    			ErrorReport.reportError(e, "Error making species tables");
-    			return false;
+    		ErrorReport.reportError(e, "Error making species tables");
+    		return false;
        	}
     }
 
 	/******************************************************
 	 * Load data
 	 */
-    private ArrayList <HitData>loadHitDataForCtg (int CTGid) throws Exception
+    private ArrayList <HitData>s2_loadHitDataForSeq (int CTGid) throws Exception
 	{
         ArrayList <HitData> hitList= new ArrayList <HitData> ();
-        try
-        {
+        try {
         	int seqLen = mDB.executeCount("select consensus_bases from contig where CTGid=" + CTGid);
             String strQ = 	"SELECT " +
-            		"pja_db_unique_hits.DBID, pja_db_unique_hits.hitID," +
-            		"pja_db_unique_hits.description, pja_db_unique_hits.species, " +
-            		"pja_db_unique_hits.dbtype, pja_db_unique_hits.taxonomy, pja_db_unique_hits.isProtein," +
-            		"pja_db_unitrans_hits.PID, " +
-            		"pja_db_unitrans_hits.e_value, pja_db_unitrans_hits.bit_score," +
-            		"pja_db_unitrans_hits.ctg_start, pja_db_unitrans_hits.ctg_end, " +
-            		"pja_db_unitrans_hits.blast_rank, pja_db_unique_hits.isProtein " +
-		    		"FROM pja_db_unique_hits " +
-		    		"JOIN pja_db_unitrans_hits " +
-		    		"ON pja_db_unitrans_hits.DUHID = pja_db_unique_hits.DUHID " +
-		    		"WHERE   pja_db_unitrans_hits.CTGID = " + CTGid + " " +
-		    		"order by pja_db_unitrans_hits.PID";
+            		"uh.DBID, uh.hitID,uh.description, uh.species, uh.dbtype, uh.taxonomy, uh.isProtein," +
+            		"sh.PID, sh.e_value, sh.bit_score, sh.ctg_start, sh.ctg_end, sh.blast_rank " +
+		    		"FROM pja_db_unique_hits   as uh " +
+		    		"JOIN pja_db_unitrans_hits as sh " +
+		    		"ON sh.DUHID = uh.DUHID " +
+		    		"WHERE sh.CTGID = " + CTGid + " " +
+		    		"order by uh.DBID, sh.bit_score, sh.e_value ASC"; // CAS317 determine best per annoDB
+		    		//"order by sh.PID"; // order they went in
 		 
             ResultSet rset = mDB.executeQuery( strQ );
-            while( rset.next() )
-            {	
+            while( rset.next() ) {	
             	int i=1;
             	HitData hit = new HitData ();
                 hit.DBid = rset.getInt(i++);
@@ -1072,11 +1054,10 @@ public class DoUniProt
                 hit.bitScore = rset.getDouble(i++);
 		        hit.ctgStart = rset.getInt(i++);
 		        hit.ctgEnd = rset.getInt(i++); 
-		        hit.rank = rset.getInt(i++);
-		        hit.isAAhit = rset.getInt(i++);  
+		        hit.rank = rset.getInt(i++);  
 		        
 		        hit.isGood = BestAnno.descIsGood(hit.desc); // CAS305 moved to BestAnno
-		        if (hit.isGood && hit.dbtype.equals("nt")) hit.isGood=false; 
+		        if (hit.isGood && hit.dbtype.equals(NT)) hit.isGood=false; 
 		        /******************************************************
 		         * RCOORDS
 		         */
@@ -1093,6 +1074,9 @@ public class DoUniProt
 				}
 				else hit.frame=0;
 				
+				if (hit.dbtype.equals(SP)) hit.isSP=true; // CAS317
+				else if (hit.dbtype.equals(TR)) hit.isTR=true; 
+				
 		        hitList.add(hit);
 	    	}
             if ( rset != null ) rset.close();
@@ -1105,8 +1089,7 @@ public class DoUniProt
         	throw e;
         }	
 	}
-    private HashSet<String> loadUniqueHitSet()
-    {
+    private HashSet<String> s1_loadUniqueHitSet() {
     	HashSet <String> hit = new HashSet<String>();
         try {
             ResultSet rset = mDB.executeQuery( "SELECT hitID FROM pja_db_unique_hits " );
@@ -1155,10 +1138,10 @@ public class DoUniProt
 		}
 	}
     /******************* Instance variables ****************************/
-	public void setFlankingRegion(int f) {flank = f; } // default 30 CAS314 always set 
-	public void setSwissProtPref(int b) {if (b==0) bUseSP=false; else bUseSP=true;}
-	public void setRemoveECO(int b) {if (b==0) bRmECO=false; else bRmECO=true;}
-	public void setMinBitScore(int m) {minBitScore = m; } // default 0
+	public void setFlankingRegion(int f) 	{flank = f; } // default 30 CAS314 always set 
+	public void setSwissProtPref(int b) 	{if (b==0) bUseSP=false; else bUseSP=true;}
+	public void setRemoveECO(int b) 		{if (b==0) bRmECO=false; else bRmECO=true;}
+	public void setMinBitScore(int m) 		{minBitScore = m; } // default 0
 	
 	private class Species {
 		int total = 0;
@@ -1190,24 +1173,31 @@ public class DoUniProt
  		 double eVal, bitScore;
 	     int DBid, Pid;
 	     String hitName;
-	     int ctgStart, ctgEnd, isAAhit, frame;
+	     int ctgStart, ctgEnd, frame;
 	     int filter=0, rank=0;
 	     boolean isAA=true;
 	     boolean isGood=true;
+	 	 boolean isSP=false, isTR=false;
 	     
-	     public int compareTo(HitData b) {
-	    	if (this.eVal < b.eVal) return -1;
-	    	if (this.eVal > b.eVal) return 1;
-	    	if (this.bitScore>b.bitScore) return -1;
- 			if (this.bitScore<b.bitScore) return 1;
- 			if (this.isGood && !b.isGood) return -1;
- 			if (!this.isGood && b.isGood) return 1;
-	    		
-    		if (this.dbtype.equals(b.dbtype)) {	
-    			if (this.rank<b.rank) return -1;
-    			if (this.rank>b.rank) return 1;
-    			return 0; 
-    		}
+	     public int compareTo(HitData b) { // CAS317 changed
+	    	if (this.bitScore > b.bitScore) return -1; 
+	    	if (this.bitScore < b.bitScore) return  1;
+	    	
+	 		if ( this.isSP && !b.isSP) return -1;
+	 		if (!this.isSP &&  b.isSP) return  1;
+	 		
+	 		if ( this.isTR && !b.isTR) return -1;
+	 		if (!this.isTR &&  b.isTR) return  1;
+	 		
+	 		if (this.eVal < b.eVal) return -1;
+	 		if (this.eVal > b.eVal) return  1;
+	 		
+ 			if ( this.isGood && !b.isGood) return -1;
+ 			if (!this.isGood &&  b.isGood) return  1;	
+ 			
+ 			if (this.rank > b.rank) return -1; 
+	    	if (this.rank < b.rank) return  1;
+    		
     		return 0;
  		}
 	 }
@@ -1216,7 +1206,7 @@ public class DoUniProt
 		if (hitsInDB!=null) hitsInDB.clear();
 		if (curHitDataForSeq!=null) curHitDataForSeq.clear();
 		// if (ctgMap!=null) ctgMap.clear(); - not this one, was passed from caller
-		if (annoSeqMap!=null) annoSeqMap.clear();
+		if (annoSeqSet!=null) annoSeqSet.clear();
 		if (duidMap!=null) duidMap.clear();
 		if (notFoundSeq!=null) notFoundSeq.clear();
 	}
@@ -1235,7 +1225,7 @@ public class DoUniProt
    	private ArrayList <BlastHitData> curHitDataForSeq = new ArrayList <BlastHitData> ();
    	
     private TreeMap<String, Integer> seqMap = new TreeMap<String, Integer> (); // sequences in database 
-    private HashMap<Integer, String> annoSeqMap = new HashMap<Integer, String> (); // sequences with annotation
+    private HashSet<Integer> annoSeqSet = new HashSet<Integer> (); // sequences with annotation (CAS317 was Map)
     
 	private int flank = 0, minBitScore = 0; // neither of these are ever set, but can be
 	private HashMap <String, Integer> duidMap = new HashMap <String, Integer> ();

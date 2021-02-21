@@ -21,6 +21,8 @@ import util.methods.Out;
  * Populated by CfgAnno from sTCW.cfg (after saved by ManagerData)
  */
 public class DoBlast {
+	private final String SP = Globalx.SP, TR=Globalx.TR, PR=Globalx.PR, NT=Globalx.NT;
+	
 	private final String seqAAFile = 		"seqAA.fa"; 
 	private final String seqNTFile = 		"seqNT.fa"; 
 	private final String orfFile =   		"orfSeqAA.fa";
@@ -59,7 +61,7 @@ public class DoBlast {
 	
 		// AnnoDB: the user may enter the tab file name. 
 		// Pairs:  the user CANNOT enter the tab file name, but it may exists and will be reused
-		int cntErr=0; 
+		int cntErr=0, cntRun=0, cntUse=0;
 		doDBblast = false;  
 		boolean doDBload = false;
 		
@@ -117,6 +119,7 @@ public class DoBlast {
 					}
 				}
 				if (!b) cntErr++;
+				else 	cntUse++; // CAS317
 			}
 		}
 	
@@ -146,7 +149,6 @@ public class DoBlast {
 		/**** create blast output file names and see if they already exist; prompt user if exists ****/
 		Out.Print("Checking for existing tab files");
 		doDBblast = false;
-		int cntRun=0, cntUse=0;
 		cntErr=0;
 		
 		for (int ix=0; ix < dbInfo.size(); ix++) {
@@ -366,15 +368,15 @@ public class DoBlast {
 			}
 				
 			String dbtype =  lp.getDBtype();
-			String linetype = "pr";
-			if (!dbtype.equals("sp") && !dbtype.equals("tr")) {
-				if (!isAA) linetype="nt"; 
+			String linetype = PR;
+			if (!dbtype.equals(SP) && !dbtype.equals(TR)) {
+				if (!isAA) linetype=NT; 
 			}
 			if (dbtype.equals("")) dbtype=linetype;
 			
 		// determine action
 			String action="";
-			if (dbtype.equals("sp") || dbtype.equals("tr") || linetype.equals("pr")) {
+			if (dbtype.equals(SP) || dbtype.equals(TR) || linetype.equals(PR)) {
 				dbInfo.get(ix).isAAdb = true;
 				if (isAAstcw) 	action = "blastp"; // AA-AA
 				else 			action = "blastx"; // tr-NT-AA
@@ -388,12 +390,12 @@ public class DoBlast {
 				if (dosearch) {
 					String x = "DB#" + (ix+1) + " " + dbInfo.get(ix).searchPgm;
 					if 		(dbtype.equals("gi")) 	Out.PrtSpMsg(1, x + " GB AA: " + prtFileName);
-					else if (dbtype.equals("sp")) 	Out.PrtSpMsg(1, x + " SP AA: " + prtFileName);
-					else if (dbtype.equals("tr"))	Out.PrtSpMsg(1, x + " TR AA: " + prtFileName);
+					else if (dbtype.equals(SP)) 	Out.PrtSpMsg(1, x + " SP AA: " + prtFileName);
+					else if (dbtype.equals(TR))	Out.PrtSpMsg(1, x + " TR AA: " + prtFileName);
 					else 							Out.PrtSpMsg(1, x + " pr AA: " + prtFileName);
 				}
 			}
-			else if (dbtype.equals("nt") || linetype.equals("nt")){
+			else if (dbtype.equals(NT) || linetype.equals(NT)){
 				if (isAAstcw) {
 					Out.PrtErr(prtFileName + ": cannot have a nucleotide annoDB with a protein sTCW");
 					return false;

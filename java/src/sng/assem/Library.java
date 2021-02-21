@@ -323,7 +323,7 @@ public class Library
 				if (curSeq != null) {
 					Matcher m = mBadCharPat.matcher(line);
 					if (m.find()) {
-						if (!PEPTIDE) msg = origName + ": Characters other than agct found in sequence (will be replaced by N)";
+						if (!PEPTIDE) msg = origName + ": Characters other than AGCTagct found in sequence (will be replaced by N)";
 						else          msg = origName + ": Characters other than valid amino acids found (will be replaced by X)";
 						
 						if (wNNonStand==0) Log.warn(msg); else Log.warnFile(msg);

@@ -38,7 +38,7 @@ import util.ui.UserPrompt;
 
 public class AddRemarkPanel extends JPanel {
 	private static final long serialVersionUID = -2526722262077846590L;
-	private static final String helpDir = Globals.helpDir + "RemarkHelp.html";
+	private static final String helpDir = Globals.helpRunDir + "RemarkHelp.html";
 
 	private void addLoc(String fileName) {
 		// pattern is also in Library.java and AssemMain; used when sequence names are locations

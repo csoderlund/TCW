@@ -38,7 +38,7 @@ import util.ui.DisplayFloat;
 public class FieldSeqTab extends Tab implements ActionListener {
 	private static final long serialVersionUID = -1208399171249754290L;
 	
-	private static final String HTML = "html/viewSingleTCW/SeqColumn.html";
+	private static final String HTML = Globals.helpDir + "SeqColumn.html";
 	private static final String [] ALWAYS_SELECTED = { "Seq ID" };
 	public static final int NAME_COL_WIDTH = 250;
 	public static final int DESCR_COL_WIDTH = 400;
@@ -112,7 +112,7 @@ public class FieldSeqTab extends Tab implements ActionListener {
 			String name = grpNames[i].equals(FieldSeqData.GROUP_NAME_FIRST_BEST) ?
 					"Best Hits" : grpNames[i];
 			String desc = grpNames[i].equals(FieldSeqData.GROUP_NAME_FIRST_BEST) ?
-					"EV - Best E-value, AN - Best Annotation, WG - Best with GO" : grpDesc[i];
+					"BS - Best Bitscore, AN - Best Annotation, WG - Best with GO" : grpDesc[i];
 	        CollapsiblePanel subPanel = new CollapsiblePanel(name, desc);
 	     
 	        if(grpNames[i].equals(FieldSeqData.GROUP_NAME_CONTIG)) {

@@ -26,7 +26,7 @@ public class LineParser {
 	public boolean parseLine(String line) {
 		strDBtype =strHitID =strOtherID =strDesc =strOS = "";
 		if (line.startsWith(">")) return parseFasta(line);
-		else return parseBlastTab(line);
+		else return parseTab(line);
 	}
 	
 	/*********************************************
@@ -87,10 +87,10 @@ public class LineParser {
 	 * just parsing subject (second column of blast)
 	 * the complete parsing is in BlastHitData
 	 */
-	public boolean parseBlastTab(String line) {
+	public boolean parseTab(String line) {
 		String[] tokens = line.split("\t");
-		if (tokens == null || tokens.length<2) return parseSubject(line);
-		else 	return parseSubject(tokens[1]);
+		if (tokens == null || tokens.length<2) 	return parseSubject(line);
+		else 									return parseSubject(tokens[1]);
 	}
 	private boolean parseSubject(String line) {
 		strDBtype = strHitID = strOtherID = "";	
@@ -136,7 +136,7 @@ public class LineParser {
 		line = line.substring(1); // get rid of >
 				
 		if (line.startsWith("sp|") || line.startsWith("tr|")) rc = matchUniProt(line);
-		else if (line.startsWith("gi|")) 					 rc = matchRefSeq(line); // old nr.gz
+		else if (line.startsWith("gi|")) 					  rc = matchRefSeq(line); // old nr.gz
 		else {
 			if (line.indexOf("\u0001")!=-1) { 
 				String [] tok = line.split("\u0001"); 	// This is for nr.gz, which has long lines 
@@ -144,39 +144,8 @@ public class LineParser {
 			}
 			rc = matchGeneral(line);
 		}
-		
-		if (strOS.length() > maxSpeciesLen ) {
-			String s = strOS.substring(0,maxSpeciesLen-1);
-			if (!badSpecies.contains(s)) { // can occur many times in blast file, just print once
-				if (badSpeciesLen<100) {
-					BlastHitData.printWarning(strHitID + ": Species name length (" + strOS.length() + ") >" + maxSpeciesLen 
-							+ "-- truncating: " + s + "...");
-					badSpecies.add(s);
-				}
-				else if (badSpeciesLen==100) {
-					Out.PrtWarn("Over 100 species length >" + maxSpeciesLen + " -- stop saving to hitsWarning file");
-					badSpecies.clear();
-				}
-				badSpeciesLen++;
-			}
-			strOS = s;
-		}
-		if (strDesc.length() > maxDescriptLen ) {
-			String d = strDesc.substring(0,maxDescriptLen-1);
-			if (!badDesc.contains(d)) {
-				if (badDescriptLen<100) { 
-					BlastHitData.printWarning(strHitID + ": Decription length (" + strDesc.length() + ") >" + maxDescriptLen + 
-							"-- truncating :" + d + "...");
-					badDesc.add(d);
-				} else if (badDescriptLen==100) {
-					Out.PrtWarn("Over 100 descriptions length >" + maxDescriptLen + " -- stop saving to hitsWarning file");
-					badDesc.clear();
-				}
-				badDescriptLen++;
-			}
-			strDesc = d;
-		}
-
+		// CAS317 was checking description length and #species here
+			
 		if (rc==false) return false;
 		return true;
 	}
@@ -344,8 +313,43 @@ public class LineParser {
 	public String getDBtype() {return strDBtype;}
 	public String getHitID() {return strHitID;}
 	public String getOtherID() {return strOtherID;}
-	public String getDescription() {return strDesc;}
-	public String getSpecies() { return strOS;}
+	public String getDescription() {
+		if (strDesc.length() > maxDescriptLen ) { // CAS317 only check ones that are to be saved
+			String d = strDesc.substring(0,maxDescriptLen-1);
+			if (!badDesc.contains(d)) {
+				if (badDescriptLen<100) { 
+					BlastHitData.printWarning(strHitID + ": Decription length (" + strDesc.length() + ") >" + maxDescriptLen + 
+							"-- truncating :" + d + "...");
+					badDesc.add(d);
+				} else if (badDescriptLen==100) {
+					Out.PrtWarn("Over 100 descriptions length >" + maxDescriptLen + " -- stop saving to hitsWarning file");
+					badDesc.clear();
+				}
+				badDescriptLen++;
+			}
+			strDesc = d;
+		}
+		return strDesc;
+	}
+	public String getSpecies() { 
+		if (strOS.length() > maxSpeciesLen ) { // CAS317 moved from parseLine
+			String s = strOS.substring(0,maxSpeciesLen-1);
+			if (!badSpecies.contains(s)) { // can occur many times in blast file, just print once
+				if (badSpeciesLen<100) {
+					BlastHitData.printWarning(strHitID + ": Species name length (" + strOS.length() + ") >" + maxSpeciesLen 
+							+ "-- truncating: " + s + "...");
+					badSpecies.add(s);
+				}
+				else if (badSpeciesLen==100) {
+					Out.PrtWarn("Over 100 species length >" + maxSpeciesLen + " -- stop saving to hitsWarning file");
+					badSpecies.clear();
+				}
+				badSpeciesLen++;
+			}
+			strOS = s;
+		}
+		return strOS;
+	}
 	
 	// These are used when reading fasta file. They will be restarted on every fasta file
 	// read from DoUniProt, but there should not be overlap. The static count at the top is for all.

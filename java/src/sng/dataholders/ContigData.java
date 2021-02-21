@@ -152,7 +152,7 @@ public class ContigData implements Comparable<ContigData>, Serializable {
 			if (nFrame==0) nFrame=3;
 			nFrame = -nFrame;
 		}
-		return "Best Eval: " + nFrame + " " + nStart + ".." + nEnd +bestEvalBlastObj.getStrEVal();
+		return "Best Bits: " + nFrame + " " + nStart + ".." + nEnd +bestEvalBlastObj.getStrEVal();
 	}
 	
 	public String getBestMatch() {

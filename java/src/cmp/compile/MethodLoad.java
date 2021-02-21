@@ -19,6 +19,7 @@ import cmp.database.Schema;
 import cmp.compile.panels.CompilePanel;
 import cmp.compile.panels.MethodPanel;
 import util.database.DBConn;
+import util.database.Globalx;
 import util.methods.ErrorReport;
 import util.methods.Out;
 import util.methods.BestAnno;
@@ -501,7 +502,7 @@ public class MethodLoad {
 					if (desc.contains("{ECO ")) desc = desc.substring(0,desc.indexOf("{ECO")); 
 					
 					String dbType = rs.getString(5);
-					boolean bIsSP = (dbType.equals("sp")) ? true : false;
+					boolean bIsSP = (dbType.equals(Globalx.SP)) ? true : false;
 					
 					int nGO = rs.getInt(6);
 					

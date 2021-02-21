@@ -607,7 +607,7 @@ public class ASFrame extends JDialog implements WindowListener{
 	}
 	private void runCheckAdd(String dirName, String file, boolean isFasta) {
 		String [] tok = dirName.split(("_"));
-		if (tok[0].equals("sp")) {
+		if (tok[0].equals(Globalx.SP)) {
 			if (tok[1].equals(subset)) { // Full
 				if (isFasta) {
 					spFasta.put(subset, file);

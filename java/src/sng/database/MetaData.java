@@ -4,7 +4,6 @@ package sng.database;
  * Read in all metadata, e.g. number of sequences, etc for all methods to call
  */
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.TreeMap;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,6 +14,8 @@ import java.util.Arrays;
 import sng.viewer.STCWFrame;
 import util.database.DBConn;
 import util.methods.ErrorReport;
+import util.methods.Out;
+import util.methods.Static;
 
 public class MetaData {
 	private  final String L = Globals.LIBCNT;
@@ -174,10 +175,24 @@ public class MetaData {
 			 	}
 		 	}
 		 	loadLibrary(mDB);
+		 	checkVer(mDB);
 			return true;
 		}
 		catch (Exception e) {
 			ErrorReport.prtReport(e, "Getting metadata -- possible corrupted database"); return false;}
+	}
+	// CAS317 
+	private void checkVer(DBConn mDB) {
+		try {
+			String annoVer = mDB.executeString("select annoVer from schemver");
+			String n = annoVer.replace(".","");
+			int v = Static.getInteger(n);
+			if (v<317) {
+				Out.prt("+++Database was annotated before v3.1.7 - It was built with 'Best Eval', not 'Best Bits'.");
+			}
+		}
+		catch (Exception e) {ErrorReport.prtReport(e,"Checking version");}
+		
 	}
 	/********************************************************
 	* In order to show replicas, the lib index have to correspond with their LID

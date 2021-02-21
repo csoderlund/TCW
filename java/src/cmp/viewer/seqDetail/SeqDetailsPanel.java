@@ -562,7 +562,7 @@ public class SeqDetailsPanel extends JPanel {
 			bestAnno = bA;
 			if (bestEval && bestAnno && bG) best="All";
 			else {
-				if (bestEval) 	best="EV";
+				if (bestEval) 	best="BS";
 				if (bestAnno) 	best=Static.strMerge(best, "AN");
 				if (bG) 		best=Static.strMerge(best, "WG");
 			}

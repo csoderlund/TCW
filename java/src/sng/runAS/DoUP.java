@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 
 import javax.swing.JOptionPane;
 
+import util.database.Globalx;
 import util.file.FileHelpers;
 import util.methods.ErrorReport;
 import util.methods.Out;
@@ -31,7 +32,7 @@ public class DoUP {
 	
 	// naming
 	public static final String subset = "fullSubset";
-	private final String sp = "sp", tr="tr";
+	private final String SP = Globalx.SP, TR=Globalx.TR;
 	private final String spPre = "uniprot_sprot", trPre = "uniprot_trembl";
 	
 	private final Pattern fasta =  Pattern.compile(">(\\S+)");
@@ -56,7 +57,7 @@ public class DoUP {
 				for (int i=0; i<spFiles.size(); i++) {
 					if (!spDats.get(i)) {
 						String f = spFiles.get(i);
-						if (!runDownload(sp, spPre, f, f)) return;	
+						if (!runDownload(SP, spPre, f, f)) return;	
 					}
 				}
 			}
@@ -66,7 +67,7 @@ public class DoUP {
 				for (int i=0; i<trFiles.size(); i++) {
 					if (!trDats.get(i)) {
 						String f = trFiles.get(i);
-						if (!runDownload(tr, trPre, f, f)) return;	
+						if (!runDownload(TR, trPre, f, f)) return;	
 					}
 				}
 			}
@@ -74,11 +75,11 @@ public class DoUP {
 			Out.PrtSpDateMsg(1, "Create FASTA files");
 			DoUPdat datObj = new DoUPdat(frameObj);
 			for (String f : spFiles) {
-				if (!datObj.fasta(sp, mkNameDir(sp,f), 
+				if (!datObj.fasta(SP, mkNameDir(SP,f), 
 						mkNameDat(spPre,f), mkNameFasta(spPre,f))) return;
 			}
 			for (String f : trFiles) {
-				if (!datObj.fasta(tr, mkNameDir(tr,f), mkNameDat(trPre,f), 
+				if (!datObj.fasta(TR, mkNameDir(TR,f), mkNameDat(trPre,f), 
 						mkNameFasta(trPre,f))) return;
 			}
 			Out.PrtMsgTime("Complete Taxonomic UniProt", startTime);
@@ -98,24 +99,24 @@ public class DoUP {
 		
 		if (isSP && !hasSPdat) {
 			Out.PrtSpDateMsg(1, "Download SwissProt");
-			if (!runDownload(sp, spPre, "", subset)) return;	
+			if (!runDownload(SP, spPre, "", subset)) return;	
 		}
 		if (isTR && !hasTRdat) {
 			Out.PrtSpDateMsg(1, "Download TrEMBL");
-			if (!runDownload(tr, trPre, "", subset)) return;	
+			if (!runDownload(TR, trPre, "", subset)) return;	
 		}
 		Out.PrtSpDateMsg(1, "Create subset files");
 		DoUPdat datObj = new DoUPdat(frameObj);
 		if (isSP) {
-			if (!fullCreateSubset(sp,spPre)) return;
+			if (!fullCreateSubset(SP,spPre)) return;
 			
-			if (!datObj.fasta(sp, mkNameDir(sp, subset), 
+			if (!datObj.fasta(SP, mkNameDir(SP, subset), 
 					mkNameDat(spPre, subset), mkNameFasta(spPre, subset))) return;
 		}
 		if (isTR) {
-			if (!fullCreateSubset(tr,trPre)) return;
+			if (!fullCreateSubset(TR,trPre)) return;
 			
-			if (!datObj.fasta( tr,mkNameDir(tr, subset), 
+			if (!datObj.fasta( TR,mkNameDir(TR, subset), 
 					mkNameDat(trPre, subset), mkNameFasta(trPre, subset))) return;
 		}
 		Out.PrtSpMsgTime(0, "Complete Full UniProt", startTime);
@@ -334,8 +335,8 @@ public class DoUP {
 			Out.PrtSpMsg(1, "Check Directories ");
 			if (!mkCheckDir(targetUpDir)) return false;
 			
-			if (bsp && !mkCheckDir(mkNameDir(sp, subset))) return false;
-			if (btr && !mkCheckDir(mkNameDir(tr, subset))) return false;
+			if (bsp && !mkCheckDir(mkNameDir(SP, subset))) return false;
+			if (btr && !mkCheckDir(mkNameDir(TR, subset))) return false;
 			return true;
 		}
 		catch (Exception e) {ErrorReport.reportError(e, "Problems creating directories");}
@@ -348,10 +349,10 @@ public class DoUP {
 			if (!mkCheckDir(targetUpDir)) return false;
 			
 			for (String f : spFiles) {
-				if (!mkCheckDir(mkNameDir(sp, f))) return false;
+				if (!mkCheckDir(mkNameDir(SP, f))) return false;
 			}
 			for (String f : trFiles) {
-				if (!mkCheckDir(mkNameDir(tr, f))) return false;
+				if (!mkCheckDir(mkNameDir(TR, f))) return false;
 			}
 			Out.PrtSpMsg(1, "Check complete");
 			return true;

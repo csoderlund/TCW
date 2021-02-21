@@ -296,9 +296,10 @@ public class DoGOs
 				rs = tcwDB.executeQuery("select " +
 						" PID, DUHID, filter_best, filter_ovbest, e_value " +
 						" from pja_db_unitrans_hits where CTGID=" + ctgid +
-						" order by e_value ASC,  filter_best DESC, filter_ovbest DESC, bit_score DESC");
+						" order by bit_score DESC,  filter_best DESC, filter_ovbest DESC, e_value ASC ");
+						// CAS317 " order by e_value ASC,  filter_best DESC, filter_ovbest DESC, bit_score DESC");
 				while (rs.next()) {
-					int hitIndex = rs.getInt(2);    					 // pja_db_unique_hit id
+					int hitIndex = rs.getInt(2);    				 // pja_db_unique_hit id
 					if (!hitGoMap.containsKey(hitIndex))  continue;   // no GO for hit
 					Hit2GO hitGoObj = hitGoMap.get(hitIndex);
 					
@@ -359,8 +360,8 @@ public class DoGOs
 			ps1.close();
 			tcwDB.closeTransaction();
 			
-			prtCntMsg(cntHas, "sequences have bestEval or bestAnno with GOs ");
-			prtCntMsg(cntNot, "sequences do not have bestEval or bestAnno with GOs ");
+			prtCntMsg(cntHas, "sequences have bestBits or bestAnno with GOs ");
+			prtCntMsg(cntNot, "sequences do not have bestBits or bestAnno with GOs ");
 			prtCntMsgMem(cntZero,"sequences have no GO ", time);
 			hitGoMap.clear();
 			

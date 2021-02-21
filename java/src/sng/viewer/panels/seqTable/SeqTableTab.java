@@ -397,7 +397,7 @@ public class SeqTableTab extends Tab
     		JPanel selectPanel = Static.createPagePanel();
 	        JLabel label = Static.createLabel("Hit Sequences from table (" + Globalx.FASTA_SUFFIX + ")");
 	       
-	        btnHitEval = Static.createRadioButton("Best Eval", false);
+	        btnHitEval = Static.createRadioButton("Best Bits", false);
 	        btnHitAnno = Static.createRadioButton("Best Anno", false); 
 	        btnHitBoth = Static.createRadioButton("Both", true); 
 	        ButtonGroup hitgrp = new ButtonGroup();
@@ -459,7 +459,7 @@ public class SeqTableTab extends Tab
     	}
 	    public String getHitFile() {
     		String prefix = filePrefix+"Hits";
-    		if (btnHitEval.isSelected()) return prefix + "Eval" + Globalx.FASTA_SUFFIX;
+    		if (btnHitEval.isSelected()) return prefix + "Bits" + Globalx.FASTA_SUFFIX;
     		if (btnHitAnno.isSelected()) return prefix + "Anno" + Globalx.FASTA_SUFFIX;
     		return prefix + "Both"+ Globalx.FASTA_SUFFIX;
     	}

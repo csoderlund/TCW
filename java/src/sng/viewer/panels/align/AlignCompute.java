@@ -84,8 +84,8 @@ public class AlignCompute
 	   		
 	   		boolean isProtein;
 	   		dbtype = dbtype.toLowerCase();
-	   		if (dbtype.equals("sp") || dbtype.equals("tr") || dbtype.equals("pr")) isProtein = true;
-	   		else if (dbtype.equals("nt")) isProtein  = false;
+	   		if (dbtype.equals(Globalx.SP) || dbtype.equals(Globalx.TR) || dbtype.equals(Globalx.PR)) isProtein = true;
+	   		else if (dbtype.equals(Globalx.NT)) isProtein  = false;
 	   		else isProtein = BlastArgs.isProtein(seq);
 	   		
 	   		BlastHitData blastData = new BlastHitData(hitName, isProtein, 

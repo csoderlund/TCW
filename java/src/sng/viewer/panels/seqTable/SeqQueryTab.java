@@ -524,9 +524,9 @@ public class SeqQueryTab extends Tab
 		addRowToPanel(annoModes, thePanel);
 
 		if (!metaData.hasGOs())
-			cmbFirstBest = new UIqueryIncEx("  Search", "Best Eval", "Best Anno", null, 0, 0);
+			cmbFirstBest = new UIqueryIncEx("  Search", "Best Bits", "Best Anno", null, 0, 0);
 		else 
-			cmbFirstBest = new UIqueryIncEx("  Search", "Best Eval", "Best Anno", "Best With GO",  0, 0);
+			cmbFirstBest = new UIqueryIncEx("  Search", "Best Bits", "Best Anno", "Best With GO",  0, 0);
 		addRowToPanel(cmbFirstBest, thePanel);
 		
 		cmbDBHitAndOr = new UIqueryIncEx( "", "AND", "OR", null, FieldSeqData.FILTER_AND, 0 );
@@ -534,7 +534,14 @@ public class SeqQueryTab extends Tab
 		addRowToPanel( bar5, thePanel );
 		
 		JPanel bar;
-		// EVal
+		
+		chkDBHitBits = new ToggleTextComboField(
+				"Has ", "100","Bitscore", BOOLEAN_LABELS, 1, defaultLabelDims, null);
+		bar = addTwoToRow ( Box.createHorizontalStrut(SUBGROUP_INSET_WIDTH), 
+				chkDBHitBits );
+		addRowToPanel ( bar, thePanel );
+		thePanel.add(Box.createVerticalStrut(5));
+		
 		chkDBHitEVal = new ToggleTextComboField(
 				"Has ", "1E-30"," E-value", BOOLEAN_LABELS, 0, defaultLabelDims, null);
 		bar = addTwoToRow ( Box.createHorizontalStrut(SUBGROUP_INSET_WIDTH), 
@@ -576,6 +583,12 @@ public class SeqQueryTab extends Tab
 		chkNumAnno = new ToggleTextComboField(
 				"General: ", "1", " #annoDBs", BOOLEAN_LABELS, 1, defaultLabelDims, null);
 		addRowToPanel ( chkNumAnno, thePanel );
+		
+		if (metaData.hasGOs())
+			cmbNEqBests = new UIqueryIncEx("  Best: ", "Bits!=Anno", "GO!=Bits&GO!=Anno", "Don't care",  -1, 0); // CAS317
+		else 
+			cmbNEqBests = new UIqueryIncEx("  Best: ", "Bits!=Anno", "Don't care", null, -1, 0); // CAS317
+		addRowToPanel(cmbNEqBests, thePanel);
 		
 		setBestHitEnabled(chkHasBestDBHit.isSelected());
 		
@@ -870,8 +883,11 @@ public class SeqQueryTab extends Tab
 		
 		cmbFirstBest.setEnabled(enabled);
 		cmbDBHitAndOr.setEnabled(enabled);
+		cmbNEqBests.setEnabled(enabled);
+		
 		chkDBHitCov.setEnabled(enabled);
 		chkDBSeqCov.setEnabled(enabled);
+		chkDBHitBits.setEnabled(enabled);
 		chkDBHitEVal.setEnabled(enabled);
 		chkDBHitIdent.setEnabled(enabled);
 		chkDBtype.setEnabled(enabled);
@@ -1391,6 +1407,8 @@ public class SeqQueryTab extends Tab
 				getAndValidateInteger ( chkDBSeqCov, "Sequence coverage" ) : 0;	
 		double dDBHitEval = (chkDBHitEVal.isSelected()) ? 
 				getAndValidateDouble ( chkDBHitEVal, "E-value" ) : -1;
+		double dDBHitBits = (chkDBHitBits.isSelected()) ? 
+						getAndValidateDouble ( chkDBHitBits, "Bitscore" ) : -1;
 		String taxo =   (chkDBtaxo.isSelected()) ? chkDBtaxo.getOptionText() : "";
 		String dbType = (chkDBtype.isSelected()) ? chkDBtype.getOptionText() : "";
 						
@@ -1398,14 +1416,29 @@ public class SeqQueryTab extends Tab
 		int nDBHitAndOr = cmbDBHitAndOr.getValue();
 		String fieldType; // 1, 0, -1
 		int bestSelect = cmbFirstBest.getValue();
-		if (bestSelect==1)      {fieldType = "";   type="Best Eval:";}
-		else if (bestSelect==0) {fieldType = "ov"; type="Best Anno:";}
+		if (bestSelect==1)      {
+			fieldType = "";   
+			type="Best Bits:";
+		}
+		else if (bestSelect==0) {
+			fieldType = "ov"; 
+			type="Best Anno:";
+		}
 		else {// if has annotation, there will be a bestmatchid not null, but not PIDgo
 			fieldType="go"; type="Best with GO:";
   			if (nDBHitCov==0 && dDBHitEval==-1 && nDBHitIdent==0 && nDBSeqCov==0) {
   				String strQ = "(contig.PIDgo>0)";
   				strUniProt = appendPredicate ( strUniProt, nDBHitAndOr, strQ );
   			}
+		}
+		if ( dDBHitBits!=-1 ) // CAS317
+		{
+			String strQ = 	"contig.PID" + fieldType +" = pja_db_unitrans_hits.PID AND " +
+							"pja_db_unitrans_hits.bit_score";
+			String op = chkDBHitBits.getOptionSelection()==0 ?" <= ":" >= ";
+			strQ += op + dDBHitBits;
+			strUniProt = appendPredicate ( strUniProt, nDBHitAndOr, strQ );	
+			sum += ", Bitscore " + op + dDBHitBits;
 		}
 		if ( dDBHitEval!=-1 )
 		{
@@ -1478,6 +1511,16 @@ public class SeqQueryTab extends Tab
 			else boolOp = " >= ";
 			strSQL = appendANDPredicate ( strSQL, "contig.cnt_annodb" + boolOp + nNumTax );
 			joinSum("#annoDBs" + boolOp + nNumTax);
+		}
+		
+		int nNotEqual = cmbNEqBests.getValue();
+		if (nNotEqual==1) {
+			strSQL = appendANDPredicate(strSQL, "contig.PID!=contig.PIDov");
+			joinSum("Bits!=Anno");
+		}
+		else if (metaData.hasGOs() && nNotEqual==0) {
+			strSQL = appendANDPredicate(strSQL, "contig.PIDgo>0 and contig.PIDgo!=contig.PID and contig.PIDgo!=contig.PIDov");
+			joinSum("GO!=Bits&GO!=Anno");
 		}
 		
 		return strSQL;
@@ -1600,6 +1643,9 @@ public class SeqQueryTab extends Tab
 		}
 		
 		if (bHasAnno) { 	
+			cmbNEqBests.setValue(UIqueryIncEx.IGNORE);
+			cmbFirstBest.setValue(0);
+		
 			chkHasBestDBHit.setSelected(false);
 			chkEitherAnno.setSelected(true);
 			
@@ -1609,6 +1655,8 @@ public class SeqQueryTab extends Tab
 			chkDBHitCov.setText("1");
 			chkDBSeqCov.setSelected(false);
 			chkDBSeqCov.setText("1");
+			chkDBHitBits.setSelected(false);
+			chkDBHitBits.setText("100");
 			chkDBHitEVal.setSelected(false);
 			chkDBHitEVal.setText("1E-30");
 			chkDBHitIdent.setSelected(false);
@@ -1712,13 +1760,14 @@ public class SeqQueryTab extends Tab
 	
 	// Good UniProt hit widgets
 	private JRadioButton chkHasBestDBHit = null, chkNoAnno = null, chkEitherAnno = null;
-	private UIqueryIncEx cmbFirstBest = null, cmbDBHitAndOr = null;
+	private UIqueryIncEx cmbFirstBest = null, cmbDBHitAndOr = null, cmbNEqBests = null;
 	private ToggleTextComboField chkDBHitCov = null, chkDBSeqCov = null;
 	private ToggleTextComboField chkDBHitEVal = null, chkDBHitIdent = null;
+	private ToggleTextComboField chkDBHitBits = null; // CAS317
 	private ToggleTextComboField chkDBtaxo = null, chkDBtype = null;
 	private boolean bHasAnno=true;
 			
-	//Hold unitrans set names (name retrieval only, not filtered)
+	//Hold seq set names (name retrieval only, not filtered)
 	private String [] pValColumns = null;
 	private String [] pValTitles = null;
 	private String [] libColumns = null;
@@ -1735,7 +1784,7 @@ public class SeqQueryTab extends Tab
 	private static final String PVAL_HEADER = "Differential Expression";
 	private static final String PVAL_DESCRIPTION = "Filter on DE p-value columns";
 	private static final String BEST_DB_HIT_HEADER = "Best Hit";
-	private static final String BEST_DB_HIT_DESCRIPTION = "Search on Best Eval or Best Anno for a sequence (use 'AnnoDB Hits' to search on all hits).";
+	private static final String BEST_DB_HIT_DESCRIPTION = "Search on Best Bits or Best Anno for a sequence (use 'AnnoDB Hits' to search on all hits).";
 	private static final String SNP_ORF_HEADER = "SNPs and ORFs";
 	private static final String SNP_ORF_DESCRIPTION = "Find sequences with SNPs (assembled contigs only) and/or ORF attributes.";
 	private static final String GO_HEADER = "GO";

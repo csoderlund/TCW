@@ -56,16 +56,10 @@ If it is checked, then any filters (from "Filter:") are also applied.
 very large.
 <li>Rank=1: The best hit for the annoDB. If this is selected with a given annoDB, it lists all
 sequences that have at least one hit from the annoDB.
-<li>Best Eval: List hits that have at least one sequence where the hit has the best e-value.
+<li>Best Bits: List hits that have at least one sequence where the hit has the best bitscore.
 <li>Best Anno: List hits that have at least one sequence where the hit has the best annotation.
-<br><i>Best Anno selected as follows: </i>
-<ul>
-<li>The description does not contain a phrase such as "uncharacterized protein".
-<li>A SwissProt hit will be selected over a non-SwissProt hit with a better e-value 
-if the exponent of its e-value is within 20% of the non-SwissProt hit.
-</ul> 
-<li>Eval&Anno: List hits that are both Best Eval and Best Anno to at least one sequences.
-<li>Eval|Anno: List hits that are both Best Eval or Best Anno to at least one sequences.
+<li>Bits&Anno: List hits that are both Best Bits and Best Anno to at least one sequences.
+<li>Bits|Anno: List hits that are both Best Bits or Best Anno to at least one sequences.
 </ul>
 
 <li><b>E-val:</b> The E-value assigned by the heuristic search program for

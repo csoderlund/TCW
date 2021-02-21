@@ -299,7 +299,7 @@ public class MainTable extends MainTableSort {
                 		String mid;
                 		String type = rs.getString(4);
                 		
-                		if (type.equals("sp") || type.equals("tr")) mid = "|" + rs.getString(6);
+                		if (type.equals(Globalx.SP) || type.equals(Globalx.TR)) mid = "|" + rs.getString(6);
                 		else {
                 			nonUP++;
                 			mid = "|n" + nonUP;

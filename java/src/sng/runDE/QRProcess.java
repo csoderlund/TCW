@@ -56,8 +56,7 @@ public class QRProcess {
 		int filCnt, int filCPM, int filCPMn, double disp, boolean doFDR,
 		String pColName, boolean addCol, TreeSet<String> g1,  TreeSet <String> g2) 
 	{
-		try
-		{
+		try {
 			ResultSet rs;
 			String sql = "select schemver from schemver where schemver='" + Schema.currentVerString() + "'";
 			rs = mDB.executeQuery(sql);
@@ -82,8 +81,7 @@ public class QRProcess {
 			if (!rScriptFile.equals("")) {
 				if (!runScript(scores, disp, rScriptFile)) return false;
 			}			
-			else
-			{
+			else {
 				Out.PrtError("No R-script");
 				return false;
 			}
@@ -91,8 +89,7 @@ public class QRProcess {
 			if (scores.size() > 0 && doFDR) runFDR(scores);
 			**/
 			printDE(scores);
-			if (scores.size() > 0 && pColName.length() > 0 && addCol)
-			{
+			if (scores.size() > 0 && pColName.length() > 0 && addCol) {
 				saveDEcols(scores, pColName, grp1, grp2);
 				saveMethod(pColName, grp1, grp2, rScriptFile, "", disp);
 			}  
@@ -111,7 +108,8 @@ public class QRProcess {
 	 * Loading p-values from file. All values have been checked in QRFrame.
 	 */
 	public boolean doLoadFile(String pColName, TreeSet<String> g1,  
-			TreeSet <String> g2, TreeMap <String, Double> scores, String pvalFile) {
+			TreeSet <String> g2, TreeMap <String, Double> scores, String pvalFile) 
+	{
 		try {
 			printDE(scores);
 			String col = Globals.PVALUE + pColName;
@@ -130,10 +128,10 @@ public class QRProcess {
         String [] df = {     "<1e-5", "<1e-4", "<0.001", "<0.01", "<0.05"};
         int [] ct =      {     0,       0,      0,       0,        0};
         for (String x : scores.keySet()) {
-        		double de = scores.get(x);
-        		for (int i=0; i<ct.length; i++) {
-        			if (Math.abs(de) < cutoff[i]) ct[i]++;
-        		}
+    		double de = scores.get(x);
+    		for (int i=0; i<ct.length; i++) {
+    			if (Math.abs(de) < cutoff[i]) ct[i]++;
+    		}
         }
         Out.Print("\nNumber of DE results:");
         Out.Print(String.format("   %5s %5s %5s %5s %5s", df[0], df[1],df[2],df[3],df[4]));
@@ -148,14 +146,12 @@ public class QRProcess {
 			
 		// add column or set to default 3
 			ResultSet rs = mDB.executeQuery("show columns from contig where field= '" + pColName + "'");
-			if (!rs.first())
-			{
+			if (!rs.first()) {
 				Out.PrtSpMsg(1, "Adding column to database...");
 				mDB.executeUpdate("alter table contig add " + pColName + 
 						" double default " + Globalx.dStrNoDE);
 			}
-			else
-			{
+			else {
 				mDB.executeUpdate("update contig set " + pColName + "=" + Globalx.dStrNoDE);
 			}
 			mDB.executeUpdate("update assem_msg set pja_msg=NULL");
@@ -166,16 +162,14 @@ public class QRProcess {
 			double nan=Globalx.dNaDE; 
 			
 			mDB.openTransaction(); 
-			for (String ctg : scores.keySet())
-			{
+			for (String ctg : scores.keySet()){
 				double sc = scores.get(ctg);
 				if (scores.get(ctg).isNaN()) {ps.setDouble(1,nan); cntNA++;}
 				else ps.setDouble(1,sc); 
 				ps.setString(2, ctg);
 				ps.addBatch();
 				cnt++; cntSave++; 
-				if (cntSave==100) 
-				{
+				if (cntSave==100) {
 					cntSave=0;
 					Out.r("add " +cnt);
 					try{
@@ -189,7 +183,7 @@ public class QRProcess {
 			if (cntNA>0) Out.PrtSpMsg(1, cntNA + " NA scores");
 			
 			// Now IF there is one library in each group set, and IF the corresponding LN__ columns exist, 
-			// then we will convert the scores to +/- to encode the direction of DE.
+			// then convert the scores to +/- to encode the direction of DE.
 			if (grp1.size() == 1 && grp2.size() == 1)
 			{
 				String col1 = RPKM + grp1.first();
@@ -198,8 +192,7 @@ public class QRProcess {
 				boolean col1Exists = rs.first();
 				rs = mDB.executeQuery("show columns from contig where field='" + col2 + "'");
 				boolean col2Exists = rs.first();
-				if (col1Exists && col2Exists)
-				{
+				if (col1Exists && col2Exists) {
 					mDB.executeUpdate("update contig set " + pColName + " =-" + pColName + 
 							" where " + col1 + "<" + col2);						
 				}
@@ -276,8 +269,7 @@ public class QRProcess {
 	 */
 	private void loadCountsToR(int filCnt, int filCPM, int filCPMn, TreeSet<String> grp1, TreeSet<String> grp2)
 	{
-		try
-		{
+		try {
 			nGroup1=nGroup2=0; // in case run a second time, don't want accumlative
 			ResultSet rs;
 			String strLib="";
@@ -291,8 +283,7 @@ public class QRProcess {
 			mDB.executeUpdate("update library set reps='' where reps is null"); // in case...
 			System.err.println("\n"); // makes replicate lines slightly prettier, if any
 			
-			for (String libName : allGrp)
-			{
+			for (String libName : allGrp) {
 				rs = mDB.executeQuery("select reps,lid from library where libid='" + libName + "'");
 				rs.first();
 				String reps = rs.getString(1).trim(); // name of reps, e.g. root1, root2, etc
@@ -303,8 +294,7 @@ public class QRProcess {
 				if (strLib.equals("")) strLib = ""+ lid;
 				else strLib += "," + lid;
 				
-				if (reps.equals(""))
-				{
+				if (reps.equals("")) {
 					sObj.addN(0, nRepSamps);
 					
 					nRepSamps++;
@@ -313,13 +303,11 @@ public class QRProcess {
 					
 				 	allReps.add(libName + "1"); // used by EDAnorm, and can't be same as grpNames
 				}
-				else
-				{
+				else {
 					String[] repnames = reps.split(",");
 					int nReps = repnames.length;
 					Out.PrtSpCntMsg(0, nReps, libName + " replicates");
-					for (int r = 1; r <= repnames.length; r++)
-					{
+					for (int r = 1; r <= repnames.length; r++) {
 						sObj.addN(r, nRepSamps);						
 						
 						nRepSamps++;	
@@ -355,8 +343,7 @@ public class QRProcess {
 			rs = mDB.executeQuery("select contigid, ctgid, gc_ratio " +
 					"from contig order by ctgid asc limit " + nSeq); // for testing
 			int seqIndex = 0;
-			while (rs.next())
-			{
+			while (rs.next()) {
 				int seqID = rs.getInt(2);
 				seqMap.put(seqID, seqIndex); // if assembled, not the same
 				rowNames[seqIndex] = rs.getString(1);
@@ -372,8 +359,7 @@ public class QRProcess {
 					" join contclone on contclone.cid=clone_exp.cid " +
 					" where lid in (" + strLib + ") " +
 					" group by contclone.ctgid, lid, rep");							
-			while (rs.next())
-			{
+			while (rs.next()) {
 				int seqID = rs.getInt(1);
 				int seqX = seqMap.get(seqID);
 				int lid = rs.getInt(2);
@@ -444,7 +430,7 @@ public class QRProcess {
 	     										Out.PrtSpMsg(1,repNamesR + ": replicate names");
 	     	
 	        re.assign("counts", counts);  		Out.PrtSpMsg(1,"counts: counts of sequences");
-	        	doCmd(countDataR + " <- array(counts,dim=c(" + nSeq + "," + nRepSamps + "))");
+	        doCmd(countDataR + " <- array(counts,dim=c(" + nSeq + "," + nRepSamps + "))");
 	        doCmd("rm(counts)");
 	        doCmd("rownames(" + countDataR + ") <- " + rowNamesR);
 	        doCmd(nGroup1R + " <- " + nGroup1);
@@ -547,24 +533,20 @@ public class QRProcess {
 	TreeMap <Integer, Sample> samMap = new TreeMap <Integer, Sample> ();
 	private class Sample {
 		public Sample(int i, String n) {
-			lid = i;
-			libName=n;
+			//lid = i;
+			//libName=n;
 		}
 		public void addN(int rep, int totalRepN) {
 			nRep.put(rep,totalRepN);
 		}
-		String libName;
-		int lid=0;
-	
 		TreeMap <Integer, Integer> nRep = new TreeMap <Integer, Integer> ();
 	}
 	
 	/*******************************************************
 	 * FDR -- CASX 7/7/19 this does not work!
 	 * they can use the FDR column from edgeR.
-	 */
-	private void runFDR(TreeMap<String,Double> ctg2score )
-	{
+	
+	private void runFDR(TreeMap<String,Double> ctg2score ){
 		Vector<String> names = new Vector<String>();
 		double[] scores = new double[ctg2score.size()];
 		int i = 0;
@@ -598,12 +580,11 @@ public class QRProcess {
 		}
 		catch(Exception e){ErrorReport.reportError(e, "Error computing FDR");}
 	}
-	
+	 */
 	/*****************************************************
 	 * runScript
 	 */
-	private boolean runScript(TreeMap<String,Double> scores,
-			double disp, String rScriptFile) 
+	private boolean runScript(TreeMap<String,Double> scores, double disp, String rScriptFile) 
 	{
      	Out.Print("\nStart R-script ");
      	if (disp>0) doCmd(dispR + " <- " + disp);
@@ -631,8 +612,7 @@ public class QRProcess {
         		return false;
         	}
          	
-        	for (int i = 0; i < ctgs.length; i++)
-        	{
+        	for (int i = 0; i < ctgs.length; i++) {
         		scores.put(ctgs[i], pvals[i]);
         	}
 
@@ -643,73 +623,71 @@ public class QRProcess {
 	/***********************************************
 	 * XXX GOSeq
 	 * colNames: 	Names of all p-value columns 
-	 * col: 			Name of the one selected column
+	 * col: 		Name of the one selected column
 	 * doAll:		use colNames (process all) or col (process one)
 	 * usePercent:	true: use the top N%  false: use p-value<N
 	 * pCutoff:		use this cutoff for N
 	 */
 	public void runGOSeq(String[] colNames, String col, boolean doAll, boolean usePercent, double pCutoff)
 	{
-		String pid = "PIDgo";  // CASX 7/8/19 changed all pid to PIDgo (GOseq warn for sequences without GOs)
+		String pid = "PIDgo";  
 		String[] cols2do = (doAll ? colNames : new String[]{col});
 		long startTime = Out.getTime();
-		try
-		{	    		
-	        	ResultSet rs = mDB.executeQuery("show tables like 'pja_unitrans_go'");
-	    		if (!rs.first()) { 
-	    			Out.PrtError("The GO tables have not been added");
-	    			Out.Print("Abort GOseq");
-	    			rs.close();
-	    			return;
-	    		}
-	    		
-	        	initJRI();
-	        	packages = new HashSet<String>(); 
-	    		getPackages(packages);
-	    		if (!checkPackage("goseq")) {
-	    			Out.PrtError("GOseq package does not exist");
-	    			return;
-	    		}
-	    		
-	    		Out.Print("\nBegin GOseq");
-	    	 	doCmd("suppressPackageStartupMessages(library(goseq))");
-	
-	 /** get sequences and lengths to be used for all GO DE columns **/	    		
-	        	int nSeq = mDB.executeCount("select count(*) from contig where " + pid + " > 0");
-	        	if (nSeq==0) {
-	        		Out.PrtWarn("The sequences have not been annotated yet."); 
-	        		return;
-	        	}
+		try {	    		
+        	ResultSet rs = mDB.executeQuery("show tables like 'pja_unitrans_go'");
+    		if (!rs.first()) { 
+    			Out.PrtError("The GO tables have not been added");
+    			Out.Print("Abort GOseq");
+    			rs.close();
+    			return;
+    		}
+    		
+        	initJRI();
+        	packages = new HashSet<String>(); 
+    		getPackages(packages);
+    		if (!checkPackage("goseq")) {
+    			Out.PrtError("GOseq package does not exist");
+    			return;
+    		}
+    		
+    		Out.Print("\nBegin GOseq");
+    	 	doCmd("suppressPackageStartupMessages(library(goseq))");
 
-	        	int[] lens = new int[nSeq]; 
-	        	String[] names = new String[nSeq]; 
+ /** get sequences and lengths to be used for all GO DE columns **/	    		
+        	int nSeq = mDB.executeCount("select count(*) from contig where " + pid + " > 0");
+        	if (nSeq==0) {
+        		Out.PrtWarn("The sequences have not been annotated yet."); 
+        		return;
+        	}
+
+        	int[] lens = new int[nSeq]; 
+        	String[] names = new String[nSeq]; 
 	        int 	n = 0;
 	        
-	        	rs = mDB.executeQuery("select contigid, consensus_bases " +
-	        			" from contig where " + pid + " > 0 order by ctgid asc"); 
-	        	
-	        	while (rs.next())
-	        	{
-	        		names[n] = rs.getString(1);
-	        		lens[n] =  rs.getInt(2);
-	        		n++;
-	        	}
-	        	re.assign("seqNames",names);	Out.PrtSpMsg(1, "seqNames: sequence names");
-	        	re.assign("seqLens",lens);	Out.PrtSpMsg(1, "seqLens:  sequence lengths");
+        	rs = mDB.executeQuery("select contigid, consensus_bases " +
+        			" from contig where " + pid + " > 0 order by ctgid asc"); 
+        	
+        	while (rs.next()) {
+        		names[n] = rs.getString(1);
+        		lens[n] =  rs.getInt(2);
+        		n++;
+        	}
+        	re.assign("seqNames",names);	Out.PrtSpMsg(1, "seqNames: sequence names");
+        	re.assign("seqLens",lens);		Out.PrtSpMsg(1, "seqLens:  sequence lengths");
 			doCmd("nSeq <- " + nSeq);
 			
 			TreeMap <String, Double> dePvalMap = new MetaData().getDegPvalMap(mDB); // p-value:cutoff saved in database
 			if (dePvalMap==null) dePvalMap = new TreeMap <String, Double> ();
 			
 /** for each P column to process: **/	
-	        	for (String pColName : cols2do)
-	        	{
-	        		double cutoff = pCutoff; 
-	        		if (pColName.equals("")) continue; 
-	        		if (pColName.equals(QRFrame.selCol) || pColName.equals(QRFrame.allCols)) continue;
-	        		String colName = pColName.substring(2);
-	        		Out.Print("\nGOSeq: processing " + colName);
-	        		
+        	for (String pColName : cols2do)
+        	{
+        		double cutoff = pCutoff; 
+        		if (pColName.equals("")) continue; 
+        		if (pColName.equals(QRFrame.selCol) || pColName.equals(QRFrame.allCols)) continue;
+        		String colName = pColName.substring(2);
+        		Out.Print("\nGOSeq: processing " + colName);
+        		
 				if (usePercent) // figure out cutoff for Top N%
 				{
 					int nThresh = (int)((cutoff*nSeq)/100);
@@ -722,24 +700,23 @@ public class QRProcess {
 					cutoff = Double.parseDouble(tx);
 				}
 				dePvalMap.put(colName, cutoff); // overwrites any previous assignment
-				
+			
 		/* get sequence DE values and create 0-1 vector of above and below a threshold */		
-		        	int[] DE = new int[nSeq]; 
-		        	int cntDE=0;
-		        n = 0;
-		        	
-		        	rs = mDB.executeQuery("select abs(" + pColName + ") from contig " +
-		        			" where " + pid + " > 0 order by ctgid asc");
-		 
-		        	while (rs.next())
-		        	{
-		        		double p = rs.getDouble(1);
-		        		int de = (p < cutoff ? 1 : 0); 
-		        		DE[n] = de;
-		        		n++;
-		        		cntDE += de;
-		        	}	
-		        	re.assign("seqDE",DE);	Out.PrtSpMsg(1, "seqDE: DE binary vector (" + cntDE + " seq p-value < " + cutoff + ")" );
+			    int[] DE = new int[nSeq]; 
+			    int cntDE=0;
+			    n = 0;
+			        	
+			    rs = mDB.executeQuery("select abs(" + pColName + ") from contig " +
+			        			" where " + pid + " > 0 order by ctgid asc");
+			 
+	        	while (rs.next()){
+	        		double p = rs.getDouble(1);
+	        		int de = (p < cutoff ? 1 : 0); 
+	        		DE[n] = de;
+	        		n++;
+	        		cntDE += de;
+	        	}	
+			    re.assign("seqDE",DE);	Out.PrtSpMsg(1, "seqDE: DE binary vector (" + cntDE + " seq p-value < " + cutoff + ")" );
 				doCmd("names(seqDE) <- seqNames");
 				doCmd("deSeqNames <- seqNames");       // deSeqNames assigned null if no p-value
 				doCmd("gos <- vector(\"list\",nSeq)");
@@ -758,8 +735,7 @@ public class QRProcess {
 						" left join pja_unitrans_go as p on p.ctgid=c.ctgid " +
 						" where c." + pid + "> 0 order by c.ctgid asc");	
 				
-				while (haveMore)
-				{
+				while (haveMore) {
 					haveMore = rs.next();
 					if (haveMore) { 
 						seqID = rs.getString(1);
@@ -771,10 +747,8 @@ public class QRProcess {
 						curID="done";
 					}
 				
-					if (!seqID.equals(curID))
-					{
-						if (seqGOs.size() > 0)
-						{
+					if (!seqID.equals(curID)) {
+						if (seqGOs.size() > 0) {
 							StringBuilder str = new StringBuilder("");
 							str.append("\"" + seqGOs.firstElement() + "\"");
 							for (int i = 1; i < seqGOs.size(); i++)
@@ -785,8 +759,7 @@ public class QRProcess {
 							re.eval(cmd);
 							seqGOs.clear();
 						}
-						else
-						{   // this replaces name with NA; if pid is PIDgo, this will not happen
+						else {   // this replaces name with NA; if pid is PIDgo, this will not happen
 							String cmd = "deSeqNames[" + n + "] <- NA";
 							re.eval(cmd);
 						}
@@ -798,40 +771,38 @@ public class QRProcess {
 					if (gonum > 0)	seqGOs.add(gonum);
 				}
 				Out.r("                                                  ");
-				
+					
 			/** run GOseq **/
 				doCmd("names(gos) = deSeqNames"); 
 				doCmd("np <- nullp(seqDE,'','',seqLens,FALSE)"); 
 				
 				String cmd = "pvals <- goseq(np,'','',gos)";
 				Out.prt("Executing command: " + cmd);
-		        	RList results = re.eval(cmd).asList();
-		        	Out.prt("Finish execution");
-		        	
-		        	String[] gonums = results.at("category").asStringArray();
-		        	double[] pvals = results.at("over_represented_pvalue").asDoubleArray();
-		        	assert(gonums.length == pvals.length);
-		        	
+	        	RList results = re.eval(cmd).asList();
+	        	Out.prt("Finish execution");
+	        	
+	        	String[] gonums = results.at("category").asStringArray();
+	        	double[] pvals = results.at("over_represented_pvalue").asDoubleArray();
+	        	assert(gonums.length == pvals.length);
+	        	
 		    /** save results **/
-		        	rs = mDB.executeQuery("show columns from go_info where field='" + pColName + "'");
-		        	if (!rs.first())
-		        	{
-		        		Out.PrtSpMsg(1, "Adding column to go_info table");
-		        		mDB.executeUpdate("alter table go_info add " + pColName + " double default " + Globalx.dStrNoDE);             
-		        	}
-		        	else mDB.executeUpdate("update go_info set " + pColName + "=" + Globalx.dStrNoDE);
-		        
-		        	mDB.executeUpdate("update assem_msg set pja_msg=NULL");
-		        	n = gonums.length; 
-		        	int cntSave=0, cnt=0;
-		        	
-		        	Out.Print("\nSaving " + n + " values to database for " + colName);
-		        	mDB.openTransaction(); 
+	        	rs = mDB.executeQuery("show columns from go_info where field='" + pColName + "'");
+	        	if (!rs.first()) {
+	        		Out.PrtSpMsg(1, "Adding column to go_info table");
+	        		mDB.executeUpdate("alter table go_info add " + pColName + " double default " + Globalx.dStrNoDE);             
+	        	}
+	        	else mDB.executeUpdate("update go_info set " + pColName + "=" + Globalx.dStrNoDE);
+        
+	        	mDB.executeUpdate("update assem_msg set pja_msg=NULL");
+	        	n = gonums.length; 
+	        	int cntSave=0, cnt=0;
+	        	
+	        	Out.Print("\nSaving " + n + " values to database for " + colName);
+	        	mDB.openTransaction(); 
 				PreparedStatement ps = mDB.prepareStatement(
 						"update go_info set " + pColName + "=? where gonum=?");
 				int cnt05=0;
-				for (int i = 0; i < gonums.length; i++)
-				{
+				for (int i = 0; i < gonums.length; i++) {
 					gonum = Integer.parseInt(gonums[i]);
 					double score = pvals[i];
 					ps.setDouble(1,score);
@@ -852,16 +823,15 @@ public class QRProcess {
 				
 				Out.PrtSpCntMsg(0, cnt05, "GO p-values < 0.05");
 				Out.Print("Finish saving "  + colName);
-	        	} // complete loop through P columns to process  
-	        	rs.close();
-	        	saveGoDE("", dePvalMap);
-	         	
-	        	Out.Print("                                                          ");
+        	} // complete loop through P columns to process  
+        	rs.close();
+        	saveGoDE("", dePvalMap);
+         	
+        	Out.Print("                                                          ");
             Out.PrtMsgTimeMem("Finished GOseq execution for " + dbName, startTime);
             Out.Print("\nThe console is in R, you may run R commands -- q() when done, or perform another Execute.");
 		}
-		catch(Exception e)
-		{
+		catch(Exception e){
 			Out.PrtError("q() out of R in terminal window.");
 			ErrorReport.reportError(e, "running GOseq");
 			return;
@@ -882,15 +852,15 @@ public class QRProcess {
 					colRm.substring(pLen).trim() : "";
 			
 			String goInfo="";
-	        	for (String colName : dePvalMap.keySet()) {
-	        		if (!colToRm.equals(colName)) {
-	        			double th = dePvalMap.get(colName);
-	        			if (goInfo=="") goInfo = colName + ":" + th;
-	        			else goInfo += "," + colName + ":" + th;
-	        		}
-	        	}
-	        	mDB.tableCheckAddColumn("assem_msg", "goDE", "text", null);
-	        	mDB.executeUpdate("update assem_msg set goDE='" + goInfo + "'");
+        	for (String colName : dePvalMap.keySet()) {
+        		if (!colToRm.equals(colName)) {
+        			double th = dePvalMap.get(colName);
+        			if (goInfo=="") goInfo = colName + ":" + th;
+        			else goInfo += "," + colName + ":" + th;
+        		}
+        	}
+        	mDB.tableCheckAddColumn("assem_msg", "goDE", "text", null);
+        	mDB.executeUpdate("update assem_msg set goDE='" + goInfo + "'");
 		}
 		catch (Exception e) {ErrorReport.reportError(e, "Saving goDE values");}
 	}
@@ -899,18 +869,16 @@ public class QRProcess {
 	 */
 	void initJRI()
 	{
-		try
-		{
-			if (re == null)
-			{
+		try {
+			if (re == null) {
 				Out.Print("Startup R");
 				Map<String, String> env = System.getenv();
 				boolean flag=false;
 			    for (String envName : env.keySet()) {
-			            if (envName.contains("R_HOME")) {
-			            		System.err.format("%s=%s\n\n", envName,env.get(envName));
-			            		flag=true;
-			            }
+		            if (envName.contains("R_HOME")) {
+		            		System.err.format("%s=%s\n\n", envName,env.get(envName));
+		            		flag=true;
+		            }
 			    }
 			    if (!flag) Out.PrtWarn("$R_HOME not set\n");
 			    Out.Print("Checking if runDE has the correct java.library.path....");
@@ -929,8 +897,7 @@ public class QRProcess {
 		            return;
 		        }
 			}
-			else
-			{
+			else {
 				Out.Print("Use existing R session");
 				doCmd("rm(list=ls())");
 			}
@@ -941,22 +908,18 @@ public class QRProcess {
 		Out.PrtSpMsg(1, cmd);
 		re.eval(cmd);
 	}
-	private 	REXP doCmdx (String cmd) {
+	private REXP doCmdx (String cmd) {
 		Out.PrtSpMsg(1, cmd);
 		return re.eval(cmd);
 	}
-	void getPackages(HashSet<String> pkgs)
-	{
-	    	REXP x = re.eval("rownames(installed.packages())");
-	    	for (String pkg : x.asStringArray())
-	    	{
-	    		pkgs.add(pkg);
-	    	}		
+	void getPackages(HashSet<String> pkgs) {
+    	REXP x = re.eval("rownames(installed.packages())");
+    	for (String pkg : x.asStringArray()) {
+    		pkgs.add(pkg);
+    	}		
 	}
-	boolean checkPackage(String pkg)
-	{
-		if (!packages.contains(pkg)) 
-		{
+	boolean checkPackage(String pkg) {
+		if (!packages.contains(pkg)) {
 			Out.Print("*****R package " + pkg + " needs to be installed.******");
 			return false;
 		}
@@ -978,9 +941,7 @@ public class QRProcess {
 	            BufferedReader br=new BufferedReader(new InputStreamReader(System.in));
 	            String s=br.readLine();
 	            return (s==null||s.length()==0)?s:s+"\n";
-	        } catch (Exception e) {
-	            Out.PrtError("jriReadConsole exception: "+e.getMessage());
-	        }
+	        } catch (Exception e) { Out.PrtError("jriReadConsole exception: "+e.getMessage()); }
 	        return null;
 	    }
 	   

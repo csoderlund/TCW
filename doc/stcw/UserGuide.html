@@ -74,7 +74,8 @@ sequences.
 		<table width='100%'><tr><td align='left' >
 <h2>Running the demo</h2>
 	</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a></td></tr></table>
-	Before starting the demo, follow steps for <a href="../Install.html" class="ext" target="_blank">Installation</a>. Make sure your <tt>HOSTS.cfg</tt> is correct.
+	Before starting the demo, follow steps for <a href="../Install.html" class="ext" target="_blank">Installation</a>. 
+	Make sure your <tt>HOSTS.cfg</tt> is correct.
 	<p>The following three demos are supplied with the package.
 		<table border=1 cellpadding=5>
 		<tr><th>Demo<th>Description<th>Documentation
@@ -89,16 +90,15 @@ sequences.
 		
 <p>At the command line, type 
 		<pre class=tt>./runSingleTCW</pre>
-		
-		
+	
 		The window shown on the right will be launched. 
-<a name="step1demo">					
+<a name="step1demo">
 		Select <tt>demoTra</tt> from the <tt class=c>Project</tt> drop-down list. 
 		
-		<p>1. Click the <tt class=c>Step 1. Build Database</tt> button.		
+		<p>1. Click the <tt class=c>Step 1. Build Database</tt> button.
 			<br>This loads the datasets in this section; there is one 
 			dataset of transcripts  with count data for three
-			conditions ("Stem","Root","OLeaf"), with five replicates each. 	 
+			conditions ("Stem","Root","OLeaf"), with five replicates each.
 				
 			<p>Note: 
 			<ul><li>A command button will turn gray while it is
@@ -128,10 +128,10 @@ sequences.
 <p>There may be one or more yes/no prompts for you to answer at the
 terminal; <font color=green>keep an eye on the terminal until it says "Start annotating sequences"</font>,
 at which point, it will run without any further prompts. For example, 
-if the <tt>GO database</tt> has not been built yet (see Step 5), the following will be written to the terminal:		
+if the <tt>GO database</tt> has not been built yet (see Step 5), the following will be written to the terminal:
 <pre>
-+++Warning: GO_tree go_demo is missing; ignoring GO step
---Please confirm above parameters. Continue with annotation?  (y/n)?
+	+++Warning: GO_tree go_demo is missing; ignoring GO step
+	--Please confirm above parameters. Continue with annotation?  (y/n)?
 				</pre>
 Answer 'y' to continue.
 <p>The output to the terminal and to the file <tt>projects/demoTra/logs/anno.log</tt> will look something like 
@@ -147,7 +147,8 @@ Answer 'y' to continue.
 		<p>5. To build the GO database, see <a href="AnnoDBs.html#demo" class="ext" target="_blank">
 		Demo annotation setup</a>. Then execute <tt class=c>GO Only</tt>.
 
-<p><font color=green>Time for adding the GOs</font>: This take longer than the other TCW steps, where it can takes around 2 to 5 minutes for this demo.  
+<p><font color=green>Time for adding the GOs</font>: 
+This take longer than the other TCW steps, where it can takes around 2 to 5 minutes for this demo.  
 If it takes a lot longer than 4 minutes for this step, 
 check your <tt>max_allows_packet</tt> (see <a href=../Trouble.html class="ext" target="_blank">Trouble shooting</a>).
 					
@@ -159,7 +160,34 @@ check your <tt>max_allows_packet</tt> (see <a href=../Trouble.html class="ext" t
 			packages, and how to add DE p-values to the TCW database. If Step 5 has been run, then you can also add
 			the p-values for the GO.
 
-		<p>See <a href=tra.html class="ext" target="_blank">overview</a> for the final demoTra overview..
+		<p>See <a href=tra.html class="ext" target="_blank">overview</a> for the final demoTra overview from the above 6 steps.
+
+<a name=demoNonUP>		
+		<p>7. (Optional) Add non-UniProt annoDBs
+<table border=0>
+<tr><td>	
+		<ol>
+		
+		<li>Back on the main window, select <tt class=c>Check All</tt> then <tt class=c>UnCheck All</tt>, which unchecks all current annoDB entries.
+		<li>Select <tt  class=c>Import AnnoDBs</tt>, then select file <tt>AnnoDBs_other.cfg</tt>. The AnnoDB table will look like the figure below.
+		<li>Go to AnnoDB <tt  class=c>Options</tt> and select <tt  class=c>Reset to Default</tt> at the bottom, then <tt  class=c>Keep</tt>.
+		NOTE: If you add more UniProt databases, you will want to redo GO. But since none of these have GOs, the GO computation does not need to be redone.
+		<li>Select <tt class=c>Annotate</tt>:
+
+<td>
+  	<a  href="img/anno_other.png">
+		<img src="img/anno_other.png" width=400 border=1></a>		
+</table>
+On <tt class=c>Annotate</tt>, you may either select "Use Defaults" on the 
+  		popup, where the default is to add to the existing annotation, or select "Answer", where you will
+  		see at the terminal (enter "a"):
+  	<pre>
+	?--Annotation exists in database. Enter [a/d/e]
+	Add to existing annotation [a], Delete annotation [d], Exit [e]: a 
+  		</pre>
+Read <a href=AnnoDBs.html#nr class="ext" target="_blank">Creating AnnoDBs from other databases</a> 
+to see how these were formatted.
+<!----------------------------------------------------------------!>
 <a name=new></a>
 <table width='100%'><tr><td align='left' >		
 <h2>CREATING A NEW PROJECT</h2>
@@ -172,7 +200,7 @@ You will be prompted for a project name; enter a name using letters, numbers, or
 When you select "OK", the following occurs:
 <ol>
 <li>The "name" will be entered for <tt class=c>singleTCW ID</tt> and "sTCW_&lt;name&gt;"  will be entered for the <tt class=c>Database</tt>.
-<li>The <tt>project/&lt;name&gt;</tt>  directory will be created with files <tt>LIB.cfg</tt> and <tt>sTCW.cfg</tt>. These maintain all information you enter.
+<li>The <tt>project/&lt;name&gt;</tt> directory will be created with files <tt>LIB.cfg</tt> and <tt>sTCW.cfg</tt>. These maintain all information you enter.
 </ol>
 For example, if you enter the name "example", the ID will be "example" and the database will be "sTCW_example".
 You may want to shorten the <tt>singleTCW ID</tt>, for example, to "ex" as shown. 
@@ -243,7 +271,7 @@ shown on the lower right.
 <tr><td>
 <tt class=c>SeqID</tt>: Enter the dataset name (a brief identifier) in the first box; it should be a short (3-5 characters) name.
 <p>
-<tt class=c>Sequence File:</tt> Click the browse button labeled "..." to select the fasta file of sequences.			
+<tt class=c>Sequence File:</tt> Click the browse button labeled "..." to select the fasta file of sequences.
 <p>
 Additional information:
 <ol>
@@ -262,7 +290,7 @@ The main panel will reappear with the <tt>SeqID</tt> and <tt>Title</tt> added to
 the <tt>Sequence Datasets</tt> table. Additionally, the information will be written in 
 <tt>projects/&lt;name&gt;/LIB.cfg</tt>.
 
-<p>Define all datasets, then select <tt class=c>Build Database</tt> to load the data into the database.	
+<p>Define all datasets, then select <tt class=c>Build Database</tt> to load the data into the database.
 Datasets cannot be added to an existing database.
 <td>
 <a href="img/runSingleAddSeq.png">
@@ -276,7 +304,7 @@ using the <tt class=c>Edit</tt> button on the main panel;
 note, the <tt>projects/&lt;name&gt;/LIB.cfg</tt> file has to be accessible to change attributes.
 
 <a name=cnt></a>
-<table width='100%'><tr><td align='left' >		
+<table width='100%'><tr><td align='left' >
 <h3>Defining count data</h3>
 </td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a></td></tr></table>
 
@@ -305,7 +333,7 @@ conditions, which will be shown on the <code>viewSingleTCW</code> overview.
 </table>
 
 <a name=rep></a>
-<table width='100%'><tr><td align='left' >		
+<table width='100%'><tr><td align='left' >
 <h4>Define biological replicates</h4>
 </td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a></td></tr></table>
 
@@ -343,7 +371,7 @@ conditions, which will be shown on the <code>viewSingleTCW</code> overview.
 	<td  valign="top">					
 		On <tt class=c>Keep</tt>, the <tt>Associated Counts</tt> table on the main panel will be updated, showing
 		the correct condition list and number of replicates for each (as shown on the right). 
-		In order to add metadata (e.g. title), select a row followed by <tt class=c>Edit</tt>.			
+		In order to add metadata (e.g. title), select a row followed by <tt class=c>Edit</tt>.
 	</td>
 		<td  valign="top">
 			<a href="img/runSingleDataSet.png">
@@ -483,9 +511,9 @@ Read <a href=AnnoDBs.html class="ext" target="_blank">Annotation Setup</a> for o
 <p><tt class=c>Import AnnoDBs</tt> provides a way to enter all UniProt databases at once. 
 If you have used <a href=AnnoDBs.html class="ext" target="_blank"><code>runAS</code></a>
 for the annotation setup,
-make sure the last step was <tt class=c>TCW.anno</tt>, which creates a file of UniProt databases. 
+make sure the last step was to select the <tt class=c>AnnoDBs.cfg</tt> button, which creates a file of UniProt databases. 
 Select <tt class=c>Import AnnoDBs</tt>, which pops up a
-file chooser, then select the <tt>projects/TCW.anno.&lt;date&gt;</tt> (or <tt>sTCW.cfg</tt> of another project); 
+file chooser, then select the <tt>projects/AnnoDBs_UniProt_&lt;date&gt;</tt> (or <tt>sTCW.cfg</tt> of another project); 
 all your UniProts will be added at once.
   <td valign="top">
 <a href="img/runSingleStep3.png"><img width=450 src="img/runSingleStep3.png"  border=1></a>
@@ -501,6 +529,8 @@ press the <tt class=c>Add</tt> button next to the AnnoDB table. This brings
 	the <tt>DBtype</tt> will be "SPpla". 
 	The <tt>DBtype</tt> is
 	shown in various tables of <code>viewSingleTCW</code> to indicate the origin of the hit.	
+<p>Read <a href=AnnoDBs.html#nr class="ext" target="_blank">Creating AnnoDBs from other databases</a> to see how these were formatted.
+Also, see the Demo  <a href=#demoNonUP>Add non-UniProt annoDBs</a>.
 <td><a href="img/runSingleEditAnno.png"><img src="img/runSingleEditAnno.png" width=500 border=1>
 </table>
 

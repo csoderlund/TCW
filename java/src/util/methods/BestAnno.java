@@ -11,53 +11,61 @@ public class BestAnno {
 	
 	/*********************************************
 	 *  sng&cmp: bunch of heuristic to figure out non-informative names
+	 *  CAS317 made a few changes
 	 */
 	static public boolean descIsGood (String desc) {
-		String des = desc.toLowerCase();
-		des = des.replace("_", " ");
-		if (des.contains("uncharacterized protein") || 
-	    		des.contains("putative uncharacterized") || 
-	    		des.contains("hypothetical protein") || 
-	    		des.contains("expressed protein") || 
-	    		des.contains("predicted protein") ||
-	    		des.contains("whole genome shotgun") ||
-	    		des.contains("scaffold") || 
+		String des = desc.toLowerCase().trim();
+		
+		String dedash = des.replace("_", " ");
+		if (dedash.contains("uncharacterized protein") || 
+	    		dedash.contains("putative uncharacterized") || 
+	    		dedash.contains("hypothetical protein") || 
+	    		dedash.equals("expressed protein") || 
+	    		dedash.contains("predicted protein") ||
+	    		dedash.contains("whole genome shotgun") ||
+	    		dedash.startsWith("low quality protein") ||  // CAS317 may be particular to dcitri
 	    		des.equals("unknown") || 
 	    		des.equals("unk") || 
-	    		des.equals("orf"))
-	    	{
-	    	        return false;
-	    	}
+	    		des.equals("orf") ||
+				dedash.contains("unnamed protein product")) // CAS317 added for NR
+	    {
+			return false;
+	    }
 		
-		int ix = des.indexOf("{ec");  
+		int ix = des.indexOf("{ec");  // Remove {ec from UniProt
 		if (ix != -1) {
 			String s = des.substring(0,ix).trim();
 			if (s.length() > 3) des = s;
 		}
+		
+		// Bunch of heuristics for un-informative names 
 		String [] words = des.split(" ");
-		if (words.length > nWORDS) return true; 
-
-		// many are just a 'name' or 'name protein' or 'name (fragment)' or 
-		// If name has lots of numbers, seems to be meaningless
-		// Names like MET_1 will pass, names like GK1599 will not
-		// Rules: if over 3 digits in first word - name
-		//		  if more digits than letters - name
-		boolean isName = false;
-		int cntDigit=0;
+		int wLen=words.length;
+		if (wLen > nWORDS) return true; 
+		
+		int cntDigit=0, cntDash=0;
 		for (int i=0; i < words[0].length(); i++) {
 			char c = words[0].charAt(i);
 			if (Character.isDigit(c)) cntDigit++;
+			else if (c=='-') cntDash++;
 		}
-		if (cntDigit>3) isName=true;
-		else {
-			int wl = words[0].length();
-			double x = (cntDigit > 0) ? ((double) wl/ (double) cntDigit) : 0;
-			if (wl <= 5 && x > 1) isName = true;
+		if (cntDash>2) return true;
+		
+		int  w0Len = words[0].length();
+		if (wLen==1 && w0Len<=3) return false;
+		if (wLen==1 && w0Len<=5 && cntDigit>0) return false;
+		
+		double mostlyN = (cntDigit > 0) ? ((double) cntDigit/ (double) w0Len) : 0;
+		
+		boolean isName = (mostlyN>0.4);
+		
+		if (isName) {
+			if (wLen==1) return false;
+			if (des.endsWith("protein")) return false;
+			if (des.endsWith("(fragment)")) return false;
+			if (des.endsWith("partial")) return false; 
+			if (des.endsWith("scaffold")) return false;
 		}
-		if (words.length == 1 && isName) return false;
-		if (isName &&  des.endsWith("protein")) return false;
-		if (isName &&  des.endsWith("(fragment)")) return false;
-		if (isName &&  des.endsWith("partial")) return false; 
 		return true;
 	}
 	static public String rmECO(String des) {

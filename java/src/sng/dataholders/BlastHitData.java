@@ -182,10 +182,16 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 		}	
 	}
 	/******************************************************************************/
-	// sorting blast hits for pairwise comparison  CAS314 sort on bitscore only
+	// XXX sorting blast hits for pairwise comparison  CAS314 sort on bitscore only
+	// Called in CoreAnno on pairs
+	// CAS317 called on DoUniProt for adding sequence hitList for an annoDB
 	public int compareTo(BlastHitData b) {
 		if (this.bitScore > b.bitScore) return -1;
 		if (this.bitScore < b.bitScore) return 1;
+		
+		if (this.eVal < b.eVal) return -1; // CAS317 
+		if (this.eVal > b.eVal) return  1;
+		
 		return 0;
 	}
 

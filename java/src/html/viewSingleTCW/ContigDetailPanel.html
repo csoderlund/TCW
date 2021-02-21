@@ -20,14 +20,12 @@ the DB hits table contents or selection.
 
 <li><b>DB hits</b> toggle: Changes the set of hits listed in the DB hits table.
 <ul>
-<li><i>Best (EV, AN, GO)</i>.
+<li><i>Best (BS, AN, GO)</i>. See Introduction for more information on the following.
 <ul>
-<li>EV is BestEval: The hit with the best e-value and bitscore.
-<li>AN is BestAnno: Either (1) SwissProt, or (2) does not have terms like "uncharacterize protein". If neither exists,
-it defaults to BestEval.
-<li>WG is Best with GO: If GO is available, this is the hit with the best e-value and has at least one 
-assigned GO term.
-<li>The Best EV, AN, and GO may all be the same, or any two of them the same. They may not be in the list of "best per annoDB".
+<li>BS is best bitscore. 
+<li>AN is best annotation.
+<li>WG is best with GO.
+<li>The Best BS, AN, and WG may all be the same, or any two of them the same. 
 </ul>
 <li><i>Best per annoDB</i>: In preprocessing, the sequences in the database are generally searched against
 one or more annotation databases, which are referred to as an <i>annoDBs</i>. 

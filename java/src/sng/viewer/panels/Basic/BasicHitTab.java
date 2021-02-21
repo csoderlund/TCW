@@ -445,7 +445,7 @@ public class BasicHitTab extends Tab {
 			String f = 		(String) values[nCol++];
 			int filtered = 	Integer.parseInt(f);
 			if ((filtered & 16) != 0 && (filtered & 32) != 0) strBest="Both";
-			else if ((filtered & 16) != 0) strBest="Eval";
+			else if ((filtered & 16) != 0) strBest="Bits";
 			else if ((filtered & 32) != 0) strBest="Anno";
 			else strBest="";
 			

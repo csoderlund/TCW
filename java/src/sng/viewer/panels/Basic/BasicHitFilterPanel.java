@@ -685,10 +685,10 @@ public class BasicHitFilterPanel extends JPanel {
 			int x = boxBest.getSelectedIndex();
 			if (x!=0) {
 				if (x==1) sum = strMerge(sum, "Rank=1");
-				else if (x==2) sum = strMerge(sum, "Best Eval");
+				else if (x==2) sum = strMerge(sum, "Best Bits");
 				else if (x==3) sum = strMerge(sum, "Best Anno");
-				else if (x==4) sum = strMerge(sum, "Best Eval & Anno");
-				else if (x==5) sum = strMerge(sum, "Best Eval | Anno");
+				else if (x==4) sum = strMerge(sum, "Best Bits & Anno");
+				else if (x==5) sum = strMerge(sum, "Best Bits | Anno");
 			}	
 			return sum;
 		}
@@ -775,8 +775,8 @@ public class BasicHitFilterPanel extends JPanel {
 		private JCheckBox  chkUseEval = null, chkUseSim = null, chkUseAlign=null;
 		private JTextField txtEval = null,    txtSim = null,    txtAlign=null;
 		
-		private String [] bestOpt = {"None(slow)", "Rank=1", "Best Eval", "Best Anno", 
-				"Eval&Anno", "Eval|Anno"};
+		private String [] bestOpt = {"None(slow)", "Rank=1", "Best Bits", "Best Anno", 
+				"Bits&Anno", "Bits|Anno"};
 		private ButtonComboBox boxBest = null;
 		
 		private JCheckBox chkCount = null;

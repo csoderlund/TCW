@@ -63,7 +63,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 	
 	private boolean isCAP=false;
 	
-	private String [] dbhits = {"Best hits (EV, AN", // completes below
+	private String [] dbhits = {"Best hits (BS, AN", // completes below
 			"Best per annoDB", "Distinct regions", "Unique species", 
 			"Unique description", "All hits"};
 	
@@ -270,6 +270,21 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 								"Selected hit", JOptionPane.PLAIN_MESSAGE);
 					else { 
 						saveTextToClipboard(theHitData.get(selections[0]).hitName);
+					}
+				}
+			}));
+			
+			copypopup.add(new JMenuItem(new AbstractAction("Selected hit - Description") {// CAS317
+				private static final long serialVersionUID = 4692812516440639008L;
+				public void actionPerformed(ActionEvent e) {
+					if (theHitTable==null) return;
+					int [] selections = theHitTable.getSelectedRows();
+					if (selections.length==0)
+						JOptionPane.showMessageDialog(theMainFrame, 
+								"Select a hit in the DB hits table.", 
+								"Selected hit", JOptionPane.PLAIN_MESSAGE);
+					else { 
+						saveTextToClipboard(theHitData.get(selections[0]).strDesc);
 					}
 				}
 			}));
@@ -599,14 +614,17 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 	
 		if (hitData==null) Out.die("hit null " + nHits);
 		if (hitData.length==0) Out.die("hit 0 " + nHits);
+		
 		for (int i=0; i<nHits; i++) {
 			HitListData hd = hitData[i];
-			int fbit = hd.filter;
 			
 			// general case: if filterType & fbit != 0, then fbit is correct filter.
-			if (filterType!=0 && filterType!=2 && filterType!=16 && (filterType&fbit) == 0) continue;
-			if (filterType==2 && hd.nRank != 1) continue; // not set in fbit
-			if (filterType==16 && hd.best==0) continue;
+			if (filterType!=0 && filterType!=2 && filterType!=16 
+					&& (filterType & hd.filter) == 0) continue; // if filterType 1, 4 or 8 
+			
+			if (filterType==2 && hd.nRank != 1) continue; // top annoDBs
+			
+			if (filterType==16 && hd.best==0) continue;	  // BS, AN, WG
 			
 			theHitData.add(hd);
 			x++;
@@ -620,7 +638,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 	 */
 	private String [] columnHeadings() {
 		String [] x = { "Hit ID",  "annoDB", "Description", "Species",  
-				"#GO", "Best","RF", "E-value", "%Sim",  "Align", "%Seq", "%Hit",   "Start", "End", "Bit"};
+				"#GO", "Best","RF", "Bit",  "E-value", "%Sim",   "%Seq", "%Hit",  "Align", "Start", "End"};
 		return x;
 	}
 	private class HitListData {
@@ -631,15 +649,15 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		public static final int SORT_BY_HASGO = 4;
 		public static final int SORT_BY_BEST = 5;
 		public static final int SORT_BY_FRAME = 6; 
-		public static final int SORT_BY_EVAL = 7; 
-		public static final int SORT_BY_PERCENT = 8; 
-		public static final int SORT_BY_ALIGN = 9; 
+		public static final int SORT_BY_BIT = 7;    // CAS317 was at end
+		public static final int SORT_BY_EVAL = 8; 
+		public static final int SORT_BY_PERCENT = 9; 
 		public static final int SORT_BY_pSEQ = 10; 
 		public static final int SORT_BY_pHIT = 11;
-		public static final int SORT_BY_SeqSTART = 12;
-		public static final int SORT_BY_SeqEND = 13; 
-		public static final int SORT_BY_BIT = 14;
-			
+		public static final int SORT_BY_ALIGN = 12; // CAS317 moved after percent
+		public static final int SORT_BY_SeqSTART = 13;
+		public static final int SORT_BY_SeqEND = 14; 
+		
 		public HitListData( int id, String name, double eVal, String type, String description, String species, String go,
 				int per, int alen, int start, int end,  String seq, int rank, int r, int fil,
 				String inter, String kg, String pf, String ec, int gobest, 
@@ -678,14 +696,14 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 			strSeq = seq;
 			best = r;  
 			if (best>0) {
-				if ((filter&16)==16 && (filter&32)==32) strBest = "EV,AN";
-				else if ((filter&16)==16) strBest = "EV";
+				if ((filter&16)==16 && (filter&32)==32) strBest = "BS,AN";
+				else if ((filter&16)==16) strBest = "BS";
 				else if ((filter&32)==32) strBest = "AN";
 				if (gobest==1) {
 					if (strBest=="") strBest = "WG";
 					else strBest += ",WG";
 				}
-				if (strBest.equals("EV,AN,WG")) strBest="All";
+				if (strBest.equals("BS,AN,WG")) strBest="All";
 				
 				int f = nFrame+3;
 				if (frameHitInfo[f]==null) {
@@ -696,6 +714,9 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 					frameHitEnd[nFrame+3] =   nEnd;
 				}
 			}
+			if (Globalx.debug)
+				strBest = (strBest=="") ? (nRank+"") : (nRank + "," + strBest); // CAS317 
+			
 			nGO = noGO;
 	   		if (go!=null && !go.equals("")) {
 				String [] tok = go.split(";"); 
@@ -720,16 +741,16 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 			case 6: 
 				if (nFrame==0) return "-";
 				return nFrame;
-			case 7:
+			case 7: return dBit;
+			case 8:
 				if(eval == 0) return new String("0.0");
 				return (new DecimalFormat("0.0E0")).format((Double)eval); 
-			case 8: return nPercent;
-			case 9: return nAlignLen;
+			case 9: return nPercent;
 			case 10: return pSeqAlign;
 			case 11: return pHitAlign;
-			case 12: return nStart;
-			case 13: return nEnd;
-			case 14: return dBit;
+			case 12: return nAlignLen;
+			case 13: return nStart;
+			case 14: return nEnd;
 			}
 			return null;
 		}
@@ -777,7 +798,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		private int best = 0;
 		private String strBest="";
 		private String strKEGG="", strEC="", strPfam="", strInterpro="";
-		private double dBit=0;
+		private double dBit=0; 
 	} // end HitData class
 	
 	/*
@@ -1158,7 +1179,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
           		"JOIN pja_db_unitrans_hits as t " +
           		"WHERE t.DUHID = q.DUHID " + 
           		"AND   t.CTGID = " + ctgData.getCTGID() + 
-          		" order by t.e_value ASC, t.best_rank DESC";
+          		" order by t.best_rank DESC, t.bit_score DESC, t.e_value ASC"; // CAS317 added rank, bit to sort
        
 		  HashSet <String> annodbs = new HashSet <String> (); 
 		  Vector <String> order = new Vector <String> (); // to keep ordered by e-value

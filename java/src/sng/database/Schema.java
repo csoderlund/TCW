@@ -71,8 +71,7 @@ public class Schema
 	public Schema(DBConn db)
 	{
 		mDB = db;		
-		try
-		{
+		try {
 			if (!db.tablesExist()) return; 
 			
 			ResultSet rs = mDB.executeQuery("select schemver from schemver");
@@ -97,7 +96,6 @@ public class Schema
 	/*******************************************************************
 	 * SCHEMA -- contains all columns except dynamic
 	 */
-	
 	public void loadSchema() throws Exception
 	{
 		try {
@@ -391,18 +389,17 @@ public class Schema
 		"	 e_value 		DOUBLE PRECISION, " +			
 		"	 bit_score 		float, " +
 		// computed fields
-		"	 blast_rank 	smallint unsigned default 0, " +
-															     // CAS303 rank failed in v8; changed to best_rank
-		"	 best_rank 			smallint unsigned default 0, " + // filter_best + filter_ovbest + filter_gobest
+		"	 blast_rank 	smallint unsigned default 0, " + // CAS317 was blast eval order, now TCW bitscore order		     
+		"	 best_rank 		smallint unsigned default 0, " + // filter_best + filter_ovbest + filter_gobest
 		"	 isProtein 		boolean default 0, " +			
-		"    filtered		tinyint  unsigned default 0, " +	// bit sting of following filters	
-		"	 filter_best  	boolean default 0, " +           // bestEval
+		"    filtered		tinyint  unsigned default 0, " + // bit string of following filters	
+		"	 filter_best  	boolean default 0, " +           // bestBits
 		"	 filter_ovbest	boolean default 0, " +           // bestAnno
 		"	 filter_gobest	boolean default 0, " +           // best with GO
-		"	 filter_olap	boolean default 0, " +  
-		"	 filter_top3	boolean default 0, " +
-		"	 filter_species	boolean default 0, " +
-		"	 filter_gene	boolean default 0, " +
+		"	 filter_olap	boolean default 0, " +  		 // seqDetail distinct regions
+		"	 filter_top3	boolean default 0, " +			 // not used - blast rank is used instead
+		"	 filter_species	boolean default 0, " +			 // seqDetail best per species
+		"	 filter_gene	boolean default 0, " +			 // seqDetail unique annotation
 		"    INDEX(filter_best), " +
 		"    INDEX(filter_ovbest), " +
 		"    INDEX(uniprot_id), " +

@@ -39,7 +39,7 @@ because they are computed differently.
 	<td>AnnoDB Hits: Seq:None(slow)<sup>*</sup>
 	<td>Pairs number at top of table
 <tr><td>Bases covered by hit
-	<td>AnnoDB Hits: Seq:Best Eval
+	<td>AnnoDB Hits: Seq:Best Bits
 	<td>Unselect Group by Hit ID; column:Align; 
 	<br>Stats, column:Sum; for NT, multiply by 3
 <tr><td>Total bases 
@@ -53,7 +53,7 @@ because they are computed differently.
 	<td>GO Annotation: no filters<sup>*</sup>
 	<td>Results number
 <tr><td>Best hit with GOs
-	<td>AnnoDB Hits: Seq:Best Eval; GO,etc:Has GO
+	<td>AnnoDB Hits: Seq:Best Bits; GO,etc:Has GO
 	<td>Seqs number at top of table
 <tr><td>Unique hits with GOs
 	<td>AnnoDB Hits: Seqs:None; GO,etc:Has GO
@@ -66,14 +66,14 @@ because they are computed differently.
 <table border=1>
 <tr><th>Column<th>Search<th>Obtain number
 <tr><td>ONLY
-	<td>Filters: Annotated, Best Eval, 
+	<td>Filters: Annotated, Best Bits, 
 	<br>Enter DBtype and Taxonomy 
 	<br>&nbsp;&nbsp;&nbsp; values for AnnoDB,
 	<br>General &lt;=1 annoDB
  	<td>Number of rows
 <tr><td colspan=3><i>The following all use AnnoDB Hits, 
 and select the correct ANNODB from the AnnoDBs panel.</i>	
-<tr><td>EVAL<td>Seq:Best Eval<td>Seqs number above the table
+<tr><td>BITS<td>Seq:Best Bits<td>Seqs number above the table
 <tr><td>ANNO<td>Seq:Best Anno<td>Seqs number above the table
 
 <tr><td>UNIQUE<td>Seq:None(slow)
@@ -108,7 +108,7 @@ the species are listed in the table.
 <table border=1>
 <tr><th>Column<th>Search<th>Obtain number
 <tr><td colspan=3><i>For the following, use AnnoDB Hits and select the Species.</i>
-<tr><td>EVAL<td>Seq:Best Eval<td>Seqs number
+<tr><td>BITS<td>Seq:Best Bits<td>Seqs number
 <tr><td>ANNO<td>Seq:Best Anno<td>Seqs number
 <tr><td>TOTAL<td>Seq:None(slow)<td>Pairs number
 </table>
@@ -123,7 +123,7 @@ the Substring indicated.</i>
 <tr><td>MultiFrame<td>Multi-frame<td>Result number
 <tr><td>&gt;=9 Ns in ORF<td>9N<td>Result number. View in Sequence Frame to see n's in ORF (CDS). 
 Others may have n's, but not in the CDS.
-<tr><td>Stops in Hit (Best Eval)<td>Stops<td>Result number
+<tr><td>Stops in Hit (Best Bits)<td>Stops<td>Result number
 
 <tr><td colspan=3><i>The following use the Filters, SNPs and ORFs.</i>
 <tr><td>Has Hit<td>Protein confirmation<td>Number of rows
