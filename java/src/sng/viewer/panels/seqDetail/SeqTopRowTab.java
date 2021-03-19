@@ -44,7 +44,11 @@ import util.database.DBConn;
 
 public class SeqTopRowTab extends Tab {
 	private static final long serialVersionUID = -6991503611757134213L;
-	private Color buttonColor = Color.LIGHT_GRAY; // new Color(230, 230, 255); 
+	
+	private static final String helpHTML =  Globals.helpDir + "DetailTopRow.html";
+	
+	private Color funColor = Globals.FUNCTIONCOLOR; // CAS318 only works on Linux, but correct coloring
+	private Color activeColor = Globals.MENUCOLOR;  //        changed from gray to green
 	private short parent;
 	private short seqTab = 1;
 	private short capTab = 2;
@@ -77,40 +81,40 @@ public class SeqTopRowTab extends Tab {
 		/********************************************
 		 *  XXX Create dropdown menu of contig
 		 */
-		rbDetails = new JButton("Details"); 
+		rbDetails = Static.createButton("Details", true, funColor); 
 		rbDetails.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				setInActive();
-				rbDetails.setBackground(buttonColor);
+				rbDetails.setBackground(activeColor);
 				rbDetails.setSelected(true);
 				opDetails();
 			}
 		});
 		
-		rbFrame = new JButton("Frame"); 
+		rbFrame = Static.createButton("Frame", true, funColor); 
 		rbFrame.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				setInActive();
-				rbFrame.setBackground(buttonColor);
+				rbFrame.setBackground(activeColor);
 				rbFrame.setSelected(true);
 				opFrame();
 			}
 		});
 		// if assembled
-		rbContig = new JButton("Contig"); 
+		rbContig = Static.createButton("Contig", true, funColor); 
 		rbContig.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				setInActive();
-				rbContig.setBackground(buttonColor);
+				rbContig.setBackground(activeColor);
 				rbContig.setSelected(true);
 				opContig();
 			}
 		});
-		rbSNP = new JButton("SNPs"); 
+		rbSNP = Static.createButton("SNPs", true, funColor); 
 		rbSNP.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				setInActive();
-				rbSNP.setBackground(buttonColor);
+				rbSNP.setBackground(activeColor);
 				rbSNP.setSelected(true);
 				opSNPs();
 			}
@@ -142,11 +146,11 @@ public class SeqTopRowTab extends Tab {
 			}
 		}));
 		
-		rbGO = Static.createButton("GO...", true); 
+		rbGO = Static.createButton("GO...", true, funColor); 
 		rbGO.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
         			setInActive();
-        			rbGO.setBackground(buttonColor);
+        			rbGO.setBackground(activeColor);
         			rbGO.setSelected(true);
         			gopopup.show(e.getComponent(), e.getX(), e.getY());
             }
@@ -176,12 +180,12 @@ public class SeqTopRowTab extends Tab {
 			}));
 		}
 		
-		rbAlign = Static.createButton("Align Hits...", true);
+		rbAlign = Static.createButton("Align Hits...", true, funColor);
 		rbAlign.setBackground(Globals.FUNCTIONCOLOR);
 		rbAlign.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {      		
         			setInActive();
-        			rbAlign.setBackground(buttonColor);
+        			rbAlign.setBackground(activeColor);
         			rbAlign.setSelected(true);
         			alignpopup.show(e.getComponent(), e.getX(), e.getY());
             }
@@ -220,7 +224,7 @@ public class SeqTopRowTab extends Tab {
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(theMainFrame,"Sequence Options", 
-						"html/viewSingleTCW/ContigTopRowPanel.html");
+						helpHTML);
 			}
 		});
 		
@@ -273,7 +277,7 @@ public class SeqTopRowTab extends Tab {
 		add ( Box.createVerticalStrut(5) );
 		add ( bottomPanel );	
 		
-		rbDetails.setBackground(buttonColor);
+		rbDetails.setBackground(activeColor);
 		rbDetails.setSelected(true);
 		
 		if (parent==capTab) opFirstCAP3(listData);
@@ -289,12 +293,12 @@ public class SeqTopRowTab extends Tab {
 		rbSNP.setSelected(false);
 		
 		// this works on linux but not mac
-		rbDetails.setBackground(Color.white);
-		rbFrame.setBackground(Color.white);
-		rbGO.setBackground(Color.white);
-		rbAlign.setBackground(Color.white);
-		rbContig.setBackground(Color.white);
-		rbSNP.setBackground(Color.white);
+		rbDetails.setBackground(funColor);
+		rbFrame.setBackground(funColor);
+		rbGO.setBackground(funColor);
+		rbAlign.setBackground(funColor);
+		rbContig.setBackground(funColor);
+		rbSNP.setBackground(funColor);
 	}
 	private void opFirstCAP3(MultiCtgData listData) {
 		ctgFullData = listData; 

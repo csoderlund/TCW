@@ -401,11 +401,10 @@ public class Schema {
 			mDB.executeUpdate("create table go_graph_path (" +
 					" relationship_type_id tinyint unsigned, " + // e.g. 1 is_a, 27 part_of; can have duplicates because relation can be both
 					" distance smallint unsigned, " + 			//e.g. if A part_of B is_a C part_of D, then distance=3 for A part_of D 
-					" relation_distance smallint unsigned, " + // e.g. if A part_of B is_a C part_of D, then relation_distance=2 for A part_of D 
-	    				" child int unsigned, " +
-	    				" ancestor int unsigned, " +
-	    				" index(child), " +
-	    				" index(ancestor)) ENGINE=MyISAM;");
+	    			" child int unsigned, " +
+	    			" ancestor int unsigned, " +
+	    			" index(child), " +
+	    			" index(ancestor)) ENGINE=MyISAM;");
 		} 
 		catch(Exception e) {ErrorReport.die(e, "Entering schema");} 
 	} 

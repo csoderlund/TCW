@@ -1,28 +1,37 @@
+<!DOCTYPE html>
 <html>
-<body style="padding:20px;width:650px;">
+<head>
+<style>
+.tablex    		{border: 0px; padding: 3px; border-spacing: 3px; }
+.tablex td 		{border: 0px; padding: 3px; border-spacing: 3px}
+</style>
 <title>Basic Queries for Sequence</title>
+</head>
+
+<body style="padding:20px;width:650px;font-family:Times">
+
 <h1>Basic Queries for Sequence</h1>
 
 This provides some basic sequence searches; for more involved searches, use
 the <b>Filter</b> bullet on the left panel.  This allows you to "build" a table
-of results from multiple queries, which can be Copied to Clipboard, 
-Exported, or view the individual sequences with "View Selected Sequence". 
+of results from multiple queries, which can be copied to Clipboard, 
+exported, or view the individual sequences with <b>View Selected Sequence</b>. 
 
 <hr>
-<h2>Search:</h2>
+<h2>Search</h2>
 
 <p>
 Choose one of four search modes and enter a string to search on.  
 <ul>
 <li><b>Seq ID:</b> Sequence name 
-<li><b>Orig ID or Longest or None:</b> (1) Original name if Seq ID &#8800 Orig ID  (2) Longest read of contig
+<li><b>Orig ID or Longest or None:</b> (1) Original name if Seq ID != Orig ID  (2) Longest read of contig
 if assembled, (3) no query if neither of the previous. 
 <li><b>TCW:</b> TCW Remarks are entered when the database is built; they provide information
 on the ORFs, and if the sequence has hits in multiple frames.
 <li><b>User:</b> User Remarks may be associated with each sequence (entered with <tt>runSingleTCW</tt>).
 </ul>
 
-<i>Search rules:</i> 
+<b><i>Search rules</i></b> 
 <ul>
 <li>It first tries to find an exact match. If found, the results are listed.
 If not found, it then tries to match the substring anywhere in the hit ID or description.
@@ -34,38 +43,49 @@ NOTE: since '%' is a special character, it cannot be in a search string as a lit
 <b>Load File</b>: The file should contain one Sequence ID per line (make sure <b>Seq IDs</b>
 is selected); likewise for Orig ID, TCW (remark) and User (remark). <i>This performs an exact search</i>.
 
-<p>Click <b>BUILD TABLE</b> or <b>ADD to TABLE</b> to execute the search,
-which starts a new table or adds to an existing table, respectively. 
-<br>Columns can be added/removed (<b>Columns</b>), 
-rearranged by dragging and sorted. 
+<hr>
+<h2>Results</h2>
+Select one or more filters, then click <b>BUILD TABLE</b> or <b>ADD to TABLE</b> to execute the 
+search, which builds a new table or adds to the existing table, respectively.
+<br>Columns can be added/removed (<b>Columns</b>), rearranged by dragging and sorted
+by clicking on a column heading.
+ 
+<p><b><i>Modify Table</i></b>
+<ul>
+<li><b>Delete Selected</b> and <b>Deleted Unselected</b>: 
+The selected rows or unselected rows will be removed, respectively. The corresponding rows will
+be removed from the other (not-displayed) list.
+<li><b>Select All</b> and <b>Unselect All</b>: Selects and unselects all rows, respectively.
+</ul>
 
 <hr>
 <h2>Columns</h2>
-<table border=0 cellspacing=3 cellpadding=3>
-<tr><td valign=top nowrap>TCW Remark<td>Assigned by TCW during ORF computation
-<tr><td valign=top nowrap>User Remark<td>Uploaded by User.
-<tr><td valign=top nowrap>Count<td>Total count from all conditions/libraries. 
-<tr><td valign=top>Orig ID or Longest<td>See Search above.
-<tr><td valign=top nowrap>Best HitID<td>The HitID of the hit with the best e-value.
+<table class=tablex>
+<tr><td><u>TCW Remark</u><td>Assigned by TCW during <tt>runSingleTCW</tt> ORF computation
+<tr><td><u>User Remark</u><td>Uploaded by the user with <tt>runSingleTCW</tt>.
+<tr><td><u>Count</u><td>Total count from all conditions/libraries. 
+<tr><td><u>Orig ID or Longest</u><td>See <b>Search</b> above.
+<tr><td><u>Best HitID</u><td>The HitID of the hit with the best e-value.
 </table>
 
 
 <hr>
 <h2>Top row of options</h2>
-<ul>
-<li><b>View Sequence</b>: Select a one or more seqIDs in the table, 
-then select 'View Sequences'.
+
+<b>View Sequence</b>: Select a one or more seqIDs in the table, 
+then select <b>View Sequences</b>.
 The sequences will be shown in the main table, where you can select it to view the
-'Sequence Details'.
-<p>
-<li><b>Copy...</b>: Select one sequence to copy to clipboard the SeqID, Best HitID, or Longest.
-<p>
-<li><b>Table...</b>: 
+<b>Sequence Details</b>.
+
+<p><b>Copy...</b>: Select one sequence to copy to clipboard the SeqID, Best HitID, or Longest.
+
+<p><b>Table...</b>: 
 <ul>
-<li>Copy table: The table will be copied so that you can paste it into a file.
-<li>Export: A window will pop-up with a file chooser, and the table will be
+<li><u>Copy table</u>: The table will be copied so that you can paste it into a file.
+<li><u>Export</u>: A window will pop-up with a file chooser, and the table will be
 written to the selected file.
 </ul>
-</ul>
+
+</body>
 </html>
 

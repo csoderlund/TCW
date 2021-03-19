@@ -1,129 +1,124 @@
+<!DOCTYPE html>
 <html>
-<!--#set var=TITLE value="Tour: viewSingle Sequence Details" -->
+<html>
+<!--#set var=TITLE value="Tour: viewSingle Sequence Table" -->
 <!--#include virtual="../../ssi/head.html" -->
-<body bgcolor="#FFFFFF" text="#000000" onLoad="init('seq')">
+<body onLoad="init('seq'); init2('viewS')">
+<a id=top></a>
 <!--#include virtual="../ssi/start2t.html" -->
-
-<a name=start>
 <!--#include virtual="./ssi/view_stcw.html" -->
 
-<center><code>Sequence Details</code>
-<table  border="0" cellspacing="0" cellpadding="2" height="18">
-<tr><td align="left" bgcolor="#666666" class="white" style="padding-bottom:4px;">
-<a href="#details" class="white">Details</a> |
-<a href="#frame" class="white">Frame</a> |
-<a href="#align"  class="white" >Align</a> |
-<a href="#goterm"  class="white">GO</a> 
+<p>
+<div style="text-align: center"><big><ttc>Sequence Details</ttc></big></div>
+<table style="padding: 2; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
+<tr><td style="background-color: #666666; padding-bottom:4px; "> 
+<a href="#details" 	class="white">Details</a>  	<mark class="white">|</mark>
+<a href="#frame" 	class="white">Frame</a>  	<mark class="white">|</mark>
+<a href="#align"  	class="white" >Align</a>  	<mark class="white">|</mark>
+<a href="#goterm"  	class="white">GO</a> 
 </td></tr>
 </table>
-</center>	
 
+<a id=details></a>
 <p>
 The <tt>Sequence Detail</tt> view can be displayed from the <tt>Sequence Table</tt> by selecting a sequence followed by 
-<tt>View Selected Sequence</tt>. 
-<!--------------------------------------------!>
+<ttc>View Selected Sequence</ttc>. 
+
 <h3>Details</h3>
 The following image is an example of the detail page. 
-<a  href="img/seqDetail.png"><img width=850 src="img/seqDetail.png" border=1></a>
-<p>
-<table>
-<tr><td>
-<p>Second row of options:
-<ul>
-<li>The <tt>Counts</tt> pull-down  can change
-the <tt>Counts</tt> to <tt>TPM</tt> or <tt>Replicates</tt>. 
-<li>The <tt>All hits</tt> can be changed to display only <tt>Best Hit, Best per AnnoDB, 
-Unique Species, Distinct Regions</tt>.
-<li>The  <tt>Copy...</tt> and <tt>Export...</tt> options are shown on the right.
-</ol>
-<td>
-<a  href="img/seqCopy.png"><img width=250 src="img/seqCopy.png" border=1></a>
-<br><a  href="img/seqExport.png"><img width=130 src="img/seqExport.png" border=1></a>
+<br><img src="img/seqDetail.png" alt="" style="border: 1px solid black; width: 850px">
+
+<table style="width:80%">
+<tr><td class=top>
+	Second row of options:
+	<ul>
+	<li>The <ttc>Counts</ttc> pull-down  can change
+	the <ttc>Counts</ttc> to <ttx>TPM</ttx> or <ttx>Replicates</ttx>. 
+	<li>The <ttc>All hits</ttc> can be changed to display only <ttx>Best Hit, Best per AnnoDB, 
+	Unique Species, Distinct Regions</ttx>.
+	<li>The  <ttc>Copy...</ttc> and <ttc>Export...</ttc> options are shown on the right.
+	</ul>
+	
+	<td  class=top><ttc>Copy...</ttc>
+	<br><img src="img/seqCopy.png" alt="" style="border: 1px solid black; width: 200px">
+	
+	<td  class=top><ttc>Export...</ttc>
+	<br><img src="img/seqExport.png" alt="" style="border: 1px solid black; width: 150px">
+</tr>
 </table>
-<!---------------------------------------------!>
-<p>
-<a name=frame>
-<table width='100%'><tr><td align='left' >
+
+<a id=frame></a>
+<table style="width: 100%"><tr><td style="text-align: left">
 <h3>Frame</h3>
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
 <table>
-<tr><td valign="top">
-The Start and Stop are highlighted in Green. The location of the best
-hit is shown in italics, where it forms a perfect ORF in this example. 
-The sequence can be shown in alternative frames using the 
-<tt>Frame</tt> pull-down.
-<p>The TCW selected best frame is the top one listed. 
-The TCW algorithm uses hit information, 5th-order Markov score,
-and start/stop codons to compute the best frame.
-<td>
-<a  href="img/seqFrame.png"><img width=600 src="img/seqFrame.png" border=1></a>
+<tr><td class="top">
+	The Start and Stop are highlighted in Green. The location of the best
+	hit is shown in italics, where it forms a perfect ORF in this example. 
+	The sequence can be shown in alternative frames using the 
+	<ttc>Frame</ttc> pull-down.
+	<p>The TCW selected best frame is the top one listed. 
+	The TCW algorithm uses hit information, 5th-order Markov score,
+	and start/stop codons to compute the best frame.
+	<td><img src="img/seqFrame.png" alt="" style="border: 1px solid black; width: 550px">
+</tr>
 </table>
-<!---------------------------------------------------------!>
-<p>
-<a name=align>
-<table width='100%'><tr><td align='left' >
+
+<a id=align></a>
+<table style="width: 100%"><tr><td style="text-align: left">
 <h3>Align Hits...</h3>
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
 
 <table>
-<tr><td valign="top"> 
-<p>There are options to show:
-<ul>
-<li>Best Hits
-<li>DB Hits: Selected Hits 
-<li>DB Hits: Selected hits in all frames.
-</ul> 
+<tr><td class="top"> 
+	<p>There are options to show:
+	<ul>
+		<li><ttc>Best Hits</ttc>
+		<li><ttc>DB Hits: Selected Hits </ttc>
+		<li><ttc>DB Hits: Selected hits in all frames</ttc>
+	</ul> 
+	<p>Dynamic programming is used to compute the alignment. The <tt>Hit:</tt> numbers are
+	from the search program (<ttp>BLAST</ttp> or <ttp>DIAMOND</ttp>), along with
+	the blue highlighted region. The yellow highlight is the UTRs computed by TCW.
 
-<p>Dynamic programming is used to compute the alignment. The "Hit:" numbers are
-from the search program (<code>BLAST</code> or <code>DIAMOND</code>), along with
-the blue highlighted region. The yellow highlight is the UTRs computed by TCW.
-
-
-<p>Selecting a hit followed by "Align..." shows a multi-line sequence view.
-
-<td>
-<a  href="img/seqAlign.png">
-<img width=650 src="img/seqAlign.png" border=1></a>
+	<p>Selecting a hit followed by <ttc>Align...</ttc> shows a multi-line sequence view.
+	</td>
+	<td><img src="img/seqAlign.png" alt="" style="border: 1px solid black; width: 550px">
 </table>
-<!---------------------------------------------------------!>
-<p>
-<a name=goterm>
-<table width='100%'><tr><td align='left' >
+
+<a id=goterm></a>
+<table style="width: 100%"><tr><td style="text-align: left">
 <h3>GO...</h3>
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
 <table>
-<tr><td valign="top">
-<td>The
-image on the right shows the union of the GO terms for sequence Nn_14440.
-<p>Most of the columns are obvious, except the following two:
-<p><tt>Level</tt>: A GO term can be at multiple levels in the tree. This number is its maximum level.
-<p><tt>#:EC</tt>: This shows evidence code for the protein being assigned the GO term. The number before an Evidence code is the number of hits that were assigned to the GO with the corresponding evidence.
-
-<td><a  href="img/seqGoAll.png">
-<img width=650 src="img/seqGoAll.png" border=1></a>
+<tr><td class="top">
+	<td>The
+	image on the right shows the union of the GO terms for sequence Nn_14440.
+	<p>Most of the columns are obvious, except the following two:
+	<p><ttc>Level</ttc>: A GO term can be at multiple levels in the tree. This number is its maximum level.
+	<p><ttc>#:EC</ttc>: This shows evidence code for the protein being assigned the GO term. The number before an Evidence code is the number of hits that were assigned to the GO with the corresponding evidence.
+	</td>
+	<td><img src="img/seqGoAll.png" alt="" style="border: 1px solid black; width: 550px"
+>
 </table>
-<p>
 
 <table>
-<tr><td valign="top">
-Selecting a GO term followed by <tt>Hits</tt> provides details of the hits that are assigned the GO.
-<td><a  href="img/seqGoHit.png">
-<img width=550 src="img/seqGoHit.png" border=1></a>
-
 <tr>
-<td valign="top">
-Selecting a GO term followed by <tt>Ancestor</tt> provides the list of ancestors for the GO.
-<td><a  href="img/seqGoAnc.png">
-<img width=500 src="img/seqGoAnc.png" border=1></a>
+	<td class="top">Selecting a GO term followed by <ttc>Hits</ttc> provides details of the hits that are assigned the GO.
+	<td><img src="img/seqGoHit.png" alt="" style="border: 1px solid black; width: 450px">
+</tr>
+<tr>
+	<td class="top">Selecting a GO term followed by <ttc>Ancestor</ttc> provides the list of ancestors for the GO.
+	<td><img src="img/seqGoAnc.png" alt="" style="border: 1px solid black; width: 450px">
 </table>
 
-
-<table width='100%'><tr><td align='left' >
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
-</table>
+<table style="width: 100%"><tr><td style="text-align: left">
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
 <!--#include virtual="../../ssi/end.html" -->
-
+</body>
+</html>
 

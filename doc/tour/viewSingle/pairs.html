@@ -1,35 +1,37 @@
+<!DOCTYPE html>
 <html>
 <!--#set var=TITLE value="Tour: viewSingle Pairs" -->
 <!--#include virtual="../../ssi/head.html" -->
-<body bgcolor="#FFFFFF" text="#000000" onLoad="init('pairs')">
+<body onLoad="init('pairs'); init2('viewS')">
+<a id=top></a>
 <!--#include virtual="../ssi/start2t.html" -->
-
-<a name=start>
 <!--#include virtual="./ssi/view_stcw.html" -->
-<center><code>Pairs -- similar sequences</code></center>
-In <code>runSingleTCW</code>, there is an annotation option to compare all sequences. 
+
+<div style="text-align: center"><big><ttc>Similar Pairs</ttc></big></div>
+In <ttp>runSingleTCW</ttp>, there is an annotation option to compare all sequences. 
 If this has been run, then there will be a <tt>Similar Pairs</tt> section.
 
-<p><a  href="img/pairTable.png"><img width=800 src="img/pairTable.png" border=1></a>
+<p><img src="img/pairTable.png" alt="" style="border: 1px solid black; width: 800px">
 
-<p>The <tt>Hit E-value</tt> and <tt>Hit %Sim</tt> is the hit E-value, the rest of the numeric columns are from dynamic programming
+<p>The <tt>Hit E-value</tt> and <tt>Hit %Sim</tt> are from the <ttc>blast</ttc> (or <ttc>diamond</ttc>) hit file, 
+the rest of the numeric columns are from dynamic programming
 alignment of the pair.
 
 <p>&nbsp;
-<p>Select a row followed by <tt>Align Selected Pair</tt> to view the nucleotide and amino acid alignment using
+<p>Select a row followed by <ttc>Align Selected Pair</ttc> to view the nucleotide and amino acid alignment using
 the best frame.
 
-<br><a  href="img/pairAlign.png">
-<img width=800 src="img/pairAlign.png" border=1></a>
+<br><img src="img/pairAlign.png" alt="" style="border: 1px solid black; width: 800px">
 
 <p>&nbsp;
-<p>Select a row followed by <tt>View Sequence</tt> and the sequences will be shown in the main <tt>Sequence Table</tt>.
+<p>Select a row followed by <ttc>View Sequence</ttc> and the sequences will be shown in the main <tt>Sequence Table</tt>.
 
-<br><a  href="img/pairSeq.png">
-<img width=800 src="img/pairSeq.png" border=1></a>
+<br><img src="img/pairSeq.png" alt="" style="border: 1px solid black; width: 800px">
 
-<table width='100%'><tr><td align='left' >
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
-</table>
+<table style="width: 100%"><tr><td style="text-align: left">
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
 
 <!--#include virtual="../../ssi/end.html" -->
+</body>
+</html>

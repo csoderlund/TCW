@@ -2,257 +2,268 @@
 <html>
 <!--#set var=TITLE value="Annotation Setup" -->
 <!--#include virtual="../ssi/head.html" -->
-<body bgcolor="#FFFFFF" text="#000000" onLoad="init('set')">
+<body onload="init('set')">
+<a id="top"></a> 
 <!--#include virtual="../ssi/start2.html" -->
+<b><font color=blue>19-Mar-2021 GO Update</font></b> - 
+The <ttp>runAS</ttp> program creates a GO MySQL database (called <ttx>GOdb</ttx>) to be used by <ttp>runSingleTCW</ttp>. 
+The <ttp>runAS</ttp> program has been updated to use the "GO Basic OBO file" in place of the "old GO MySQL tar file"".
+Though TCW v3.1.8 will work with old <ttx>GOdb</ttx> databases, it is <i>strongly recommended</i> that you create a new <tt>GOdb</tt>
+and update any <ttx>sTCWdbs</ttx>. Even if the <ttx>GOdb</ttx> is newer than the downloaded <ttx>UniProt</ttx> files, the OBO file
+is more up-to-date than the latest GO MySQL tar file.
+<p><font color=blue>Note:</font> For the next release v3.1.9, I will be making improvements to the <ttp>viewSingleTCW</ttp> GO
+features to improve how the GO relations are shown.
 
-<!--------------- Body of document follows ------------------------------->
-<a name=top>
-<p>
-To prepare for annotation with <code>runSingleTCW</code>, it is necessary
-to download the databases to compared against. TCW provides support
-for downloading the taxonomic and full UniProts
-along with mapping from the UniProt IDs to GO, KEGG, Pfam, EC, and InterPro.
-<p><b>Tested</b>:
-<code>runAS</code> has been tested on Linux, MacOS 10.9 and 10.15.  
-If you have any problems, please let me know at <tt>tcw at agcol.arizona.edu</tt>.
-
-<p><b>Contents:</b>
-<table cellpadding=3 cellspacing=3>
-<tr>
-<td nowrap><li><a href="#over">Overview</a>
-<td>&nbsp;&nbsp;&nbsp;
-<td nowrap><li><a href="#mem">Memory and time</a>
-
-<tr>
-<td nowrap><li><a href="#demo">Demo annotation setup</a>
-<td>&nbsp;&nbsp;&nbsp;
-<td nowrap><li><a href="#best">What AnnoDBs to use</a>
-
-<tr>
-<td nowrap><li><a href="#run">Using Java graphical interface -- <code>runAS</code>
-<td>&nbsp;&nbsp;&nbsp;
-<td nowrap><li><a href="#other">Creating AnnoDBs from other databases (e.g. NCBI-nr)</a>
-
-<tr>
-<td nowrap><li><a href="#details">Details and file structure
-<td>&nbsp;&nbsp;&nbsp;
-<td nowrap><li><a href="#runstcw">Entering AnnoDBs and GOs into <code>runSingleTCW</code></a>
-
-<tr>
-<td nowrap><li><a href="#clean">Cleanup</a>
-<td>&nbsp;&nbsp;&nbsp;
-<td nowrap> <li><a href="#tax">Why use taxonomic databases</a>
-
-<tr>
-<td>&nbsp;&nbsp;&nbsp;
-<td>&nbsp;&nbsp;&nbsp;
-<td nowrap> <li><a href="#link">Links to important databases</a>
-
+<p>To prepare for annotation with <ttp>runSingleTCW</ttp>, it is necessary to download the databases to compared against. 
+TCW provides support for downloading the taxonomic and full UniProts along with mapping from the UniProt IDs to GO, KEGG, Pfam, EC, and InterPro. 
+<p><b>Tested</b>: <ttp>runAS</ttp> has been tested on Linux, MacOS 10.9 and 10.15. If you have any problems, 
+please let me know at <ttx>tcw at agcol.arizona.edu</ttx>. </p>
+<table class="tablex" style="width:80%">
+	<tr>
+		<td colspan="2"><b>Contents:</b> 
+		<tr>
+			<td class="top"> 
+			<ul>
+				<li><a href="#over">Overview</a> 
+				<li><a href="#demo">Demo annotation setup</a> 
+				<li><a href="#run">Using Java graphical interface -- <ttp>runAS</ttp></a> 
+				<li><a href="#details">Details and file structure</a> 
+				<li><a href="#clean">Cleanup</a> 
+			</ul>
+			</td>
+			<td class="top"> 
+			<ul>
+				<li><a href="#mem">Memory and time</a> 
+				<li><a href="#best">What AnnoDBs to use</a> 
+				<li><a href="#other">Creating AnnoDBs from other databases (e.g. NCBI-nr)</a> 
+				<li><a href="#runstcw">Entering AnnoDBs and GOs into <ttp>runSingleTCW</ttp></a> 
+				<li><a href="#tax">Why use taxonomic databases</a> 
+				<li><a href="#link">Links to important databases</a> 
+			</ul>
+			</td>
+		</tr>
 </table>
-<a name=over></a>
-<table width='100%'><tr><td align='left' >	
-<h2>Overview</h2>
-</td><td align='right'  class='smtxt'><a href=#top>Go to top</a></td></tr></table>
+
+<a id="over"></a> 
+<table style="width: 100%"><tr><td style="text-align: left"> 
+<h2>Overview </h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
 <b><i>Terminology</i></b>: 
-<p>The term "AnnoDB" refers to any database that will be used for annotation,
-i.e. the sequences in TCW will be searched against all AnnoDB databases and the hits stored
-in the single TCW database (sTCWdb) for query. 
+<p>The term "AnnoDB" refers to any database that will be used for annotation, i.e. the sequences in 
+TCW will be searched against all AnnoDB databases and the hits stored in the single TCW database 
+(sTCWdb) for query. </p>
+<p><b><i>Requirements</i></b>: </p>
 
-<p><b><i>Requirements</i></b>: 
-<table>
-
-<li>For mySQL, the command <b><tt>mysqladmin</tt></b> is used, so
-you may need to define its path, e.g. on Mac, 
-<pre>
+<a href="../img/bullet2.gif"><img src="../img/bullet2.gif" alt="bullet" style="border: 0px; width: 20px"></a>
+	<ttp>RunAS</ttp> uses <b><ttp>curl</ttp></b> for downloading annoDBs and the GO database. 
+<table style="width: 80%">
+	<tr>
+		<td>You can get <ttp>curl</ttp> on most Linux machines with 'sudo yum install curl', 
+		and MacOS comes with it. If you cannot install it, <ttp>runAS</ttp> will prompt you as shown on the right; 
+		if you select <ttc>Continue</ttc>, it will perform the download with its own Java code, though it may take 
+		longer and is not as robust, i.e. could have potential problems due to network latency, etc. </td>
+		
+		<td><a href="img/runAScurl.png"><img src="img/runAScurl.png" 
+			alt="curl" style="border: 1px solid black; width: 300px"></a> </td>
+	</tr>
+</table>
+<p><b>Pre-v3.1.8 only</b>
+<p><a href="../img/bullet2.gif"><img src="../img/bullet2.gif" alt="bullet" style="border: 0px; width: 20px"></a>
+For mySQL, the command <b><ttx>mysqladmin</ttx></b> is used, so you may need to define its path, e.g. on Mac, </p>
+	<pre>
 	alias mysqladmin '/usr/local/mysql/bin/mysqladmin'    #tcsh
 	alias mysqladmin='/usr/local/mysql/bin/mysqladmin'    #bash
-</pre>
-
-<p><li>With MySQL and MariaDB,  you may need to set following MySQL variable in order to add the GO database:
-<pre>
+	</pre>
+	
+<a href="../img/bullet2.gif"><img src="../img/bullet2.gif" alt="bullet" style="border: 0px; width: 20px"></a>
+With MySQL and MariaDB, you may need to set following MySQL variable in order to add the GO database: 
+	<pre>
 	SET GLOBAL local_infile = 1;
-</pre>
-
-<tr><td valign=top> 
-<li><code>RunAS</code> uses <b><code>curl</code></b> for downloading annoDBs and the GO database.
-<br>You can get <code>curl</code> on most Linux machines with 'sudo yum install curl', and MacOS comes with it.
-If you cannot install it, <code>runAS</code> will prompt you as shown on
-the right; if you select <tt>Continue</tt>, it will perform the download with its own Java code, 
-though it may take longer and is not as robust, i.e. could have potential problems due to network latency, etc.
-<td><a href="img/runAScurl.png"><img src="img/runAScurl.png" width=300 border=1>
-</table>
-
-<p><b><i>Processing steps</b></i>: The TCW <code>runAS</code> will perform the following:
+	</pre>
+<p><b><i>Processing steps</i></b>: The TCW <ttp>runAS</ttp> will perform the following: </p>
 <ol>
-<li>Create the directory under <tt>projects/DBfasta</tt> for the downloads and generated FASTA files. 
-
-<li>Download the selected Taxonomic UniProts ".dat" files and create FASTA files. 
-<li>Download the selected full UniProt, remove entries from taxonomic databases, and create a FASTA file of the remaining sequences.
-<li>Create GO database, which contains mappings from UniProt IDs to GO, KEGG, EC, Pfam and InterPro.
-<ol type='a'>
-<li>Download  <tt>go_&lt;date&gt;-termdb-tables.tar.gz</tt>.cfg.
-<li>Create a local mySQL GO database with the information from this tar file. 
-<li>Add information to the local GO database from the .fasta and .dat files in the UniProt directory.
+	<li>Create the directory under <ttx>projects/DBfasta</ttx> for the downloads and generated FASTA files. 
+	<li>Download the selected Taxonomic UniProts <ttx>.dat</ttx> files and create FASTA files. 
+	<li>Download the selected full UniProt, remove entries from taxonomic databases, and create a FASTA file of the remaining sequences. 
+	<li>Create GO database, which contains mappings from UniProt IDs to GO, KEGG, EC, Pfam and InterPro. 
+	<ol type='a'>
+		<li>Download <ttx>go-basic.obo</ttx> from <a href="http://current.geneontology.org/ontology/" class="ext" target="_blank"><ttx>http://current.geneontology.org/ontology/</ttx></a>
+		<li>Create a local mySQL GO database (<ttx>GOdb</ttx>) with the information from this file. 
+		<li>Add information to the <ttx>GOdb</ttx> from the .fasta and .dat files in the UniProt directory. 
+	</ol>
+	<li>Create the file <ttx>projects/AnnoDBs_UniProt_&lt;date&gt;.cfg</ttx> to be imported to <ttp>runSingleTCW</ttp>. 
 </ol>
-<li>Create the file <tt>projects/AnnoDBs_UniProt_&lt;date&gt;.cfg</tt> to be imported to <code>runSingleTCW</code>.
-</ol>
 
-<b><i>Important</b></i>:
-<table border=0 cellspacing=3 cellpadding=3>
-<tr><td nowrap><a href=#mem>Time and Memory</a><td>This can take a lot of time and memory, so make sure to read this section.
-<tr><td nowrap><a href=#best>What AnnoDBs to use</a><td>To reduce the time and memory, make sure to read this section.
-<tr><td nowrap  valign=top><a href=#other>Using other databases</a><td valign=top>Other databases, such as NCBI nr, can be used for annotation
-but they will not have GO, KEGG, EC, Pfam, or InterPro. 
+<b><i>Important</i></b>: 
+<table class="tablex">
+	<tr>
+		<td class="top"><a href="#mem">Time and Memory</a> 
+		<td>This can take a lot of time and memory, so make sure to read this section. 
+	</tr>
+	<tr>
+		<td  class="top"><a href="#best">What AnnoDBs to use</a> 
+		<td>To reduce the time and memory, make sure to read this section. 
+	</tr>
+	<tr>
+		<td  class="top"><a href="#other">Using other databases</a> 
+		<td  class="top">Other databases, such as NCBI nr, can be used for annotation but they will not have GO, KEGG, EC, Pfam, or InterPro. 
+	</tr>
 </table>
 
-<!------------------------------------------------------------->
-<a name=demo></a>
-<table width='100%'><tr><td align='left' >
-<h2>Demo annotation setup</h2>
-</td><td align='right'  class='smtxt'><a href=#top >Go to top</a></td></tr></table>
+<!--  ============= DEMO ======================== -->
+<a id="demo"></a> 
+<table style="width: 100%"><tr><td style="text-align: left"> 
+<h2>Demo annotation setup </h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
-<table>
-<tr><td valign="top">
-The TCW package provides subsets of UniProt for annotating the demo. 
-In order to add GO annotations, a local GO mySQL 'demo' database needs to be created.
-
-
-<ol type="A">
-<li>From the TCW_3 directory, execute:
-<pre class=tt>
-./runAS -d
-</pre>
-The "-d" will cause it to enter the demo parameters, as shown on the right.
-The highlighted entries already exist. Its only necessary to build the GO database. 
-<br>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
-<li>Execute <tt class=c>Build GO</tt>.
-<p>The GO tables are available for the demo, i.e. they will not be downloaded. This is evident from the purple GO label.
-<p>Building the GO database takes approximately 5-10 minutes.
-</ol>
-<td><a href="img/runASdemo.png"><img src="img/runASdemo.png" width=300 border=1>
+<table class="tablex" style="width:80%">
+	<tr>
+		<td class="top"> The TCW package provides subsets of UniProt for annotating the demo. 
+		In order to add GO annotations, a local GO mySQL 'demo' database needs to be created. 
+		<ol type="A">
+			<li>From the TCW_3 directory, execute:
+			<br><ttx>./runAS -d</ttx>		
+			<br>The "-d" will cause it to enter the demo parameters, as shown on the right. 
+			The highlighted entries already exist. Its only necessary to build the GO database. 
+			<br>&nbsp; <br>&nbsp; <br>&nbsp;
+			 
+			<li>Execute <ttc>Build GO</ttc>. 
+			<p>
+				The GO tables are available for the demo, i.e. they will not be downloaded. This is evident from the purple GO label. 
+			</p>
+			<p>
+				Building the GO database takes approximately 5-10 minutes. 
+			</p>
+		</ol>
+		<td><a href="img/runASdemo.png"><img src="img/runASdemo.png" alt="demo" style="border: 1px solid black; width: 300px"></a>
 </table>
-
-<h4>Details about the Demo setup</h4>
-In the <tt>projects/DBfasta</tt> directory, there is the sub-directory <tt>UniProt_demo</tt> and <tt>GO_tmpdemo</tt>, 
-which contains the following:
+<h4>
+	Details about the Demo setup 
+</h4>
+In the <ttx>projects/DBfasta</ttx> directory, there is the sub-directory <ttx>UniProt_demo</ttx> and <ttx>GO_tmpdemo</ttx>, 
+which contains the following: 
 <pre>
-	GO_tmpdemo:
-	go_daily-termdb-tables.tar.gz
+	GO_obodemo:
+	go_obo
 
 	UniProt_demo:
 	sp_bacteria/	sp_fungi/	   sp_plants/	      tr_plants/
 	sp_fullSubset/	sp_invertebrates/  tr_invertebrates/
 </pre>
-Each taxonomic directory has a <tt>.dat</tt> and a <tt>.fasta</tt> file, 
-which are very small subsets of the original UniProt taxonomic <tt>.dat</tt> file. 
+Each taxonomic directory has a <ttx>.dat</ttx> and a <ttx>.fasta</ttx> file, which are very small subsets of the 
+original UniProt taxonomic <ttx>.dat</ttx> file. 
 
-<!------------------------------------------------------------->
-<a name=run></a>
-<table width='100%'><tr><td align='left' >	
-<h2>Java graphical interface -- <code>runAS</code></h2>
-</td><td align='right'  class='smtxt'><a href=#top>Go to top</a></td></tr></table>
+<!-- ========== Java interface ================= -->
+<a id="run"></a> 
+<table style="width: 100%"><tr><td style="text-align: left"> 
+<h2>Java graphical interface -- <ttp>runAS</ttp> </h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
-<table>
-<tr><td>
-Typically, all you need to do is make sure you have an internet connection open
-and that you have enough disk space (see <a href=#mem>Memory</a>),
-then:
-<ol>
-<li>The "TCW Annotation Directories" define where the files will be put.
-TCW provides defaults as shown on the right; it is recommended you use the defaults.
-<br>&nbsp;
-<li>Select the taxonomic databases you want to use, then select <tt class=c>Build Tax</tt>,
-which downloads the respective files and creates FASTA files.
-<br>&nbsp;
-<li>Select the full databases you want to use, then select <tt class=c>Build Full</tt>,
-which downloads the respective files, creates a subset of the full by removing
-all entries found in the downloaded taxonomic databases, and creates a FASTA file.
-<br>&nbsp;
-<li>Select <tt class=c>Build GO</tt>, which downloads the GO database,
-creates a local mySQL GO database with a mapping of the UniProts from your downloaded
-set. This uses the information in <tt>HOSTS.cfg</tt>. 
-
-<br>&nbsp;
-<li>Select <tt class=c>AnnoDB.cfg</tt>, which writes a file called <tt>projects/AnnoDBs_UniProt_&lt;date&gt;.cfg</tt>
-that contains all the information downloaded; this can be used as input to <code>runSingleTCW</code> 
-(see <a href="#runstcw">Import AnnoDBs</a>).
-<br>&nbsp;
-<li><tt class=c>Check</tt>: Selecting this button highlights everything that has been done.
-For example, the figure on the upper right shows that the directory
-<tt>UniProt_Jan2021</tt> has been created and only Archaea and Virus SwissProt have been downloaded and processed. 
-The <tt class=c>Check</tt> automatically runs on startup.
-
-</ul>
-</ol>
-<td><a href="img/runAS.png"><img src="img/runAS.png" width=400 border=1>
-</table>
-
-<br><u>Important points</u>:
-<ul>
-
-<li><i><font color=green><code>runAS</code> will not replace an existing downloaded file</i></font>: It will overwrite
-a .fasta file, but never a .dat file. If you want a .dat file downloaded again, you must remove it yourself.
-<br>&nbsp;
-<li><i><font color=green>Recreate</font></i>: If you add taxonomic database(s) after creating the respective Full Uniprot
-and/or GO database, you must recreate both of these. 
-<br>&nbsp;
-<li><i><font color=green>GO db</font></i>: It is important that you create the GO database right after downloading the UniProt files
-so that they correspond.
-<br>&nbsp;
-<li><font color=red><i>Only download what you need!</i></font> 
-See <a href=#mem>Memory and Time</a> and <a href=#best>What AnnoDBs to use</a>.
-</ul>
-
-<a name=details>
-<table width='100%'><tr><td align='left' >	
-<h2>Details and file structure</h2>
-</td><td align='right'  class='smtxt'><a href=#top>Go to top</a></td></tr></table>
-
-<b>Check</b>: 
-Select to update the highlighting, as discussed below.
-Check is automatically run on startup, and when any of the three "Builds" are executed.
-
-<p><b><i>Label Highlights</i></b>
-<ul>
-<li>If the <i>UniProt</i> directory is highlighted in blue, it exists.
-<li>If the <i>GO</i> directory is highlighted in pink, it exists but the GO tables have not
-been downloaded. 
-<br>If it is highlighted in blue, the GO tables have been downloaded. 
-<li>If the <i>Database</i> is highlighted in blue, the GO database exists. 
-</ul>
-
-
-<b><i>Taxonomic and Full UniProt Highlights</i></b>
-
-<p><u>Clear checkbox</u>: If a taxonomic or full checkbox is clear, then neither the .dat file or .fasta file exists for it.
-When you check the box followed by "Build Tax", you will need to confirm a popup
-that states "Download SP - xxx", where xxx will be
-the list of files to download. The download is always automatically followed by creating the .fasta file.
-
-<p><u>Pink checkbox</u>: If the .dat file exists, but the .fasta file does not, the checkbox will be highlighted pink. 
-Check the pink box(s) and run "Build Tax" in order to create the 
-.fasta file. You will need to confirm a pop-up that states
-"Create SP Fasta - xxx", where xxx is the taxonomic groups that will be created. Since
-the .fasta file is automatically created after download, this will not happen unless there is a problem 
-such as the disk being full.
-
-<p><u>Blue checkbox</u>: If both the .dat file and the .fasta file exists, the check box will be highlighted blue. 
-
-<table border=0 cellspacing=3 cellpadding=3>
-<tr><td valign=top>If you downloaded some taxonomic databases, created the SP Full database, then downloaded another
-taxonomic database, you will need to recreate the SP Full database. Check the SwissProt box,
-and run "Build Full" again. You will get a pop-up to confirm as shown on the right.
-<td><a href="img/runASnoDL.png"><img src="img/runASnoDL.png" width=300 border=1>
-</table>
-
-
-<p><b><i>File Structure</i></b> 
-<p>For each taxonomic and full UniProt that you downloaded, a directory will be created
-under the "UniProt" directory. For example,
+Typically, all you need to do is make sure you have an internet connection open and that you have enough disk space 
+		(see <a href="#mem">Memory</a>), then: 
 <pre>
-	./TCW/projects/DBfasta/UniProt_Jan2021% ls *
+	./runAS
+</pre>
+<table class="tablex">
+	<tr>
+		<td> 
+		<ol>
+			<li>The <ttl>TCW Annotation Directories</ttl> define where the files will be put. TCW provides defaults as shown on the right; 
+			it is recommended you use the defaults. <br>
+			&nbsp; 
+			<li>Select the taxonomic databases you want to use, then select <ttc>Build Tax</ttc>, 
+			which downloads the respective files and creates FASTA files. <br>
+			&nbsp; 
+			<li>Select the full databases you want to use, then select <ttc>Build Full</ttc>, which downloads 
+			the respective files, creates a subset of the full by removing all entries found in the downloaded taxonomic databases, 
+			and creates a FASTA file. <br>
+			&nbsp; 
+			<li>Select <ttc>Build GO</ttc>, which downloads the GO database, creates a local mySQL GO database 
+			with a mapping of the UniProts from your downloaded set. This uses the information in <ttx>HOSTS.cfg</ttx>. <br>
+			&nbsp; 
+			<li>Select <ttc>AnnoDB.cfg</ttc>, which writes a file called <ttx>projects/AnnoDBs_UniProt_&lt;date&gt;.cfg</ttx> 
+			that contains all the information downloaded; this can be used as input to <ttp>runSingleTCW</ttp> 
+			(see <a href="#runstcw">Import AnnoDBs</a>). <br>
+			&nbsp; 
+			<li><ttc>Check</ttc>: Selecting this button highlights everything that has been done. 
+			For example, the figure on the upper right shows that the directory <ttx>UniProt_Jan2021</ttx> has been created and 
+			only Archaea and Virus SwissProt have been downloaded and processed. 
+			The <ttc>Check</ttc> automatically runs on startup. 
+		</ol>
+		<td><a href="img/runAS.png"><img src="img/runAS.png" alt="runAS" style="border: 1px solid black; width: 350px"></a>
+	</tr>
+</table>
+<br>
+<u>Important points</u>: 
+<ul>
+	<li><i><mark class="green"><ttp>runAS</ttp> will not replace an existing downloaded file</mark></i>: 
+	It will overwrite a .fasta file, but never a .dat file. If you want a .dat file downloaded again, 
+	you must remove it yourself. <br>
+	&nbsp; 
+	<li><i><mark class="green">Recreate</mark></i>: If you add taxonomic database(s) after creating the respective 
+	Full Uniprot and/or GO database, you must recreate both of these. <br>
+	&nbsp; 
+	<li><i><mark class="green">GO db</mark></i>: It is important that you create the GO database right after downloading 
+	the UniProt files so that they correspond. <br>
+	&nbsp; 
+	<li><mark class="red"><i>Only download what you need!</i></mark> 
+	See <a href="#mem">Memory and Time</a> and <a href="#best">What AnnoDBs to use</a>. 
+</ul>
+
+<a id="details"></a> 
+<!-- ============ Details ================ -->
+<table style="width: 100%"><tr><td style="text-align: left"> 
+<h2>Details and file structure </h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<b>Check</b>: Select to update the highlighting, as discussed below. Check is automatically run on startup, 
+and when any of the three "Builds" are executed. 
+<p>
+	<b><i>Label Highlights</i></b> 
+</p>
+
+<ul>
+	<li>At the top:
+	<ul>
+	<li>If the <ttl>UniProt</ttl> directory label is highlighted in blue, it exists. 
+	<li>If the <ttl>GO</ttl> directory label is highlighted in pink, it exists but the GO tables have not been downloaded. 
+	<br>If the <ttl>GO</ttl> directory label is highlighted in blue, the GO tables have been downloaded. 
+	</ul>
+	<li>On the middle right:
+	<ul>
+	<li>If the GO <ttl>Database</ttl> label is highlighted in blue, the GO database exists. 
+	</ul>
+</ul>
+<b><i>Taxonomic and Full UniProt Highlights</i></b> 
+<p>
+	<u>Clear checkbox</u>: If a taxonomic or full checkbox is clear, then neither the .dat file or .fasta file exists for it. 
+	When you check the box followed by "Build Tax", you will need to confirm a popup that states "Download SP - xxx", 
+	where xxx will be the list of files to download. The download is always automatically followed by creating the .fasta file. 
+</p>
+<p>
+	<u>Pink checkbox</u>: If the .dat file exists, but the .fasta file does not, the checkbox will be highlighted pink. 
+	Check the pink box(s) and run "Build Tax" in order to create the .fasta file. You will need to confirm a pop-up that 
+	states "Create SP Fasta - xxx", where xxx is the taxonomic groups that will be created. 
+	Since the .fasta file is automatically created after download, this will not happen unless 
+	there is a problem such as the disk being full. 
+</p>
+<p>
+	<u>Blue checkbox</u>: If both the .dat file and the .fasta file exists, the check box will be highlighted blue. 
+</p>
+<table class="tablex" style="width:70%">
+	<tr>
+		<td class="top">If you downloaded some taxonomic databases, created the SP Full database, 
+		then downloaded another taxonomic database, you will need to recreate the SP Full database. Check the SwissProt box, 
+		and run "Build Full" again. You will get a pop-up to confirm as shown on the right. 
+		<td><a href="img/runASnoDL.png"><img src="img/runASnoDL.png" alt="" style="border: 1px solid black; width: 300px"> </a>
+	</tr>
+</table>
+<p><b><i>File Structure</i></b> </p>
+<p>For each taxonomic and full UniProt that you downloaded, a directory will be created under the "UniProt" directory. 
+For example, </p>
+<pre>
+	./TCW/projects/DBfasta/UniProt_Jan2021%&gt; ls *
 	sp_archaea:
 	uniprot_sprot_archaea.dat.gz	uniprot_sprot_archaea.fasta.gz
 
@@ -260,69 +271,57 @@ under the "UniProt" directory. For example,
 	uniprot_sprot.dat.gz	uniprot_sprot_fullSubset.fasta uniprot_sprot_fullSubset.dat.gz
 
 	sp_viruses:
-	uniprot_sprot_viruses.dat.gz	uniprot_sprot_viruses.fasta.gz
+	uniprot_sprot_viruses.dat.gz	uniprot_sprot_viruses.fasta.gz	
 </pre>
-Note that the sp_fullSubset directory has TWO .dat files, the second one (<tt>uniprot_sprot_fullSubset.dat.gz</tt>) 
-was created with the Taxonomic entries removed and corresponds to the .fasta file
-<p>When you run the <code>BLAST</code> or <code>DIAMOND</code> search programs from <code>runSingleTCW</code>,
-the formatted files will be placed in the corresponding directory.
-
-<p><u>Compress Fasta</u>: If you plan on using <code>DIAMOND</code> as the search program, 
-you may compress the fasta files after download, e.g.
+Note that the sp_fullSubset directory has TWO .dat files, the second one (<ttx>uniprot_sprot_fullSubset.dat.gz</ttx>)
+ was created with the Taxonomic entries removed and corresponds to the .fasta file 
+<p>When you run the <ttp>BLAST</ttp> or <ttp>DIAMOND</ttp> search programs from <ttp>runSingleTCW</ttp>, 
+the formatted files will be placed in the corresponding directory. </p>
+<p><u>Compress Fasta</u>: If you plan on using <ttp>DIAMOND</ttp> as the search program, you may compress 
+the fasta files after download, e.g. </p>
 <pre>
 	cd projects/DBfasta/UniProt_&lt;date&gt;
 	gzip */*.fasta
 </pre>
-
-<p><b><i>GO (Gene Ontology)</i></b>
-<p>A tar file containing the schema and data is downloaded
-from <a href=http://archive.geneontology.org class="ext" target="_blank"><tt>http://archive.geneontology.org/</tt></a>. 
-The most current file is go_daily-termdb-tables.tar.gz
-
-<p><u>Database</u>: This text entry on the <code>runAS</code> interface is the name 
-of the GO MySQL database that will be created; you will enter
-this name in <code>runSingleTCW</code>.
-
-<p>The processing steps are as follows:
+<p><b><i>GO (Gene Ontology)</i></b></p>
+<p>The <tt>go.obo</tt> file containing the schema and data is downloaded from 
+<a href="http://current.geneontology.org/ontology/" class="ext" target="_blank"><ttx>http://current.geneontology.org/ontology/</ttx></a>.</p>
+<p><u>Database</u>: This text entry on the <ttp>runAS</ttp> interface is the name of the GO MySQL database that 
+will be created; you will enter this name in <ttp>runSingleTCW</ttp>. </p>
+<p>The processing steps are as follows: </p>
 <ol>
-<li>Download the GO tar file to <i>GO</i> directory and untar it.
-<li>Create the GO database and load the schema from the <b>GO</b> directory.
-<li>Modify the GO database as follows: loads the UniProt IDs with GOs from the UniProt .dat files
-that exist under the specified UniProt directory, and creates the GO-UniProt mapping.
-<li> This uses the mySQL userid and password from the HOSTS.cfg file.
+	<li>Download the GO Basic OBO file to <i>GO</i> directory. 
+	<li>Build a GO specific MySQL database (referred to as <tt>GOdb</tt>) with the contents of the file.
+	<li>Add the UniProts to the <tt>GOdb</tt>.
 </ol>
+<p><b><i>Other details</i></b></p>
+<p>Log file: A log of the processing is written to <ttx>projects/DBfasta/logs/runAS.log</ttx>. 
+<!--
+See the <a href="runAS.log.html" class="ext" target="_blank">log file</a> for an example.</p>
+-->
+<p><ttp>runMultitCW</ttp>: If multiple sTCWdbs are to be compared using <ttp>multiTCW</ttp>, 
+it is important they all use the same set of AnnoDBs and GO database. 
+The <ttp>runSingleTCW</ttp> "<ttx>Import AnnoDBs</ttx>" feature is a convenient to ensure the 
+usage of the same AnnoDBs for all relevant sTCWdbs.</p>
 
-<p><b><i>Other details</i></b>
-<p>Log file: A log of the processing is written to <tt>projects/DBfasta/logs/runAS.log</tt>.
-See the <a href=runAS.log.html class="ext" target="_blank">log file</a> for an example.
+<a id="clean"></a> 
+<table style="width: 100%"><tr><td style="text-align: left"> 
+<h2>Clean up </h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
-<p><code>runMultitCW</code>: If multiple sTCWdbs are to be compared using <code>multiTCW</code>, 
-it is important they all use the same set of AnnoDBs and GO database. The <code>runSingleTCW</code> 
-"<tt>Import AnnoDBs</tt>" feature is a convenient to ensure the usage of the same AnnoDBs for all relevant sTCWdbs.
-
-<!------------------------------------------------------------------------>
-<a name=clean></a>
-<table width='100%'><tr><td align='left' >
-<h2>Clean up</h2>
-</td><td align='right'  class='smtxt'><a href=#top>Go to top</a></td></tr></table>
-
-<code>runAS</code> does not remove files that are no longer necessary, which are
-the files downloaded from the internet:
+<ttp>runAS</ttp> does not remove files that are no longer necessary, which are the files downloaded from the internet: 
 <ul>
-<li>All "dat.gz" files in the UniProt directories, as the information has
-been transferred to the FASTA files and GO database. 
-<li>The GO directory, as the information has been transferred to the GO database. 
+	<li>All "dat.gz" files in the UniProt directories, as the information has been transferred 
+	to the FASTA files and GO database. 
+	<li>The GO directory, as the information has been transferred to the GO database. 
 </ul>
-These files can be removed, as <code>runSingleTCW</code>
-uses the FASTA files in the UniProt directories and the GO mySQL database. However, if you
-do not have a space problem, keep them just for insurance; 
-when UniProt does the monthly update, your downloaded files will no be longer available
-on their site. 
-<p>For the FASTA files that you will be using 
-<code>DIAMOND</code> to search against, you 
-can gzip them as <code>DIAMOND</code> can search against gzipped files.
-<p>When your calculating space, remember that the <code>BLAST</code> and <code>DIAMOND</code> programs
-will format the .fasta file, which takes up even more space. For example:
+These files can be removed, as <ttp>runSingleTCW</ttp> uses the FASTA files in the UniProt directories and 
+the GO mySQL database. However, if you do not have a space problem, keep them just for insurance; when UniProt 
+does the monthly update, your downloaded files will no be longer available on their site. 
+<p>For the FASTA files that you will be using <ttp>DIAMOND</ttp> to search against, you can gzip them as 
+<ttp>DIAMOND</ttp> can search against gzipped files.</p>
+<p>When your calculating space, remember that the <ttp>BLAST</ttp> and <ttp>DIAMOND</ttp> programs will 
+format the .fasta file, which takes up even more space. For example: </p>
 <pre>
 	/TCW/projects/DBfasta/UniProt_Jan2021/sp_fullSubset% ls -hlG
 	total 3408080
@@ -331,231 +330,340 @@ will format the .fasta file, which takes up even more space. For example:
 	-rw-r--r--  1 cari  staff   250M Jan 26 09:24 uniprot_sprot_fullSubset.fasta
 	-rw-r--r--  1 cari  staff   255M Jan 26 07:41 uniprot_sprot_fullSubset.fasta.dmnd
 </pre>
-<!------------------------------------------------------------------------>
-<a name=mem></a>
-<table width='100%'><tr><td align='left' >
-<h2>Memory and Time</h2>
-</td><td align='right' class='smtxt'><a href=#top>Go to top</a></td></tr></table>
 
-<b><i>Taxonomic</i></b>
-<p>Downloads on 24-Jan-2021 onto a Linux machine with a ~500 Mbsp download connection and 128Gb of RAM.
-<table border=1 cellspacing=3 cellpadding=3>
-<tr><th>File<th>.dat Size<th>Download<th>FASTA Size<sup>1</sup><th>Creation
-<tr><td>uniprot_sprot_bacteria.dat.gz     <td align=right>203M<td align=right>1m:10s<td align=right>150Mb<td align=right> 0m:24s
-<tr><td>uniprot_sprot_fungi.dat.gz        <td align=right>49M<td align=right>0m:8s<td align=right>21M<td align=right>0m:4s 
-<tr><td>uniprot_sprot_invertebrates.dat.gz<td align=right>33M<td align=right>0m:12s<td align=right>14M<td align=right>0m:2s
-<tr><td>uniprot_sprot_plants.dat.gz       <td align=right>50M<td align=right>0m:14s<td align=right>21M<td align=right>0m:5s
-<tr><td>uniprot_sprot_viruses.dat.gz      <td align=right>16M<td align=right>0m:3s<td align=right>9M<td align=right>0m:1s
-<tr><td>uniprot_sprot_bacteria.dat.gz     <td align=right><font color=red>88G</red><td align=right>6h:36m:40s<td align=right>61G<td align=right>2h:21m:3s
-<tr><td>uniprot_trembl_fungi.dat.gz       <td align=right>8.1G<td align=right>26m:23s<td align=right>6.9G<td align=right>14m:28s
-<tr><td>uniprot_trembl_invertebrates.dat.gz<td align=right>7.4G<td align=right>32m:5s<td align=right>6.1G<td align=right>13m:22s
-<tr><td>uniprot_trembl_plants.dat.gz<td align=right>11G<td align=right>28m:43s<td align=right>9.2G<td align=right>18m:48s
-<tr><td>uniprot_trembl_viruses.dat.gz<td align=right>3.5G<td align=right>13m:35s<td align=right>2.1G<td align=right>5m:30s
+<!-- =============================================== -->
+<a id="mem"></a> 
+<table style="width: 100%"><tr><td style="text-align: left"> 
+<h2>Memory and Time </h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>	
+	
+<b><i>Taxonomic</i></b> 
+<p>Downloads on 24-Jan-2021 onto a Linux machine with a ~500 Mbsp download connection and 128Gb of RAM.</p>
+<table class="tabley">
+	<tr>
+		<th>File 
+		<th>.dat Size 
+		<th>Download 
+		<th>FASTA Size<sup>1</sup> 
+		<th>Creation 
+	</tr>
+	<tr>
+		<td>uniprot_sprot_bacteria.dat.gz 
+		<td style="text-align: right">203M 
+		<td style="text-align: right">1m:10s 
+		<td style="text-align: right">150Mb 
+		<td style="text-align: right"> 0m:24s 
+	</tr>
+	<tr>
+		<td>uniprot_sprot_fungi.dat.gz 
+		<td style="text-align: right">49M 
+		<td style="text-align: right">0m:8s 
+		<td style="text-align: right">21M 
+		<td style="text-align: right">0m:4s 
+	</tr>
+	<tr>
+		<td>uniprot_sprot_invertebrates.dat.gz 
+		<td style="text-align: right">33M 
+		<td style="text-align: right">0m:12s 
+		<td style="text-align: right">14M 
+		<td style="text-align: right">0m:2s 
+	</tr>
+	<tr>
+		<td>uniprot_sprot_plants.dat.gz 
+		<td style="text-align: right">50M 
+		<td style="text-align: right">0m:14s 
+		<td style="text-align: right">21M 
+		<td style="text-align: right">0m:5s 
+	</tr>
+	<tr>
+		<td>uniprot_sprot_viruses.dat.gz 
+		<td style="text-align: right">16M 
+		<td style="text-align: right">0m:3s 
+		<td style="text-align: right">9M 
+		<td style="text-align: right">0m:1s 
+	</tr>
+	<tr>
+		<td>uniprot_sprot_bacteria.dat.gz 
+		<td style="text-align: right"><mark class=red>88G</mark> 
+		<td style="text-align: right">6h:36m:40s 
+		<td style="text-align: right">61G 
+		<td style="text-align: right">2h:21m:3s 
+	</tr>
+	<tr>
+		<td>uniprot_trembl_fungi.dat.gz 
+		<td style="text-align: right">8.1G 
+		<td style="text-align: right">26m:23s 
+		<td style="text-align: right">6.9G 
+		<td style="text-align: right">14m:28s 
+	</tr>
+	<tr>
+		<td>uniprot_trembl_invertebrates.dat.gz 
+		<td style="text-align: right">7.4G 
+		<td style="text-align: right">32m:5s 
+		<td style="text-align: right">6.1G 
+		<td style="text-align: right">13m:22s 
+	</tr>
+	<tr>
+		<td>uniprot_trembl_plants.dat.gz 
+		<td style="text-align: right">11G 
+		<td style="text-align: right">28m:43s 
+		<td style="text-align: right">9.2G 
+		<td style="text-align: right">18m:48s 
+	</tr>
+	<tr>
+		<td>uniprot_trembl_viruses.dat.gz 
+		<td style="text-align: right">3.5G 
+		<td style="text-align: right">13m:35s 
+		<td style="text-align: right">2.1G 
+		<td style="text-align: right">5m:30s 
+	</tr>
 </table>
-<sup>1</sup><small>When TCW extracts the sequence into a FASTA file, it is not written in a gzipped format.
-However, if you are going to use <code>DIAMOND</code>, you can zip them.</small>
-
-<p><b><i>Full UniProt</b></i>
-<table border=1 cellspacing=3 cellpadding=3>
-<tr><th>File<th>.dat Size<th>Download<th>Subset .dat<th>FASTA Size<th>Creation Time
-<tr><td>uniprot_sprot.dat.gz  <td align=right>583M<td align=right>1m:16s  <td align=right>209M<td align=right>55M<td align=right>3m:11s
-<tr><td>uniprot_trembl.dat.gz<td align=right ><font color=red>126G</font><td align=right>7h:3m:10s<td align=right>12.9G<td align=right>10.3G<td align=right>5h:33m:22s
+<sup>1</sup><small>When TCW extracts the sequence into a FASTA file, it is not written in a gzipped format. 
+However, if you are going to use <ttp>DIAMOND</ttp>, you can zip them.</small> 
+<p><b><i>Full UniProt</i></b></p>
+<table class="tabley">
+	<tr>
+		<th>File 
+		<th>.dat Size 
+		<th>Download 
+		<th>Subset .dat 
+		<th>FASTA Size 
+		<th>Creation Time 
+		<tr>
+			<td>uniprot_sprot.dat.gz 
+			<td style="text-align: right">583M 
+			<td style="text-align: right">1m:16s 
+			<td style="text-align: right">209M 
+			<td style="text-align: right">55M 
+			<td style="text-align: right">3m:11s 
+		</tr>
+		<tr>
+			<td>uniprot_trembl.dat.gz 
+			<td style="text-align: right"><mark class="red">126G</mark> 
+			<td style="text-align: right">7h:3m:10s 
+			<td style="text-align: right">12.9G 
+			<td style="text-align: right">10.3G 
+			<td style="text-align: right">5h:33m:22s 
+		</tr>
 </table>
-
-<p><b><i>GO database</b></i>
-<p>It takes less than a minute to download the GO file..
-The time it takes to build the GO database is proportional to the number of UniProts to be processed.
-For example, 
-<table border=1 cellspacing=3 cellpadding=3>
-<tr><th>Machine<th>AnnoDBs<th>Time<th>Database size
-<tr><td>MacOS Catalina<td>3 Archaea, Virus and SwissProt Subset<td align=right>6m:30s<td align=right>534M
-<tr><td>Old Linux<td>12 The taxonomic and full listed above<td align=right>10h:38m:24s<sup>1</sup><td align=right>30G<sup>1</sup>
+<p><b><i>GO database</i></b></p>
+<p>It takes less than a minute to download the GO file.. The time it takes to build the GO 
+	database is proportional to the number of UniProts to be processed. For example,</p>
+<table class="tabley">
+	<tr>
+		<th>Machine 
+		<th>AnnoDBs 
+		<th>Time 
+		<th>Database size 
+	</tr>
+	<tr>
+		<td>MacOS Catalina 
+		<td>3 Archaea, Virus and SwissProt Subset 
+		<td style="text-align: right">6m:30s 
+		<td style="text-align: right">534M 
+	</tr>
+	<tr>
+		<td>Old Linux 
+		<td>12 The taxonomic and full listed above 
+		<td style="text-align: right">10h:38m:24s<sup>1</sup> 
+		<td style="text-align: right">30G<sup>1</sup> 
+	</tr>
 </table>
-<sup>1</sup><small>Most of the time, 7h:4m:56s, was for loading the tr_bacteria, which would also account for a lot of the database size.</small>
+<sup>1</sup><small>Most of the time, 7h:4m:56s, was for loading the tr_bacteria, 
+which would also account for a lot of the database size.</small> 
 
+<!-- ================================= -->
+<a id="best"></a> 
+<table style="width: 100%"><tr><td style="text-align: left"> 
+<h2>What AnnoDBs to use </h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
-<!--------------------------------------------->
-<a name=best></a>
-<table width='100%'><tr><td align='left' >
-<h2>What AnnoDBs to use</h2>
-</td><td align='right'  class='smtxt'><a href=#top >Go to top</a></td></tr></table>
-<b><i>Strong suggestions:</i></b>
+<b><i>Strong suggestions:</i></b> 
 <ul>
-<li><i><font color=red>Only download what is relevant!</font></i>
-<ul>
-<li>Download all relevant SwissProt files and the Full SwissProt UniProt. 
-<li>Download only the most relevant TrEMBL files, and never the Full TrEMBL UniProt unless absolutely necessary.
+	<li><i><mark class="red"> Only download what is relevant!</mark></i> 
+	<ul>
+		<li>Download all relevant SwissProt files and the Full SwissProt UniProt. 
+		<li>Download only the most relevant TrEMBL files, and never the Full TrEMBL UniProt unless absolutely necessary. 
+	</ul>
+	<li><mark class="red"><i>Do not perform constant downloads, it is a drain on the UniProt servers.</i></mark> <br>
+	The UniProts do not change that fast, and it changes 'best' hits in TCW, which can disturb any on-going analysis. 
 </ul>
-<li><font color=red><i>Do not perform constant downloads, it is a drain on the UniProt servers.</i></font>
-<br>The UniProts do not change that fast, and it changes 'best' hits in TCW, which can disturb any on-going analysis.
-</ul>
-
-<b><i>Evidence</i></b>
-<p>The dataset used for the following tests is from <i>de novo</i> assembled sequences from <i>Andropogon gerardii</i>, 
-which is related to Sorghum. It was downloaded from 
-<a href=https://doi.org/10.5061/dryad.5bk4c class="ext" target="_blank">Dryad</a> and published by 
-<a href=https://onlinelibrary.wiley.com/doi/abs/10.1111/1755-0998.12733 class="ext" target="_blank">Hoffman and Smith (2017)</a>. 
-The full dataset had &gt;60k transcripts, which was reduced to 27,085 (it was reduced to be able to run faster tests, though care was taken to
-use unannotated sequences from an earlier annotation).
-
-<p>Four annotations were
-compared:
-<table border=1 cellspacing=3 cellpadding=3>
-<tr><th>Dataset #<th>AnnoDBs<th>#Annotated (%)
-<tr><td>#1<td>sp_plants, tr_plants, sp_fullSubset<td>25,049  (92.5%)
-<tr><td>#2<td>#1 + sp_virus, sp_fungi, sp_invertebrate, sp_bacteria<td>25,052  (92.5%)
-<tr><td>#3<td>#2 + tr_virus, tr_fungi, tr_invertebrate, tr_bacteria, tr_fullSubset<td>25,070  (92.6%)
-<tr><td>#4<td>#1 + nr<td>25,160  (92.9%)
+<b><i>Evidence</i></b> 
+<p>The dataset used for the following tests is from <i>de novo</i> assembled sequences from 
+<i>Andropogon gerardii</i>, which is related to Sorghum. It was downloaded from 
+<a href="https://doi.org/10.5061/dryad.5bk4c" class="ext" target="_blank">Dryad</a> and published by 
+<a href="https://onlinelibrary.wiley.com/doi/abs/10.1111/1755-0998.12733" class="ext" target="_blank">Hoffman and Smith (2017)</a>. 
+The full dataset had &gt;60k transcripts, which was reduced to 27,085 (it was reduced to be able to run faster tests, 
+though care was taken to use unannotated sequences from an earlier annotation). 
+</p>
+<p>Four annotations were compared: </p>
+<table class="tabley">
+	<tr>
+		<th>Annotation
+		<th>AnnoDBs 
+		<th>#Annotated
+	</tr>
+	<tr>
+		<td>#1 
+		<td>sp_plants, tr_plants, sp_fullSubset 
+		<td>25,049 (92.5%) 
+	</tr>
+	<tr>
+		<td>#2 
+		<td>#1 + sp_virus, sp_fungi, sp_invertebrate, sp_bacteria 
+		<td>25,052 (92.5%) 
+	</tr>
+	<tr>
+		<td>#3 
+		<td>#2 + tr_virus, tr_fungi, tr_invertebrate, tr_bacteria, tr_fullSubset 
+		<td>25,070 (92.6%) 
+	</tr>
+	<tr>
+		<td>#4 
+		<td>#1 + nr 
+		<td>25,160 (92.9%) 
+	</tr>
 </table>
-<br>If your organism is not closely related to any model organism, then there will likely be a bigger difference.
-<!--------------------------------------------->
+<br>
+If your organism is not closely related to any model organism, then there will likely be a bigger difference.
+ 
+<!-- ============================================= -->
+<a id="other"></a> 
+<table style="width: 100%"><tr><td style="text-align: left"> 
+<h2>Creating AnnoDBs from other databases </h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
-
-<a name=other></a>	
-<table width='100%'><tr><td align='left' >
-<h2>Creating AnnoDBs from other databases</h2>
-</td><td align='right'  class='smtxt'><a href=#top >Go to top</a></td></tr></table>
-UniProt and NCBI-nr descriptor lines works with TCW. For other databases, you will need to make sure they have a TCW
-accepted descriptor line. 
-
-<p><b>Description lines</b> 
-
+UniProt and NCBI-nr descriptor lines works with TCW. For other databases, you will need to make sure they 
+have a TCW accepted descriptor line. 
+<p><b>Description lines</b> </p>
 <p>The description line is the ">" line that describes the subsequent sequence in a FASTA file. 
-From it, <code>runSingleTCW</code> extracts: 
+From it, <ttp>runSingleTCW</ttp> extracts: 
+</p>
 <ul>
-<li><tt>DB type</tt>: used in naming the tab output file and is used in <code>viewSingleTCW</code> to aid
-in identifying where the hitID is from.
-<li><tt>hitID</tt>: the unique identifier of the hit.
-<li><tt>description</tt>: generally the functional description
-<li><tt>species</tt>: the species 
+	<li><ttx>DB type</ttx>: used in naming the tab output file and is used in <ttp>viewSingleTCW</ttp> 
+	to aid in identifying where the hitID is from. 
+	<li><ttx>hitID</ttx>: the unique identifier of the hit. 
+	<li><ttx>description</ttx>: generally the functional description 
+	<li><ttx>species</ttx>: the species 
 </ul>
-
-<b>UniProt</b>
-
+<br><b>UniProt</b>
 <pre>
 	>sp|Q9V2L2|1A1D_PYRAB Putative 1-ami OS=Pyrococcus abyssi GN=PYRAB00630 PE=3 SV=1v
 </pre>
 <ul>
-<li>For TrEMBL, the first two characters would be 'tr'. The 'sp' or 'tr' are the <tt>DB type</tt>
-<li>The third entry of the first string is the identifier (e.g. 1A1D_PYRAB)
-<li>The string up to the OS is the description.
-<li>The string after the "OS=" is the species.
+	<li>For TrEMBL, the first two characters would be 'tr'. The 'sp' or 'tr' are the <ttx>DB type</ttx> 
+	<li>The third entry of the first string is the identifier (e.g. 1A1D_PYRAB) 
+	<li>The string up to the OS is the description. 
+	<li>The string after the "OS=" is the species. 
 </ul>
-
-<a name=nr>
-<p><b>NCBI nr</b> (See <a href=#link>Download NR</a>)
-
+<a id="nr"></a> 
+<p><b>NCBI nr</b> (See <a href="#link">Download NR</a>)</p>
 <pre>
 	>XP_642837.1 hypothetical protein DDB_G0276911 [Dictyostelium discoideum AX4]
 </pre>
 <ul>
-<li>The first entry is the identifier (e.g. XP_642837.1). 
-Note, there is no longer a way to detect the database origin within the file, hence, the <tt>DB type</tt> will be the generic 'PR' for protein.
-<li>The text from the first space to the first "[" is the description.
-<li>The text within the "[]" is the species.
+	<li>The first entry is the identifier (e.g. XP_642837.1). Note, there is no longer a way to detect 
+	the database origin within the file, hence, the <ttx>DB type</ttx> will be the generic 'PR' for protein. 
+	<li>The text from the first space to the first "[" is the description. 
+	<li>The text within the "[]" is the species. 
 </ul>
-As it does not have an "type code", its type will default to "PR". If the taxonomy is given as "nr",
-the abbreviation for this database will be <u>PRnr</u>.
+As it does not have an "type code", its type will default to "PR". If the taxonomy is given as "nr", the 
+abbreviation for this database will be <u>PRnr</u>. 
 
-<!--------!>
-<p><b>Generic</b> 
-<p>If you have a file other than UniProt or nr, make the descriptor names as follows:
+<!--  ============== -->
+<p><b>Generic</b></p>
+<p>If you have a file other than UniProt or nr, make the descriptor names as follows: </p>
 <pre>
 	>CC|ID description OS=species
 </pre>
 <ul>
-<li>CC is the type code, and will be used as the <tt>DB type</tt> in TCW.
-<li>ID is the unique identifier
-<li>Everything up to the OS is the description
-<li>Everything after the OS is the species
+	<li>CC is the type code, and will be used as the <ttx>DB type</ttx> in TCW. 
+	<li>ID is the unique identifier 
+	<li>Everything up to the OS is the description 
+	<li>Everything after the OS is the species 
 </ul>
-<p><u>Example 1</u>: The TCW perl script <tt>scripts/formatPlantTFDB.pl</tt> takes as input a file from
-<a href=http://planttfdb.gao-lab.org/download.php class="ext" target="_blank">PlantTFDB</a>, which has header lines
-like:
+<p><u>Example 1</u>: The TCW perl script <ttx>scripts/formatPlantTFDB.pl</ttx> takes as input a file from 
+<a href="http://planttfdb.gao-lab.org/download.php" class="ext" target="_blank">PlantTFDB</a>, 
+which has header lines like: </p>
 <pre>
 	>KFK36254.1 Arabis alpina|G2-like|G2-like family protein
 </pre>
-and converts them to header lines:
+and converts them to header lines: 
 <pre>
 	>tf|G2_like_1 G2-like family protein {KFK36254.1} OS=Arabis alpina
 </pre>
-The type will be "TF"". If the taxonomy entered into <code>runSingleTCW</code> is "plants"",
-the abbreviation for this database will be <u>TFpla</u>.
-
-
-<p><u>Example 2</u>: The TCW python script <tt>scripts/formatNCBIrna.py</tt> takes as input an RNA file from NCBI,
-which has header lines like:
+The type will be "TF"". If the taxonomy entered into <ttp>runSingleTCW</ttp> is "plants"", 
+the abbreviation for this database will be <u>TFpla</u>. 
+<p><u>Example 2</u>: The TCW python script <ttx>scripts/formatNCBIrna.py</ttx> takes as 
+input an RNA file from NCBI, which has header lines like: </p>
 <pre>
 	>XM_002436391.2 PREDICTED: Sorghum bicolor GDP-mannose 4,6 dehydratase 1 (LOC8069086), mRNA
 </pre>
-and converts them to header lines:
+and converts them to header lines: 
 <pre>
 	>XM_002436391.2 GDP-mannose 4,6 dehydratase 1 (LOC8069086), mRNA OS=Sorghum bicolor
 </pre>
-As this does not have a type code at the beginning, its type will default to "NT". If the taxonomy is entered as "sb",
-the abbreviation for this database will be <u>NTsb</u>. The script can be modified to add a type code.
+As this does not have a type code at the beginning, its type will default to "NT". 
+If the taxonomy is entered as "sb", the abbreviation for this database will be <u>NTsb</u>. 
+The script can be modified to add a type code. 
 
-<!---------------------------------------------------------!>
-<a name=runstcw></a>
-<table width='100%'><tr><td align='left'>
-<h2>Entering AnnoDBs and GOs into <code>runSingleTCW</code></h2>
-</td><td align='right' class='smtxt'><a href=#top>Go to top</a></td></tr></table>
-Execute <tt>./runSingleTCW</tt> and select your project.
+<!-- ========================================= -->
+<a id="runstcw"></a> 
+<table style="width: 100%"><tr><td style="text-align: left"> 
+<h2>Entering AnnoDBs and GOs into <ttp>runSingleTCW</ttp> </h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+Execute <ttx>./runSingleTCW</ttx> and select your project. 
 <ul>
-<li>Select <tt class=c>Import Anno</tt>, a file chooser will popup, select 
-<tt>projects/AnnoDBs_UniProt_&lt;date&gt;.cfg</tt>. This will enter the names of the UniProts in AnnoDB, and enter
-the name of the GO database (which can be changed with "Options").
-<li>Now you are ready to run <tt class=c>Annotate</tt> with the UniProt and GO you 
-just downloaded.
+	<li>Select <ttc>Import Anno</ttc>, a file chooser will popup, select 
+	<ttx>projects/AnnoDBs_UniProt_&lt;date&gt;.cfg</ttx>. This will enter the names of the UniProts in AnnoDB, 
+	and enter the name of the GO database (which can be changed with "Options"). 
+	<li>Now you are ready to run <ttc>Annotate</ttc> with the UniProt and GO you just downloaded. 
 </ul>
-<a  href="img/runSingleStep3.png"><img src="img/runSingleStep3.png" border=1></a> 
-<p>Additionally, AnnoDBs can be entered using the "Add" button, where the taxonomy is defined.
-And, the "Import AnnoDBs" can add the databases from an existing <tt>sTCW.cfg</tt>
-file. 
-<p>The GO database and GO slim category are defined in the "Options" menu.
+<a href="img/runSingleStep3.png"><img src="img/runSingleStep3.png" alt="" style="border: 1px solid black; width: 80%"></a> 
+<p>Additionally, AnnoDBs can be entered using the "Add" button, where the taxonomy is defined. 
+And, the "Import AnnoDBs" can add the databases from an existing <ttx>sTCW.cfg</ttx> file. </p>
+<p>The GO database and GO slim category are defined in the "Options" menu. <a id="tax"></a> </p>
 
-<a name=tax></a>
-<table width='100%'><tr><td align='left' >
-<h2>Why use taxonomic databases instead of the full UniProt</h2>
-</td><td align='right' class='smtxt'><a href=#top >Go to top</a></td></tr></table>
+<!-- ====================================== -->
+<table style="width: 100%"><tr><td style="text-align: left"> 
+<h2>Why use taxonomic databases instead of the full UniProt </h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
-<code>viewSingleTCW</code> refers to the annoDBs by the 'DBtype' and 'taxonomy', with them combined into 'DBtax'. 
-The DBtype and taxonomy can be queried on and columns of the data viewed. The "sp" is SwissProt and the "tr" is "Trembl". 
-The "fullSubset" and "SPful" are the full SwissProt database with the taxonomic entries removed.
+<ttp>viewSingleTCW</ttp> refers to the annoDBs by the 'DBtype' and 'taxonomy', with them 
+combined into 'DBtax'. The DBtype and taxonomy can be queried on and columns of the data viewed. 
+The "sp" is SwissProt and the "tr" is "Trembl". The "fullSubset" and "SPful" are the full SwissProt 
+database with the taxonomic entries removed. 
+<p>The following shows an example of a set of hit proteins: </p>
+<p><a href="img/runASview.png"><img src="img/runASview.png" alt="" style="border: 1px solid black;"></a> </p>
+<p>The following shows a table of sequences: </p>
+<p><a href="img/runASview.png"><img src="img/runASview2.png" alt="" style="border: 1px solid black;"></a> </p>
+<p>The following shows the details of a specific sequence: </p>
+<a href="img/runASview.png"><img src="img/runASview3.png" alt="" style="border: 1px solid black;"></a>
 
+<!-- ============================================= -->
+<a id="link"></a> 
+<table style="width: 100%"><tr><td style="text-align: left"> 
+<h2>Important links to databases </h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
-<p>The following shows an example of a set of hit proteins:
-<p><a  href="img/runASview.png"><img src="img/runASview.png" border=1></a>
-
-<p>The following shows a table of sequences:
-<p><a  href="img/runASview.png"><img src="img/runASview2.png" border=1></a>
-
-<p>The following shows the details of a specific sequence:
-<p><a  href="img/runASview.png"><img src="img/runASview3.png" border=1></a>
-
-<a name=link></a>
-<table width='100%'><tr><td align='left' >
-<h2>Important links to databases</h2>
-</td><td align='right'  class='smtxt'><a href=#top >Go to top</a></td></tr></table>
-To download the UniProt files without <code>runAS</code>:
+To download the UniProt files without <ttp>runAS</ttp>: 
 <ul>
-<li>Go to <a href=https://www.uniprot.org/downloads class="ext" target="_blank">UniProt Downloads</a>.
-<li>In the second line from the top, it says "For downloading complete data sets we recommend using <b>ftp.uniprot.org</b>."
-Click the <b>ftp.uniprot.org</b>. 
-<li>This brings up the UniProt download directories in a Finder window. You may view it as "Guest".
-<li>Click "Current_release", "knowledgebase". Here you will see "complete" and "taxonomic_divisions".
+	<li>Go to <a href="https://www.uniprot.org/downloads" class="ext" target="_blank">UniProt Downloads</a>. 
+	<li>In the second line from the top, it says "For downloading complete data sets we recommend 
+	using <b>ftp.uniprot.org</b>." Click the <b>ftp.uniprot.org</b>. 
+	<li>This brings up the UniProt download directories in a Finder window. You may view it as "Guest". 
+	<li>Click "Current_release", "knowledgebase". Here you will see "complete" and "taxonomic_divisions". 
 </ul>
-
-The NCBI-nr database can be downloaded:
+The NCBI-nr database can be downloaded: 
 <ul>
-<li><a href="ftp://ftp.ncbi.nih.gov/blast/db/FASTA/nr.gz" class="ext" target="_blank">NCBI nr<a> 
-(ftp.ncbi.nih.gov/blast/db/FASTA). 
-<li>As of 24-Jan-21, it is 89GB and took 1h:45m to download.
-<li>It is called <tt><b>nr.gz</b></tt>; since the File Chooser requires a FASTA suffix, type at the command line: <b><tt>mv nr.gz nr.fa.gz</tt></b>
+	<li><a href="ftp://ftp.ncbi.nih.gov/blast/db/FASTA/nr.gz" class="ext" target="_blank">NCBI nr</a> 
+	(ftp.ncbi.nih.gov/blast/db/FASTA). 
+	<li>As of 24-Jan-21, it is 89GB and took 1h:45m to download. 
+	<li>It is called <ttx>nr.gz</ttx>; since the File Chooser requires a FASTA suffix, 
+	rename it: <ttx>mv nr.gz nr.fa.gz</ttx> 
 </ul>
-
-GO database: <a href=http://archive.geneontology.org class="ext" target="_blank"><tt>http://archive.geneontology.org/</tt></a>
-
-<!--#include virtual="../ssi/end.html" -->	
-</html> 
-
+GO Basic OBO file: <a href="http://current.geneontology.org/ontology/" class="ext" target="_blank"><ttx>http://current.geneontology.org/ontology/</ttx></a>.</p>
+<!--#include virtual="../ssi/end.html" -->
+</body>
+</html>

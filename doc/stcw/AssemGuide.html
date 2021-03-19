@@ -2,12 +2,12 @@
 <HTML>
 <!--#set var=TITLE value="sTCW Assembly Guide" -->
 <!--#include virtual="../ssi/head.html" -->
-<a name=top></a>
+<body>
 <!--#include virtual="../ssi/start2.html" -->
 
 This document describes the TCW assembly process,
-which is run via the <code>runSingleTCW</code> interface or the script <code>execAssm</code> using the parameter file 
-<tt>projects/&lt;project-name&gt;/sTCW.cfg</tt>.
+which is run via the <ttp>runSingleTCW</ttp> interface or the script <ttp>execAssm</ttp> using the parameter file 
+<ttx>projects/&lt;project-name&gt;/sTCW.cfg</ttx>.
 <p>
 Note that TCW <i>cannot assemble raw RNA-seq reads</i>. Rather, assembly in TCW serves primarily the following purposes:
 <ul>
@@ -27,42 +27,42 @@ Note that TCW <i>cannot assemble raw RNA-seq reads</i>. Rather, assembly in TCW 
 	<li><a href="#trouble">Trouble shooting</a>
 </ul>
 
-<a name=demo>
+<a id=demo></a>
 <h2>Assembly of the Demo Project</h2>
 
-This demo uses the project <tt>demoAsm</tt>. The assembly process uses <tt>blast</tt> and <tt>cap3</tt> (see 
+This demo uses the project <ttx>demoAsm</ttx>. The assembly process uses <ttx>blast</ttx> and <ttx>cap3</ttx> (see 
 <a href="../Install.html" class="ext" target="_blank">Installation</a>).
-<font color=green>IMPORTANT NOTE:</font> The Blast path MUST be defined in the <tt class=c>HOSTS.cfg</tt> using the <tt>blast_path</tt> parameter;
-see <a href=../Install.html#replace  class="ext" target="_blank">Install</a>.
+<mark class=green>IMPORTANT NOTE:</mark> The Blast path MUST be defined in the <ttx>HOSTS.cfg</ttx> using the <ttx>blast_path</ttx> parameter;
+see <a href="../Install.html#replace"  class="ext" target="_blank">Install</a>.
  
 <p>
-<table cellspacing=0 cellpadding=0>
+<table>
 	<tr>
-		<td width="65%" valign="top">
-<p>
-Start by running <code>runSingleTCW</code> and selecting project <tt>demoAsm</tt>, giving the
-interface shown on the right.
-<p>The project has two libraries, <tt>Illumina</tt> (an Illumina RNA-seq library) and <tt>Sanger</tt>( 
-an EST Sanger library). The Illumina transcripts have read counts from two
-count libraries, <tt>tip</tt> and <tt>zone</tt>, reflecting two different tissues of the rhizome. 
+	<td class="top">
+	<p>
+	Start by running <ttp>runSingleTCW</ttp> and selecting project <ttx>demoAsm</ttx>, giving the
+	interface shown on the right.
+	<p>The project has two libraries, <ttx>Illumina</ttx> (an Illumina RNA-seq library) and <ttx>Sanger</ttx>
+	(an EST Sanger library). The Illumina transcripts have read counts from two
+	count libraries, <ttx>tip</ttx> and <ttx>zone</ttx>, reflecting two different tissues of the rhizome. 
 
-<p>
-Press the <tt class=c>Step 1. Build Database</tt> button to create the database and load the data.
-<p> 
-Then set <tt class=c>#CPUs</tt> to the number of processors your machine can spare for the assembly
-(one or two are sufficient for this project). 
-<p>
-Press <tt class=c>Step 2. Instantiate</tt> to start the assembly. Make sure the <tt class=c>Skip Assembly</tt> is NOT checked.
-<p>
-When done, it prints a summary (see below). 
-		</td>
-		<td width="35%" valign="top" style="padding-left:10px;">
-			<a name="FIG1">
-			<a href="img/runSingleTCWasm.png"><img src="img/runSingleTCWasm.png" width="450" border=1></a>
-			<p>
-		</td>
+	<p>
+	Press the <ttc>Step 1. Build Database</ttc> button to create the database and load the data.
+	<p> 
+	Then set <ttc>#CPUs</ttc> to the number of processors your machine can spare for the assembly
+	(one or two are sufficient for this project). 
+	<p>
+	Press <ttc>Step 2. Instantiate</ttc> to start the assembly. Make sure the <ttc>Skip Assembly</ttc> is NOT checked.
+	<p>
+	When done, it prints a summary (see below). 
+	</td>
+	<td>
+		<a id="FIG1"></a>
+		<a href="img/runSingleTCWasm.png"><img src="img/runSingleTCWasm.png" alt="" style="border: 1px solid black; width: 450px"></a>
+	</td>
 	</tr>
-<table>		
+</table>	
+	
 <h4>Final assembly summary</h4>
 
 Below is the summary (the numbers can be slightly different due to a different machine, #CPUs, and blast version).
@@ -92,39 +92,35 @@ Below is the summary (the numbers can be slightly different due to a different m
 	Finished in  1m:40s
 </pre>
 
-<a name="translib">
-<table width='100%'><tr><td align='left' >
+<a id=translib></a>
 <h2>Transcript with counts and EST libraries</h2>
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+
 When assembling transcripts with counts and EST libraries, a resulting contig with one or more transcript sequences
 and one or more ESTs will add the transcript counts and add the aligned EST.
-<p>
-<a name=names></a>
-<table width='100%'><tr><td align='left' >
-<h2>Choosing Read Names</h2>
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
 
+<a id=names></a>
+<h2>Choosing Read Names</h2>
 
 Using consistent and well-chosen read names makes data analysis much easier, and
 is essential for some aspects of TCW.
 <p> 
 The name of the read is the string immediately following the ">" in the fasta file.
 For example, if your fasta file contains the lines
-<div class="codesec"><pre>
->ZM_BFa0001A01.f
-AAGATCCGCCTCATTCACACCCCCATCTACCTAGCTAGCTAGTTTACCAAAAAAAAATCTGGCCACA
-GGGATGCGGTGGCGGCTGCAGCCGGCGCCGGCGCCGACGCTGCTCCTCGTCCTGCTGGTG
->ZM_BFa0001A01.r
-AAAAAGCAAAATACAAACCAAGCTCCAGTTCCAATACATTACTCTAGCACAAGCTTTCAG
-CACATTACAAAGTAGGAACCAAGACCACCCAAGCTCCAATCACACTACAATTCATCACCA
-</pre></div>
-then the two read names are <tt>ZM_BFa0001A01.f</tt> and <tt>ZM_BFa0001A01.r</tt>.
+<pre>
+	>ZM_BFa0001A01.f
+	AAGATCCGCCTCATTCACACCCCCATCTACCTAGCTAGCTAGTTTACCAAAAAAAAATCTGGCCACA
+	GGGATGCGGTGGCGGCTGCAGCCGGCGCCGGCGCCGACGCTGCTCCTCGTCCTGCTGGTG
+	>ZM_BFa0001A01.r
+	AAAAAGCAAAATACAAACCAAGCTCCAGTTCCAATACATTACTCTAGCACAAGCTTTCAG
+	CACATTACAAAGTAGGAACCAAGACCACCCAAGCTCCAATCACACTACAATTCATCACCA
+</pre>
+then the two read names are <ttx>ZM_BFa0001A01.f</ttx> and <ttx>ZM_BFa0001A01.r</ttx>.
 <p>
 Naming guidelines:
 <ul>
 <li><b>length/characters:</b> Keep read names under 25 characters, using only letters, numbers, and underscores.
 <li><b>uniqueness:</b> No two reads in a TCW database may have the same name. 
-<li><b>prefixes:</b> Use the library name as the read prefix (e.g. <tt>ZM_BFa</tt> in this example). <br>
+<li><b>prefixes:</b> Use the library name as the read prefix (e.g. <ttx>ZM_BFa</ttx> in this example). <br>
 	This makes it much easier to study the assembled contigs where different
 	libraries are mixed up. 
 <li>For 454 data, the names are meaningless to the typical user, hence, the reads should be
@@ -136,44 +132,40 @@ if some have ".r" meaning 3', while for others it means 5', then TCW cannot use 
 information to improve the assembly.
 </ul>
 
-<p>
-<a name=stages></a>
-<table width='100%'><tr><td align='left' >
+<a id=stages></a>
 <h2>The Assembly Process</h2>
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
 
 Following are the main stages of TCW assembly, organized by their headings
 which print to the screen. The sample durations
 are for a 700k read assembly using 6, 2.4 Ghz CPUs and the default settings.
 
-
-<table cellpadding=5 border=1>
+<table class="tabley" style="width: 800px">
 	<tr>
-		<td >Section Heading</td><td width='500'>What TCW is doing</td><td>Sample duration</td>
+		<th>Section Heading</th><th>What TCW is doing</th><th>Sample duration</th>
 	</tr>
 	<tr>
-		<td valign='top'>&gt;&gt;&gt;Delete previous assembly</td>
+		<td class='nw'>&gt;&gt;&gt;Delete previous assembly</td>
 		<td>There was a previous assembly of the same name, which you have selected to delete and
 			start over. This can take a while for big projects!!</td><td>2h</td>
 	</tr>
 	<tr>
-		<td valign='top'>&gt;&gt;&gt;Initial bury alignment</td>
+		<td class='top'>&gt;&gt;&gt;Initial bury alignment</td>
 		<td>TCW sets aside ("buries") reads which are nearly identical to another read, in order to reduce 
 			redundant assembly effort. It runs a "self-blast" of all the reads against
 			each other, using Megablast. It then parses the output and saves the buries to the database. </td><td>1h 10m</td>
 	</tr>
 	<tr>
-		<td valign='top'>&gt;&gt;&gt;Compute cliques</td>
+		<td class='top'>&gt;&gt;&gt;Compute cliques</td>
 		<td>A clique is a special type of cluster<sup>1</sup>. TCW groups the reads into cliques and builds the
 			initial contigs from them. To do this it again runs Megablast of the reads against
 			each other, this time using only the non-buried reads. </td><td>1h 10m</td>
 	</tr>
 	<tr>
-		<td valign='top'>&gt;&gt;&gt;Clique assembly</td>
+		<td class='top'>&gt;&gt;&gt;Clique assembly</td>
 		<td>Each clique is given to cap3 to assemble. Any leftover read are made into singleton "contigs".</td><td>2h</td>
 	</tr>
 	<tr>
-		<td valign='top'>&gt;&gt;&gt;Clique cap buries</td>
+		<td class='top'>&gt;&gt;&gt;Clique cap buries</td>
 		<td>The initial contigs from clique assembly are now analyzed for additional reads to bury. Any
 			read lying in a region of 5x or greater coverage may be "cap-buried" in another read whose
 			span in the contig is close enough. This is controlled by sTCW.cfg parameters CAP_BURY_MIN_DEPTH
@@ -181,13 +173,13 @@ are for a 700k read assembly using 6, 2.4 Ghz CPUs and the default settings.
 			by the end of this stage. </td><td>10m</td>
 	</tr>
 	<tr>
-		<td valign='top'>&gt;&gt;&gt;Contig merge rounds</td>
+		<td class='top'>&gt;&gt;&gt;Contig merge rounds</td>
 		<td>Now TCW goes through the contig merge rounds specified by the "TC"<sup>2</sup> parameters in sTCW.cfg. For
 			each round it writes out the current contig consensus sequences, blasts them against each
 			other, and attempts to merge each overlapping pair. </td><td>9h</td>
 	</tr>
 	<tr>
-		<td valign='top'>&gt;&gt;&gt;Finalize contigs</td>
+		<td class='top'>&gt;&gt;&gt;Finalize contigs</td>
 		<td> Mate-pair contigs are joined together by N's. All buried reads are collected and assigned to 
 			their correct final contig. Each read is re-aligned to the consensus sequence of its contig, 
 			and the SNPs and extras are identified. Suspect contigs are flagged.</td><td>1h 10m</td>
@@ -197,20 +189,16 @@ are for a 700k read assembly using 6, 2.4 Ghz CPUs and the default settings.
 <br><sup>2</sup> In a TC (transitive closure), each contig must have an overlap with at least one contig in the TC.
 
 
-<a name=params></a>
-<table width='100%'><tr><td align='left' >
+<a id=params></a>
 <h2>Assembly Parameters</h2>
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a></td></tr></table>
-
 Note, the default parameters have been extensively tested and you will probably not want to change them.
-Most of the parameters for assembly are available for change through the <code>runSingleTCW</code> interface (press
-the <tt class=c>Options</tt> button in the Assembly section). 
+Most of the parameters for assembly are available for change through the <ttp>runSingleTCW</ttp> interface (press
+the <ttc>Options</ttc> button in the Assembly section). 
 <p>
-<a name=snps></a>
-<table width='100%'><tr><td align='left' >
+<a id=snps></a>
 <h2>Calculation of SNPs and extras</h2>
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
-The parameters listed in the following can be set in the <tt>LIB.cfg</tt> file with an editor.
+
+The parameters listed in the following can be set in the <ttx>LIB.cfg</ttx> file with an editor.
 
 <p>A SNP is possible when one or more read have a different base at some location than is found in the consensus. 
 However, base-calling error can lead to many false positives, so TCW applies two screens to the possible
@@ -227,22 +215,22 @@ and add a pad character (*) to the consensus. The score is computed in the same 
 the config parameters EXTRA_CONFIRM, EXTRA_RATE, EXTRA_SCORE. Extras not determined to be real are
 stored in the database and shown in the UI.
 
-<a name=trouble></a>
+<a id=trouble></a>
 <h2>Trouble Shooting</h2>
 
 <ul>
 <li>Blast fails. Try running the blast executable from the command line, which will usually elucidate the problem.
-<br><font color=green>IMPORTANT NOTE:</font> 
-The full Blast path MUST be defined in the <tt class=c>HOSTS.cfg</tt> using the <tt>blast_path</tt> parameter;
-see <a href=../Install.html#replace  class="ext" target="_blank">Install</a>.
+<br><mark class=green>IMPORTANT NOTE:</mark> 
+The full Blast path MUST be defined in the <ttx>HOSTS.cfg</ttx> using the <ttx>blast_path</ttx> parameter;
+see <a href="../Install.html#replace"  class="ext" target="_blank">Install</a>.
 <p>
 <li>CAP3 fails. 
 <ul>
-<li>If you get an <tt>"java.io.IOException: Cannot run program</tt>", then the supplied CAP3 is
+<li>If you get an <ttx>"java.io.IOException: Cannot run program</ttx>", then the supplied CAP3 is
 not compatible with your OS. Go to <a href="http://seq.cs.iastate.edu/cap3.html" class="ext" target="_blank">seq.cs.iastate.edu/cap3.html</a>,
-and download a CAP3 compatible with your systems and put it in <tt>/Ext/linux/CAP3</tt> or <tt>/Ext/mac/CAP3</tt> for Linux or Mac, respectively.
+and download a CAP3 compatible with your systems and put it in <ttx>/Ext/linux/CAP3</ttx> or <ttx>/Ext/mac/CAP3</ttx> for Linux or Mac, respectively.
 <li>On recent Mac OS (e.g. Catalina), external programs that are not registered with Apple will not automatically run.
-To fix this, see <a href=../Mac-OSX.html#ext  class="ext" target="_blank" >External program</a>.
+To fix this, see <a href="../Mac-OSX.html#ext"  class="ext" target="_blank" >External program</a>.
 </ul>
 <p>
 <li>Interruptions.
@@ -257,9 +245,9 @@ errors then it should be restarted from the beginning.
 you need to delete the database and start again.
 <p>
 <li>Crashes.  If the assembly crashes, it will usually write the Java exception error into a 
-file <tt>stcw.error1.log</tt>. This is information that we can use to debug and fix the problem.
+file <ttx>stcw.error1.log</ttx>. This is information that we can use to debug and fix the problem.
 <p>
-<li>For other problems, see <a href=../Trouble.html  class="ext" target="_blank">Trouble Shooting</a>.
+<li>For other problems, see <a href="../Trouble.html"  class="ext" target="_blank">Trouble Shooting</a>.
 </ul>
 
 <h4>For assembly, the database must support Innodb tables</h4>
@@ -270,16 +258,16 @@ still perform all TCW functions except for assembly.
 <p>
 The most common cause of this problem is a mismatch in the innodb log
 file size. The MySQL error log will contain messages like 
-<div class="codesec"><pre>
-InnoDB: Error: log file ./ib_logfile0 is of different size 0 5242880 bytes
-InnoDB: than specified in the .cnf file 0 104857600 bytes!
-</pre></div>
+<pre>
+	InnoDB: Error: log file ./ib_logfile0 is of different size 0 5242880 bytes
+	InnoDB: than specified in the .cnf file 0 104857600 bytes!
+</pre>
 Solution is to delete this log file and restart MySQL.
 
 <h4>Doing an assembly, the database is very slow</h4>
 
 The default parameters of MySQL are not suitable for large high-performance
-databases. Especially, the <tt>innodb_buffer_pool_size</tt> must be increased. 
+databases. Especially, the <ttx>innodb_buffer_pool_size</ttx> must be increased. 
 100M is sufficient for one large project, but for many large projects it should
 be 1G at minimum. For more see <br>
 <a href="http://dev.mysql.com/doc/refman/5.0/en/innodb-buffer-pool.html" class="ext" target="_blank">
@@ -287,4 +275,5 @@ http://dev.mysql.com/doc/refman/5.0/en/innodb-buffer-pool.html</a>.
 Note, this only affects usage during an assembly, when InnoDB tables are used.
 <br>
 <!--#include virtual="../ssi/end.html" -->
+</body>
 </HTML>

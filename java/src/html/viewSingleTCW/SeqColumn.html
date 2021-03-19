@@ -1,6 +1,14 @@
+<!DOCTYPE html>
 <html>
-<body style="padding:20px;width:650px;font-family:Times">
+<head>
 <title>Sequence Columns</title>
+<style>
+.tablex    		{border: 0px; padding: 3px; border-spacing: 3px; }
+.tablex td 		{border: 0px; padding: 3px; border-spacing: 3px}
+</style>
+</head>
+<body style="padding:20px;width:650px;font-family:Times">
+
 
 <h1>Sequence Columns</h1>
 Use this interface to select columns for the results tables from Sequence queries. Note that
@@ -11,16 +19,16 @@ of these interfaces, so this Help provides any additional information.
 <p>The columns available depend on the attributes of the database, e.g. whether
 its TCW-assembled, differential expression was computed, annotation was performed.
 
-<p>Both "Show All" and "Filters" use these column setting for the
+<p>Both <b>Show All</b> and <b>Filters</b> use these column setting for the
  respective table. To change the columns in a given
  table, display it and then use "Refresh Columns" to update the columns.
  
 <h3>General</h3>
 General sequence attributes: ID, length, total reads, etc. The columns available
 depend on the attributes of the database, e.g. if it is an assembled set, it
-will have the column'#buried'. 
-<br><br>In the "User Remark" column has user-supplied information added with
-runSingleTCW. The "TCW Remark" is information added by TCW during annotation.
+will have the column <u>#buried</u>. 
+<br><br>In the <b>User Remark</b> column has user-supplied information added with
+runSingleTCW. The <b>TCW Remark</b> is information added by TCW during <tt>viewSingleTCW</tt> annotation.
 
 
 <h3>Counts and TPM (or RPKM)</h3>
@@ -50,20 +58,22 @@ The DE column in the sequence table sorts without regard to the sign.
 the DE computation returned an NA.
 
 <h3>Best Hits</h3>
-The first set of values are from the AnnoDB file. The second set is from the Search
-file (i.e. produced by <tt>Blast</tt> or <tt>Diamond</tt>). The last set (if present)
-are from the UniProt .dat file.
-<table border=0 cellpadding=5>
-<tr><td>Best Bitscore: <td>The hit with the best bitscore. See Instructions for more information.
-<tr><td nowrap>Best Annotation: <td>The hit with the best annotation. See Instructions for more information.
-<tr><td valign=top>Best with GO</i>:<td> (if the database has GO annotation)
+The first set of values are from the <tt>AnnoDB fasta file</tt>. The second set is from the search
+file (i.e. produced by <tt>BLAST</tt> or <tt>DIAMOND</tt>). The last set (if present)
+are from the <tt>UniProt .dat file</tt>.
+<br>&nbsp;
+<table class=tablex>
+<tr><td valign=top nowrap><u>Best Bitscore</u> <td>The hit with the best bitscore. See Instructions for more information.
+<tr><td valign=top nowrap><u>Best Annotation</u> <td>The hit with the best annotation. See Instructions for more information.
+<tr><td valign=top nowrap><u>Best with GO</u><td> (if the database has GO annotation)
 The best hit with at least one assigned GO term.
 </table>
+
 <h3>SNPs and ORFs</h3>
 
 Note that SNPs are only available if the  assembly was performed within TCW. 
 
-<P>ORFs is the best Open Reading Frame. The best ORF is determined using 
+<P>ORFs is the best "Open Reading Frame"". The best ORF is determined using 
 the best hit, longest open reading frame, and 5th-order Markov score. 
 For details, see www.agcol.arizona.edu/software/tcw/doc/stcw/ORF.html. 
 
@@ -81,3 +91,5 @@ can produce false-positives on RNA-seq data, especially at low fold change. Resu
 be verified by a more rigorous method (e.g., EdgeR, DESeq), but note that the latter methods
 work only on pairwise condition comparisons, and require replicates to work accurately.  
 
+</body>
+</html>

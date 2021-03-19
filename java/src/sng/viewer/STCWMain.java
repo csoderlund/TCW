@@ -46,8 +46,8 @@ public class STCWMain
 					+ "     -o1 N  set the 1st cover cutoff to N (default N=50)\n"
 					+ "     -o2 N  set the 2nd cover cutoff to N (default N=90)\n"
 					+ "  -w Output overview to terminal and exit.\n"
-					+ "\n"
-					+ "viewSingleTCW x  Prints the ID and dbName of all sTCW databases.\n\n"		
+					+ "  -x Prints the ID and dbName of all sTCW databases.\n"	
+					+ "\n"	
 					);
 			return;
 		}
@@ -73,6 +73,13 @@ public class STCWMain
 		if (dbList==null || dbList.size()==0) {
 			System.err.println("No sTCW databases on " + hostsObj.host());
 			return;
+		}
+		if (hasOption(args, "-x")) { // CAS318 - made explicit (still prints if incorrect id)
+			System.err.println("Valid IDs with dbName:");
+			for (DBInfo db : dbList) {
+				System.err.format("   %-10s %s\n", db.getID(), db.getdbName());
+			}
+			System.exit(-1);
 		}
 		DBInfo dbObj = null;
 		String dbx="";

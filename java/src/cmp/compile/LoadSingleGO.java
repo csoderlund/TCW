@@ -128,9 +128,10 @@ public class LoadSingleGO {
 					if (!goDB.contains(gonum)) continue;
 					gi.added=true;
 					
+					// CAS318 removed relation_distance as not in OBO
 					mDB.executeUpdate("insert into " +
-					" go_graph_path (relationship_type_id, distance, relation_distance, child, ancestor) " +
-					" select g.relationship_type_id, g.distance, g.relation_distance, g.child, g.ancestor " +
+					" go_graph_path (relationship_type_id, distance,  child, ancestor) " +
+					" select g.relationship_type_id, g.distance,  g.child, g.ancestor " +
 					" from " + dbName + ".go_graph_path as g " +
 					" where ancestor>0 and child=" + gonum);
 					

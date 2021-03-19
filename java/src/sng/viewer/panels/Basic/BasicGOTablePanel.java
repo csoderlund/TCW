@@ -106,8 +106,7 @@ public class BasicGOTablePanel {
 		columnPanel = new ColumnPanel();
 		tablePanel = new TablePanel();
 	}
-	private class ColumnPanel extends JPanel
-	{
+	private class ColumnPanel extends JPanel {
 		private static final long serialVersionUID = -7235165216064464845L;
 		private ColumnPanel() {
 			setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -116,179 +115,178 @@ public class BasicGOTablePanel {
 			setAlignmentY(Component.CENTER_ALIGNMENT);
 		     	  
 			loadInitData();
-		    	/// General 
-		    	JPanel generalColsPanel = Static.createPagePanel();
-		    	generalColsPanel.setAlignmentY(Component.TOP_ALIGNMENT);
-		    	generalColsPanel.add(new JLabel("General"));
-		    	generalColsPanel.add(Box.createVerticalStrut(10));
-	    	
-		    	chkGeneralColumns = new JCheckBox[COL_NAMES.length];
-		    	for(int x=0; x < COL_NAMES.length; x++) {
-		    		chkGeneralColumns[x] = new JCheckBox(COL_NAMES[x], false);
-		    		chkGeneralColumns[x].setBackground(BGCOLOR);
-		    		chkGeneralColumns[x].addActionListener(new ActionListener() {
-						public void actionPerformed(ActionEvent e) {
-							checkAllGen();
-						}
-					});
-		    		generalColsPanel.add(chkGeneralColumns[x]);
-		    	}
-		    	chkGeneralColumns[GOindex].setEnabled(false);
-		    generalColsPanel.add(Box.createVerticalStrut(10));
-		    
-		    	JPanel checkGenPanel = Static.createRowPanel();
-		    	chkSelectAllGen = new JCheckBox("Check/uncheck all");
-		    	chkSelectAllGen.setSelected(false);
-		    	chkSelectAllGen.setBackground(BGCOLOR);
-		    	chkSelectAllGen.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent arg0) {
-						for(int x=1; x<chkGeneralColumns.length; x++) { // Skip GOindex
-							boolean isSel = chkSelectAllGen.isSelected();
-							chkGeneralColumns[x].setSelected(isSel);
-						}
+	    	/// General 
+	    	JPanel generalColsPanel = Static.createPagePanel();
+	    	generalColsPanel.setAlignmentY(Component.TOP_ALIGNMENT);
+	    	generalColsPanel.add(new JLabel("General"));
+	    	generalColsPanel.add(Box.createVerticalStrut(10));
+    	
+	    	chkGeneralColumns = new JCheckBox[COL_NAMES.length];
+	    	for(int x=0; x < COL_NAMES.length; x++) {
+	    		chkGeneralColumns[x] = new JCheckBox(COL_NAMES[x], false);
+	    		chkGeneralColumns[x].setBackground(BGCOLOR);
+	    		chkGeneralColumns[x].addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						checkAllGen();
 					}
 				});
-		    	checkGenPanel.add(chkSelectAllGen);
-		    	checkGenPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		    	generalColsPanel.add(checkGenPanel);
+	    		generalColsPanel.add(chkGeneralColumns[x]);
+	    	}
+	    	chkGeneralColumns[GOindex].setEnabled(false);
+		    generalColsPanel.add(Box.createVerticalStrut(10));
+		    
+	    	JPanel checkGenPanel = Static.createRowPanel();
+	    	chkSelectAllGen = new JCheckBox("Check/uncheck all");
+	    	chkSelectAllGen.setSelected(false);
+	    	chkSelectAllGen.setBackground(BGCOLOR);
+	    	chkSelectAllGen.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					for(int x=1; x<chkGeneralColumns.length; x++) { // Skip GOindex
+						boolean isSel = chkSelectAllGen.isSelected();
+						chkGeneralColumns[x].setSelected(isSel);
+					}
+				}
+			});
+	    	checkGenPanel.add(chkSelectAllGen);
+	    	checkGenPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+	    	generalColsPanel.add(checkGenPanel);
 	    	
 		    int rowBreak=10; // for both ec and de
 	//evidence code
 		 	JPanel ecColsPanel = Static.createPagePanel();
 		 	ecColsPanel.setAlignmentY(Component.TOP_ALIGNMENT);
-		    	if (ecColNames.length>0) { // pre v1.6.4 did not have EC in go_info   
-			    	ecColsPanel.add(new JLabel("Evidence Codes"));
-			    	ecColsPanel.add(Box.createVerticalStrut(10));
-			    
-			    	int ecNum = ecColNames.length;
-			    	chkECColumns = new JCheckBox[ecNum];
-			    	int nRow = ecNum;
-			    	if (ecNum>rowBreak) nRow=(int) ((ecNum/2.0)+0.5);
-			  
-			    	JPanel subPanel1 = Static.createPagePanel();
-			    subPanel1.setAlignmentY(Component.TOP_ALIGNMENT);
-			    	JPanel subPanel2 = Static.createPagePanel();
-			    	subPanel2.setAlignmentY(Component.TOP_ALIGNMENT);
-			    	    	
-			    	for (int x=0; x<ecNum; x++) {
-			    		chkECColumns[x] = new JCheckBox(ecColNames[x], false);
-			    		chkECColumns[x].setBackground(BGCOLOR);
-			    		chkECColumns[x].addActionListener(new ActionListener() {
-						public void actionPerformed(ActionEvent e) {
-							checkAllEC();
-						}
-					});
-			    		if (x<nRow) subPanel1.add(chkECColumns[x]);
-			    		else subPanel2.add(chkECColumns[x]);
-			    	}
-			    	if (nRow!=ecNum) {
-			    		JPanel subPanel =  Static.createRowPanel();
-				    	subPanel.add(subPanel1);
-				    	subPanel.add(Box.createHorizontalStrut(10));
-				    	subPanel.add(subPanel2);
-				    	ecColsPanel.add(subPanel);
-			    	}
-			    	else ecColsPanel.add(subPanel1);
-			    	ecColsPanel.add(Box.createVerticalStrut(10));
-			    	
-			    	JPanel checkECPanel = Static.createRowPanel();
-			    	chkSelectAllECs = new JCheckBox("Check/uncheck all");
-			    	chkSelectAllECs.setSelected(false);
-			    	chkSelectAllECs.setBackground(BGCOLOR);
-			    	chkSelectAllECs.addActionListener(new ActionListener() {
-						public void actionPerformed(ActionEvent arg0) {
-							for(int x=0; x<chkECColumns.length; x++) {
-								boolean isSel = chkSelectAllECs.isSelected();
-								chkECColumns[x].setSelected(isSel);
-							}
-						}
-					});
-			    	checkECPanel.add(chkSelectAllECs);
-			    	checkECPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-			    	ecColsPanel.add(checkECPanel);
-		    	}
-/////// DE
-		    	JPanel deColsPanel = Static.createPagePanel();
-		    	deColsPanel.setAlignmentY(Component.TOP_ALIGNMENT);
-	   
-		    	if (deColNames.size() > 0)
-		    	{
-		    	 	deColsPanel.add(new JLabel("GO DE P-value"));
-			    	deColsPanel.add(Box.createVerticalStrut(10));
-			    	
-			    	int deNum = deColNames.size();
-			    int 	nRow = deNum;
-			    	if (deNum>rowBreak) nRow=(int) ((deNum/2.0)+0.5);
-			    	
-		    		JPanel deSubPanel1 = Static.createPagePanel();
-		    		deSubPanel1.setAlignmentY(Component.TOP_ALIGNMENT);
-		    		JPanel deSubPanel2 = Static.createPagePanel();
-		    		deSubPanel2.setAlignmentY(Component.TOP_ALIGNMENT);
-		    		
-			    	chkDEColumns = new JCheckBox[deColNames.size()];
-			    	for(int x=0; x<chkDEColumns.length; x++) {
-			    		chkDEColumns[x] = new JCheckBox(deColNames.get(x), false);
-			    		chkDEColumns[x].setBackground(BGCOLOR);
-			    		chkDEColumns[x].addActionListener(new ActionListener() {
-							public void actionPerformed(ActionEvent e) {
-								checkAllDE();
-							}
-						});
-			    		if (x<nRow) deSubPanel1.add(chkDEColumns[x]);
-			    		else deSubPanel2.add(chkDEColumns[x]);
-			    	}
-			    	if (nRow!=deNum) {
-			    		JPanel subPanel =  Static.createRowPanel();
-				    	subPanel.add(deSubPanel1);
-				    	subPanel.add(Box.createHorizontalStrut(10));
-				    	subPanel.add(deSubPanel2);
-				    	deColsPanel.add(subPanel);
-			    	}
-			    	else deColsPanel.add(deSubPanel1);
-			    	deColsPanel.add(Box.createVerticalStrut(10));  	
+	    	if (ecColNames.length>0) { // pre v1.6.4 did not have EC in go_info   
+		    	ecColsPanel.add(new JLabel("Evidence Codes"));
+		    	ecColsPanel.add(Box.createVerticalStrut(10));
 		    
-			    JPanel checkDEPanel = Static.createRowPanel();
-			    	chkSelectAllDEs = new JCheckBox("Check/uncheck all");
-			    	chkSelectAllDEs.setSelected(false);
-			    	chkSelectAllDEs.setBackground(BGCOLOR);
-			    	chkSelectAllDEs.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent arg0) {
-						boolean isSel = chkSelectAllDEs.isSelected();
-						for(int x=0; x<chkDEColumns.length; x++)
-							chkDEColumns[x].setSelected(isSel);
+		    	int ecNum = ecColNames.length;
+		    	chkECColumns = new JCheckBox[ecNum];
+		    	int nRow = ecNum;
+		    	if (ecNum>rowBreak) nRow=(int) ((ecNum/2.0)+0.5);
+		  
+		    	JPanel subPanel1 = Static.createPagePanel();
+			    subPanel1.setAlignmentY(Component.TOP_ALIGNMENT);
+		    	JPanel subPanel2 = Static.createPagePanel();
+		    	subPanel2.setAlignmentY(Component.TOP_ALIGNMENT);
+		    	    	
+		    	for (int x=0; x<ecNum; x++) {
+		    		chkECColumns[x] = new JCheckBox(ecColNames[x], false);
+		    		chkECColumns[x].setBackground(BGCOLOR);
+		    		chkECColumns[x].addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						checkAllEC();
 					}
 				});
-			    	checkDEPanel.add(chkSelectAllDEs);
-			    	checkDEPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-			   
-			    	deColsPanel.add(checkDEPanel);
+		    		if (x<nRow) subPanel1.add(chkECColumns[x]);
+		    		else subPanel2.add(chkECColumns[x]);
 		    	}
+		    	if (nRow!=ecNum) {
+		    		JPanel subPanel =  Static.createRowPanel();
+			    	subPanel.add(subPanel1);
+			    	subPanel.add(Box.createHorizontalStrut(10));
+			    	subPanel.add(subPanel2);
+			    	ecColsPanel.add(subPanel);
+		    	}
+		    	else ecColsPanel.add(subPanel1);
+		    	ecColsPanel.add(Box.createVerticalStrut(10));
+		    	
+		    	JPanel checkECPanel = Static.createRowPanel();
+		    	chkSelectAllECs = new JCheckBox("Check/uncheck all");
+		    	chkSelectAllECs.setSelected(false);
+		    	chkSelectAllECs.setBackground(BGCOLOR);
+		    	chkSelectAllECs.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent arg0) {
+						for(int x=0; x<chkECColumns.length; x++) {
+							boolean isSel = chkSelectAllECs.isSelected();
+							chkECColumns[x].setSelected(isSel);
+						}
+					}
+				});
+		    	checkECPanel.add(chkSelectAllECs);
+		    	checkECPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		    	ecColsPanel.add(checkECPanel);
+	    	}
+/////// DE
+	    	JPanel deColsPanel = Static.createPagePanel();
+	    	deColsPanel.setAlignmentY(Component.TOP_ALIGNMENT);
+	   
+	    	if (deColNames.size() > 0)
+	    	{
+	    	 	deColsPanel.add(new JLabel("GO DE P-value"));
+		    	deColsPanel.add(Box.createVerticalStrut(10));
+		    	
+		    	int deNum = deColNames.size();
+			    int 	nRow = deNum;
+		    	if (deNum>rowBreak) nRow=(int) ((deNum/2.0)+0.5);
+		    	
+	    		JPanel deSubPanel1 = Static.createPagePanel();
+	    		deSubPanel1.setAlignmentY(Component.TOP_ALIGNMENT);
+	    		JPanel deSubPanel2 = Static.createPagePanel();
+	    		deSubPanel2.setAlignmentY(Component.TOP_ALIGNMENT);
+	    		
+		    	chkDEColumns = new JCheckBox[deColNames.size()];
+		    	for(int x=0; x<chkDEColumns.length; x++) {
+		    		chkDEColumns[x] = new JCheckBox(deColNames.get(x), false);
+		    		chkDEColumns[x].setBackground(BGCOLOR);
+		    		chkDEColumns[x].addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							checkAllDE();
+						}
+					});
+		    		if (x<nRow) deSubPanel1.add(chkDEColumns[x]);
+		    		else deSubPanel2.add(chkDEColumns[x]);
+		    	}
+		    	if (nRow!=deNum) {
+		    		JPanel subPanel =  Static.createRowPanel();
+			    	subPanel.add(deSubPanel1);
+			    	subPanel.add(Box.createHorizontalStrut(10));
+			    	subPanel.add(deSubPanel2);
+			    	deColsPanel.add(subPanel);
+		    	}
+		    	else deColsPanel.add(deSubPanel1);
+		    	deColsPanel.add(Box.createVerticalStrut(10));  	
+		    
+			    JPanel checkDEPanel = Static.createRowPanel();
+		    	chkSelectAllDEs = new JCheckBox("Check/uncheck all");
+		    	chkSelectAllDEs.setSelected(false);
+		    	chkSelectAllDEs.setBackground(BGCOLOR);
+		    	chkSelectAllDEs.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					boolean isSel = chkSelectAllDEs.isSelected();
+					for(int x=0; x<chkDEColumns.length; x++)
+						chkDEColumns[x].setSelected(isSel);
+				}});
+		    	checkDEPanel.add(chkSelectAllDEs);
+		    	checkDEPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		   
+		    	deColsPanel.add(checkDEPanel);
+	    	}
 	    	
 		   	/**** Select puts general and de side by side ****/
 		    JPanel sideBySidePanel = Static.createRowPanel();
-		    	sideBySidePanel.add(generalColsPanel);
-		    	sideBySidePanel.add(Box.createHorizontalStrut(30));
+		    sideBySidePanel.add(generalColsPanel);
+		    sideBySidePanel.add(Box.createHorizontalStrut(30));
 		    sideBySidePanel.add(ecColsPanel);
-		    	sideBySidePanel.add(Box.createHorizontalStrut(30));
-		    	sideBySidePanel.add(deColsPanel);
-		    	
-		    	sideBySidePanel.setMaximumSize(sideBySidePanel.getPreferredSize());
-		    	sideBySidePanel.setMinimumSize(sideBySidePanel.getPreferredSize());
-		    	sideBySidePanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+	    	sideBySidePanel.add(Box.createHorizontalStrut(30));
+	    	sideBySidePanel.add(deColsPanel);
 	    	
-		    	/////// Accept Discard
-		    	JPanel buttonPanel = Static.createRowPanel();
-		    	buttonPanel.setBackground(BGCOLOR);
-		    	JButton keepButton = new JButton("Accept");
-		    	keepButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					saveColumns();
-					theTableModel.fireTableStructureChanged();
-					tablePanel.tableResizeColumns();
-					
-					setVisible(false);
-					theGOQuery.showMain();
-				}
+	    	sideBySidePanel.setMaximumSize(sideBySidePanel.getPreferredSize());
+	    	sideBySidePanel.setMinimumSize(sideBySidePanel.getPreferredSize());
+	    	sideBySidePanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+    	
+	    	/////// Accept Discard
+	    	JPanel buttonPanel = Static.createRowPanel();
+	    	buttonPanel.setBackground(BGCOLOR);
+	    	JButton keepButton = new JButton("Accept");
+	    	keepButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				saveColumns();
+				theTableModel.fireTableStructureChanged();
+				tablePanel.tableResizeColumns();
+				
+				setVisible(false);
+				theGOQuery.showMain();
+			}
 			});
 		
 			JButton discardButton = new JButton("Discard");
@@ -298,27 +296,28 @@ public class BasicGOTablePanel {
 					theGOQuery.showMain();
 				}
 			});
-		    	buttonPanel.add(keepButton);
-		    	buttonPanel.add(Box.createHorizontalStrut(10));
-		    	buttonPanel.add(discardButton);
-		    	buttonPanel.setMaximumSize(buttonPanel.getPreferredSize());
-		    	buttonPanel.setMinimumSize(buttonPanel.getPreferredSize());
-		    	buttonPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-		    	
-		    	JLabel tmpLabel = new JLabel("<HTML><H2>Select columns to view</H2></HTML>");
-		    	tmpLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-		    	tmpLabel.setMaximumSize(tmpLabel.getPreferredSize());
-		    	tmpLabel.setMinimumSize(tmpLabel.getPreferredSize());
+	    	buttonPanel.add(keepButton);
+	    	buttonPanel.add(Box.createHorizontalStrut(10));
+	    	buttonPanel.add(discardButton);
+	    	buttonPanel.setMaximumSize(buttonPanel.getPreferredSize());
+	    	buttonPanel.setMinimumSize(buttonPanel.getPreferredSize());
+	    	buttonPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+	    	
+	    	JLabel tmpLabel = new JLabel("<HTML><H2>Select columns to view</H2></HTML>");
+	    	tmpLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+	    	tmpLabel.setMaximumSize(tmpLabel.getPreferredSize());
+	    	tmpLabel.setMinimumSize(tmpLabel.getPreferredSize());
 		    add(Box.createVerticalStrut(10));
-		    	add(tmpLabel);
-		    	add(Box.createVerticalStrut(10));
-		    	add(sideBySidePanel);
-		    	add(Box.createVerticalStrut(20));
-		    	add(buttonPanel);
-		    	setVisible(false);
-		    	
-		    	initSelections();
+	    	add(tmpLabel);
+	    	add(Box.createVerticalStrut(10));
+	    	add(sideBySidePanel);
+	    	add(Box.createVerticalStrut(20));
+	    	add(buttonPanel);
+	    	setVisible(false);
+	    	
+	    	initSelections();
 		} // end createColumnPanel
+		/************************************************/
 		private void loadInitData() {
 			try {
 				DBConn mDB = theMainFrame.getNewDBC();
@@ -376,31 +375,31 @@ public class BasicGOTablePanel {
 			setVisible(true);
 		 }
 		 private void checkAllGen() {
-		    	boolean allSelected = true;
-		    	for(int x=0; x<chkGeneralColumns.length && allSelected; x++)
-		    			allSelected = chkGeneralColumns[x].isSelected();
-		    	chkSelectAllGen.setSelected(allSelected);
+	    	boolean allSelected = true;
+	    	for(int x=0; x<chkGeneralColumns.length && allSelected; x++)
+	    			allSelected = chkGeneralColumns[x].isSelected();
+	    	chkSelectAllGen.setSelected(allSelected);
 		}
 	    private void checkAllEC() {
-	    		if (ecColNames.length == 0) return;
-	    	
-		    	boolean allSelected = true;
-		    	for(int x=0; x<chkECColumns.length && allSelected; x++)
-		    			allSelected = chkECColumns[x].isSelected();
-		    	chkSelectAllECs.setSelected(allSelected);
+    		if (ecColNames.length == 0) return;
+    	
+	    	boolean allSelected = true;
+	    	for(int x=0; x<chkECColumns.length && allSelected; x++)
+	    			allSelected = chkECColumns[x].isSelected();
+	    	chkSelectAllECs.setSelected(allSelected);
 		}
 	    private void checkAllDE() {
-		    	if (deColNames.size() == 0) return;
-		    
-		    	boolean allSelected = true;
-		    	for(int x=0; x<chkDEColumns.length && allSelected; x++)
-		    		allSelected = chkDEColumns[x].isSelected();
-		    	
-		    	chkSelectAllDEs.setSelected(allSelected);
+	    	if (deColNames.size() == 0) return;
+	    
+	    	boolean allSelected = true;
+	    	for(int x=0; x<chkDEColumns.length && allSelected; x++)
+	    		allSelected = chkDEColumns[x].isSelected();
+	    	
+	    	chkSelectAllDEs.setSelected(allSelected);
 		}
 	    private void saveColumns() {
-	    		String prefs="";
-	    		int x=0;
+	    	String prefs="";
+	    	int x=0;
 			for (; x<chkGeneralColumns.length; x++) {
 				boolean b = chkGeneralColumns[x].isSelected();
 				selectedCol[x] = b;
@@ -423,8 +422,8 @@ public class BasicGOTablePanel {
 			prefsRoot.put(prefLabel, prefs);
 	    }
 	    private void initSelections() {
-	    		nStatic = chkGeneralColumns.length;
-	    		nEC = (chkECColumns==null ? 0 : chkECColumns.length);
+	    	nStatic = chkGeneralColumns.length;
+	    	nEC = (chkECColumns==null ? 0 : chkECColumns.length);
 			nDE = (chkDEColumns==null ? 0 : chkDEColumns.length);
 			
 			totalColumns = nStatic + nDE + nEC;
@@ -555,15 +554,15 @@ public class BasicGOTablePanel {
 		    protected JTable table;
 
 		    public ColumnListener(JTable t) {
-			    	table = t;
-			    	bAscend = new boolean[selectedCol.length];
-			    	for(int x=0; x<bAscend.length; x++)
-			    		bAscend[x] = true;   
+		    	table = t;
+		    	bAscend = new boolean[selectedCol.length];
+		    	for(int x=0; x<bAscend.length; x++)
+		    		bAscend[x] = true;   
 		    }
 
 		    public void mouseClicked(MouseEvent e) {
-		    		sortTable(e.getX(), SwingUtilities.isLeftMouseButton(e));
-		    		theTableModel.fireTableDataChanged();
+		    	sortTable(e.getX(), SwingUtilities.isLeftMouseButton(e));
+		    	theTableModel.fireTableDataChanged();
 		    }
   	  	
   	  		private void sortTable(int xLocation, boolean leftClick) {
@@ -629,22 +628,22 @@ public class BasicGOTablePanel {
 
 				public Component prepareRenderer(
 				        TableCellRenderer renderer, int row, int column)
-				    {
-				        Component c = super.prepareRenderer(renderer, row, column);
-				       
-					    if (theTable.isRowSelected(row)) 	c.setBackground(Globalx.selectColor);
-					    else if (isDEtrim) {
-					    	 	Integer gonum = (Integer)(theResults.get(rowMap.get(row))[GOindex]);
-					    		if (treeFilterIn.contains(gonum)) c.setBackground(DETRIMCOLOR);
-					    		else 							 c.setBackground(Color.WHITE);
-					    }
-					    else {
-					    		boolean bBlueBG = ((row % 2) == 1);
-					    		if ( bBlueBG ) 					c.setBackground( Globalx.altRowColor );
-							else                             c.setBackground( null );
-					    }   
-				        return c;
+			    {
+			        Component c = super.prepareRenderer(renderer, row, column);
+			       
+				    if (theTable.isRowSelected(row)) 	c.setBackground(Globalx.selectColor);
+				    else if (isDEtrim) {
+				    	 	Integer gonum = (Integer)(theResults.get(rowMap.get(row))[GOindex]);
+				    		if (treeFilterIn.contains(gonum)) c.setBackground(DETRIMCOLOR);
+				    		else 							 c.setBackground(Color.WHITE);
 				    }
+				    else {
+				    		boolean bBlueBG = ((row % 2) == 1);
+				    		if ( bBlueBG ) 					c.setBackground( Globalx.altRowColor );
+						else                             c.setBackground( null );
+				    }   
+			        return c;
+			    }
 			};
 			theTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 			theTable.setCellSelectionEnabled(false);
@@ -836,13 +835,10 @@ public class BasicGOTablePanel {
 		private class BorderLessTableCellRenderer extends DefaultTableCellRenderer {
 		    private static final long serialVersionUID = 1L;
 		    public Component getTableCellRendererComponent(
-		            final JTable table,
-		            final Object value,
-		            final boolean isSelected,
-		            final boolean hasFocus,
-		            final int row,
-		            final int col) {
-
+		            final JTable table, final Object value,
+		            final boolean isSelected, final boolean hasFocus,
+		            final int row, final int col) 
+		    {
 		        final boolean showFocusedCellBorder = false; // change this to see the behavior change
 
 		        final Component c = super.getTableCellRendererComponent(
@@ -1128,36 +1124,36 @@ public class BasicGOTablePanel {
 	        
 	        // bottom buttons
 	        row = Static.createRowPanel();
-	    		btnOK = new JButton("OK");
-	    		btnOK.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						nMode=1;
-						setVisible(false);
-					}
-				});
-	    		row.add(btnOK);
-	    		row.add(Box.createHorizontalStrut(10));
-	    		btnCancel = new JButton("Cancel");
-	    		btnCancel.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						nMode=0;
-						setVisible(false);
-					}
-				});
-	    		
-	    		btnOK.setPreferredSize(btnCancel.getPreferredSize());
-	    		btnOK.setMaximumSize(btnCancel.getPreferredSize());
-	    		btnOK.setMinimumSize(btnCancel.getPreferredSize());
-	    		row.add(btnCancel);
-	    		page.add(row);
-	    		
-	    		page.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-	    		add(page);
-	    		
-	    		pack();
-	    		this.setResizable(false);
-	    		UIHelpers.centerScreen(this);
-	    	}
+    		btnOK = new JButton("OK");
+    		btnOK.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					nMode=1;
+					setVisible(false);
+				}
+			});
+    		row.add(btnOK);
+    		row.add(Box.createHorizontalStrut(10));
+    		btnCancel = new JButton("Cancel");
+    		btnCancel.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					nMode=0;
+					setVisible(false);
+				}
+			});
+    		
+    		btnOK.setPreferredSize(btnCancel.getPreferredSize());
+    		btnOK.setMaximumSize(btnCancel.getPreferredSize());
+    		btnOK.setMinimumSize(btnCancel.getPreferredSize());
+    		row.add(btnCancel);
+    		page.add(row);
+    		
+    		page.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+    		add(page);
+    		
+    		pack();
+    		this.setResizable(false);
+    		UIHelpers.centerScreen(this);
+    	}
 		public String getColumn() {return txtColName.getText();}
 		public int getMode() {return nMode;}
 		

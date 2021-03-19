@@ -1,76 +1,77 @@
+<!DOCTYPE html>
 <html>
 <!--#set var=TITLE value="Tour: runMultiTCW" -->
 <!--#include virtual="../../ssi/head.html" -->
-<body bgcolor="#FFFFFF" text="#000000" onLoad="init('runM')">
+<body  onLoad="init('runM')">
+<a id=top></a>
 <!--#include virtual="../ssi/start2t.html" -->
 
-<a name=top>
-<center><code>runMultiTCW</code>
-<table  border="0" cellspacing="0" cellpadding="2" height="18">
-<tr><td align="left" bgcolor="#666666" class="white" style="padding-bottom:4px;">
-<a href="#main" class="white">Main Panel</a> |
-<a href="#add" class="white">Additional Panel</a> |
-<a href="#stat" class="white">Example summary statistics |
+<div style="text-align: center"><big><ttp>runMultiTCW</ttp></big> - Build Comparison Database from Multiple sTCWdbs</div>
+
+<table  class="tablex" style="margin-left: auto;margin-right: auto;">
+<tr><td class="white" style="text-align:left; background-color:#666666; padding-bottom:4px;">
+<a href="#main" class="white">Main Panel</a> <mark class="white">|</mark> 
+<a href="#add" class="white">Additional Panel</a> <mark class="white">|</mark> 
+<a href="#stat" class="white">Example summary statistics</a> <mark class="white">|</mark> 
 <a href="#refs"  class="white" >References</a>
 </td></tr>
 </table>
 
-</center>	
-<p><code>runMultiTCW</code> takes as input two or more singleTCW (sTCW) databases 
+<p><ttp>runMultiTCW</ttp> takes as input two or more singleTCW (sTCW) databases 
 and builds a multiTCW (mTCW) database of clustered sequences. 
 See <a href="../../mtcw/UserGuide.html" class="ext" target="_blank">mTCW UserGuide</a> for details. 
 
-<a name=main>
+<a id=main></a>
 <h3>Main panel</h3>	
 
-<table cellpadding=5>
-<tr><td valign=top>	
+<table class="tablex">
+<tr><td class=top>	
 	
-<tt><b>1. sTCWdbs (single TCW databases)</tt></b>. 
+<ttl>1. sTCWdbs (single TCW databases)</ttl>. 
 
-<p><tt>Add/Edit</tt>: Define the input sTCW databases
-(see <a href=#add>panel #1</a>), which can be created from
+<p><ttx>Add/Edit</ttx>: Define the input sTCW databases
+(see <a href="#add">panel #1</a>), which can be created from
 nucleotide sequences (NT-sTCW) and/or protein sequences (AA-sTCW). 
 For NT-sTCW, the nucleotide sequences and translated ORFs will be loaded.
 
-<p><tt>Build database</tt>: Builds a database of all sequences, TPM, DE, annotations and GOs.
+<p><ttc>Build database</ttc>: Builds a database of all sequences, TPM, DE, annotations and GOs.
 
 
 <p>
-<tt><b>2. Compare sequences</tt></b>
+<ttl>2. Compare sequences</ttl>
 
-<p><tt>Run Search</tt>: This creates a file of all sequences and performs a heuristic search<sup>1</sup> against itself
-to determine similar sequences. The search program and parameters can be changed (see <a href=#add>panel #2</a>).
+<p><ttc>Run Search</ttc>: This creates a file of all sequences and performs a heuristic search<sup>1</sup> against itself
+to determine similar sequences. The search program and parameters can be changed (see <a href="#add">panel #2</a>).
 <p>
-<tt>Add Pair from Hits</tt>: All pairs from the Hit file are entered into the database.
+<ttc>Add Pair from Hits</ttc>: All pairs from the Hit file are entered into the database.
 
 
 <p>
-<tt><b>3. Cluster Sets</tt></b>. 
+<ttl>3. Cluster Sets</ttl>. 
 
-<p><tt>Add/Edit</tt>: Add a cluster type to be computed (see <a href=#add>panel #3</a>), where the methods are:
+<p><ttc>Add/Edit</ttc>: Add a cluster type to be computed (see <a href="#add">panel #3</a>), where the methods are:
 <ol>
 <li>BBH - TCW algorithm  for Bi-directional Best Hit between N sTCWdbs, where each resulting cluster has N sequences and all pairs are BBH.
 <li>Closure - TCW algorithm for determining clusters, where each sequence in a cluster has
 a hit, good similarity and good overlap with all other sequences in the cluster.
 <li>Best Hit - TCW algorithm for clustering on Hit ID or Hit Descriptions.
-<li>OrthoMCL<sup>3</sup> - <code>runMultiTCW</code> executes the 
-<code>orthoMCL</code> scripts and then loads the results into the mTCW database.
+<li>OrthoMCL<sup>3</sup> - <ttp>runMultiTCW</ttp> executes the 
+<ttp>orthoMCL</ttp> scripts and then loads the results into the mTCW database.
 <li>User Defined - load a file of clusters where the file format is the orthoMCL format.
 </ol>
 
-<p><tt>Add New Cluster</tt>: The clusters defined in the table will be computed and added to the database.		
+<p><ttc>Add New Cluster</ttc>: The clusters defined in the table will be computed and added to the database.		
 </td>
 
 <td>
 <a  href="img/runMultiTCW.png">
-<img width=450 src="img/runMultiTCW.png" border=1></a>
+<img src="img/runMultiTCW.png" alt="" style="border: 1px solid black; width: 450px"></a>
 </td> </tr>
 </table>
 
 <p>
-<tt><b>4. Statistics</tt></b> 	
-<p><tt>Add Stats</tt>: Add statistics (see <a href=#add>panel #4</a>), as follows.
+<ttl>4. Statistics</ttl> 	
+<p><ttc>Add Stats</ttc>: Add statistics (see <a href="#add">panel #4</a>), as follows.
 <ol>
 <li>PCC (Pearson Correlation Coefficient): This is only relevant if there are shared conditions, 
 as it is used to determine how similar the TPM values of the conditions are. 
@@ -82,11 +83,11 @@ only NT-sTCW databases, as it is based on the aligned nucleotide coding regions.
 <li>Each pair that has a hit and is in a cluster is pair-wise aligned. 
 <ol type='i'>
 <li>Statistics are computed from the alignment, such as synonymous and nonsynonymous codons, TS/TV, etc
- (see <a href=#stat>e.g. summary</a>).
+ (see <a href="#stat">e.g. summary</a>).
 <li>The KaKs files are written from the alignments for input to
-the <code>KaKs_calculator</code><sup>4</sup> along with a script to run from the terminal.
+the <ttp>KaKs_calculator</ttp><sup>4</sup> along with a script to run from the terminal.
 </ol>
-<li>Read KaKs files: This is only relevant if the <code>KaKs_calculator</code> has been
+<li>Read KaKs files: This is only relevant if the <ttp>KaKs_calculator</ttp> has been
 executed on the KaKs files.  It reads the results into the database.
 </ol>
 <br>
@@ -94,39 +95,40 @@ executed on the KaKs files.  It reads the results into the database.
 fails on a cluster, in which case MUSCLE<sup>5</sup>  is used.
 </ol>
 		
-<a name=add>
-<table width='100%'><tr><td align='left' >
+<a id=add></a>
+<table style="width: 100%"><tr><td style="text-align: left">
 <h3>Additional panels</h3>
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
-<table cellpadding=5>
-<tr><td valign=top>		
+
+<table class="tablex">
+<tr><td class=top>		
 1. Add single TCW database
-<br><a  href="img/addSingle.png"><img width=400 src="img/addSingle.png" border=1></a>
+<br><a  href="img/addSingle.png"><img src="img/addSingle.png" alt="" style="border: 1px solid black; width: 400px"></a>
 </td>
 
-<td valign=top>
+<td class=top>
 2. Run Search
 <a  href="img/hitSettings.png">
-<br><img width=400 src="img/hitSettings.png" border=1></a>
+<br><img src="img/hitSettings.png" alt="" style="border: 1px solid black; width: 400px"></a>
 </td>
 
 <tr>
-<td valign=top>
+<td class=top>
 3. Add a cluster method
-<br><a  href="img/method.png"><img width=400 src="img/method.png" border=1></a>
+<br><a  href="img/method.png"><img src="img/method.png" alt="" style="border: 1px solid black; width: 400px"></a>
 </td>
 
-<td valign=top>
-4. Add statistics. The counts on the bottom are updated after <tt>Run Stats</tt> is executed.
-<br><a  href="img/stats.png"><img width=300 src="img/stats.png" border=1></a>
+<td class=top>
+4. Add statistics. The counts on the bottom are updated after <ttc>Run Stats</ttc> is executed.
+<br><a  href="img/stats.png"><img src="img/stats.png" alt="" style="border: 1px solid black; width: 300px"></a>
 </td>
 </table>
 
-<a name=stat>
-<table width='100%'><tr><td align='left' >
+<a id=stat></a>
+<table style="width: 100%"><tr><td style="text-align: left">
 <h3>Example summary statistics</h3>
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 <pre>
 Project: ex  Cluster: 868  Pairs: 997  Seqs: 707  Hits: 2.1k   PCC Stats KaKs Multi
 
@@ -186,18 +188,19 @@ PAIRS: 997
                          Ka&gt;Ks    5                             Other    133  
 
 </pre>
-<a name=refs>
-<table width='100%'><tr><td align='left' >
+<a id=refs></a>
+<table style="width: 100%"><tr><td style="text-align: left">
 <h3>References</h3>
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
 
 <ol>
 <li>Supported search programs: any of the following programs can be used for the AA search, and blastn is used for the NT search.
 
 <ul>
-<li><b>BLAST</b>: 
+<li><ttp>BLAST</ttp>: 
 Altschul SF, Madden TL, Schaffer AA, Zhang J, Zhang Z, et al. (1997) Gapped BLAST and PSI-BLAST: a new generation of protein database search programs. Nucleic Acids Res 25: 3389-3402.
-<li><b>Diamond</b>: 
+<li><ttp>Diamond</ttp>: 
 Buchfink B, Xie C, Huson D (2015) Fast and Sensitive Protein Alignment 
 using DIAMOND, Nature Methods, 12, 59-60 doi:10.1038/nmeth.3176.
 </ul>
@@ -210,4 +213,5 @@ using DIAMOND, Nature Methods, 12, 59-60 doi:10.1038/nmeth.3176.
 </ol>
 
 <!--#include virtual="../../ssi/end.html" -->
-
+</body>
+</html>

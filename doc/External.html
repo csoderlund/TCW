@@ -2,76 +2,78 @@
 <html>
 <!--#set var=TITLE value="TCW External References" -->
 <!--#include virtual="./ssi/head.html" -->
+<body>
+<a id="top"></a>
 <!--#include virtual="./ssi/start1.html" -->
-<a name="top"> 
 <h3>
 	External software and databases
 </h3>
-The TCW uses the following external software packages, where they are all included with the TCW package the optional DE methods. <b><i>Please</i></b> reference any program in your publications that are used in your analysis. 
+The TCW uses the following external software packages, where they are all included with the TCW package the optional DE methods. <i>Please</i> reference any program in your publications that are used in your analysis. 
 <h4>
 	runAS (Annotation Setup)
 </h4>
 <ol>
-<li><code><b>UniProt</code></b>: though other databases can be used for annotation, the TCW has the best support for this database. <br>
+<li><ttp>UniProt</ttp>: though other databases can be used for annotation, the TCW has the best support for this database. <br>
 	Dimmer EC, Huntley RP, Alam-Faruque Y, Sawford T, O'Donovan C, et al. (2012) The UniProt-GO Annotation database in 2011. Nucleic Acids Res 40: D565-570. 
-	<li><code><b>Gene Ontology (GO)</b></code>: if UniProt is used, the TCW uses it along with the GO database for GO annotations. <br>
+	<li><ttp>Gene Ontology (GO)</ttp>: if UniProt is used, the TCW uses it along with the GO database for GO annotations. <br>
 	The GO consortium (2012) The Gene Ontology: enhancements for 2011. Nucleic Acids Res 40: D559-564. 
 </ol>
 <h4>
 	runSingleTCW (single species database)
 </h4>
 <ol>
-	<li><code><b>BLAST</code></b>: is used for assembly and annotation. <br>
+	<li><ttp>BLAST</ttp>: is used for assembly and annotation. <br>
 	Altschul SF, Madden TL, Schaffer AA, Zhang J, Zhang Z, et al. (1997) Gapped BLAST and PSI-BLAST: a new generation of protein database search programs. Nucleic Acids Res 25: 3389-3402. 
-	<li><code><b>DIAMOND</code></b>: maybe be used in place of Blast for super-fast annotation. <br>
-	Benjamin Buchfink, Chao Xie & Daniel H. Huson, Fast and Sensitive Protein Alignment using DIAMOND, Nature Methods, 12, 59–60 (2015) doi:10.1038/nmeth.3176. 
-	<li><code><b>CAP3</code></b>: is used for assembly. <br>
+	<li><ttp>DIAMOND</ttp>: maybe be used in place of Blast for super-fast annotation. <br>
+	Benjamin Buchfink, Chao Xie &amp; Daniel H. Huson, Fast and Sensitive Protein Alignment using DIAMOND, 
+	Nature Methods, 12, 59&ndash;60 (2015) doi:10.1038/nmeth.3176. 
+	<li><ttp>CAP3</ttp>: is used for assembly. <br>
 	Huang X, Madan A (1999) CAP3: A DNA sequence assembly program. Genome Res 9: 868-877. 	
-	<li><code><b>Transdecoder</code></b>: the scripts for creating the Markov model and scoring a sequence were re-programmed in Java for the TCW ORF finder. <br>
+	<li><ttp>Transdecoder</ttp>: the scripts for creating the Markov model and scoring a sequence were re-programmed in Java for the TCW ORF finder. <br>
 	Hass BJ, Papanicolaou A, Yassour M. et al. (2013) De novo transcript sequence reconstruction from RNA-seq using the Trinity platform for reference generation and analysis. Nature Protocols 8:1494-1512 
-	<li><code><b>UniProt</code></b> and <b>Gene Ontology (GO)</b>.
+	<li><ttp>UniProt</ttp> and Gene Ontology (GO).
 </ol>
 <h4>
 	runDE (Differential Expression)
 </h4>
 The following are all R packages. 
 <ol>
-	<li><code><b>edgeR</code></b>: differential expression (DE) analysis <br>
+	<li><ttp>edgeR</ttp>: differential expression (DE) analysis <br>
 	Robinson MD, McCarthy DJ, Smyth GK (2010) edgeR: a Bioconductor package for differential expression analysis of digital gene expression data. Bioinformatics 26: 139-140. 
-	<li><code><b>DESeq</code></b>: differential expression (DE) analysis <br>
+	<li><ttp>DESeq</ttp>: differential expression (DE) analysis <br>
 	Love MI, Huber W and Anders S (2014) Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2. Genome Biology 15:550. 
-	<li><code><b>GOSeq</code></b>: GO differential expression <br>
+	<li><ttp>GOSeq</ttp>: GO differential expression <br>
 	Young MD, Wakefield MJ, Smyth GK, Oshlack A (2010) Gene ontology analysis for RNA-seq: accounting for selection bias. Genome Biol 11: R14. 
 </ol>
 <h4>
 	runMultiTCW (compare database created from single species sTCW databases)
 </h4>
 <ol>
-	<li><code><b>orthoMCL</code></b>: to compute orthologous and paralogous clusters. <br>
+	<li><ttp>orthoMCL</ttp>: to compute orthologous and paralogous clusters. <br>
 	Li L, Stoeckert CJ, Jr., Roos DS (2003) OrthoMCL: identification of ortholog groups for eukaryotic genomes. Genome Res 13: 2178-2189. 
-	<li><code><b>KaKs_Calculator</code></b>: compute Ka/Ks values. <br>
+	<li><ttp>KaKs_Calculator</ttp>: compute Ka/Ks values. <br>
 	Zhang Z, Li J, Xiao-Qian Z, Wang J, Wong, G, Yu J (2006) KaKs_Calculator: Calculating Ka and Ks through model selection and model averaging. Geno. Prot. Bioinfo. Vol 4 No 4. 259-263. 
-	<li><code><b>MAFFT</code></b>: computes multiple alignment for scoring. <br>
+	<li><ttp>MAFFT</ttp>: computes multiple alignment for scoring. <br>
 	Katoh K, Standley DM (2013) MAFFT Multiple Sequence Alignment Software Version 7: Improvements in Performance and Usability. Molecular Biology and Evolution Vol 30, Issue 4 772:780 
-	<li><code><b>MUSCLE</code></b>: computes multiple alignment of a cluster. <br>
+	<li><ttp>MUSCLE</ttp>: computes multiple alignment of a cluster. <br>
 	Edgar RC (2004) MUSCLE: multiple sequence alignment with high accuracy and high throughput. Nucleic Acids Res 32: 1792-1797. 
-	<li><code><b>MstatX</code></b>: scores the multiple alignment. <br>
+	<li><ttp>MstatX</ttp>: scores the multiple alignment. <br>
 	Guillaume Collet (2012) https://github.com/gcollet/MstatX. 
-	<li><code><b>BLAST</b></code> and <code><b>DIAMOND</code></b> for comparisons.
+	<li><ttp>BLAST</ttp> and <ttp>DIAMOND</ttp> for comparisons.
 </ol>
 <h4>
 	viewSingleTCW (view sTCW databases)
 </h4>
 <ol>
-	<li><code><b>BLAST</b></code> and <code><b>DIAMOND</code></b> for comparisons.
+	<li><ttp>BLAST</ttp> and <ttp>DIAMOND</ttp> for comparisons.
 </ol>
 <h4>
 	viewMultiTCW (view mTCW databases)
 </h4>
 <ol>
-	<li><code><b>BLAST</b></code>  and <code><b>DIAMOND</code></b> for comparisons.
-	<li><code><b>MAFFT</code></b> and <code><b>MUSCLE</code></b> for multiple alignments.
+	<li><ttp>BLAST</ttp>  and <ttp>DIAMOND</ttp> for comparisons.
+	<li><ttp>MAFFT</ttp> and <ttp>MUSCLE</ttp> for multiple alignments.
 </ol>
-<p>
 <!--#include virtual="./ssi/end.html" -->
+</body>
 </html>

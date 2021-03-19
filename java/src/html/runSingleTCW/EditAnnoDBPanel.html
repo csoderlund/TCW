@@ -1,95 +1,101 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
+<head>
 <title>Add or Edit annoDB</title>
- <body style="padding:20px;width:650px;font-family: Times;">
- <h2>Add annoDB</h2>
-    Define the annoDBs (e.g. UniProt taxonomic databases) to search against. 
-    UniProt is strongly supported as it will 
-    also provide GO annotations if desired (from the .dat files).
-    Additionally, it is highly recommended that you obtain <tt>Diamond</tt> 
-    since it is significally faster than <tt>Blast</tt>. 
-	<p>
-	<table border=0 width="100%" cellpadding=3>
-		<tr>
-			<td valign="top">Taxonomy</td>
-			<td>
-				The taxonomy of an annoDB (e.g. 'plants') or it can be some other identifier.  
-				<b><i>Naming Rules</i></b>:
-				<ul>
-				<li>The annoDB is named by its DBtype + Taxonomy, e.g. "SP-plants".
-				
-				<li><b><i>DBtype</i></b>: If the annotation file uses definition lines like
-				">sp|Q6V4H0|10HGO_CATRO", then the two letters before the "|" is used as the DBtype, 
-				e.g. "SP" for SwissProt, "TR" for TrEMBL.
-				Otherwise, the DBtype is "PR" for proteins files and "NT" for nucleotide files.
-				
-				<li>Often the annoDB name is abbreviated in viewSingleTCW (e.g. SPpla). Hence, it is important
-				that the DBtype plus the first 3 letters of the taxonomy are unique.
-				</ul>
-				You can query viewSingleTCW for all hits of a given taxonomy and view the taxonomy
-				as a column. 
-			   </td>
-		</tr>
-			<td valign="top" nowrap>annoDB FASTA File</td>
-			<td>
-			
-			A FASTA file with any of the following suffixes: .fa, .fasta, .fna, .ffn, .faa, .frn.
-			It is valid to have the compress ".gz" added to any of these suffixes. If your file has
-			a different suffix, use the <b>File Format:</b> "All Files".
-			<ul>
-			<li>For "Generate Hit Tabular File", the sequences will be searched against this file.
-			<li>For both the "Generate" and the "Use Existing" options, this file is used to extract
-			the description and species information.
-			</ul>
-		<tr>
-			<td valign="top" nowrap>Date of annoDB download</td>
-			<td>This will be used as the date of the annoDB. 
-			<br>FORMAT: yyyy-mm-dd
-			<br>If none is supplied, the date of the file on disk is used. 
-			</td>
-		</tr>
+<style>
+.tablex    		{border: 0px; padding: 3px; border-spacing: 3px; }
+.tablex td 		{border: 0px; padding: 3px; border-spacing: 3px}
+</style>
+</head>
+<body style="padding:20px;width:650px;font-family:Times">
+
+<h2>Add annoDB</h2>
+Define the annoDBs (e.g. UniProt taxonomic databases) to search against. 
+See the <b>runAS</b> Help and on-line documentation for instructions on annoDBs.
+
+<table class=tablex>
+<tr>
+	<td valign="top"><b>Taxonomy</b></td>
+	<td>
+		The taxonomy of an annoDB (e.g. 'plants') or it can be some other identifier.  
+		<br><u><i>Naming Rules</i></u>:
+		<ul>
+		<li>The annoDB is named by its DBtype + Taxonomy, e.g. "SP-plants".
 		
-		<tr><td valign="top" nowrap>Generate Hit Tabular File
-			 <td>The sequences will be searched against the FASTA file and loaded into the database.
-		<tr>
-			<td valign="top" nowrap>&nbsp;&nbsp;&nbsp;&nbsp;Search program</td>
-			<td><tt>Diamond</tt> and <tt>Blast</tt>. These are supplied in the <tt>/Ext</tt>
-			directory.
-		    </td>
-		</tr>
+		<li><u><i>DBtype</i></u>: If the annotation file uses definition lines like
+		">sp|Q6V4H0|10HGO_CATRO", then the two letters before the "|" are used as the DBtype, 
+		e.g. "SP" for SwissProt, "TR" for TrEMBL.
+		Otherwise, the DBtype is "PR" for proteins files and "NT" for nucleotide files.
 		
-		<tr>
-			<td valign="top" nowrap>&nbsp;&nbsp;&nbsp;&nbsp;Parameters</td>
-			<td>Add or change the search parameters; do not leave this blank.
-			TCW will automatically add the number of CPUs and output file name.
-			<br>See the documentation for the search program for explanation of their parameters. 
-			<i><b>TCW does not check the correctness of changed parameters.</b></i> 
-			</td>
-		</tr>
+		<li>Often the annoDB name is abbreviated in <tt>viewSingleTCW</tt> (e.g. SPpla). Hence, it is important
+		that the DBtype plus the first 3 letters of the taxonomy are unique.
+		</ul>
+		You can query <tt>viewSingleTCW</tt> for all hits of a given taxonomy and view the taxonomy
+		as a column. 
+	   </td>
+</tr>
+<tr>
+		<td valign="top"><b>annoDB FASTA File</b></td>
+		<td>
 		
-		<tr><td valign="top" nowrap>Use Existing Hit Tabular File 
-			 <td>If the search has already been performed, load the existing file (see below).
-			 
-		<tr>
-			<td valign="top" nowrap>&nbsp;&nbsp;&nbsp;&nbsp;Hit Tabular File</td>
-			<td>User supplied tabular file of search results that correspond to the "annoDB FASTA file".
-			The file should end with ".tab".
-			</td>
-		</tr>
-		
-	</table>
+		A FASTA file with any of the following suffixes: .fa, .fasta, .fna, .ffn, .faa, .frn.
+		It is valid to have the compress ".gz" added to any of these suffixes. If your file has
+		a different suffix, use the <b>File Format:</b> "All Files".
+		<ul>
+		<li>For <b>Generate Hit Tabular File</b>, the sequences will be searched against this file.
+		<li>For both the <b>Generate</b> and the <b>Use Existing</b> options, this file is used to extract
+		the description and species information.
+		</ul>
+</tr>
+<tr>
+		<td valign="top"><b>Date of annoDB download</b></td>
+		<td>This will be used as the date of the annoDB. 
+		<br>FORMAT: yyyy-mm-dd
+		<br>If none is supplied, the date of the file on disk is used. 
+		</td>
+</tr>		
+<tr><td valign="top"><b>Generate Hit Tabular File</b>
+		 <td>The sequences will be searched against the FASTA file and loaded into the database.
+</tr>
+<tr>
+		<td valign="top" nowrap>&nbsp;&nbsp;&nbsp;&nbsp;<u>Search program</u></td>
+		<td><tt>DIAMOND</tt> and <tt>BLAST</tt>. These are supplied in the <tt>/Ext</tt>
+		directory.
+		</td>
+</tr>
+	
+<tr>
+		<td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;<u>Parameters</u></td>
+		<td>Add or change the search parameters; do not leave this blank.
+		TCW will automatically add the number of CPUs and output file name.
+		<br>See the documentation for the search program for explanation of their parameters. 
+		<i><u>TCW does not check the correctness of changed parameters.</u></i> 
+		</td>
+</tr>
+	
+<tr><td valign="top"><b>Use Existing Hit Tabular File</b> 
+		 <td>If the search has already been performed, load the existing file (see below).
+		 
+<tr>
+		<td valign="top" nowrap>&nbsp;&nbsp;&nbsp;&nbsp;<u>Hit Tabular File</u></td>
+		<td>User supplied tabular file of search results that correspond to the <b>annoDB FASTA file</b>.
+		The file should end with ".tab".
+		</td>
+</tr>
+	
+</table>
 	
     
-    <h4>Use Existing Hit Tabular File</h4>
-    If the search has previously been performed by TCW, it will recognize that the file
-    exists and will prompt you as to whether you want to re-use it. That is, you do not 
-    need to enter the file here.
-    
-    <p>The corresponding annoDB FASTA file still needs to be provided to extract
-			 the description and species.
-			 
-	<h2>Edit annoDB</h2>
-	Only the taxonomy can be changed. Do not edit the 'annoDB FASTA File' name in the sTCW.cfg
-	file or the change will not work. 
+<h3>Use Existing Hit Tabular File</h3>
+If the search has previously been performed by TCW, it will recognize that the file
+exists and will prompt you as to whether you want to re-use it. That is, you do not 
+need to enter the file here; you only need to enter the file name here if the tabular
+file's name is different from the default.
+
+<p>The corresponding <b>annoDB FASTA file</b> still needs to be provided to extract
+		 the description and species.
+		 
+<h2>Edit annoDB</h2>
+After the annoDB has been added to the database, only the taxonomy can be changed. 
 </body>
 </html>

@@ -1,82 +1,75 @@
+<!DOCTYPE html>
 <html>
 <!--#set var=TITLE value="Tour: runDE" -->
 <!--#include virtual="../../ssi/head.html" -->
-<body bgcolor="#FFFFFF" text="#000000" onLoad="init('runDE')">
+<body  onLoad="init('runDE')">
+<a id=top></a>
 <!--#include virtual="../ssi/start2t.html" -->
 
-<a name=start>
-<center><code>runDE</code>
-<table  border="0" cellspacing="0" cellpadding="2" height="18">
-<tr><td align="left" bgcolor="#666666" class="white" style="padding-bottom:4px;">
-<a href="#main" class="white">runDE</a> |
-<a href="#batch" class="white">Batch</a> |
-<a href="#R" class="white">R-scripts</a> |
+<div style="text-align: center"><big><ttp>runDE</ttp></big> - Differential Expression</div>
+<table  class="tablex" style="margin-left: auto;margin-right: auto;">
+<tr><td class="white" style="text-align:left; background-color:#666666; padding-bottom:4px;">
+<a href="#main" class="white">runDE</a> <mark class="white">|</mark> 
+<a href="#batch" class="white">Batch</a> <mark class="white">|</mark> 
+<a href="#R" class="white">R-scripts</a> <mark class="white">|</mark> 
 <a href="#refs"  class="white" >References</a>
 </td></tr>
-</table>
-</center>	
-
-<a name=main>
-<p><code>runDE</code> adds differential expression (DE) to a singleTCW database.
-It uses JRI (Java-R interface) to R methods. TCW supplies <tt>edgeR<sup>1</sup></tt>, <tt>EDSeq2<sup>2</sup></tt> and <tt>GOseq<sup>3</sup></tt>,
+</table>	
+<a id=main></a>
+<p><ttp>runDE</ttp> adds differential expression (DE) to a singleTCW database.
+It uses JRI (Java-R interface) to R methods. TCW supplies <ttp>edgeR<sup>1</sup></ttp>, <ttp>EDSeq2<sup>2</sup></ttp> and <ttp>GOseq<sup>3</sup></ttp>,
 or the user can supply an R-script to a method. 
 See <a href="../../stcw/DiffExp.html" class="ext" target="_blank">Differential Expression Guide</a> for details. 
-<table width=100% cellpadding=5>
-			<tr>
-				<td>		
 
-				<p>1. Select one condition from group 1 and one condition from group 2.
-				<p>2. Select a method.
-				<p>3. Only select <tt>Fixed Dispersion</tt> if no replicates. 
-				Only select <tt>Apply FDR</tt> if using an R-script that does not provide FDR adjusted p-values. 
-				<p>4. Click <tt>Save results in p-value column</tt> to save the results in the database. If the two conditions
-				have been selected, it will provide a default name (that can be over-written).
-				<p>5. <tt>Group 1 - Group 2</tt> will run the DE method and (if Save selected) add the results to the database.
-				<p>6. When all columns have been added, click on the <tt>Select p-value column</tt> until
-				it says <tt>All p-value columns</tt>, then select <tt>Execute GOseq</tt>. 
-				<p><p>On the terminal window, it will be left in R so that you can execute
-				R commands. The output to terminal suggests some commands to view graphs of the 
-				results.			
-				
-				</td>
-				<td>
-					<center><font size=2>(Click to see larger)</font></center>
-					<a name="Fig1">
-					<a  href="img/runDE.png">
-					<img width=500 src="img/runDE.png" border=1></a>
-				</td>
-			</tr>
-			</table>
-<p>		
-<a name=batch>
-<table width='100%'><tr><td align='left' >
+<table class="tablex">
+<tr>
+	<td class=top>		
+	<p>1. Select one condition from group 1 and one condition from group 2.
+	<p>2. Select a method.
+	<p>3. Only select <ttc>Fixed Dispersion</ttc> if no replicates. 
+	<p>4. Click <ttc>Save results in p-value column</ttc> to save the results in the database. If the two conditions
+	have been selected, it will provide a default name (that can be over-written).
+	<p>5. <ttc>Group 1 - Group 2</ttc> will run the DE method and (if Save selected) add the results to the database.
+	<p>6. When all columns have been added, click on the <ttc>Select p-value column</ttc> until
+	it says <ttc>All p-value columns</ttc>, then select <ttc>Execute GOseq</ttc>. 
+	<p><p>On the terminal window, it will be left in R so that you can execute
+	R commands. The output to terminal suggests some commands to view graphs of the 
+	results.			
+	</td>
+	<td>
+		<a id="Fig1"></a>
+		<a  href="img/runDE.png">
+		<img src="img/runDE.png" alt="" style="border: 1px solid black; width: 450px"></a>
+	</td>
+</tr>
+</table>
+	
+<a id=batch></a>
 <h4>Batch mode</h4>
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
 
-<tt>All Pairs for Group 1</tt>: All conditions in Group 1 will be paired for DE analysis. For example, if Rhiz, Root, and Stem are selected, then DE columns RhRo, RhSt and RoSt will be computed.
-<p><tt>All Pairs from File</tt>: A file will be read where the first column is Group 1, the second is Group 2 and the third is the column name. All entries will be computed and added to the database.
-<p>
-<a name=R>
-<table width='100%'><tr><td align='left' >
+<ttc>All Pairs for Group 1</ttc>: All conditions in Group 1 will be paired for DE analysis. For example, if Rhiz, Root, and Stem are selected, then DE columns RhRo, RhSt and RoSt will be computed.
+<p><ttc>All Pairs from File</ttc>: A file will be read where the first column is Group 1, the second is Group 2 and the third is the column name. All entries will be computed and added to the database.
+
+<a id=R></a>
 <h4>R-scripts</h4>
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
-
 A script of R commands can be provided, which uses the variables created by 
-<code>runDE</code> to compute DE. <code>RunDE</code> 
+<ttp>runDE</ttp> to compute DE. <ttp>RunDE</ttp> 
 writes the data into the R environment (e.g. the count data is written to a matrix called 
-<tt>countData</tt>), executes the R script using the <tt>source</tt> command, and 
-reads the results from the variable called <tt>results</tt>.  Two scripts are supplied as example.
+<ttx>countData</ttx>), executes the R script using the <ttx>source</ttx> command, and 
+reads the results from the variable called <ttx>results</ttx>.  Two scripts are supplied as example.
 <p>
 
-<table width='100%'><tr><td align='left' >
-<a name=refs>
+<a id=refs></a>
+<table style="width: 100%"><tr><td style="text-align: left">
 <h3>References</h3>
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
 <ol>
-<li><b>edgeR</b> - Robinson MD, McCarthy DJ, Smyth GK (2010) edgeR: a Bioconductor package for differential expression analysis of digital gene expression data. Bioinformatics 26: 139-140.
-<li><b>DESeq2</b> - Love MI, Huber W and Anders S (2014) Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2. Genome Biology 15:550.
-<li><b>GOSeq</b> - Young MD, Wakefield MJ, Smyth GK, Oshlack A (2010) Gene ontology analysis for RNA-seq: accounting for selection bias. Genome Biology 11: R14.
+<li><ttp>edgeR</ttp> - Robinson MD, McCarthy DJ, Smyth GK (2010) edgeR: a Bioconductor package for differential expression analysis of digital gene expression data. Bioinformatics 26: 139-140.
+<li><ttp>DESeq2</ttp> - Love MI, Huber W and Anders S (2014) Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2. Genome Biology 15:550.
+<li><ttp>GOSeq</ttp> - Young MD, Wakefield MJ, Smyth GK, Oshlack A (2010) Gene ontology analysis for RNA-seq: accounting for selection bias. Genome Biology 11: R14.
 </ol>
 <!--#include virtual="../../ssi/end.html" -->
+</body>
 </html>
 

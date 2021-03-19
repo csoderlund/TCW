@@ -1,63 +1,61 @@
+<!DOCTYPE html>
 <html>
 <!--#set var=TITLE value="Tour: viewSingle AnnoDB Hits" -->
 <!--#include virtual="../../ssi/head.html" -->
-<body bgcolor="#FFFFFF" text="#000000" onLoad="init('anno')">
+<body  onLoad="init('anno'); init2('viewS')">
 <!--#include virtual="../ssi/start2t.html" -->
-
-<a name=start>
+<a id=top></a>
 <!--#include virtual="./ssi/view_stcw.html" -->
-<center><code>AnnoDB Hit Query</code></center>
+<div style="text-align: center"><big><ttc>Anno Hit Query</ttc></big></div>
 
-<p>The  <tt>annoDB Hits</tt>  option under  <tt>Basic Query</tt>  searches by hit ID, hit Description and/or filters.
+<p>The  <ttc>annoDB Hits</ttc>  option under  <ttc>Basic Query</ttc>  searches by hit ID, hit Description and/or filters.
 <ul>
-<li>Select the <tt>Search</tt> checkbox to enter a substring for searching. 
-<li>Select the <tt>Filters</tt> checkbox to set one or more associated filters. 
-<li>Both <tt>Search</tt> and  <tt>Filters</tt> can be set; all filters must pass for a hit to be shown.
+<li>Select the <ttc>Search</ttc> checkbox to enter a substring for searching. 
+<li>Select the <ttc>Filters</ttc> checkbox to set one or more associated filters. 
+<li>Both <ttc>Search</ttc> and  <ttc>Filters</ttc> can be set; all filters must pass for a hit to be shown.
 <li>The line above the table shows the filters applied.
-<li>Select a hit followed by  <tt>View Sequences</tt>  will show all the associated sequences in the <tt>Sequence Table</tt>.
+<li>Select a hit followed by  <ttc>View Sequences</ttc>  will show all the associated sequences in the <ttx>Sequence Table</ttx>.
 </ul>
-<p><a  href="img/hitQuery.png"><img width=800 src="img/hitQuery.png" border=1></a>
+<p><img src="img/hitQuery.png" alt="" style="border: 1px solid black; width: 800px">
 
-<p>Uncheck the <tt>Group by Hit ID</tt> to view the sequences.
-<br><a  href="img/hitQuerySeq.png">
-<img width=800 src="img/hitQuerySeq.png" border=1></a>
+<p>Uncheck the <ttc>Group by Hit ID</ttc> to view the sequences.
+<br><img  src="img/hitQuerySeq.png" alt="" style="border: 1px solid black; width: 800px">
 
 <p>The align option shows the alignment of all sequences that have been assigned to a hit. The alignment shown below uses dynamic programming.
-<br><a  href="img/hitAlign.png">
-<img width=800 src="img/hitAlign.png" border=1></a>
+<br><img  src="img/hitAlign.png" alt="" style="border: 1px solid black; width: 800px">
 
 <h3>Filters and Columns</h3>
 <table>
-<tr><td valign="top">
-<tt>Filters Seq</tt>: This row of options apply to the sequences that align to the annoDB hit (generally protein, but can be nucleotide).
-<ul><li>Selecting <tt>TPM</tt> brings up the window on the right. By selecting "RoSt", which is the p-value for the
+<tr><td class="top">
+<ttc>Filters Seq</ttc>: This row of options apply to the sequences that align to the annoDB hit (generally protein, but can be nucleotide).
+<ul><li>Selecting <ttc>TPM</ttc> brings up the window on the right. By selecting "RoSt", which is the p-value for the
 counts of Root compared to Stem, the result would be all annoDB hits that have at least one sequence
 with RoSt&lt;0.05. 
-
-<td><a  href="img/hitCount.png"><img width=500 src="img/hitCount.png" border=1></a>
-
-<tr><td valign="top">
-<tt>Filters Hit</tt>: This row of options apply to the annotation assigned to the annoDB hit.
-<ul><li>Selecting <tt>AnnoDBs</tt> brings up a window of all available annoDBs, e.g. "sp -- plants", where one or more
-of these may be selected. By default, they are all selected.
-<li>Selecting <tt>Species</tt> brings up a window of all available species (shown on the right), where one or more may be selected. By default,
-they are all selected.
-<li>Selecting <tt>GO, etc</tt> brings up the window shown below.
 </ul>
-<a  href="img/hitGO.png"><img width=300 src="img/hitGO.png" border=1></a>
-<td>
-<a  href="img/hitSpecies.png"><img width=500 src="img/hitSpecies.png" border=1></a></center>
+<td><img  src="img/hitCount.png" alt="" style="border: 1px solid black; width: 500px">
+
+<tr><td class="top">
+	<ttc>Filters Hit</ttc>: This row of options apply to the annotation assigned to the annoDB hit.
+	<ul><li>Selecting <ttc>AnnoDBs</ttc> brings up a window of all available annoDBs, e.g. "sp -- plants", where one or more
+	of these may be selected. By default, they are all selected.
+	<li>Selecting <ttc>Species</ttc> brings up a window of all available species (shown on the right), where one or more may be selected. By default,
+	they are all selected.
+	<li>Selecting <ttc>GO, etc</ttc> brings up the window shown below.
+	</ul>
+	<img  src="img/hitGO.png" alt="" style="border: 1px solid black; width: 300px">
+
+	<td><img  src="img/hitSpecies.png" alt="" style="border: 1px solid black; width: 500px">
 
 <tr><td>&nbsp;<td>&nbsp;
 <tr><td>&nbsp;<td>&nbsp;
 
-<tr><td valign="top"><tt>Columns</tt>: The window on the right are the available columns for this table. These can be changed without running <tt>BUILD TABLE</tt> again.
-<td><a  href="img/hitColumns.png"><img width=500 src="img/hitColumns.png" border=1></a></center>
+<tr><td class="top"><ttc>Columns</ttc>: The window on the right are the available columns for this table. These can be changed without running <ttc>BUILD TABLE</ttc> again.
+	<td><img  src="img/hitColumns.png" alt="" style="border: 1px solid black; width: 500px">
 </table>
-
  
-<table width='100%'><tr><td align='left' >
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
-</table>
+<table style="width: 100%"><tr><td style="text-align: left">
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
 <!--#include virtual="../../ssi/end.html" -->
+</body>
+</html>

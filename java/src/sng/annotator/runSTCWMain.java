@@ -3,8 +3,6 @@ package sng.annotator;
 import java.io.*;
 import java.util.Vector;
 import java.util.HashSet;
-import java.sql.ResultSet;
-
 
 import sng.database.Globals;
 import sng.database.Overview;
@@ -18,9 +16,10 @@ import util.file.FileHelpers;
 import util.methods.ErrorReport;
 import util.methods.Out;
 
-/** 
- * 2/6/19 rename CoreMain to runSTCWMain
-* annotate a specified dataset using its sTCW.cfg parameters.
+/**
+ * Main routine - called from execAnno or from runSingleTCW on annotate 
+ * 	annotate a specified dataset using its sTCW.cfg parameters.
+ * 	2/6/19 rename CoreMain to runSTCWMain
 */
 public class runSTCWMain 
 {	
@@ -390,36 +389,43 @@ public class runSTCWMain
 	{
 		boolean rc = true;
 		String godbName = godb;
-		if (godbName == null || godbName.equals(""))
-		{
+		if (godbName == null || godbName.equals("")) {
 			rc = false;
 			Out.PrtSpMsg(1, "No GO database");
 			if (dieflag)  Out.die("Set GO database in runSingleTCW before working with GOs (see runSingleTCW annoDB Options)");
 		}
-		else
-		{
-			try
-			{
+		else{
+			try{
 				Out.PrtSpMsg(1, "GO database = " + godbName);
 				
-				if (!DBConn.checkMysqlDB("runSingle ", hostsObj.host(),godbName,hostsObj.user(),hostsObj.pass()))
-				{
-					if (!dieflag) Out.PrtWarn("GO database " + godbName + " is missing; ignoring GO step\n");
-					else Out.die("GO database " + godbName + " not found");
+				if (!DBConn.checkMysqlDB("runSingle ", hostsObj.host(),godbName,hostsObj.user(),hostsObj.pass())){
+					if (!dieflag) 	Out.PrtWarn("GO database " + godbName + " is missing; ignoring GO step\n");
+					else 			Out.die("GO database " + godbName + " not found");
 					return false;
 				}
 				
 				DBConn goDB = DoGOs.connectToGODB(hostsObj.host(),hostsObj.user(),hostsObj.pass(), godbName);
-				if (goDB == null)
-				{
-					if (!dieflag) Out.PrtWarn("GO database " + godbName + " is not current; ignoring GO step\n");
-					else Out.die("GO database " + godbName + " is not current");
+				if (goDB == null) {
+					if (!dieflag) 	Out.PrtWarn("GO database " + godbName + " is not current; ignoring GO step\n");
+					else 			Out.die("GO database " + godbName + " is not current");
 					return false;
 				}
-				String upTbl = godbName + ".PAVE_Uniprot";
-				ResultSet rs = goDB.executeQuery("select * from " + upTbl + " limit 1");
-				if (!rs.first()) 
-				{
+				// --- pre-v318 -------------------------//
+				if (goDB.tableExist("PAVE_Uniprot")) 
+					fixOldGOdb(goDB); 
+				boolean isOBO = (goDB.tableColumnExists(Globalx.goMetaTable, "isOBO"));
+				if (!isOBO) 
+					Out.PrtWarn("GO Slims are not available with pre-v318 GOdbs");
+				//-----------------------------------------///
+				
+				// Verify GOdb
+				String upTab = Globalx.goUpTable;
+				boolean b = goDB.tableExist(upTab);
+				if (b) {
+					int cnt = goDB.executeCount("select count(*) from " + upTab);
+					b = (cnt>0);
+				}
+				if (!b) {
 					rc = false;
 					if (!dieflag) Out.PrtWarn("GO database " + godbName + " is not current; ignoring GO step\n");
 					else Out.die("GO database " + godbName + " is not current");
@@ -427,6 +433,7 @@ public class runSTCWMain
 				else Out.PrtSpMsg(2,"Add GO terms");
 				goDB.close();
 				
+				// GO Slims
 				if (goSlimSubset!=null && !goSlimSubset.equals(""))
 					Out.PrtSpMsg(2,"Add GO_slim_subset " + goSlimSubset);
 				else if (goSlimOBOFile!=null && !goSlimOBOFile.equals(""))
@@ -437,7 +444,18 @@ public class runSTCWMain
 		}
 		return rc;
 	}
-	
+	// CAS318 - old GOdb from mysql 
+	private static void fixOldGOdb(DBConn goDB) {
+		try {
+			Out.prt("+++ Renaming TCW added tables to GOdb");
+			goDB.tableRename("PAVE_Uniprot",  Globalx.goUpTable);
+			goDB.tableRename("PAVE_metadata", Globalx.goMetaTable);
+			goDB.tableRename("PAVE_gotree",   Globalx.goTreeTable);
+			
+			Out.PrtWarn("GO Slims are not available with pre-v318 GOdbs");
+		}
+		catch(Exception e){ErrorReport.die(e, "Converting old GOdb to >=v318");}		
+	}
 	/***************************************************************************
 	 * Returns paths to various directories and files used by the annotator
 	 ***************************************************************************/

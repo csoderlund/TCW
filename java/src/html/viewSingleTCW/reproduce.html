@@ -1,8 +1,15 @@
+<!DOCTYPE html>
 <html>
+<head>
 <title>sTCW overview</title>
-<center>
-<table width=800 border=0>
-<tr><td>
+<style>
+.tabley    		{border: 1px  solid black; border-spacing: 0px;  border-collapse: collapse;}
+.tabley td 		{border: 1px  solid black; padding: 3px; }
+</style>
+</head>
+<body style="padding:20px;width:650px;font-family:Times">
+
+
 <h2>Reproduce sTCW overview</h2>
 
 This describes how to obtain the table of results corresponding to statistics
@@ -16,7 +23,7 @@ in the overview. The following short-hand is used:
 <h3>INPUT</h3>
 Most of the input section is data supplied by the user with runSingleTCW. The following
 two are computed:
-<table border=1>
+<table class=tabley>
 <tr><td>Counts: SIZE<td>Show all<td>Column:Counts for all conditions: Stats, column:Sum
 <tr><td>AVG-len<td>Show All<td>Column:Length; Stats, column:Average
 <tr><td>MED-len<td>Show All<td>Column:Length; Stats, column:Median
@@ -27,7 +34,7 @@ because they are computed differently.
 <h3>ANNOTATION</h3>
 <h3>Annotation Statistics:</h3>
 
-<table border=1>
+<table class=tabley>
 <tr><th>Column<th>Search<th>Obtain number
 <tr><td>Sequences with hits
 	<td>Filters: Annotated
@@ -63,7 +70,7 @@ because they are computed differently.
 
 <h3>AnnoDBs:</h3>
 
-<table border=1>
+<table class=tabley>
 <tr><th>Column<th>Search<th>Obtain number
 <tr><td>ONLY
 	<td>Filters: Annotated, Best Bits, 
@@ -105,7 +112,7 @@ species name:
 the species are listed in the table.
 </ul>
 
-<table border=1>
+<table class=tabley>
 <tr><th>Column<th>Search<th>Obtain number
 <tr><td colspan=3><i>For the following, use AnnoDB Hits and select the Species.</i>
 <tr><td>BITS<td>Seq:Best Bits<td>Seqs number
@@ -114,7 +121,7 @@ the species are listed in the table.
 </table>
 
 <h3>Total ORFs:</h3>
-<table border=1>
+<table class=tabley>
 <tr><th>Column<th>Search<th>Obtain number
 <tr><td colspan=3><i>The following use the Basic Sequence. Select "TCW" and enter
 the Substring indicated.</i>
@@ -135,17 +142,19 @@ column; take the number that have use the protein frame and subtract
 from the total number from 'Protein confirmation'.
 
 <tr><td>ORF>=300<td>Has ORF >= 300<td>Number of rows
-<tr><td>Has Start&Stop<td>Has Start and Stop<td>Number of rows
+<tr><td>Has Start&amp;Stop<td>Has Start and Stop<td>Number of rows
 <tr><td>Has Start|Stop<td>No filter<td> Columns:HasStart, HasStop;
 <br>Sort both columns so 'Yes' rise to the top,
 find where the rows start with 'No','No'.
 </table>
 <h3>GC Content:</h3>
 The only number reproducible is the GC Content, which is the %GC over the entire sequence..
-<table border=1>
+
+<table class=tabley>
 <tr><td>GC Content<td>Show All<td>Column:%GC; Stats, column:Average
 <br>Note, there will be some slight difference in the number due to round-off error.
 </table>
+
 <ul>
 <li>The "Pos i" column is the percent of G or C in the ith positon of the CDS codons.
 <li>The %GC is the percent of G's and C's over the sequence length.
@@ -156,7 +165,7 @@ The only number reproducible is the GC Content, which is the %GC over the entire
 <h2>EXPRESSION</h2>
 The following sections may not exist if the input had no count files or the DE methods
 were not executed.
-<table border=1>
+<table class=tabley>
 <tr><td>TPM*
 	<td>Filter: select Condition under Exclude; set "At Most" to 1.99. 
 	<td>This will continue using 4.99, 9.99, etc, where the previous results are
@@ -176,7 +185,7 @@ If the sequences (e.g. ESTs) have been assembled, there are statistics on buried
 mate-pairs, etc. Most of them are columns, so select the column, then use the 
 "Show column stats" to view the sum. The following will only cover the three sections
 that are found in un-assembled sequences.
-<table border=1>
+<table class=tabley>
 <tr><td>Sequence lengths
 	<td>Filters: General: change &gt;= to &lt;=, 
 	  enter upper limit into Length
@@ -189,4 +198,5 @@ that are found in un-assembled sequences.
 	<td>The resulting rows are the #n&gt;0; sort the rows in descending order and scroll down
 	to the row number that start having #n&gt;10.
 </table>
+</body>
 </html>

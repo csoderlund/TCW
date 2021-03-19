@@ -1,22 +1,29 @@
+<!DOCTYPE html>
 <html>
+<head>
 <title>Filters</title>
+<style>
+.tablex    		{border: 0px; padding: 3px; border-spacing: 3px; }
+.tablex td 		{border: 0px; padding: 3px; border-spacing: 3px}
+</style>
+</head>
 <body style="padding:20px;width:650px;font-family:Times">
+
 <h1>Filters</h1>
 Overall rules:
 <ol>
-<li>Set the desired filters, then select <tt>View Filtered Sequences</tt>; only the sequences
+<li>Set the desired filters, then select <b>View Filtered Sequences</b>; only the sequences
 that pass all filters will be shown in the resulting sequence table. 
-<li>Sections are collapsible; to expand a section to see its filters,
-click on the +. 
+<li>Sections are collapsible; to expand a section to see its filters, click on the +. 
 <li>
-All filters correspond to columns with the same name in the same sections of the "Columns" tab
+All filters correspond to columns with the same name in the same sections of the <b>Columns</b> tab
 on the left.
 <li>
-TCW uses the terminology <tt>every</tt> and <tt>any</tt>, but alternative terminology is:
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;every = all = and = & &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; any = at least one = or = |
+TCW uses the terminology <b>every</b> and <b>any</b>, but alternative terminology is:
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;every = all = and = &amp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; any = at least one = or = |
 <li>A summary of the filters is shown at the top of the sequence table. 
 Example abbreviations used:
-(U) means Up, (E) is either, & is every, | is any.
+(U) means Up, (E) is either, &amp; is every, | is any.
 </ol>
 <h3>General</h3>
 Filter on sequence length, total read count, and whether the sequence has
@@ -27,13 +34,13 @@ Filter based on counts or TPM of one or more conditions, where TPM is the defaul
 NOTE: If RPKM was computed instead of TPM, then the Filter page will say RPKM instead of TPM.
 
 <ol>
-<li>Check either <tt>At least N from every/any included condition</tt> and/or <tt>At most N from every/any excluded conditions</tt>.
-<li>Select <tt>every</tt> or <tt>any</tt>, where <tt>every</tt> required all conditions to pass the filter, <tt>any</tt> requires at least one
+<li>Check either <b>At least N from every/any included condition</b> and/or <b>At most N from every/any excluded conditions</b>.
+<li>Select <b>every</b> or <b>any</b>, where <b>every</b> required all conditions to pass the filter, <b>any</b> requires at least one
 to pass the filter. 
 <li>Enter the number of TPM requires as the lower limit for the included condition and
 upper limit for the excluded. 
 </ol>
-For example, say you choose Include=condA,condB and Exclude=condC,condD with the defaults.
+For example, say you choose <b>Include</b>=condA,condB and <b>Exclude</b>=condC,condD with the defaults.
 This filter would results in a list of sequence where both condA and condB are >= 1.0
 and both condC and condD are = 0.0.
 
@@ -41,16 +48,16 @@ and both condC and condD are = 0.0.
 This applies to the TPM columns. 
 <ol>
 <li>Check to turn filter on.
-<li>Select a TPM condition from the <tt>Select 1</tt> list and another condition from the <tt>Select 2</tt> list.
-Then click <tt>Add</tt>, which will add the pair separated by a "/" in the box on the right.
-<li>Select <tt>Up</tt>, <tt>Down</tt> or <tt>Either</tt>, where the last shows both up and down N-fold.
+<li>Select a TPM condition from the <b>Select 1</b> list and another condition from the <b>Select 2</b> list.
+Then click <b>Add</b>, which will add the pair separated by a "/" in the box on the right.
+<li>Select <b>Up</b>, <b>Down</b> or <b>Either</b>, where the last shows both up and down N-fold.
 <li>Set the number for N-fold, where the default is "2".
 <li>If there are more than one pair selected (i.e. shown in box on right),
-select <tt>Every</tt> if you want all pairs to pass the filter, 
-or <tt>Any</tt> if you at least one to pass the filter. 
-<li>To remove an N-fold pair from the box, select it followed by <tt>Remove</tt>.
-<li>To change the Up/Down/Either selection for an entry in the table, select the entry followed by <tt>Change</tt>.
-<li>To view the results, use the <tt>Columns</tt> tab on the left and select the same conditions.
+select <b>Every</b> if you want all pairs to pass the filter, 
+or <b>Any</b> if you at least one to pass the filter. 
+<li>To remove an N-fold pair from the box, select it followed by <b>Remove</b>.
+<li>To change the Up/Down/Either selection for an entry in the table, select the entry followed by <b>Change</b>.
+<li>To view the results, use the <b>Columns</b> tab on the left and select the same conditions.
 </ol>
 
 
@@ -60,38 +67,41 @@ the function to add DE (Differential
 expression) p-values to your database.
 
 <ol>
-<li>You must check the box next to <tt>p-value</tt> and enter a p-value.
+<li>You must check the box next to <b>p-value</b> and enter a p-value.
 <li>You must select one or more DE values. Listed here will be the columns that were
 added with the runDE function.
-<li>Change <tt>Every</tt> to <tt>Any</tt> if you wish to see results where any of the selected DE values
+<li>Change <b>Every</b> to <b>Any</b> if you wish to see results where any of the selected DE values
 meets the threshold.
 </ol>
 The database stores up/down regulation as positive/negative DE p-values, in which
-case you will see options <tt>Up/down/either</tt> for each DE column. 
-For example, if you select <tt>Up</tt>, then you will see only results for which that p-value
+case you will see options <b>Up/down/either</b> for each DE column. 
+For example, if you select <b>Up</b>, then you will see only results for which that p-value
 has a <i>positive</i> value.
 
 <h3>Best Hit</h3>
-Selecting <tt>Annotated</tt> shows a table of all annotated sequences, with any filters applied.
-<p>All Filters below the <tt>Search</tt> label are applied to the selected <tt>Best</tt>, e.g. 
- <tt>Best Bits</tt>, <tt>Best Anno</tt> or <tt>Best With GO</tt>. (See Instructions for their definitions).
+Selecting <b>Annotated</b> shows a table of all annotated sequences, with any filters applied.
+<p>All Filters below the <b>Search</b> label are applied to the selected <b>Best</b>, e.g. 
+ <b>Best Bits</b>, <b>Best Anno</b> or <b>Best With GO</b>. (See Instructions for their definitions).
 <p>Filters requiring explanation:
-<table border=0 cellpadding=5>
-<tr><td><tt>DBtype</tt> and <tt>Taxonomy</tt> <td>if one of each is selected, the DBtype-Taxo pair
-must correspond to one listed on the Overview under <tt>Annotation Databases</tt>.
-<tr><td  valign=top><tt>#annoDB</tt> <td>the query is applied to the value in the column <tt>#annoDBs</tt> under <tt>General</tt> (see <tt>Columns</tt>). 
-<tr><td><tt>Bits!=Anno</tt> <td>show all sequences where the Best Bits is not the same as the Best Anno.
-<tr><td valign=top><tt>GO!=Bits&GO!=Anno</tt> <td>show all sequences where the <tt>Best with GOs</tt> is not the same as either Best Bits or Best Anno.
+
+<table class=tablex>
+<tr><td valign=top nowrap><b>DBtype</b> and <b>Taxonomy</b> <td>If one of each is selected, the DBtype-Taxo pair
+must correspond to one listed on the <b>Overview</b> panel under "Annotation Databases".
+<tr><td valign=top nowrap><b>#annoDB</b> <td>The query is applied to the value in the column <u>#annoDBs</u> under <b>General</b> (see <b>Columns</b>). 
+<tr><td><b>Bits!=Anno</b> <td>Show all sequences where the Best Bits is not the same as the Best Anno.
+<tr><td valign=top nowrap><b>GO!=Bits&amp;GO!=Anno</b> <td>Show all sequences where the <b>Best with GOs</b> is not the same as either Best Bits or Best Anno.
 </table>
-<p><i>Note: there are additional annotation queries under <tt>annoDB Hits</tt>.</i>
+<i>Note: there are additional annotation queries under <b>annoDB Hits</b>.</i>
 
 <h3>GO</h3>
 
 Enter a GO term, e.g. 3674 or GO:0003674, and all sequences that have this GO as assigned or inherited
 will be displayed.  Additional
-GO queries are available from the <tt>Basic GO Annotation</tt>. 
+GO queries are available from the <b>Basic GO Annotation</b>. 
 
 <h3>SNPs and ORFs</h3>
 
 Note, SNPs are only computed for assembled contigs, so SNP queries are not available for
 imported transcript sequences. ORFs are computed in either case. 
+</body>
+</html>

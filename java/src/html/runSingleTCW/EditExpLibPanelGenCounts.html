@@ -1,7 +1,15 @@
+<!DOCTYPE html>
 <html>
-<title>Build count file</title>
+<head>
+<title>Build combined count file</title>
+<style>
+.tablex    		{border: 0px; padding: 3px; border-spacing: 3px; }
+.tablex td 		{border: 0px; padding: 3px; border-spacing: 3px}
+</style>
+</head>
 <body style="padding:20px;width:650px;font-family:Times">
-<h3>Build combined counts file</h3>
+
+<h2>Build combined counts file</h2>
 
 Often the counts for each replicate are provided in separate files,
 which need to be combined into one table for import into TCW. This interface is designed
@@ -15,25 +23,28 @@ Sequence_name2	count2
 </pre>
 
 <p>
-<table border=0 cellspacing=4 cellpadding=3>
-<tr><td valign="top" nowrap>Add Directory of Files<td>Go to the directory with your count files and
-select "Open". All files will be checked for the correct format, and the correct ones will be 
-entered into the table. The Rep name is extracted from the file name; it can be changed by 
-editing the "Rep Name" column.
-<tr><td valign="top" nowrap>Add Rep File<td>A file chooser window will pop up to chose a file. The "Rep name"
-will be determined from the file name; it can be changed by editing the "Rep Name" column.  
+<table class=tablex>
+<tr><td valign="top" nowrap><b>Add Directory of Files</b><td>Go to the directory with your count files and
+select <b>Open</b>. All files will be checked for the correct format, and the correct ones will be 
+entered into the table. The "Rep name" is extracted from the file name; it can be changed by 
+editing the <u>Rep Name</u> column.
+<tr><td valign="top" nowrap><b>Add Rep File</b><td>A file chooser window will pop up to chose a file. The "Rep name"
+will be determined from the file name; it can be changed by editing the <u>Rep Name</u> column.  
 
-<tr><td valign="top" nowrap>Remove Rep<td>Select a row to remove it from the table.
-<tr><td valign="top" nowrap>Clear<td> Clears the table contents.
+<tr><td valign="top" nowrap><b>Remove Rep</b><td>Select a row to remove it from the table.
+<tr><td valign="top" nowrap><b>Clear</b><td> Clears the table contents.
 
-<tr><td valign="top" nowrap>Generate File<td>The file "Combined_read_counts.csv" will be generated,
+<tr><td valign="top" nowrap><b>Generate File</b><td>The file <tt>Combined_read_counts.csv</tt> will be generated,
 which will have one column for each of your original files, with the specified Rep names as headers.
-This will be entered as the Count File in the  Add/Edit panel, and when you press "Keep"
-on that panel, the information will be transferred to the main window.
+This will be entered as the <b>Count File</b> in the  <b>Add or Edit</b> panel, and when you press <b>Keep</b>
+on that panel, the information will be transferred to the main panel.
 
 
-<tr><td valign="top" nowrap>Close<td> The window will be closed without discarding the table contents.
-However, if you exit runSingleTCW, the information will be lost. 
+<tr><td valign="top" nowrap><b>Close</b><td> The panel will be closed without discarding the table contents.
+However, if you exit <tt>runSingleTCW</tt>, the information will be lost. 
 </table>
-<p>To edit the "Rep Name" column, you may have to click at the very beginning or end of the cell you 
+<p>To edit the <u>Rep Name</u> column, you may have to click at the very beginning or end of the cell you 
 want to change; the cell will turn white indicating you can edit.
+
+</body>
+</html>

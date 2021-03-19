@@ -1,6 +1,10 @@
+<!DOCTYPE html>
 <html>
-<body style="padding:20px;width:650px;font-family:Times">
+<head>
 <title>Sequence Frame</title>
+</head>
+<body style="padding:20px;width:650px;font-family:Times">
+
 <h1>Sequence Frame</h1>
 If this is a protein database, the sequence is displayed and the rest of this is irreverent.
 <p>
@@ -8,36 +12,35 @@ During annotation, TCW selects the frame that is most likely to be coding.
 It uses a combination of protein hit, 5th-order Markov Chain 
 and length (for more detail, see www.agcol.arizona.edu/software/tcw/doc/stcw/ORF.html). 
 
+<h3>Frame Options - second row of buttons</h3>
 
-<h2>Frame Options - second row of buttons</h2>
-
-<u>Frame</u> toggle: By default, the TCW selected frame is shown. This button allows 
+<b>Frame</b> toggle: By default, the TCW selected frame is shown. This button allows 
 the other frames to be displayed.
 
-<p><u>ORFs/NT</u> to <u>Scores/AA</u> toggle: Changes the content of the upper panel, as discussed below. 
+<p><b>ORFs/NT</b> to <b>Scores/AA</b> toggle: Changes the content of the upper panel, as discussed below. 
 Also, "Scores" shows
 the corresponding amino acid sequence instead of the nucleotide sequence for the frame.
 
-<p><u>Start</u>: Changes the highlighting of the start codons.
+<p><b>Start</b>: Changes the highlighting of the start codons.
 
-<p><u>CDS</u>: Highlights in green the CDS; overrides the highlighted start codons.
+<p><b>CDS</b>: Highlights in green the CDS; overrides the highlighted start codons.
 
-<p><u>Hit</u>: Highlight the hit region using italics (or blue font, which will overrides the highlighted CDS region). 
+<p><b>Hit</b>: Highlight the hit region using italics (or blue font, which will overrides the highlighted CDS region). 
 The region coordinates are from the heuristic search program (e.g. Blast) and assigned during annotation.
 This is only present if there are hits to the sequence and the "Best Bits" hit is
 to a protein sequence. It only works for the frame with the hit.
 
 
-<h2>ORFs/NT</h2>
+<h4>ORFs/NT</h4>
 The TCW selected ORF will occur first in the list, followed by the following information: 
 <ul>
 <li>The ORF coordinates are listed, where a single quote (') after the start codon indicates that
 the ORF does not have a start codon, likewise for the stop codon.
 <br>&nbsp;
 <li>The 5th-order Markov model and Codon Usage scores. The Markov score was computed according to Hass et al. (2013) Nature Protocols 8:1494-1512 for TransDecoder. A <b>good</b> Markov score is positive
-and the best score for all frames <i>of the given ORF</i> (see the <u>Scores/AA</u> display). 
+and the best score for all frames <i>of the given ORF</i> (see the <b>Scores/AA</b> display). 
 This is in contrast to the
-<b>best</b> Markov score, which is the best over all ORFs shown in the <u>ORFs/NT</u> display. 
+<i>best</i> Markov score, which is the best over all ORFs shown in the <b>ORFs/NT</b> display. 
 <ul>
 <li>Not good Markov score:  (1) A single quote (') after the Markov score. (2)
 A "!g" will be in the ORFmk remark. 
@@ -62,13 +65,13 @@ then the E-value will not be shown (see URL listed above)
 </ul>
 </ul>
 
-<h3>Scores/AA</h3>
+<h4>Scores/AA</h4>
 
 <i>Scores - for the selected ORF</i>: It shows the Markov and Codon scores
 for the current ORF sequence in all 6 frames, with the starting location of 
 the ORF equal to position 1,2,3,-1,-2,-3 (in that order, the negatives are reverse complemented).
 
-<p><b>No Markov Score</b>: if the Markov scores were not computed for this sTCW database, then
+<p><i>No Markov Score</i>: if the Markov scores were not computed for this sTCW database, then
 this ORF/Score pull-down will not exist and the Markov and Codon scores will not be shown.
-
+</body>
 </html>

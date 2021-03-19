@@ -1,81 +1,72 @@
-
+<!DOCTYPE html>
 <html>
 <!--#set var=TITLE value="Tour: viewMultiTCW" -->
 <!--#include virtual="../../ssi/head.html" -->
-<body bgcolor="#FFFFFF" text="#000000" onLoad="init('start')">
+<body onLoad="init('start'); init2('viewM')">
+<a id=top></a>
 <!--#include virtual="../ssi/start2t.html" -->
-
-<a name=start>
 <!--#include virtual="./ssi/view_mtcw.html" -->
 
-<center><code>Overview</code>
-<table  border="0" cellspacing="0" cellpadding="2" height="18">
-<tr><td align="left" bgcolor="#666666" class="white" style="padding-bottom:4px;">
-<a href="#overview" class="white">Overview Panel</a> |
-<a href="#col" class="white">Table columns</a> |
+<div style="text-align: center"><big><ttc>Overview</ttc></big></div>
+<table  class="tablex" style="margin-left: auto;margin-right: auto;">
+<tr><td class="white" style="text-align:left; background-color:#666666; padding-bottom:4px;">
+<a href="#overview" class="white">Overview Panel</a>  <mark class="white">|</mark>
+<a href="#col" class="white">Table columns</a>  <mark class="white">|</mark>
 <a href="#exp" class="white">Table...</a> 
 </td></tr>
 </table>
-</center>	
 
+<p><ttp>viewMultiTCW</ttp> displays information from a multiTCW (mTCW) database, which was created
+by one or more singleTCW (sTCW) databases with <a href="../runMulti" class="ext" target="_blank">runMultiTCW</a>.
 
-<p><code>viewMultiTCW</code> displays information from a multiTCW (mTCW) database, which was created
-by one or more singleTCW (sTCW) databases with <a href=../runMulti class="ext" target="_blank">runMultiTCW</a>.
-
-<!---------------------------- Overview ----------------------------->
-
-<a name=overview>
+<a id=overview></a>
 <h3>Overview Panel</h3> 
 
-<table border=0>
-<tr><td valign="top">
-<b>General</b>
-<br>&#10148;<tt>Overview</tt>
-
-<li><a href=ex.html>Overview</a>
-is a link to the file of the full overview, where part of it shown on the right. 
-<li><a href=explain.html>Explain</a> describes how the statistics were computed.
-<li>This mTCW database has 4 different types of clusters,
-as described in the Overview.
-
-
-<p>&#10148;<tt>Find Hits</tt> allows a sequence to be searched against the 
+<table class="tablex">
+<tr><td class="top">
+<ttc>General</ttc>
+<br>&#10148;<ttc>Overview</ttc>: <a href="ex.html">Overview</a>
+is a link to the file of the full overview, where the first part is shown on the right.
+This mTCW database has 3 input sTCWdbs and 4 different types of clusters.
+<p><a href="explain.html">Explain</a> describes how the statistics were computed.
+<br>
+<p>&#10148;<ttc>Find Hits</ttc> allows a sequence to be searched against the 
 database sequences, or a selected database.
 
-<p><b>Filters</b>: Provides filters for the four types of tables: clusters, pairs, sequences and hits.
+<p><ttc>Filters</ttc>: Provides filters for the four types of tables: clusters, pairs, sequences and hits.
 
-<p><b>Samples</b>: The tables can be very big, so the bottom four tabs provide <tt>Sample</tt> tables
+<p><ttc>Samples</ttc>: The tables can be very big, so the bottom four tabs provide <ttx>Sample</ttx> tables
 of just a few 1000 entries.
 
-<td><a  href="img/viewMulti.png"><img width=650 src="img/viewMulti.png" border=1></a>
+<td><img src="img/viewMulti.png" alt="" style="border: 1px solid black; width: 650px">
 </table>
-<p>
-<a name=col>
-<table width='100%'><tr><td align='left' >
+
+<a id=col></a>
 <h3>Table Columns</h3>
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
 All four tables have the following at the bottom of their table:
-<br><a  href="img/colSelect.png"><img width=250 src="img/colSelect.png" border=1></a>
+<br><img src="img/colSelect.png" alt="" style="border: 1px solid black; width: 250px">
 <ol>
-<li>The <tt>Select Column</tt> panel displays all possible columns. 
-<li>Mousing over a column name describes it in the lower left corner.
-<li>Selecting or deselecting a column name immediately shows or removes the column from the table.
-<li>The  columns can be sorted and moved around.
+	<li>The <ttc>Select Column</ttc> panel displays all possible columns. 
+	<li>Mousing over a column name describes it in the lower left corner.
+	<li>Selecting or deselecting a column name immediately shows or removes the column from the table.
+	<li>The  columns can be sorted and moved around.
 </ol>
 
-<p>
-<!---------------------------------------------------------------------------->
-<a name=exp>
-<table width='100%'><tr><td align='left' >
+<a id=exp></a>
 <h3>Table...</h3>
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+<table>
+<tr>
+	<td>All tables have <ttc>Table...</ttc> drop-down, which allows exporting the table, the sequence of the table, etc.
+	<p>All tables have a <ttc>Show Column Stats</ttc> option to display summary
+	statistics for the rows and numeric columns of the displayed table, as illustrated below for the Pairs table.
 
+	<td><img src="img/showColumns.png" alt="" style="border: 1px solid black; width: 450px">
+</tr>
+</table>
 
-All tables have <code>Table...</code> drop-down, which allows exporting the table, the sequence of the table, etc.
+<table style="width: 100%"><tr><td style="text-align: left">
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
-<p>All tables have a "Show Column Stats" option to display summary
-statistics for the rows and numeric columns of the displayed table, as illustrated below for the Pairs table.
-<p>
-<a  href="img/showColumns.png"><img width=450 src="img/showColumns.png" border=1></a>
 <!--#include virtual="../../ssi/end.html" -->
-
+</body>
+</html>

@@ -1,11 +1,19 @@
 package sng.runAS;
 
 /******************************************************
+ * CAS318 OBSOLETE this has been replaced with DoOBO -- just saving case I need to reference....
  * Downloads the GO database and creates a local one with the 
  * UniProt records from the UniProt directory.
- * URL http://archive.geneontology.org/daily/go_daily-termdb-tables.tar.gz
- * or, e.g. http://archive.geneontology.org/full/2016-03-01/go_201603-termdb-tables.tar.gz
- * PAVE is the original name for TCW
+ * URL http://release.geneontology.org/daily/go_daily-termdb-tables.tar.gz
+ * or, e.g. http://release.geneontology.org/full/2016-03-01/go_201603-termdb-tables.tar.gz
+ * Add to schema:
+ * 		3 TCW_ tables
+ * 		term       add gonum int unsigned default 0
+ *		           add level smallint default 0
+ *		graph_path add child     int unsigned default 0
+ *		           add ancestor  int unsigned default 0
+ *		term2term  add child  int unsigned default 0
+ *				   add parent int unsigned default 0
  */
 import java.io.BufferedWriter;
 import java.io.File;
@@ -26,16 +34,19 @@ import util.methods.ErrorReport;
 import util.methods.Out;
 
 public class DoGO {
-	private final String subset = DoUP.subset;
-	private final String goURL = "http://archive.geneontology.org/";
-	public static String goDailyFile = "go_daily-termdb-tables.tar.gz";
-	public static String goPreDB = Globalx.goPreDB;
-
 	// test stuff -- so read file on disk instead of over network for testing
 	private boolean test=ASMain.test;
 	private String demoIn = "./projects/DBfasta/dats/";
+		
+	private final String subset = DoUP.subset; // file name of full subset
+	private final String goURL = "http://release.geneontology.org/"; // CAS318 changed from archive to release
+	public static String goDailyFile = "go_daily-termdb-tables.tar.gz";
 	
 	private final DecimalFormat df = new DecimalFormat("#,###,###");
+	
+	static private final String goTreeTable = Globalx.goTreeTable; // CAS318 were prefixed with PAVE_
+	static private final String goMetaTable = Globalx.goMetaTable;
+	static private final String goUpTable =   Globalx.goUpTable;
 	
 	public DoGO(ASFrame asf) { 
 		frameObj = asf;
@@ -70,7 +81,7 @@ public class DoGO {
 		if (!checkDBdelete()) return;
 		
 		try {
-			if (!loadGOschema()) return; 
+			if (!loadGOschema()) return;
 			
 			goDB = connectToGODB(goDBname);
 			
@@ -79,6 +90,7 @@ public class DoGO {
 				return;
 			}
 			modifyGOdb(goDBname);
+			deleteTablesGOdb();
 			goDB.close();
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Creating GO database");}
@@ -106,7 +118,10 @@ public class DoGO {
 			Out.PrtSpMsg(1, "Check for directory " + goPath);
 			if (!new File(goPath).exists()) {
 			 	String cmd = "tar xf " + goFile;
-			 	if (!doCmd(cmd, goDir, "untar GO file", true)) return false;
+			 	if (!doCmd(cmd, goDir, "untar GO file", true)) {
+			 		Out.PrtSpMsg(0, "+++ If the tar file is corrupted - may be due to updates -- try again in 24 hours");
+			 		return false;
+			 	}
 			}
 			return true;
 		}
@@ -142,6 +157,7 @@ public class DoGO {
 				out.write("mysqlimport " + params + " -L " + goDBname + " " + f + "\n");
 			out.close();
 			
+			Out.PrtSpMsg(2, "The load takes a while - with no output to terminal - please be patient....");
 			cmd = "sh " + shFile;
 			// CAS303 the mysqlimport failed on Mac 10.15 MySQL v8; the local_infile fixed the problem
 			if (!doCmd(cmd, goFullDir, "load GO into database", false)) {
@@ -149,7 +165,6 @@ public class DoGO {
 				System.out.println("mysql> set global local_infile = 1;");
 				return false;
 			}
-			
 			return true;
 		}
 		catch (Exception e) {ErrorReport.prtReport(e,  action);}
@@ -171,16 +186,17 @@ public class DoGO {
 		String action = "Loading " + upDir + " to " + goDBname;
 		Out.PrtSpMsg(1, action);
 		try {
-			goDB.executeUpdate("CREATE TABLE PAVE_metadata (filename text null) ENGINE=MyISAM;");
+			goDB.executeUpdate("CREATE TABLE " + goMetaTable + " (filename text null) ENGINE=MyISAM;");
 			
 			String file = goFile;
-			if (file.contains("daily")) {
+			if (file.contains("daily")) { // CAS318 this is date GOdb created, but may not be date downloaded
 				SimpleDateFormat sdf=new SimpleDateFormat("yyyyMM"); 
 				String date = sdf.format(new Date());
-				file = file.replace("daily", date);
+				if (goDBname.contains("demo")) file = file.replace("daily", "demo"); // CAS318
+				else file = file.replace("daily", date);
 			}
-			goDB.executeUpdate("insert into PAVE_metadata set filename='" + file + "'");
-			goDB.executeUpdate("CREATE TABLE PAVE_Uniprot (" +
+			goDB.executeUpdate("insert into " + goMetaTable + " set filename='" + file + "'");
+			goDB.executeUpdate("CREATE TABLE " + goUpTable + " (" +
                     "UPindex bigint unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,"+
                     "UPid varchar(25), acc varchar(15)," +
                     "go text, pfam text, kegg text, ec text, interpro text,"+
@@ -227,9 +243,8 @@ public class DoGO {
 			ResultSet rs = null;
 			
 		/** term - Add go number column to the term table = integer without "GO:" prefix. **/
-			Out.PrtSpMsg(2,"Add gonum to term");
-			if (!goDB.tableColumnExists("term", "gonum"))
-			{
+			Out.PrtSpMsg(2,"Add columns gonum, level to term");
+			if (!goDB.tableColumnExists("term", "gonum")) {
 				goDB.executeUpdate("alter table term add gonum int unsigned default 0");
 				goDB.executeUpdate("alter table term add level smallint default 0");
 			}
@@ -239,15 +254,10 @@ public class DoGO {
 			goDB.executeUpdate("alter table term add index(gonum)");
 			
 		/** graph_path - Add gonums to the graph_path table so we can find ancestor GOs easily **/
-			Out.PrtSpMsg(2,"Add gonum of term_id1 and term_id2 to graph_path");
-			Out.PrtSpMsg(3,"Initialize 2 columns and an index...");
-			if (!goDB.tableColumnExists("graph_path", "child"))
-			{
-				Out.PrtSpMsg(4,"1 Add child...");
+			Out.PrtSpMsg(2,"Add columns gonum of term_id1 (ancestor) and term_id2 (child) to graph_path");
+			if (!goDB.tableColumnExists("graph_path", "child")) {
+				goDB.executeUpdate("alter table graph_path add ancestor int unsigned default 0"); // CAS318 put first 
 				goDB.executeUpdate("alter table graph_path add child int unsigned default 0");
-				Out.PrtSpMsg(4,"2 Add ancestor...");
-				goDB.executeUpdate("alter table graph_path add ancestor int unsigned default 0");
-				Out.PrtSpMsg(4,"3 Add index...");
 				goDB.executeUpdate("alter table graph_path add index(child)");
 			}
 			else {
@@ -283,12 +293,11 @@ public class DoGO {
 			" and relationship_type_id in (" + is_a_Num + "," + part_of_Num + ")");
 			
 		/** term2term - add gonum for term_id1 (term1_id=parent, term2_id=child)**/
-			Out.PrtSpMsg(2,"Add gonum to term2term");
+			Out.PrtSpMsg(2,"Add columns gonum of term_id1 (parent) and term_id2 (child) to term2term");
 			// Add gonums to the term2term table so we can do the depth-first search
-			if (!goDB.tableColumnExists("term2term", "child"))
-			{
+			if (!goDB.tableColumnExists("term2term", "child")) {
+				goDB.executeUpdate("alter table term2term add parent int unsigned default 0"); // CAS318 put first 
 				goDB.executeUpdate("alter table term2term add child int unsigned default 0");
-				goDB.executeUpdate("alter table term2term add parent int unsigned default 0");
 				goDB.executeUpdate("alter table term2term add index(child)");
 				goDB.executeUpdate("alter table term2term add index(parent)");
 			}
@@ -306,10 +315,10 @@ public class DoGO {
 					" and term.gonum != 0 " + 
 					" and relationship_type_id in (" + is_a_Num + "," + part_of_Num + ")");
 		
-		/** PAVE_gotree **/ 
+		/** TCW_gotree **/ 
 			Out.PrtSpMsg(2,"Create a table of levels");
-			if (!goDB.tableExists("PAVE_gotree"))  
-	    			goDB.executeUpdate("create table PAVE_gotree (" +
+			if (!goDB.tableExists(goTreeTable))  
+	    			goDB.executeUpdate("create table " + goTreeTable + " (" +
 	    				" idx 	int unsigned auto_increment primary key, " +
 	    				" gonum int unsigned, " +
 	    				" level smallint unsigned," + 
@@ -352,7 +361,7 @@ public class DoGO {
 			int cntSave=0;
 			
 			PreparedStatement ps = goDB.prepareStatement(
-					"insert into PAVE_gotree (gonum, level) values(?,?)");
+					"insert into " + goTreeTable + " (gonum, level) values(?,?)");
 			
 			for (int i=0; i<types.length; i++) // loop 3 times...
 			{
@@ -384,7 +393,7 @@ public class DoGO {
 						if (cntSave == 5000) { 
 							cntSave=0;
 							ps.executeBatch();
-							System.err.print(types[i] + " " + nOrdered + "               \r");
+							Out.r(types[i] + " " + nOrdered);
 						}
 
 						if (parent2child.containsKey(num))
@@ -408,8 +417,8 @@ public class DoGO {
 			// For GOs at multiple levels (e.g., cell_part) we take the highest level (e.g. prefer 3 over 2). 
 			// This fixes the "cell_part" type problem but is otherwise basically arbitrary.
 			Out.PrtSpMsg(2,"Add GO level numbers to term");
-			goDB.executeUpdate("update term set level = (select max(level)+1 " +
-								" from PAVE_gotree where gonum=term.gonum)" );
+			goDB.executeUpdate("update term set level = (select max(level)+1 from " +
+								goTreeTable + " where gonum=term.gonum)" );
 			Out.PrtSpMsgTimeMem(1, "Complete TCW GO database modifications", time);
 		}
 		catch(Exception e){ErrorReport.reportError(e, "Updating go database");}
@@ -444,6 +453,26 @@ public class DoGO {
 		catch (Exception e) {ErrorReport.prtReport(e, "GO check params");}
 		return true;
 	}
+	private void deleteTablesGOdb() { // CAS318 no functional reason for this, but easier to look at GOdb
+		try {
+			Out.PrtSpMsg(1, "Final step - remove empty tables");
+			int n=0;
+			Vector <String> tabs = new Vector <String> ();
+			ResultSet rs = goDB.executeQuery("SHOW TABLES");
+			while (rs.next()) tabs.add(rs.getString(1));
+			rs.close();
+			
+			for (String name : tabs) {
+			    int cnt = goDB.executeCount("select count(*) from " + name);
+			    if (cnt==0) {
+			        goDB.tableDrop(name);
+			        n++;
+			    }
+			}
+			Out.PrtSpMsg(2,"Remove " + n + " empty tables");
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "Remove empty tables from GOdb");}
+	}
 	private DBConn connectToGODB(String goname)
 	{		
 		DBConn goDB = null;
@@ -467,7 +496,7 @@ public class DoGO {
 			if (!rc) return 0; 
 			
 			DBConn goDB = new DBConn(hostObj.host(), goname, hostObj.user(), hostObj.pass());
-			if (!goDB.tableExists("PAVE_Uniprot")) x=1; // gets added in modfiyGOdb
+			if (!goDB.tableExists(goUpTable)) x=1; // gets added in modfiyGOdb
 			else x=2; 
 			
 			goDB.close();
@@ -476,17 +505,7 @@ public class DoGO {
 		catch(Exception e) {Out.PrtWarn("Could not check GO database " + goDBname);}
 		return 0;
 	}
-	/****************************************************
-	 *  called in GO.java -- necessary if the perl scripts were used
-	 */
-	public DoGO() { 
-		hostObj = new HostsCfg(); // Gets mysql user/pass and checks that mySQL can be accessed
-	}
-	public void modifyGOdb(DBConn g, String godbname) {
-		Out.PrtSpMsg(0, "TCW GO database needs to be modified - one time only");
-		goDB = g;
-		modifyGOdb(godbname);
-	}
+	
 	/**************************************************/
 	private String upDir;
 	private String goDBname;  // e.g. go_Apr2016

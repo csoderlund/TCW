@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Sequence View</title>
+</head>
+<body style="padding:20px;width:650px;font-family:Times">
+
+<h1>Sequence View</h1>
+
+<h3>Top row of buttons</h3>
+The second row of buttons changes according to the option selected on the top row; it has its own
+<b>Help2</b> on the second row of buttons.
+<p>The display can be toggled between the following 4 (6 if assembled) options by selecting the appropriate
+button:
+<ol>
+<li><b>Details</b> The sequence details, including the DB hits table.
+<li><b>Contig</b> (assembled only) Shows the alignment of the reads/ESTs to the consensus.
+<li><b>SNPs</b> (assembled only) Shows a panel of the SNPs.
+<li><b>Frame</b> Show the sequence in frame, along with the location of the hit (if exists).
+<li><b>GOs...</b>
+<ul>
+<li><u>Assigned GOs for all hits</u> Show the union of the assigned GOs to all hits in the DB hits table.
+<li><u>All GOs for all hits</u> Show the union of the assigned and inherited GOs to all hits in the DB hits table.
+<li><u>Assigned GOs for selected hit</u> Shows the assigned GOs for the selected hit. It also shows
+the Interpro, enzyme EC, Pfam and KEGG assigned identifiers assigned to the hit.
+<li><u>All GOs for selected hit</u> Shows the assigned and inherited GOs for the selected hit. 
+</ul>
+
+<li><b>Align hits...</b>
+<ul>
+<li><u>Best Hit</u> Aligns the hit(s) displayed for "best EV, AN" (see below for descript of these).
+<li><u>DB hits: Selected hit(s)</u> Select one or more hits from the DB hits table to be aligned.
+<li><u>DB hits: Selected hit(s) in all frames</u> The hit will be aligned to all 6 frames of the
+sequence. (This may take awhile, so you should only select one.)
+</ul>
+
+</ol>
+The <b>Next</b> and <b>Previous</b> options goes to the next or previous sequence in the current 
+sequence table.
+</body>
+</html>

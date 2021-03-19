@@ -13,11 +13,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Vector;
 
-
-import cmp.database.Globals;
 import sng.database.MetaData;
 import sng.database.Schema;
-import sng.database.Version;
 import util.database.DBConn;
 import util.database.Globalx;
 import util.database.HostsCfg;
@@ -28,11 +25,12 @@ import util.methods.ErrorReport;
 import util.methods.Out;
 
 public class DoGOs 
-{
-	public DoGOs(CoreDB sqlObj, String godbName, String slimSubset, String slimOBOFile)
-	{
-		try
-		{
+{ 
+	static private final String goMetaTable = Globalx.goMetaTable;// CAS318 were prefixed with PAVE_
+	static private final String goUpTable =   Globalx.goUpTable;
+	
+	public DoGOs(CoreDB sqlObj, String godbName, String slimSubset, String slimOBOFile) {
+		try {
 			Out.Print("");
 			Out.PrtDateMsg("Start GO update");
 			long startTime = Out.getTime();
@@ -46,6 +44,10 @@ public class DoGOs
 				return;
 			}
 			goDB = hosts.getDBConn(godbName);
+			
+			godbsrc = tcwDB.executeString("Select go_msg from assem_msg"); // CAS318 - use for messages instead of godbName
+			if (godbsrc==null || godbsrc=="") godbsrc = "Unknown GO source";
+			else godbsrc = godbsrc.substring(0, godbsrc.indexOf(" ")+1); // Just get version
 			
 			if (!makeGoTables(godbName)) return;
 			
@@ -72,27 +74,22 @@ public class DoGOs
 			HashSet <Integer>   goAllSet = new HashSet <Integer> ();
 			HashMap <Integer, Hit2GO>  hitGoMap = new HashMap <Integer, Hit2GO> ();
 			
-			// Tables used from GO database
+			// Tables used from GO database - must prefix with database name for transfers
 			String goGraphPath = 	godbName + ".graph_path";
-			String goTerm = 			godbName + ".term";
+			String goTerm = 		godbName + ".term";
 			String goTerm2term = 	godbName + ".term2term";
-			String goPAVEuniprot = 	godbName + ".PAVE_Uniprot";
-			String goPAVEtree = 		godbName + ".PAVE_gotree";
+			String goTCWup = 		godbName + "." + goUpTable;
 			
 			if (!hasAnnotation(tcwDB)) {
 				Out.PrtError("GO was specified but there is no annotation!");
 				return false;
 			}
-			if (!goDB.tableExists("PAVE_Uniprot")) {// note, db.tableExists doesn't see this table which is in the other DB
-				Out.PrtError("Cannot add GO tables because " + goPAVEuniprot + " does not exist.");
+			if (!goDB.tableExists(goUpTable)) {// note, db.tableExists doesn't see this table which is in the other DB ??
+				Out.PrtError("Cannot add GO tables because " + goTCWup + " does not exist - runAS");
 				return false;
 			}
-			if (!goDB.tableExists("graph_path")) {// note, db.tableExists doesn't see this table which is in the other DB
+			if (!goDB.tableExists("graph_path")) {
 				Out.PrtError("Cannot add GO tables because " + goGraphPath + " does not exist.");
-				return false;
-			}
-			if (!goFixed(goDB)) {
-				Out.PrtSpMsg(2, "GO database not modified for TCW - runAS");
 				return false;
 			}
 			
@@ -105,14 +102,14 @@ public class DoGOs
 			tcwDB.executeUpdate("update pja_db_unitrans_hits set filter_gobest=0");
 			tcwDB.executeUpdate("update assem_msg set go_msg='', go_slim='', go_ec=null");
 			
-/** assem_msg.go_msg **/
-			String msg = "GOs added with " + Version.sTCWhead;
-			if (goDB.tableExists("PAVE_metadata")) {
-				rs = goDB.executeQuery("select filename from PAVE_metadata");
+/** Create Overview message for processing info: assem_msg.go_msg **/
+			String msg = "GOdb: " + godbName + "  [GOs added with " + Globalx.sTCWver + "]"; // CAS318 added GOdb
+			if (goDB.tableExists(goMetaTable)) {
+				rs = goDB.executeQuery("select filename from " + goMetaTable);
 				if (rs!=null && rs.next()) {
 					String file = rs.getString(1);
 					if (file!=null) {
-						String x = file + "    [" + msg + "]"; 
+						String x = file + "  " + msg; 
 						tcwDB.executeUpdate("update assem_msg set go_msg='" + x + "'");
 					}
 				}
@@ -136,14 +133,18 @@ public class DoGOs
 			
 /** pja_db_unique_hits -- add kegg, pfam, ec  ***/
 			Out.PrtSpMsg(1, "Add GO/Interpro/Kegg/Pfam/EC to unique hits table");
+			int s = goDB.executeCount("select count(*) from " + goUpTable); // CAS318 add count - if many UniProts...
+			Out.PrtSpMsg(2, "Transferring data from a table with " + Out.df(s) + " entries");
+			if (s>5000000)
+				Out.PrtSpMsg(3, "There will be no terminal status for this step - please be patient...");
+			
 			time = Out.getTime();
-				// backwards compatible -- added interpro to V4 goDBs.
-			if (goDB.tableColumnExists("PAVE_Uniprot", "interpro")) {
-				tcwDB.executeUpdate("update pja_db_unique_hits as tw, " + goPAVEuniprot + " as g " + 
+			if (goDB.tableColumnExists(goUpTable, "interpro")) {// backwards compatible -- added interpro to V4 goDBs.
+				tcwDB.executeUpdate("update pja_db_unique_hits as tw, " + goTCWup + " as g " + 
 				" set tw.kegg=g.kegg, tw.pfam=g.pfam, tw.ec=g.ec, tw.interpro=g.interpro, tw.goList=g.go " +
 				" where g.upid=tw.hitid");
 			} else {
-				tcwDB.executeUpdate("update pja_db_unique_hits as tw, " + goPAVEuniprot + " as g " + 
+				tcwDB.executeUpdate("update pja_db_unique_hits as tw, " + goTCWup + " as g " + 
 				" set tw.kegg=g.kegg, tw.pfam=g.pfam, tw.ec=g.ec, tw.goList=g.go " +
 				" where g.upid=tw.hitid");
 			}
@@ -160,7 +161,7 @@ public class DoGOs
 			prtCntMsgMem(ne, "EC", time);
 			
 /** build hitGoMap and goAllSet - direct hits only **/	
-	Out.PrtSpMsg(1, "Build hit-GO table");
+			Out.PrtSpMsg(1, "Build hit-GO table");
 			Out.PrtSpMsg(2, "Get hits  ");
 			time = Out.getTime();
 			rs = tcwDB.executeQuery("select DUHID, hitID, goList from pja_db_unique_hits where goList!=''");
@@ -270,7 +271,7 @@ public class DoGOs
 			
 /** find GOs per sequence. assign best Hit for each GO **/
 	// For each hit 
-		Out.PrtSpMsg(1, "Build Seq-GO table ...           ");
+			Out.PrtSpMsg(1, "Build Seq-GO table ...           ");
 			time = Out.getTime();
 			cnt=cntSave=0;
 			int cntHas=0, cntNot=0, cntZero=0;
@@ -398,11 +399,11 @@ public class DoGOs
 			// CAS303 change rank to best_rank for Mysql v8
 			tcwDB.executeUpdate("update pja_db_unitrans_hits " +
 					"set best_rank=(filter_best+filter_ovbest+filter_gobest)");
-			prtCntMsgMem(cnt," update sequences with best Hit with GO", time);
+			prtCntMsgMem(cnt,"update sequences with best Hit with GO", time);
 			seqPIDgoMap.clear();
 			
 	/** go_graph_path and go_term2term **/
-	Out.PrtSpMsg(1, "Build GO tables");
+			Out.PrtSpMsg(1, "Build GO tables");
 			
 			Out.PrtSpMsg(2, "Create graph_path from " + godbName + " for GOs");
 			time = Out.getTime();
@@ -410,8 +411,8 @@ public class DoGOs
 			tcwDB.openTransaction();
 			for (int gonum : goAllSet) { 						// goAllSet
 				tcwDB.executeUpdate("insert into " +
-					" go_graph_path (relationship_type_id, distance, relation_distance, child, ancestor) " +
-					" select g.relationship_type_id, g.distance, g.relation_distance, g.child, g.ancestor " +
+					" go_graph_path (relationship_type_id, distance,  child, ancestor) " +
+					" select g.relationship_type_id, g.distance, g.child, g.ancestor " +
 					" from " + goGraphPath + " as g " +
 					" where ancestor>0 and child=" + gonum);
 			
@@ -424,7 +425,7 @@ public class DoGOs
 				if (cnt % 1000 == 0) Out.r("Insert GO " + cnt);
 			}
 			tcwDB.closeTransaction();
-			prtCntMsgMem(cnt," processed", time);
+			prtCntMsgMem(cnt,"processed", time);
 			
 /** XXX go_info table -- holds information about each direct and ancestor GO  **/
 			 
@@ -461,7 +462,8 @@ public class DoGOs
 				for (String ec : ecList) {
 					ecBin[x++] = (ecSet.contains(ec)) ? 1 : 0;
 				}
-				String name="obsolete - level and term_type unknown";
+				
+				String name="obsolete - not in " + godbsrc;
 				String type="biological_process"; // has to be in enum
 				int level=0;
 				
@@ -478,7 +480,7 @@ public class DoGOs
 					if (type.equals(types[i])) found=true;
 				}
 				if (!found) { 
-					Out.PrtWarn("Incomplete record in GO database for " + String.format(Globals.GO_FORMAT, gonum));
+					Out.PrtWarn("Incomplete record in GO database for " + String.format(Globalx.GO_FORMAT, gonum));
 					cntNotFound++;
 					continue;
 				}
@@ -504,20 +506,22 @@ public class DoGOs
 			tcwDB.closeTransaction();
 			
 			prtCntMsgMem(cnt,"added unique GOs", time);
-			if (cntNotFound>0) prtCntMsg(cntNotFound, " in UniProt but not in GO database");
+			if (cntNotFound>0) prtCntMsg(cntNotFound, "in UniProt but not in GO database");
 			goAllSet.clear();
 			
-/** pja_gotree -- transfer go.go_tree to tw.go_tree where there is an entry in go_info **/
+/** CAS318 - GOTRIM this is used for the Basic GO Trim function
+ * pja_gotree -- transfer go.go_tree to tw.go_tree where there is an entry in go_info 
+			
 			Out.PrtSpMsg(2, "Create GO tree");
 			time = Out.getTime();
 			tcwDB.executeUpdate("insert into pja_gotree " +
 				" select 0, gt.gonum, gt.level, tw.descr, 0, tw.term_type  " +
-	    			" from " + goPAVEtree + " as gt " +
+	    			" from " + goTCWtree + " as gt " +
 	    			" join go_info as tw on tw.gonum=gt.gonum " +
 	    			" order by gt.idx asc");
 			cnt = tcwDB.executeCount("select count(*) from pja_gotree");
 			prtCntMsgMem(cnt, "branches", time);
-			
+**/			
 			return true;
 		}
 		catch(Exception e){ErrorReport.die(e, "Error adding GO tables");}
@@ -546,19 +550,25 @@ public class DoGOs
 	}
 	/***********************************************************************
 	 * Slim processing
+	 * CAS318 changed to GO OBO - previous GO MySQL will not work
 	 */
 	private void loadSlimSubset(String slimSubset) {
 		Out.PrtSpMsg(2, "Add Slim Subset " + slimSubset);
 		
 		try {
+			boolean isOBO = (goDB.tableColumnExists(Globalx.goMetaTable, "isOBO"));
+			if (!isOBO) {
+				Out.PrtWarn("GO Slims are not available with pre-v318 GOdbs");
+				return;
+			}
 			long time = Out.getTime();
-			
+			Vector <Integer> goSlims = new Vector <Integer> ();
+				
 			int subset_id=0;
-			ResultSet rs = goDB.executeQuery("select id, name, acc from term where term_type='subset'");
+			ResultSet rs = goDB.executeQuery("select id, name from term where term_type='subset'");
 			while (rs.next()) {
-				String acc = rs.getString(3);
-			
-				if (acc.equals(slimSubset)) {
+				String name = rs.getString(2);
+				if (name.equals(slimSubset)) {
 					subset_id = rs.getInt(1);
 					break;
 				};
@@ -568,13 +578,10 @@ public class DoGOs
 				return;
 			}
 			// read slims for GOdb
-			Vector <Integer> goSlims = new Vector <Integer> ();
-			rs = goDB.executeQuery("select t.gonum " +
-					"from term_subset as s, term as t " +
-					"where s.subset_id=" + subset_id + " and s.term_id=t.id ");
-			while (rs.next()) {
+			rs = goDB.executeQuery("select gonum from term_subset where subset_id=" + subset_id);
+			while (rs.next()) 
 				goSlims.add(rs.getInt(1));
-			}
+	
 			prtCntMsg(goSlims.size(), "Slims in " + slimSubset);
 			
 			// set slims in TCW
@@ -672,24 +679,12 @@ public class DoGOs
 		String ec;
 	}
 	
-
 	private static boolean hasAnnotation(DBConn db)
 	{
 		try{
 			return db.tableExists("pja_db_unitrans_hits");
 		}
 		catch(Exception e){ErrorReport.die(e, "Error finding go uniprot table in database");}
-		return false;
-	}
-	/*************************************************************  
-	 * Run once on the shared go database to add some columns 
-	 **/
-	private static boolean goFixed(DBConn goDB)
-	{
-		try{
-			return goDB.tableExists("PAVE_gotree");
-		}
-		catch(Exception e){ErrorReport.die(e, "Error finding go tree in database");}
 		return false;
 	}
 	
@@ -704,4 +699,5 @@ public class DoGOs
 	}
 	private DBConn tcwDB;
 	private DBConn goDB;
+	private String godbsrc;
 }

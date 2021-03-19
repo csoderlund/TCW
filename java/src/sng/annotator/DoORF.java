@@ -64,12 +64,12 @@ public class DoORF {
 	// Parameter defaults are set in Globals; I put values here just to remind me
 	private boolean pbAltStart=false;  // Use alternative start sites	
 	private double  pdHitEval=1e-30;  // Automatically use this frame
-	private int 		piHitSim=50;		  // or if the alignment to the hit has >= this similarity
+	private int 	piHitSim=50;	  // or if the alignment to the hit has >= this similarity
 	private double  pdDiffLen=0.3;	 // parameter - whether to use weight rules
 	
 	// can set at command line with -r -sc N -hc N
 	private int     piHitOlap=0;      // %hit coverage
-	private int 		piSeqOlap=0;		 // %seq coverage
+	private int 	piSeqOlap=0;	  // %seq coverage
 	
 	private int     piMinSet=50;
 	private String  pCdsFileName = "-1";
@@ -162,173 +162,172 @@ public class DoORF {
 		catch (Exception err) {ErrorReport.reportError(err, "CalcORF");}
     }
 	
-	
-	private void loadSeqData ( ) 
-    {	
+	/*****************************************************************/
+	private void loadSeqData ( ) {	
 		Out.PrtSpMsg(2, "Load all sequence from database");
 		ResultSet rs = null;  
 		String [] type = {"EV", "AN"}; // could also use "WG"
 			
-		try
-		{	
+		try{	
 	   /* Load seqData - Get all seqIDs along with their sequences and best hit */
-    	   		int cntSeq = mDB.executeCount("select count(*) from contig");
-    	   		seqData = new SeqData[cntSeq];
-    	
-    	   		int idx=0, cntHasAnno=0;
-    	   		rs = mDB.executeQuery("SELECT CTGID, contigid, consensus, notes, PID, PIDov, PIDgo FROM contig"); 
-    	   		while (rs.next()) {
-    	   			int pid = rs.getInt(5);
-    	   			if (pid>0) cntHasAnno++;
-    	   			seqData[idx++] = new SeqData(rs.getInt(1), rs.getString(2), 
-    	   				rs.getString(3), rs.getString(4), pid, rs.getInt(6), rs.getInt(7));
-    	   		}
-    	   		rs.close();
-    	   		Out.PrtSpCntMsg(3, idx, "Sequences to process");
-    	   		
-    	   		if (cntHasAnno==0) {
-    	   			Out.PrtSpMsg(3, "No hits in database");
-    	   			return; 
-    	   		}
-    			
-    			int hasPr = mDB.executeCount("select count(*) from pja_db_unitrans_hits " +
-    	   				" where isProtein=1 limit 1");
-    	   		if (hasPr==0) {
-    	   			Out.PrtSpMsg(2, "No protein hits in database");
-    	   			return;
-    	   		}
+	   		int cntSeq = mDB.executeCount("select count(*) from contig");
+	   		seqData = new SeqData[cntSeq];
+	
+	   		int idx=0, cntHasAnno=0;
+	   		rs = mDB.executeQuery("SELECT CTGID, contigid, consensus, notes, PID, PIDov, PIDgo FROM contig"); 
+	   		while (rs.next()) {
+	   			int pid = rs.getInt(5);
+	   			if (pid>0) cntHasAnno++;
+	   			seqData[idx++] = new SeqData(rs.getInt(1), rs.getString(2), 
+	   				rs.getString(3), rs.getString(4), pid, rs.getInt(6), rs.getInt(7));
+	   		}
+	   		rs.close();
+	   		Out.PrtSpCntMsg(3, idx, "Sequences to process");
+	   		
+	   		if (cntHasAnno==0) {
+	   			Out.PrtSpMsg(3, "No hits in database");
+	   			return; 
+	   		}
+			
+			int hasPr = mDB.executeCount("select count(*) from pja_db_unitrans_hits " +
+	   				" where isProtein=1 limit 1");
+	   		if (hasPr==0) {
+	   			Out.PrtSpMsg(2, "No protein hits in database");
+	   			return;
+	   		}
     		   	
     	   /** Get the best hit for each sequence **/
-    	   		String sql = "SELECT isProtein, e_value, ctg_start, ctg_end,  " +
-    	   			" prot_cov, ctg_cov, percent_id FROM pja_db_unitrans_hits ";
-    	   		int cntHit=0, cntNoHit=0,  cntAN=0, cntStop=0, cntNT=0, cntBadMulti=0;
-    	   		int cntGoodHit=0, cntGreatHit=0, cntScov=0, cntHcov=0;
-    	   		
-    	   		int [] pid = new int [type.length];
-    	   		
-    	   		// Loop through sequences
-    	   		for (idx=0; idx<cntSeq; idx++) {
-    	   			if (seqData[idx].pid==0) {
-    	   				cntNoHit++;
-    	   				continue;
-    	   			}
-    				cntHit++;
+	   		String sql = "SELECT isProtein, e_value, ctg_start, ctg_end,  " +
+	   			" prot_cov, ctg_cov, percent_id FROM pja_db_unitrans_hits ";
+	   		int cntHit=0, cntNoHit=0,  cntAN=0, cntStop=0, cntNT=0, cntBadMulti=0;
+	   		int cntGoodHit=0, cntGreatHit=0, cntScov=0, cntHcov=0;
+	   		
+	   		int [] pid = new int [type.length];
+	   		
+	   		// Loop through sequences
+	   		for (idx=0; idx<cntSeq; idx++) {
+	   			if (seqData[idx].pid==0) {
+	   				cntNoHit++;
+	   				continue;
+	   			}
+				cntHit++;
+				
+	   			// Checking all three to avoid one with stops or NT hit. Set to zero if same as others.
+	   			pid[0] =  seqData[idx].pid;
+	   			pid[1] =  seqData[idx].pidov;
+	   			
+	   			boolean found=false;
+	   			
+	   			String seqSql = sql + " WHERE CTGID = " + seqData[idx].seqID;
+	   			
+	   			// First loop is for EV; if it is NT, then loop again for AN
+	   			for (int i=0; i<type.length && !found; i++) {
+	   				if (pid[i]==0) continue;
+	   				
+	   				rs = mDB.executeQuery(seqSql + " and PID= " + pid[i]);  
+	   				if (!rs.next()) {
+	   					Out.PrtError("Could not read " + seqData[idx].name + " " + type[i] + "=" + pid[i]);
+	   					continue;
+	   				}
+	   				boolean isProtein = rs.getBoolean(1);
+	   				if (!isProtein) {
+	   					cntNT++;
+	   					continue;
+	   				}
+	   				
+	   				double eval = rs.getDouble(2);
+	   				int start = rs.getInt(3);
+    	 			int end =   rs.getInt(4);
+    	 			int hitCov = rs.getInt(5); 
+    	 			int seqCov = rs.getInt(6);
+	   				int sim = rs.getInt(7);
+	   				
+	   				// CAS318 Options says this it HitSim, but its just %Sim from file
+	   				boolean isGoodHit = (eval<= pdHitEval || sim >= piHitSim) ? true : false;
+					
+					if (isGoodHit) { // set Olap>0 with execAnno -r 
+						if (seqCov<piSeqOlap) { 
+    						isGoodHit=false;
+    						cntScov++;
+    					}
+						else if (hitCov<piHitOlap) {
+    						isGoodHit=false;
+    						cntHcov++;
+    					}
+					}
+					
+				// Stops in hit
+    	 			if (start<0 || end> seqData[idx].seqLen || end < 0) { 
+    	 				Out.bug("Bad coordinates: " + seqData[idx].name + " Length: " +  seqData[idx].seqLen + " Start: " + start + " End: " + end);
+    	 				continue;
+    	 			}
+    	 			int orient = 1;
+    				String orientedSeq;
     				
-    	   			// Checking all three to avoid one with stops or NT hit. Set to zero if same as others.
-    	   			pid[0] =  seqData[idx].pid;
-    	   			pid[1] =  seqData[idx].pidov;
-    	   			
-    	   			boolean found=false;
-    	   			
-    	   			String seqSql = sql + " WHERE CTGID = " + seqData[idx].seqID;
-    	   			
-    	   			// First loop is for EV; if it is NT, then loop again for AN
-    	   			for (int i=0; i<type.length && !found; i++) {
-    	   				if (pid[i]==0) continue;
-    	   				
-    	   				rs = mDB.executeQuery(seqSql + " and PID= " + pid[i]);  
-    	   				if (!rs.next()) {
-    	   					Out.PrtError("Could not read " + seqData[idx].name + " " + type[i] + "=" + pid[i]);
-    	   					continue;
-    	   				}
-    	   				boolean isProtein = rs.getBoolean(1);
-    	   				if (!isProtein) {
-    	   					cntNT++;
-    	   					continue;
-    	   				}
-    	   				
-    	   				double eval = rs.getDouble(2);
-    	   				int start = rs.getInt(3);
-	    	 			int end =   rs.getInt(4);
-	    	 			int hitCov = rs.getInt(5); 
-	    	 			int seqCov = rs.getInt(6); // ditto
-    	   				int sim = rs.getInt(7);
-    	   				
-    	   				boolean isGoodHit = (eval<= pdHitEval || sim >= piHitSim) ? true : false;
-    					
-    					if (isGoodHit) { // set Olap>0 with execAnno -r 
-    						if (seqCov<piSeqOlap) { 
-	    						isGoodHit=false;
-	    						cntScov++;
-	    					}
-    						else if (hitCov<piHitOlap) {
-	    						isGoodHit=false;
-	    						cntHcov++;
-	    					}
-    					}
-    					
-    				// Stops in hit
-	    	 			if (start<0 || end> seqData[idx].seqLen || end < 0) { 
-	    	 				Out.bug("Bad coordinates: " + seqData[idx].name + " Length: " +  seqData[idx].seqLen + " Start: " + start + " End: " + end);
-	    	 				continue;
-	    	 			}
-	    	 			int orient = 1;
-	    				String orientedSeq;
-	    				
-	    				if (end <= start) { // RCOORDS: sequence will be reverse complemented before ORF finding
-	    					start = seqData[idx].seqLen - start + 1;
-	    					end =   seqData[idx].seqLen - end + 1;
-	    					orient = -1;
-	    					orientedSeq = seqData[idx].getSeqRev();
-	    				}
-	    				else orientedSeq = seqData[idx].seq;
-	    				
-	    				int frame = start % 3;
-	    				if (frame==0) frame = 3;
-	    				if (orient == -1) frame = -frame;
-    					
-	    				boolean hasStop=false;
-	    				int nStop=0;
-    					for (int j=start-1; j<end-3; j+=3) {
-    						String codon = orientedSeq.substring(j, j+3);
-    						if (isCodonStop(codon)) nStop++;
-    					}
-    					if (nStop>0) {
-    						seqData[idx].addRemark(Globals.RMK_HIT_hitSTOP + type[i] + nStop);
-    						hasStop=true;
-    					}
-    							
-	    	    	 		// XXX Internal Heuristic for extending ORF
-	    	    	 		boolean isGreatHit =  (hitCov >= extendHitOlap && sim >= extendHitSim) ? true : false;
-	    	    	 		  	    	 		
-    					seqData[idx].addHit(eval, sim, hitCov, seqCov, start, end, frame, isGoodHit, isGreatHit, hasStop);
-	    				if (i==1) {
-		   				cntAN++;
-		   				seqData[idx].addRemark(Globals.RMK_ORF_ANNO);
-		   			}
-	    				found=true;
-    	    	 		} // End loop through EV, AN
-    	   			
-    	   			if (seqData[idx].isGoodHit)  cntGoodHit++; // just counting if Eval and Sim are good
-    	   			if (seqData[idx].isGreatHit) cntGreatHit++;
-    	   			if (seqData[idx].hasStops)   cntStop++; // this can still be good hit so give frame precedence, just don't use coords
-    	   			if (seqData[idx].remark.contains(Globals.RMK_MultiFrame) // it has to be a really bad hit
-    	   					&& seqData[idx].hitCov<multiHitOlap 
-    	   					&& seqData[idx].seqCov<multiSeqOlap
-    	   					&& seqData[idx].sim < multiSim) {
-    	   				seqData[idx].isGoodHit=false;
-    					cntBadMulti++;
+    				if (end <= start) { // RCOORDS: sequence will be reverse complemented before ORF finding
+    					start = seqData[idx].seqLen - start + 1;
+    					end =   seqData[idx].seqLen - end + 1;
+    					orient = -1;
+    					orientedSeq = seqData[idx].getSeqRev();
     				}
-    	   		} // end loop through sequenses
-    	   		if ( rs != null ) rs.close();
-    	   		Out.PrtSpCntMsg2(3, cntHit,    "With hits", cntNoHit,  "With no hit"); // CAS314
-    	   		Out.PrtSpCntMsgZero(3, cntNT,   "Ignored NT hit");
-    	   		Out.PrtSpCntMsgZero(4, cntAN,   "Used Best Anno (vs Eval) ");
-    	   		
-    	   		Out.PrtSpCntMsg2(3, cntGoodHit,  "Good hit", cntGreatHit, "Good coverage ");
+    				else orientedSeq = seqData[idx].seq;
+    				
+    				int frame = start % 3;
+    				if (frame==0) frame = 3;
+    				if (orient == -1) frame = -frame;
+					
+    				boolean hasStop=false;
+    				int nStop=0;
+					for (int j=start-1; j<end-3; j+=3) {
+						String codon = orientedSeq.substring(j, j+3);
+						if (isCodonStop(codon)) nStop++;
+					}
+					if (nStop>0) {
+						seqData[idx].addRemark(Globals.RMK_HIT_hitSTOP + type[i] + nStop);
+						hasStop=true;
+					}
+							
+    	    	 	// XXX Internal Heuristic for extending ORF
+    	    	 	boolean isGreatHit =  (hitCov >= extendHitOlap && sim >= extendHitSim) ? true : false;
+    	    	 		  	    	 		
+					seqData[idx].addHit(eval, sim, hitCov, seqCov, start, end, frame, isGoodHit, isGreatHit, hasStop);
+    				if (i==1) {
+    					cntAN++;
+    					seqData[idx].addRemark(Globals.RMK_ORF_ANNO);
+    				}
+    				found=true;
+	    	 	} // End loop through EV, AN
+	   			
+	   			if (seqData[idx].isGoodHit)  cntGoodHit++; // just counting if Eval and Sim are good
+	   			if (seqData[idx].isGreatHit) cntGreatHit++;
+	   			if (seqData[idx].hasStops)   cntStop++; // this can still be good hit so give frame precedence, just don't use coords
+	   			if (seqData[idx].remark.contains(Globals.RMK_MultiFrame) // it has to be a really bad hit
+	   					&& seqData[idx].hitCov<multiHitOlap 
+	   					&& seqData[idx].seqCov<multiSeqOlap
+	   					&& seqData[idx].sim < multiSim) {
+	   				seqData[idx].isGoodHit=false;
+					cntBadMulti++;
+				}
+	   		} // end loop through sequenses
+	   		if ( rs != null ) rs.close();
+	   		Out.PrtSpCntMsg2(3, cntHit,    "With hits", cntNoHit,  "With no hit"); // CAS314
+	   		Out.PrtSpCntMsgZero(3, cntNT,   "Ignored NT hit");
+	   		Out.PrtSpCntMsgZero(4, cntAN,   "Used Best Anno (vs Eval) ");
+	   		
+	   		Out.PrtSpCntMsg2(3, cntGoodHit,  "Good hit", cntGreatHit, "Good coverage ");
  
-    	   		Out.PrtSpCntMsgZero(5, cntScov, "Failed seq coverage " + piSeqOlap);
-    	   		Out.PrtSpCntMsgZero(5, cntHcov, "Failed hit coverage " + piHitOlap);
-    	   		Out.PrtSpCntMsgZero(3, cntStop, "Hits with stops, find longest non-Stop region in hit");
-    	   		Out.PrtSpCntMsgZero(3, cntBadMulti, "Ignore poor hit with multiframes ");
-    	   	 	Out.PrtSpMsg(2, "Complete load");
+    	   	Out.PrtSpCntMsgZero(5, cntScov, "Failed seq coverage " + piSeqOlap);
+	   		Out.PrtSpCntMsgZero(5, cntHcov, "Failed hit coverage " + piHitOlap);
+	   		Out.PrtSpCntMsgZero(3, cntStop, "Hits with stops, find longest non-Stop region in hit");
+	   		Out.PrtSpCntMsgZero(3, cntBadMulti, "Ignore poor hit with multiframes ");
+	   	 	Out.PrtSpMsg(2, "Complete load");
        }
        catch (Exception e) {
-    	   		String x = "This error occurs when the hitResults are not consistent with sequences.";
-    	   		Out.PrtWarn(x);
-    	   		ErrorReport.prtToErrFile(x);
-    	   		ErrorReport.die(e, "Loading Sequence Data");
-    	   	}
+	   		String x = "This error occurs when the hitResults are not consistent with sequences.";
+	   		Out.PrtWarn(x);
+	   		ErrorReport.prtToErrFile(x);
+	   		ErrorReport.die(e, "Loading Sequence Data");
+	   	}
 	 }
 	
 	/*****************************************************/

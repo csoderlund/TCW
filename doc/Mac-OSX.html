@@ -2,25 +2,25 @@
 <HTML>
 <!--#set var=TITLE value="TCW installing on MacOS" -->
 <!--#include virtual="./ssi/head.html" -->
+<body>
+<a id=top></a>
 <!--#include virtual="./ssi/start1.html" -->
-<a name=top>
-
 
 <h2>Running TCW on MacOS</h2>
 
 The following includes:
 <ul>
-<li><a href=#prob>Problems on Mac</a>
-<li><a href=#cat1>Installation on MacOS 10.15.4</a> (May2020)
-<li><a href=#ext>Running /Ext/mac external programs</a>
+<li><a href="#prob">Problems on Mac</a>
+<li><a href="#cat1">Installation on MacOS 10.15.4</a> (May2020)
+<li><a href="#ext">Running /Ext/mac external programs</a>
 </ul>
 
-<a name=prob> 
+<a id=prob></a>
 <h3>Problems on Mac</h3>
 
 I've run TCW extensively on my Mac, and found a few slight Java problems:
 <ul>
-<li>In runSingleTCW and runMultiTCW, the interface does not always automatically update until I click in the window.
+<li>In <ttp>runSingleTCW</ttp> and <ttp>runMultiTCW</ttp>, the interface does not always automatically update until I click in the window.
 <li>Pop-up windows can get hidden behind the main window, and it makes TCW appear to be frozen -- move the main TCW window to find the
 hidden window.
 <li>The buttons are all white, and the highlighting on the GO tree is very light. Occasionally, the highlighting causes text to disappear.
@@ -29,7 +29,7 @@ hidden window.
 
 
 
-<a name=cat1>
+<a id=cat1></a>
 <h3>
 		Installation on MacOS 10.5.4 (Catalina)
 </h3>
@@ -44,12 +44,13 @@ hidden window.
 		Click the '.dmg' file and follow the instructions. 
 		<p>
 		<li>
-		There will be a mySQL icon on your System Preferences, where you can start/stop the MySQL server. <br>
-		&nbsp; 
-		<li>Test: I use tcsh, so I enter the following into the .tcshrc file: <pre>
+		There will be a mySQL icon on your System Preferences, where you can start/stop the MySQL server. 
+		<br>&nbsp; 
+		<li>Test: I use tcsh, so I enter the following into the .tcshrc file: 
+		<pre>
 	alias mys '/usr/local/mysql/bin/mysql -u root -p[password]'
 		</pre>
-		From the command line, I execute <tt>source .tcshrc</tt>. If you are using zch or bash, you will need to use their equivalent commands. 
+		From the command line, I execute <ttx>source .tcshrc</ttx>. If you are using zch or bash, you will need to use their equivalent commands. 
 		<p>
 			From the command line, enter 'mys', and then at the prompt: <pre>
         >create database mytest;
@@ -58,15 +59,15 @@ hidden window.
 			<li>In the HOSTS.cfg of the TCW package, set DB_user=[mysql userid], DB_password=[mysql password] 
 	</ol>
 	<p>
-		At this point, <code>runSingleTCW</code> and <code>runMultiTCW</code> can build databases and view them. 
-		However, you will not be able to run DE calculations without installing R, or <code>OrthoMCL</code> 
+		At this point,  can build databases and view them. 
+		However, you will not be able to run DE calculations without installing R, or <ttp>OrthoMCL</ttp> 
 		without installing the Perl-mysql interface. 
 		
 	<h4>
 		R and R-Java interface
 	</h4>
 		<ol>
-		<li>Download from <a href=//cran.r-project.org/bin/macosx>cran.r-project.org/bin/macosx</a> the
+		<li>Download from <a href="//cran.r-project.org/bin/macosx>cran.r-project.org/bin/macosx"></a> the
 		file R-4.0.0.pkg. Click to install.
 		<p>
 		<li>Type 'R' at the terminal prompt, then the following:
@@ -84,7 +85,7 @@ hidden window.
 setenv R_HOME /Library/Frameworks/R.framework/Resources  # tcsh
 export R_HOME=/Library/Frameworks/R.framework/Resources  # zcsh
 </pre>
-<li>Make sure <code>runDE</code> has the following: 
+<li>Make sure <ttp>runDE</ttp> has the following: 
 <pre>
 -Djava.library.path=/Library/Frameworks/R.Framework/Resources/library/rJava/jri
 </pre>
@@ -109,7 +110,7 @@ export R_HOME=/Library/Frameworks/R.framework/Resources  # zcsh
 	sudo ln -s /usr/local/mysql/lib/libmysqlclient.18.dylib /usr/lib/libmysqlclient.18.dylib
 </pre>
 
-<a name=ext>
+<a id=ext></a>
 <h3>
 	Running /Ext/mac external programs
 </h3>
@@ -122,27 +123,27 @@ the program will just fail. Do the following:
 <li>You will get a pop-up, select "Open".
 <li>After that, you will be able to run it via TCW.
 </ol>
-I did not have to do this for <code>Blast</code>, but I did need to do it for the other <tt>/Ext/mac</tt> programs.
-All were straight-forward except for <code>mafft</code>; I had to authenticate all the following in the <tt>mafftdir</tt>
+I did not have to do this for <ttp>Blast</ttp>, but I did need to do it for the other <ttx>/Ext/mac</ttx> programs.
+All were straight-forward except for <ttp>mafft</ttp>; I had to authenticate all the following in the <ttx>mafftdir</ttx>
 directory: 
 <pre>
-bin/
-mafft
-libexec/
-	version
-	countlen
-	splittbfast
-	tbfast
-	disttbfast
-	dvtditr
-	f2cl
+	bin/
+	mafft
+	libexec/
+		version
+		countlen
+		splittbfast
+		tbfast
+		disttbfast
+		dvtditr
+		f2cl
 </pre>
 There is a way to allow any downloaded program to execute by using:
 <pre>
-sudo spctl --master-disable
+	sudo spctl --master-disable
 </pre>
-Then in Preferences, Security&Privacy, General, select 'anywhere'. I did not try this.
+Then in Preferences, Security&amp;Privacy, General, select 'anywhere'. I did not try this.
 <!--#include virtual="./ssi/end.html" -->
-
+</body>
 </HTML>
 

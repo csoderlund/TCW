@@ -2,95 +2,88 @@
 <HTML>
 <!--#set var=TITLE value="sTCW Update Annotation" -->
 <!--#include virtual="../ssi/head.html" -->
+<body>
 <!--#include virtual="../ssi/start2.html" -->
-<a name=top>
 
 Though the options for the annotation should be set in the runSingleTCW interface,
 they can be <b>Save</b> and then the annotation run from the command line with:
 <pre>
-./execAnno &lt;project&gt;
+	./execAnno &lt;project&gt;
 </pre>
 
-
-<!--------------------------------------------->
-
-<a name=update>
-<table width='100%'><tr><td align='left' >
+<a id=update></a>
 <h3>Updating or redoing annotation</h3>
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
 
 You may wish to re-run annotation steps for following reasons:
 <ol>
 <li>Update to a newer AnnoDB (e.g. more recent UniProt release): In this case,
 you would delete existing annotation and all existing hit (tab) files.
 <li>Add a new AnnoDB: In this case, make sure to uncheck all annoDBs in the 
-<code>runSingleTCW</code> interface that are already in the database.
+<ttp>runSingleTCW</ttp> interface that are already in the database.
 <li>Remove an annoDB: In this case, you will need to delete the existing annotation
 and reload all annoDBs that you want to keep. The original hit files can be reused.
-<li>Add additional similar pairs. In this case, turn off all other options and run "<tt class=c>Annotate</tt>;
+<li>Add additional similar pairs. In this case, turn off all other options and run "<ttc>Annotate</ttc>;
 additional pairs will be added with the existing hit files.
 </ol>
-<table width=450>
-<tr><td>The image on the right shows what can be removed. Select the top option for 
+
+<table style="width: 450px">
+<tr><td class="top">The image on the right shows what can be removed. Select the top option for 
 #1 and #3. Select the third item for the #1.
-<td><a href="img/remove.png"><img src="img/remove.png" width=250 border=1>
+<td><a href="img/remove.png"><img src="img/remove.png" alt="" style="border: 1px solid black; width: 250px"></a>
 </table>
 
-Changes can be accomplished by editing the AnnoDB list in <code>runSingleTCW</code>, then
-re-running <tt class=c>Annotate</tt>, and responding to the yes/no prompts
+Changes can be accomplished by editing the AnnoDB list in <ttp>runSingleTCW</ttp>, then
+re-running <ttc>Annotate</ttc>, and responding to the yes/no prompts
 which will appear on the console, as follows (note, at any point during these
 question, you can Ctrl-C to stop the process):
-<p>
-<div class="codesec"><pre>
-?--Annotation exists in database. Enter [a/d/e]
-Add to existing annotation [a], Delete annotation [d], Exit [e]:
-</div></pre>
+<pre>
+	?--Annotation exists in database. Enter [a/d/e]
+	Add to existing annotation [a], Delete annotation [d], Exit [e]:
+</pre>
 Answer 'a' to add to the existing annotation.
 <br>Answer 'd' to replace all annotation. Note that this
 does NOT delete hit files from disk, and they may be loaded again if desired. 
 <br>Answer 'e' to exit.
 
 <p>The following is a flow for adding annotation from existing files.
-<div class="codesec"><pre>
-Checking annoDB fasta
-   DB#1 diamond SP AA: projects/DBfasta/UniProt_demo/sp_plants/uniprot_sprot_plants.fasta
-   DB#2 blast SP AA: projects/DBfasta/UniProt_demo/sp_fullSubset/uniprot_sprot_fullSubset.fasta
-   DB#3. blastn GB NT: projects/DBfasta/NT/dcitri.fa
-   Pairs blastn: /projects/demoTra/hitResults/tra_seqNT.fa
-   Pairs tblastx: /projects/demoTra/hitResults/tra_seqNT.fa
-   Pairs diamond: /projects/demoTra/hitResults/tra_orfSeqAA.fa
-Checking for existing tab files
+<pre>
+	Checking annoDB fasta
+	   DB#1 diamond SP AA: projects/DBfasta/UniProt_demo/sp_plants/uniprot_sprot_plants.fasta
+	   DB#2 blast SP AA: projects/DBfasta/UniProt_demo/sp_fullSubset/uniprot_sprot_fullSubset.fasta
+	   DB#3. blastn GB NT: projects/DBfasta/NT/dcitri.fa
+	   Pairs blastn: /projects/demoTra/hitResults/tra_seqNT.fa
+	   Pairs tblastx: /projects/demoTra/hitResults/tra_seqNT.fa
+	   Pairs diamond: /projects/demoTra/hitResults/tra_orfSeqAA.fa
+	Checking for existing tab files
 
-?--At least one hit tab file exists for selected set.
-   Use current tab files [u], prompt on each tab file [p], exit[e]:  p
+	?--At least one hit tab file exists for selected set.
+	   Use current tab files [u], prompt on each tab file [p], exit[e]:  p
 
-   DB#1 uniprot_sprot_plants.fasta
-      Output exists:  /projects/demoTra/hitResults/tra_SPpla.dmnd.tab; Date: Sun Jan 17 12:37:16 MST 2021
-?--Load this existing file [y] or perform new search [n]  [y/n]:
-</div></pre>
+	   DB#1 uniprot_sprot_plants.fasta
+		   Output exists: /projects/demoTra/hitResults/tra_SPpla.dmnd.tab; Date: Sun Jan 7 1:37:16 MST 2021
+	?--Load this existing file [y] or perform new search [n]  [y/n]:
+</pre>
 A 'y' will use the existing file and not redo the search. 
 
 <p>
 If you get the prompt:
-<div class="codesec"><pre>
-?--DB#1 The annoDB projects/DBfasta/UniProt_demo/sp_plants/uniprot_sprot_plants.fasta
-      has been processed previously. Continue? (y/n)? 
-</div></pre>
+<pre>
+	?--DB#1 The annoDB projects/DBfasta/UniProt_demo/sp_plants/uniprot_sprot_plants.fasta
+		  has been processed previously. Continue? (y/n)? 
+</pre>
 This means you have already added an annoDB with the exact same path name. 
-<p>
+
 <h4>Pairs only</h4>
 The pairs-only can be removed from the database using:
 <pre>
-./execAnno &lt;DB Name&gt; -p
+	./execAnno &lt;DB Name&gt; -p
 </pre>
 <h4>Save database</h4>
 To save an existing annotated database, use:
 <pre>
-mysqldump -u &lt;user&gt; -p &lt;database_name&gt; &gt; &lt;dump_file_name&gt;
+	mysqldump -u &lt;user&gt; -p &lt;database_name&gt; &gt; &lt;dump_file_name&gt;
 </pre>
 
-
-<p>
 <!--#include virtual="../ssi/end.html" -->
-
+</body>
 </HTML>

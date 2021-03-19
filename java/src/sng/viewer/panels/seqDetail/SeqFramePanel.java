@@ -46,7 +46,7 @@ import util.database.DBConn;
 public class SeqFramePanel extends JPanel {
 	private static final long serialVersionUID = 9005938171358335556L;
 	
-	private static final String helpFile = Globals.helpDir + "ContigFramePanel.html";
+	private static final String helpFile = Globals.helpDir + "DetailFramePanel.html";
 	private String HASMARK="'";
 	private int yTop = 10, xLeft = 10, codonCol=20, rowHeight=15, seqNumLength=5, imageHeight=400;
 	private boolean isProtein=false;

@@ -1,62 +1,69 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
+<head>
 <title>Add or Edit Sequence Datasets</title>
-	
+<style>
+.tablex    		{border: 0px; padding: 3px; border-spacing: 3px; }
+.tablex td 		{border: 0px; padding: 3px; border-spacing: 3px}
+</style>
+</head>
 <body style="padding:20px;width:650px;font-family:Times">
+
 <h2>Add or Edit Sequence Datasets</h2>
-Only the SeqID and Sequence File are required, so enter these first. 
-<br>The default location for all files are under the /projects/&lt;project&gt; directory,
+Only the <b>SeqID</b> and <b>Sequence File</b> are required, so enter these first. 
+<br>The default location for all files are under the <tt>/projects/&lt;project&gt;</tt> directory,
 but they can be elsewhere. 
 
 <p>
-	<table border=0 width=800>
+	<table class=tablex>
 		<tr>
-			<td valign="top" width=150>SeqID</td>
+			<td valign="top" width=100><b>SeqID</b></td>
 			<td>A short identifier for the dataset. Use letters, numbers, and underscores only. 
 			<i>It must be unique, i.e. it cannot be the same as another SeqID or any condition name.</i></td>
 		</tr>
 		<tr>
-			<td valign="top">Sequence File</td>
+			<td valign="top"><b>Sequence File</b></td>
 			<td>The FASTA sequence file for this dataset, where each ">" must have a unique 
-			identifier for the sequence. If the file is not in the "/project" project directory, 
+			identifier for the sequence. If the file is not in the <tt>/project</tt> project directory, 
 			provide its full path.
-			<br><br>Suffix: The FASTA file may have any of the following suffixes: .fa, .fasta, .fna, .ffn, .faa, .frn.
+			<br><br><b>File Chooser</b>: 
+			The FASTA file may have any of the following suffixes: .fa, .fasta, .fna, .ffn, .faa, .frn.
 			It is valid to have the compress ".gz" added to any of these suffixes. If your file has
 			a different suffix, use the <b>File Format:</b> "All Files".
 			</td>
 		</tr>
 		
 		<tr>
-			<td valign="top">Count File</td>
+			<td valign="top"><b>Count File</b></td>
 			<td>A file that contains all the read or spectral counts, as follows:
 			The first row contains the column headings "SeqName" followed by the replicate names; the 
-			rest of the rows contain the sequence name followed by the counts (see the UserGuide 
-			for more detail).
-			<br><br>Suffix: The file should have the suffix ".txt".  If your file has
+			rest of the rows contain the sequence name followed by the counts (see the on-line 
+			<tt>runSingleTCW</tt> UserGuide for more detail).
+			<br><br><b>File Chooser</b>: The file should have the suffix ".txt".  If your file has
 			a different suffix, use the <b>File Format:</b> "All Files".
-			<br><br>The file is read for the column names when "Keep" is selected, and the Count Table 
-			on the main window has a row added for each condition.
+			<br><br>The file is read for the column names when <b>Keep</b> is selected, 
+			and the <b>Associated Counts</b> table on the main panel has a row added for each condition.
 			
 		</td>
 		</tr>
 		<tr>
-			<td valign="top">Build from multiple count files</td>
-			<td>It is often the case that that replicate counts are in separate files, where each
-			file has two columns: sequence name and read count, where the sequence name is
+			<td valign="top"><b>Build from multiple count files</b></td>
+			<td>It is often the case that replicate counts are in separate files, where each
+			file has two columns: sequence name and read count, where the sequence names are
 			the same as found in the sequence file. This function allows you to enter your
 			count files and build a single file of counts.
 		</tr>
 		<tr><td>&nbsp;</td></tr>
 		<tr>
-			<td valign="top">Quality File</td>
-			<td>Optional fasta quality file for the sequence file.
+			<td valign="top"><b>Quality File</b></td>
+			<td>Optional FASTA quality file for the sequence file.
 			</td>
 		</tr>
 		<tr><td>&nbsp;</td></tr>
 		
 		<tr>
-				<td colspan=2 align=left>
-					<b>Sanger ESTs</b>: mate-pairs should have the same name but with a 5' and 3' suffix.
+				<td colspan=2>
+					<b>Sanger ESTs</b>: Mate-pairs should have the same name but with a 5' and 3' suffix.
 					The default suffixes are .f and .r. If your file uses other suffixes (e.g. .5 and .3),
 					then enter them in the respective text boxes.
 				</td>
@@ -64,10 +71,10 @@ but they can be elsewhere.
 		
 			<tr><td>&nbsp;</td></tr>
 		<tr>
-				<td colspan=2 align=left>
-					<b>ATTRIBUTES:</b> These values are listed on the viewSingleTCW 
-					overview page. Do not use single or double quotes. Attributes may be edited after the
-					database is created by using the "Edit" button on the main window.
+				<td colspan=2>
+					<b>ATTRIBUTES:</b> These values are listed on the <tt>viewSingleTCW</tt> 
+					<b>Overview</b> panel. Do not use single or double quotes. Attributes may be edited after the
+					database is created by using the <b>Edit</b> button on the main panel.
 				</td>
 			</tr>	
 	</table>

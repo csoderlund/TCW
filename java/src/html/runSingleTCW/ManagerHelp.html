@@ -1,126 +1,143 @@
+<!DOCTYPE html>
 <html>
-	<title>runSingleTCW</title>
-	<body style="padding:20px;width:650px;font-family:Times">
-	
+<head>
+<title>runSingleTCW</title>
+<style>
+.tablex    		{border: 0px; padding: 3px; border-spacing: 3px; }
+.tablex td 		{border: 0px; padding: 3px; border-spacing: 3px}
+</style>
+</head>
+<body style="padding:20px;width:650px;font-family:Times">
 		
-<h2>singleTCW Main Window</h2>
-<br>See www.agcol.arizona.edu/software/tcw/doc/stcw/UserGuide.html for a description on building 
+<h1>runSingleTCW main panel</h1>
+See <tt>www.agcol.arizona.edu/software/tcw/doc/stcw/UserGuide.html</tt> for a description on building 
 a TCW database. It has highly recommended you run the demo before building your own. This
 "Help" provides details.
-<p>The main data type is the "sequence", which could be transcripts
+<p>The main data type is the <i>sequence</i>, which could be transcripts
 with optional read counts, proteins with optional spectral counts, genes with locations,
 or TCW assembled contigs.  If sequences (e.g. ESTs) are assembled,
 the resulting contig consensus sequence will have read counts from the assembly.
+
+<h2>Top Section</h2> 
+
 <h3>Add Project</h3> 
-You will be prompted for a <i>project-name</i> -- keep it short but descriptive. When you select
-"Ok", a directory named <i>project-name</i> will be created
-under the /projects directories, 
+When this button is selected, you will be prompted for a "project name", henceforth
+referred to as <tt>&lt;project&gt;</tt>. Keep the
+<tt>&lt;project&gt;</tt> short but descriptive. When you select
+<b>Ok</b>, a directory named <tt>&lt;project&gt;</tt> will be created
+under the <tt>/projects</tt> directories, 
 where information is stored for the building the project. Additionally, values will be automatically
 entered for the following two:
 
-<table border=0 cellspacing=5>
-<tr><td valign="top" nowrap>singleTCW ID<td> The <i>project-name</i> is entered, which you may change.
+<table class=tablex>
+<tr><td valign="top" nowrap><b>singleTCW ID</b><td> The <tt>&lt;project&gt;</tt> name is 
+automatically entered when you <b>Add Project</b>, which you may change.
 Keep this name short but descriptive, e.g. about 3 letters.
-<tr><td valign="top">Database<td>The <i>project-name</i> will be entered as the database name with a
-"sTCW_" prefix -- do not remove the prefix. 
+<tr><td valign="top"><b>Database</b><td>The <tt>&lt;project&gt;</tt> name will be automatically 
+entered as the database 
+name with a "sTCW_" prefix. Do not remove the "sTCW_" prefix. 
 </table>
 Though it is not required, you may put your dataset files in your project directory
-under /projects (e.g.
-see /TCW/projects/demoTra). You may create this directory yourself, which will
-automatically be listed on the pull-down "Project" selector.
+under <tt>/projects</tt> (e.g.
+see <tt>/TCW/projects/demoTra</tt>). You may create this directory yourself, which will
+automatically be listed on the pull-down <b>Project</b> selector.
 
 <h3>Existing project</h3>
-<table border=0 cellspacing=5>
-<tr><td valign="top">Project<td>
+<table class=tablex>
+<tr><td valign="top"><b>Project</b><td>
 Allows you to select a project, where your projects are the directories under
-the /projects directory. You can either click on the "Select..." to view a drop-down
+the <tt>/projects</tt> directory. You can either click on the <b>Select...</b> to view a drop-down
 of projects, or select the arrows to scroll through them.
-<tr><td valign="top">Save<td> 
+<tr><td valign="top"><b>Save</b><td> 
 Save all information you have added. The information is also saved
-whenever you execute "Keep" from any window, 
-or a function ("Build Database", "Instantiate" and "Annotate").
-Information about the datasets is stored in /projects/<i>project-name</i>/LIB.cfg and
+whenever you execute <b>Keep</b> from any panel, 
+or a function (<b>Build Database</b>, <b>Instantiate</b> and <b>Annotate</b>).
+Information about the datasets is stored in <tt>/projects/&lt;project&gt;/LIB.cfg</tt> and
 information about the instantiation and annotation is stored in 
-/projects/<i>project-name</i>/sTCW.cfg.
+<tt>/projects/&lt;project&gt;/sTCW.cfg</tt>.
  
-<tr><td valign="top">Copy<td>
+<tr><td valign="top"><b>Copy</b><td>
 
 1. It creates a copy of the current 
-/projects/<i>project-name</i> directories with the same name
+<tt>/projects/&lt;project&gt;</tt> directories with the same name
 but with "Cp" appended to them. 
 <br>2. All the sub-directories and files in the 
-/projects/<i>project-name</i> directory will be copied with the exception of
-the /hitResults and /orfResults directories.
-<br>3. The <i>singleTCW ID</i> and <i>sTCW database</i>
+<tt>/projects/&lt;project&gt;</tt> directory will be copied with the exception of
+the <tt>/hitResults</tt> and <tt>/orfResults</tt> directories.
+<br>3. The <tt>singleTCW ID</tt> and <tt>sTCW database</tt>
 values will have "Cp" appended to them. 
-<br>4. The three Steps will need to be run, where it will create an identical sTCW database unless
-you change any of the variables first.
+<br>4. The three steps will need to be run to build the copy database, 
+where it will create an identical sTCW database unless
+you change any of the parameters first.
 
-<tr><td valign="top">Remove</td><td valign="top"> 
+<tr><td valign="top"><b>Remove</b></td><td valign="top"> 
 For the current project only, the options to remove are:
 <br>1. Annotation from sTCW database
 <br>2. sTCW database
-<br>3. Hit files from disk (/project/<i>project-name</i>/hitResults)
-<br>4. All files from disk for this sTCW project (i.e. the  /project/<i>project-name</i>)</td></tr>
+<br>3. Hit files from disk (<tt>/project/&lt;project&gt;/hitResults</tt>)
+<br>4. All files from disk for this sTCW project (i.e. the  <tt>/project/&lt;project&gt;</tt>)</td></tr>
 
-<tr><td valign="top">Overview<td> Shows the overview page of the selected project. 
-There will only be an overview page if "Build Database" has been executed.
+<tr><td valign="top"><b>Overview</b><td> Shows the overview page of the selected project. 
+There will only be an overview page if <b>Build Database</b> has been executed.
 
 </table>
 
-<h3>Step 1. Build Database</h3>
-Add one or more Sequence Datasets with the "Add" button.  Each of the following brings up a new panel for you to
-enter the information; each has a "Help" button to provide more information.
-<table border=0 cellspacing=5>
-<tr><td valign="top">Add<td>You must enter the name of a sequence file and optional quality file and/or count file of conditions.  
-The "Keep" will take you back to this main window,
-where the conditions will be shown in the second table, and the Reps column will be initialized to 1.
-<tr><td>Edit<td>You can make changes with
-the "Edit" button, but once you have executed "Build Database", you can only change the
+<h2>Step 1. Build Database</h2>
+Add one or more <b>Sequence Datasets</b> with the <b>Add</b> button.  Each of the following brings up a new panel for you to
+enter the information; each has a <b>Help</b> button to provide more information.
+
+<table class=tablex>
+<tr><td valign="top"><b>Add</b><td>You must enter the name of a sequence file and optional quality 
+file and/or count file of conditions.  
+The <b>Keep</b> will take you back to this main panel,
+where the conditions will be shown in the second table, and the <u>Reps</u> column will be initialized to 1.
+<tr><td><b>Edit</b><td>You can make changes with
+the <b>Edit</b> button, but once you have executed <b>Build Database</b>, you can only change the
 Attribute data (e.g. tissue type).
-<tr><td valign="top">Define Replicates<td> This function
+<tr><td valign="top"><b>Define Replicates</b><td> This function
 will allows you to group replicates per condition. 
-<tr><td valign="top">Edit Attributes<td>After you have defined replicates (if needed), 
+<tr><td valign="top"><b>Edit Attributes</b><td>After you have defined replicates (if needed), 
 then edit the attributes of the conditions
- with "Edit Attributes". Attributes can be added or edited after the database is created.
+ with <b>Edit Attributes</b>. Attributes can be added or edited after the database is created.
 </table>
 
-<h3>Step 2. Instantiation</h3>
+<h2>Step 2. Instantiation</h2>
 
-<table border=0 cellspacing=5>
-<tr><td valign="top">Use Sequence Names from File<td>When the input sequence will not be assembled, 
+<table class=tablex>
+<tr><td valign="top"><b>Use Sequence Names from File</b><td>When the input sequence will not be assembled, 
 this option may be checked to use
-the original sequence names, though the names <b>must</b> be composed of characters, digits or "_", and may not
+the original sequence names, though the names <i>must</i> be composed of characters, digits or "_", and may not
 be greater than 25 characters.
-<tr><td valign="top">Skip Assembly<td>When the input sequences will be assembled, uncheck this box. The "Options"
-panel may be used
+<tr><td valign="top"><b>Skip Assembly</b><td>When the input sequences will be assembled, 
+uncheck this box. The <b>Options</b> panel may be used
 to define details of the assembly, though the default parameters are well-tested.
-<tr><td  valign="top">#CPU<td>For assembly and annotation, if your machine has more than one CPU (thread/processor),
-make sure that the "#CPUs" is set to the number in order to speed up processing.
+<tr><td  valign="top"><b>#CPU</b><td>For assembly and annotation, if your machine has more than one CPU (thread/processor),
+make sure that the <b>#CPUs</b> is set to the number in order to speed up processing.
 </table>
 
 The TPM (Transcripts Per Kilobase Million) is computed in this step.
-To compute RPKM (Reads Per Kilobase Million) instead, see 'execAssm -h'.
+To compute RPKM (Reads Per Kilobase Million) instead, run <tt>./execAssm -h</tt> from the terminal
+for instructions.
 
 
-<h3>Step 3. Annotate</h3>
-Add your annoDBs and Options (i.e. select the GO database), then execute "Step 3: Annotate".
+<h2>Step 3. Annotate</h2>
+Add your annoDBs and <b>Options</b> (e.g. select the <b>GO Database</b>), then execute <b>Annotate</b>.
 <p>
 Before running this step, 
 you download the protein and/or nucleotide databases to search against (these are referred to as 
 <i>annoDBs</i>), the resulting files are called <i>hit files</i>. 
-If you are using UniProt, you may also create the <i>GO database</i>, which
+If you are using UniProt, you may also create the GO database, which
 provides GO, EC, PFam and KEGG identifiers. To download UniProt and GO, and create the GO database,
 use the interface <b>runAS</b>.
 <p>
 If you use databases other then UniProt, you need to make sure there that the descriptor line
-for each sequence (i.e. > lines) is formated correctly. Genbank formats are accepted,
-plus a generic format (see the online Annotation Setup).
+for each sequence (i.e. > lines) is formatted correctly. Genbank formats are accepted,
+plus a generic format (see the online "Annotation Setup" and <b>runAS</b> help).
 
-<p>You have a choice of using <tt>blast</tt> or <tt>diamond</tt> for searching the database sequences
+<p>You have a choice of using <tt>BLAST</tt> or <tt>DIAMOND</tt> for searching the database sequences
 against an annoDB (these programs are in <tt>/Ext</tt> subdirectory).
 
-<p>When you select "Step 3: Annotate", there will be a popup with the choice:
+<p>When you select <b>Annotate</b>, there will be a popup with the choice:
 <ul>
 <li>Answer - Answer prompts at command line.
 <br>All parameters are written out to the terminal. There may be questions if
@@ -132,11 +149,11 @@ hit files.
 
 <p>Annotation Interface:  a few details.
 <ul>
-<li>Import AnnoDBs: you may select the <tt>AnnoDBs_UniProt_demo.cfg</tt> file created in <b>runAS</b>, or a <tt>sTCW.cfg</tt>
+<li><b>Import AnnoDBs</b>: you may select the <tt>AnnoDBs_UniProt_demo.cfg</tt> file created in <b>runAS</b>, or a <tt>sTCW.cfg</tt>
 file of another project; in both cases, the UniProts listed in the file will be used to populate
 the annoDB table.
 <li>Click a line once to selected it, than a second time to check or un-check the box.
-<li>The annoDBs can be re-order with the "Move Up" and "Move Down" according
+<li>The annoDBs can be re-order with the <b>Move Up</b> and <b>Move Down</b> according
 to their importance, where they will be shown in that order in the <tt>viewSingleTCW</tt> overview.
 </ul>
 
@@ -145,8 +162,8 @@ to their importance, where they will be shown in that order in the <tt>viewSingl
 <li>Uncheck all annoDBs that have been added (they are in italics). You need to click the
 line twice - once to highlight it and once to uncheck.
 <li>Add any additional annoDBs and check them.
-<li>Select "Options" if you want to add similarity pairs.
-<li>Execute "Step 3: Annotate".
+<li>Select <b>Options</b> if you want to add additional similarity pairs.
+<li>Execute <b>Annotate</b>.
 <br>You will be prompt at the command line as to whether you want to 
 <br><tt>
 Add to existing annotation [a], Delete annotation [d], Exit [e]: a
@@ -156,52 +173,55 @@ Add to existing annotation [a], Delete annotation [d], Exit [e]: a
 
 <p>Remove annotation:
 <ol>
-<li>All annoDBs from database: Use the "Remove..." button at the top to remove the existing annotation from the database.
+<li>All annoDBs from database: Use the <b>Remove...</b> button at the top to remove the existing annotation from the database.
 <li>Remove one annoDB from database: There is no way to do this. You must (a) remove all annotation,
-(b) uncheck any annoDBs you do not want, (3) "Step 3: Annotate" to reload the annoDBs, which will
+(b) uncheck any annoDBs you do not want, (3) run <b>Annotate</b> to reload the annoDBs, which will
 use the existing hit files so will not take as long (but can still take a few hours on a large database).
-<li>From the table: (a) "Remove All" removes all entries from the table that are not in the database.
-(b) Select a entry in the table followed by "Remove" on the right.
+<li>From the table: (a) <b>Remove All</b> removes all entries from the table that are not in the database.
+(b) Select a entry in the table followed by <b>Remove</b> on the right.
 </ol>
 
-<h4>ORF only</h4>
-Execute the ORF finder on all sequences. This must be executed after "Step 2: Instantiate".
+<h3>ORF only</h3>
+Execute the ORF finder on all sequences. This must be executed after <b>Step 2: Instantiate</b>.
+If <b>Annotate</b> has already been run, it will replace the existing ORFs.
 
-<h4>GO only</h4>
-If "Annotate Sequences" was already run and you just want to add GO annotation to it, or update previous
-GO annotation, use this function. TCW GO annotation requires a reference mySQL "GO database"
-which must be created before hand using <b>runAS</b> or the supplied perl scripts. 
+<h3>GO only</h3>
+If <b>Annotate</b> was already run and you just want to add GO annotation to it, or update previous
+GO annotation, use this function. The TCW GO database must exist,
+created by <b>runAS</b>, and identified using the <b>Option</b> panel. 
 Note, this also adds Pfam, KEGG, Interpro and EC for the UniProts hit in your database. 
 
-<h3>Options along the bottom</h3>
+<h2>Options along the bottom</h2>
 
-<h4>Launch viewSingleTCW</h4>
-Launches this program to view the resulting project.
+<h3>Launch viewSingleTCW</h3>
+Launches this program to view the resulting project, the same as running <tt>/.viewSingleTCW &lt;project&gt;</tt>
+from the terminal.
 
-<h4>Add Remarks or Locations</h4>
+<h3>Add Remarks or Locations</h3>
 You can add remarks or locations from a file, which can be displayed in a column in any table and can
-be searched on viewSingleTCW. Click this "Add Remarks or Locations" button
-to see additional Help.
+be searched on <tt>viewSingleTCW</tt>. 
 
-<h3>Troubleshooting</h3>
+<h2>Troubleshooting</h2>
 <ol>
-<li>If you have added a "Sequence Dataset" to the interface, you can not change anything except the
-attributes, even if "Load Data" has not be executed. To make a change, remove the dataset and re-add. 
-<li>After a TCW database has been created, runSingleTCW can be used to edit
+<li>If you have added a <b>Sequence Dataset</b> to the interface, you can not change anything except the
+attributes, even if <b>Build Database</b> has not be executed. To make a change, remove the dataset and re-add. 
+<li>After a TCW database has been created, <tt>runSingleTCW</tt> can be used to edit
 the attributes (i.e. tissue, etc). This ONLY works right from the TCW directory that has 
 the <tt>/project</tt> subdirectories, as it needs to read the LIB.cfg and sTCW.cfg 
 project files. 
-<li>runSingleTCW will detect certain file format problems, etc, 
-but some errors are not found until "Load Data" is executed.
-If that happens, remove the mySQL database, fix the error and restart.
+<li><tt>runSingleTCW</tt> will detect certain file format problems, etc, 
+but some errors are not found until <b>Build Database</b> is executed.
+If that happens, remove the sTCW mySQL database (use <b>Remove...</b> at the top),
+fix the error and restart.
 <li>If something appears wrong and you do not know how to fix it, you can remove
-the <tt>/projects/<i>project-name</i>/LIB.cfg</tt> file and restart. 
+the <tt>/projects/&lt;project&gt;/LIB.cfg</tt> file and restart. 
 <li>If any process seems to "hang", i.e. no output to terminal for a very long time,
-either close the runSingleTCW window or ctrl-C. Then just restart. NOTE: on Macs,
-pop-up windows get hidden easy and freeze the main singleTCW window until you acknowledge
+either close the <tt>runSingleTCW</tt> or ctrl-C. Then just restart. NOTE: on Macs,
+pop-up windows get hidden easy and freeze the main singleTCW panel until you acknowledge
 the pop-up, so look around for it...
 <li>File Chooser: All files used in TCW have defined suffixes (e.g. .tab is the suffix for blast tabular files).
 The File Chooser only shows the files with the defined suffix, but if your file has a different suffix,
 choose the <b>File Format</b> "All Files".
 </ol>
-
+</body>
+</html>

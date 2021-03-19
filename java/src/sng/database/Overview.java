@@ -323,27 +323,29 @@ public class Overview {
         lines.add( "ANNOTATION" ); 
   
         try {
-    		String msg="";
-    		String annoVer = mDB.executeString( "SELECT annoVer from schemver");
-    		if (annoVer != null) {
-    			msg = "   Annotated with TCW release: " + annoVer;
-    			if (!annoVer.equals(Version.strTCWver)) msg += "    Updated with: " + Version.strTCWver;
-    		}
+    		String msg="   ";
+    		
             String annotationDate = mDB.executeString (  "SELECT annotationdate FROM assembly");    
             if (annotationDate==null || annotationDate.equals("") || annotationDate.equals("0000-00-00")) {
-                msg += "   Annotate has not been run yet";
+                msg += "Annotate has not been run yet";
                 lines.add(msg); lines.add("");
                 hasAnno = false;
                 return true; 
             }
             
             if (annotationDate.equals("1111-11-11"))
-                msg += "   Annotate was started but did not finish";
+                msg += "Annotate was started but did not finish";
             else if (annotationDate.equals("1111-12-11"))
-                msg += "   Pairwise computation did not finish";
+                msg += "Pairwise computation did not finish";
             else {
-                msg += "   Annotation date: " + TimeHelpers.convertDate(annotationDate);
+                msg += "Annotation date: " + TimeHelpers.convertDate(annotationDate);
             }
+            
+            String annoVer = mDB.executeString( "SELECT annoVer from schemver");
+    		if (annoVer != null) { // CAS318 put this second
+    			msg += "   Annotated with sTCW v" + annoVer;
+    			if (!annoVer.equals(Version.strTCWver)) msg += "    Updated with v" + Version.strTCWver;
+    		}
             lines.add(msg);
             lines.add("");
             hasAnno = true;
@@ -751,7 +753,7 @@ public class Overview {
     			String go = mDB.executeString( "Select go_msg from assem_msg");
     			if (go!=null && !go.equals("")) {
     				if (go.endsWith(".tar.gz")) go = go.replace(".tar.gz", "");
-    				lines.add("   Over-represented GOs: " + go);
+    				lines.add("   Gene Ontology: " + go); // CAS318 had 'Over-represented'
     				
     				if (mDB.tableColumnExists("assem_msg", "go_slim")) { 
         				String slim = mDB.executeString( "Select go_slim from assem_msg");

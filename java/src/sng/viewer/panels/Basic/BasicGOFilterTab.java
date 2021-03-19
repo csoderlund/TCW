@@ -61,7 +61,9 @@ import util.ui.UserPrompt;
 public class BasicGOFilterTab extends Tab {
 	private static final long serialVersionUID = 5545816581105885864L;
 	
+	private boolean isGOTRIM=false; // CAS318 trim is currently disabled
 	private final String helpHTML =  Globals.helpDir + "BasicQueryGO.html";
+	private final String goHelpHTML = Globals.helpDir + "goHelp/index.html"; // CAS318 new GO help
 			
 	private boolean doDEtrim=true; // this seems to work, but doesn't reduce by much. 
 	
@@ -173,7 +175,7 @@ public class BasicGOFilterTab extends Tab {
 		btnGoHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(theParentFrame, 
-						"Go Help", "html/viewSingleTCW/GO.html");
+						"Go Help", goHelpHTML);
 			}
 		});
 		topRowPanel.add(new JLabel("For selected: "));
@@ -250,6 +252,12 @@ public class BasicGOFilterTab extends Tab {
 		}));	
 		showpopup.addSeparator();
 		
+		showpopup.add(new JMenuItem(new AbstractAction("GO - Neighbor list and relation") { // CAS318 put first
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				goTablePanel.showPathsForSelected(GOtree.NEIGHBORS, btnShow);
+			}
+		}));
 		showpopup.add(new JMenuItem(new AbstractAction("GO - Ancestor list by level") {
 			private static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent e) {
@@ -262,25 +270,21 @@ public class BasicGOFilterTab extends Tab {
 				goTablePanel.showPathsForSelected(GOtree.DESCENDENTS, btnShow);
 			}
 		}));	
-		showpopup.add(new JMenuItem(new AbstractAction("GO - Neighbor list and relation") {
-			private static final long serialVersionUID = 4692812516440639008L;
-			public void actionPerformed(ActionEvent e) {
-				goTablePanel.showPathsForSelected(GOtree.NEIGHBORS, btnShow);
-			}
-		}));
+		
 		showpopup.add(new JMenuItem(new AbstractAction("GO - Related in table by table order") {
 			private static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent e) {
 				goTablePanel.showRelatedFromTable(btnShow);
 			}
 		}));	
-		
+		/** Disabled for v3.1.8
 		showpopup.add(new JMenuItem(new AbstractAction("GO - Ancestor list by distance and relation") {
 			private static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent e) {
 				goTablePanel.showPathsForSelected(GOtree.ANC_DIST, btnShow);
 			}
-		}));	
+		}));
+		**/	
 		showpopup.add(new JMenuItem(new AbstractAction("GO - Ancestor path table") {
 			private static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent e) {
@@ -828,7 +832,7 @@ public class BasicGOFilterTab extends Tab {
 		});   
 		chkShowDEtrim.setBackground(Globals.BGCOLOR);
 		
-		if (deColumnNames.size() > 0 && doDEtrim)
+		if (isGOTRIM && deColumnNames.size() > 0 && doDEtrim)
 		{				
 			row5.add(Box.createHorizontalStrut(15));
 			row5.add(deTrimLabel);

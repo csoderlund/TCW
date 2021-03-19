@@ -1,8 +1,15 @@
+<!DOCTYPE html>
 <html>
-<body style="padding:20px;width:650px;">
+<head>
+<title>Sequence Pairs</title>
+<style>
+.tablex    		{border: 0px; padding: 3px; border-spacing: 3px; }
+.tablex td 		{border: 0px; padding: 3px; border-spacing: 3px}
+</style>
+</head>
+<body style="padding:20px;width:650px;font-family:Times">
 <h1>Sequence Pairs</h1>
 The table shows similar-sequence pairs calculated during the annotation stage (see below).
-
 
 <p>
 Select <b>Pairs Columns</b> on the left panel to add/remove columns from the table.
@@ -16,24 +23,24 @@ This aligns the two sequences using a dynamic programming algorithm.
 The resulting panel is a graphical display of the aligned sequences in the best frame, and the panel has the following
 additional alignment options:
 <p>
-<table cellpadding=3>
-<tr><td nowrap valign=top>Align in best frame (default)<td> It aligns the nucleotide using 
+<table class=tablex>
+<tr><td nowrap valign=top><u>Align in best frame (default)</u><td> It aligns the nucleotide using 
 the pre-computed orientation and the amino acids using the pre-computed frame. 
-<tr><td nowrap valign=top>Align in all frames<td>Align the nucleotide sequences in both orientations. Align
+<tr><td nowrap valign=top><u>Align in all frames</u><td>Align the nucleotide sequences in both orientations. Align
 the amino acid with the precomputed frame. Then compute the remaining 35 possibilities.
-<tr><td nowrap valign=top>Align the top 3 shared hits<td> The 3 best hits shared between the two sequences will
+<tr><td nowrap valign=top><u>Align shared hits to pair (max 3)</u><td> The 3 best hits shared between the two sequences will
 be aligned to each sequence, for a total of 6 alignments.
 </table>
 
 <h2>View sequences</h2>
-This creates a sequence table of the two sequences. The resulting table is placed under
-<b>Filters</b> (i.e. TCW treats it as a filtered table).
+This creates a sequence table of the two sequences, which is placed under
+<b>Filters</b>.
 
 <h2>Table...</h2>
-<table cellpadding=3>
-<tr><td nowrap valign=top>Show column stats<td>This results in a popup window of statistics for all numeric columns.
-<tr><td nowrap valign=top>Copy table<td>This copies the table to the clipboard.
-<tr><td nowrap valign=top>Export table of columns<td>This export the table to file.
+<table class=tablex>
+<tr><td nowrap valign=top><u>Show column stats</u><td>This results in a popup window of statistics for all numeric columns.
+<tr><td nowrap valign=top><u>Copy table</u><td>This copies the table to the clipboard.
+<tr><td nowrap valign=top><u>Export table of columns</u><td>This export the table to file.
 </table>
-
+</body>
 </html>

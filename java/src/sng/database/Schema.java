@@ -753,12 +753,11 @@ public class Schema
 					"create table go_graph_path (" +
 					" relationship_type_id tinyint unsigned, " +
 					" distance smallint unsigned, " + //e.g. if A part_of B is_a C part_of D, then distance=3 for A part_of D 
-					" relation_distance smallint unsigned, " + // e.g. if A part_of B is_a C part_of D, then relation_distance=2 for A part_of D 
-	    				" child int unsigned, " +
-	    				" ancestor int unsigned, " +
-	    				" index(child), " +
-	    				" index(ancestor)" +
-	    				" ) ENGINE=MyISAM;");
+	    			" child int unsigned, " +
+	    			" ancestor int unsigned, " +
+	    			" index(child), " +
+	    			" index(ancestor)" +
+	    			" ) ENGINE=MyISAM;");
 			
 			// this is used in GOtree.java 
 			if (db.tableExists("go_term2term")) db.executeUpdate("drop table go_term2term");

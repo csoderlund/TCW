@@ -1,34 +1,34 @@
+<!DOCTYPE html>
 <html>
 <!--#set var=TITLE value="Tour: viewSingle Sequence Query" -->
 <!--#include virtual="../../ssi/head.html" -->
-<body bgcolor="#FFFFFF" text="#000000" onLoad="init('seqB')">
+<body onLoad="init('seqB'); init2('viewS')">
+<a id=top></a>
 <!--#include virtual="../ssi/start2t.html" -->
-
-<a name=start>
 <!--#include virtual="./ssi/view_stcw.html" -->
 
-<center><code>Sequence Query</code></center>
-
-The sequence can be queried by sequence ID or remark, where the <tt>User</tt>
-remarks are added through the <code>runSingleTCW</code> interface, and the <tt>TCW</tt> remarks are added by TCW during ORF
+<div style="text-align: center"><big><ttc>Sequence Query</ttc></big></div>
+The sequence can be queried by sequence ID or remark, where the <ttx>User</ttx>
+remarks are added through the <ttp>runSingleTCW</ttp> interface, and the <ttx>TCW</ttx> remarks are added by TCW during ORF
 computation; one such remark ("Multi-frame") indicates that the sequence has aligned hits in
 multiple frames. 
 
+<p><img src="img/seqQuery.png" alt="" style="border: 1px solid black; width: 850px">
 
-<p><a  href="img/seqQuery.png"><img width=850 src="img/seqQuery.png" border=1></a>
+<p>Sometimes it is easier if TCW assigns names to the sequences (option in <ttp>runSingleTCW</ttp>), in
+which case, the original name (<ttc>Orig ID</ttc>) can still be viewed and queried on. Another <ttp>runSingleTCW</ttp> option
+is to assemble the sequences, in which case the <ttc>Orig ID</ttc> will be replaced with the <ttc>Longest</ttc> read of the contig.
 
-<p>Sometimes it is easier if TCW assigns names to the sequences (option in <code>runSingleTCW</code>), in
-which case, the original name (<tt>Orig ID</tt>) can still be viewed and queried on. Another <code>runSingleTCW</code> option
-is to assemble the sequences, in which case the <tt>Orig ID</tt> will be replaced with the <tt>Longest</tt> read of the contig.
+<p>One or more sequence can be selected followed by <ttx>View Sequences</ttx> and they will be shown in the main <ttx>Sequence table</ttx>. 
 
-<p>One or more sequence can be selected followed by <tt>View Sequences</tt> and they will be shown in the main <tt>Sequence table</tt>. 
-
-<p>This <tt>Query</tt> interface could be merged with the sequence <tt>Filter</tt> interface, but it has the
+<p>This <ttc>Query</ttc> interface could be merged with the sequence <ttc>Filter</ttc> interface, but it has the
 added ability of being able to modify the table; the following options are at the bottom of the table:
 
-<p><a  href="img/seqButtons.png"><img width=650 src="img/seqButtons.png" border=1></a>
+<p><img src="img/seqButtons.png" alt="" style="border: 1px solid black; width: 650px">
 
-<table width='100%'><tr><td align='left' >
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+<table style="width: 100%"><tr><td style="text-align: left">
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
 <!--#include virtual="../../ssi/end.html" -->
+</body>
+</html>

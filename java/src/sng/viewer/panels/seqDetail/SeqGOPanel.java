@@ -57,6 +57,9 @@ import util.database.DBConn;
 public class SeqGOPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	
+	private static final String helpHTML =  Globals.helpDir + "DetailGoPanel.html";
+	private static final String helpGoHTML =  Globals.helpDir + "goHelp/index.html";
+	
 	static final private int SHOW_ASSIGNED_GO = SeqTopRowTab.SHOW_ASSIGNED_GO;
 	static final private int SHOW_ALL_GO = SeqTopRowTab.SHOW_ALL_GO;
 	static final private int SHOW_SEL_GO = SeqTopRowTab.SHOW_SEL_GO;
@@ -153,7 +156,7 @@ public class SeqGOPanel extends JPanel {
 		btnGoHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(getInstance(), 
-						"GO Help", "html/viewSingleTCW/GO.html");
+						"GO Help", helpGoHTML);
 			}
 		});
 		toolPanel.add( Box.createHorizontalGlue() );
@@ -162,7 +165,7 @@ public class SeqGOPanel extends JPanel {
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(theParentFrame, 
-						"Sequence GO Help", "html/viewSingleTCW/ContigGoPanel.html");
+						"Sequence GO Help", helpHTML);
 			}
 		});
 		
@@ -465,7 +468,11 @@ public class SeqGOPanel extends JPanel {
 						" where hitID='" + strHit + "' limit 1");
 			if (rs.next()) {
 				String hitGoEvidStr = rs.getString(1);
-				hitGoList = hitGoEvidStr.split(";");
+				if (hitGoEvidStr==null || hitGoEvidStr=="") {// CAS318 linux if select hit with no GOs
+					Out.PrtWarn("No GOs for " + strHit);
+					return;
+				}
+				hitGoList = hitGoEvidStr.split(";"); 
 			}
 			else {
 				Out.PrtWarn("No GOs for " + strHit);
@@ -610,11 +617,11 @@ public class SeqGOPanel extends JPanel {
     			lines.add(line);
     			
     			// check all hits for sequence to see if they have this go
-    			for (String hitID : sortHit) {
-    				
+    			for (String hitID : sortHit) { 
+    				if (hitID==null) continue; // CAS318 linux gets null hitID - 
     				String goStr="";
-    				rs = mDB.executeQuery("select goList from pja_db_unique_hits " +
-    						"where hitID='" + hitID + "'");
+    				rs = mDB.executeQuery("select goList from pja_db_unique_hits where hitID='" 
+    							+ hitID + "'");
     				if (rs.next()) goStr = rs.getString(1);
     				else {
     					lines.add("Error on " + hitID);

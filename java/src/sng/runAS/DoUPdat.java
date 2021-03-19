@@ -194,7 +194,7 @@ public class DoUPdat {
 			goDB.openTransaction(); 
 			
 			PreparedStatement ps = goDB.prepareStatement(
-					"insert ignore into PAVE_Uniprot (upid, acc, go, pfam, kegg, ec, interpro) " +
+					"insert ignore into " + Globalx.goUpTable + " (upid, acc, go, pfam, kegg, ec, interpro) " +
 					"values (?,?,?,?,?,?,?)");
 			String line, id="", acc="", go="", pfam="", kegg="", ec="", ip="";
 			HashMap <String, Integer> badEC = new HashMap <String, Integer> ();

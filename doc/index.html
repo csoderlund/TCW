@@ -2,39 +2,40 @@
 <HTML>
 <!--#set var=TITLE value="TCW Documentation Index" -->
 <!--#include virtual="./ssi/head.html" -->
-<body bgcolor="#FFFFFF" text="#000000" onLoad="init('doc')">
+<body onLoad="init('doc')">
+<a id=top></a>
 <!--#include virtual="./ssi/start1.html" -->
-<a name=top>
 
-<table width=80%  align="center" cellspacing="3">
+<center>
+<table style="width: 80%">
  
-<tr><td colspan=3> <font face="Verdana, Arial, Helvetica, sans-serif" size="3">Getting started</td></tr></font>
+<tr><td colspan=3> Getting started</td></tr>
 <tr>	<td>&nbsp;&nbsp;<td><a href="Summary.html">Summary</a>		<td>A summary of the input, processing and suite of programs.
 
 <tr>	<td>&nbsp;&nbsp;<td><a href="Install.html">Installation</a><td>Installing TCW and other necessary and optional software.
 <tr>	<td colspan=3>&nbsp;&nbsp;
 
-<tr><td colspan=3> <font face="Verdana, Arial, Helvetica, sans-serif" size="3">Major documents with step-by-step details using the Demo dataset</td></tr>
-<tr>	<td>&nbsp;&nbsp;<td><a href="stcw/AnnoDBs.html"><code>runAS</code></a></td>
-			<td>Annotation Setup<sup>1</sup> - Getting UniProt, GO, nr, etc for use with <code>runSingleTCW</code></td></tr>
+<tr><td colspan=3> Major documents with step-by-step details using the Demo dataset</td></tr>
+<tr>	<td>&nbsp;&nbsp;<td><a href="stcw/AnnoDBs.html"><ttp>runAS</ttp></a></td>
+			<td>Annotation Setup<sup>1</sup> - Getting UniProt, GO, nr, etc for use with <ttp>runSingleTCW</ttp></td></tr>
 
-<tr>	<td>&nbsp;&nbsp;<td><a href="stcw/UserGuide.html"><code>runSingleTCW</code></a></td>
+<tr>	<td>&nbsp;&nbsp;<td><a href="stcw/UserGuide.html"><ttp>runSingleTCW</ttp></a></td>
 			<td>Single species - Building a single species annotated TCW database
 			 
-<tr>	<td>&nbsp;&nbsp;<td nowrap><a href="stcw/DiffExp.html"><code>runDE</code></a></td>
+<tr>	<td>&nbsp;&nbsp;<td class="top"><a href="stcw/DiffExp.html"><ttp>runDE</ttp></a></td>
 			<td>Differential Expression - Add DE to the singleTCW database
 			</td></tr> 
-<tr>	<td>&nbsp;&nbsp;<td><a href="mtcw/UserGuide.html"><code>runMultiTCW</code></a></td>
+<tr>	<td>&nbsp;&nbsp;<td><a href="mtcw/UserGuide.html"><ttp>runMultiTCW</ttp></a></td>
 			<td>Multiple species - Building a comparison database from single TCW databases
 			
-<tr>	<td>&nbsp;&nbsp;<td><code>viewSingleTCW</code> and <code>viewMultiTCW</code></td>
+<tr>	<td>&nbsp;&nbsp;<td><ttp>viewSingleTCW</ttp> and <ttp>viewMultiTCW</ttp></td>
 			<td>Viewing results - the user manual is built into the programs Help pages; 
 			also see 
-			<a href=./tour/viewSingle/index.html>Single Tour</a> and 
-			<a href=./tour/viewMulti/index.html>Multi Tour</a>. 
+			<a href="./tour/viewSingle/index.html">Single Tour</a> and 
+			<a href="./tour/viewMulti/index.html">Multi Tour</a>. 
 			
 <tr>	<td colspan=3>&nbsp;&nbsp;
-<tr><td colspan=3> <font face="Verdana, Arial, Helvetica, sans-serif" size="3">Details</td></tr>
+<tr><td colspan=3> Details</td></tr>
 <tr>	<td>&nbsp;&nbsp;<td><a href="stcw/AnnoGuide.html">Updating annotation</a></td>
 			<td>Removing, adding, updating annotation</td></tr>
 		<tr>	<td>&nbsp;&nbsp;<td><a href="stcw/ORF.html">ORF finder</a></td>
@@ -43,7 +44,7 @@
 			<td>Not typically necessary<sup>2</sup></td> </tr>
 
 <tr>	<td colspan=3>&nbsp;&nbsp;
-<tr><td colspan=3> <font face="Verdana, Arial, Helvetica, sans-serif" size="3">Other docs</td></tr>
+<tr><td colspan=3> Other docs</td></tr>
 <tr>	<td>&nbsp;&nbsp;<td><a href="External.html">External Software</a></td><td>Packages used by TCW</td></tr>
 <tr>	<td>&nbsp;&nbsp;<td><a href="./tour">TCW Tour</a> </td> 	<td>Snapshots of different TCW screens</td></tr>
 
@@ -54,17 +55,19 @@
 				Release Notes</a></td><td>Release detail since v1.0</td></tr>
 <tr>	<td>&nbsp;&nbsp;<td><font color=red>Help</font></td><td>All TCW programs have Help pop-ups on every display.
 	
-
+<tr><td colspan=3><td>&nbsp;&nbsp;</td>
 <tr><td colspan=3><sup>1</sup><font size="2">The sequences that are loaded into TCW (e.g. transcripts, proteins) are searched against one or more databases for annotation;
 these annotation databases are referred to as "AnnoDBs". When UniProt is used for annotation, TCW provides GO, KEGG,
-EC, Interpro and Pfam annotations.
+EC, Interpro and Pfam annotations.</font></td>
 
 <tr><td colspan=3><sup>2</sup><font size="2">TCW can be used with already assembled transcripts, proteins or mRNA (e.g. predicted genes with introns removed), 
 i.e. the assembly is not usually necessary now.
-Though the TCW assembly does not work for high-throughput sequencing reads, it is still occasionally useful for Sanger ESTs or assembling multiple sets of transcripts.
+Though the TCW assembly does not work for high-throughput sequencing reads, it is still occasionally useful for Sanger
+ESTs or assembling multiple sets of transcripts.</font></td>
 </table>
-<p>
+</center>
 <!--#include virtual="./ssi/end.html" -->
+</body>
 </HTML>
 
 

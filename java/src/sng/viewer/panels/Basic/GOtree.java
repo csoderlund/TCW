@@ -64,6 +64,8 @@ public class GOtree {
 	public static final int SELECTED_HIT_ASSIGNED = 12;
 	public static final int SELECTED_HIT_ALL = 13;
 	
+	private boolean bSortByLevel=true;
+	
 	private static String [] action = { // these are parsed for file names
 		"GO Ancestor List", "GO Descendent List", "GO Neighbors List", "GO Related in table",
 		"GO Ancestor Paths", "GO Ancestor Ordered List",
@@ -286,7 +288,7 @@ public class GOtree {
 	private Vector <String> showGoAncByLevelList(int gonum, String godesc) {
 		try {															
 			DBConn mDB = theMainFrame.getNewDBC();
-			setTypes(mDB);
+			setRelTypes(mDB);
 			
 			ResultSet rs=mDB.executeQuery("select term_type from go_info where gonum=" + gonum);
 			String term="";
@@ -339,7 +341,7 @@ public class GOtree {
 	private Vector <String> showGoAncByDistList(int gonum, String godesc) {
 		try {													
 			DBConn mDB = theMainFrame.getNewDBC();
-			setTypes(mDB);
+			setRelTypes(mDB);
 			
 			ResultSet rs=mDB.executeQuery("select term_type from go_info where gonum=" + gonum);
 			String term="";
@@ -355,6 +357,7 @@ public class GOtree {
 			// The is_a and part_of have different distances, hence, two tables
 			Vector<String> goIsA = new Vector<String> (); 
 			Vector<String> goPartOf = new Vector<String> (); 
+			Vector<String> goReplacedBy = new Vector<String> (); 
 			while (rs.next()) { 
 				int gonum2 = rs.getInt(1);
 				if (gonum==gonum2) continue;
@@ -366,10 +369,11 @@ public class GOtree {
 				
 				String l = String.format("%-10s  %-5s  %s", go, level, desc);
 				
-				if (!typeMap.containsKey(type)) continue;
-				String relType = typeMap.get(type);
+				if (!relTypeMap.containsKey(type)) continue;
+				String relType = relTypeMap.get(type);
 				if (relType.equals("is_a")) goIsA.add(l);
-				else goPartOf.add(l);
+				else if (relType.equals("part_of")) goPartOf.add(l);
+				else if (relType.equals("replaced_by")) goReplacedBy.add(l);
 			}
 			if (rs!=null) rs.close(); mDB.close();
 			
@@ -391,6 +395,12 @@ public class GOtree {
 				for (String g : goPartOf) lines.add(g);
 			}
 			
+			if (goPartOf.size()>0) {
+				lines.add(goReplacedBy.size() + " Relation: replaced_by");
+				lines.add(String.format("%-10s  %-5s  %s", "GO term", "Dist",  "Description"));		
+				for (String g : goPartOf) lines.add(g);
+			}
+			
 			lines.add("");
 			return lines;
 		}
@@ -402,7 +412,7 @@ public class GOtree {
 		try {
 			DBConn mDB = theMainFrame.getNewDBC();
 			ResultSet rs=null;
-			setTypes(mDB);
+			setRelTypes(mDB);
 			
 			HashSet <Integer> dups = new HashSet <Integer> (); // can have is_a and part_of
 			int offset=3; // For Related, first GO at lines.get(3)
@@ -450,7 +460,7 @@ public class GOtree {
 	private Vector <String> showGoNeighborsList(int gonum, String godesc) {
 		try {															
 			DBConn mDB = theMainFrame.getNewDBC();
-			setTypes(mDB);
+			setRelTypes(mDB);
 			
 			ResultSet rs=mDB.executeQuery("select term_type from go_info where gonum=" + gonum);
 			String term="";
@@ -460,39 +470,50 @@ public class GOtree {
 			lines.add("Neighbors of " + String.format(GO_FORMAT, gonum) + " - " + godesc + term);
 			lines.add("");	
 			
+			bSortByLevel=false;
+			String rType;
 			HashMap <Integer, GOterm> neighGOs = new HashMap <Integer, GOterm> ();
 			for (int i=0; i<2; i++) {
 				if (i==0) {
-					lines.add("Parents:");
+					rType = "Parents: ";
 					rs = mDB.executeQuery("select t.parent, t.relationship_type_id, i.descr " +
 						" from go_term2term as t, go_info as i" +
 						" where parent>0 and child=" + gonum + " and t.parent=i.gonum ");
 				}
 				else {
-					lines.add("Children:");
+					neighGOs.clear(); // CAS318
+					rType = "Children: ";
 					rs = mDB.executeQuery("select t.child, t.relationship_type_id, i.descr " +
 							" from go_term2term as t, go_info as i" +
 							" where child>0 and parent=" + gonum + " and t.child=i.gonum");
 				}
 				while (rs.next()) { 
 					int gonum2 = rs.getInt(1);
-					String type = typeMap.get(rs.getInt(2));
+					String rtype = relTypeMap.get(rs.getInt(2));
 					String desc = rs.getString(3);
 					if (neighGOs.containsKey(gonum2)) {
 						GOterm gt = neighGOs.get(gonum2);
-						if (!type.equals(gt.type)) gt.type="both";
+						if (!rtype.equals(gt.rtype)) gt.rtype="both";
 					}
 					else {
-						neighGOs.put(gonum2,  new GOterm(gonum2, type, desc));
+						neighGOs.put(gonum2,  new GOterm(gonum2, rtype, desc));
 					}
 				}
+				// CAS318 added sort by description to match Amigo order
+				Vector <GOterm> list = new Vector <GOterm> ();
+				for (GOterm g : neighGOs.values()) list.add(g);
+				Collections.sort(list);
+				
+				lines.add(rType + neighGOs.size());
 				if (neighGOs.size()==0) lines.add("None");
-				else {
-					lines.add(String.format("%-10s  %-8s  %s", "GO term", "Relation", "Description"));
-					for (int gonum2 : neighGOs.keySet()) { 
-						GOterm gt = neighGOs.get(gonum2);
+				else { // CAS318 put relation first
+					lines.add(String.format("%-11s  %-10s  %s", "Relation", "GO term",  "Description"));
+					for (GOterm gt : list) { 
+						String type = gt.rtype;
+						if (type.startsWith("rep") && i==1) type = "replaces";
+						
 						String go = String.format(GO_FORMAT, gt.gonum);
-						String l = String.format("%-10s  %-8s  %s", go, gt.type, gt.desc);
+						String l = String.format("%-11s  %-10s  %s", type, go,  gt.desc);
 						lines.add(l);
 					}
 				}
@@ -502,6 +523,8 @@ public class GOtree {
 			lines.add("Children only shown if they have a hit in the sTCWdb");
 			if (rs!=null) rs.close(); 
 			mDB.close();
+			bSortByLevel=true;
+			
 			return lines;
 		}
 		catch(Exception e) {ErrorReport.prtReport(e, "query for Ancestor list");}
@@ -928,22 +951,18 @@ public class GOtree {
 	}	
 	
 	/****************** Map is_a and part_of to index *****************/
-	// The partof does change 'id', which is found in the GO MySQL term table.
-	private void setTypes(DBConn mDB) {
+	// TODO 
+	private void setRelTypes(DBConn mDB) {
 		try {
-			int x=1, total;
-			ResultSet rs = mDB.executeQuery("select isa from assem_msg");
-			if (rs.next()) x = rs.getInt(1);
-			typeMap.put(x, "is_a");
-			total=x;
+			relTypeMap.put(0, "both");
 			
-			rs = mDB.executeQuery("select partof from assem_msg");
-			if (rs.next()) x = rs.getInt(1);
-			typeMap.put(x, "part_of");
-			total += x;
+			int x = mDB.executeInteger("select isa from assem_msg");
+			relTypeMap.put(x, "is_a");
 			
-			typeMap.put(0, "");
-			typeMap.put(total, "both");
+			x = mDB.executeInteger("select partof from assem_msg");
+			relTypeMap.put(x, "part_of");
+			
+			relTypeMap.put(3, "replaced_by");
 		}
 		catch(Exception e) {ErrorReport.prtReport(e, "set types");}
 	}
@@ -958,9 +977,9 @@ public class GOtree {
 			this.gonum = gonum;
 			this.desc = desc;
 		}
-		GOterm (int gonum, String type,  String desc) { // go neighbors
+		GOterm (int gonum, String rtype,  String desc) { // go neighbors
 			this.gonum = gonum;
-			this.type = type; // is_a, part_of
+			this.rtype = rtype; // is_a, part_of
 			this.desc = desc;
 		}
 		GOterm (int gonum, int level, int dist, String desc) { // go Hits
@@ -978,6 +997,9 @@ public class GOtree {
 		public void setMsg(String msg) {this.msg = msg;}
 		
 		public int compareTo(GOterm t) { 
+			if (!bSortByLevel) { // CAS318 for neighbors - to match amigo display
+				return this.desc.compareToIgnoreCase(t.desc);
+			}
 			if (!this.term.equals(t.term)) {
 				return this.term.compareToIgnoreCase(t.term);
 			}
@@ -992,7 +1014,7 @@ public class GOtree {
 			return (this.gonum - t.gonum); 
 		}
 		int gonum;
-		String desc= "", type="", term="", msg="";
+		String desc= "", rtype="", term="", msg="";
 		int level=0;
 		int count=1;
 		int dist=0; // go_graph_path.distance
@@ -1425,6 +1447,7 @@ private class AllDialog extends JDialog {
 			goDup.clear();
 			if (rs!=null) rs.close(); mDB.close();
 			
+			
 			Collections.sort(goList);
 			
 			String delim = (nMode==MODE_POP) ? " "  : FileC.TSV_DELIM; 
@@ -1673,7 +1696,7 @@ private class AllDialog extends JDialog {
 	private Vector <Vector <Integer>> allPaths = new Vector <Vector <Integer>> (); // vector of go terms for each path
 	private int [][] prtPaths=null;
 	
-	private HashMap <Integer, String> typeMap = new HashMap <Integer, String> ();
+	private HashMap <Integer, String> relTypeMap = new HashMap <Integer, String> ();
 	private HashMap <Integer, Integer> ancMap=null, descMap=null;
 	
 	private boolean bSORT_BY_DIST = false; // not used

@@ -185,6 +185,8 @@ public class MetaData {
 	private void checkVer(DBConn mDB) {
 		try {
 			String annoVer = mDB.executeString("select annoVer from schemver");
+			if (annoVer==null || annoVer=="") return; // CAS318 occurs if only Build Database
+				
 			String n = annoVer.replace(".","");
 			int v = Static.getInteger(n);
 			if (v<317) {

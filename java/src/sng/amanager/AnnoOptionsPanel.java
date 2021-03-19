@@ -175,7 +175,7 @@ public class AnnoOptionsPanel extends JPanel {
 		row.add(txtHitEval);
 		row.add(Box.createHorizontalStrut(1));
 		
-		ntJLabel[1] = new JLabel(" or %HitSim>=");
+		ntJLabel[1] = new JLabel(" or %Sim>="); // CAS318 %Identity from file, was HitSim
 		row.add(ntJLabel[1]);
 		row.add(Box.createHorizontalStrut(1));
 		txtHitSim  = Static.createTextField("0", NUM_LG_FIELD_WIDTH);
@@ -467,10 +467,11 @@ public class AnnoOptionsPanel extends JPanel {
 		try {
 			DBConn goDB = hostsObj.getDBConn(godbName);
 	
-			ResultSet rset = goDB.executeQuery("select acc from term where term_type='subset'");
+			// pre-v318 will not get any, as 'name' is not prefixed with goslim_
+			ResultSet rset = goDB.executeQuery("select name from term where term_type='subset'");
 			while(rset.next()) {
 				String acc = rset.getString(1);
-				if (acc.startsWith("goslim"))
+				if (acc.startsWith("goslim_"))
 					subsets.add(rset.getString(1));
 			}
 			rset.close();	

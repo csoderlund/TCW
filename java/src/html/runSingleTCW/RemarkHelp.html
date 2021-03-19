@@ -1,27 +1,35 @@
+<!DOCTYPE html>
 <html>
-	<title>Remark and Location Help</title>
-	<body style="padding:20px;width:650px;font-family:Times">
-	
+<head>
+<title>Remark and Location Help</title>
+<style>
+.tabley    		{border: 1px  solid black; border-spacing: 0px;  border-collapse: collapse;}
+.tabley td 		{border: 1px  solid black; padding: 3px; }
+</style>
+</head>
+<body style="padding:20px;width:650px;font-family:Times">
+		
 <h2>Add remarks or locations to database</h2>	
 
-<p>
-<table border=1>
-<tr><td nowrap>Location File:<td> reads the file, removes any existing location information,
+<table class=tabley>
+<tr><td nowrap><b>Location File</b><td> Reads the file, removes any existing location information,
 and adds the location information to each sequence. 
-<tr><td nowrap>User Remarks File:<td> reads the file and adds the remarks to any existing <tt>User remark</tt>
+<tr><td nowrap><b>Remarks File</b><td> Reads the file and adds the remarks to any existing <tt>User remark</tt>
 for the sequence.
 
-<tr><td nowrap>Remove Remark:<td> removes the remarks from the sequence <tt>User remark</tt> column.
+<tr><td nowrap><b>Remove Remark:</b><td> removes the remarks from the sequence <tt>User remark</tt> column.
 </table>
-<br>There is also a <tt>TCW Remark</tt>, which contains information from the ORF finder; this <tt>TCW Remark</tt> is not touch
-by the above commands.
+<br>For the first two, select the file with the "<b>...</b>", which brings up the <b>File Chooser</b>.
+It expects the files to end in ".txt" or ".tsv". If your file does not have either suffix,
+select "All Files" from the <b>File Format:</b> drop-down. After selecting the file, click the
+<b>Add</b> on the same line.
 
-<br><br>The File Chooser (...) expects the files to end in ".txt" or ".tsv". If your file does not have that suffix,
-select "All Files" from the <b>File Format:</b> drop-down.
+<p>There is also a <tt>TCW Remark</tt>, which contains information from the ORF finder; this <tt>TCW Remark</tt> is not touch
+by the above commands.
 
 <h2>Locations</h2>
 The file is a set of rows where the first word of each row is
-the sequence ID and the rest of the row is the location in the format: 
+the 'sequence ID' and the rest of the row is the location in the format: 
 <pre>
     supercontig_name:start-end(strand)
     e.g. SC_1:392-496(-).
@@ -34,13 +42,12 @@ and a Filter can be set to view only those sequences with a location.
 
 <h2>User Remarks</h2>
 The file is just a set of rows where the
-first word of each row is the sequence ID, and the rest of the row is added 
-as the Remark for the sequence. 
+first word of each row is the 'sequence ID', and the rest of the row is added 
+as the remark for the sequence. 
 <ul>
 <li>Single and double quotes will be changed to spaces.
 <li>The semi-colon ';' will be changed to a colon ':'.
-<li>The dollar sign '$' will be changed to the ampersand '&'; 
-</table>
+<li>The dollar sign '$' will be changed to the ampersand '&amp;'; 
 </ul>
 
 <p>
@@ -50,4 +57,5 @@ by selecting it under the <tt>General</tt> columns tab, and a Filter can be set 
 You can search on the <tt>User Remark</tt> in the <tt>Basic Sequence Query</tt>. This is a great way to add additional information about your sequences.
 <i>If you make the remarks "keyword=value" pairs, you can then search on the keyword
 to get a specific group of sequences.</i>
+</body>
 </html>

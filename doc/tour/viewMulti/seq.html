@@ -1,79 +1,73 @@
-
+<!DOCTYPE html>
 <html>
 <!--#set var=TITLE value="Tour: viewMulti Sequence" -->
 <!--#include virtual="../../ssi/head.html" -->
-<body bgcolor="#FFFFFF" text="#000000" onLoad="init('seq')">
+<body  onLoad="init('seq'); init2('viewM')">
+<a id=top></a>
 <!--#include virtual="../ssi/start2t.html" -->
-
-<a name=start>
 <!--#include virtual="./ssi/view_mtcw.html" -->
 
-<center><code>Sequences</code>
-<table  border="0" cellspacing="0" cellpadding="2" height="18">
-<tr><td align="left" bgcolor="#666666" class="white" style="padding-bottom:4px;">
-<a href="#table" class="white">Table</a> |
-<a href="#filter" class="white">Filters</a> |
+<div style="text-align: center"><big><ttc>Sequences</ttc></big></div>
+<table style="padding: 2;  border-spacing:0; border-collapse:collapse;  margin-left: auto; margin-right: auto;">
+<tr><td style="background-color: #666666; padding-bottom:4px; "> 
+<a href="#table" class="white">Table</a> <mark class="white">|</mark>
+<a href="#filter" class="white">Filters</a> <mark class="white">|</mark>
 <a href="#col" class="white">Columns</a>
 </td></tr>
 </table>
-</center>	
 
-<a name=table>
-<table width='100%'><tr><td align='left' >
+<a id=table></a>
 <h3>Sequence Table</h3> 
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
 
 The table below was created with the filter to show all Sequence that are found in clusters
 CL, HT, BB and OM.
-<table border=0>
-<tr><td>
-<p>Select a row followed by:
-<ul>
-<li><code>Pairs</code>: the table of pairs for the sequence will be shown (see lower left image). 
-<br><br>
-<li><code>Cluster</code>: the table of clusters for the sequence will be shown (see lower right image). 
-<br><br>
-<li><code>Align (selected): see <a href=align.html>Align</a>.
-</ul>
-<td><a  href="img/seqTable.png"><img width=700 src="img/seqTable.png" border=1></a>
+<table>
+<tr>
+	<td>
+	<p>Select a row followed by:
+	<ul>
+		<li><ttc>Pairs</ttc>: the table of pairs for the sequence will be shown (see lower left image). 
+		<br><br>
+		<li><ttc>Cluster</ttc>: the table of clusters for the sequence will be shown (see lower right image). 
+		<br><br>
+		<li><ttc>Align (selected)</ttc>: see <a href="align.html">Align</a>.
+	</ul>
+	<td><img src="img/seqTable.png" alt="" style="border: 1px solid black; width: 700px">
+</tr>
 </table>
 
 <p>
-<table border=0>
-<tr><td valign="top">
+<table>
+<tr><td class="top">
 <small>Pairs for the selected sequence</small>
-<a  href="img/seqPair.png"><img width=450 src="img/seqPair.png" border=1></a>
+<br><img  src="img/seqPair.png" alt="" style="border: 1px solid black; width: 450px">
 
 <td>
 <small>Clusters for selected sequence</small>
-<br><a  href="img/seqClus.png"><img  width=450 src="img/seqClus.png" border=1></a>
+<br><img  src="img/seqClus.png" alt="" style="border: 1px solid black; width: 450px">
 </table>
 
 
-<p>
-<!---------------------------------------------------------------->
-<a name=filter>
-<table width='100%'><tr><td align='left' >
+<a id=filter></a>
+<table style="width: 100%"><tr><td style="text-align: left">
 <h3>Sequence Filters</h3> 
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
-<table border=0>
-<tr><td valign="top">
+<table>
+<tr><td class="top">
 <small>Filter</small>
-<br><a  href="img/seqFilter.png"><img width=400 src="img/seqFilter.png" border=1></a>
-<td valign="top">
+<br><img  src="img/seqFilter.png" alt="" style="border: 1px solid black; width: 400px">
+<td class="top">
 <small>Filter (Continue)</small>
-<br><a  href="img/seqFilter2.png"><img width=340 src="img/seqFilter2.png" border=1></a>
+<br><img  src="img/seqFilter2.png" alt="" style="border: 1px solid black; width: 340px">
 </table>
 
-<p>
-<!---------------------------------------------------------------->
-<a name=col>
-<table width='100%'><tr><td align='left' >
+<a id=col></a>
+<table style="width: 100%"><tr><td style="text-align: left">
 <h3>Sequence Columns</h3> 
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
-
-<br><a  href="img/seqColumn.png"><img width=550 src="img/seqColumn.png" border=1></a>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+<br><img src="img/seqColumn.png" alt="" style="border: 1px solid black; width: 550px">
 
 <!--#include virtual="../../ssi/end.html" -->
-
+</body>
+</html>

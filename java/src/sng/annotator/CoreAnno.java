@@ -98,7 +98,7 @@ public class CoreAnno {
 	 * 3. tselfBlastPairs Read tselfblast file for all tblastx hits
 	 * 4. pairsSpMx contains all pairs
 	 * 5. Get all current pair_wise data and remove from pairsSpMx so not redone
-	 * 7. DP all pairs within JPAVE_pairs_limit 
+	 * 7. DP all pairs within pairs_limit 
 	 */
 	private boolean doHomologyTests() throws Exception {						
 		if (maxDPpairs == 0 || !doBlastObj.doPairs()) return true; // no comparisons to be performed

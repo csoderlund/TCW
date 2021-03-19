@@ -1,45 +1,53 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
-	<title>Annotation Options</title>
-	<body style="padding:20px;width:650px;font-family:Times;">
-	
-	Annotation, ORF finding, and similar sequences are computed when you click
-	"Annotate". Run only ORF finding or GO annotation with
-	with "ORFs only"and "GO only", respectively. The parameters on this panel
-	are used for these three tasks.
-	
-	<h3>ANNOTATION:</h3>
-	<table border=0 cellpadding=3>
-		<tr><td valign="top" nowrap>Best Anno - SwissProt preference</td> 
-		<td>The "Best Anno" is the best hit without a phrase in its description such as
+<head>
+<title>Annotation Options</title>
+<style>
+.tablex    		{border: 0px; padding: 3px; border-spacing: 3px; }
+.tablex td 		{border: 0px; padding: 3px; border-spacing: 3px}
+</style>
+</head>
+<body style="padding:20px;width:650px;font-family:Times">
+<h2>Annotation Options</h2>
+<i>From the main panel:</i> annotation, ORF finding, and similar sequences are computed when you click
+<b>Annotate</b>. Run only ORF finding or GO annotation with
+with <b>ORFs only</b> and <b>GO only</b>, respectively. The parameters on this panel
+are used for these three tasks.
+
+<h3>ANNOTATION:</h3>
+<table class=tablex>
+	<tr>
+	<td valign="top"><b>Best Anno - SwissProt preference</b></td> 
+	<td>The <i>Best Anno</i> is the best hit without a phrase in its description such as
 		"uncharacterized protein". If this option is selected, and if the best-anno is
 		not a SwissProt hit, then the best-anno SwissProt hit is used if the bitscore is greater
-		than 70% of the "Best Anno" bitscore. The purpose of this option is
+		than 70% of the <i>Best Anno</i> bitscore. The purpose of this option is
 		to give preference to SwissProt since the descriptions tend to be better and they
-		are the most reliable protein sequences.
+		are the most reliable protein sequences.</td>
 		
-		<tr><td valign="top" nowrap>Remove {ECO...} from UniProt descript</td> 
-		<td>Many UniProt descriptions (especially in TrEMBL) end with strings that start
+	<tr><td valign="top"><b>Remove {ECO...} from UniProt descript</b></td> 
+	<td>Many UniProt descriptions (especially in TrEMBL) end with strings that start
 		with "{ECO". This option removes this string from the description.
 		
-		<tr><td valign="top" nowrap>GO Database*</td>
+	<tr><td valign="top" nowrap><b>GO Database*</b></td>
 		<td>By selecting a GO database, Gene Ontology information will be added.
 		
-		<tr><td valign="top" nowrap>Slims from GO database</td>
+	<tr><td valign="top" nowrap><b>Slims from GO database</b></td>
 		<td>The GO database has GO Slims identified for various groups, e.g. goslim_plants.
 		These are read when you select a GO database and you may select one, in which case,
 		the set will be identified in the TCW database for query. 
-		<tr><td valign="top" nowrap>Slims from OBO File</td>
+		
+	<tr><td valign="top" nowrap><b>Slims from OBO File</b></td>
 		<td>Slims can be read from a file, and the OBO file is the GO file format for slims
 		(google for "OBO file format").
 		</table>
 	*If you are not able to select one, then one needs to be downloaded and installed;
 		see online "Annotation Setup" (http://www.agcol.arizona.edu/software/tcw/doc/stcw/AnnoDBs.html).
 		
-	<h3>ORF finder:</h3>
+<h3>ORF finder:</h3>
 	See http://www.agcol.arizona.edu/software/tcw/doc/stcw/ORF.html for a full explanation
 	of TCW ORF finding and these parameters.
-	<p>Use Alternative Starts - By default, TCW only uses ATG. If you select this option, it will also use
+	<p><b>Use Alternative Starts</b> - By default, TCW only uses ATG. If you select this option, it will also use
 	CTG and TTG.
 	
 	<p>The best ORF must be selected for (i) each of the 6 frames and (ii) between the 6 frames. 
@@ -47,54 +55,48 @@
 	rules are used in order of precedence:
 	
 	<ul>
-	<li>Rule 1: <i>Best Hit.</i> 
-	<br>Parameter: E-value cutoff [default: 1E-03] or %Similarity [default: 95].
-	<br><br>The ORF with the best hit will be selected if the hit E-value &lt;= than the cutoff
-	or the similarity (also referred to as identity) is &gt;= than its cutoff. Note that the default E-value
-	cutoff is
-	1E-03, which is the lowest Diamond E-value. With Diamond hits and this cutoff, the similarity is not
-	necessary. However, if the E-value is set higher, it can miss some exact matches, hence, the
-	similarity parameter is available to catch them.
+	<li><b>Rule 1:</b> <i>Best Hit.</i> 
+	<br>Parameter: <u>E-value</u> &lt;= [default: 1E-10] or <u>%Sim</u> &gt;= [default: 20].
+	<br><br>The sequence will be used if the best hit (EV or AN) if the hit E-value &lt;= than the cutoff
+	or the Hit similarity (also referred to as identity) is &gt;= than its cutoff. 
+	
 	<br><br>NOTE: If the best hits are mostly from a nucleotide database, this does not work.
 	<br><br>
 	
-	<li>Rule 2: <i>Longest ORF.</i> 
-	<br>Parameter: cutoff [default: 0.3].
+	<li><b>Rule 2:</b> <i>Longest ORF.</i> 
+	<br>Parameter: <u>log length ratio</u> &gt; [default: 0.5].
 	<br><br>If the lengths of two candidate ORFs are very different, than the longest ORF is used.
-	To determine if their lengths are 'very' different,
-	the log length ratio is compared to a user-supplied cutoff, e.g. 0.3. For example,
-	the log ratio of 3000:4500 is 0.405,
-	so the longest ORF would be used, 
+	To determine if their lengths are <i>very</i> different,
+	the log length ratio is compared to a user-supplied cutoff, e.g. 0.3. For example, if the
+	cutoff is 0.3: the log ratio of 3000:4500 is 0.405, so the longest ORF would be used, 
 	but the log ratio of 3000:4000 is 0.288, so Rule 3 would be used.
 
 	<br><br>
-	<li>Rule 3: <i>Best Markov score.</i> 
-	<br>Parameters: Minimal Set [default: 50], CDS file [default: none].
+	<li><b>Rule 3:</b> <i>Best Markov score.</i> 
+	<br>Parameters: <u>Minimal Set</u> [default: 50] and the following.
 	<br><br>For 5th-order Markov model computation*, there are two options:
 	<ol>
-	<li> Train with hits: For the best hits identified in Rule 1,
+	<li><u>Train with Best Hits</u>: For the best hits identified in Rule 1,
 	the exact hit region of each sequence will be part of the training set. There must be at least N sequences
 	that pass the E-value test, where N is the user supplied 'Minimum Set'
-	<li> Train with CDS file:  This should be a FASTA file of coding sequences. 
-	
-	</ol>
-	*The Markov score was computed according to Hass et al. (2013) Nature Protocols 8:1494-1512 for Transcoder.
-</ul>
-<h4>Train with CDS file</h4>
-This option allows you to supply a file of nucleotide coding sequences in FASTA format to be used to train.
+	<li><u>Train with CDS file</u>:  This option allows you to supply a file of nucleotide coding sequences in FASTA format to be used to train.
 As they are coding sequences, the sequences must be in frame.
 	
-	
-	<h3>SIMILAR PAIRS:</h3>
+	</ol>
+	*The Markov score was computed according to Hass et al. (2013) <i>Nature Protocols</i> 8:1494-1512 for Transcoder.
+</ul>
+
+		
+<h3>SIMILAR PAIRS:</h3>
 		The sequences in the databases will be compared against each. Then, TCW will use
-		dynamic programming on the top <i>Pairs limit</i> pairs based on the best bitscores.
+		dynamic programming on the top <u>Pairs limit</u> pairs based on the best bitscores.
 		The results are entered into the database and can be queried with <tt>viewSingleTCW</tt>.
 
 		<p>At least one of the following should be selected, where only the last one
 		is relevant for AA-STCW databases.
-		<table border=0 cellspacing=5 cellpadding=3>
+		<table class=tablex>
 		<tr>
-			<td valign="top" colspan=2><code>Blastn</code> (NT-NT)</td>
+			<td valign="top" colspan=2><tt>Blastn</tt> (NT-NT)</td>
 		</tr>
 		<tr>
 			<td nowrap>&nbsp;&nbsp;&nbsp;&nbsp;</t>
@@ -102,7 +104,7 @@ As they are coding sequences, the sequences must be in frame.
 		</tr>
 		
 		<tr>
-			<td valign="top" colspan=2><code>Tblastx</code> (6-frame)</td>
+			<td valign="top" colspan=2><tt>Tblastx</tt> (6-frame)</td>
 		</tr>
 		<tr>
 			<td nowrap valign="top">&nbsp;&nbsp;&nbsp;&nbsp;</td>
@@ -110,12 +112,12 @@ As they are coding sequences, the sequences must be in frame.
 		</tr>
 		
 		<tr>
-			<td valign="top" colspan=2><code>Blastp</code> (AA or translated ORFs)</td>
+			<td valign="top" colspan=2><tt>Blastp</tt> (AA or translated ORFs)</td>
 		</tr>
 		<tr>
 			<td nowrap valign="top">&nbsp;&nbsp;&nbsp;&nbsp;</td>
 			<td>TCW executes blasts with the provided parameters and selected 
-			program (<code>diamond</code> or <code>blast</code>)
+			program (<tt>diamond</tt> or <tt>blast</tt>)
 		</tr>
 		
 		<tr>
@@ -126,14 +128,14 @@ As they are coding sequences, the sequences must be in frame.
 	</table>
 	If a pair hit file exists, the user will be prompts on whether to use the existing file or re-run
 	the search.
-	<p>The "Params" text boxes cannot be blank. <i>TCW does NOT check the correctness of parameters set by the user.</i>
+	<p>The <u>Params</u> text boxes cannot be blank. <i>TCW does NOT check the correctness of parameters set by the user.</i>
 	
-	<p><i>Providing Pair hit files (self-hit)</i>
+	<p><i><b>Providing Pair hit files (self-hit)</b></i>
 	<p>The files are all in the project's <tt>/hitResults</tt> directory, names as follows:
-	<table cellspacing=5 >
-	<tr><td><code>blastn</code><td>&nbsp;&nbsp;&nbsp;&nbsp;&lt;<tt>stcwID&gt;_self_blastp.tab</tt>
-	<tr><td><code>tblastx</code><td>&nbsp;&nbsp;&nbsp;&nbsp;&lt;<tt>stcwID&gt;_self_tblastx.tab</tt>
-	<tr><td><code>blastp</code><td>&nbsp;&nbsp;&nbsp;&nbsp;&lt;<tt>stcwID&gt;_self_blastp.tab</tt> or <tt>&lt;stcwID&gt;_self_blastp.dmnd.tab</tt>
+	<table class=tablex>
+	<tr><td><tt>blastn</tt><td>&nbsp;&nbsp;&nbsp;&nbsp;&lt;<tt>stcwID&gt;_self_blastp.tab</tt>
+	<tr><td><tt>tblastx</tt><td>&nbsp;&nbsp;&nbsp;&nbsp;&lt;<tt>stcwID&gt;_self_tblastx.tab</tt>
+	<tr><td><tt>blastp</tt><td>&nbsp;&nbsp;&nbsp;&nbsp;&lt;<tt>stcwID&gt;_self_blastp.tab</tt> or <tt>&lt;stcwID&gt;_self_blastp.dmnd.tab</tt>
 	</table>
 	<br>
 	A self-hit file can be entered under any of these names, then select the associated checkbox

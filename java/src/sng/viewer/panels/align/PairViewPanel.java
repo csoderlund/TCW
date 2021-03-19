@@ -47,7 +47,7 @@ public class PairViewPanel extends JPanel implements ClipboardOwner
 {		
 	public static int GAP = 12;
 	public static int EXTEND = 2;
-	private final String helpHTML = Globals.helpDir + "SeqAlign.html";
+	private final String helpHTML = Globals.helpDir + "Align.html";
 	
 	public void lostOwnership(Clipboard clipboard, Transferable contents) { }
 	

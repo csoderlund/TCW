@@ -1,44 +1,48 @@
+<!DOCTYPE html>
 <html>
-<body style="padding:20px;width:650px;font-family:Times">
+<head>
 <title>Sequence Details</title>
+</head>
+<body style="padding:20px;width:650px;font-family:Times">
+
 <h1>Sequence Details</h1>
 <ol>
-<li><b>Best ORF</b>: shows the RF (reading frame) and coordinates. A '*' indicates a missing start or stop. 
-<li><b>DB hits table</b>: 
+<li>Best ORF: shows the RF (reading frame) and coordinates. A '*' indicates a missing start or stop. 
+<li>DB hits table: 
 <ul>
-<li>The columns "E-value, %Sim, AlignLen, Start and End" are from the first Search results for
- the hit (<tt>Blast</tt> or <tt>Diamond</tt>). 
-<li>The column "Align" is in the hit coordinates (e.g. amino acids if the hit is a protein), whereas the Start and End in the sequence coordinates.
-<li>The options GO..., Align... and Copy/Export... all have options that use
+<li>The columns <u>E-value</u>, <u>%Sim</u>, <u>AlignLen</u>, <u>Start</u> and <u>End</u> are from the best 
+search results for the hit (i.e. from <tt>BLAST</tt> or <tt>DIAMOND</tt>). 
+<li>The column <u>Align</u> is in the hit coordinates (e.g. amino acids if the hit is a protein), whereas the Start and End in the sequence coordinates.
+<li>The options <b>GO...</b>, <b>Align...</b> and <b>Copy/Export...</b> all have options that use
 the DB hits table contents or selection.
 </ul>
 </ol>
 
-<h2>Detail Options - second row of buttons</h2>
+<h3>Detail Options - second row of buttons</h3>
 <ol>
 <li><b>Counts</b> toggle: Toggles between counts, TPM (or RPKM), Replicates (if there are replicates).
 
 <li><b>DB hits</b> toggle: Changes the set of hits listed in the DB hits table.
 <ul>
-<li><i>Best (BS, AN, GO)</i>. See Introduction for more information on the following.
+<li><u>Best Hits (BS, AN, GO)</u>. See Introduction for more information on the following.
 <ul>
 <li>BS is best bitscore. 
 <li>AN is best annotation.
 <li>WG is best with GO.
 <li>The Best BS, AN, and WG may all be the same, or any two of them the same. 
 </ul>
-<li><i>Best per annoDB</i>: In preprocessing, the sequences in the database are generally searched against
+<li><u>Best per annoDB</u>: In preprocessing, the sequences in the database are generally searched against
 one or more annotation databases, which are referred to as an <i>annoDBs</i>. 
 For example, the sequences
 may have been searched against SwissProt Plants and TrEMBL Plants taxonomic databases. The best
 hit for each is listed.
-<li><i>Distinct regions</i>: A set of hits that represent the regions of the sequence for which
+<li><u>Distinct regions</u>: A set of hits that represent the regions of the sequence for which
 hits align to based on hit coordinates. Note the Start and End coordinates in the table, they will
 not be the same, though may overlap some.
-<li><i>Unique annotation</i>: Determines the unique descriptions, after filtering on: 
+<li><u>Unique annotation</u>: Determines the unique descriptions, after filtering on: 
 (1) ignore putative, hypothetical and predicted, (2) remove last character of description as often a number or letter.
-<li><i>Unique species</i>: Lists one of each species that was hit
-<li><i>Total</i>: All hits to the sequence. 
+<li><u>Unique species</u>: Lists one of each species that was hit
+<li><u>Total</u>: All hits to the sequence. 
 </ul>
 <i>Note: sometimes its necessary to click in the window to get it to change the table, after changing the
 DB Hits option.</i>
@@ -49,5 +53,5 @@ a hit to be selected in the DB hits table. The last four copy the seqID or seque
 
 <li><b>Export...</b> Writes a file of the sequence or DB hits.
 </ol>
-
+</body>
 </html>

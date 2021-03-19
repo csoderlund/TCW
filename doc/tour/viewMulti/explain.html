@@ -1,9 +1,21 @@
+<!DOCTYPE html>
 <html>
+<head>
 <title>mTCW overview</title>
-<center>
-<table width=800 border=0>
+
+<style>
+.nw {vertical-align: top; white-space: nowrap;}	
+.top {vertical-align: top; }	
+table.y, .y td, th { border: 1px solid black; border-collapse: collapse; border-spacing: 5px;}
+th, td {padding: 5px;}
+</style>
+</head>
+
+<body style="font-family: Arial, sans-serif;  font-size: 14px;">
+<table style="width:70%; margin-left: auto; margin-right: auto;">
 <tr><td>&nbsp;
 <tr><td>&nbsp;
+
 <tr><td>
 <h2>Explain mTCW overview</h2>
 If the mTCWdb was created with only AA sequences, the Pairs statistics will not be present.
@@ -12,16 +24,16 @@ has the corresponding information.
 
 <p>Names in the "Compute" column refer to table (Cluster, Pair, Seq) Columns unless stated otherwise.
 
-<table border=1 cellpadding=5>
+<table class=y>
 <tr><th>Label<th>Description<th>Compute
-<tr><td nowrap valign="top"><b>DATASETS</b>
+<tr><td class=nw><b>DATASETS</b>
 <td colspan=2>
 This first section describes the data imported from the sTCWdbs. 
 
-<tr><td nowrap valign="top"><b>CLUSTER SETS</b>
+<tr><td class=nw><b>CLUSTER SETS</b>
 <td colspan=2>One or more sets of clusters will be present in the mTCW. The columns are in the Cluster table.
-<tr><td nowrap valign="top" colspan=3><i>Sizes</i>
-<tr><td nowrap valign="top">&nbsp;&nbsp;[Range]
+<tr><td class=nw colspan=3><i>Sizes</i>
+<tr><td class=nw>&nbsp;&nbsp;[Range]
 <td>The range of cluster sizes per cluster set. These may be computed from viewing all
 Clusters sorted on the 'Count' column.
 <td>Count
@@ -38,27 +50,27 @@ A small number indicates more conservation. <td>Avg(Trident)<sup>1</sup>
 <tr><td>&nbsp;&nbsp;SD<td>Standard deviation of the Trident score. 
 <td>StdDev(Trident)<sup>1</sup>
 
-<tr><td nowrap valign="top"><b>PAIRS</b>
+<tr><td class=nw><b>PAIRS</b>
 	<td colspan=2>Similar pairs were identified from the comparing the 
 	sequences using a search program (BLAST or DIAMOND), 
 	where AA is from the amino acid search and NT is from the nucleotide search (NT may not exist).
 	The columns are in the Pairs table. 
 
-<tr><td nowrap valign="top" colspan=3><i>Hits</i> (from hit file) The following is the same for NT.
+<tr><td class=nw colspan=3><i>Hits</i> (from hit file) The following is the same for NT.
     
-<tr><td nowrap valign="top">&nbsp;&nbsp;Diff
+<tr><td class=nw>&nbsp;&nbsp;Diff
 	<td>The number of hits from different datasets.
 	<td> Pair Filter: Has AA, Different sets.
-<tr><td nowrap valign="top">&nbsp;&nbsp;Same
+<tr><td class=nw>&nbsp;&nbsp;Same
 	<td>The number of hits from the same dataset. 
 	<td>Pair Filter: Has AA, Same sets.
-<tr><td nowrap valign="top">&nbsp;&nbsp;Similarity	
+<tr><td class=nw>&nbsp;&nbsp;Similarity	
 	<td>Percent similarity of all alignments 
 	<br>(Average percent similarity of each alignment).
 	<td>see<sup>1b</sup> 
 	<br>((Avg(%AAsim))<sup>1</sup>
 	
-<tr><td nowrap valign="top">&nbsp;&nbsp;Coverage	
+<tr><td class=nw>&nbsp;&nbsp;Coverage	
 	<td>Percent overlap of all alignments 
 	<br>(Average percent alignment of the length of each sequence in the pair).
 	
@@ -66,7 +78,7 @@ A small number indicates more conservation. <td>Avg(Trident)<sup>1</sup>
 	<br>((Avg(%AAcov1)+
 	<br>Avg(%AAcov2))/2)<sup>1</sup>
 	
-<tr><td nowrap valign="top" colspan=3><i>Aligned</i> (aligned using dynamic programming, Filter: Has Stats)
+<tr><td class=nw colspan=3><i>Aligned</i> (aligned using dynamic programming, Filter: Has Stats)
 
 <tr><td>&nbsp;&nbsp;CDS:<td>The number of aligned CDS bases including gaps but not overhangs.<td>Sum(Align)<sup>1</sup>
 <tr><td>&nbsp;&nbsp;5UTR:<td>Same as CDS but for 5UTR.<td>see<sup>2</sup>
@@ -75,98 +87,98 @@ A small number indicates more conservation. <td>Avg(Trident)<sup>1</sup>
 
 
 <tr><td colspan=3><i>Codon column</i>
-<tr><td nowrap valign="top">&nbsp;&nbsp;Codons
+<tr><td class=nw>&nbsp;&nbsp;Codons
     <td>Number of aligned codons excluding gaps. 
 	<td>Sum(Calign)<sup>1</sup>
 	
-<tr><td nowrap valign="top">&nbsp;&nbsp;Exact
+<tr><td class=nw>&nbsp;&nbsp;Exact
     <td>Percent of the number of codons that are exactly the same.
 	<td>%Cexact; see<sup>1b</sup>
 	
-<tr><td nowrap valign="top">&nbsp;&nbsp;Synonymous
+<tr><td class=nw>&nbsp;&nbsp;Synonymous
     <td>Percent of the number of codons that are synonymous (different codon, same amino acid).
     <td>%Csyn; see<sup>1b</sup>
     
-<tr><td nowrap valign="top">&nbsp;&nbsp;&nbsp;&nbsp;Fourfold
+<tr><td class=nw>&nbsp;&nbsp;&nbsp;&nbsp;Fourfold
     <td>Percent of the number codons that are fourfold (4d), which are two synonymous codons 
     where the ith position allows any of the 4 bases. 
     <td>%C4d; see<sup>1b</sup>
     
-<tr><td nowrap valign="top">&nbsp;&nbsp;&nbsp;&nbsp;Twofold
+<tr><td class=nw>&nbsp;&nbsp;&nbsp;&nbsp;Twofold
     <td>Percent of the number of codons that are fourfold (2d), which are two synonymous codons 
     where the ith position allows any of the 2 bases. 
     <td>%C2d; see<sup>1b</sup>
     
-<tr><td nowrap valign="top">&nbsp;&nbsp;Nonsynonymous
+<tr><td class=nw>&nbsp;&nbsp;Nonsynonymous
     <td>Percent of the number of codons that are nonsynonynous (different amino acid).
     <td>%CnonSyn; see<sup>1b</sup> 
         
 <tr><td colspan=3><i>Amino acid column</i> (same number as Codons)
      
-<tr><td nowrap valign="top">&nbsp;&nbsp;Exact
+<tr><td class=nw>&nbsp;&nbsp;Exact
     <td>Percent of the AA characters that are the same.
     <td>%Aexact; see<sup>1b</sup>
     
-<tr><td nowrap valign="top">&nbsp;&nbsp;Substitution&gt;0
+<tr><td class=nw>&nbsp;&nbsp;Substitution&gt;0
     <td>Percent of AA characters that are substitutions with BLOSUM62&gt;0.
     <td>%Apos; see<sup>1b</sup>
     
-<tr><td nowrap valign="top">&nbsp;&nbsp;Substitution&lt;=0
+<tr><td class=nw>&nbsp;&nbsp;Substitution&lt;=0
     <td>Percent of AA characters that are substitution with BLOSUM62&lt;=0.
 	<td>%Aneg; see<sup>1b</sup>
 
-<tr><td nowrap valign="top" colspan=3><i>Nucleotides columns </i>
+<tr><td class=nw colspan=3><i>Nucleotides columns </i>
     (References to CDS, 5UTR, 3UTR are the numbers by 'Aligned:')
 
-<tr><td nowrap valign="top">&nbsp;&nbsp;CDS Diff
+<tr><td class=nw>&nbsp;&nbsp;CDS Diff
     <td>Percent of CDS bases that are not the same, i.e. ((Gap+SNP)/Align)*100.0. 
        <td>%Cdiff; see<sup>1b</sup>
   
-  <tr><td nowrap valign="top">&nbsp;&nbsp;&nbsp;&nbsp;Gaps
+  <tr><td class=nw>&nbsp;&nbsp;&nbsp;&nbsp;Gaps
     <td>Percent of CDS bases that are Gaps, i.e. (Gaps/Align)*100.0
     <td>see<sup>1b</sup>
     
-   <tr><td nowrap valign="top">&nbsp;&nbsp;&nbsp;&nbsp;SNPs
+   <tr><td class=nw>&nbsp;&nbsp;&nbsp;&nbsp;SNPs
     <td>Percent of CDS bases that are SNPs, i.e (SNP/Align)*100.0.
     <td>see<sup>1b</sup>
            
-<tr><td nowrap valign="top">&nbsp;&nbsp;5UTR Diff
+<tr><td class=nw>&nbsp;&nbsp;5UTR Diff
     <td>Percent of 5UTR bases that are different. 
        <td>%5diff; see<sup>1</sup>
          
-<tr><td nowrap valign="top">&nbsp;&nbsp;3UTR Diff
+<tr><td class=nw>&nbsp;&nbsp;3UTR Diff
     <td>Percent of 3UTR bases that are not different. 
     <td>%3diff; see<sup>1</sup>
          
-<tr><td colspan=3><i>Columns: Pos1   Pos2   Pos3  Total</i><sup>4</sup>
-<tr><td nowrap valign="top">&nbsp;&nbsp;Transition (ts)
+<tr><td class=nw colspan=3><i>Columns: Pos1   Pos2   Pos3  Total</i><sup>4</sup>
+<tr><td >&nbsp;&nbsp;Transition (ts)
     <td>Percent of SNPs that are transitions in each of the three codon positions.
        <td>see<sup>2</sup>
-<tr><td nowrap valign="top">&nbsp;&nbsp;Transversion (tv)
+<tr><td class=nw>&nbsp;&nbsp;Transversion (tv)
     <td>Percent of SNPs that are transversion in each of the three codon positions.
        <td>see<sup>2</sup>
-<tr><td nowrap valign="top">&nbsp;&nbsp;ts/tv
+<tr><td class=nw>&nbsp;&nbsp;ts/tv
     <td>The total number of transitions divided the total number of transversions.
         <td>ts/tv; see<sup>2</sup>
     
 <tr><td colspan=3><i>Columns: GC  CpG-Nt  CpG-Cd </i><sup>4</sup>
-<tr><td nowrap valign="top">&nbsp;&nbsp;Both
+<tr><td class=nw>&nbsp;&nbsp;Both
     <td>Percent of CDS bases where both (union) sequences have a GC base. 
     Same for the CpG sites, where CpG-Nt (nucleotide) and CpG-Cd (codon, CpG does not cross codon boundaries).
     <td>see<sup>3</sup>
- <tr><td nowrap valign="top">&nbsp;&nbsp;Either
+ <tr><td class=nw>&nbsp;&nbsp;Either
     <td>Percent of CDS bases where either or both (intersection) sequences have a GC base. 
     Same for the CpG sites, where CpG-Nt (nucleotide) and CpG-Cd (codon, CpG does not cross codon boundaries).
     <td>see<sup>3</sup>
      
-  <tr><td nowrap valign="top">&nbsp;&nbsp;Jaccard
+  <tr><td class=nw>&nbsp;&nbsp;Jaccard
     <td>The total number of 'both' divided by the total number of 'either'.
     There is a pair column for the GC and codon-based CpG-Cd, but not the nucleotide-base CpG-Nt.
     <td>GC-JI, 
     <br>CpG-JI; see<sup>3</sup>
     
-<tr><td nowrap valign="top" colspan=3><i>KaKs method</i><sup>5</sup>
-<tr><td nowrap valign="top" colspan=3><i>Average
+<tr><td class=nw colspan=3><i>KaKs method</i><sup>5</sup>
+<tr><td class=nw colspan=3><i>Average</i>
 <tr><td>&nbsp;&nbsp;Ka<td>Nonsynonymous substitution rate<td>Avg(Ka)<sup>1</sup> 
 <tr><td>&nbsp;&nbsp;Ks<td>Synonymous substitution rate<td>Avg(Ks)<sup>1</sup>
 <tr><td>&nbsp;&nbsp;KaKs<td>Selective strength. A score &lt;1 is purifying, &gt;1 is positive, 
@@ -177,7 +189,7 @@ half.<td>Q2=Median(KaKs)<sup>1</sup>
 <tr><td><i>P-value</i><td>The 'other' count includes pairs where the KaKs_calculator did not provide
 a p-value though did provide a KaKs value.<td>p-value
 
-<tr><td nowrap valign="top"><b>SEQUENCES</b>
+<tr><td class=nw><b>SEQUENCES</b>
 <td colspan=2>
 The columns are in the Sequence table; use Sequence Filters to select a dataset
 to view its corresponding results.
@@ -205,40 +217,42 @@ in the Sequence Detail panel.
 <td  colspan=2>The total DE from each dataset. These can be verified from the singleTCWs.
 
 </table>
-<table border=0 cellpadding=3> 
-<tr><td  valign=top><sup>1</sup>
-<td><small>For a Pair table, select the  "Table.../Show Column Stats" which provides "Avg" and "Sum".
-</small>
-<tr><td  valign=top><sup>1b</sup>
-<td><small>Percents for the Overview are from summing the numerator and denominator before  dividing. 
-<br>The Average of a percent column of 
-the "Table.../Show Column Stats" is taking the the average of the percentages. 
-<br>For example, in the mTCW demo, 
-the <i>Exact number of all aligned bases</i> is 58.6%, whereas the Column
-stats "Average" is the <i>average of all align to length percentages</i>, which is 60.286. 
-<p>The only way to view the number of Exact, Synonymous, etc codons is, for a given pair:
-<br>(a) Sequence Table, (b) Pairwise..., (c) AA,CDS,NT, (d) Align CDS..., (e) Match
-(f) Codon Exact (and other counts) at the top.
-</small>
-<tr><td valign=top><sup>2</sup> <td><small>The only way to view the number of aligned UTR 
-bases is, for a given pair: 
-<br>(a) Sequence Table, (b) Pairwise..., (c) 5UTR,CDS,3UTR, (d) Align 5UTR..., (e) Match
-(f) CROP is the number of aligned UTR bases.
-</small>
-<tr><td  valign=top><sup>3</sup> <td><small>
-(a) Sequence Table, (b) Pairwise..., (c) 5UTR,CDS,3UTR, (d) Align CDS..., 
-(e) ts/tv, (f) The ts and tv numbers are at the top.
-</small>
-<tr><td  valign=top><sup>4</sup> <td><small>
-(a) Sequence Table, (b) Pairwise..., (c) 5UTR,CDS,3UTR, (d) Align CDS..., (e) CpG, 
-(f) The GC and CpG numbers are at the top, where
-<br>"All CpG" is "CpG-Nt" and "By Codon" is "CpG-Cd".
-</small>
 
-<tr><td  valign=top><sup>5</sup> <td><small>The KaKs_calculator (Zhang et al. 2006) will typically be used to 
+<table> 
+<tr><td class=top><sup>1</sup>
+	<td><small>For a Pair table, select the  "Table.../Show Column Stats" which provides "Avg" and "Sum".</small>
+<tr><td  class=top><sup>1b</sup>
+	<td><small>Percents for the Overview are from summing the numerator and denominator before  dividing. 
+		<br>The Average of a percent column of 
+		the "Table.../Show Column Stats" is taking the the average of the percentages. 
+		<br>For example, in the mTCW demo, 
+		the <i>Exact number of all aligned bases</i> is 58.6%, whereas the Column
+		stats "Average" is the <i>average of all align to length percentages</i>, which is 60.286. 
+		<br>The only way to view the number of Exact, Synonymous, etc codons is, for a given pair:
+		<br>(a) Sequence Table, (b) Pairwise..., (c) AA,CDS,NT, (d) Align CDS..., (e) Match
+		(f) Codon Exact (and other counts) at the top.
+		</small>
+<tr><td class=top><sup>2</sup> <td><small>The only way to view the number of aligned UTR 
+	bases is, for a given pair: 
+	<br>(a) Sequence Table, (b) Pairwise..., (c) 5UTR,CDS,3UTR, (d) Align 5UTR..., (e) Match
+	(f) CROP is the number of aligned UTR bases.
+	</small>
+<tr><td  class=top><sup>3</sup> <td><small>
+	(a) Sequence Table, (b) Pairwise..., (c) 5UTR,CDS,3UTR, (d) Align CDS..., 
+	(e) ts/tv, (f) The ts and tv numbers are at the top.
+	</small>
+<tr><td  class=top><sup>4</sup> <td><small>
+	(a) Sequence Table, (b) Pairwise..., (c) 5UTR,CDS,3UTR, (d) Align CDS..., (e) CpG, 
+	(f) The GC and CpG numbers are at the top, where
+	<br>"All CpG" is "CpG-Nt" and "By Codon" is "CpG-Cd".
+	</small>
+
+<tr><td  class=top><sup>5</sup> <td><small>The KaKs_calculator (Zhang et al. 2006) will typically be used to 
     compute the KaKs values, where the method
     used is shown on the "KaKs Method" line. 
-</small>
+	</small>
 </table>
-</center>
+
+</table>
+</body>
 </html>

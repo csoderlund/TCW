@@ -9,10 +9,12 @@ import java.text.DecimalFormat;
 public class Globalx {
 	public static boolean debug = false; // changed in STCWMain or MTCWMain from command line 
 	
-	public static final String strRelDate = "(21-Feb-21)"; 
-	public static final String strTCWver = "3.1.7"; 
+	public static final String strRelDate = "(19-Mar-21)"; 
+	public static final String strTCWver = "3.1.8"; 
 	public static final String URL = "http://www.agcol.arizona.edu ";
 	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate;
+	public static final String sTCWver = "sTCW v" + strTCWver;
+	public static final String mTCWver = "mTCW v" + strTCWver;
 	public static final String error="***";
 	
 	public final static String extDir = "Ext"; // CAS303 changed from external and external_osx
@@ -109,6 +111,11 @@ public class Globalx {
 	// multiple places use substring(0,4) to get abbr
 	static public final String [] GO_TERM_LIST = {"biological_process","cellular_component","molecular_function"};
 	static public final String [] GO_TERM_ABBR = {"biol", "cell", "mole"};
+	
+	// runAS.DoGO builds; 
+	static public final String goTreeTable = "TCW_gotree"; // CAS318 were prefixed with PAVE_
+	static public final String goMetaTable = "TCW_metadata";
+	static public final String goUpTable =   "TCW_UniProt";
 	
 	static public final String tcwDelim = ";";
 	public static final String ROW_DELIMITER = "\t";

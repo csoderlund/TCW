@@ -136,21 +136,21 @@ public class Out {
 	 
 	// No Space argument
 	static public void PrtCntMsg(int cnt, String msg) {
-		PrtSpMsg(3, String.format("%7s %s", df.format(cnt), msg));
+		PrtSpMsg(2, String.format("%9s %s", df.format(cnt), msg));
 	}
 	static public void PrtCntMsg2(int cnt, String msg, int cnt2, String msg2) {
-		PrtSpMsg(3, String.format("%7s %-20s  %7s %s", df.format(cnt), msg, df.format(cnt2), msg2));
+		PrtSpMsg(2, String.format("%9s %-20s  %7s %s", df.format(cnt), msg, df.format(cnt2), msg2));
 	}
 	
 	// Time as argument
 	static public void PrtSpCntMsg(int sp, long cnt, String msg, long t) {
-		PrtSpMsgTime(sp, String.format("%7s %s", df.format(cnt), msg), t);
+		PrtSpMsgTime(sp, String.format("%9s %s", df.format(cnt), msg), t);
 	}
 	static public void PrtSpCntMsg(int sp, int cnt, String msg, long t) {
-		PrtSpMsgTime(sp, String.format("%7s %s", df.format(cnt), msg), t);
+		PrtSpMsgTime(sp, String.format("%9s %s", df.format(cnt), msg), t);
 	}
 	static public void PrtCntMsg(int cnt, String msg, long t) {
-		PrtSpMsgTime(3, String.format("%7s %40s %s", df.format(cnt), msg), t);
+		PrtSpMsgTime(2, String.format("%9s %40s %s", df.format(cnt), msg), t);
 	}
 	
 	// Message first

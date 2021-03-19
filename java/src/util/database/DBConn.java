@@ -275,6 +275,13 @@ public class DBConn
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Cannot drop table " + table);}
 	}
+	public void tableRename(String otab, String ntab) { // CAS318
+		try {
+			if (tableExists(otab))
+				executeUpdate ("RENAME TABLE " + otab + " to " + ntab);
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "Cannot rename table " + otab);}
+	}
 	public void tableDelete(String table) {
 	   	try { // finding 'status' fails when 'show tables' succeeds (incorrectly)
 	   	   ResultSet rs = executeQuery("show table status like '" + table + "'");
@@ -725,9 +732,9 @@ public class DBConn
 			Out.PrtSpMsg(1, "For some configuration, the following is necessary for runAS:");
 			rs = st.executeQuery("show variables like 'local_infile'");
 			if (rs.next()) {
-				String s = rs.getString(2);
+				String s = rs.getString(2).toLowerCase();
 				Out.PrtSpMsg(2,"local_infile=" + s);
-				if (s.contentEquals("no")) 
+				if (s.contentEquals("no") || s.contentEquals("off") || s.contentEquals("0")) // CAS318 add off/0
 					Out.PrtSpMsg(2, "Suggest: SET GLOBAL local_infile = 1;");
 			}
 			

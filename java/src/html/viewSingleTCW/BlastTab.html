@@ -1,11 +1,19 @@
+<!DOCTYPE html>
 <html>
+<head>
 <title>Search</title>
+<style>
+.tabley    		{border: 1px  solid black; border-spacing: 0px;  border-collapse: collapse;}
+.tabley td 		{border: 1px  solid black; padding: 3px; }
+</style>
+</head>
 <body style="padding:20px;width:650px;font-family:Times">
+
 <h2>Searching</h2>
 Search sequence(s) against sTCW NT-sequences, sTCW AA-ORFs, or a selected database
 of protein sequences. 
 <ol>
-<li><i>Query:</i> Input one or more sequence in FASTA format into the entry box. 
+<li><b>Query:</b> Input one or more sequence in FASTA format into the entry box. 
 <ul>
 <li>If your sequence contains characters A,G,C,T, or N, it will
 be treated as a nucleotide sequence, else a protein sequence.
@@ -13,7 +21,7 @@ be treated as a nucleotide sequence, else a protein sequence.
 a hit sequence or the seqID sequence, and <b>Paste</b> it here.
 </ul>
 <p>
-<li><i>Subject:</i> 
+<li><b>Subject:</b> 
 <br>For NT-sTCW, there will be the following options: 
 <ul>
 <li>NT-Seq (nucleotide sequences in the database)
@@ -26,8 +34,8 @@ For AA-sTCW, the options will be:
 <li>AA-DB (a selected protein database)
 </ul>
 <p>
-<li>You have a choice to use <tt>Blast</tt> and <tt>Diamond</tt>. 
-<tt>Diamond</tt> can only be used with an AA subject (blastp or blastx mode).
+<li>You have a choice to use <tt>BLAST</tt> and <tt>DIAMOND</tt>. 
+<tt>DIAMOND</tt> can only be used with an AA subject (blastp or blastx mode).
 
 <p> 
 <li>You may enter/change
@@ -54,7 +62,7 @@ not in the "/ResultHits" directory, the formatted files are not deleted.
 <b>Reset</b>: Sets the display back to all defaults.
  
 
-<h3>No Results Found</h3>
+<h4>No Results Found</h4>
 If you do not get the results you expect:
 <ol>
 <li>Remember that the original annotation is typically 1000's of sTCW sequences compared with
@@ -66,19 +74,20 @@ the terminal; copy it and run it from the terminal. If there was
 any error (e.g. in the parameters), it will tell you the error. 
 </ol>
 
-<h3>Original Search Results</h3>
+<h4>Original Search Results</h4>
 When the database was built, the sequences were annotated with one or more "AnnoDBs" (e.g. UniProt).
 In order to view the search results, select a given sequence for the query, then the appropriate
 AnnoDB (usually in <tt>/projects/DBfasta</tt>) for the subject. Note that the E-value and Bitscore will be different,
 and there is a chance it will not ever be shown since the input is one sequence versus 1000's.
-<h2>Relevant parameters</h2>
-<h3>Blastx</h3>
+
+<h4>Relevant parameters</h4>
+<b>BLASTX</b>:
 Execute 'blastx -help' or 'blastp -help' from the command line to view the full set of parameters.
 
-<table border=1>
+<table class=tabley>
 <tr><th>Parameter<th>Default<th >Description
 <tr><td nowrap>-evalue<td>10 (1e+01)<td>Maximum e-value to report alignments
-<tr><td nowrap>-max_target_seqs<td>500<td> Maximum number of aligned sequences to keep (outfmt=6)
+<tr><td  nowrap>-max_target_seqs<td>500<td> Maximum number of aligned sequences to keep (outfmt=6)
 <tr><td>-num_threads<td>1<td>Number of threads (CPUs) to use in the BLAST search
 
 <tr><td>-word_size<td>??<td>Integer Word size
@@ -92,9 +101,8 @@ Execute 'blastx -help' or 'blastp -help' from the command line to view the full 
 </table>
 
 
-<h3>Diamond</h3>
-Execute 'diamond help' from the command line to view the full set of parameters.
-<table border=1>
+<p><b>DIAMOND</b>: Execute 'diamond help' from the command line to view the full set of parameters.
+<table class=tabley>
 <tr><td>Parameter<td>Default<td>Description
 <tr><td>--evalue (-e)<td>0.001 (1e-03)<td>maximum e-value to report alignments
 <tr><td nowrap>--max-target-seqs (-k)<td>--<td>Maximum number of target sequences to report alignments for
@@ -112,4 +120,5 @@ will disable this feature.
 <tr><td>--query-cover #<td>--<td>Report only alignments above the given percentage of query cover.
 <tr><td>--subject-cover #<td>--<td>Report only alignments above the given percentage of subject cover.
 </table>
-
+</body>
+</html>

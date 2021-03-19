@@ -590,7 +590,7 @@ public class DoBlast {
 		return rc;
 	}
 	
-	// executed before first DB blast and then whenever there is a JPAVE_unitrans_subset_n parameter
+	// executed before first DB blast
 	private boolean writeSeqFile(boolean isORF){	
 		File blastDir = new File(seqBlastDir);
 		if (!blastDir.exists()) {

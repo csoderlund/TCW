@@ -486,7 +486,7 @@ public class SeqTableTab extends Tab
             JLabel goLabel = new JLabel("GO Level: ");
 			txtGOlevel  = new JTextField(3);
 			txtGOlevel.setMaximumSize(txtGOlevel.getPreferredSize());
-			txtGOlevel.setText("2");
+			txtGOlevel.setText("");
 			
 			cmbTermTypes = new ButtonComboBox();
     		cmbTermTypes.addItem("Any domain");

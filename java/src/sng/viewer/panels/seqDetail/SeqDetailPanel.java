@@ -51,7 +51,7 @@ import util.database.DBConn;
 
 public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardOwner {
 	private static final long serialVersionUID = 4196828062981388452L;
-	private static final String helpDir =  Globals.helpDir + "ContigDetailPanel.html";
+	private static final String helpHTML =  Globals.helpDir + "DetailPanel.html";
 	private static final int NUM_DISPLAY_ROWS = 15;
 	private static final int MAX_TABLE_WIDTH = 550;
 	
@@ -344,7 +344,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		JButton btnHelp = Static.createButton("Help2", true, Globalx.HELPCOLOR);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(getInstance(),"Sequence Details", helpDir);
+				UserPrompt.displayHTMLResourceHelp(getInstance(),"Sequence Details", helpHTML);
 			}
 		});
 			

@@ -1,90 +1,94 @@
-
+<!DOCTYPE html>
 <html>
 <!--#set var=TITLE value="Tour: viewMulti Alignment" -->
 <!--#include virtual="../../ssi/head.html" -->
-<body bgcolor="#FFFFFF" text="#000000" onLoad="init('align')">
+<body  onLoad="init('align'); init2('viewM')">
+<a id=top></a>
 <!--#include virtual="../ssi/start2t.html" -->
-
-<a name=start>
 <!--#include virtual="./ssi/view_mtcw.html" -->
 
-<center><code>Alignment</code>
-<table  border="0" cellspacing="0" cellpadding="2" height="18">
-<tr><td align="left" bgcolor="#666666" class="white" style="padding-bottom:4px;">
-<a href="#table" class="white">Sequence Table</a> |
-<a href="#pair" class="white">Pairwise</a> |
-<a href="#msadb" class="white">MSAdb</a> |
-<a href="#msa" class="white">MSA...</a>
+<div style="text-align: center"><big><ttc>Alignment</ttc></big></div>
+<table style="padding: 2;  border-spacing:0; border-collapse:collapse;  margin-left: auto; margin-right: auto;">
+<tr><td style="background-color: #666666; padding-bottom:4px; "> 
+<a href="#table" 	class="white">Sequence Table</a> 	<mark class="white">|</mark>
+<a href="#pair" 	class="white">Pairwise</a> 	<mark class="white">|</mark>
+<a href="#msadb" 	class="white">MSAdb</a> 	<mark class="white">|</mark>
+<a href="#msa" 		class="white">MSA...</a>
 </td></tr>
 </table>
-</center>	
 
-<a name=table>
-<table width='100%'><tr><td align='left' >
+<a id=table></a>
 <h3>Sequence Table</h3> 
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
 
 Alignments are only available from the sequence table. However, every table leads to the sequence table:
-<table border=0>
-<tr><td valign="top"><small>Sequence view</small>
-<br><a  href="img/seqTableTop.png"><img width=450 src="img/seqTableTop.png" border=1></a>
-<td valign="top"><small>Sequence view for clusters</small>
-<br><a  href="img/clusterSeqs.png"><img width=450 src="img/clusterSeqs.png" border=1></a>
-<tr><td valign="top"><small>Sequence view for pairs</small><br>
-<a  href="img/pairSeqs.png"><img width=450 src="img/pairSeqs.png" border=1></a>
-<td valign="top"><small>Sequence view for hits</small><br>
-<a  href="img/hitSeqs.png"><img width=450 src="img/hitSeqs.png" border=1></a>
+<table class="tablex">
+<tr>
+	<td class="top"><small>Sequence view</small>
+		<br><img  src="img/seqTableTop.png" alt="" style="border: 1px solid black; width: 420px">
+	<td class="top"><small>Sequence view for clusters</small>
+		<br><img src="img/clusterSeqs.png" alt="" style="border: 1px solid black; width: 420px">
+<tr><td class="top"><small>Sequence view for pairs</small>
+		<br><img  src="img/pairSeqs.png" alt="" style="border: 1px solid black; width: 420px">
+	<td class="top"><small>Sequence view for hits</small>
+		<br><img  src="img/hitSeqs.png" alt="" style="border: 1px solid black; width: 420px">
 </table>
 If there are only protein (AA) sequences in the database, only the AA options described below will be available.
-<p>
-<a name=pair>
-<table width='100%'><tr><td align='left' >
-<h3>Pairwise</h3> 
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
-This drop-down has the following options, where all options use dynamic programming for the selected sequence(s):
-<table border=0>
-<tr><td><br><a  href="img/pairOpt.png"><img width=200 src="img/pairOpt.png" border=1></a>
-<td>The "for one pair" options are only enabled if a pair is selected.
+
+<a id=pair></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Pairwise...</h3> 
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+
+<table style="width:60%">
+<tr>
+	<td>
+	The <ttc>Pairwise...</ttc> drop-down has the options shown on the righe, where all options use dynamic programming for the selected sequence(s).
+	<p>The "for one pair" options are only enabled if a pair is selected.
+	<td><img  src="img/pairOpt.png" alt="" style="border: 1px solid black; width: 200px">
 </table>
+
 <br>AA, CDS and NT alignments of a pair. The text alignment can be viewed by clicking the AA, CDS or NT buttons.
-<br><a  href="img/pairAlign.png"><img width=700 src="img/pairAlign.png" border=1></a>
+<br><img  src="img/pairAlign.png" alt="" style="border: 1px solid black; width: 700px">
 <br><br>
 
-<table border=0>
+<table>
 <tr><td>
-Menu for the CDS text alignment: 
-<a  href="img/alignMenu.png">
-<img width=300 src="img/alignMenu.png" border=1></a>
-<td>
-
-Text alignment of the CDS showing matches. The '|' are mutations in synonymous codons, the '*' in nonsynonymous codons.
-<a  href="img/alignText.png"><img width=600 src="img/alignText.png" border=1></a>
+	Menu for the CDS text alignment: 
+	<br><img  src="img/alignMenu.png" alt="" style="border: 1px solid black; width: 300px">
+	<td class=top>
+	Text alignment of the CDS showing matches. 
+	<br>The '|' are mutations in synonymous codons, the '*' mutations in nonsynonymous codons.
+	<br><img src="img/alignText.png" alt="" style="border: 1px solid black; width: 600px">
 </table>
 
-<p>
-<a name=msadb>
-<table width='100%'><tr><td align='left' >
+<a id=msadb></a>
+<table style="width: 100%"><tr><td style="text-align: left">
 <h3>MSAdb</h3> 
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
-This option is only available for <small>Sequence view for clusters</small>, as the multiple sequence alignment (MSA)
-is computed when the database is built.
-<br>
-<a  href="img/MSAdb.png"><img width=700 src="img/MSAdb.png" border=1></a>
-<br>
-<a  href="img/MSAzappo.png"><img width=700 src="img/MSAzappo.png" border=1></a>
+This option is only available for <ttc>Sequence view for clusters</ttc>, as the multiple sequence alignment (MSA)
+is computed per cluster when the database is built.
+<br><img  src="img/MSAdb.png" alt="" style="border: 1px solid black; width: 700px">
+<p><img  src="img/MSAzappo.png" alt="" style="border: 1px solid black; width: 700px">
 
-<p>
-<a name=msa>
-<table width='100%'><tr><td align='left' >
+<a id=msa></a>
+<table style="width: 100%"><tr><td style="text-align: left">
 <h3>MSA...</h3> 
-</td><td align='right' valign='top' class='smtxt'><a href=#top>Go to top</a> </td></tr></table>
-This drop-down has the following options, where all options execute the MSA program for the set of selected sequences:
-<table border=0>
-<tr><td><br><a  href="img/msaOpt.png"><img width=120 src="img/msaOpt.png" border=1></a>
-<td>Where AA is the translated ORF, CDS is the un-translated ORF, and NT is the entire transcript.
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+
+<table style="width: 70%">
+<tr>
+	<td>The <ttc>MSA...</ttc> drop-down has the options shown on the right, where all options execute the MSA program for the set of selected sequences.
+	<p>AA is the translated ORF, CDS is the un-translated ORF, and NT is the entire transcript.
+	<td><img src="img/msaOpt.png" alt="" style="border: 1px solid black; width: 120px">	
 </table>
 The display is the same as shown above for MSAdb.
 
-<!--#include virtual="../../ssi/end.html" -->
+<table style="width: 100%"><tr><td style="text-align: left">
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
+<!--#include virtual="../../ssi/end.html" -->
+</body>
+</html>
