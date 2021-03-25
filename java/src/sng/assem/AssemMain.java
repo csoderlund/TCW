@@ -203,6 +203,8 @@ public class AssemMain
 		Schema schObj = new Schema(mDB);
 		
 	/** Determine state of database **/
+		// CAS319 force overview update at end
+		mDB.executeUpdate("update assem_msg set pja_msg = NULL where AID = 1");
 		
 		String msg="Instantiate";
 		bSkipAssembly=true;

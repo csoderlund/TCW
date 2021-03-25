@@ -9,8 +9,8 @@ import java.text.DecimalFormat;
 public class Globalx {
 	public static boolean debug = false; // changed in STCWMain or MTCWMain from command line 
 	
-	public static final String strRelDate = "(19-Mar-21)"; 
-	public static final String strTCWver = "3.1.8"; 
+	public static final String strRelDate = "(25-Mar-21)"; 
+	public static final String strTCWver = "3.1.9"; 
 	public static final String URL = "http://www.agcol.arizona.edu ";
 	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate;
 	public static final String sTCWver = "sTCW v" + strTCWver;

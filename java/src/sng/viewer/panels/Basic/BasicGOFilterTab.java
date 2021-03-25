@@ -382,7 +382,23 @@ public class BasicGOFilterTab extends Tab {
 		
 		// Export using GOtree.java
 		tablepopup.addSeparator();
-		tablepopup.add(new JMenuItem(new AbstractAction("All Ancestors") {
+		tablepopup.add(new JMenuItem(new AbstractAction("Each GO's parents with relation") {
+			private static final long serialVersionUID = 1L;
+
+			public void actionPerformed(ActionEvent e) {
+				try {
+					btnTable.setEnabled(false); 
+					enabledFunctions(false);
+					
+					goTablePanel.showExportAllPaths(btnTable, GOtree.ALL_PARENTS);
+					
+					enabledFunctions(true);
+					btnTable.setEnabled(true);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error all paths for table");
+				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error all paths for table", null);}
+			}
+		}));
+		tablepopup.add(new JMenuItem(new AbstractAction("All ancestors") {
 			private static final long serialVersionUID = 1L;
 
 			public void actionPerformed(ActionEvent e) {
@@ -398,7 +414,7 @@ public class BasicGOFilterTab extends Tab {
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error all paths for table", null);}
 			}
 		}));
-		tablepopup.add(new JMenuItem(new AbstractAction("Longest Paths (slow and large results)") {
+		tablepopup.add(new JMenuItem(new AbstractAction("Longest paths (slow and large results)") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -414,7 +430,7 @@ public class BasicGOFilterTab extends Tab {
 			}
 		}));
 		
-		tablepopup.add(new JMenuItem(new AbstractAction("All Paths (slow and very large results)") {
+		tablepopup.add(new JMenuItem(new AbstractAction("All paths (slow and very large results)") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -575,7 +591,7 @@ public class BasicGOFilterTab extends Tab {
 		txtEvalVal = Static.createTextField(DEF_EVAL, 5, false);
 		row2.add(chkUseEval);
 		row2.add(txtEvalVal);
-		row2.add(Box.createHorizontalStrut(30));
+		row2.add(Box.createHorizontalStrut(5));
 		
 		// [x] #Seqs [    ]
 		chkUseNSeq = Static.createCheckBox("#Seqs>=", false);
@@ -588,10 +604,13 @@ public class BasicGOFilterTab extends Tab {
 		txtNSeqVal = Static.createTextField("2", 3, false);
 		row2.add(chkUseNSeq);
 		row2.add(txtNSeqVal);
-		row2.add(Box.createHorizontalStrut(30));
+		row2.add(Box.createHorizontalStrut(25));
 		
 		// [x] [Evidence Codes] 
 		if (ecColumnNames.length>0) {
+			lblHitGO = Static.createLabel("Hit-GO:"); // CAS317 label was partial on linux
+			row2.add(lblHitGO); row2.add(Box.createHorizontalStrut(5));
+			
 			chkUseEC = Static.createCheckBox("", false);
         	chkUseEC.addActionListener(new ActionListener() {
     			public void actionPerformed(ActionEvent e) {
@@ -1354,27 +1373,27 @@ public class BasicGOFilterTab extends Tab {
 	private String makeQueryECClause()
 	{
 		int cnt=0;
-    		for(int x=0; x<chkECfilter.length; x++)
-    			if (chkECfilter[x].isSelected()) cnt++;
-    		if (cnt==ecColumnNames.length || cnt==0) return ""; // ecColumNames are only ones in DB
-    		
-    		String ops = "|";
-    		String opc = " or ";
-    		
-    		String [] allNames = theParentFrame.getMetaData().getEClist();
-    		String clause = "", summary="";
-    		cnt=0;
-    		for(int x=0; x<chkECfilter.length; x++)
-    			if (chkECfilter[x].isSelected()) {
-    				if (clause != "") clause += opc;
-    				clause += allNames[x] + "=1";
-    				if (cnt<=3) {
-    					if (summary!="")summary += ops;
-    					if (cnt<3) summary += allNames[x];
-    					else if (cnt==3) summary += "...";
-    				}
-    				cnt++;
-    			}
+		for(int x=0; x<chkECfilter.length; x++)
+			if (chkECfilter[x].isSelected()) cnt++;
+		if (cnt==ecColumnNames.length || cnt==0) return ""; // ecColumNames are only ones in DB
+		
+		String ops = "|";
+		String opc = " or ";
+		
+		String [] allNames = theParentFrame.getMetaData().getEClist();
+		String clause = "", summary="";
+		cnt=0;
+		for(int x=0; x<chkECfilter.length; x++)
+			if (chkECfilter[x].isSelected()) {
+				if (clause != "") clause += opc;
+				clause += allNames[x] + "=1";
+				if (cnt<=3) {
+					if (summary!="")summary += ops;
+					if (cnt<3) summary += allNames[x];
+					else if (cnt==3) summary += "...";
+				}
+				cnt++;
+			}
 		theStatusStr = strMerge(theStatusStr, summary);
 		
 		return " (" + clause + ") ";
@@ -1734,7 +1753,7 @@ public class BasicGOFilterTab extends Tab {
 	private JLabel lblFilter = null;
 	
 	// Seq-hit row
-	private JLabel lblSeqHit = null;
+	private JLabel lblSeqHit = null, lblHitGO;
 	private JCheckBox chkUseEval = null, chkUseNSeq = null, chkUseEC = null;
 	private JTextField txtEvalVal = null, txtNSeqVal = null;
 	private JButton btnEC=null;
@@ -1761,7 +1780,6 @@ public class BasicGOFilterTab extends Tab {
 	private JLabel deTrimLabel=null;
 	private JCheckBox chkShowDEtrim = null, chkComputeDEtrim = null;
 
-	
 	//Data members
 	private int nLevelMin = -1, nLevelMax = -1;
 	private STCWFrame theParentFrame = null;

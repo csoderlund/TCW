@@ -75,7 +75,6 @@ public class DoUniProt
 	 	
 	 	// final things
 	 	if (annoSeqSet.size() > 0) {
-	 		CoreDB.updateAnnoVer(mDB);
 	 		Step3_saveSpeciesSQLTable();
 	 	}
 	 	if (!pRC) return false;  

@@ -42,7 +42,7 @@ the end, which explains how this will be different if the <b>DE #Seqs</b> is cha
 <li><b>Evidence Codes</b>: Check the box, then select <b>Evidence Codes</b> to bring
 up a panel of available codes. The codes that are not found for any hit-to-GO
 assignment is listed but not selectable. The filter is passed if a GO
-has <b>any</b> of the selected ECs. 
+has <b>any</b> of the selected ECs. NOTE: A GO inherits evidence codes.
 </ul>
 
 <b>Level</b>
@@ -172,11 +172,13 @@ NOTE: Occasionally, this query may be slow when there are many paths for the GO;
 
 <b>Table...</b>
 <ol type='a'>
+
+<li><u>Show Columns Stats</u>: A popup window of statistics for the numeric columns.
+<br>&nbsp;
+
 <li><u>Copy Table</u>: Copy the table to the clipboard for pasting elsewhere.
 <br>&nbsp;
 
-<li><u>Show columns stats</u>: A popup window of statistics for the numeric columns.
-<br>&nbsp;
 
 <li><u>Export Table</u>: A tab-delimited file of the contents of the table.
 <br>If you just select two columns, (GO Term,#Seqs) or (GO Term, P-value), 
@@ -196,19 +198,21 @@ all #Seqs columns are added (TCW needs the format exact). The resulting file can
 be used in Excel to make bar graphs.
 <br>&nbsp;
 
-<li>The last three options have a popup with a choice of viewing the results in a popup
+<li>The last four options have a popup with a choice of viewing the results in a popup
 or have them written to file. The two path options can be written in a tab-delimited file
 or a html file.
 <ul>
-<li><u>All Ancestors</u>: All ancestors of the GOs in the table.
+<li><u>Each GO's parents with relations</u>: For each GO in table, print its parents and relations (e.g. <tt>is_a</tt>)
+<br>&nbsp;
+<li><u>All ancestors</u>: The combined list of ancestors for all GOs in the table, sorted by level.
 <br>&nbsp;
 
-<li><u>Longest Paths</u>: The longest paths of the GOs in the table;
+<li><u>Longest paths</u>: The longest paths of the GOs in the table;
 that is, shorter paths that are contained in another will not be shown. NOTE: This can take minutes
 to compute and be large.
 <br>&nbsp;
 
-<li><u>All Paths</u>: All paths of the GOs in the table. NOTE: This can be a very large.
+<li><u>All paths</u>: All paths of the GOs in the table. NOTE: This can be a very large.
 
 </ul>
 </ol>

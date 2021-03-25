@@ -131,6 +131,7 @@ public class Schema
 			"   go_msg text default null, "	+  //  name of goterm file, which contains date
 			"   go_ec  text default null, " +  //  evidence codes in db
 			"	go_slim tinytext default null,"  +  // either goDB subset 
+			"	go_rtypes text default null,"  +  // isa, partof, replaceby
 			"   norm tinytext default null" +	// CAS304 RPKM or TPM
 			"	) ENGINE=MyISAM; ";
 		mDB.executeUpdate(sql);
@@ -672,14 +673,27 @@ public class Schema
 	public static void createGOtables (DBConn db) {
 		try {
 			if (db.tableExists("go_info")) {
-				db.executeUpdate("drop table go_info");
 				Out.PrtSpMsg(1, "Clearing database GO tables");
-				Out.PrtWarn("Any GOseq values will be removed. You will need to re-execute GOseq");
+				ResultSet rset = db.executeQuery("SHOW COLUMNS FROM go_info"); // CAS319 check before print warn
+		        while(rset.next()) {
+		        	String col = rset.getString(1);
+		        	if(col.startsWith(Globals.PVALUE)) {
+		        		Out.PrtWarn("Any GOseq values will be removed. You will need to re-execute GOseq");
+		            	break;
+		            }
+		        }
+				db.tableDrop("go_info");
+				db.tableDrop("go_term2term");
+				db.tableDrop("go_graph_path");
+				db.tableDrop("pja_uniprot_go");
+				db.tableDrop("pja_unitrans_go");
+				db.tableDrop("pja_gotree");
 			}
 			else Out.PrtSpMsg(1, "Create database GO tables");
+			
+			// are in schema above, but for backwards compatible
+			db.tableCheckAddColumn("assem_msg", "go_rtypes", "text", ""); // CAS319 replaces isa and partof columns
 			db.tableCheckAddColumn("assem_msg", "go_slim", "tinytext", "");
-			db.tableCheckAddColumn("assem_msg", "isa", "tinyint default 1", "");
-			db.tableCheckAddColumn("assem_msg", "partof", "tinyint default 25", "");
 			db.tableCheckAddColumn("pja_db_unitrans_hits", "filter_gobest", "boolean default 0", "filter_ovbest");
 			
 			// entry for every direct and ancestor
@@ -688,21 +702,43 @@ public class Schema
 			for (int i=0; i<ecList.length; i++)  ecStr += ecList[i] + " boolean default 0, ";
 			
 			db.executeUpdate(
-			"create table go_info (" +
-					" gonum int, " +
-					" descr tinytext, " +
-					" term_type enum('biological_process','cellular_component','molecular_function'), " +
-					" level smallint default 0, " + 
-					" bestEval double, " + // new 4.0
-					" nUnitranHit int unsigned default 0, " +
-					" slim boolean default 0, " +   
-					ecStr +
-					" unique(gonum), " +
-					" index(gonum) " +
-					") ENGINE=MyISAM;");
+				"create table go_info (" + // GOdb.term table
+				" gonum int, " +
+				" descr tinytext, " +
+				" term_type enum('biological_process','cellular_component','molecular_function'), " +
+				" level smallint default 0, " + 
+				" bestEval double, " + // new 4.0
+				" nUnitranHit int unsigned default 0, " +
+				" slim boolean default 0, " +   
+				ecStr +
+				" unique(gonum), " +
+				" index(gonum) " +
+				") ENGINE=MyISAM;");
+			// this is used in GOtree.java
+			// if distance=1, then immediate parent so in term2term (CAS318 currently no value)
+			// GO database: graph_path table except use child/ancestor instead of their term1_id and term2_id	
+			db.executeUpdate(
+				"create table go_graph_path (" +
+				" relationship_type_id tinyint unsigned, " +
+				" distance smallint unsigned, " + //e.g. if A part_of B is_a C part_of D, then distance=3 for A part_of D 
+    			" child int unsigned, " +
+    			" ancestor int unsigned, " +
+    			" index(child), " +
+    			" index(ancestor)" +
+    			" ) ENGINE=MyISAM;");
+				
+			// this is used in GOtree.java 
+			if (db.tableExists("go_term2term")) db.executeUpdate("drop table go_term2term");
+			db.executeUpdate(
+				"create table go_term2term (" +
+					" relationship_type_id tinyint unsigned, " +
+					" child int unsigned, " +
+	    			" parent int unsigned, " +
+	    			" index(child), " +
+	    			" index(parent)" +
+	    			" ) ENGINE=MyISAM;");
 			
 			// Same info as in pja_db_unique_hits.goList, i.e. direct assignments
-			if (db.tableExists("pja_uniprot_go")) db.executeUpdate("drop table pja_uniprot_go");
 			db.executeUpdate(
 				"create table pja_uniprot_go (" +
 					" DUHID bigint, " +
@@ -713,7 +749,6 @@ public class Schema
 				    ") ENGINE=MyISAM;");
 			
 			// entry for each sequence-GO entry for all GOs found in set of hits for sequence
-			if (db.tableExists("pja_unitrans_go")) db.executeUpdate("drop table pja_unitrans_go");
 			db.executeUpdate(
 				"create table pja_unitrans_go (" +
 					" CTGID bigint, " +
@@ -732,8 +767,7 @@ public class Schema
 					" index(gonum) " +
 					" ) ENGINE=MyISAM;");
 			
-			// used in BasicGO to build trimmed set
-			if (db.tableExists("pja_gotree")) db.executeUpdate("drop table pja_gotree");
+			/** CAS319 not being used - used in BasicGO to build trimmed set
 			db.executeUpdate(
 					"create table pja_gotree (" +
 					" tblidx int unsigned primary key auto_increment, " +
@@ -744,31 +778,8 @@ public class Schema
 	    				" term_type enum('biological_process','cellular_component','molecular_function')," +
 	    				" index(gonum) " +
 	    				" ) ENGINE=MyISAM;");
+			**/
 			
-			// this is used in GOtree.java
-			// if distance=1, then immediate parent so in term2term
-			// GO database: graph_path table except use child/ancestor instead of their term1_id and term2_id
-			if (db.tableExists("go_graph_path")) db.executeUpdate("drop table go_graph_path");
-			db.executeUpdate(
-					"create table go_graph_path (" +
-					" relationship_type_id tinyint unsigned, " +
-					" distance smallint unsigned, " + //e.g. if A part_of B is_a C part_of D, then distance=3 for A part_of D 
-	    			" child int unsigned, " +
-	    			" ancestor int unsigned, " +
-	    			" index(child), " +
-	    			" index(ancestor)" +
-	    			" ) ENGINE=MyISAM;");
-			
-			// this is used in GOtree.java 
-			if (db.tableExists("go_term2term")) db.executeUpdate("drop table go_term2term");
-			db.executeUpdate(
-				"create table go_term2term (" +
-					" relationship_type_id tinyint unsigned, " +
-					" child int unsigned, " +
-	    			" parent int unsigned, " +
-	    			" index(child), " +
-	    			" index(parent)" +
-	    			" ) ENGINE=MyISAM;");
 		}
 		catch(Exception e){ErrorReport.die(e, "Error adding GO tables to schema");}
 	}
@@ -938,8 +949,6 @@ public class Schema
 			// release 8 March 16
 			System.out.println("   Adding columns....");
 			mDB.tableCheckAddColumn("contig", "PIDgo", "integer", "");
-			mDB.tableCheckAddColumn("assem_msg", "isa", "tinyint default 1", "");
-			mDB.tableCheckAddColumn("assem_msg", "partof", "tinyint default 25", "");
 			
 			// release N March 16
 			boolean add = mDB.tableCheckAddColumn("pja_db_unitrans_hits", "filter_gobest", 

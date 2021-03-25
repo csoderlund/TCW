@@ -1002,7 +1002,6 @@ public class DoORF {
 			// Save to database
 			try {
 				String gcOverview = gcObj.prtFinal();
-				CoreDB.updateAnnoVer(mDB); // updates annoDate
 				String ov = overview + "\n" + gcOverview;
 	 			mDB.executeUpdate("update assem_msg" +
 	 					" set orf_msg='" + prtObj.orfOverviewLegend + "'" + ", gc_msg='" + ov + "'");

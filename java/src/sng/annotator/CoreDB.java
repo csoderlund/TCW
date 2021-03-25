@@ -25,12 +25,10 @@ import util.methods.*;
 
 public class CoreDB {
 	private boolean bAnnoExists=false;
-	private boolean bGOtree = false;
-	private String annoVer="v1.0", annoDate="";
+	private boolean bGO = false;
 	public boolean isFirstAnno() { return !bAnnoExists;}
-	public boolean existsGOtree() { return bGOtree;}
-	public String getAnnoVer() { return annoVer;}
-	public String getAnnoDate() { return annoDate;}
+	public boolean existsGO() { return bGO;}
+	
 	
 	// Used only by ManagerFrame to deleteAnnotation
 	public CoreDB (DBConn db) 
@@ -82,19 +80,20 @@ public class CoreDB {
 	    	try {
 	    		annotationdate = rs.getString("annotationdate");
 	    	}
-	    	catch(Exception e) {
-	    		annotationdate = "";
-	    	} 
-	   
-	    	if (annotationdate==null && existsAnno()) { 
-	    		System.out.println("Annotation date is missing but annotation exists - may be incomplete");
-	    		setAnnotationDate();
-	    		annotationdate="unknown";
-	    	}
+	    	catch(Exception e) {annotationdate = "";} 
+	    	
 	    	String anno = "Annotation:   " + annotationdate;
-			if (annotationdate == null || annotationdate.equals("") || annotationdate.equals("2000-11-09")) {
-				anno = "Database has no annotation.";
-				bAnnoExists = false;
+	    	if (annotationdate == null || annotationdate.equals("")) {
+	    		if (existsAnno()) {
+	    			System.out.println("Annotation date is missing but annotation exists - may be incomplete");
+	    			anno = "Annotation:  incomplete ";
+	    			bAnnoExists = true;
+	    		}
+	    		else {
+	    			anno = "Database has no annotation.";	
+	    			bAnnoExists = false;
+	    		}
+	    		annotationdate="unknown";
 			} 
 			else {
 				bAnnoExists=true;
@@ -105,13 +104,7 @@ public class CoreDB {
 	    			anno = "Previous annotation started but did not finish.";
 	    		}
 			}
-			if (mDB.tableColumnExists("schemver", "annoVer")) {
-				rs = mDB.executeQuery("Select annoVer, annoDate from schemver");
-				if (rs.next()) {
-					annoVer = rs.getString(1);
-					annoDate = rs.getString(2);
-				}		
-			}
+			
 			isAAtcw = mDB.tableColumnExists("assem_msg", "peptide");
 	    	String type = (isAAtcw) ? "AA-sTCW" : "NT-sTCW";
 	    	
@@ -137,7 +130,10 @@ public class CoreDB {
 	    		}
 	    		else System.err.println("Add to existing annotation");
 	    	}	
-	    	bGOtree = mDB.tableExists("pja_gotree");
+	    	// CAs319 was looking for gotree
+	    	bGO = mDB.tableExists("go_info");
+	    	if (bGO)
+	    		bGO = (mDB.executeCount("select count(*) from go_info limit 1")>0);
 	    	
 	    	if (rs!=null) rs.close();  
 	    }
@@ -165,17 +161,15 @@ public class CoreDB {
    public boolean deleteAnnotation (boolean prt) 
    {
 	   if (prt) Out.PrtSpMsg(0, "Start deleting all previous annotation data");
-	   deleteOverview();
-       try
-       { 	
-    	   		Out.PrtSpMsg(1, "Remove annotation from sequences...");
-    	   		
-    	   		Schema s = new Schema(mDB);
-    			if (!s.current()) s.update();
-    			
-    			mDB.executeUpdate("UPDATE assem_msg set pja_msg=null, meta_msg=null," +
-    					"spAnno=false, orf_msg=null, gc_msg=null, go_msg=null, go_ec=null,go_slim=null");
-    			
+       try { 	
+	   		Out.PrtSpMsg(1, "Remove annotation from sequences...");
+	   		
+	   		Schema s = new Schema(mDB);
+			if (!s.current()) s.update();
+			
+			mDB.executeUpdate("UPDATE assem_msg set pja_msg=null, meta_msg=null," +
+					"spAnno=false, orf_msg=null, gc_msg=null, go_msg=null, go_ec=null,go_slim=null");
+			
        	    mDB.executeUpdate("UPDATE contig " +
        	   		"SET PID = NULL, bestmatchid = NULL, PIDov = NULL, PIDgo = NULL, " +
            		"cnt_overlap = 0, cnt_species = 0, cnt_gene = 0, " +
@@ -215,13 +209,7 @@ public class CoreDB {
        catch(Exception e) {ErrorReport.die(e,"Error deleting annotation data - try again...");}
        return false;
    }
-   public void deleteOverview() {
-	   try {
-		   mDB.executeUpdate("update assem_msg set " +
-	       	   		"pja_msg = NULL, go_msg = null, orf_msg = null where AID = 1");
-	   }
-	   catch(Exception e) {ErrorReport.die(e,"Error deleting overview");}  	   	
-   }
+  
    public void deletePairwise() {
 	   Out.PrtSpMsg(0, "Start deleting all previous annotation data");
        try
@@ -558,19 +546,7 @@ public class CoreDB {
     	}
     	catch (Exception e) {ErrorReport.prtReport(e, "Saving pair overview results");} 	
     }
-    public boolean setAnnotationDate() 
-	{
-		try {
-    		if (!existsAnno()) 
-    			mDB.executeUpdate("UPDATE assembly SET annotationdate=null WHERE AID=1");
-    		else 
-    			mDB.executeUpdate("UPDATE assembly SET annotationdate=(CAST(NOW() as DATE)) WHERE AID=1");	
-			
-			return true;
-		}
-		catch (Exception e) {ErrorReport.prtReport(e, "cannot set annotation date");} 
-		return false;
-	}
+  
     // used in ManagerFrame for Remove
     public boolean existsAnno() {
     	try {

@@ -13,7 +13,7 @@
 .tabley td 		{border: 1px  solid black; padding: 3px; }
 </style>
 </head>
-<body style="padding:20px;width:650px;font-family:Times">
+<body style="padding:20px;width:700px;font-family:Times">
 <h1>GO Help</h1>
 <p>The version of GO that was used for the TCW annotation is shown at the bottom
 of the sTCWdb <b>Overview</b>.
@@ -34,7 +34,8 @@ TCW has the following mappings:
 <li>Protein names to sequences (from a heuristic search program such as BLAST or DIAMOND), 
 <li>GO terms to proteins (from UniProt), 
 <li>GO terms to sequences (the GOs assigned to the proteins that hit the sequence). 
-</ul>When a protein is assigned a GO term, the ancestors of the GO term 
+</ul>
+When a protein is assigned a GO term, the ancestors of the GO term 
 inherits the hit and sequences of the hit; this is because ancestors are
 increasingly more general terms and all apply. Hence, the GO terms in TCW
 are all the <i>assigned (direct)</i> and <i>inherited (indirect)</i> GO terms.  
@@ -64,49 +65,24 @@ its lowest level.
 This is especially true if one mixes the different relations used to connect terms."
 </qoute>
 Nevertheless, TCW computes levels where it assigns a GO its lowest level. 
-<table class=tablex>
-<caption>Figure 3: Descendant and Neighbor List for Nucleotide binding (GO:0000166)</caption>
-<tr><th class=left>A. TCW GO Descendent List<th><th class=class>B. GO Neighbor List</tr>
-<tr><td>
-<pre>
-GO term    Level Description 
-GO:0051287   6   NAD binding
-GO:0050661   6   NADP binding
-GO:0017076   6   purine nucleotide binding
-GO:0032553   6   ribonucleotide binding
-GO:0030554   7   adenyl nucleotide binding
-GO:0010181   7   FMN binding
-GO:0019001   7   guanyl nucleotide binding
-etc (18 terms total)
-
-*Descendants are only shown if they have a hit
-</pre>
-<td>&nbsp;&nbsp;&nbsp;
-<td>
-<pre>
-Parents:
-GO:0036094  is_a  mole  small molecule binding
-GO:1901265  is_a  mole  nucleoside phosphate binding
-
-Children*:
-GO:0017076  is_a  mole  purine nucleotide binding
-GO:0032553  is_a  mole  ribonucleotide binding
-GO:0050661  is_a  mole  NADP binding
-GO:0051287  is_a  mole  NAD binding
-
-*Children are only shown if they have a hit
-</pre>
+<p><table class="tablex">
+<caption>Figure 2: Neighborhood for Nucleotide binding (GO:0000166)</caption>
+<tr><th class=left>A. Amigo Neighbors (Partial Children List) <th class=left>&nbsp;&nbsp;&nbsp;&nbsp;B. TCW Neighbors</tr>
+<tr>
+<td><img src=goNeighAmigoPartial.png alt="" width=600>
+<td valign=top><img src=goNeighTCW.png alt=""  width=400>
 </tr>
 </table>
 
 <p>
 <b>NOTE:</b> In TCW, only GOs that have an assigned or inherited hit will be in the database,
-hence, a GOs descendants will not necessarily all be in the TCW database, but its
-ancestors will be.
+hence, a GOs descendants will not necessarily all be in the TCW database (e.g. GO:0016502 is a child, but is not
+list for the TCW display since it is not in the database). However, all ancestors will be in the database since
+they are inherited by at least this GO.
 <p>
 The relation types used in TCW are 'is_a' and 'part_of'.
 
-<h4>Graph terms</h4>
+<h3>Graph terms</h3>
 In computer science, a graph has <i>nodes</i> and <i>edges</i>. There are 
 <i>paths</i> between nodes by following the edges. 
 The graph is <i>directed</i> if the edges have arrows, where a <i>child</i> node points to the <i>parent</i> node.
@@ -119,20 +95,20 @@ one parent. See <a href="http://geneontology.org/page/ontology-structure" class=
 http://geneontology.org/page/ontology-structure</a>  for a more in-depth discussion.
 <p>TCW does not uses edges that cross the three trees. 
 
-<h4>E-values</h4>
+<h3>E-values</h3>
 A GO term may be assigned or inherited by many protein hits in the TCW database. Each protein hit
 has an e-value indicating how well it aligned to the sequence. The GO-protein hit is assigned the
 best e-value over all the hit-sequence pairs. 
 
-<h4>Examples</h4>
+<h3>Examples</h3>
 Say protein X (proX) aligns to sequence Y (seqY) with an e-value, and GO:0000166 is assigned to proX with an evidence code EC, 
 then seqY is also said to be annotated with GO:0000166. 
 <ul>
 <li>Since proX is assigned GO:0000166, it also inherits all GO:0000166 ancestors.
 <li>Since seqY has annotation of GO:0000166, it also inherits all GO:0000166 ancestors.
 <li>Since GO:0000166 is assigned to proX, all its ancestors inherit proX.
-<li>Since GO:0000166 annotates seqY, all its ancestors also annotated seqY.
-<li>GO:0000166 has EC from proX and e-value from proX-seqY hit.
+<li>Since GO:0000166 annotates seqY, all its ancestors also annotate seqY.
+<li>GO:0000166 has EC from proX and the e-value from the proX-seqY hit.
 </ul>
 
 <b>Searching in TCW</b>: If you search for GO:0000166 in a TCW database in the GO 
@@ -148,7 +124,7 @@ or inherited.
 the <b>Sequence Detail</b> view will be shown for the sequence.
 Select <b>Show GO for all hits</b> to see whether it is assigned (has EC) or inherited (no EC). 
 
-<h4>Evidence codes (EC)</h4> 
+<h3>Evidence codes (EC)</h3> 
 They are shown in the pop-up hit table if there is a direct
 assignment. They are also shown in the sequence GO table.
 

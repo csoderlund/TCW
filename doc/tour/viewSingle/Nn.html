@@ -1,15 +1,15 @@
-<!DOCTYPE html>
 <html>
-<head>
 <title>Nn overview</title>
-</head>
 <body>
-
-<h2 style="text-align: center">TCW overview for Nn </h2>
-<table style="width:700; margin-left: auto; margin-right: auto;border: 1px solid black;"><tr><td>
+<center>
+<h2>TCW overview for Nn </h2>
+<table width=700 border=1><tr><td>
 <pre>
-Project: Nn   #Seqs: 26,685   #Hits: 246,867   #GOs: 22,170    TPM  DE  GO-DE   Pairs
+Project:  Nn   #Seqs: 26,685   #Hits: 593,083   #GOs: 24,582    TPM  DE  GO-DE   Pairs
  
+06-Nov-20 Build Database  sequences loaded from external source
+18-Mar-21 Last Annotation with sTCW v3.1.8    Updated with v3.1.9
+
 INPUT
    Counts: 
       SEQID  ID            SIZE  #REPS  
@@ -24,50 +24,43 @@ INPUT
       SEQID    SIZE  TITLE         SPECIES           SOURCE  AVG-len  MED-len  
       NnR    26,685  Sacred lotus  Nelumbo nucifera  NCBI      1,467    1,229  
 
-ANNOTATION
-   Annotated with TCW release: 3.1.0   Annotation date: 06-Nov-20
+ANNOTATIONS
+   Hit Statistics:
+      Sequences with hits     25,970  (97.3%)     Bases covered by hit  28,913,634  (73.8%)  
+      Unique hits            593,083              Total bases           39,167,358           
+      Total sequence hits  1,344,487                                                         
 
-   Annotation Statistics:
-      Sequences with hits   26,044  (97.6%)     Bases covered by hit  29,187,078  (74.5%)  
-      Unique hits          246,867              Total bases           39,167,358           
-      Total sequence hits  465,369                                                         
-                                                                                           
-      Sequences with GOs    23,640  (88.6%)     Best hit with GOs         19,679  (73.7%)  
-      Unique GOs            22,170              Unique hits with GOs     200,085  (81.0%)  
+   annoDBs (Annotation databases): 8   (see Legend below)
+      ANNODB             ONLY    BITS    ANNO  UNIQUE   TOTAL   AVG  HIT-SEQ (#SEQ)  BEST  AVG  COVER  COVER  
+                                                               %SIM                  HIT  %SIM   >=50   >=90  
+      SP-plants            11      37      56  27,301  239.7k  49.3  19,711 (73.9%)       60.9  55.7%   1.8%  
+      SP-invertebrates      0       0       1   8,963  70,718  39.2   8,229 (30.8%)       42.3  16.0%   0.4%  
+      SP-fungi              0       1       1  13,824  77,828  38.1   8,299 (31.1%)       40.0  13.5%   0.3%  
+      SP-viruses            0       0       0     517   8,922  32.0   1,671 ( 6.3%)       34.6   1.4%     0%  
+      SP-bacteria           0       1       1  27,967  67,926  38.7   5,077 (19.0%)       38.0  11.5%  <0.1%  
+      SP-fullSubset         0       0       0  28,247  130.6k  39.9   9,683 (36.3%)       41.8  15.0%   0.3%  
+      TR-plants         3,907  25,282  25,062  450.9k  634.7k  69.0  25,957 (97.3%)       92.4  79.9%  54.7%  
+      TF-tf                 2     649     849  35,322  114.0k  49.4  12,968 (48.6%)       57.0  21.6%  11.3%  
 
-   annoDBs (Annotation databases): 4   (see Legend below)
-      ANNODB          ONLY    EVAL    ANNO  UNIQUE   TOTAL   AVG  HIT-SEQ (#SEQ)  BEST  AVG  COVER  COVER  
-                                                            %SIM                  HIT  %SIM   >=50   >=90  
-      SP-fullSubset      1       3     101  43,091  113.9k  44.8  12,452 (46.7%)       41.0  15.3%   0.3%  
-      SP-plants         19     386     885  22,848  87,888  59.0  19,909 (74.6%)       60.0  56.2%   1.8%  
-      TR-plants      3,849  24,139  22,874  170.1k  229.2k  80.3  26,018 (97.5%)       92.4  80.2%  55.1%  
-      TF-TF              5   1,516   2,184  10,836  34,432  51.7  13,280 (49.8%)       55.8  21.4%  11.1%  
+   Top 15 species from total: 4,872
+      SPECIES (25 char)        BITS    ANNO   TOTAL     SPECIES              BITS   ANNO    TOTAL  
+      Nelumbo nucifera       24,396  20,765  65,502     Fagus sylvatica        28     47    8,970  
+      Macleaya cordata          116     873  18,111     Hevea brasiliensis     28     24    5,192  
+      Vitis vinifera            105     321  37,684     Malus domestica        26     29    8,903  
+      Davidia involucrata        70     298  29,036     Citrus unshiu          23     14    5,347  
+      Nyssa sinensis             49     124  17,698     Prunus dulcis          20    250    8,222  
+      Cinnamomum micranthum      47     282  10,191     Durio zibethinus       20     37   12,465  
+      Aquilegia coerulea         39      76  16,225     Ananas comosus         20     30    4,475  
+      Camellia sinensis          35      38   7,679     Other                 948  2,762  1088.8k  
 
-   Top 15 species from total: 3,479
-      SPECIES (25 char)       EVAL    ANNO   TOTAL     SPECIES                 EVAL   ANNO   TOTAL  
-      Nelumbo nucifera      24,459  22,676  47,714     Cinnamomum micranthum     39    101   3,345  
-      Arabidopsis thaliana     187     590  51,932     Aquilegia coerulea        37     41   4,490  
-      Macleaya cordata         115     239   6,400     Malus baccata             24     32     997  
-      Vitis vinifera            95     138  10,958     Hevea brasiliensis        21     11   2,071  
-      Davidia involucrata       58     102   9,921     Citrus unshiu             20     13   1,773  
-      Malus domestica           50     104   3,313     Salix viminalis           20      2   1,100  
-      Oryza sativa              48     101  13,926     Camellia sinensis         19     16   2,156  
-      Nyssa sinensis            45      45   5,574     Other                    807  1,833  299.7k  
-
-   Total ORFs: 26,685 (100.0%)
-      Has Hit            26,043 (97.6%)    ORF>=300         23,917 (89.6%)    MultiFrame     571  (2.1%)  
-      Is Longest ORF     25,547 (95.7%)    Has Start&Stop   21,613 (81.0%)    >=9 Ns in ORF    2   (<1%)  
-      Markov Best Score  25,787 (96.6%)    Has Start|Stop   25,545 (95.7%)    Stops in Hit   678  (2.5%)  
-      All of the above   24,693 (92.5%)    Average ORF len           1105         
-
-   GC Content: 44.78%
-      Pos1  17.1%              5UTR    CDS   3UTR              5UTR      CDS    3UTR  
-      Pos2  13.7%    %GC      43.14  45.35  37.60    Length  4,192k  29,492k  5,484k  
-      Pos3  14.6%    CpG-O/E   0.71   0.52   0.43    AvgLen   157.1   1105.2   205.5  
-                                    
-   Similar pairs:
-      Total pairs:                1,000  
-      with Translated selfblast:  1,000  
+   Gene Ontology Statistics:
+      Unique GOs          24,582              Unique hits with GOs  410,922  (69.3%)  
+      Sequences with GOs  24,670  (92.4%)     Seq best hit has GOs   20,283  (76.0%)  
+      Has goslim_plant        57                                                      
+                                                                                      
+      biological_process  16,666  (67.8%)     is_a                   39,994           
+      molecular_function   5,640  (22.9%)     part_of                 4,057           
+      cellular_component   2,276  ( 9.3%)     replaced_by                84           
 
 EXPRESSION
    TPM: (% of 26,685)
@@ -81,49 +74,65 @@ EXPRESSION
 
    Differential expression: (% of 26,685)
                  <1E-5       <1E-4       <0.001        <0.01        <0.05  
-      RhRo  4,443(17%)  6,495(24%)   8,938(33%)  11,797(44%)  14,032(53%)  
-      RhSt  3,363(13%)  6,181(23%)   9,269(35%)  12,155(46%)  14,192(53%)  
-      RhOL  1,859 (7%)  4,023(15%)   7,545(28%)  11,392(43%)  13,934(52%)  
+      RzRo  4,443(17%)  6,495(24%)   8,938(33%)  11,797(44%)  14,032(53%)  
+      RzSt  3,363(13%)  6,181(23%)   9,269(35%)  12,155(46%)  14,192(53%)  
+      RzOL  1,859 (7%)  4,023(15%)   7,545(28%)  11,392(43%)  13,934(52%)  
       RoSt  7,006(26%)  9,793(37%)  12,446(47%)  14,876(56%)  16,492(62%)  
       RoOL  3,467(13%)  5,754(22%)   8,642(32%)  11,939(45%)  14,380(54%)  
       StOL    330 (1%)  1,188 (4%)   3,124(12%)   6,107(23%)   9,192(34%)  
 
-   Over-represented GOs: (% of 22,170)
+   Over-represented GOs: (% of 24,582)
                <1E-5     <1E-4    <0.001       <0.01       <0.05  
-      RhRo    3(<1%)   23(<1%)  112 (1%)    516 (2%)  1,541 (7%)  
-      RhSt  268 (1%)  348 (2%)  534 (2%)  1,053 (5%)  1,959 (9%)  
-      RhOL  109(<1%)  142 (1%)  272 (1%)    647 (3%)  1,500 (7%)  
-      RoSt  108(<1%)  172 (1%)  303 (1%)    750 (3%)  1,836 (8%)  
-      RoOL   78(<1%)  126 (1%)  195 (1%)    517 (2%)  1,358 (6%)  
-      StOL  164 (1%)  187 (1%)  275 (1%)    563 (3%)  1,314 (6%)  
+      RzRo  101(<1%)  238 (1%)  697 (3%)  2,016 (8%)  3,909(16%)  
+      RzSt  280 (1%)  379 (2%)  610 (2%)  1,241 (5%)  2,479(10%)  
+      RzOL  137 (1%)  228 (1%)  446 (2%)  1,076 (4%)  2,288 (9%)  
+      RoSt  226 (1%)  411 (2%)  806 (3%)  1,854 (8%)  3,633(15%)  
+      RoOL  123 (1%)  222 (1%)  492 (2%)  1,303 (5%)  2,850(12%)  
+      StOL  155 (1%)  209 (1%)  379 (2%)    907 (4%)  2,138 (9%)  
 
 SEQUENCES
-   Build date: 06-Nov-20
-   Sequences loaded from external source
-
    Sequence lengths:
        <=100     101-500    501-1000   1001-2000   2001-3000  3001-4000  4001-5000    >5000  
       1(<1%)  4,584(17%)  6,214(23%)  9,452(35%)  4,222(16%)  1,388(5%)    507(2%)  317(1%)  
-
-   ORF lengths:
-        <=100     101-500    501-1000   1001-2000  2001-3000  3001-4000  4001-5000     >5000  
-      86(<1%)  6,860(26%)  7,842(29%)  8,656(32%)  2,271(9%)    660(2%)    180(1%)  130(<1%)  
 
    Quality:
       Sequences with #n>0:   1,328  ( 5.0%)  
       Sequences with #n>10:     11  (<0.1%)  
 
+   ORF lengths:
+         <=100     101-500    501-1000   1001-2000  2001-3000  3001-4000  4001-5000     >5000  
+      105(<1%)  6,859(26%)  7,843(29%)  8,640(32%)  2,264(8%)    661(2%)    183(1%)  130(<1%)  
+
+   Total ORFs: 26,685 (100.0%)
+      Has Hit            25,968 (97.3%)    ORF>=300         23,902 (89.6%)    MultiFrame     1,060  (4.0%)  
+      Is Longest ORF     25,535 (95.7%)    Has Start&Stop   21,646 (81.1%)    >=9 Ns in ORF      2   (<1%)  
+      Markov Best Score  25,777 (96.6%)    Has Start|Stop   25,568 (95.8%)    Stops in Hit     718  (2.7%)  
+      All of the above   24,645 (92.4%)    Average ORF len           1104         
+
+   GC Content: 44.78%
+      Pos1  17.1%              5UTR    CDS   3UTR              5UTR      CDS    3UTR  
+      Pos2  13.6%    %GC      43.12  45.35  37.58    Length  4,235k  29,470k  5,462k  
+      Pos3  14.6%    CpG-O/E   0.70   0.52   0.43    AvgLen   158.7   1104.4   204.7  
+                                    
+   Similar pairs: 100
+      Translated nucleotide  100  
+
 
 -------------------------------------------------------------------
 PROCESSING INFORMATION:
    AnnoDB Files:
-      Type  Taxo        FILE                            DB DATE    ADD DATE   EXECUTE                                     
-      sp    fullSubset  uniprot_sprot_fullSubset.fasta  23-Oct-20  06-Nov-20  diamond  --masking 0 --max-hsps 1 --top 20  
-      sp    plants      uniprot_sprot_plants.fasta      23-Oct-20  06-Nov-20  diamond  --masking 0 --max-hsps 1 --top 20  
-      tr    plants      uniprot_trembl_plants.fasta     23-Oct-20  06-Nov-20  diamond  --masking 0 --max-hsps 1 --top 20  
-      tf    TF          PlantTFDB_pep.fas               27-Aug-20  06-Nov-20  diamond  --masking 0 --max-hsps 1 --top 20  
+      Type  Taxo           FILE                                  DB DATE    ADD DATE   EXECUTE                 
+      sp    plants         uniprot_sprot_plants.fasta.gz         17-Feb-21  18-Mar-21  Load Nn_SPpla.dmnd.tab  
+      sp    invertebrates  uniprot_sprot_invertebrates.fasta.gz  17-Feb-21  18-Mar-21  Load Nn_SPinv.dmnd.tab  
+      sp    fungi          uniprot_sprot_fungi.fasta.gz          17-Feb-21  18-Mar-21  Load Nn_SPfun.dmnd.tab  
+      sp    viruses        uniprot_sprot_viruses.fasta.gz        17-Feb-21  18-Mar-21  Load Nn_SPvir.dmnd.tab  
+      sp    bacteria       uniprot_sprot_bacteria.fasta.gz       17-Feb-21  18-Mar-21  Load Nn_SPbac.dmnd.tab  
+      sp    fullSubset     uniprot_sprot_fullSubset.fasta.gz     17-Feb-21  18-Mar-21  Load Nn_SPful.dmnd.tab  
+      tr    plants         uniprot_trembl_plants.fasta.gz        17-Feb-21  18-Mar-21  Load Nn_TRpla.dmnd.tab  
+      tf    tf             PlantTFDB_TCW.fa                      25-Jan-21  18-Mar-21  Load Nn_TFtf.dmnd.tab   
 
-   Over-represented GOs: go_202010-termdb-tables.tar.gz    [GOs added with sTCW v3.1.0 (5-Nov-20)]
+   Gene Ontology: go-basic.obo-Feb2021  GOdb: go_Mar2021  [GOs added with sTCW v3.1.9]
+   GO Slim: goslim_plant
 
    ORF finder:
       Use ATG only for start site
@@ -135,22 +144,22 @@ PROCESSING INFORMATION:
 
    DE (Differential Expression) computation: 
       DE column    Conditions                     Method
-      RhRo         Rhiz : Root                    source(edgeRglm.R)
-      RhSt         Rhiz : Stem                    source(edgeRglm.R)
-      RhOL         Rhiz : OLeaf                   source(edgeRglm.R)
+      RzRo         Rhiz : Root                    source(edgeRglm.R)
+      RzSt         Rhiz : Stem                    source(edgeRglm.R)
+      RzOL         Rhiz : OLeaf                   source(edgeRglm.R)
       RoSt         Root : Stem                    source(edgeRglm.R)
       RoOL         Root : OLeaf                   source(edgeRglm.R)
       StOL         Stem : OLeaf                   source(edgeRglm.R)
 
-   GOseq: RhOL:0.05,RhRo:0.05,RhSt:0.05,RoOL:0.05,RoSt:0.05,StOL:0.05
+   GOseq: RoOL:0.05,RoSt:0.05,RzOL:0.05,RzRo:0.05,RzSt:0.05,StOL:0.05
 
 -------------------------------------------------------------------
 LEGEND:
    annoDB:
       ANNODB    is DBTYPE-TAXO, which is the DBtype and taxonomy
       ONLY      #Seqs that hit the annoDB and no others
-      EVAL      #Seqs with the best E-value from the annoDB
-      ANNO      #Seqs with the best annotation from the annoDB 
+      BITS      #Seqs with the overall best bitscore from the annoDB
+      ANNO      #Seqs with the overall best annotation from the annoDB 
       UNIQUE    #Unique hits to the annoDB
       TOTAL     #Total seq-hit pairs for the annoDB
       AVG %SIM  Average percent similarity of the total seq-hit pairs
@@ -164,6 +173,5 @@ LEGEND:
       Descriptions may not contain words such as 'uncharacterized protein'
 
 </pre>
-</table>
 </body>
 </html>

@@ -16,6 +16,7 @@ import java.util.Stack;
 import java.util.Vector;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Collections;
 
@@ -30,6 +31,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 
 import sng.viewer.STCWFrame;
+import sng.database.MetaData;
 import util.database.DBConn;
 import util.database.Globalx;
 import util.file.FileC;
@@ -45,6 +47,7 @@ public class GOtree {
 	private static final String GO_PATH_FILE = "AllGoPaths";
 	private static final String GO_LONG_FILE = "AllGoLongestPaths";
 	private static final String GO_ANC_FILE = "AllGoAncestors";
+	private static final String GO_PAR_FILE = "AllGoParents";
 	
 	public static final int ANCESTORS=0;
 	public static final int DESCENDENTS=1;
@@ -57,12 +60,13 @@ public class GOtree {
 	public static final int ALL_HITS=7;
 	public static final int HIT_GO_SEQ=8;
 	
-	public static final int ALL_ANCESTORS=9;
-	public static final int LONGEST_PATHS=10;
-	public static final int ALL_PATHS=11;
+	public static final int ALL_PARENTS=9;
+	public static final int ALL_ANCESTORS=10;
+	public static final int LONGEST_PATHS=11;
+	public static final int ALL_PATHS=12;
 	
-	public static final int SELECTED_HIT_ASSIGNED = 12;
-	public static final int SELECTED_HIT_ALL = 13;
+	public static final int SELECTED_HIT_ASSIGNED = 13;
+	public static final int SELECTED_HIT_ALL = 14;
 	
 	private boolean bSortByLevel=true;
 	
@@ -70,7 +74,8 @@ public class GOtree {
 		"GO Ancestor List", "GO Descendent List", "GO Neighbors List", "GO Related in table",
 		"GO Ancestor Paths", "GO Ancestor Ordered List",
 		"Hits Assigned List ", "Hits Inherited List", "Sequences with GOs",
-		 "All GO Ancestors", "All Longest GO Paths", "All GO paths", 
+		"All Parents with Relation",
+		"All GO Ancestors", "All Longest GO Paths", "All GO paths", 
 		"Assigned GOs for selected hit", "Assigned and inherited GOs for selected hit"
 	};
 	public GOtree(STCWFrame f) {
@@ -160,7 +165,7 @@ public class GOtree {
 					else if (type==PATHS) {
 						lines = showGoAncPathsHtml(go, descr);
 					}
-					else if (type==ANC_DIST) {
+					else if (type==ANC_DIST) { 
 						lines = showGoAncByDistList(go, descr);
 					}
 					else if (type==HITS) {
@@ -337,7 +342,7 @@ public class GOtree {
 		catch(Exception e) {ErrorReport.prtReport(e, "query for Ancestor list");}
 		return null;
 	}
-	// Ancestor sorted by distance
+	// Ancestor sorted by distance - CAS318 - disabled as distance has no value
 	private Vector <String> showGoAncByDistList(int gonum, String godesc) {
 		try {													
 			DBConn mDB = theMainFrame.getNewDBC();
@@ -417,7 +422,7 @@ public class GOtree {
 			HashSet <Integer> dups = new HashSet <Integer> (); // can have is_a and part_of
 			int offset=3; // For Related, first GO at lines.get(3)
 			
-			rs = mDB.executeQuery("Select child, distance, relationship_type_id, i.descr, i.level " +
+			rs = mDB.executeQuery("Select child, relationship_type_id, i.descr, i.level " +
 					" from go_graph_path as p, go_info as i " +
 					" where p.child=i.gonum and ancestor=" + gonum + 
 					" order by i.level, p.child"); 
@@ -430,8 +435,8 @@ public class GOtree {
 				dups.add(gonum2);
 				
 				String go = String.format(GO_FORMAT, gonum2);
-				String desc = rs.getString(4);
-				String level = String.format(" %2d", rs.getInt(5));
+				String desc = rs.getString(3);
+				String level = String.format(" %2d", rs.getInt(4));
 			
 				String l = String.format("%-10s %-5s %s", go, level, desc);
 				goLines.add(l);
@@ -870,7 +875,7 @@ public class GOtree {
 				String ec = rs.getString(2);
 				String desc = rs.getString(3);
 				String level = "  " + rs.getInt(4);
-				String term = rs.getString(5).substring(0,4);
+				String term = rs.getString(5).substring(0,3);
 				String l = String.format("%-10s %-5s %-3s  %-4s  %s", go, level, ec, term, desc);
 				lines.add(l);
 				count++;
@@ -913,7 +918,7 @@ public class GOtree {
 				String ec = rs.getString(2);
 				String desc = rs.getString(3);
 				String level = "  " + rs.getInt(4);
-				String term = rs.getString(5).substring(0,4);
+				String term = rs.getString(5).substring(0,3);
 				String l = String.format("%-10s %-5s %-3s  %-4s  %s", go, level, ec, term, desc);
 				goMap.put(gonum, l);
 				count++;
@@ -934,7 +939,7 @@ public class GOtree {
 					String go2 = String.format(GO_FORMAT, gonum2);
 					String desc = rs.getString(2);
 					String level = "  " + rs.getInt(3);
-					String term = rs.getString(4).substring(0,4);
+					String term = rs.getString(4).substring(0,3);
 					String l = String.format("%-10s %-5s %-3s  %-4s  %s", go2, level, "", term, desc);
 					lines.add(l);
 					count++;
@@ -951,18 +956,13 @@ public class GOtree {
 	}	
 	
 	/****************** Map is_a and part_of to index *****************/
-	// TODO 
 	private void setRelTypes(DBConn mDB) {
 		try {
+			TreeMap <String, Integer> relMap = MetaData.getGoRelTypes(mDB);
+			
 			relTypeMap.put(0, "both");
-			
-			int x = mDB.executeInteger("select isa from assem_msg");
-			relTypeMap.put(x, "is_a");
-			
-			x = mDB.executeInteger("select partof from assem_msg");
-			relTypeMap.put(x, "part_of");
-			
-			relTypeMap.put(3, "replaced_by");
+			for (String rel : relMap.keySet()) 
+				relTypeMap.put(relMap.get(rel), rel);
 		}
 		catch(Exception e) {ErrorReport.prtReport(e, "set types");}
 	}
@@ -991,7 +991,7 @@ public class GOtree {
 		GOterm (int gonum, int level, String term, String desc) {//All ancestors
 			this.gonum = gonum;
 			this.level = level;
-			this.term = term.substring(0,4);
+			this.term = term.substring(0,3);
 			this.desc = desc;
 		}
 		public void setMsg(String msg) {this.msg = msg;}
@@ -1225,9 +1225,10 @@ private class AllDialog extends JDialog {
 	
 	public AllDialog(int type) {
 		nType = type;
-		if (nType==ALL_ANCESTORS)  {msg = "All ancestors"; fName=GO_ANC_FILE;}
-		else if (nType==ALL_PATHS) {msg = "All paths";     fName=GO_PATH_FILE;}
-		else                       {msg = "Longest paths"; fName=GO_LONG_FILE;}
+		if      (nType==ALL_PARENTS)  	{msg = "All parents";   fName=GO_PAR_FILE;}
+		else if (nType==ALL_ANCESTORS)  {msg = "All ancestors"; fName=GO_ANC_FILE;}
+		else if (nType==ALL_PATHS) 		{msg = "All paths";     fName=GO_PATH_FILE;}
+		else                       		{msg = "Longest paths"; fName=GO_LONG_FILE;}
 		
 		Out.Print("Starting " + msg);
 		
@@ -1264,7 +1265,7 @@ private class AllDialog extends JDialog {
 		btnPop.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				nMode = MODE_POP;
-				nOut= (nType==ALL_ANCESTORS) ? OUT_TXT : OUT_HTML;
+				nOut = (nType==ALL_ANCESTORS || nType==ALL_PARENTS) ? OUT_TXT : OUT_HTML;
 			}
 		});
 		
@@ -1359,7 +1360,10 @@ private class AllDialog extends JDialog {
 		try {
 			Out.Print("   " + goMap.size() + " GOs from table");
 			Vector <String> lines = null;
-			if (nType==ALL_ANCESTORS) {
+			if (nType==ALL_PARENTS) {
+				lines = goAllParents(goMap);
+			}
+			else if (nType==ALL_ANCESTORS) {
 				lines = goAllAncestors(goMap);
 			}
 			else  { // ALl paths
@@ -1374,7 +1378,7 @@ private class AllDialog extends JDialog {
 			if (nMode==MODE_POP) { 
 				String [] alines = new String [lines.size()];
 				lines.toArray(alines);
-				if (nType==ALL_ANCESTORS)
+				if (nType==ALL_ANCESTORS || nType==ALL_PARENTS)
 					UserPrompt.displayInfoMonoSpace(null, msg, alines); // adds nl
 				else 
 					UserPrompt.displayHTML(msg, alines); // do not need nl
@@ -1395,7 +1399,76 @@ private class AllDialog extends JDialog {
 		catch (Exception e) {ErrorReport.prtReport(e, "Error in seleciton");}
 		return false;
 	}
-	// compute and output longest paths in text form (Popup) or tsv (Write)
+	/* CAS319 add - show all parents and relations */
+	private Vector <String> goAllParents(TreeSet <Integer> goSet) {
+		try {	
+			Vector <String> lines = new Vector <String> ();
+			DBConn mDB = theMainFrame.getNewDBC();
+			ResultSet rs=null;
+		
+			Vector <GOterm> goList = new Vector <GOterm> ();
+			
+			for (int gonum : goSet) {
+				rs = mDB.executeQuery("select " +
+						" descr, level, term_type from go_info " +
+						" where gonum=" + gonum); 
+				
+				if (rs.next()) {	
+					String desc = rs.getString(1);
+					int level = rs.getInt(2);
+					String term_type = rs.getString(3);
+					
+					GOterm gt = new GOterm(gonum, level, term_type, desc);
+					gt.msg=" *";
+					goList.add(gt);	
+				}
+				else Out.PrtError("TCW error on gonum=" + gonum);
+			}
+			
+			setRelTypes(mDB);
+			
+			String delim = (nMode==MODE_POP) ? " "  : FileC.TSV_DELIM; 
+			String format = "%-11s" + delim + "%10s" + delim + "%3s" + delim + "%s";
+			
+			int cnt=0, cnt1=0;
+			for (GOterm gt : goList) {
+				rs = mDB.executeQuery("select " +
+						" p.relationship_type_id, p.parent, g.descr, g.term_type " +
+						" from go_term2term as p" +
+						" join go_info as g on g.gonum=p.parent" +
+						" where child=" + gt.gonum); 
+				
+				String go = String.format(GO_FORMAT, gt.gonum);
+				lines.add(String.format(format, "----------", go, gt.term, gt.desc));
+				while (rs.next()) {
+					int gonum2 = rs.getInt(2);
+					if (gonum2==gt.gonum) continue;
+					go = String.format(GO_FORMAT, gonum2);
+					
+					int rel = rs.getInt(1);
+					String x = (relTypeMap.containsKey(rel)) ? relTypeMap.get(rel) : "unk";
+					
+					String desc = rs.getString(3);
+					
+					String term = rs.getString(4).substring(0,3);
+					
+					lines.add(String.format(format, x, go, term, desc));
+					cnt++; cnt1++;
+				}
+				if (cnt1>=1000) {
+					Out.r("parents " + cnt);
+					cnt1=0;
+				}
+			}
+			if (rs!=null) rs.close(); mDB.close();
+			
+			
+			return lines;
+		}
+		catch(Exception e) {ErrorReport.prtReport(e, "Ancestor list");}
+		return null;
+	}
+	/* All ancestors, term_type, level, desc */
 	private Vector <String> goAllAncestors(TreeSet <Integer> goMap) {
 		try {	
 			Vector <String> lines = new Vector <String> ();

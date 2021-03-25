@@ -10,6 +10,42 @@
 <h3>TCW Version 3.1</h3>
 Version 3.1 releases are about tidying things up, without any major new features
 
+<h4>v3.1.9  25-Mar-21</h4>
+This release fixes a few tiny bugs created by the last release.
+<ul>
+<li><ttc>Overview</ttc>
+<ul>
+<li>No GO info in <ttc>Overview</ttc>.
+<li>Rearranged <ttc>Overview</ttc>.
+<li>Added some GO statistics
+</ul>
+
+<li><ttp>viewSingleTCW</ttp>
+<ul>
+<li><ttc>Basic GO</ttc>: 
+<ul>
+<li><ttc>Show...</ttc> <u>Neighborhood list with relations</u> has the added relations of <i>replaced_by</i>
+and <i>replaces</i>.
+<li>Added item under <ttc>Table...</ttc> called <u>Each GO's parents with relation</u> which produces
+a popup or file with output like:
+<pre>
+----------      GO:0000019      bio     regulation of mitotic recombination
+is_a            GO:0000018      bio     regulation of DNA recombination
+----------      GO:0000027      bio     ribosomal large subunit assembly
+is_a            GO:0022618      bio     ribonucleoprotein complex assembly
+part_of         GO:0042255      bio     ribosome assembly
+part_of         GO:0042273      bio     ribosomal large subunit biogenesis
+</pre>
+<li>The <ttc>GO Help</ttc> has been updated.
+</ul>
+<li><ttc>Sequence Detail</ttc>: A few small problems with GO, e.g. the number of "Unique GOs" was always 0.
+</ul>
+<li>On-line <ttc>TCW Tour</ttc>: 
+<ul>
+<li>A new GO Help page, see <a href="./tour/viewSingle/goHelp/go794.html" a class=ext target="_blank">GO:0000794</a>
+</ul>
+</ul>
+
 <h4>v3.1.8  19-Mar-21</h4>
 <ul>
 <li><ttp>runAS</ttp> - building the <tt>GOdb</tt> mysql database of GOs and UniProts.

@@ -32,7 +32,7 @@ because they are computed differently.
 </table>
  
 <h3>ANNOTATION</h3>
-<h3>Annotation Statistics:</h3>
+<h3>Hit Statistics:</h3>
 
 <table class=tabley>
 <tr><th>Column<th>Search<th>Obtain number
@@ -53,18 +53,6 @@ because they are computed differently.
 	<br>(residues for AA seqs)
 	<td>Show All 
 	<td>Column:Length; Stats, column:Sum
-<tr><td>Sequences with GOs
-	<td>Filters: Best Hit: Annotated, Best with GO
-	<td>Number of rows
-<tr><td>Unique GOs
-	<td>GO Annotation: no filters<sup>*</sup>
-	<td>Results number
-<tr><td>Best hit with GOs
-	<td>AnnoDB Hits: Seq:Best Bits; GO,etc:Has GO
-	<td>Seqs number at top of table
-<tr><td>Unique hits with GOs
-	<td>AnnoDB Hits: Seqs:None; GO,etc:Has GO
-	<td>Hits number at top of table
 </table>
 <sup>*</sup> Use Clear All
 
@@ -112,12 +100,77 @@ species name:
 the species are listed in the table.
 </ul>
 
+<h3>Gene Ontology Statistics:</h3>
+
 <table class=tabley>
 <tr><th>Column<th>Search<th>Obtain number
-<tr><td colspan=3><i>For the following, use AnnoDB Hits and select the Species.</i>
-<tr><td>BITS<td>Seq:Best Bits<td>Seqs number
-<tr><td>ANNO<td>Seq:Best Anno<td>Seqs number
-<tr><td>TOTAL<td>Seq:None(slow)<td>Pairs number
+<tr><td>Unique GOs
+	<td>GO Annotation: no filters<sup>*</sup>
+	<td>Results number
+<tr><td>Unique hits with GOs
+	<td>AnnoDB Hits: Seqs:None; GO,etc:Has GO
+	<td>Hits number at top of table
+<tr><td>Sequences with GOs
+	<td>Filters: Best Hit: Annotated, Best with GO
+	<td>Number of rows
+<tr><td>Seq best hit has GOs
+	<td>AnnoDB Hits: Seq:Best Bits; GO,etc:Has GO
+	<td>Seqs number at top of table
+
+	
+<tr><td>biological_process
+	<td>GO Annotation: Level: biological_process
+	<td>Number GOs at top of table
+<tr><td>molecular_function
+	<td>GO Annotation: Level: molecular_function
+	<td>Number GOs at top of table	
+<tr><td>cellular_component
+	<td>GO Annotation: Level: cellular_component
+	<td>Number GOs at top of table	
+<tr><td>is_a, part_of, replaced_by
+	<td>GO Annotation:  no filters<sup>*</sup>
+	<td>Table..., Each GO's parents with relations, Export to file, grep	<sup>**</sup>
+</table>
+<sup>*</sup> Use Clear All
+<br><sup>**</sup> From terminal, <tt>grep Is_a AllGoParents.tsv | wc</tt>. Then replace
+<tt>is_a</tt> with <tt>part_of</tt>, then with <tt>replaced_by</tt>.
+
+
+<h2>EXPRESSION</h2>
+The following sections may not exist if the input had no count files or the DE methods
+were not executed.
+<table class=tabley>
+<tr><td>TPM*
+	<td>Filter: select Condition under Exclude; set "At Most" to 1.99. 
+	<td>This will continue using 4.99, 9.99, etc, where the previous results are
+subtracted from the current. The results are for intervals &gt;=N to &lt;M.
+<tr><td>Differential Expression
+	<td>Filter: select the condition pair, then enter the number, e.g. 1E-5.
+	<td>These counts are accumulative.
+<tr><td>Over-represented GOs:
+	<td>GO Annotation; select the condition pair using the DE panel; enter the threshold,
+	e.g. 0.05.
+	<td>These counts are accumulative.
+</table>
+* If "RPKM" is at the top of the Overview instead of "TPM", then RPKM was computed instead of TPM.
+
+<h2>SEQUENCES</h2>
+If the sequences (e.g. ESTs) have been assembled, there are statistics on buried,
+mate-pairs, etc. Most of them are columns, so select the column, then use the 
+"Show column stats" to view the sum. The following will only cover the three sections
+that are found in un-assembled sequences.
+<table class=tabley>
+<tr><td>Sequence lengths
+	<td>Filters: General: change &gt;= to &lt;=, 
+	  enter upper limit into Length
+	<td>The counts of the intervals to the left need to be subtracted from the number of rows.
+<tr><td>ORF lengths
+	<td>Filter: SNPs and ORFs; enter lower limit into ORF len
+	<td>Work from right to left, the counts of the intervals to the right need to be subtracted from the number of rows.
+<tr><td>Quality
+	<td>Filters: General: Has Ns: Yes; Column: Ns
+	<td>The resulting rows are the #n&gt;0; sort the rows in descending order and scroll down
+	to the row number that start having #n&gt;10.
 </table>
 
 <h3>Total ORFs:</h3>
@@ -162,41 +215,5 @@ The only number reproducible is the GC Content, which is the %GC over the entire
 <li>The UTRs can be viewed in the Sequence Detail alignments, but there is no column for it.
 </ul>
 
-<h2>EXPRESSION</h2>
-The following sections may not exist if the input had no count files or the DE methods
-were not executed.
-<table class=tabley>
-<tr><td>TPM*
-	<td>Filter: select Condition under Exclude; set "At Most" to 1.99. 
-	<td>This will continue using 4.99, 9.99, etc, where the previous results are
-subtracted from the current. The results are for intervals &gt;=N to &lt;M.
-<tr><td>Differential Expression
-	<td>Filter: select the condition pair, then enter the number, e.g. 1E-5.
-	<td>These counts are accumulative.
-<tr><td>Over-represented GOs:
-	<td>GO Annotation; select the condition pair using the DE panel; enter the threshold,
-	e.g. 0.05.
-	<td>These counts are accumulative.
-</table>
-* If "RPKM" is at the top of the Overview instead of "TPM", then RPKM was computed instead of TPM.
-
-<h2>SEQUENCES</h2>
-If the sequences (e.g. ESTs) have been assembled, there are statistics on buried,
-mate-pairs, etc. Most of them are columns, so select the column, then use the 
-"Show column stats" to view the sum. The following will only cover the three sections
-that are found in un-assembled sequences.
-<table class=tabley>
-<tr><td>Sequence lengths
-	<td>Filters: General: change &gt;= to &lt;=, 
-	  enter upper limit into Length
-	<td>The counts of the intervals to the left need to be subtracted from the number of rows.
-<tr><td>ORF lengths
-	<td>Filter: SNPs and ORFs; enter lower limit into ORF len
-	<td>Work from right to left, the counts of the intervals to the right need to be subtracted from the number of rows.
-<tr><td>Quality
-	<td>Filters: General: Has Ns: Yes; Column: Ns
-	<td>The resulting rows are the #n&gt;0; sort the rows in descending order and scroll down
-	to the row number that start having #n&gt;10.
-</table>
 </body>
 </html>

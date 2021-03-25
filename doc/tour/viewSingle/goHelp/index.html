@@ -13,12 +13,12 @@
 .tabley td 		{border: 1px  solid black; padding: 3px; }
 </style>
 </head>
-<body style="padding:20px;width:650px;font-family:Times">
+<body style="padding:20px;width:750px;font-family:Times">
 <h1>GO Help</h1>
 <p>The version of GO that was used for the TCW annotation is shown at the bottom
 of the sTCWdb <b>Overview</b>.
 Unless TCW was built with the latest GO database, there will be 
-differences from what is found on amigo.geneontology.org as the
+differences from what is found on <tt>amigo.geneontology.org</tt> as the
 gene ontology is constantly being updated. The following example is dated 4-Mar-2021,
 and screen shots are from:</p>
 <table>
@@ -64,45 +64,20 @@ its lowest level.
 This is especially true if one mixes the different relations used to connect terms."
 </qoute>
 Nevertheless, TCW computes levels where it assigns a GO its lowest level. 
-<table class=tablex>
-<caption>Figure 3: Descendant and Neighbor List for Nucleotide binding (GO:0000166)</caption>
-<tr><th class=left>A. TCW GO Descendent List<th><th class=class>B. GO Neighbor List</tr>
-<tr><td>
-<pre>
-GO term    Level Description 
-GO:0051287   6   NAD binding
-GO:0050661   6   NADP binding
-GO:0017076   6   purine nucleotide binding
-GO:0032553   6   ribonucleotide binding
-GO:0030554   7   adenyl nucleotide binding
-GO:0010181   7   FMN binding
-GO:0019001   7   guanyl nucleotide binding
-etc (18 terms total)
-
-*Descendants are only shown if they have a hit
-</pre>
-<td>&nbsp;&nbsp;&nbsp;
-<td>
-<pre>
-Parents:
-GO:0036094  is_a  mole  small molecule binding
-GO:1901265  is_a  mole  nucleoside phosphate binding
-
-Children*:
-GO:0017076  is_a  mole  purine nucleotide binding
-GO:0032553  is_a  mole  ribonucleotide binding
-GO:0050661  is_a  mole  NADP binding
-GO:0051287  is_a  mole  NAD binding
-
-*Children are only shown if they have a hit
-</pre>
+<p><table class="tablex">
+<caption>Figure 2: Neighborhood for Nucleotide binding (GO:0000166)</caption>
+<tr><th class=left>A. Amigo Neighbors (Partial Children List) <th class=left>&nbsp;&nbsp;&nbsp;&nbsp;B. TCW Neighbors</tr>
+<tr>
+<td><img src=goNeighAmigoPartial.png alt="" width=600>
+<td valign=top><img src=goNeighTCW.png alt=""  width=400>
 </tr>
 </table>
 
 <p>
 <b>NOTE:</b> In TCW, only GOs that have an assigned or inherited hit will be in the database,
-hence, a GOs descendants will not necessarily all be in the TCW database, but its
-ancestors will be.
+hence, a GOs descendants will not necessarily all be in the TCW database (e.g. GO:0016502 is a child, but is not
+list for the TCW display since it is not in the database). However, all ancestors will be in the database since
+they are inherited by at least this GO.
 <p>
 The relation types used in TCW are 'is_a' and 'part_of'.
 
@@ -147,6 +122,8 @@ or inherited.
 <p>In the resulting table of sequences, select a sequence followed by <b>View Selected Sequence</b>; 
 the <b>Sequence Detail</b> view will be shown for the sequence.
 Select <b>Show GO for all hits</b> to see whether it is assigned (has EC) or inherited (no EC). 
+
+<p>See <a href="go794.html" class=ext target="_blank">All GO View</a> for a detail flow through one example.
 
 <h4>Evidence codes (EC)</h4> 
 They are shown in the pop-up hit table if there is a direct

@@ -108,7 +108,7 @@ public class LoadFromDB {
             curContig.setLongest( rset.getString(23)); // CAS311
             
             boolean hasGO=false;
-         	if (mDB.tableExist("go_info") && mDB.tableExist("pja_gotree")) hasGO=true;
+         	if (mDB.tableExist("go_info")) hasGO=true;
          	rset.close();
              
             if (hasGO) {
@@ -252,7 +252,7 @@ public class LoadFromDB {
             rset.close();
             
             boolean hasGO=false;
-         	if (mDB.tableExist("go_info") && mDB.tableExist("pja_gotree")) hasGO=true;
+         	if (mDB.tableExist("go_info")) hasGO=true;
         	
             if (hasGO) {
                 ResultSet rset2 = mDB.executeQuery("select count(*) from pja_unitrans_go as ug " +

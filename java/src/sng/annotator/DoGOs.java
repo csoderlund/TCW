@@ -94,13 +94,15 @@ public class DoGOs
 			}
 			
 /** Create Tables **/
-			Schema.createGOtables(tcwDB);
+			Schema.createGOtables(tcwDB); // drops current 
 			
 			tcwDB.executeUpdate("update pja_db_unique_hits " +
 				" set ec='', pfam='', kegg='', goList='', goBrief='', interpro=''");
 			tcwDB.executeUpdate("update contig set PIDgo=0");
 			tcwDB.executeUpdate("update pja_db_unitrans_hits set filter_gobest=0");
 			tcwDB.executeUpdate("update assem_msg set go_msg='', go_slim='', go_ec=null");
+			if (tcwDB.tableColumnExists("assem_msg", "goDE"))
+				tcwDB.executeUpdate("update assem_msg set goDE=''");
 			
 /** Create Overview message for processing info: assem_msg.go_msg **/
 			String msg = "GOdb: " + godbName + "  [GOs added with " + Globalx.sTCWver + "]"; // CAS318 added GOdb
@@ -108,22 +110,16 @@ public class DoGOs
 				rs = goDB.executeQuery("select filename from " + goMetaTable);
 				if (rs!=null && rs.next()) {
 					String file = rs.getString(1);
-					if (file!=null) {
-						String x = file + "  " + msg; 
-						tcwDB.executeUpdate("update assem_msg set go_msg='" + x + "'");
-					}
+					if (file!=null) msg = file + "  " + msg; 
 				}
 			}
-			else tcwDB.executeUpdate("update assem_msg set go_msg='" + msg + "'");
-		
-			int isa=1, partof=25;
-			rs = goDB.executeQuery("select id from term where name='is_a'");
-			if (rs.next()) isa = rs.getInt(1);
-			else System.err.println("Cannot get is_a from go database, setting it to " + isa);
-			rs = goDB.executeQuery("select id from term where name='part_of'");
-			if (rs.next()) partof = rs.getInt(1);
-			else System.err.println("Cannot get part_of from go database, setting it to " + partof);
-			tcwDB.executeUpdate("update assem_msg set isa=" + isa + ", partof=" + partof);
+			// CAS319 - changed from having isa and partof to go_rtypes; used in Basic.GOtree
+			rs = goDB.executeQuery("select id, name from term  where term_type='external' order by id");
+			String tMsg="";
+			while (rs.next()) {
+				tMsg += rs.getInt(1) + ":" + rs.getString(2) + ";";
+			}
+			tcwDB.executeUpdate("update assem_msg set go_msg='" + msg + "', go_rtypes='" + tMsg + "'");
 			
 			Out.PrtSpMsg(1, "Computing GOs for:");
 			int nSeq = tcwDB.executeCount("select count(*) from contig");

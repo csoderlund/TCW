@@ -143,7 +143,7 @@ public class runSTCWMain
 				boolean firstAnno = sqlObj.isFirstAnno();
 				boolean doAnnoDB = (blastObj.numDB() > 0) ? true : false;
 				boolean doSelf =    blastObj.doPairs();
-				boolean hasGOtree = sqlObj.existsGOtree();
+				boolean hasGO = sqlObj.existsGO();
 				
 				if (!firstAnno && !doAnnoDB && !doSelf) { 
 					Out.Print("No annoDB or pairs annotation to be done\n");
@@ -157,7 +157,7 @@ public class runSTCWMain
 				}
 				
 				doGO = false;
-				if (doAnnoDB || !hasGOtree) { 
+				if (doAnnoDB || !hasGO) { 
 					Out.Print("Check GO database ");
 					if (checkGODB(false)) doGO=true;
 				}
@@ -188,24 +188,27 @@ public class runSTCWMain
 		}
 		
 		boolean successAnno=true; 
+		if (bdoAnno || doRecalcORF || doGO) updateState(false); // set null in case interrupt
+		
 		if (bdoAnno || doRecalcORF) {
 			BlastHitData.startHitWarnings("Warnings for " + projName);
 			if (!bdoAnno && doRecalcORF) 
-				orfObj.setCmdParam(ORF_Type_Param, ORF_Transcoder_Param, 
-						ORF_FIND_DUPS, ORF_Seq_Cov, ORF_Hit_Cov);
+				orfObj.setCmdParam(ORF_Type_Param, ORF_Transcoder_Param, ORF_FIND_DUPS, ORF_Seq_Cov, ORF_Hit_Cov);
+		
 			successAnno = annoObj.run(getCurProjPath(), orfObj);
 		}
 		if (successAnno) {
 			String msg=null;
-			if (doGO)
-			{
-				new DoGOs(sqlObj,godb, goSlimSubset, goSlimOBOFile); 
+			if (doGO) {
+				new DoGOs(sqlObj,godb, goSlimSubset, goSlimOBOFile); // dies if anything fails
 			}
-			else if (bdoAnno && sqlObj.existsGOtree()) 
+			else if (bdoAnno && sqlObj.existsGO()) 
 				msg ="GO annotations exist. Update with 'Exec GO only' if new UniProt annoDBs were added.";	
 			
 			// 8. Create Overview -- file is written in overview.java 
 			try {
+				if (bdoAnno || doRecalcORF || doGO) updateState(true); // CAS319 add here
+				
 				Overview viewObj;
 				if (cover1>0 || cover2>0) viewObj = new Overview(mDB, cover1, cover2);
 				else viewObj = new Overview(mDB);
@@ -218,11 +221,10 @@ public class runSTCWMain
 			Out.PrtMsgTime("\nEnd annotation for " + projName, startTime);
 		}
 		else { 
-			if (doGO)
-				Out.PrtWarn("Skip GO due to annotation errors");
-			sqlObj.deleteOverview();
+			if (doGO) Out.PrtWarn("Skip GO due to annotation errors");
 			Out.PrtMsgTime("\nIncomplete annotation for " + projName, startTime);
 		}
+		
 		Out.closeSize();
 		finish();
 	}
@@ -232,6 +234,22 @@ public class runSTCWMain
 		}
 		Out.close();
 		return true;
+	}
+	/*********************************************
+	 * These were all over the place.
+	 */
+	static private void updateState(boolean bSuccess) {
+		try {
+			mDB.executeUpdate("update assem_msg set pja_msg = NULL where AID = 1");
+			
+			mDB.executeUpdate("update schemver set annoVer='" +  Version.strTCWver + "'");
+			mDB.executeUpdate("update schemver set annoDate='" + Version.strRelDate + "'");
+			
+			if (bSuccess) 
+				 mDB.executeUpdate("UPDATE assembly SET annotationdate=(CAST(NOW() as DATE)) WHERE AID=1");	
+			else mDB.executeUpdate("UPDATE assembly SET annotationdate=null WHERE AID=1");	
+		}
+		catch (Exception e) {ErrorReport.reportError(e, "Updating annotation verion");}
 	}
 	/******************************************************
 	 * set options/actions
@@ -411,12 +429,7 @@ public class runSTCWMain
 					return false;
 				}
 				// --- pre-v318 -------------------------//
-				if (goDB.tableExist("PAVE_Uniprot")) 
-					fixOldGOdb(goDB); 
-				boolean isOBO = (goDB.tableColumnExists(Globalx.goMetaTable, "isOBO"));
-				if (!isOBO) 
-					Out.PrtWarn("GO Slims are not available with pre-v318 GOdbs");
-				//-----------------------------------------///
+				fixOldGOdb(goDB); 
 				
 				// Verify GOdb
 				String upTab = Globalx.goUpTable;
@@ -447,12 +460,15 @@ public class runSTCWMain
 	// CAS318 - old GOdb from mysql 
 	private static void fixOldGOdb(DBConn goDB) {
 		try {
-			Out.prt("+++ Renaming TCW added tables to GOdb");
-			goDB.tableRename("PAVE_Uniprot",  Globalx.goUpTable);
-			goDB.tableRename("PAVE_metadata", Globalx.goMetaTable);
-			goDB.tableRename("PAVE_gotree",   Globalx.goTreeTable);
-			
-			Out.PrtWarn("GO Slims are not available with pre-v318 GOdbs");
+			if (goDB.tableExist("PAVE_Uniprot")) {
+				Out.prt("+++ Renaming TCW added tables to GOdb");
+				goDB.tableRename("PAVE_Uniprot",  Globalx.goUpTable);
+				goDB.tableRename("PAVE_metadata", Globalx.goMetaTable);
+				goDB.tableRename("PAVE_gotree",   Globalx.goTreeTable);
+			}
+			boolean isOBO = (goDB.tableColumnExists(Globalx.goMetaTable, "isOBO"));
+			if (!isOBO) 
+				Out.PrtWarn("GO Slims are not available with pre-v318 GOdbs");
 		}
 		catch(Exception e){ErrorReport.die(e, "Converting old GOdb to >=v318");}		
 	}

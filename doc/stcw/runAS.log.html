@@ -115,65 +115,51 @@ Start Full UniProt                                  25-Jan-21 17:46:10
          18,071,318 written to uniprot_trembl_fullSubset.fasta 10.3Gb    23m:40s
 Complete Full UniProt                                                    5h:33m:22s
 
-Start GO processing go_Jan2021                      26-Jan-21 16:16:56
+## Author's note: typically, the GOdb should be created as the same time as the UniProts.
+##	However, the following illustrates the update with v3.1.8 to use the go-basic.obo file.
+
+Start GO processing go_Mar2021                      18-Mar-21 11:02:30
    UniProt directory: ./projects/DBfasta/UniProt_Jan2021
-   GO temporary directory: ./projects/DBfasta/GO_tmpJan2021
-   URL: http://archive.geneontology.org/
-   Create ./projects/DBfasta/GO_tmpJan2021
-      Downloading go_daily-termdb-tables.tar.gz
-      curl complete ./projects/DBfasta/GO_tmpJan2021/go_daily-termdb-tables.tar.gz   0m:1s
-      Exec: tar xf go_daily-termdb-tables.tar.gz
-      From: ./projects/DBfasta/GO_tmpJan2021
-   Loading go_daily-termdb-tables.tar.gz to go_Jan2021
-      Exec: mysqladmin -h localhost -u XXX -pXXX create go_Jan2021
-      Exec: sh load.sh
-      From: ./projects/DBfasta/GO_tmpJan2021/go_daily-termdb-tables/
-   Loading ./projects/DBfasta/UniProt_Jan2021 to go_Jan2021
+   GO temporary directory: projects/DBfasta/GO_oboMar2021
+   Delete mySQL database go_Mar2021
+   Use existing GO file
+         50,514 Total GOs     3,305 Alt GOs
+         32,542 Biological   56,609 is_a       5,533 part_of 
+         13,289 Molecular    15,018 is_a          11 part_of 
+          4,683 Cellular      5,127 is_a       2,097 part_of 
+             14 Slims           208 GOs in Slim
+   Complete Load OBO file                                                0m:6s  (4Mb)
+   Loading ./projects/DBfasta/UniProt_Jan2021 to go_Mar2021
       Processing sp_bacteria/uniprot_sprot_bacteria.dat.gz
-            334,772 UniProts                                             1m:31s  
+            334,772 UniProts                                             1m:38s
       Processing sp_fungi/uniprot_sprot_fungi.dat.gz
-            35,073 UniProts                                              0m:12s 
+            35,073 UniProts                                              0m:13s
       Processing sp_invertebrates/uniprot_sprot_invertebrates.dat.gz
-            28,129 UniProts                                              0m:9s  
+            28,129 UniProts                                              0m:9s
       Processing sp_plants/uniprot_sprot_plants.dat.gz
-            43,403 UniProts                                              0m:16s 
+            43,403 UniProts                                              0m:15s
       Processing sp_viruses/uniprot_sprot_viruses.dat.gz
-            17,008 UniProts                                              0m:5s  
-      Processing tr_bacteria/uniprot_trembl_bacteria.dat.gz
-            140,981,583 UniProts                                         7h:4m:56s  
-      Processing tr_fungi/uniprot_trembl_fungi.dat.gz
-            12,550,674 UniProts                                          38m:6s  
+            17,008 UniProts                                              0m:4s
       Processing tr_invertebrates/uniprot_trembl_invertebrates.dat.gz
-            12,275,877 UniProts                                          38m:38s  
+            12,275,877 UniProts                                          35m:32s
       Processing tr_plants/uniprot_trembl_plants.dat.gz
-            20,516,158 UniProts                                          51m:26s  
-      Processing tr_viruses/uniprot_trembl_viruses.dat.gz
-            4,761,529 UniProts                                           17m:29s  
+            20,516,158 UniProts                                          47m:34s
       Processing sp_fullSubset/uniprot_sprot_fullSubset.dat.gz
-            105,587 UniProts                                             0m:54s  
-      Processing tr_fullSubset/uniprot_trembl_fullSubset.dat.gz
-            18,071,318 UniProts                                          57m:34s  
+            105,587 UniProts                                             0m:51s
       Totals:
-         GO: 366,494,418  Pfam: 205,097,912  KEGG: 19,743,222  EC: 34,072,204  InterPro: 536,451,547
-   Modify TCW GO database go_Jan2021
-      Add gonum to term
-      Add gonum of term_id1 and term_id2 to graph_path
-         Initialize 2 columns and an index...
-            1 Add child...
-            2 Add ancestor...
-            3 Add index...
-         Bulk update of graph_path...
-      Add gonum to term2term
-         Bulk update of term2term for id1...
-         Bulk update of term2term for id2...
-      Create a table of levels
-         19,590 Parent-child
-         988,393 tree entries for biological_process
-         196,238 tree entries for cellular_component
-         23,799 tree entries for molecular_function
-      Add GO level numbers to term
-   Complete TCW GO database modifications                                6m:8s  
-Complete creating GO database go_Jan2021                                 10h:38m:24s  (4Mb)
+         GO: 49,907,782  Pfam: 21,175,254  KEGG: 2,806,531  EC: 3,866,797  InterPro: 56,704,777
+   Compute levels
+         19,633 Parent-child
+        924,561 edges for biological_process; max level 18
+         37,471 edges for cellular_component; max level 14
+         28,245 edges for molecular_function; max level 13
+      Add GO level numbers to term table
+   Complete GO Levels                                                    0m:14s  (8Mb)
+   Compute ancestors
+         50,514 GOs to process ancestors
+        676,026 Ancestor paths 
+   Complete ancestors                                                    2m:52s  (86Mb)
+Complete creating GO database go_Mar2021                                 1h:29m:36s  (86Mb)
 
 Write ./projects/AnnoDBs_UniProt_Jan2021.cfg
       12 entries written

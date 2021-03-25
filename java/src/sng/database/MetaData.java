@@ -318,13 +318,42 @@ public class MetaData {
 		catch (Exception e) {ErrorReport.reportError(e, "Error: reading database for Tuples");}
 	}
 	 /*********************************************************
+	  * Basic GO - CAS319 overview needs this to be static
+	  */
+	 public static TreeMap <String, Integer> getGoRelTypes(DBConn mDB) {// CAS319 add
+		 try {
+			TreeMap <String, Integer> goRelTypeMap = new TreeMap <String, Integer> ();
+			if (mDB.tableColumnExists("assem_msg", "go_rtypes")) {
+				String rtypes = mDB.executeString("select go_rtypes from assem_msg");
+				String [] tok = rtypes.split(";");
+				for (String t : tok) {
+					String [] r = t.split(":");
+					int x = Integer.parseInt(r[0]);
+					goRelTypeMap.put(r[1], x);
+				}
+			}
+			if (goRelTypeMap.size()<3) { // for pre-319
+				goRelTypeMap.clear();
+				if (mDB.tableColumnExists("assem_msg", "is_a")) {
+					goRelTypeMap.put("is_a", mDB.executeInteger("select is_a from assem_msg"));
+					goRelTypeMap.put("part_of", mDB.executeInteger("select part_of from assem_msg"));
+					goRelTypeMap.put("replaced_by", 0);
+				}
+				else Out.PrtWarn("The GO relation types are not in this sTCWdb");
+			} 
+			return goRelTypeMap;
+		 }
+		 catch (Exception e) {ErrorReport.reportError(e, "Error: reading database for GO relations");}
+		 return null;
+	 }
+	 /*********************************************************
 	  * Basic GO - loads on first use
 	  */
 	 public HashSet <String> getECinDB() {
 		if (ecInDB==null) loadGoEC();
 		return ecInDB;
 	 }
-	 
+	
 	 public String [] getTermTypes() {
 		 if (termTypes!=null) return termTypes;
 		 try {
@@ -440,7 +469,6 @@ public class MetaData {
       		
       		"Inferred from Electronic Annotation",
       		"Unknown"};
-	
 	
 	/**********************************************************************/
 	

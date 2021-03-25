@@ -54,7 +54,6 @@ public class CoreAnno {
 				Out.PrtSpMsg(1, ctgMap.size() + " Sequences loaded ");
 				boolean b = uniObj.processAllDBhitFiles(isAAstcw, ctgMap);
 				if (!b) { // terminate if errors 
-					if (!setAnnotationDate()) return false;
 					Out.PrtMsgTime("Pre-mature ending due to errors", time);
 					return false;
 				}
@@ -71,23 +70,12 @@ public class CoreAnno {
 			********************************************************************/
 			
 			if (!doHomologyTests()) return false;
-			if (!setAnnotationDate()) return false;
 			
 			return true;
 		} catch (Throwable e) {
 			ErrorReport.reportError(e, "Core Annotator");
 			return false;
 		}
-	}
-
-	private boolean setAnnotationDate() {
-		try {
-			sqlObj.setAnnotationDate();
-		} catch (Exception e) {
-			ErrorReport.reportError(e, "Failed to set annotation date.");
-			return false;
-		}
-		return true;
 	}
 	
 	/***************** HOMOLOGY TESTS *********************************/

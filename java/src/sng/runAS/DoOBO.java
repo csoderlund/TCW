@@ -31,6 +31,12 @@ import util.methods.Out;
  * 4. create levels - rewrote without go_tree, and the time dropped from 3m to 15s
  * 5. create graph_path
  * Everything in the rest of sTCW will work exactly the same as with the original mysql GO
+ * 
+ * Relations: is_a, part_of, replaced_by
+ *   DoOBO: The relations are put into term as the first three rows, so their indexes are used in term2term
+ *   sng.annotator: DoGO: the indexes are not put in the term table, but stored in assem_msg.go_rtypes. 
+ *   sng.database.Metadata: reads them from assem_msg.go_rtypes.
+ *   It is expected that: is_a:1 part_of:2 replaced_by:3 -- where the relation (e.g. is_a) are hardcoded in places
  */
 public class DoOBO {
 	private final String goURL = "http://current.geneontology.org/ontology/";
