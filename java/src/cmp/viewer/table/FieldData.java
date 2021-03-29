@@ -135,7 +135,7 @@ public class FieldData {
 		
 		mkBreak.add(c);
 		if (hasGO) {
-			addGrp(c++, "nGOs", Integer.class, HIT_TABLE, "nGO", "Number of GO terms assigned to the majority best anno hit", false);
+			addGrp(c++, "nGOs", Integer.class, HIT_TABLE, "nGO", "Number of GOs assigned to the majority best anno hit", false);
 			addGrp(c++, "GOs", String.class,   HIT_TABLE, "goList" , "List of GOs assigned to the majority best anno hit", false);
 		}
 		addGrp(c++, "%Hit", Integer.class,   GRP_TABLE, "perAnno" , "Percent of the sequences in the cluster with the majority hit", false);

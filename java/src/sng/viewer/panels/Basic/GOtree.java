@@ -47,7 +47,7 @@ public class GOtree {
 	private static final String GO_PATH_FILE = "AllGoPaths";
 	private static final String GO_LONG_FILE = "AllGoLongestPaths";
 	private static final String GO_ANC_FILE = "AllGoAncestors";
-	private static final String GO_PAR_FILE = "AllGoParents";
+	private static final String GO_PAR_FILE = "EachGoParents";
 	
 	public static final int ANCESTORS=0;
 	public static final int DESCENDENTS=1;
@@ -68,14 +68,18 @@ public class GOtree {
 	public static final int SELECTED_HIT_ASSIGNED = 13;
 	public static final int SELECTED_HIT_ALL = 14;
 	
+	private static String altID = "alt_id";
+	private static String replacedBy = "Replaced by";
+	private static String alternateID = "Alternate ID";
+	
 	private boolean bSortByLevel=true;
 	
-	private static String [] action = { // these are parsed for file names
-		"GO Ancestor List", "GO Descendent List", "GO Neighbors List", "GO Related in table",
+	private static String [] action = { // these are parsed for file names - need GO + 2 words
+		"GO Ancestor List", "GO Descendent List", "GO Neighbor Relation", "GO Related in table",
 		"GO Ancestor Paths", "GO Ancestor Ordered List",
 		"Hits Assigned List ", "Hits Inherited List", "Sequences with GOs",
-		"All Parents with Relation",
-		"All GO Ancestors", "All Longest GO Paths", "All GO paths", 
+		"Each GO Parent Relation",
+		"GO Ancestor Set", "All Longest GO Paths", "All GO paths", 
 		"Assigned GOs for selected hit", "Assigned and inherited GOs for selected hit"
 	};
 	public GOtree(STCWFrame f) {
@@ -182,7 +186,7 @@ public class GOtree {
 					
 					showButton.setEnabled(true);
 				}
-				catch (Exception e) {ErrorReport.prtReport(e, "GO query failed");}
+				catch (Exception e) {ErrorReport.prtReport(e, "GO query failed for " + type);}
 			}
 		});
 		thread.setPriority(Thread.MIN_PRIORITY);
@@ -268,13 +272,13 @@ public class GOtree {
 			if (ancTab.size()>0) {
 				lines.add("");
 				lines.add("Ancestors in table");
-				lines.add(String.format("%-10s  %-5s  %s", "GO term", "Level",  "Description"));		
+				lines.add(String.format("%-10s  %-5s  %s", "GO ID", "Level",  "Description"));		
 				for (String g: ancTab) lines.add(g);
 			}
 			if (descTab.size()>0) {
 				lines.add("");
 				lines.add("Descendants in table");
-				lines.add(String.format("%-10s  %-5s  %s", "GO term", "Level",  "Description"));		
+				lines.add(String.format("%-10s  %-5s  %s", "GO ID", "Level",  "Description"));		
 				for (String g: descTab) lines.add(g);
 			}
 			if (cntTrim>0) {
@@ -305,6 +309,7 @@ public class GOtree {
 					" from go_graph_path as p" +
 					" join go_info as g on g.gonum=p.ancestor" +
 					" where child=" + gonum + 
+					" and relationship_type_id!=3 " + // CAS320
 					" order by g.level, p.ancestor"); 
 			
 			int offSet=3; // For related, start at line.get(3)
@@ -332,7 +337,7 @@ public class GOtree {
 			lines.add("");
 			
 			if (goLines.size()>0) {
-				lines.add(String.format("%-10s  %-5s  %s", "GO term", "Level",  "Description"));		
+				lines.add(String.format("%-10s  %-5s  %s", "GO ID", "Level",  "Description"));		
 				for (String g : goLines) lines.add(g);
 			}
 			lines.add("");
@@ -362,7 +367,7 @@ public class GOtree {
 			// The is_a and part_of have different distances, hence, two tables
 			Vector<String> goIsA = new Vector<String> (); 
 			Vector<String> goPartOf = new Vector<String> (); 
-			Vector<String> goReplacedBy = new Vector<String> (); 
+			Vector<String> goAltID = new Vector<String> (); 
 			while (rs.next()) { 
 				int gonum2 = rs.getInt(1);
 				if (gonum==gonum2) continue;
@@ -378,7 +383,7 @@ public class GOtree {
 				String relType = relTypeMap.get(type);
 				if (relType.equals("is_a")) goIsA.add(l);
 				else if (relType.equals("part_of")) goPartOf.add(l);
-				else if (relType.equals("replaced_by")) goReplacedBy.add(l);
+				else if (relType.equals("alt_id")) goAltID.add(l);
 			}
 			if (rs!=null) rs.close(); mDB.close();
 			
@@ -388,7 +393,7 @@ public class GOtree {
 			
 			lines.add(goIsA.size() + " Relation: is_a");
 			if (goIsA.size()>0) {	
-				lines.add(String.format("%-10s  %-5s  %s", "GO term", "Dist",  "Description"));		
+				lines.add(String.format("%-10s  %-5s  %s", "GO ID", "Dist",  "Description"));		
 				for (String g : goIsA) lines.add(g);
 			}
 			
@@ -396,13 +401,13 @@ public class GOtree {
 			
 			lines.add(goPartOf.size() + " Relation: part_of");
 			if (goPartOf.size()>0) {
-				lines.add(String.format("%-10s  %-5s  %s", "GO term", "Dist",  "Description"));		
+				lines.add(String.format("%-10s  %-5s  %s", "GO ID", "Dist",  "Description"));		
 				for (String g : goPartOf) lines.add(g);
 			}
 			
-			if (goPartOf.size()>0) {
-				lines.add(goReplacedBy.size() + " Relation: replaced_by");
-				lines.add(String.format("%-10s  %-5s  %s", "GO term", "Dist",  "Description"));		
+			if (goAltID.size()>0) {
+				lines.add(goAltID.size() + " Alternate IDs: ");
+				lines.add(String.format("%-10s  %-5s  %s", "GO ID", "Dist",  "Description"));		
 				for (String g : goPartOf) lines.add(g);
 			}
 			
@@ -423,8 +428,10 @@ public class GOtree {
 			int offset=3; // For Related, first GO at lines.get(3)
 			
 			rs = mDB.executeQuery("Select child, relationship_type_id, i.descr, i.level " +
-					" from go_graph_path as p, go_info as i " +
+					" from go_graph_path as p, " +
+					" go_info as i " +
 					" where p.child=i.gonum and ancestor=" + gonum + 
+					" and relationship_type_id!=3 " + // CAS320
 					" order by i.level, p.child"); 
 			
 			Vector <String> goLines = new Vector <String> ();
@@ -443,22 +450,34 @@ public class GOtree {
 				if (descMap!=null) descMap.put(gonum2, offset);
 				offset++;
 			}
+			if (rs!=null) rs.close(); 
 			
 			Vector <String> lines = new Vector <String> ();
 			lines.add(goLines.size() + " Descendents of " + String.format(GO_FORMAT, gonum) + " - " + goDesc);
 			lines.add("");
 			
+			int rbGO=0;
+			if (goLines.size()==0) {
+				rbGO = mDB.executeInteger("select parent from go_term2term where child=" + gonum + " and relationship_type_id=3");
+				if (rbGO>0) {
+					lines.add("See Replacement " + String.format(GO_FORMAT, rbGO));
+				}
+
+			}
+			mDB.close();
+			
 			if (goLines.size()>0) {
-				lines.add(String.format("%-10s %-5s %s ", "GO term", "Level", "Description"));
+				lines.add(String.format("%-10s %-5s %s ", "GO ID", "Level", "Description"));
 				for (String g : goLines) lines.add(g);
 			}
 			lines.add("");
 			
-			lines.add("Descendents are only shown if they have a hit in the sTCWdb");
-			if (rs!=null) rs.close(); mDB.close();
+			if (rbGO==0) lines.add("Descendents are only shown if they have a hit in the sTCWdb");
+			
 			return lines;
 		}
 		catch(Exception e) {ErrorReport.prtReport(e, "query for hits");}
+
 		return null;
 	}
 	/**************** GO neighbor list **************************/
@@ -471,19 +490,20 @@ public class GOtree {
 			String term="";
 			if (rs.next()) term = "  (" + rs.getString(1) + ")";
 			
-			Vector <String> lines = new Vector <String> ();
-			lines.add("Neighbors of " + String.format(GO_FORMAT, gonum) + " - " + godesc + term);
-			lines.add("");	
+			Vector <String> tmpLines = new Vector <String> ();
 			
 			bSortByLevel=false;
 			String rType;
 			HashMap <Integer, GOterm> neighGOs = new HashMap <Integer, GOterm> ();
-			for (int i=0; i<2; i++) {
+			HashSet <Integer> altId = new HashSet <Integer> ();
+			int repId = 0;
+			for (int i=0; i<2; i++) { // 0=parent, 1=child
 				if (i==0) {
 					rType = "Parents: ";
 					rs = mDB.executeQuery("select t.parent, t.relationship_type_id, i.descr " +
 						" from go_term2term as t, go_info as i" +
-						" where parent>0 and child=" + gonum + " and t.parent=i.gonum ");
+						" where parent>0 and child=" + gonum + 
+						" and t.parent=i.gonum ");
 				}
 				else {
 					neighGOs.clear(); // CAS318
@@ -494,41 +514,64 @@ public class GOtree {
 				}
 				while (rs.next()) { 
 					int gonum2 = rs.getInt(1);
-					String rtype = relTypeMap.get(rs.getInt(2));
+					String type = relTypeMap.get(rs.getInt(2));
 					String desc = rs.getString(3);
-					if (neighGOs.containsKey(gonum2)) {
+					if (type.equals(altID)) {
+						if (i==1) altId.add(gonum2); // CAS320 - replace_by
+						else repId = gonum2;
+					}
+					else if (neighGOs.containsKey(gonum2)) {
 						GOterm gt = neighGOs.get(gonum2);
-						if (!rtype.equals(gt.rtype)) gt.rtype="both";
+						if (!type.equals(gt.rtype)) gt.rtype="both";
 					}
 					else {
-						neighGOs.put(gonum2,  new GOterm(gonum2, rtype, desc));
+						neighGOs.put(gonum2,  new GOterm(gonum2, type, desc));
 					}
 				}
-				// CAS318 added sort by description to match Amigo order
+				if (rs!=null) rs.close(); 
+				mDB.close();
+															// CAS318 added sort by description to match Amigo order
 				Vector <GOterm> list = new Vector <GOterm> ();
 				for (GOterm g : neighGOs.values()) list.add(g);
 				Collections.sort(list);
 				
-				lines.add(rType + neighGOs.size());
-				if (neighGOs.size()==0) lines.add("None");
-				else { // CAS318 put relation first
-					lines.add(String.format("%-11s  %-10s  %s", "Relation", "GO term",  "Description"));
+				tmpLines.add(rType + neighGOs.size());
+				if (neighGOs.size()==0) tmpLines.add("None");
+				else { 										// CAS318 put relation first
 					for (GOterm gt : list) { 
 						String type = gt.rtype;
-						if (type.startsWith("rep") && i==1) type = "replaces";
-						
 						String go = String.format(GO_FORMAT, gt.gonum);
 						String l = String.format("%-11s  %-10s  %s", type, go,  gt.desc);
-						lines.add(l);
+						tmpLines.add(l);
 					}
 				}
 				neighGOs.clear();
+				tmpLines.add("");
+			}
+			bSortByLevel=true;
+			
+	// final lines	- CAS320 want to put alt_id stuff first
+			Vector <String> lines = new Vector <String> ();
+			
+			lines.add("Neighborhood of " + String.format(GO_FORMAT, gonum) + " - " + godesc + term);
+			lines.add("");	
+		
+			if (altId.size()>0) {
+				String msg = alternateID + ": ";
+				for (int x : altId) msg += String.format(GO_FORMAT, x) + " ";
+				lines.add(msg);
 				lines.add("");
 			}
-			lines.add("Children only shown if they have a hit in the sTCWdb");
-			if (rs!=null) rs.close(); 
-			mDB.close();
-			bSortByLevel=true;
+			if (repId>0) {
+				String msg = replacedBy +": " + String.format(GO_FORMAT, repId);
+				lines.add(msg);
+				lines.add("");
+			}
+			for (String t : tmpLines) lines.add(t);
+			lines.add("Notes:");
+			if (repId==0) lines.add("Children only shown if they have a hit in the sTCWdb");
+			else lines.add("See 'Replaced by: GO' for children");
+			if (altId.size()>0) lines.add("Alternate IDs only shown if have a hit in the sTCWdb");	
 			
 			return lines;
 		}
@@ -869,7 +912,7 @@ public class GOtree {
 					"join go_info as  g on g.gonum=p.gonum " +
 					"WHERE p.duhid=" + duhid + " order by g.level, p.gonum"); 
 			lines.add(String.format("%-10s %-5s %-3s  %-4s  %s", 
-								"GO term", "Level", "EC", "Type", "Description"));
+								"GO ID", "Level", "EC", "Type", "Description"));
 			while (rs.next()) {
 				String go = String.format(GO_FORMAT, rs.getInt(1));
 				String ec = rs.getString(2);
@@ -910,7 +953,7 @@ public class GOtree {
 					"join go_info as  g on g.gonum=p.gonum " +
 					"WHERE p.duhid=" + duhid + " order by g.term_type, g.level, p.gonum"); 
 			lines.add(String.format("%-10s %-5s %-3s  %-4s  %s", 
-								"GO term", "Level", "EC", "Type", "Description"));
+								"GO ID", "Level", "EC", "Type", "Description"));
 			while (rs.next()) {
 				int gonum = rs.getInt(1);
 				String go = String.format(GO_FORMAT, gonum);
@@ -1215,7 +1258,7 @@ private class AllDialog extends JDialog {
 	private final int OUT_HTML=1, OUT_TSV=2, OUT_TXT=3;
 
 	private int nMode=MODE_POP; 
-	private int nInfo=INFO_DESC; // 1=descriptions 2=GO term
+	private int nInfo=INFO_DESC; // 1=descriptions 2=GO ID
 	private int nOut=1;  // 1=html, 2=tsv
 	
 	private int nType;   //  parameter all, paths, anc
@@ -1245,7 +1288,7 @@ private class AllDialog extends JDialog {
 			}
 		});
 	
-		JRadioButton btnTerm =  Static.createRadioButton("GO terms", false);
+		JRadioButton btnTerm =  Static.createRadioButton("GO IDs", false);
     	btnTerm.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				nInfo = INFO_TERM;
@@ -1439,7 +1482,7 @@ private class AllDialog extends JDialog {
 						" where child=" + gt.gonum); 
 				
 				String go = String.format(GO_FORMAT, gt.gonum);
-				lines.add(String.format(format, "----------", go, gt.term, gt.desc));
+				lines.add(String.format(format, "--------->", go, gt.term, gt.desc));
 				while (rs.next()) {
 					int gonum2 = rs.getInt(2);
 					if (gonum2==gt.gonum) continue;
@@ -1447,6 +1490,7 @@ private class AllDialog extends JDialog {
 					
 					int rel = rs.getInt(1);
 					String x = (relTypeMap.containsKey(rel)) ? relTypeMap.get(rel) : "unk";
+					if (x.contentEquals(altID)) x = replacedBy;
 					
 					String desc = rs.getString(3);
 					
@@ -1465,7 +1509,7 @@ private class AllDialog extends JDialog {
 			
 			return lines;
 		}
-		catch(Exception e) {ErrorReport.prtReport(e, "Ancestor list");}
+		catch(Exception e) {ErrorReport.prtReport(e, "Parent list");}
 		return null;
 	}
 	/* All ancestors, term_type, level, desc */
@@ -1525,7 +1569,7 @@ private class AllDialog extends JDialog {
 			
 			String delim = (nMode==MODE_POP) ? " "  : FileC.TSV_DELIM; 
 			String format = "%-11s" + delim + "%6s" + delim +"%-5s" + delim + "%s";
-			lines.add(String.format(format, "GO term", "Domain", "Level", "Description"));
+			lines.add(String.format(format, "GO ID", "Domain", "Level", "Description"));
 			
 			for (GOterm gt : goList) { 
 				String go = String.format(GO_FORMAT, gt.gonum);

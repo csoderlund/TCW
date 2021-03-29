@@ -43,12 +43,10 @@ import util.ui.UserPrompt;
 public class ASFrame extends JDialog implements WindowListener{
 	private static final long serialVersionUID = -3424085221960261295L; 
 	private boolean isDemo = ASMain.isDemo; // upDir: UniProt_demo, GO_tmpdemo
-	private boolean isOBO = ASMain.isOBO; 
 	
 	private final String subset = DoUP.subset;
 	private final String rootDir = Globalx.ANNODIR; // projects/DBfasta
 	private final String upDir =   rootDir + "/UniProt_";
-	private final String goDirTar =   rootDir + "/GO_tmp";
 	private final String goDirOBO =   rootDir + "/GO_obo";
 	private final String goPreDB = Globalx.goPreDB;
 	
@@ -81,7 +79,6 @@ public class ASFrame extends JDialog implements WindowListener{
 		setVisible(true);
 		
 		upObj = new DoUP(this);
-		goObj = new DoGO(this);
 		oboObj = new DoOBO(this);
 		runCheck();
 	}
@@ -153,8 +150,7 @@ public class ASFrame extends JDialog implements WindowListener{
 		
 		txtGOdir = new JTextField(20);
 		txtGOdir.setMaximumSize(txtGOdir.getPreferredSize());
-		String goDir = (isOBO) ? goDirOBO : goDirTar;
-		txtGOdir.setText(getDir(goDir));
+		txtGOdir.setText(getDir(goDirOBO));
 		row.add(txtGOdir);
 		
 		JButton btnGetFile2 = new JButton("...");
@@ -482,10 +478,7 @@ public class ASFrame extends JDialog implements WindowListener{
 		else msg += "GO files exist. Build GO database.\n";
 		
 		String goDBname = txtGOdb.getText();
-		int rc;
-		
-		if (isOBO) rc = oboObj.goDBcheck(goDBname);
-		else  		rc = goObj.checkGODB(goDBname);
+		int rc = oboObj.goDBcheck(goDBname);
 		
 		if (rc==2) { // database exists
 			int ret = JOptionPane.showOptionDialog(this, 			
@@ -511,8 +504,8 @@ public class ASFrame extends JDialog implements WindowListener{
 			return;
 		}
 		
-		if (isOBO)  oboObj.run(txtUPdir.getText(), goPath, txtGOdb.getText(), hasGOfile);
-		else 		goObj.run(txtUPdir.getText(), goPath, txtGOdb.getText(), hasGOfile);
+		oboObj.run(txtUPdir.getText(), goPath, txtGOdb.getText(), hasGOfile);
+		
 		runCheck();
 	}
 	/******************************************************************/
@@ -576,19 +569,16 @@ public class ASFrame extends JDialog implements WindowListener{
 		try {
 			// GO
 			hasGOfile=false;
-			String goFullPath = goDir;
-			goFullPath += (isOBO) ? DoOBO.goFile : DoGO.goDailyFile; 
-			if (new File(goDir).exists()) {
+			String goPath = goDir + DoOBO.goFile;
+			if (new File(goPath).exists()) {
 				lblGOdir.setBackground(Color.pink);
-				if (new File(goFullPath).exists()) {
+				if (new File(goPath).exists()) {
 					lblGOdir.setBackground(fastaColor);
 					hasGOfile=true;
 				} 
 			}
-			int rc;
-			if (isOBO)  rc = oboObj.goDBcheck(txtGOdb.getText());
-			else 		rc = goObj.checkGODB(txtGOdb.getText());
-			
+			int rc = oboObj.goDBcheck(txtGOdb.getText());
+		
 			if (rc>0) {
 				if (rc==2) 		lblGOdb.setBackground(fastaColor);
 				else if (rc==1) lblGOdb.setBackground(Color.pink);
@@ -754,6 +744,5 @@ public class ASFrame extends JDialog implements WindowListener{
 	
 	private ASFrame parent;
 	private DoUP upObj=null;
-	private DoGO goObj=null;
 	private DoOBO oboObj=null;
 }

@@ -7,9 +7,49 @@
 <!--#include virtual="./ssi/start1.html" -->
 
 
-<h3>TCW Version 3.1</h3>
-Version 3.1 releases are about tidying things up, without any major new features
+<h3>TCW Version 3.2</h3>
+Release v3.1.8 converted from using the GO file <tt>go_&lt;date&gt;-termdb-tables.tar.gz</tt> to the GO file <tt>go-basic.obo</tt>, 
+which is used to build the <tt>GOdb</tt>. This ended up to be a pretty big changed,
+hence, this release date is <u>v3.2</u> to indicate the new GO source.
 
+<h4>v3.2.0  29-Mar-21</h4>
+<p><i>Existing GOdb and sTCWdb</i>: 
+If you use GO evidence codes or EC (enzyme code), you will want to recreate the GOdb (i.e. <ttp>runAS</ttp>)
+and re-run <ttc>GO Only</ttc> from <ttp>runSingleTCW</ttp>.
+<ul>
+<li><ttp>runAS</ttp>
+<ul>
+<li>Parsing go-basic.obo: 
+<ul>
+<li>As a sanity check, all UniProt GO are checked for existence in the <tt>go-basic.obo</tt> file.
+<li>Was not saving the last GO.
+</ul>
+<li>Parsing UniProt: 
+<ul>
+<li>Only the last EC (enzyme code) was being saved; now all ECs under "RecName" are saved. 
+<br>Also, the text after the EC code 
+is removed, e.g. "<tt>2.4.1.- {ECO:0000256|RuleBase:RU362057}</tt>" is 
+"<tt>2.4.1.-</tt>".
+<li>The GO evidence code "IC" was being stored as "UNK".
+<li>A count of the number of obsolete GOs in an UniProt file is printed to the terminal.
+<br>The obsolete GO is still in the GOdb and the obsolete GO in sTCWdb will have a prefix of "obsolete" and no neighborhood.
+</ul>
+</ul>
+<li><ttp>runSingleTCW</ttp>
+<ul>
+<li><ttc>Evidence Codes</ttc>: <font color=red>Bug</font> The evidence codes were wrong (I don't know what release broke this).
+<br>This has been fixed and only the evidence codes from the UniProt hits with the GO assigned will be shown. 
+</ul>
+<li><ttp>viewSingleTCW</ttp> - <ttc>Basic GO</ttc>
+<ul>
+<li>The interface has been updated to indicate that only assigned Evidence codes are used.
+<li>Slight changes to <ttc>Show...</tcc> to make the 'alt_id' (replacements) more obvious.
+<li>Changed some terminology to be compatible with AmiGO, e.g. "GO term" changed "GO ID".
+</ul>
+<li>Updated the <a href="stcw/AnnoDBs.html#obo" class=ext target="_blank">runAS</a> documentation to describe parsing the OBO file.
+</ul>
+
+<h3>TCW Version 3.1</h3>
 <h4>v3.1.9  25-Mar-21</h4>
 This release fixes a few tiny bugs created by the last release.
 <ul>
@@ -29,9 +69,9 @@ and <i>replaces</i>.
 <li>Added item under <ttc>Table...</ttc> called <u>Each GO's parents with relation</u> which produces
 a popup or file with output like:
 <pre>
-----------      GO:0000019      bio     regulation of mitotic recombination
+--------->      GO:0000019      bio     regulation of mitotic recombination
 is_a            GO:0000018      bio     regulation of DNA recombination
-----------      GO:0000027      bio     ribosomal large subunit assembly
+--------->      GO:0000027      bio     ribosomal large subunit assembly
 is_a            GO:0022618      bio     ribonucleoprotein complex assembly
 part_of         GO:0042255      bio     ribosome assembly
 part_of         GO:0042273      bio     ribosomal large subunit biogenesis

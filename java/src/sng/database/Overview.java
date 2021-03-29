@@ -647,7 +647,7 @@ public class Overview {
 	        	Out.prtSpCnt(1,nSlims, "Slims from " + slimSubset);
 	        }
 	        
-	        int nBio=0, nMol=0, nCel=0, nISA=0, nPOF=0, nREP=0;
+	        int nBio=0, nMol=0, nCel=0, nISA=0, nPOF=0;
 	        
 	        nBio = mDB.executeCount("select count(*) from go_info where term_type='biological_process'");
 	        nMol = mDB.executeCount("select count(*) from go_info where term_type='molecular_function'");
@@ -656,10 +656,8 @@ public class Overview {
 	        TreeMap <String, Integer> relType = MetaData.getGoRelTypes(mDB); // Case gets changed in further
 	        int isa = (relType.containsKey("is_a")) ? relType.get("is_a") : 1; 
 	        int po = (relType.containsKey("part_of")) ? relType.get("part_of") : 2;
-	        int rb = (relType.containsKey("replaced_by")) ? relType.get("replaced_by") : 3;
 	        nISA = mDB.executeCount("select count(*) from go_term2term where relationship_type_id=" + isa);
 	        nPOF = mDB.executeCount("select count(*) from go_term2term where relationship_type_id=" + po);
-	        nREP = mDB.executeCount("select count(*) from go_term2term where relationship_type_id=" + rb);
 	        
 	        int [] just = {1, 0, 1, 1, 0, 1};
 	        rows = new String[40][6];
@@ -724,11 +722,7 @@ public class Overview {
             rows[r][c++] = dff.format(nCel);
             rows[r][c++] = Out.perFtxtP(nCel, nUniqueGOs);
             
-            if (isV318) {
-	            rows[r][c++] = "   replaced_by";
-	            rows[r][c++] = dff.format(nREP);
-	            rows[r][c++] = "";
-            }
+          
 	        makeTable(just.length, r+1, null, just, lines); 
            
     		return true;

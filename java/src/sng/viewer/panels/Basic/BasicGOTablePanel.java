@@ -84,7 +84,7 @@ public class BasicGOTablePanel {
 	 {"go_info.gonum","go_info.term_type", "go_info.level","go_info.descr","go_info.bestEval", "go_info.nUnitranHit" };
 	
 	private final String [] COL_NAMES = 
-		 {"GO term", "Domain", "Level",  "Description", EVALUE , "#Seqs"};
+		 {"GO ID", "Domain", "Level",  "Description", EVALUE , "#Seqs"};
 	private String []      ecColNames = null;
 	private Vector<String> deColNames = null;
 	private int endEC=0, endStatic=0;
@@ -156,7 +156,7 @@ public class BasicGOTablePanel {
 		 	JPanel ecColsPanel = Static.createPagePanel();
 		 	ecColsPanel.setAlignmentY(Component.TOP_ALIGNMENT);
 	    	if (ecColNames.length>0) { // pre v1.6.4 did not have EC in go_info   
-		    	ecColsPanel.add(new JLabel("Evidence Codes"));
+		    	ecColsPanel.add(new JLabel("Evidence Codes (Assigned Only)")); // CAS320 add ()
 		    	ecColsPanel.add(Box.createVerticalStrut(10));
 		    
 		    	int ecNum = ecColNames.length;

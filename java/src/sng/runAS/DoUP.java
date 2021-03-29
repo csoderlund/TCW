@@ -75,11 +75,11 @@ public class DoUP {
 			Out.PrtSpDateMsg(1, "Create FASTA files");
 			DoUPdat datObj = new DoUPdat(frameObj);
 			for (String f : spFiles) {
-				if (!datObj.fasta(SP, mkNameDir(SP,f), 
+				if (!datObj.dat2fasta(SP, mkNameDir(SP,f), 
 						mkNameDat(spPre,f), mkNameFasta(spPre,f))) return;
 			}
 			for (String f : trFiles) {
-				if (!datObj.fasta(TR, mkNameDir(TR,f), mkNameDat(trPre,f), 
+				if (!datObj.dat2fasta(TR, mkNameDir(TR,f), mkNameDat(trPre,f), 
 						mkNameFasta(trPre,f))) return;
 			}
 			Out.PrtMsgTime("Complete Taxonomic UniProt", startTime);
@@ -110,13 +110,13 @@ public class DoUP {
 		if (isSP) {
 			if (!fullCreateSubset(SP,spPre)) return;
 			
-			if (!datObj.fasta(SP, mkNameDir(SP, subset), 
+			if (!datObj.dat2fasta(SP, mkNameDir(SP, subset), 
 					mkNameDat(spPre, subset), mkNameFasta(spPre, subset))) return;
 		}
 		if (isTR) {
 			if (!fullCreateSubset(TR,trPre)) return;
 			
-			if (!datObj.fasta( TR,mkNameDir(TR, subset), 
+			if (!datObj.dat2fasta( TR,mkNameDir(TR, subset), 
 					mkNameDat(trPre, subset), mkNameFasta(trPre, subset))) return;
 		}
 		Out.PrtSpMsgTime(0, "Complete Full UniProt", startTime);

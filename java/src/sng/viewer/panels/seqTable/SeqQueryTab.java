@@ -601,7 +601,7 @@ public class SeqQueryTab extends Tab
 		
 		JComponent thePanel = new CollapsiblePanel(GO_HEADER, GO_DESCRIPTION); 
 
-		chkGOID = new ToggleTextField("GO term number ", "", "", 10, null);
+		chkGOID = new ToggleTextField("GO ID number ", "", "", 10, null);
 		
 		addRowToPanel(chkGOID, thePanel);
 		return thePanel;
@@ -1788,7 +1788,7 @@ public class SeqQueryTab extends Tab
 	private static final String SNP_ORF_HEADER = "SNPs and ORFs";
 	private static final String SNP_ORF_DESCRIPTION = "Find sequences with SNPs (assembled contigs only) and/or ORF attributes.";
 	private static final String GO_HEADER = "GO";
-	private static final String GO_DESCRIPTION = "Search for a specific GO term (show all assigned and inherited)";
+	private static final String GO_DESCRIPTION = "Search for a specific GO ID (show all assigned and inherited)";
 
     private MetaData metaData = null;
 	private int nChildren = 0;

@@ -5,14 +5,10 @@
 <body onload="init('set')">
 <a id="top"></a> 
 <!--#include virtual="../ssi/start2.html" -->
-<b><font color=blue>19-Mar-2021 GO Update</font></b> - 
 The <ttp>runAS</ttp> program creates a GO MySQL database (called <ttx>GOdb</ttx>) to be used by <ttp>runSingleTCW</ttp>. 
 The <ttp>runAS</ttp> program has been updated to use the "GO Basic OBO file" in place of the "old GO MySQL tar file"".
-Though TCW v3.1.8 will work with old <ttx>GOdb</ttx> databases, it is <i>strongly recommended</i> that you create a new <tt>GOdb</tt>
-and update any <ttx>sTCWdbs</ttx>. Even if the <ttx>GOdb</ttx> is newer than the downloaded <ttx>UniProt</ttx> files, the OBO file
-is more up-to-date than the latest GO MySQL tar file.
-<p><font color=blue>Note:</font> For the next release v3.1.9, I will be making improvements to the <ttp>viewSingleTCW</ttp> GO
-features to improve how the GO relations are shown.
+<i>If you used a v3.1.8 or earlier version, <b>it is strongly recommended you update to v3.2.0 or later</b></i> (run <ttc>Build GO</ttc> in <ttp>runAS</ttp>,
+then <ttc>GO Only</ttc> in <ttp>runSingleTCW</ttp>).
 
 <p>To prepare for annotation with <ttp>runSingleTCW</ttp>, it is necessary to download the databases to compared against. 
 TCW provides support for downloading the taxonomic and full UniProts along with mapping from the UniProt IDs to GO, KEGG, Pfam, EC, and InterPro. 
@@ -29,15 +25,16 @@ please let me know at <ttx>tcw at agcol.arizona.edu</ttx>. </p>
 				<li><a href="#run">Using Java graphical interface -- <ttp>runAS</ttp></a> 
 				<li><a href="#details">Details and file structure</a> 
 				<li><a href="#clean">Cleanup</a> 
+				<li><a href="#mem">Memory and time</a> 
 			</ul>
 			</td>
 			<td class="top"> 
 			<ul>
-				<li><a href="#mem">Memory and time</a> 
 				<li><a href="#best">What AnnoDBs to use</a> 
 				<li><a href="#other">Creating AnnoDBs from other databases (e.g. NCBI-nr)</a> 
 				<li><a href="#runstcw">Entering AnnoDBs and GOs into <ttp>runSingleTCW</ttp></a> 
 				<li><a href="#tax">Why use taxonomic databases</a> 
+				<li><a href="#obo">Parsing go-basic.obo</a>
 				<li><a href="#link">Links to important databases</a> 
 			</ul>
 			</td>
@@ -68,19 +65,7 @@ TCW will be searched against all AnnoDB databases and the hits stored in the sin
 			alt="curl" style="border: 1px solid black; width: 300px"></a> </td>
 	</tr>
 </table>
-<p><b>Pre-v3.1.8 only</b>
-<p><a href="../img/bullet2.gif"><img src="../img/bullet2.gif" alt="bullet" style="border: 0px; width: 20px"></a>
-For mySQL, the command <b><ttx>mysqladmin</ttx></b> is used, so you may need to define its path, e.g. on Mac, </p>
-	<pre>
-	alias mysqladmin '/usr/local/mysql/bin/mysqladmin'    #tcsh
-	alias mysqladmin='/usr/local/mysql/bin/mysqladmin'    #bash
-	</pre>
-	
-<a href="../img/bullet2.gif"><img src="../img/bullet2.gif" alt="bullet" style="border: 0px; width: 20px"></a>
-With MySQL and MariaDB, you may need to set following MySQL variable in order to add the GO database: 
-	<pre>
-	SET GLOBAL local_infile = 1;
-	</pre>
+
 <p><b><i>Processing steps</i></b>: The TCW <ttp>runAS</ttp> will perform the following: </p>
 <ol>
 	<li>Create the directory under <ttx>projects/DBfasta</ttx> for the downloads and generated FASTA files. 
@@ -145,7 +130,7 @@ In the <ttx>projects/DBfasta</ttx> directory, there is the sub-directory <ttx>Un
 which contains the following: 
 <pre>
 	GO_obodemo:
-	go_obo
+	go_basic.obo
 
 	UniProt_demo:
 	sp_bacteria/	sp_fungi/	   sp_plants/	      tr_plants/
@@ -187,8 +172,8 @@ Typically, all you need to do is make sure you have an internet connection open 
 			(see <a href="#runstcw">Import AnnoDBs</a>). <br>
 			&nbsp; 
 			<li><ttc>Check</ttc>: Selecting this button highlights everything that has been done. 
-			For example, the figure on the upper right shows that the directory <ttx>UniProt_Jan2021</ttx> has been created and 
-			only Archaea and Virus SwissProt have been downloaded and processed. 
+			For example, the figure on the right shows that the directory <ttx>UniProt_Mar2021</ttx> has been created and 
+			only Plant SwissProt has been downloaded and processed. 
 			The <ttc>Check</ttc> automatically runs on startup. 
 		</ol>
 		<td><a href="img/runAS.png"><img src="img/runAS.png" alt="runAS" style="border: 1px solid black; width: 350px"></a>
@@ -227,8 +212,8 @@ and when any of the three "Builds" are executed.
 	<li>At the top:
 	<ul>
 	<li>If the <ttl>UniProt</ttl> directory label is highlighted in blue, it exists. 
-	<li>If the <ttl>GO</ttl> directory label is highlighted in pink, it exists but the GO tables have not been downloaded. 
-	<br>If the <ttl>GO</ttl> directory label is highlighted in blue, the GO tables have been downloaded. 
+	<li>If the <ttl>GO</ttl> directory label is highlighted in pink, it exists but the GO OBO file has not been downloaded. 
+	<br>If the <ttl>GO</ttl> directory label is highlighted in blue, the GO OBO file have been downloaded. 
 	</ul>
 	<li>On the middle right:
 	<ul>
@@ -237,16 +222,15 @@ and when any of the three "Builds" are executed.
 </ul>
 <b><i>Taxonomic and Full UniProt Highlights</i></b> 
 <p>
-	<u>Clear checkbox</u>: If a taxonomic or full checkbox is clear, then neither the .dat file or .fasta file exists for it. 
-	When you check the box followed by "Build Tax", you will need to confirm a popup that states "Download SP - xxx", 
-	where xxx will be the list of files to download. The download is always automatically followed by creating the .fasta file. 
+	<u>Clear checkbox</u>: If a <ttl>Taxonomic</ttl> is clear, then neither the .dat file or .fasta file exists for it. 
+	When you check the box followed by <ttc>Build Tax</ttc>, you will need to confirm a popup that states "Download SP - xxx", 
+	where xxx will be the list of files to download. The download is always automatically followed by creating the .fasta files.
+	The same applies to the <ttl>Full</ttl> checkboxes. 
 </p>
 <p>
 	<u>Pink checkbox</u>: If the .dat file exists, but the .fasta file does not, the checkbox will be highlighted pink. 
-	Check the pink box(s) and run "Build Tax" in order to create the .fasta file. You will need to confirm a pop-up that 
-	states "Create SP Fasta - xxx", where xxx is the taxonomic groups that will be created. 
-	Since the .fasta file is automatically created after download, this will not happen unless 
-	there is a problem such as the disk being full. 
+	Check the pink box(s) and run <ttc>Build Tax</ttc> in order to create the .fasta file only. 
+	The same applies to the <ttl>Full</ttl> checkboxes. 
 </p>
 <p>
 	<u>Blue checkbox</u>: If both the .dat file and the .fasta file exists, the check box will be highlighted blue. 
@@ -255,12 +239,12 @@ and when any of the three "Builds" are executed.
 	<tr>
 		<td class="top">If you downloaded some taxonomic databases, created the SP Full database, 
 		then downloaded another taxonomic database, you will need to recreate the SP Full database. Check the SwissProt box, 
-		and run "Build Full" again. You will get a pop-up to confirm as shown on the right. 
+		and run <ttc>Build Full</ttc> again. You will get a pop-up to confirm as shown on the right. 
 		<td><a href="img/runASnoDL.png"><img src="img/runASnoDL.png" alt="" style="border: 1px solid black; width: 300px"> </a>
 	</tr>
 </table>
 <p><b><i>File Structure</i></b> </p>
-<p>For each taxonomic and full UniProt that you downloaded, a directory will be created under the "UniProt" directory. 
+<p>For each taxonomic and full UniProt that you downloaded, a directory will be created under the <ttl>UniProt</ttl> directory. 
 For example, </p>
 <pre>
 	./TCW/projects/DBfasta/UniProt_Jan2021%&gt; ls *
@@ -284,7 +268,7 @@ the fasta files after download, e.g. </p>
 	gzip */*.fasta
 </pre>
 <p><b><i>GO (Gene Ontology)</i></b></p>
-<p>The <tt>go.obo</tt> file containing the schema and data is downloaded from 
+<p>The <tt>go-basic.obo</tt> file is downloaded from 
 <a href="http://current.geneontology.org/ontology/" class="ext" target="_blank"><ttx>http://current.geneontology.org/ontology/</ttx></a>.</p>
 <p><u>Database</u>: This text entry on the <ttp>runAS</ttp> interface is the name of the GO MySQL database that 
 will be created; you will enter this name in <ttp>runSingleTCW</ttp>. </p>
@@ -638,6 +622,64 @@ database with the taxonomic entries removed.
 <p><a href="img/runASview.png"><img src="img/runASview2.png" alt="" style="border: 1px solid black;"></a> </p>
 <p>The following shows the details of a specific sequence: </p>
 <a href="img/runASview.png"><img src="img/runASview3.png" alt="" style="border: 1px solid black;"></a>
+
+
+<!-- ============================================= -->
+<a id="obo"></a> 
+<table style="width: 100%"><tr><td style="text-align: left"> 
+<h2>Parsing go-basic.obo</h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<i>The following is an example record in the OBO file:</i>
+<pre>
+[Term]
+id: GO:0000785
+name: chromatin
+namespace: cellular_component
+alt_id: GO:0000789
+alt_id: GO:0000790
+alt_id: GO:0005717
+def: "The ordered and organized complex of DNA, protein, ....
+comment: Chromosomes include parts that are not part of  ....
+synonym: "chromosome scaffold" RELATED []
+synonym: "cytoplasmic chromatin" NARROW []
+synonym: "nuclear chromatin" NARROW []
+xref: NIF_Subcellular:sao1615953555
+is_a: GO:0110165 ! cellular anatomical entity
+relationship: part_of GO:0005694 ! chromosome
+</pre>
+
+<i>TCW parses for the following keywords:</i>
+<table class=tabley>
+<tr><th>Keyword		<th>AmiGO term<th>TCW term<th>Example
+<tr><td>id			<td>Accession	<td>GO ID		<td>GO:0000785
+<tr><td>name		<td>Name		<td>Description	<td>chromatin
+<tr><td>namespace	<td>Ontology	<td>Domain		<td>cellular_component
+<tr><td>is_a		<td>is_a		<td>is_a		<td>GO:0110165
+<tr><td>relationship: part_of<td>?	<td>part_of		<td>GO:0005694
+<tr><td>alt-id		<td>Alternate ID<td>Alternate ID	<td>GO:0000790
+<tr><td>&nbsp;		<td>replaced by	<td>Replaced by<td>GO:0000785
+<tr><td>is_obsolete: true<td>Name: obsolete<td>Description: obsolete<td>obsolete replicative cell aging
+</table>
+
+<p><i>Views in AmiGO and TCW:</i></p>
+<table class=tablex>
+<tr>
+<th>AmiGO<th>TCW
+<tr>
+<td valign=top><a href="img/runASgo785.png"><img src="img/runASgo785.png" alt="" style="border: 1px solid black; width: 450px"></a>
+<td valign=top><a href="img/runASgo785t.png"><img src="img/runASgo785t.png" alt="" style="border: 1px solid black; width: 350px"></a>
+<tr>
+<td><a href="img/runASgo790.png"><img src="img/runASgo790.png" alt="" style="border: 1px solid black; width: 250px"></a>
+<td><a href="img/runASgo790t.png"><img src="img/runASgo790t.png" alt="" style="border: 1px solid black; width: 350px"></a>
+</tr>
+</table>
+
+<i><u>NOTES:</u></i> 
+<ol>
+<li>UniProt occasionally uses the Alternate IDs and has a few Obsolete GO terms.
+<li>I cannot guarantee that AmiGO always treats "alt_id" as specified here. 
+</ol> 
 
 <!-- ============================================= -->
 <a id="link"></a> 

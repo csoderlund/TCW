@@ -443,7 +443,7 @@ public class runSTCWMain
 					if (!dieflag) Out.PrtWarn("GO database " + godbName + " is not current; ignoring GO step\n");
 					else Out.die("GO database " + godbName + " is not current");
 				} 
-				else Out.PrtSpMsg(2,"Add GO terms");
+				else Out.PrtSpMsg(2,"Add GOs");
 				goDB.close();
 				
 				// GO Slims

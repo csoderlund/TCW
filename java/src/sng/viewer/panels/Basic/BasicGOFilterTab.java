@@ -200,7 +200,7 @@ public class BasicGOFilterTab extends Tab {
 	private void createTopCopy() {
 		final JPopupMenu copypopup = new JPopupMenu();
 		
-		copypopup.add(new JMenuItem(new AbstractAction("GO term") {
+		copypopup.add(new JMenuItem(new AbstractAction("GO ID") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -252,19 +252,19 @@ public class BasicGOFilterTab extends Tab {
 		}));	
 		showpopup.addSeparator();
 		
-		showpopup.add(new JMenuItem(new AbstractAction("GO - Neighbor list and relation") { // CAS318 put first
+		showpopup.add(new JMenuItem(new AbstractAction("GO - Neighborhood with relations") { // CAS318 put first
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
 				goTablePanel.showPathsForSelected(GOtree.NEIGHBORS, btnShow);
 			}
 		}));
-		showpopup.add(new JMenuItem(new AbstractAction("GO - Ancestor list by level") {
+		showpopup.add(new JMenuItem(new AbstractAction("GO - Ancestors by level") {
 			private static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent e) {
 				goTablePanel.showPathsForSelected(GOtree.ANCESTORS, btnShow);
 			}
 		}));	
-		showpopup.add(new JMenuItem(new AbstractAction("GO - Descendant list by level") {
+		showpopup.add(new JMenuItem(new AbstractAction("GO - Descendants by level") {
 			private static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent e) {
 				goTablePanel.showPathsForSelected(GOtree.DESCENDENTS, btnShow);
@@ -382,7 +382,7 @@ public class BasicGOFilterTab extends Tab {
 		
 		// Export using GOtree.java
 		tablepopup.addSeparator();
-		tablepopup.add(new JMenuItem(new AbstractAction("Each GO's parents with relation") {
+		tablepopup.add(new JMenuItem(new AbstractAction("Each GO parents with relation") {
 			private static final long serialVersionUID = 1L;
 
 			public void actionPerformed(ActionEvent e) {
@@ -398,7 +398,7 @@ public class BasicGOFilterTab extends Tab {
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error all paths for table", null);}
 			}
 		}));
-		tablepopup.add(new JMenuItem(new AbstractAction("All ancestors") {
+		tablepopup.add(new JMenuItem(new AbstractAction("Set of ancestors") {
 			private static final long serialVersionUID = 1L;
 
 			public void actionPerformed(ActionEvent e) {
@@ -509,7 +509,7 @@ public class BasicGOFilterTab extends Tab {
 		row1.add(radUseSearch);
 		row1.add(lblSearch);
 		
-		lblGOID = Static.createLabel("GO term", false);
+		lblGOID = Static.createLabel("GO ID", false);
 		chkGOID = Static.createRadioButton("", true);
 		chkGOID.addActionListener(new ActionListener() {
 		      public void actionPerformed(ActionEvent ae) {
@@ -970,8 +970,9 @@ public class BasicGOFilterTab extends Tab {
 		String [] ecDesc = md.getECdesc();
 		HashSet <String> ecInDB = md.getECinDB();
 		
-		evidCodePanel = Static.createPageCenterPanel();		
-	 	JLabel header = new JLabel("<HTML><H2>Select EC (evidence code) to filter</H2></HTML>");
+		evidCodePanel = Static.createPageCenterPanel();	
+		String html = "<HTML><H2>Select EC (evidence code) to filter (Assigned only)</H2></HTML>";
+	 	JLabel header = new JLabel(html); // CAS320 add ()
 	 	header.setAlignmentX(Component.CENTER_ALIGNMENT);
 	 	header.setMaximumSize(header.getPreferredSize());
 	 	header.setMinimumSize(header.getPreferredSize());
@@ -1222,12 +1223,12 @@ public class BasicGOFilterTab extends Tab {
 				
 				try {
 					if (loadList!=null && searchStr.startsWith(loadStart)) { // gonums checked in loadFile
-						theStatusStr = "GO Term=" + searchStr;
+						theStatusStr = "GO ID=" + searchStr;
 						String x = Static.addQuoteDBList(loadList);
 						theWhereStr = " where go_info.gonum  IN ("  + x + ")"; 
 					}
 					else {
-						theStatusStr="GO Term=" + String.format(GO_FORMAT, Integer.parseInt(theVal));
+						theStatusStr="GO ID=" + String.format(GO_FORMAT, Integer.parseInt(theVal));
 						theWhereStr= " where go_info.gonum = " + theVal ;
 					}
 				}
@@ -1542,9 +1543,9 @@ public class BasicGOFilterTab extends Tab {
 			}
 			file.close(); 
 			if (cntBad>0) {
-				String msg = "Incorrect GO terms:\n" + bad;
+				String msg = "Incorrect GO IDs:\n" + bad;
 				JOptionPane.showMessageDialog(null, 
-						msg, "Incorrect GO terms", JOptionPane.PLAIN_MESSAGE);
+						msg, "Incorrect GO IDs", JOptionPane.PLAIN_MESSAGE);
 			}
 			if (loadList.size()==0) {
 				loadList = null;

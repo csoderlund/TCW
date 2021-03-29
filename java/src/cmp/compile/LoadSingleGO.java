@@ -361,7 +361,7 @@ public class LoadSingleGO {
 	private boolean saveGOinfo() {
 		try {
 			long time = Out.getTime();
-			Out.PrtSpMsg(1, "Save go term information for " + goMap.size() + " GOs");
+			Out.PrtSpMsg(1, "Save GO information for " + goMap.size() + " GOs");
 			mDB.openTransaction();
 			int cnt=0, cntSave=0, cntBadType=0;
 			String [] types = Globalx.GO_TERM_LIST; 

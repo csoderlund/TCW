@@ -155,7 +155,7 @@ public class SeqGOPanel extends JPanel {
 				}
 				
 				gi.desc=   rs.getString(2);
-				gi.type =  rs.getString(3).substring(0,4);
+				gi.type =  rs.getString(3).substring(0,3);
 				gi.level = rs.getInt(4);
 			}
 			if (rs!=null) rs.close(); mDB.close();
@@ -357,7 +357,7 @@ public class SeqGOPanel extends JPanel {
 		}
 
 		public String getColumnName(int colIndex) {
-			if(colIndex == 0) return "GO term";
+			if(colIndex == 0) return "GO ID";
 			if(colIndex == 1) return "Description";
 			if(colIndex == 2) return "Type";
 			if(colIndex == 3) return "Level";

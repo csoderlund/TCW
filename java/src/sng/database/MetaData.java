@@ -317,61 +317,13 @@ public class MetaData {
 		} 
 		catch (Exception e) {ErrorReport.reportError(e, "Error: reading database for Tuples");}
 	}
-	 /*********************************************************
-	  * Basic GO - CAS319 overview needs this to be static
-	  */
-	 public static TreeMap <String, Integer> getGoRelTypes(DBConn mDB) {// CAS319 add
-		 try {
-			TreeMap <String, Integer> goRelTypeMap = new TreeMap <String, Integer> ();
-			if (mDB.tableColumnExists("assem_msg", "go_rtypes")) {
-				String rtypes = mDB.executeString("select go_rtypes from assem_msg");
-				String [] tok = rtypes.split(";");
-				for (String t : tok) {
-					String [] r = t.split(":");
-					int x = Integer.parseInt(r[0]);
-					goRelTypeMap.put(r[1], x);
-				}
-			}
-			if (goRelTypeMap.size()<3) { // for pre-319
-				goRelTypeMap.clear();
-				if (mDB.tableColumnExists("assem_msg", "is_a")) {
-					goRelTypeMap.put("is_a", mDB.executeInteger("select is_a from assem_msg"));
-					goRelTypeMap.put("part_of", mDB.executeInteger("select part_of from assem_msg"));
-					goRelTypeMap.put("replaced_by", 0);
-				}
-				else Out.PrtWarn("The GO relation types are not in this sTCWdb");
-			} 
-			return goRelTypeMap;
-		 }
-		 catch (Exception e) {ErrorReport.reportError(e, "Error: reading database for GO relations");}
-		 return null;
-	 }
+	
 	 /*********************************************************
 	  * Basic GO - loads on first use
 	  */
 	 public HashSet <String> getECinDB() {
 		if (ecInDB==null) loadGoEC();
 		return ecInDB;
-	 }
-	
-	 public String [] getTermTypes() {
-		 if (termTypes!=null) return termTypes;
-		 try {
-			DBConn mDB = theMainFrame.getNewDBC();
-			ResultSet rset = mDB.executeQuery("SHOW COLUMNS FROM go_info LIKE 'term_type'");
-			if(rset.next()) {
-				String val = rset.getString(2);
-				val = val.substring(val.indexOf('(') + 1, val.length() - 1);
-				String [] valArr = val.split(",");
-				termTypes = new String[valArr.length];
-				for(int x=0; x<valArr.length; x++) {
-					termTypes[x] = valArr[x].substring(1, valArr[x].length()-1);
-				}
-			}
-			rset.close(); 
-		 }
-		 catch (Exception e) {ErrorReport.prtReport(e, "Getting term types");}
-		return termTypes;
 	 }
 	 
 	 public HashSet <String> getEChash() {return new HashSet<String> (Arrays.asList(ecList));}
@@ -429,6 +381,7 @@ public class MetaData {
 
 	private HashSet <String> ecInDB = null;
 	
+	// 27 - order must stay
 	private String [] ecList = {
 			"EXP", "IDA","IMP","IGI","IPI","IEP", // experimental
 			"HTP", "HDA", "HMP", "HGI", "HEP",   // high throughput
@@ -470,8 +423,40 @@ public class MetaData {
       		"Inferred from Electronic Annotation",
       		"Unknown"};
 	
-	/**********************************************************************/
 	
+	 /*********************************************************
+	  * Basic GO - CAS319 overview needs this to be static
+	  * alt_id is not really a relation, but is treated as one.
+	  * 	It is referred to as "Alternate ID" and "Replaced_by" in AmiGO.
+	  * 	GOtree.java replaced 'alt_id' accordingly
+	  */
+	 public static TreeMap <String, Integer> getGoRelTypes(DBConn mDB) {// CAS319 add
+		 try {
+			TreeMap <String, Integer> goRelTypeMap = new TreeMap <String, Integer> ();
+			if (mDB.tableColumnExists("assem_msg", "go_rtypes")) {
+				String rtypes = mDB.executeString("select go_rtypes from assem_msg");
+				String [] tok = rtypes.split(";");
+				for (String t : tok) {
+					String [] r = t.split(":");
+					int x = Integer.parseInt(r[0]);
+					goRelTypeMap.put(r[1], x);
+				}
+			}
+			if (goRelTypeMap.size()<3) { // for pre-319
+				goRelTypeMap.clear();
+				if (mDB.tableColumnExists("assem_msg", "is_a")) {
+					goRelTypeMap.put("is_a", mDB.executeInteger("select is_a from assem_msg"));
+					goRelTypeMap.put("part_of", mDB.executeInteger("select part_of from assem_msg"));
+				}
+				else Out.PrtWarn("The GO relation types are not in this sTCWdb");
+			} 
+			return goRelTypeMap;
+		 }
+		 catch (Exception e) {ErrorReport.reportError(e, "Error: reading database for GO relations");}
+		 return null;
+	 }
+	 /**********************************************************************/
+		
 	 public String getNorm() {return strNorm;}
 	 public int nContigs() { return nSeqs;}
 	 public int nContigSets() {if (seqLibNames==null) return 0; else return seqLibNames.length;}
@@ -546,7 +531,6 @@ public class MetaData {
 	 private boolean bHasKEGG = false;
 	 private boolean bHasInterpro = false;
 	 private boolean bHasSlims = false;
-	 private String [] termTypes = null;
 	
 	 private boolean bHasPairwise = false;
 	 private boolean bIsAAsTCW = false;

@@ -86,7 +86,7 @@ has the selected TPM (or RPKM) and/or DE p-values.
 <li><b>GO, etc:</b> Has GO, KEGG, Interpro, EC and/or PFam (only exists if GO processing was performed). 
 <ol>
 <li>If <b>Has GO</b> is checked and no string is entered, all hits that have a GO will be shown.
-<li>If a GOterm is entered, <b>Has GO</b> must be checked; all hits with the GO term <i>assigned</i> to it will be shown. If only
+<li>If a GO ID is entered, <b>Has GO</b> must be checked; all hits with the GO ID <i>assigned</i> to it will be shown. If only
 the GO number is entered, the 'GO:' prefix will be added.
 <li>The same two rules also apply to Interpro, KEGG, PFam, and EC. However, the GO search is exact,
 where the rest are substrings, so it is best to enter the exact string, e.g. IPR027417.
@@ -160,7 +160,7 @@ following to get a popup window of the information:
 <ul>
 <li><u>Assigned GOs for hit</u>: UniProt has assigned GOs to many proteins. This options
 show the assigned GOs with their level and description. 
-<li><u>Assigned and inherited GOs for hit</u>: All ancestors of a GO term inherit the protein-GO
+<li><u>Assigned and inherited GOs for hit</u>: All ancestors of a GO ID inherit the protein-GO
 association. This option shows the assigned GOs (as the previous option), but also all
 inherited GOs. See the <b>GO Help</b> on the <b>Basic GO</b> for a more detailed explanation.
 <li><u>All columns</u>: All columns for the selected sequence or hit. A benefit of this window

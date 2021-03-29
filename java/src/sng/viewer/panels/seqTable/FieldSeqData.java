@@ -187,7 +187,7 @@ public class FieldSeqData implements Serializable
     public static final String GROUP_DESC_OVER_BEST 	= "annoDB hit with the best annotation (i.e. excluding phrases such as \'uncharacterized protein\', see Help)";
     
     public static final String GROUP_NAME_GO_BEST 	= "Best Hit with GO";
-    public static final String GROUP_DESC_GO_BEST 	= "annoDB hit with best e-value and assigned GO terms";
+    public static final String GROUP_DESC_GO_BEST 	= "annoDB hit with best e-value and assigned GO ID";
     
     public static final String GROUP_NAME_SNPORF 	= "SNPs and ORFs";
     public static final String GROUP_DESC_SNPORF 	= "Information on SNPs (if assembled) and best ORF";
@@ -516,7 +516,7 @@ public class FieldSeqData implements Serializable
         if(metaData.hasGOs()) {
     	 	mapper.addStringField( FIRST_BEST_GO, "BS GO", TABLE_FIRST_BEST_DETAIL, 
 	        		"goList", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-	        		"GO Terms for the overall best bitscore." );
+	        		"GO IDs for the overall best bitscore." );
     	 	mapper.setFieldSubQuery(FIRST_BEST_GO, "firstbestgo", TABLE_FIRST_BEST_DETAIL + ".goList");
     	 	
 	        mapper.addStringField( FIRST_BEST_INTERPRO, "BS Interpro", TABLE_FIRST_BEST_DETAIL, 
@@ -621,7 +621,7 @@ public class FieldSeqData implements Serializable
         if(metaData.hasGOs()) {
     		mapper.addStringField( OVER_BEST_GO, "AN GO", TABLE_OVER_BEST_DETAIL, 
 	        		"goList", GROUP_NAME_OVER_BEST, GROUP_DESC_OVER_BEST, 
-	        		"GO Terms for the overall BestAnno." );
+	        		"GO IDs for the overall BestAnno." );
     		mapper.setFieldSubQuery(OVER_BEST_GO, "overbestgo", TABLE_OVER_BEST_DETAIL + ".goList");
     		
     		mapper.addStringField( OVER_BEST_INTERPRO, "AN Interpro",   TABLE_OVER_BEST_DETAIL, 
@@ -727,7 +727,7 @@ public class FieldSeqData implements Serializable
    
 		mapper.addStringField( GO_BEST_GO, "WG GO", TABLE_GO_BEST_DETAIL, 
         		"goList", GROUP_NAME_GO_BEST, GROUP_DESC_GO_BEST, 
-        		"GO Terms for the BestHitWithGO." );
+        		"GO IDs for the BestHitWithGO." );
 		mapper.setFieldSubQuery(GO_BEST_GO, "gobestgo", TABLE_GO_BEST_DETAIL + ".goList");
 		
 		mapper.addStringField( GO_BEST_INTERPRO, "WG Interpro", TABLE_GO_BEST_DETAIL, 

@@ -116,53 +116,51 @@ Start Full UniProt                                  25-Jan-21 17:46:10
 Complete Full UniProt                                                    5h:33m:22s
 
 ## Author's note: typically, the GOdb should be created as the same time as the UniProts.
-##	However, the following illustrates the update with v3.1.8 to use the go-basic.obo file.
+##  Whereas the UniProt were downloaded two months earlier than the GOs in this log.
+##	However, there seems to be some obsolete GOs even if they are downloaded the same day.
 
-Start GO processing go_Mar2021                      18-Mar-21 11:02:30
+Start GO processing go_Mar2021                      28-Mar-21 14:17:15
    UniProt directory: ./projects/DBfasta/UniProt_Jan2021
-   GO temporary directory: projects/DBfasta/GO_oboMar2021
+   GO temporary directory: ./projects/DBfasta/GO_oboMar2021
    Delete mySQL database go_Mar2021
-   Use existing GO file
-         50,514 Total GOs     3,305 Alt GOs
+   URL: http://current.geneontology.org/ontology/
+         50,514 Total GOs     3,305 Alt GOs    3,125 Obsolete
          32,542 Biological   56,609 is_a       5,533 part_of 
          13,289 Molecular    15,018 is_a          11 part_of 
           4,683 Cellular      5,127 is_a       2,097 part_of 
              14 Slims           208 GOs in Slim
-   Complete Load OBO file                                                0m:6s  (4Mb)
+   Complete Load OBO file                                                0m:6s  (12Mb)
    Loading ./projects/DBfasta/UniProt_Jan2021 to go_Mar2021
       Processing sp_bacteria/uniprot_sprot_bacteria.dat.gz
-            334,772 UniProts                                             1m:38s
-      Processing sp_fungi/uniprot_sprot_fungi.dat.gz
-            35,073 UniProts                                              0m:13s
-      Processing sp_invertebrates/uniprot_sprot_invertebrates.dat.gz
-            28,129 UniProts                                              0m:9s
-      Processing sp_plants/uniprot_sprot_plants.dat.gz
-            43,403 UniProts                                              0m:15s
-      Processing sp_viruses/uniprot_sprot_viruses.dat.gz
-            17,008 UniProts                                              0m:4s
-      Processing tr_invertebrates/uniprot_trembl_invertebrates.dat.gz
-            12,275,877 UniProts                                          35m:32s
-      Processing tr_plants/uniprot_trembl_plants.dat.gz
-            20,516,158 UniProts                                          47m:34s
+               334,772 UniProts   5 Obsolete GOs                         1m:16s  (12Mb)
+      Processing sp_fungi/uniprot_sprot_fungi.dat.gz       
+                35,073 UniProts  18 Obsolete GOs                         0m:9s  (12Mb)
+      Processing sp_invertebrates/uniprot_sprot_invertebrates.dat.gz       
+                28,129 UniProts   8 Obsolete GOs                         0m:7s  (12Mb)
+      Processing sp_plants/uniprot_sprot_plants.dat.gz        
+                43,403 UniProts   2 Obsolete GOs                         0m:12s  (12Mb)
+      Processing sp_viruses/uniprot_sprot_viruses.dat.gz           
+                17,008 UniProts   1 Obsolete GOs                         0m:4s  (12Mb)
+      Processing tr_invertebrates/uniprot_trembl_invertebrates.dat.gz           
+            12,275,877 UniProts   12 Obsolete GOs                        28m:41s  (12Mb)
+      Processing tr_plants/uniprot_trembl_plants.dat.gz              
+            20,516,158 UniProts    4 Obsolete GOs                        39m:14s  (12Mb)
       Processing sp_fullSubset/uniprot_sprot_fullSubset.dat.gz
-            105,587 UniProts                                             0m:51s
+               105,587 UniProts   46 Obsolete GOs                        0m:43s  (12Mb)
       Totals:
-         GO: 49,907,782  Pfam: 21,175,254  KEGG: 2,806,531  EC: 3,866,797  InterPro: 56,704,777
+         GO: 49,907,782  Pfam: 21,175,254  KEGG: 2,806,531  EC: 3,736,965  InterPro: 56,704,777
    Compute levels
          19,633 Parent-child
         924,561 edges for biological_process; max level 18
          37,471 edges for cellular_component; max level 14
          28,245 edges for molecular_function; max level 13
       Add GO level numbers to term table
-   Complete GO Levels                                                    0m:14s  (8Mb)
+   Complete GO Levels                                                    0m:14s  (16Mb)
    Compute ancestors
          50,514 GOs to process ancestors
         676,026 Ancestor paths 
-   Complete ancestors                                                    2m:52s  (86Mb)
-Complete creating GO database go_Mar2021                                 1h:29m:36s  (86Mb)
-
-Write ./projects/AnnoDBs_UniProt_Jan2021.cfg
-      12 entries written
+   Complete ancestors                                                    2m:57s  (94Mb)
+Complete creating GO database go_Mar2021                                 1h:13m:48s  (94Mb)
 </pre>
 </body>
 </html>    

@@ -12,7 +12,7 @@ filters set. Select a check box or radio button to enable the associated search 
 <p>This is the main interface for queries related to gene ontology.
 See <b>GO Help</b> for a description of terms. First, a few facts:
 <ol>
-<li>A GO term is only in the TCW database if it has an assigned or inherited hit. 
+<li>A GO ID is only in the TCW database if it has an assigned or inherited hit. 
 <li>The Gene Ontology is constantly evolving, hence, TCW will only be consistent with
 the Gene Ontology if TCW was built with the latest GO database from 
 www.geneontology.org (the GO version is listed in the <b>Overview</b> panel).
@@ -21,12 +21,12 @@ www.geneontology.org (the GO version is listed in the <b>Overview</b> panel).
 <hr>
 <h2>Search</h2>
 <ul>
-<li><b>GO term:</b> The GO number, e.g. GO:0003674, or 3674. 
+<li><b>GO ID:</b> The GO number, e.g. GO:0003674, or 3674. 
 (<i>Must use one of these formats!</i>).
 <li><b>Description:</b> All GO descriptions are searched for the substring.
 </ul>
-<b>Load File</b>: The file should contain one GO term or one description per line,
-depending on whether <b>GO term</b> or <b>Description</b> is selected. <i>Description must
+<b>Load File</b>: The file should contain one GO ID or one description per line,
+depending on whether <b>GO ID</b> or <b>Description</b> is selected. <i>Description must
 be the exact text when loaded from file</i>.
 <hr>
 
@@ -42,7 +42,9 @@ the end, which explains how this will be different if the <b>DE #Seqs</b> is cha
 <li><b>Evidence Codes</b>: Check the box, then select <b>Evidence Codes</b> to bring
 up a panel of available codes. The codes that are not found for any hit-to-GO
 assignment is listed but not selectable. The filter is passed if a GO
-has <b>any</b> of the selected ECs. NOTE: A GO inherits evidence codes.
+has <b>any</b> of the selected ECs. 
+<br>NOTE: Only the assigned ECs are associated with the GO;
+you can view all inherited evidence codes by selected a GO followed by <u>Hits - inherited</u>.
 </ul>
 
 <b>Level</b>
@@ -97,13 +99,13 @@ be removed from the other (not-displayed) list.
 
 <p><b>Copy...</b> to the clipboard, which can be pasted elsewhere
 <ol type='a'>
-<li><u>Go term</u> - from selected row
+<li><u>Go ID</u> - from selected row
 <li><u>Table</u> - the entire table
 </ol>
 
 <p><b>Show...</b> the options will be provided to either show the results in
 a popup window or write the results to file. For the 4 middle options, there is
-also an option to only write the GO terms to file; this can be used with "Load File"
+also an option to only write the GO IDs to file; this can be used with "Load File"
 on the "Basic GO Annotation" panel.
 
 <ol type='a'>
@@ -133,18 +135,18 @@ necessarily show all the ECs.
 <br>&nbsp;
 
 <li><u>GO - Neighbor list and relation</u>:
-The immediate parents and children of the GO term. 
+The immediate parents and children of the GO ID. 
 The relation of 'is_a' or 'part_of' is shown for this option.
 NOTE: same note as for descendants. Starting with sTCW v3.1.8, there is also a relation 'replaced_by'
 and 'replaces'.
 <br>&nbsp;
 
-<li><u>GO - Ancestor list by level</u>: 
-All ancestors of the GO term sorted by level. 
+<li><u>GO - Ancestors by level</u>: 
+All ancestors of the GO ID sorted by level. 
 <br>&nbsp;
 
-<li><u>GO - Descendants list by level</u>:
-All descendants of the GO term sorted by level. 
+<li><u>GO - Descendants by level</u>:
+All descendants of the GO ID sorted by level. 
 NOTE: if a descendent GO does not have any assigned or inherited hits, it is not in the
 database so is not shown. 
 <br>&nbsp;
@@ -159,7 +161,7 @@ table. The GOs will be listed in the same order as found in the table.
 <li><u>GO - Ancestor list by distance and relation</u>:
 <b>Disabled</b> The Gene Ontology assigns a distance to each parent-child relation. This option orders
 the ancestors by this distance. The relation of 'is_a' or 'part_of' is shown for this option;
-a GO term can have both relations and a different distance for each. 
+a GO ID can have both relations and a different distance for each. 
 -->
 
 <br>&nbsp;
@@ -181,7 +183,7 @@ NOTE: Occasionally, this query may be slow when there are many paths for the GO;
 
 
 <li><u>Export Table</u>: A tab-delimited file of the contents of the table.
-<br>If you just select two columns, (GO Term,#Seqs) or (GO Term, P-value), 
+<br>If you just select two columns, (GO ID,#Seqs) or (GO ID, P-value), 
 the exported file can be used as input to REVIGO (http://revigo.irb.hr). 
 <br>&nbsp;
 
@@ -202,9 +204,9 @@ be used in Excel to make bar graphs.
 or have them written to file. The two path options can be written in a tab-delimited file
 or a html file.
 <ul>
-<li><u>Each GO's parents with relations</u>: For each GO in table, print its parents and relations (e.g. <tt>is_a</tt>)
+<li><u>Each GO parents with relations</u>: For each GO in table, print its parents and relations (e.g. <tt>is_a</tt>)
 <br>&nbsp;
-<li><u>All ancestors</u>: The combined list of ancestors for all GOs in the table, sorted by level.
+<li><u>Set of ancestors</u>: The combined list of ancestors for all GOs in the table, sorted by level.
 <br>&nbsp;
 
 <li><u>Longest paths</u>: The longest paths of the GOs in the table;
@@ -216,17 +218,13 @@ to compute and be large.
 
 </ul>
 </ol>
-<i>Processing details:</i> 
-The paths and neighbor database queries use the GO term2term table, where the path query is recursive.
-All other show/table queries use the GO graph_path table.
-
 
 <hr>
 <h2>#Seqs</h2>
 There are four occurrences that use <b>#Seqs</b> on this panel. 
 <ol>
 <li><b>Seq-hit: #Seqs</b>: If this is set, the GOs displayed must
-have at least this many sequences associated with the GO term.
+have at least this many sequences associated with the GO ID.
 <br>&nbsp;
 <li> <b>Column#Seqs</b>: This is typically all sequences that have a hit
 associated with the GO, unless the <b>DE #Seqs</b> is changed from <b>All</b>.
@@ -244,7 +242,7 @@ in the table.
 Each sequence has the following annotations:
 <ol>
 <li>Sequence length.
-<li>Zero or more hits, where many are associated with GO terms.
+<li>Zero or more hits, where many are associated with GO IDs.
 <li>Read counts for different conditions along with DE values 
 between pairs of conditions.
 </ol>
@@ -267,14 +265,14 @@ this is confusing, but its done that way to account for the sequences that went 
 <b>This is disabled in v3.1.8. </b>
 <p>
 In order to help identify the GOs most worthy of investigation, a
-DE-based trimmed subset of the GO terms is automatically computed, as follows:
+DE-based trimmed subset of the GO IDs is automatically computed, as follows:
 <ol>
-<li>Find all GO terms passing the specified DE filter.
+<li>Find all GO IDs passing the specified DE filter.
 <li>For all passed GOs, compute the product of their p-values ("combDE").  
 For failed GOs, set combDE is set to 2.
-<li>Each GO term is examined, along with its children in the GO hierarchy. If there is a child with
+<li>Each GO ID is examined, along with its children in the GO hierarchy. If there is a child with
 better combDE score than the parent, the parent is removed; otherwise, the children are removed. 
-<li>The remaining, non-removed GO terms are the DETrim subset. 
+<li>The remaining, non-removed GO IDs are the DETrim subset. 
 </ol>
 
 <p>Justification:

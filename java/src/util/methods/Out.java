@@ -111,6 +111,9 @@ public class Out {
 	static public void PrtSpCntMsgTimeMem(int sp, int cnt, String msg, long time) {
 		PrtSpMsgTimeMem(sp, String.format("%7s %s", df.format(cnt), msg), time);
 	}
+	static public void PrtSpCntMsgTimeMemM(int sp, int cnt, String msg, long time) {//123,456,789
+		PrtSpMsgTimeMem(sp, String.format("%11s %s", df.format(cnt), msg), time);
+	}
 	static public void PrtSpCntMsg(int sp, String cntStr, String msg) {
 		PrtSpMsg(sp, String.format("%7s %s", cntStr, msg));
 	}

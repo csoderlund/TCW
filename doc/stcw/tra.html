@@ -5,66 +5,58 @@
 <h2>TCW overview for tra </h2>
 <table width=700 border=1><tr><td>
 <pre>
-Project: tra   #Seqs: 211   #Hits: 12,307   #GOs: 6,023    TPM  DE  GO-DE   Pairs
+Project:  tra   #Seqs: 211   #Hits: 12,511   #GOs: 6,651    TPM  DE  GO-DE   Pairs
  
+25-Mar-21 Build Database  sequences loaded from external source
+26-Mar-21 Last Annotation with sTCW v3.1.9    Updated with v3.1.10
+
 INPUT
    Counts: 
-      SEQID  ID          SIZE  #REPS  
-      tra    Stem   1,865,201      5  
-      tra    Root     955,097      5  
-      tra    Oleaf    474,551      5  
+      SEQID  ID          SIZE  TITLE            #REPS  
+      tra    Stem   1,865,201  Tissue Stem          5  
+      tra    Root     955,097  Tissue Root          5  
+      tra    Oleaf    474,551  Tissue Old Leaf      5  
 
    Sequences: 
-      SEQID  SIZE  TITLE    AVG-len  MED-len  
-      tra     211  demoTra    1,079      861  
+      SEQID  SIZE  TITLE                             AVG-len  MED-len  
+      tra     211  Demo of assembled Illumina reads    1,079      861  
 
-ANNOTATION
-   Annotated with TCW release: 3.1.7   Annotation date: 19-Feb-21
-
-   Annotation Statistics:
+ANNOTATIONS
+   Hit Statistics:
       Sequences with hits     209  (99.1%)     Bases covered by hit  178,458  (78.4%)  
-      Unique hits          12,307              Total bases           227,683           
-      Total sequence hits  17,994                                                      
-                                                                                       
-      Sequences with GOs      208  (98.6%)     Best hit with GOs         194  (91.9%)  
-      Unique GOs            6,023              Unique hits with GOs    5,909  (48.0%)  
+      Unique hits          12,511              Total bases           227,683           
+      Total sequence hits  18,423                                                      
 
-   annoDBs (Annotation databases): 7   (see Legend below)
+   annoDBs (Annotation databases): 8   (see Legend below)
       ANNODB            ONLY  BITS  ANNO  UNIQUE  TOTAL   AVG  HIT-SEQ (#SEQ)  BEST  AVG  COVER  COVER  
                                                          %SIM                  HIT  %SIM   >=50   >=90  
       SP-plants            0     0     0   1,320  2,954  53.7     193 (91.5%)       69.9  61.7%   3.6%  
-      SP-fungi             0     0     0     850  1,451  43.4     118 (55.9%)       47.0  26.3%   0.8%  
       SP-invertebrates     0     0     0     608  1,248  42.5     126 (59.7%)       47.5  30.2%   0.8%  
+      SP-fungi             0     0     0     850  1,451  43.4     118 (55.9%)       47.0  26.3%   0.8%  
       SP-bacteria          0     0     0     787  1,121  44.2      63 (29.9%)       45.8  25.4%     0%  
       SP-fullSubset        0     0     0   1,259  2,288  44.7     137 (64.9%)       48.7  34.3%   0.7%  
-      TR-plants            8   206   206   4,569  5,216  76.0     209 (99.1%)       81.8  68.4%   8.6%  
+      TR-plants            6   206   206   4,569  5,216  76.0     209 (99.1%)       81.8  68.4%   8.6%  
       TR-invertebrates     0     3     3   2,914  3,716  50.0     179 (84.8%)       54.7  38.5%   2.8%  
+      TF-tf                0     0     0     204    429  44.6     123 (58.3%)       51.0   6.5%     0%  
 
-   Top 15 species from total: 1,511
+   Top 15 species from total: 1,535
       SPECIES (25 char)         BITS   ANNO  TOTAL     SPECIES                 BITS   ANNO   TOTAL  
-      Musa acuminata              77     53    325     Vitis vinifera             2      4      96  
+      Musa acuminata              77     53    328     Vitis vinifera             2      4      96  
       Musa balbisiana             58     44    314     Anthurium amnicola         2      3      96  
       Ensete ventricosum          18     14    213     Dendrobium catenatum       2      2      77  
-      Elaeis guineensis           11     23    346     Macleaya cordata           2      2      40  
-      Phoenix dactylifera          9     22    318     Nelumbo nucifera           1      3      98  
+      Elaeis guineensis           11     24    349     Macleaya cordata           2      2      40  
+      Phoenix dactylifera          9     21    322     Nelumbo nucifera           1      3      99  
       Zingiber officinale          7      7     27     Pinus tabuliformis         1      2       4  
-      Ananas comosus               4     12    452     Asparagus officinalis      1      1      68  
-      Meloidogyne enterolobii      3      0     10     Other                     11     17  15,510  
+      Ananas comosus               4     12    455     Asparagus officinalis      1      1      68  
+      Meloidogyne enterolobii      3      0     10     Other                     11     17  15,925  
 
-   Total ORFs: 211 (100.0%)
-      Has Hit             209 (99.1%)    ORF>=300         191 (90.5%)    MultiFrame     3  (1.4%)  
-      Is Longest ORF      200 (94.8%)    Has Start&Stop    54 (25.6%)    >=9 Ns in ORF  0    (0%)  
-      Markov Best Score  211 (100.0%)    Has Start|Stop   163 (77.3%)    Stops in Hit   4  (1.9%)  
-      All of the above    199 (94.3%)    Average ORF len         857         
-
-   GC Content: 48.65%
-      Pos1  18.3%              5UTR    CDS   3UTR              5UTR     CDS    3UTR  
-      Pos2  13.7%    %GC      44.23  48.75  36.27    Length     22k    181k     25k  
-      Pos3  16.6%    CpG-O/E   0.87   0.71   0.63    AvgLen   104.9   857.0   117.1  
-                                    
-   Similar pairs: 50
-      Nucleotide             10  
-      Translated nucleotide  50  
+   Gene Ontology Statistics:
+      Unique GOs          6,651              Unique hits with GOs  10,701  (85.5%)  
+      Sequences with GOs    208  (98.6%)     Seq best hit has GOs     194  (91.9%)  
+                                                                                    
+      biological_process  4,878  (73.3%)     is_a                  10,778           
+      molecular_function  1,027  (15.4%)     part_of                1,176           
+      cellular_component    746  (11.2%)                                            
 
 EXPRESSION
    TPM: (% of 211)
@@ -79,16 +71,13 @@ EXPRESSION
       StOl  0 (0%)   2 (1%)  12 (6%)  65(31%)  101(48%)  
       RoOl  1(<1%)  16 (8%)  37(18%)  74(35%)  110(52%)  
 
-   Over-represented GOs: (% of 6,023)
+   Over-represented GOs: (% of 6,651)
              <1E-5   <1E-4  <0.001    <0.01     <0.05  
-      StRo  0 (0%)  0 (0%)  2(<1%)  44 (1%)  292 (5%)  
-      StOl  0 (0%)  0 (0%)  0 (0%)   1(<1%)   55 (1%)  
-      RoOl  0 (0%)  0 (0%)  2(<1%)  23(<1%)  189 (3%)  
+      StRo  0 (0%)  0 (0%)  2(<1%)  58 (1%)  311 (5%)  
+      StOl  0 (0%)  0 (0%)  0 (0%)   1(<1%)   48 (1%)  
+      RoOl  0 (0%)  0 (0%)  2(<1%)  21(<1%)  172 (3%)  
 
 SEQUENCES
-   Build date: 15-Feb-21
-   Sequences loaded from external source
-
    Sequence lengths:
       <=100  101-500  501-1000  1001-2000  2001-3000  3001-4000  4001-5000  >5000  
       0(0%)  37(18%)   84(40%)    72(34%)      8(4%)      8(4%)      2(1%)  0(0%)  
@@ -97,20 +86,43 @@ SEQUENCES
       <=100  101-500  501-1000  1001-2000  2001-3000  3001-4000  4001-5000  >5000  
       0(0%)  61(29%)   92(44%)    48(23%)      5(2%)      5(2%)      0(0%)  0(0%)  
 
+   Total ORFs: 211 (100.0%)
+      Has Hit             209 (99.1%)    ORF>=300         191 (90.5%)    MultiFrame     4  (1.9%)  
+      Is Longest ORF      200 (94.8%)    Has Start&Stop    54 (25.6%)    >=9 Ns in ORF  0    (0%)  
+      Markov Best Score  211 (100.0%)    Has Start|Stop   163 (77.3%)    Stops in Hit   4  (1.9%)  
+      All of the above    199 (94.3%)    Average ORF len         857         
+
+   GC Content: 48.65%
+      Pos1  18.3%              5UTR    CDS   3UTR              5UTR     CDS    3UTR  
+      Pos2  13.7%    %GC      44.23  48.75  36.27    Length     22k    181k     25k  
+      Pos3  16.6%    CpG-O/E   0.87   0.71   0.63    AvgLen   104.9   857.0   117.1  
+                                    
+   Similar pairs: 100
+      Nucleotide              15  
+      Translated nucleotide  100  
+
+LOCATIONS
+   Sequences with location:          12  unique locations: 12
+   Sequences on positive strand:      7  negative strand:  5
+   Sequences per group:
+      1  2  3-4  5-7  8-10  11-20  21-30  >30  
+      0  0    3    0     0      0      0    0  
+
 
 -------------------------------------------------------------------
 PROCESSING INFORMATION:
    AnnoDB Files:
       Type  Taxo           FILE                                DB DATE    ADD DATE   EXECUTE                  
-      sp    plants         uniprot_sprot_plants.fasta          27-Jan-21  19-Feb-21  Load tra_SPpla.dmnd.tab  
-      sp    fungi          uniprot_sprot_fungi.fasta           27-Jan-21  19-Feb-21  Load tra_SPfun.dmnd.tab  
-      sp    invertebrates  uniprot_sprot_invertebrates.fasta   27-Jan-21  19-Feb-21  Load tra_SPinv.dmnd.tab  
-      sp    bacteria       uniprot_sprot_bacteria.fasta        27-Jan-21  19-Feb-21  Load tra_SPbac.dmnd.tab  
-      sp    fullSubset     uniprot_sprot_fullSubset.fasta      27-Jan-21  19-Feb-21  Load tra_SPful.dmnd.tab  
-      tr    plants         uniprot_trembl_plants.fasta         27-Jan-21  19-Feb-21  Load tra_TRpla.dmnd.tab  
-      tr    invertebrates  uniprot_trembl_invertebrates.fasta  27-Jan-21  19-Feb-21  Load tra_TRinv.dmnd.tab  
+      sp    plants         uniprot_sprot_plants.fasta          27-Jan-21  26-Mar-21  Load tra_SPpla.dmnd.tab  
+      sp    invertebrates  uniprot_sprot_invertebrates.fasta   27-Jan-21  26-Mar-21  Load tra_SPinv.dmnd.tab  
+      sp    fungi          uniprot_sprot_fungi.fasta           27-Jan-21  26-Mar-21  Load tra_SPfun.dmnd.tab  
+      sp    bacteria       uniprot_sprot_bacteria.fasta        27-Jan-21  26-Mar-21  Load tra_SPbac.dmnd.tab  
+      sp    fullSubset     uniprot_sprot_fullSubset.fasta      27-Jan-21  26-Mar-21  Load tra_SPful.dmnd.tab  
+      tr    plants         uniprot_trembl_plants.fasta         27-Jan-21  26-Mar-21  Load tra_TRpla.dmnd.tab  
+      tr    invertebrates  uniprot_trembl_invertebrates.fasta  27-Jan-21  26-Mar-21  Load tra_TRinv.dmnd.tab  
+      tf    tf             PlantTFDB_TCW.fa                    25-Oct-20  26-Mar-21  Load tra_TFtf.dmnd.tab   
 
-   Over-represented GOs: go_202102-termdb-tables.tar.gz    [GOs added with sTCW v3.1.7 (21-Feb-21)]
+   Gene Ontology: go-basic.obo-Feb2021  GOdb: go_demo  [GOs added with sTCW v3.1.9]
 
    ORF finder:
       Use ATG only for start site

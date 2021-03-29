@@ -18,7 +18,6 @@ import util.methods.Out;
 
 public class ASMain {
 	public static boolean test=false, isDemo=false;
-	public static boolean isOBO=true;	// CAS318
 	private static final String annoDir = "projects/DBfasta";
 	private static final String logFile = "runAS.log";
 	
@@ -29,16 +28,11 @@ public class ASMain {
 		if (hasArg(args, "-h") || hasArg(args, "-help") || hasArg(args, "?")) {
 			System.err.println("Usage: runAS [id]");
 			System.err.println("   -d: use for demo");
-			System.err.println("   -f: use old GO mysql (go_daily-termdb-tables.tar.gz)");
 			return;
 		}
 		if (hasArg(args, "-d")) {
 			isDemo=true;
 			System.out.println("Running in demo mode");
-		}
-		if (hasArg(args, "-f")) { 
-			isOBO=false;
-			System.out.println("Running in old GO mysql mode");
 		}
 		if (hasArg(args, "-t")) {
 			test=true;

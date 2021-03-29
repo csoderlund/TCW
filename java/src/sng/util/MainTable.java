@@ -494,7 +494,7 @@ public class MainTable extends MainTableSort {
     		ResultSet rs = mdb.executeQuery("select gonum, term_type, descr from go_info");
     		while(rs.next()) {
     			String gonum = String.format(Globalx.GO_FORMAT, rs.getInt(1));
-    			String type =  rs.getString(2).substring(0,4);
+    			String type =  rs.getString(2).substring(0,3);
     			String descr = rs.getString(3);
     			goMap.put(gonum, type + "  " + descr);
     		}

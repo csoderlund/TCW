@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.text.DecimalFormat;
 import java.util.Stack;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -32,11 +33,11 @@ import util.methods.Out;
  * 5. create graph_path
  * Everything in the rest of sTCW will work exactly the same as with the original mysql GO
  * 
- * Relations: is_a, part_of, replaced_by
+ * Relations: is_a, part_of, alt_id
  *   DoOBO: The relations are put into term as the first three rows, so their indexes are used in term2term
  *   sng.annotator: DoGO: the indexes are not put in the term table, but stored in assem_msg.go_rtypes. 
  *   sng.database.Metadata: reads them from assem_msg.go_rtypes.
- *   It is expected that: is_a:1 part_of:2 replaced_by:3 -- where the relation (e.g. is_a) are hardcoded in places
+ *   It is expected that: is_a:1 part_of:2 alt_id:3 -- where the relation (e.g. is_a) are hardcoded in places
  */
 public class DoOBO {
 	private final String goURL = "http://current.geneontology.org/ontology/";
@@ -46,7 +47,7 @@ public class DoOBO {
 
 	static private final int ISA = 1;
 	static private final int PARTOF = 2;
-	static private final int REPLACEDBY = 3;
+	static private final int ALTID = 3; // CAS320 changed from replaced_by
 	
 	static private final String goMetaTable = Globalx.goMetaTable; // CAS318 was prefixed with PAVE_
 	static private final String goUpTable =   Globalx.goUpTable;
@@ -180,8 +181,7 @@ public class DoOBO {
 				// Term_type: 
 					//  OBO "namespace" (biological_process, molecular_function, cellular_component) 
 					//  OBO "subsetdef", i.e. goslim
-					//  1 is_a, 2 part_of
-					//  3 replaced_by
+					//  1 is_a, 2 part_of, 3 alt_id
 				//  no acc (is_a, part_of, GO:...); no is_obsolete, is_root, is_relation
 			goDB.executeUpdate("CREATE TABLE term (" +
 					" id integer PRIMARY KEY AUTO_INCREMENT, " + 
@@ -252,6 +252,9 @@ public class DoOBO {
 			Pattern patID = Pattern.compile("id:\\s+GO:(\\d+)");
 			Pattern patALT = Pattern.compile("alt_id:\\s+GO:(\\d+)");
 			Pattern patRL = Pattern.compile("(.*)\\s+GO:(\\d+)(.*)");
+			// CAS320 - make list of GOs to check in DoUPdat that they are all there (sanity check)
+			Pattern patIDStr = Pattern.compile("id:\\s+(GO:\\d+)");
+			Pattern patALTStr = Pattern.compile("alt_id:\\s+(GO:\\d+)");
 			
 			long time=Out.getTime();
 			BufferedReader inFH=FileHelpers.openGZIP(goDir+"/"+goFile);
@@ -320,17 +323,18 @@ public class DoOBO {
 			PreparedStatement ps3 = goDB.prepareStatement( 
 					"insert ignore into term_subset (gonum, subset_id) " +
 					"values (?,?)");
-			
-			// create initial term rows with id's that will be later used
-			ps1.setString(1, "is_a");    ps1.setString(2, "external"); ps1.setInt(3, 0); ps1.setInt(4, 0); 
+		
+		/** External and Goslim entries **/
+			// The order these are put in is very important as the id's are assumed to be 1,2,3 
+			ps1.setString(1, "is_a");    ps1.setString(2, "external"); ps1.setInt(3, 0); ps1.setInt(4, 0); //id=1
     	 	ps1.addBatch();
-    	 	ps1.setString(1, "part_of"); ps1.setString(2, "external"); ps1.setInt(3, 0); ps1.setInt(4, 0); 
+    	 	ps1.setString(1, "part_of"); ps1.setString(2, "external"); ps1.setInt(3, 0); ps1.setInt(4, 0); //id=2
     	 	ps1.addBatch();
-    	 	ps1.setString(1, "replaced_by"); ps1.setString(2, "external"); ps1.setInt(3, 0); ps1.setInt(4, 0); 
+    	 	ps1.setString(1, "alt_id"); ps1.setString(2, "external"); ps1.setInt(3, 0); ps1.setInt(4, 0); //id=3
     	 	ps1.addBatch();
     	 	ps1.executeBatch();
     	 	
-    	 	int index=3;
+    	 	int index=4;
     	 	for (String ss : subIdMap.keySet()) {
     	 		ps1.setString(1, ss); ps1.setString(2, "subset"); ps1.setInt(3, 0); ps1.setInt(4, 0); 
     	 		ps1.addBatch();
@@ -338,23 +342,23 @@ public class DoOBO {
     	 		index++;
     	 	}
     	 	ps1.executeBatch();
-    	 	
+  
+    	 /** GO TERMs **/
 			int cntGO=0, cnt1=0, cnt2=0, cnt3=0, cntErr=0;
 			int cntBio=0, cntMole=0, cntCell=0, cntAlt=0;
 			int cntBioIA=0, cntMoleIA=0, cntCellIA=0, cntBioPO=0, cntMolePO=0, cntCellPO=0;
 					
 			int gonum=0, is_obsolete=0;
-			String name="", term_type="";
+			String name="", term_type="", goID="";
 			Vector <String>  parVec = new Vector <String> ();
 			Vector <Integer> subVec = new Vector <Integer> ();
 			Vector <Integer> goAltVec = new Vector <Integer> (); // this includes the Alts
 	
-	/** GO TERMs **/
 			while ((line = inFH.readLine()) != null) {
 				if (cntErr>25) Out.die("Too many errors");
 				
 				/******** finish **********/
-				if (line.startsWith("[Term]")) {
+				if (line.startsWith("[Term]") || line.startsWith("[Typedef]")) {// CAS320 added typedef
 					if (gonum==0) continue;
 					
 					for (int go : goAltVec) { // The GO and any alts
@@ -379,7 +383,7 @@ public class DoOBO {
 					
 						if ((go!=gonum)) { // term2term 		alt 	replacedby 	gonum
 							cntAlt++;
-							ps2.setInt(1, REPLACEDBY);
+							ps2.setInt(1, ALTID);
 							ps2.setInt(2, gonum);
 							ps2.setInt(3, go);
 							ps2.addBatch();
@@ -428,22 +432,31 @@ public class DoOBO {
 					}
 	 	            parVec.clear(); subVec.clear(); goAltVec.clear();
 	 	            gonum=is_obsolete = 0;
-	 	            name=term_type="";
-	 	            continue;
-				}
+	 	            name=term_type=goID="";
+	 	            
+	 	            if (line.startsWith("[Typedef]")) break; // do not process rest of file
+	 	            else continue;
+				} // end saving last GO
 				
 				/********** parse ***************/
 				// id: GO:0000001
 				if (line.startsWith("id:")) {
 					m = patID.matcher(line);
 					if (m.matches()) {
-						String y = m.group(1);
+						String goStr = m.group(1);
 						try {
-							gonum = Integer.parseInt(y);
+							gonum = Integer.parseInt(goStr);
 							goAltVec.add(gonum);
 						}
 						catch (Exception e) {
 							Out.PrtErr("Bad id: '" + line + "'");cntErr++;}
+						
+						m = patIDStr.matcher(line);
+						if (m.matches()) {
+							goID = m.group(1);
+							goSet.add(goID);
+						}
+						else {Out.PrtErr("Bad GO: '" + line + "'");cntErr++;}
 					}
 					continue;
 				}
@@ -451,16 +464,22 @@ public class DoOBO {
 				if (line.startsWith("alt_id:")) {
 					m = patALT.matcher(line);
 					if (m.matches()) {
-						String y = m.group(1);
+						String goStr = m.group(1);
 						try {
-							int n = Integer.parseInt(y);
+							goSet.add(goStr);
+							int n = Integer.parseInt(goStr);
 							goAltVec.add(n);
 						}
 						catch (Exception e) {
 							Out.PrtErr("Bad alt_id: '" + line + "'");cntErr++;}
+						
+						m = patALTStr.matcher(line);
+						if (m.matches()) goSet.add(m.group(1));
+						else {Out.PrtErr("Bad GO: '" + line + "'");cntErr++;}
 					}
 					continue;
 				}
+				
 				// name: mitochondrion inheritance
 				if (line.startsWith("name:")) {
 					tok = line.split(":");
@@ -515,11 +534,13 @@ public class DoOBO {
 					continue;
 				}
 				// def: "OBSOLETE.
-				if (line.startsWith("def:")  && line.contains("OBSOLETE")) {
+				if (line.startsWith("is_obsolete:")  && line.contains("true")) {
 					is_obsolete=1;
+					obsSet.add(goID);
 					continue;
 				}
 			}// end loop through OBO file
+			if (gonum!=0) Out.PrtWarn("File may be incomplete - last GO#" + gonum);
 			
 			if (cnt1>0) ps1.executeBatch();
 			if (cnt2>0)	ps2.executeBatch();
@@ -528,23 +549,25 @@ public class DoOBO {
 			ps1.close(); ps2.close(); ps3.close();
 			goDB.closeTransaction();
 			inFH.close();
-			PrtCntMsg2x(cntGO, "Total GOs", cntAlt, "Alt GOs");
-			PrtCntMsg3x(cntBio, "Biological", cntBioIA, "is_a", cntBioPO,"part_of");
-			PrtCntMsg3x(cntMole, "Molecular", cntMoleIA, "is_a", cntMolePO,"part_of");
-			PrtCntMsg3x(cntCell, "Cellular", cntCellIA, "is_a", cntCellPO,"part_of");
-			PrtCntMsg2x(subIdMap.size(), "Slims", cnt3, "GOs in Slim");
-			Out.PrtSpMsgTimeMem(1, "Complete Load OBO file", time);
+			
+			PrtCntMsg3x(cntGO, 		"Total GOs", 	cntAlt, 	"Alt GOs", obsSet.size(), "Obsolete");
+			PrtCntMsg3x(cntBio, 	"Biological", 	cntBioIA, 	"is_a", cntBioPO,	"part_of");
+			PrtCntMsg3x(cntMole, 	"Molecular", 	cntMoleIA, 	"is_a", cntMolePO,	"part_of");
+			PrtCntMsg3x(cntCell, 	"Cellular", 	cntCellIA, 	"is_a", cntCellPO,	"part_of");
+			PrtCntMsg2x(subIdMap.size(), "Slims", 	cnt3, 		"GOs in Slim");
+			Out.PrtSpMsgTimeMem(1, 	"Complete Load OBO file", time);
 			return true;
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Creating GO database"); return false;}
 	}
 	static DecimalFormat df = new DecimalFormat("#,###,###");
 	private void PrtCntMsg2x(int cnt, String msg, int cnt2, String msg2) {
-			Out.PrtSpMsg(2, String.format("%9s %-10s  %7s %s", df.format(cnt), msg, df.format(cnt2), msg2));
-		}
+		Out.PrtSpMsg(2, String.format("%9s %-10s  %7s %s", 
+				df.format(cnt), msg, df.format(cnt2), msg2));
+	}
 	private void PrtCntMsg3x(int cnt, String msg, int cnt2, String msg2, int cnt3, String msg3) {
-			Out.PrtSpMsg(2, String.format("%9s %-10s  %7s %-8s %7s %-8s", 
-					df.format(cnt), msg, df.format(cnt2), msg2, df.format(cnt3), msg3));
+		Out.PrtSpMsg(2, String.format("%9s %-10s  %7s %-8s %7s %-8s", 
+				df.format(cnt), msg, df.format(cnt2), msg2, df.format(cnt3), msg3));
 	}
 	/********************************************
 	 * Calls DoUPdat to load
@@ -568,7 +591,7 @@ public class DoOBO {
 					// The fullSubset have original and new reduced -- used reduced
 					if (dname.contains(subset) && !fname.contains(subset)) continue;
 						
-					if (!datObj.dat2go(upDir, dname+f.getName(),  goDB)) return false; 
+					if (!datObj.dat2godb(upDir, dname+f.getName(),  goDB, goSet, obsSet)) return false; 
 					break;
 				}	
 			}
@@ -591,7 +614,8 @@ public class DoOBO {
 			TreeMap<Integer,TreeSet<Integer>> parent2child = new TreeMap<Integer,TreeSet<Integer>>();
 			HashMap<Integer, Integer> levMap = new HashMap<Integer, Integer> ();
 			
-			String sql = "select child,parent from term2term where child != 0 and parent != 0 "; 		
+			String sql = "select child,parent from term2term where child != 0 and parent != 0 "
+					+ "and relationship_type_id!=3"; 		// CAS320
 			ResultSet rs = goDB.executeQuery(sql);
 			while (rs.next()) {
 				int child = rs.getInt(1);
@@ -784,6 +808,8 @@ public class DoOBO {
 		HashMap <Integer, Integer> ancMap = new  HashMap <Integer, Integer> (); // assigned and inherited ancestors, relation
 	}
 	/**************************************************/
+	private HashSet <String> goSet = new HashSet <String> ();  // all GO IDs
+	private HashSet <String> obsSet = new HashSet <String> (); // set of obsolete GO IDS
 	private String upDir;
 	private String goDBname;  // e.g. go_Apr2016
 	private String goDir;     // e.g. ./projects/DBfasta/GO_oboApr2016 -- downloaded here

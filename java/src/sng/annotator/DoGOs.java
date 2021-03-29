@@ -422,11 +422,11 @@ public class DoGOs
 			}
 			tcwDB.closeTransaction();
 			prtCntMsgMem(cnt,"processed", time);
-			
-/** XXX go_info table -- holds information about each direct and ancestor GO  **/
+					
+/** XXX go_info table -- holds information about each direct and ancestor GO, and evidence code  **/
 			 
 			// if UniPort has a GO that is not in the GO database, causes an inconsistency
-			String [] ecList = new MetaData().getEClist();
+			String [] ecList = new MetaData().getEClist(); // Used by Schema to put EC columns in same order
 			String ecStr = ecList[0]+"=?";
 			for (int i=1; i<ecList.length; i++) ecStr += "," + ecList[i] + "=?";
 			PreparedStatement ps2 = tcwDB.prepareStatement("INSERT into go_info SET " +
@@ -444,6 +444,7 @@ public class DoGOs
 			tcwDB.openTransaction();
 			for (int gonum : goAllSet)  							// goAllSet
 			{	
+				// from tcwDB pga_unitrans_go
 				double eval = -2.0;
 				rs = tcwDB.executeQuery("SELECT bestEval FROM pja_unitrans_go " +
 						"where gonum=" + gonum + " ORDER BY bestEval ASC LIMIT 1");
@@ -452,13 +453,19 @@ public class DoGOs
 				int nUnitranHit = tcwDB.executeCount("select count(*) from pja_unitrans_go" +
 						" where gonum=" + gonum);
 				
+				// from tcwDB pga_uniprot_go: Evidence code Assign Direct assignments (CAS320 was inherited to, but was wrong)
 				int [] ecBin= new int [ecList.length];
-				HashSet <String> ecSet = makeECset(gonum);
+				HashSet <String> ecSet = new HashSet <String> ();
+				rs = tcwDB.executeQuery("SELECT distinct EC FROM pja_uniprot_go WHERE gonum=" + gonum);
+				while (rs.next()) ecSet.add(rs.getString(1));
+				rs.close();
+				
 				int x=0;
 				for (String ec : ecList) {
 					ecBin[x++] = (ecSet.contains(ec)) ? 1 : 0;
 				}
 				
+				// from goDB.GO_TERM
 				String name="obsolete - not in " + godbsrc;
 				String type="biological_process"; // has to be in enum
 				int level=0;
@@ -470,6 +477,7 @@ public class DoGOs
 					level = rs.getInt(3);
 				}
 				else cntNotFound++;
+				rs.close();
 				
 				boolean found=false; 
 				for (int i=0; i<types.length && !found; i++) {
@@ -487,8 +495,8 @@ public class DoGOs
 				ps2.setDouble(5, eval);
 				ps2.setInt(6, nUnitranHit);
 				ps2.setInt(7, 0);
-				for (int i=0, j=8; i<ecBin.length; i++, j++)
-					ps2.setInt(j, ecBin[i]);
+				for (int ec=0, col=8; ec<ecBin.length; ec++, col++)
+					ps2.setInt(col, ecBin[ec]);
 				ps2.addBatch();
 				cnt++; cntSave++;
 				if (cntSave==NLOOP) {
@@ -523,27 +531,7 @@ public class DoGOs
 		catch(Exception e){ErrorReport.die(e, "Error adding GO tables");}
 		return false;
 	}
-	private HashSet <String> makeECset(int gonum) {
-		HashSet <String> ecSet = new HashSet <String> ();
-		try {
-			// get ancestors
-			Vector <Integer> goList = new Vector <Integer> ();
-			ResultSet rs = tcwDB.executeQuery("select child from go_graph_path " +
-					"where child>0 and ancestor=" + gonum);
-			while (rs.next()) {
-				goList.add(rs.getInt(1)); // will include gonum
-			}
-			// find the direct hit EC for each ancestor
-			for (int gonum2 : goList) {
-				rs = tcwDB.executeQuery("SELECT distinct EC FROM pja_uniprot_go WHERE gonum=" + gonum2);
-			
-				while (rs.next()) ecSet.add(rs.getString(1));
-			}
-			rs.close();
-		}
-		catch(Exception e){ErrorReport.die(e, "Getting EC list for go " + gonum);}
-		return ecSet;
-	}
+
 	/***********************************************************************
 	 * Slim processing
 	 * CAS318 changed to GO OBO - previous GO MySQL will not work

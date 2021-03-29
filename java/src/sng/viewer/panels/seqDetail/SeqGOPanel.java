@@ -324,7 +324,7 @@ public class SeqGOPanel extends JPanel {
 				}
 				
 				gi.desc=rs.getString(2);
-				gi.type = rs.getString(3).substring(0,4);
+				gi.type = rs.getString(3).substring(0,3);
 				gi.level = rs.getInt(4);
 			}
 			Collections.sort(goOrder);
@@ -684,7 +684,7 @@ public class SeqGOPanel extends JPanel {
 		lines.add(line);
 		lines.add("");
 		
-		line = String.format("%-10s  %-30s  %4s  %5s", "GO term", "Description", "Type", "Level");
+		line = String.format("%-10s  %-30s  %4s  %5s", "GO ID", "Description", "Type", "Level");
 		if (displayType==SHOW_ASSIGNED_GO) 
 			line += String.format("  %5s  %6s  %-15s", "#Hits", "E-val", "Best Hit ID");
 		else if (displayType==SHOW_ALL_GO)
@@ -695,7 +695,7 @@ public class SeqGOPanel extends JPanel {
 		for (GOinfo gi : goOrder) {
 			String go = String.format(GO_FORMAT, gi.gonum);
 			String desc = gi.desc;
-			if (desc==null) desc = "probably replaced GO term";
+			if (desc==null) desc = "probably replaced GO ID";
 			if (desc.length()>=30) desc = desc.substring(0,28) + "..";
 			
 			line = String.format("%10s  %-30s  %4s  %5d", go, desc, gi.type, gi.level);
@@ -832,7 +832,7 @@ public class SeqGOPanel extends JPanel {
 		}
 
 		public String getColumnName(int colIndex) {
-			if(colIndex == 0) return "GO term";
+			if(colIndex == 0) return "GO ID";
 			if(colIndex == 1) return "Description";
 			if(colIndex == 2) return "Type";
 			if(colIndex == 3) return "Level";
