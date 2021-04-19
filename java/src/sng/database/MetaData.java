@@ -267,27 +267,32 @@ public class MetaData {
 	}
 	 /*************************************************
 	 * used by BasicGOQueryTab upSeq, dnSeq
-	 * created in QRProcess: mDB is passed in because this is not part of viewSingleTCW, 
-	 * 						 so no STCWframe.newDBConn.
 	 *************************************************/
 	 public TreeMap <String, Double> getDegPvalMap(DBConn mDB) {
 		 if (degPvalMap!=null) return degPvalMap;
 		 try {
 			degPvalMap = new TreeMap <String, Double> ();
-			if (!mDB.tableColumnExists("assem_msg", "goDE")) {
-				mDB.close();
-				return null;
-			}
-			String goDE = mDB.executeString("select goDE from assem_msg");
-			mDB.close();
 			
-			String [] tok = goDE.split(",");
-			for (String x : tok) {
-				String [] tok2 = x.split(":");
-				if (tok2.length==2)
-					degPvalMap.put(tok2[0], Double.parseDouble(tok2[1]));
+			if (mDB.tableColumnExists("libraryDE", "goCutoff")) { // CAS321 (17-Apr-21)
+				ResultSet rs = mDB.executeQuery("select pCol, goCutoff from libraryDE");
+				while (rs.next()) {
+					double cutoff =  rs.getDouble(2);
+					if (cutoff>0) degPvalMap.put(rs.getString(1), cutoff);
+				}
+				if (degPvalMap.size()>0) return degPvalMap;
 			}
-			return degPvalMap;
+			// pre-v321
+			if (mDB.tableColumnExists("assem_msg", "goDE")) {
+				String goDE = mDB.executeString("select goDE from assem_msg");
+				
+				String [] tok = goDE.split(",");
+				for (String x : tok) {
+					String [] tok2 = x.split(":");
+					if (tok2.length==2)
+						degPvalMap.put(tok2[0], Double.parseDouble(tok2[1]));
+				}
+				return degPvalMap;
+			}
 		} 
 		catch (Exception e) {ErrorReport.reportError(e, "Error: reading database for GO DE Pvals");}
 		return null;
@@ -442,7 +447,7 @@ public class MetaData {
 					goRelTypeMap.put(r[1], x);
 				}
 			}
-			if (goRelTypeMap.size()<3) { // for pre-319
+			if (goRelTypeMap.size()==0) { // for pre-319
 				goRelTypeMap.clear();
 				if (mDB.tableColumnExists("assem_msg", "is_a")) {
 					goRelTypeMap.put("is_a", mDB.executeInteger("select is_a from assem_msg"));

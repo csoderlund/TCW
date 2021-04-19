@@ -4,33 +4,28 @@
 <h1>Differential expression (DE)</h1>
 
 This tool allows you to define groups of conditions and compute their 
-differential expression, either using R package edgeR or DESeq2, or supplying
+differential expression, either using R package <tt>edgeR</tt> or <tt>DESeq2</tt>, or supplying
 an R-script for a given R package that computes DE. 
  
-DE-enriched GO categories can also be found using GOSeq.
+DE-enriched GO categories can also be found using <tt>GOSeq</tt> or a user-supplied R-script.
 See the Online Guide for assistance installing the R packages.
 
 <h2>Compute p-values for DE</h2>
 The following gives the basic facts. Details can be found in the last section.
-<p>
-METHOD:
 <ol>
-<li><u>R-script</u>: select a file that contains R commands.
-Two files are provided as example, edgeR.R and DESeq.R.
-</ol>
-<p>
-OPTIONS:
-<ol>
+<li><u>R-script</u>: Select a file that contains R commands.
+Two methods are provided as example, <tt>edgeRglm.R</tt> and <tt>DESeq2.R</tt>.
+
 <li>Pre-filter:
 <ul>
-<li><u>Count</u>: any sequence that does not have at least one sample with counts >cutoff is not evaluated. 
+<li><u>Count</u>: Any sequence that does not have at least one sample with counts >cutoff is not evaluated. 
 <li><u>CPM</u>: This has two parameters, say N and M.
 Any sequence that does not have CPM &gt; N for &gt;= M samples is not evaluated.
 The CPM for a sequence is the (count/sample_size) * 1E6. For example, if there are 2 conditions
 with 3 replicates each, and N=20 and M=2, then at least 2 of the 6 samples
 must have CPM&gt;20. 
 
-<li><u>None</u>: no filtering.
+<li><u>None</u>: No filtering.
 </ul>
 <p>If you want to see the first 25 (non-zero) filtered sequences, then use:
 <pre>
@@ -38,37 +33,44 @@ must have CPM&gt;20.
 </pre>
 The values will be written to the terminal near the top of the output.
 
-<p><i>When viewing the results in <tt>viewSingleTCW</tt>,
+<p>When viewing the results in <tt>viewSingleTCW</tt>,
 the filtered sequences will have a 3 for the DE value. If the DE analysis return a
-NA, it will also have a value of 3.</i>
+NA, it will have a value of 2.
 <p>
 <li><u>Fixed dispersion</u>: used when there are no replicates. 
 <ul>
-<li>For edgeR, if there are no replicates and this is not set, it will use a 0.1 dispersion. 
-<li>DESeq2 does not use a  fixed dispersion (see its documentation). 
-<li>This value will be written to the R environment using the variable 'disp' if an R-script is being used.
+<li>For <tt>edgeR</tt>, if there are no replicates and this is not set, it will use a 0.1 dispersion. 
+<li><tt>DESeq2</tt> does not use a  fixed dispersion (see its documentation). 
+<li>This value will be written to the R environment using the variable 'disp'.
 </ul>
 
 </ol>
-EXECUTE:
+Execute
 <ol>
-<li><u>Group 1 - Group 2</u>: 
-<ul>
-<li>Select at least one condition from each group.
-<li>If you want to store the results in the database, check <u>Save results in P-value column</u>.
-If the groups have been selected, a column name will be auto-generated which you can change.
-When you change the groups for a subsequent execution, uncheck-then-check the column box
-to auto-generated a name for the new groups.
-<li>The condition(s) in Group 1 will be compared with the condition(s) in group 2.
-</ul>
-<li><u>All Pairs for Group 1</u>: 
+<li><b>All Pairs for Group 1</b>: 
 <ul>
 <li>Only check conditions in Group 1.
 <li>Results will be saved in the database with auto-generated column names.
 <li>Each pair of conditions selected in group 1 will compared; any selections
 in Group 2 are ignored.
 </ul>
-<li><u>All Pairs from File</u>: 
+<li><b>Group 1 - Group 2</b>: 
+<ul>
+<li>Select at least one condition from each group. 
+The condition(s) in Group 1 will be compared with the condition(s) in group 2.
+<li>If you want to store the results in the database:
+<ul>
+<li>Check <u>Save results in P-value column</u>.
+If the groups have been selected, a column name will be auto-generated which you can change.
+<li>When you change the groups for a subsequent execution, uncheck-then-check the column box
+to auto-generated a name for the new groups. 
+</ul>
+<li>This is the only option that allows you to compute DE without writing to the database,
+e.g. if you want to view the results in R first.
+<li>This is the only option that checks to see if you are over-writing an existing column.
+</ul>
+
+<li><b>All Pairs from File</b>: 
 <ul>
 <li>The Condition section is ignored; the conditions to
 compare are specified in the file (see file format in "Details").
@@ -76,50 +78,50 @@ compare are specified in the file (see file format in "Details").
 <li>All pairs from the file will be compared with the selected method
 and options.
 </ul>
-<li><u>P-values from file</u>
+<li><b>P-values from file</b>
 <ul>
-<li>The Conditions, METHOD, and OPTIONS sections are ignored, and R is not used.
-<li>The p-values are read from file (see "Details" for file format). 
+<li>The Conditions and options are ignored, and R is not used.
+<li>The p-values are read from file (see "Details" below for file format). 
 </ul>
 </ol>
 <p><i>A p-value does not distinguish whether condition 1 is greater than condition 2 or vice versa.
-Therefore, if the RPKM for condition 1 is less than the RPKM condition 2, 
+Therefore, if the count for condition 1 is less than the count for condition 2, 
 a negative sign is put before the p-value.</i>
 
 <p>The first three options will leave your terminal in the "R environment", described
 in the section below.
 
-<!----------------------------------------------------!>
-<h2>Column Operations</h2>
-Select p-value column: 
-<ul>
-<li>Select with left mouse to see all choices.
-<li>Select with right mouse to click through choices.
-<li>The "All p-value columns" apply to all columns.
-</ul>
-Select <u>Remove</u> to remove the selected column(s) and corresponding GOseq column (if it exists).
-<p>
-Select <u>Execute GOseq</u> to run the GOseq function on the selected column(s), where
-GOseq detects GO which are over/under represented.
- The data will be entered into the GO table of the database using the p-value column name.
- If the GOseq p-value column exists, it will overwrite the existing value.
-Cutoff:
+<h2>GO enrichment</h2>
+Select <b>Execute</b> to run the specified <u>R-script</u> on the selected column(s). The
+default R-script computes <tt>GOseq</tt>.
+The data will be entered into the GO table of the database using the p-value column name.
+If the GO p-value column exists, it will overwrite the existing value.
+<p><u>Cutoff</u>:
 <ol>
-<li>P-value: if a sequence a DE p-value less than this amount (e.g. 0.05), 
-it is considered DE. GOseq
+<li>P-value: If a sequence has a DE p-value less than this amount (e.g. 0.05), 
+it is considered DE. <tt>GOseq</tt>
 takes as input the information as to whether or not each sequence is DE, 
 where a 1 indicates it is and a 0 indicates it is not. 
-<li>Top X%: instead of a p-value, you can request that the X% of the sequences with the
-lowest DE be considered DE for input to GOseq.
+<i>According to the <tt>goSeq</tt> documentation, the results are 
+NOT multiple hypothesis tested.</i>
+<li>Top X%: Instead of a p-value, you can request that the X% of the sequences with the
+lowest DE be considered DE for input to <tt>GOseq</tt>.
 </ol> 
+NOTE: It does not check if the GO p-value column exists, it will automatically replace it.
+<!----------------------------------------------------!>
+<h2>Remove p-value columns</h2>
+
+Select <b>Remove</b> to remove the selected p-value column(s) and corresponding GO column (if it exists).
+A value of <u>All p-values</u> will remove all p-value columns.
+
 <!----------------------------------------------------!>
 <h2>Update, Close and Exit</h2>
 <ol>
-<li><u>Update Overview</u>:
+<li><b>Update Overview</b>:
 The "Overview" needs to be updated after changes to the DE columns.
 It will also display the overview; if there have been no changes, it will only display.
-<li><u>Close</u>: Close the window, but do not exit the R environment (if active).
-<li><u>Exit</u>: Close the window, and if there are no other active <tt>runDE</tt>
+<li><b>Close</b>: Close the window, but do not exit the R environment (if active).
+<li><b>Exit</b>: Close the window, and if there are no other active <tt>runDE</tt>
 windows, exit R.
 </ol>
 <!----------------------------------------------------!>
@@ -157,7 +159,7 @@ type q(), followed by 'y', then start the R environment from the command line.
 
 <p>
 Ordinarily you should pick exactly one condition for each group, creating a two-condition comparison.
-In this case, any replicates in the conditions will automatically be used by those methods (EdgeR,DESeq2) 
+In this case, any replicates in the conditions will automatically be used by the methods
 which employ replicates.
 <p>
 You can also form groups having more than one condition, in which case the conditions in a given
@@ -209,7 +211,7 @@ are selected as Group 1 and Group 2, the values in this array will be:
 <tt>
 root, root, root, rhiz, rhiz, rhiz
 </tt>
-<li>Other variables are also written. To view them, execute a built-in or existing script;
+<li>Other variables are also written. To view them, execute an existing script;
 the variables are written to standard out with explanations.
 </ul>
 <li>The R-script is execute with the "source" command.
@@ -218,5 +220,6 @@ the variables are written to standard out with explanations.
 is created before the R-script execution, so if the order is not changes, it does not
 need to be changed.
 </ol>
-See the existing scripts for example.
+See the existing scripts for example. The <u>GO enrichment</u> also uses an R-script in 
+a similar way (see <tt>goSeq.R</tt>).
 </html>

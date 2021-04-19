@@ -13,261 +13,170 @@ import java.util.HashSet;
 import java.util.Map;
 import java.lang.StringBuilder;
 
-
 import org.rosuda.JRI.REXP;
-import org.rosuda.JRI.RList;
 import org.rosuda.JRI.RMainLoopCallbacks;
 import org.rosuda.JRI.Rengine;
 
 import sng.database.Globals;
-import sng.database.MetaData;
 import sng.database.Schema;
 import util.database.DBConn;
 import util.database.Globalx;
 import util.methods.ErrorReport;
 import util.methods.Out;
 
+/********************************************************
+ * seq DE
+ * 	input counts of two groups (e.g. Root and Stem); set P-value of DE for seq
+ * 	add and set contig.P_colName (e.g. P_RoSt)
+ * 	enter libraryDE.P_colName, title (e.g. Root: Stem), method
+ * 
+ * go over-represented
+ * 	input is boolean vector of contigs.P_colName<cutoff; set p-value of DE for GO
+ * 	add and set go_info.P_colName (same name as in contig table, e.g. P_RoSt)
+ * 	enter assem_msg.goDE all P_colName with cutoffs
+ */
 public class QRProcess {
 	private final int NUM_PRT_FILTER=25;
 	/********* R variables *********************
-	 * These variable are set in R for the R-scripts methods
+	 * These variable are set in R for the DE R-scripts methods
 	 */
 	private final String countDataR = "countData";
 	private final String rowNamesR = "rowNames";
 	private final String grpNamesR = "grpNames";
 	private final String repNamesR = "repNames";
 	private final String dispR = "disp"; 
-	private final String resultR = "results";
 	private final String nGroup1R = "nGroup1";
 	private final String nGroup2R = "nGroup2";
+	private final String resultR = "results";
 	
-	private String doPlots = "";
+	/********************************************
+	 * Variables set in R for the GO enrichment R-script; also uses resultR
+	 */
+	private final String seqDEsR 	= "seqDEs";
+	private final String seqNamesR 	= "seqNames";
+	private final String seqLensR 	= "seqLens";
+	private final String seqGOsR 	= "seqGOs";
+	private final String gonumsR 	= "goNums";
+	private final String nSeqsR		= "nSeqs";
+	
 	private final String RPKM = Globals.LIBRPKM;
+	private final String pColPrefix = Globals.PVALUE; 
 
 	public QRProcess(String name, DBConn m) {
 		mDB = m;
 		dbName = name;
 	}
-
-	/******************************************
-	 * XXX DE methods
+	public boolean rStart(boolean bDE) {
+		try {
+			String sql = "select schemver from schemver where schemver='" + Schema.currentVerString() + "'";
+			String ver = mDB.executeString(sql);
+			if (ver==null || ver.contentEquals("")) {
+				System.err.println("Database is not current (" + Schema.currentVerString() + ") - viewSingleTCW project to update.");
+				boolean c = Out.yesNo("Continue?"); // CAS321 was just returning false
+				if (!c) return false;				
+			}
+			if (re == null) {
+				initJRI();
+				packages = new HashSet<String>();
+				getPackages(packages);
+			}
+			
+			if (!bDE) {
+				nSeq = mDB.executeCount("select count(*) from contig where PIDgo > 0");
+	        	if (nSeq==0) {
+	        		Out.PrtWarn("The sequences have not been annotated yet."); 
+	        		return false;
+	        	}
+	        	
+				String tab = mDB.executeString("show tables like 'pja_unitrans_go'");
+				if (tab==null || tab.contentEquals("")) {
+					Out.PrtWarn("GOs have not been added to this database."); 
+	        		return false;
+				}
+	    		if (!checkPackage("goseq")) {
+	    			Out.PrtError("GOseq package does not exist");
+	    			return false;
+	    		}
+	    		doCmd(true, "suppressPackageStartupMessages(library(goseq))");
+			}
+			return true;
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "Cannot start R"); return false;}
+			
+	}
+	public void rFinish() {
+		re.startMainLoop();
+		Out.Print("The console is in R, you may run R commands -- q() or Cntl-C " +
+				"when done, or perform another Execute.");
+		System.err.print(">");
+	}
+	/***************************************************
+	 * Loading p-values from file. All values have been checked in QRFrame.
 	 */
-	public boolean doExecute(String rScriptFile, 
-		int filCnt, int filCPM, int filCPMn, double disp, boolean doFDR,
+	public boolean deReadPvalsFromFile(String pColName, TreeSet<String> g1,  
+			TreeSet <String> g2, TreeMap <String, Double> scores, String pvalFile) 
+	{
+		try {
+			dePrint(scores);
+			String col = Globals.PVALUE + pColName;
+			deSaveCols(scores, col, g1, g2);
+			deSaveMethod(col, g1, g2, "", pvalFile, 0);
+			Out.Print("\nFinished adding p-values from file " + pvalFile + " for " + dbName);
+			return true;
+		}
+		catch(Exception e){ErrorReport.reportError(e, "Error in execute"); return false;}
+	}
+	/******************************************
+	 * XXX DE methods - the loop through multiple grp1/grp2 occurs in QRframe
+	 */
+	public boolean deRun(boolean b, String rScriptFile, 
+		int filCnt, int filCPM, int filCPMn, double disp, 
 		String pColName, boolean addCol, TreeSet<String> g1,  TreeSet <String> g2) 
 	{
 		try {
-			ResultSet rs;
-			String sql = "select schemver from schemver where schemver='" + Schema.currentVerString() + "'";
-			rs = mDB.executeQuery(sql);
-			if (!rs.first())
-			{
-				System.err.println("Database is not current, view database with viewSingleTCW to update");
-				System.err.println("Terminate executing DE");
-				return false;				
-			}
 			TreeSet<String> grp1 = g1;
 			TreeSet<String> grp2 = g2;	
 
 			long startTime = Out.getTime();
 			
-			initJRI();
-			packages = new HashSet<String>();
-			getPackages(packages);
+			if (re == null) {
+				initJRI();
+				packages = new HashSet<String>();
+				getPackages(packages);
+			}
 			
-			loadCountsToR(filCnt, filCPM, filCPMn, grp1,grp2);
+			deLoadCountsToR(b, filCnt, filCPM, filCPMn, disp, grp1,grp2);
 			
 			TreeMap<String,Double> scores = new TreeMap<String,Double>();
 			if (!rScriptFile.equals("")) {
-				if (!runScript(scores, disp, rScriptFile)) return false;
+				if (!deRunScript(scores, rScriptFile)) return false;
 			}			
 			else {
 				Out.PrtError("No R-script");
 				return false;
 			}
-			/** CASX 7/7/19 doesn't work
-			if (scores.size() > 0 && doFDR) runFDR(scores);
-			**/
-			printDE(scores);
+			
+			dePrint(scores);
 			if (scores.size() > 0 && pColName.length() > 0 && addCol) {
-				saveDEcols(scores, pColName, grp1, grp2);
-				saveMethod(pColName, grp1, grp2, rScriptFile, "", disp);
+				deSaveCols(scores, pColName, grp1, grp2);
+				deSaveMethod(pColName, grp1, grp2, rScriptFile, "", disp);
+				Out.r("                                             ");
 			}  
-			Out.PrtMsgTimeMem("\nFinished DE execution for " + dbName, startTime);
+			Out.PrtMsgTimeMem("\nFinished DE execution for " + prtName(pColName), startTime);
 		
-			if (doPlots!="") System.err.println("\n" + doPlots);
-        		re.startMainLoop();
-			Out.Print("The console is in R, you may run R commands -- q() or Cntl-C " +
-					"when done, or perform another Execute.");
-			System.err.print(">");
 			return true;
 		}
 		catch(Exception e){ErrorReport.reportError(e, "Error in execute"); return false;}
 	}
-	/***************************************************
-	 * Loading p-values from file. All values have been checked in QRFrame.
-	 */
-	public boolean doLoadFile(String pColName, TreeSet<String> g1,  
-			TreeSet <String> g2, TreeMap <String, Double> scores, String pvalFile) 
-	{
-		try {
-			printDE(scores);
-			String col = Globals.PVALUE + pColName;
-			saveDEcols(scores, col, g1, g2);
-			saveMethod(col, g1, g2, "", pvalFile, 0);
-			Out.Print("\nFinished adding p-values from file " + pvalFile);
-			return true;
-		}
-		catch(Exception e){ErrorReport.reportError(e, "Error in execute"); return false;}
-	}
-	/*************************************************
-	 * save pvalues
-	 */
-	private void printDE(TreeMap<String,Double> scores) {
-		double [] cutoff =    {     1e-5,    1e-4,    0.001,   0.01,     0.05};
-        String [] df = {     "<1e-5", "<1e-4", "<0.001", "<0.01", "<0.05"};
-        int [] ct =      {     0,       0,      0,       0,        0};
-        for (String x : scores.keySet()) {
-    		double de = scores.get(x);
-    		for (int i=0; i<ct.length; i++) {
-    			if (Math.abs(de) < cutoff[i]) ct[i]++;
-    		}
-        }
-        Out.Print("\nNumber of DE results:");
-        Out.Print(String.format("   %5s %5s %5s %5s %5s", df[0], df[1],df[2],df[3],df[4]));
-        Out.Print(String.format("   %5d %5d %5d %5d %5d", ct[0], ct[1],ct[2],ct[3],ct[4]));
-	}
-	private void saveDEcols(TreeMap<String,Double> scores, String pColName, 
-			TreeSet <String> grp1, TreeSet <String> grp2) 
-	{
-		try {
-			String colName = pColName.substring(2); // so doesn't print P_
-			Out.Print("\nSaving " + scores.size() + " scores for " + colName);
-			
-		// add column or set to default 3
-			ResultSet rs = mDB.executeQuery("show columns from contig where field= '" + pColName + "'");
-			if (!rs.first()) {
-				Out.PrtSpMsg(1, "Adding column to database...");
-				mDB.executeUpdate("alter table contig add " + pColName + 
-						" double default " + Globalx.dStrNoDE);
-			}
-			else {
-				mDB.executeUpdate("update contig set " + pColName + "=" + Globalx.dStrNoDE);
-			}
-			mDB.executeUpdate("update assem_msg set pja_msg=NULL");
-		
-			PreparedStatement ps = mDB.prepareStatement("update contig set " + pColName 
-					+ "=? where contigid=?");
-			int cntSave = 0, cntNA=0, cnt=0;
-			double nan=Globalx.dNaDE; 
-			
-			mDB.openTransaction(); 
-			for (String ctg : scores.keySet()){
-				double sc = scores.get(ctg);
-				if (scores.get(ctg).isNaN()) {ps.setDouble(1,nan); cntNA++;}
-				else ps.setDouble(1,sc); 
-				ps.setString(2, ctg);
-				ps.addBatch();
-				cnt++; cntSave++; 
-				if (cntSave==100) {
-					cntSave=0;
-					Out.r("add " +cnt);
-					try{
-						ps.executeBatch();
-					}
-					catch(Exception e){System.err.println("BAD VALUE " + ctg + " " + scores.get(ctg));}
-				}
-			}
-			if (cntSave>0) ps.executeBatch();
-			mDB.closeTransaction(); 
-			if (cntNA>0) Out.PrtSpMsg(1, cntNA + " NA scores");
-			
-			// Now IF there is one library in each group set, and IF the corresponding LN__ columns exist, 
-			// then convert the scores to +/- to encode the direction of DE.
-			if (grp1.size() == 1 && grp2.size() == 1)
-			{
-				String col1 = RPKM + grp1.first();
-				String col2 = RPKM + grp2.first();
-				rs = mDB.executeQuery("show columns from contig where field='" + col1 + "'");
-				boolean col1Exists = rs.first();
-				rs = mDB.executeQuery("show columns from contig where field='" + col2 + "'");
-				boolean col2Exists = rs.first();
-				if (col1Exists && col2Exists) {
-					mDB.executeUpdate("update contig set " + pColName + " =-" + pColName + 
-							" where " + col1 + "<" + col2);						
-				}
-			}
-			rs.close();
-			
-			Out.Print("Finished saving scores for " + colName);
-		}
-		catch (Exception e) {ErrorReport.prtReport(e, "Adding DE columns");}
-	}
-	// Metadata goes in libraryDE 
-	private void saveMethod(String pColName, TreeSet <String> grp1, TreeSet <String> grp2,
-			String rScriptFile, String pvalFile, double disp) {
-		try {
-			String title = "";
-			for (String lib : grp1) title += lib + " ";
-			title += ": ";
-			for (String lib : grp2) title += lib + " ";
-			if (title.length()>100) title = title.substring(0,99);
-		
-			String sMethod = "";
-			if (!rScriptFile.equals("")) {
-				String file = rScriptFile.substring(rScriptFile.lastIndexOf("/")+1);
-				if (file.length()>20) file = file.substring(0,20);
-				sMethod = "source(" + file + ")";
-			}
-			else if (!pvalFile.equals("")) {
-				String file = pvalFile.substring(pvalFile.lastIndexOf("/")+1);
-				if (file.length()>20) file = file.substring(0,20);
-				sMethod = "File: " + file;
-			}
-			else Out.die("TCW error in save method");
-			
-			if (disp>0) sMethod += " Disp=" + disp;
-				
-			// this table not in schema
-			ResultSet rs = mDB.executeQuery("show tables like 'libraryDE'");
-			if (!rs.first()) {
-				System.out.println("Create library DE table");
-				mDB.executeUpdate("create table libraryDE (" +
-				  "pCol varchar(30), title varchar(100), method varchar(40), index(pCol));");
-			}
-			else {
-				rs = mDB.executeQuery("show columns from libraryDE where field='method'");
-				if (!rs.first()) mDB.executeUpdate("alter table libraryDE add method varchar(40)");
-			}
-			if (sMethod.length()>=40) {
-				System.err.println("DE method length over 40: " + sMethod);
-				sMethod = sMethod.substring(0,39);
-			}
-			if (title.length()>=100) {
-				System.err.println("Conditions over length over 100: " + title);
-				title = title.substring(0,99);
-			}
-			
-			rs = mDB.executeQuery("Select title from libraryDE where pCol='" + pColName + "'");
-			if (rs.first()) {
-				mDB.executeUpdate("update libraryDE set title='" + title + "', method='" + sMethod +
-						"' where pCol='" + pColName + "'");
-			}
-			else {
-				mDB.executeUpdate("insert into libraryDE set pCol='" + 
-						pColName + "', title='" + title +  "', method='" + sMethod +"'");
-			}
-			rs.close();
-		}
-		catch (Exception e) {ErrorReport.prtReport(e, "Adding DE metadata");}
-	}
+	
+	
 	/***
-	 *  Put the expression data into R objects for use by the DE methods
+	 *  Put the counts into R objects for use by the DE methods
 	 *  grp1 are the libraries to be compared with grp2
-	 *  return an array of two integers 
-	 *  filter on cpm >= filCPM for > filCPMn samples
+	 *  filCnt = filter on count; filCPM and filCPMn = filter on CPM
 	 */
-	private void loadCountsToR(int filCnt, int filCPM, int filCPMn, TreeSet<String> grp1, TreeSet<String> grp2)
+	private void deLoadCountsToR(boolean b, int filCnt, int filCPM, int filCPMn, double disp,
+			TreeSet<String> grp1, TreeSet<String> grp2)
 	{
 		try {
 			nGroup1=nGroup2=0; // in case run a second time, don't want accumlative
@@ -278,11 +187,12 @@ public class QRProcess {
 			allGrp.addAll(grp2);
 			int nRepSamps = 0;
 		  	Vector<String> allReps = new Vector<String>(); 
+		  	TreeMap <Integer, Sample> samMap = new TreeMap <Integer, Sample> ();
 		
 	// Get Samples: e.g. root has root1, root2...
 			mDB.executeUpdate("update library set reps='' where reps is null"); // in case...
-			System.err.println("\n"); // makes replicate lines slightly prettier, if any
 			
+			Out.PrtSpMsg(0, "Replicates:");
 			for (String libName : allGrp) {
 				rs = mDB.executeQuery("select reps,lid from library where libid='" + libName + "'");
 				rs.first();
@@ -306,7 +216,7 @@ public class QRProcess {
 				else {
 					String[] repnames = reps.split(",");
 					int nReps = repnames.length;
-					Out.PrtSpCntMsg(0, nReps, libName + " replicates");
+					Out.PrtSpCntMsg(0, nReps, libName);
 					for (int r = 1; r <= repnames.length; r++) {
 						sObj.addN(r, nRepSamps);						
 						
@@ -318,8 +228,9 @@ public class QRProcess {
 					}
 				}
 			}
-		// Create Groups: array to group conditions: if multiple conditions in group, need to use 'Grp'
-		// else can use the condition name (e.g. root for reps root1, root2...)
+		/* Create groups */
+			// array to group conditions: if multiple conditions in group, need to use 'Grp'
+			// else can use the condition name (e.g. root for reps root1, root2...)
 			String group1="Grp1", group2="Grp2";
 			if (grp1.size()==1 && grp2.size()==1) { 
 				group1 = grp1.first();
@@ -339,7 +250,8 @@ public class QRProcess {
 			String [] rowNames = new String[nSeq];
 			double[] gc = new double[nSeq];
 			TreeMap <Integer, Integer> seqMap = new TreeMap <Integer, Integer> ();
-		// Get sequences (don't change contig order)
+			
+		/* Get sequences (don't change contig order) */
 			rs = mDB.executeQuery("select contigid, ctgid, gc_ratio " +
 					"from contig order by ctgid asc limit " + nSeq); // for testing
 			int seqIndex = 0;
@@ -352,7 +264,8 @@ public class QRProcess {
 			}
 			int[][] cntMatrix = new int[nSeq][nRepSamps];
 			
-		// Get counts: counts are in database by sequences assembled into contigs (super-sequence).
+		/* Get counts */
+			// counts are in database by sequences assembled into contigs (super-sequence).
 			// For non-assembled, sequence==super-sequences
 			// For assembled, sum(count) for the same contig, lib and rep.
 			rs = mDB.executeQuery("select ctgid, lid, rep, sum(count) from clone_exp " +
@@ -374,9 +287,10 @@ public class QRProcess {
 				
 				cntMatrix[seqX][repNum] = count;
 			}
+		/* Filter */
 			int [] counts;
 			if (filCnt>0 || filCPM>0) {
-				boolean [] isKeep = loadFilter(filCnt, filCPM, filCPMn, 
+				boolean [] isKeep = deLoadFilter(filCnt, filCPM, filCPMn, 
 						cntMatrix, colNames, rowNames, allReps);
 				// Make counts without !keep, update seqNames, update nSeq
 				int remove=0, mSeq=0;
@@ -413,37 +327,50 @@ public class QRProcess {
 					for (int j=0; j<nSeq; j++) 
 						counts[k++] = cntMatrix[j][i];
 			}
-			
 			if (re == null) initJRI();
-	        	
-        	Out.Print("Assigning R variables");
-        	/********************************************
-        	 * XXX these assignments are used by the methods
-        	 *
-        	doCmd(groupR + " <- c(rep(\"Grp1\", " + nSamp1 + " ),rep(\"Grp2\", " +nSamp2 + "))"); 
-        	doCmd("colnames(" + countDataR + ") <- " + colNamesR); gives error
-        	*/
-        	re.assign("gc",gc); 				Out.PrtSpMsg(1, "gc: GC values of sequences");
-        	re.assign(rowNamesR,rowNames); 		Out.PrtSpMsg(1,rowNamesR + ": sequences (row) names");
-	        re.assign(grpNamesR, colNames); 	Out.PrtSpMsg(1,grpNamesR + ": group (column) names");
+			
+        	if (b) Out.Print("Assigning R variables");
+        	else   Out.Print("Assigning R variables (see #1)");
+        /********************************************
+        * XXX these assignments are used by the methods
+ 		********************************************/
+        	re.assign("gc",gc); 				if (b) Out.PrtSpMsg(1, "gc: GC values of sequences");
+        	re.assign(rowNamesR,rowNames); 		if (b) Out.PrtSpMsg(1,rowNamesR + ": sequences (row) names");
+	        re.assign(grpNamesR, colNames); 	if (b) Out.PrtSpMsg(1,grpNamesR + ": group (column) names");
 	     	re.assign(repNamesR, allReps.toArray(new String[0])); 
-	     										Out.PrtSpMsg(1,repNamesR + ": replicate names");
+	     										if (b) Out.PrtSpMsg(1,repNamesR + ": replicate names");
 	     	
-	        re.assign("counts", counts);  		Out.PrtSpMsg(1,"counts: counts of sequences");
-	        doCmd(countDataR + " <- array(counts,dim=c(" + nSeq + "," + nRepSamps + "))");
-	        doCmd("rm(counts)");
-	        doCmd("rownames(" + countDataR + ") <- " + rowNamesR);
-	        doCmd(nGroup1R + " <- " + nGroup1);
-	        doCmd(nGroup2R + " <- " + nGroup2);
+	        re.assign("counts", counts);  		if (b) Out.PrtSpMsg(1,"counts: counts of sequences");
+	        doCmd(b, countDataR + " <- array(counts,dim=c(" + nSeq + "," + nRepSamps + "))");
+	        doCmd(b, "rm(counts)");
+	        doCmd(b, "rownames(" + countDataR + ") <- " + rowNamesR);
+	        doCmd(b, nGroup1R + " <- " + nGroup1);
+	        doCmd(b, nGroup2R + " <- " + nGroup2);
+	        
+	        if (disp>0) doCmd(b, dispR + " <- " + disp);
+	     	else if (nGroup1==1 && nGroup2==1) doCmd(b, dispR + " <- 0.1");
 		}
 		catch(Exception e){ErrorReport.die(e, "performing DB counts");}
+	}
+	/**************************************************
+	 * Assigns column number to Lib+Rep - used by deLoadCountsToR
+	 */
+	private class Sample {
+		public Sample(int i, String n) {
+			//lid = i;
+			//libName=n;
+		}
+		public void addN(int rep, int totalRepN) {
+			nRep.put(rep,totalRepN);
+		}
+		TreeMap <Integer, Integer> nRep = new TreeMap <Integer, Integer> ();
 	}
 	/****************************************************
 	 * Produces same cpm as: edgeR.cpm(y, normalized.lib.sizes=FALSE, log=FALSE)
 	 * 3Sept18 tested again on hind with latest edgeR. It does not give the exact same answer
 	 * when edgeR samSize = lib.size*norm.factors (i.e. edgeR computed norm.factors are used)
 	 */
-	private boolean [] loadFilter(int filCnt, int filCPM, int filCPMn, 
+	private boolean [] deLoadFilter(int filCnt, int filCPM, int filCPMn, 
 			int [][]cntMatrix, String [] colNames, String [] rowNames, Vector <String> repNames) {
 		
 		int nSeq = rowNames.length;
@@ -529,68 +456,16 @@ public class QRProcess {
 			Out.PrtSpCntMsg(1, cntZero, "sequences with all zero counts");
 		return isKeep;
 	}
-	// Assigns column number to Lib+Rep
-	TreeMap <Integer, Sample> samMap = new TreeMap <Integer, Sample> ();
-	private class Sample {
-		public Sample(int i, String n) {
-			//lid = i;
-			//libName=n;
-		}
-		public void addN(int rep, int totalRepN) {
-			nRep.put(rep,totalRepN);
-		}
-		TreeMap <Integer, Integer> nRep = new TreeMap <Integer, Integer> ();
-	}
 	
-	/*******************************************************
-	 * FDR -- CASX 7/7/19 this does not work!
-	 * they can use the FDR column from edgeR.
-	
-	private void runFDR(TreeMap<String,Double> ctg2score ){
-		Vector<String> names = new Vector<String>();
-		double[] scores = new double[ctg2score.size()];
-		int i = 0;
-		for (String name : ctg2score.keySet())
-		{
-			names.add(name);
-			scores[i] = ctg2score.get(name);
-			i++;
-		}
-		try
-		{
-			if (re == null) initJRI();      	
-	        	Out.Print("\nConvert to FDR....");
-	        	
-	        	doCmd("suppressPackageStartupMessages(library(\"multtest\"))");
-	        	re.assign("rawScores", scores);
-				
-	        	doCmd("scoresFDR <- mt.rawp2adjp(rawScores,c(\"BH\"))");
-	        	
-	        REXP x = doCmdx("orderedFDR <- scoresFDR$adjp[order(scoresFDR$index),2]");;
-	        
-	        	double[] adjScores = x.asDoubleArray();
-	        	assert(adjScores.length == names.size());
-	        	for (i = 0; i < names.size(); i++)
-	        	{
-	        		String name = names.get(i);
-	        		double fdr = adjScores[i];
-	        		ctg2score.put(name, fdr);
-	        	}
-	        	Out.Print("FDR done");
-		}
-		catch(Exception e){ErrorReport.reportError(e, "Error computing FDR");}
-	}
-	 */
 	/*****************************************************
-	 * runScript
+	 * All data is loaded for R. Run DE script
 	 */
-	private boolean runScript(TreeMap<String,Double> scores, double disp, String rScriptFile) 
+	private boolean deRunScript(TreeMap<String,Double> scores, String rScriptFile) 
 	{
+		boolean b=true; // print
      	Out.Print("\nStart R-script ");
-     	if (disp>0) doCmd(dispR + " <- " + disp);
-     	else if (nGroup1==1 && nGroup2==1) doCmd(dispR + " <- 0.1");
-		
-     	doCmd("source('" + rScriptFile + "')");
+     	
+     	doCmd(b, "source('" + rScriptFile + "')");
 		 
 		REXP x;
 		double[] pvals=null;
@@ -601,277 +476,409 @@ public class QRProcess {
 		catch (Exception e) {Out.PrtError("No R variable 'results' exists"); return false;}
 		
         if (pvals==null || pvals.length==0) {
-        		Out.PrtError(resultR + " R variable does not contain an array of results (type double)");
-        		return false;
-        	}
-        	x = doCmdx(rowNamesR);
-        	String[] ctgs = x.asStringArray();
-        	
-        	if (ctgs.length==0) {
-        		Out.PrtError(rowNamesR + " R variable does not contain an array of row names (type string)");
-        		return false;
-        	}
-         	
-        	for (int i = 0; i < ctgs.length; i++) {
-        		scores.put(ctgs[i], pvals[i]);
-        	}
+    		Out.PrtError(resultR + " R variable does not contain an array of results (type double)");
+    		return false;
+    	}
+    	x = doCmdx(rowNamesR);
+    	String[] ctgs = x.asStringArray();
+    	
+    	if (ctgs.length==0) {
+    		Out.PrtError(rowNamesR + " R variable does not contain an array of row names (type string)");
+    		return false;
+    	}
+     	
+    	for (int i = 0; i < ctgs.length; i++) {
+    		scores.put(ctgs[i], pvals[i]);
+    	}
 
-        	Out.Print("R-script done");
-        	return true;
+    	Out.Print("R-script done");
+    	return true;
 	}
-
+	/*************************************************
+	 * save pvalues
+	 */
+	private void dePrint(TreeMap<String,Double> scores) {
+		double [] cutoff =    {     1e-5,    1e-4,    0.001,   0.01,     0.05};
+        String [] df = {     "<1e-5", "<1e-4", "<0.001", "<0.01", "<0.05"};
+        int [] ct =      {     0,       0,      0,       0,        0};
+        for (String x : scores.keySet()) {
+    		double de = scores.get(x);
+    		for (int i=0; i<ct.length; i++) {
+    			if (Math.abs(de) < cutoff[i]) ct[i]++;
+    		}
+        }
+        Out.Print("\nNumber of DE results:");
+        Out.Print(String.format("   %5s %5s %5s %5s %5s", df[0], df[1],df[2],df[3],df[4]));
+        Out.Print(String.format("   %5d %5d %5d %5d %5d", ct[0], ct[1],ct[2],ct[3],ct[4]));
+	}
+	/*********************************************************
+	 * Create DE column if not exist, else clear
+	 * Enter data frin 
+	 */
+	private void deSaveCols(TreeMap<String,Double> scores, String pColName, 
+			TreeSet <String> grp1, TreeSet <String> grp2) 
+	{
+		try {
+			String colName = pColName.substring(2); // so doesn't print P_
+			Out.Print("\nSaving " + scores.size() + " scores for " + colName);
+			
+		/* add column or set to default 3 */
+			ResultSet rs = mDB.executeQuery("show columns from contig where field= '" + pColName + "'");
+			if (!rs.first()) {
+				Out.PrtSpMsg(1, "Adding column to database...");
+				mDB.executeUpdate("alter table contig add " + pColName + 
+						" double default " + Globalx.dStrNoDE);
+			}
+			else {
+				mDB.executeUpdate("update contig set " + pColName + "=" + Globalx.dStrNoDE);
+			}
+			mDB.executeUpdate("update assem_msg set pja_msg=NULL");
+		
+			PreparedStatement ps = mDB.prepareStatement("update contig set " + pColName 
+					+ "=? where contigid=?");
+			int cntSave = 0, cntNA=0, cnt=0;
+			double nan=Globalx.dNaDE; 
+			
+			mDB.openTransaction(); 
+			for (String ctg : scores.keySet()){
+				double sc = scores.get(ctg);
+				if (scores.get(ctg).isNaN()) {ps.setDouble(1,nan); cntNA++;}
+				else ps.setDouble(1,sc); 
+				ps.setString(2, ctg);
+				ps.addBatch();
+				cnt++; cntSave++; 
+				if (cntSave==100) {
+					cntSave=0;
+					Out.r("add " +cnt);
+					try{
+						ps.executeBatch();
+					}
+					catch(Exception e){System.err.println("BAD VALUE " + ctg + " " + scores.get(ctg));}
+				}
+			}
+			if (cntSave>0) ps.executeBatch();
+			mDB.closeTransaction(); 
+			if (cntNA>0) Out.PrtSpMsg(1, cntNA + " NA scores");
+			
+		/* Set negative if col1<col2 */
+			// IF there is one library in each group set, and IF the corresponding LN__ columns exist, 
+			// then convert the scores to +/- to encode the direction of DE.
+			if (grp1.size() == 1 && grp2.size() == 1)
+			{
+				String col1 = RPKM + grp1.first();
+				String col2 = RPKM + grp2.first();
+				rs = mDB.executeQuery("show columns from contig where field='" + col1 + "'");
+				boolean col1Exists = rs.first();
+				rs = mDB.executeQuery("show columns from contig where field='" + col2 + "'");
+				boolean col2Exists = rs.first();
+				if (col1Exists && col2Exists) {
+					mDB.executeUpdate("update contig set " + pColName + " =-" + pColName + 
+							" where " + col1 + "<" + col2);						
+				}
+			}
+			rs.close();
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "Adding DE columns");}
+	}
+	/*******************************
+	 *  Metadata goes in libraryDE 
+	 */
+	private void deSaveMethod(String pColName, TreeSet <String> grp1, TreeSet <String> grp2,
+			String rScriptFile, String pvalFile, double disp) {
+		try {
+			String title = "";
+			for (String lib : grp1) title += lib + " ";
+			title += ": ";
+			for (String lib : grp2) title += lib + " ";
+			if (title.length()>100) title = title.substring(0,99);
+		
+			String sMethod = "";
+			if (!rScriptFile.equals("")) {
+				String file = rScriptFile.substring(rScriptFile.lastIndexOf("/")+1);
+				if (file.length()>20) file = file.substring(0,20);
+				sMethod = file;
+			}
+			else if (!pvalFile.equals("")) {
+				String file = pvalFile.substring(pvalFile.lastIndexOf("/")+1);
+				if (file.length()>20) file = file.substring(0,20);
+				sMethod = file;
+			}
+			else Out.die("TCW error in save method");
+			
+			ResultSet rs = mDB.executeQuery("Select title from libraryDE where pCol='" + pColName + "'");
+			if (rs.first()) {
+				Out.PrtSpMsg(1, "Overwrite existing " + pColName);
+				if (mDB.tableExists("go_info")) { //CAS321 was not removing Go data
+					String goMethod = mDB.executeString("select goMethod from libraryDE where pCol='" + pColName + "'");
+					if (goMethod!=null && goMethod!="") {
+						Out.PrtSpMsg(1, "Remove GO p-values for " + pColName);
+						mDB.tableCheckDropColumn("go_info", pColName);
+					}
+				}
+				mDB.executeUpdate(
+					"update libraryDE set title='" + title + "', method='" + sMethod + "', goMethod='', goCutoff=-1.0" +
+						" where pCol='" + pColName + "'");
+			}
+			else {
+				mDB.executeUpdate("insert into libraryDE set pCol='" + 
+						pColName + "', title='" + title +  "', method='" + sMethod +"'");
+			}
+			rs.close();
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "Adding DE metadata");}
+	}
+/****************************************************************************************/
 	/***********************************************
-	 * XXX GOSeq
+	 * XXX GOSeq enrichment (over-represented)
 	 * colNames: 	Names of all p-value columns 
 	 * col: 		Name of the one selected column
 	 * doAll:		use colNames (process all) or col (process one)
 	 * usePercent:	true: use the top N%  false: use p-value<N
 	 * pCutoff:		use this cutoff for N
 	 */
-	public void runGOSeq(String[] colNames, String col, boolean doAll, boolean usePercent, double pCutoff)
+	public void goRun(boolean b, String colName, boolean usePercent, double pCutoff, String rScriptFile)
 	{
-		String pid = "PIDgo";  
-		String[] cols2do = (doAll ? colNames : new String[]{col});
+		String pColName = pColPrefix + colName;
+		
 		long startTime = Out.getTime();
 		try {	    		
-        	ResultSet rs = mDB.executeQuery("show tables like 'pja_unitrans_go'");
-    		if (!rs.first()) { 
-    			Out.PrtError("The GO tables have not been added");
-    			Out.Print("Abort GOseq");
-    			rs.close();
-    			return;
-    		}
+    		double cutoff = pCutoff; 
+			if (usePercent) { // figure out cutoff for Top N%
+				int nThresh = (int)((cutoff*nSeq)/100);
+				double thresh2 = mDB.executeFloat("select abs(" + pColName +  ") from contig " +
+						"where PIDgo > 0 order by " + pColName + " asc limit " + nThresh);
+				String tx = String.format("%.4f", thresh2); // limit precision
+				Out.PrtSpMsg(1, pCutoff + "% = seq p-value cutoff:" + tx);
+				cutoff = Double.parseDouble(tx);
+			}
+			
+    	/** load data **/
+    		goLoadDEtoR(b, pColName, cutoff, nSeq);
+				
+		/** run GOseq **/
+    		TreeMap<String,Double> scores = new TreeMap<String,Double> ();
+    		goRunScript(scores, rScriptFile);
     		
-        	initJRI();
-        	packages = new HashSet<String>(); 
-    		getPackages(packages);
-    		if (!checkPackage("goseq")) {
-    			Out.PrtError("GOseq package does not exist");
-    			return;
-    		}
-    		
-    		Out.Print("\nBegin GOseq");
-    	 	doCmd("suppressPackageStartupMessages(library(goseq))");
-
- /** get sequences and lengths to be used for all GO DE columns **/	    		
-        	int nSeq = mDB.executeCount("select count(*) from contig where " + pid + " > 0");
-        	if (nSeq==0) {
-        		Out.PrtWarn("The sequences have not been annotated yet."); 
-        		return;
-        	}
-
-        	int[] lens = new int[nSeq]; 
-        	String[] names = new String[nSeq]; 
-	        int 	n = 0;
-	        
-        	rs = mDB.executeQuery("select contigid, consensus_bases " +
-        			" from contig where " + pid + " > 0 order by ctgid asc"); 
-        	
-        	while (rs.next()) {
-        		names[n] = rs.getString(1);
-        		lens[n] =  rs.getInt(2);
-        		n++;
-        	}
-        	re.assign("seqNames",names);	Out.PrtSpMsg(1, "seqNames: sequence names");
-        	re.assign("seqLens",lens);		Out.PrtSpMsg(1, "seqLens:  sequence lengths");
-			doCmd("nSeq <- " + nSeq);
-			
-			TreeMap <String, Double> dePvalMap = new MetaData().getDegPvalMap(mDB); // p-value:cutoff saved in database
-			if (dePvalMap==null) dePvalMap = new TreeMap <String, Double> ();
-			
-/** for each P column to process: **/	
-        	for (String pColName : cols2do)
-        	{
-        		double cutoff = pCutoff; 
-        		if (pColName.equals("")) continue; 
-        		if (pColName.equals(QRFrame.selCol) || pColName.equals(QRFrame.allCols)) continue;
-        		String colName = pColName.substring(2);
-        		Out.Print("\nGOSeq: processing " + colName);
-        		
-				if (usePercent) // figure out cutoff for Top N%
-				{
-					int nThresh = (int)((cutoff*nSeq)/100);
-					rs = mDB.executeQuery("select abs(" + pColName +  ") from contig " +
-							"where " + pid + " > 0 order by " + pColName + " asc limit " + nThresh);
-					rs.last();
-					double thresh2 = rs.getDouble(1);
-					String tx = String.format("%.4f", thresh2); // limit precision
-					Out.PrtSpMsg(1, pCutoff + "% = seq p-value cutoff:" + tx);
-					cutoff = Double.parseDouble(tx);
-				}
-				dePvalMap.put(colName, cutoff); // overwrites any previous assignment
-			
-		/* get sequence DE values and create 0-1 vector of above and below a threshold */		
-			    int[] DE = new int[nSeq]; 
-			    int cntDE=0;
-			    n = 0;
-			        	
-			    rs = mDB.executeQuery("select abs(" + pColName + ") from contig " +
-			        			" where " + pid + " > 0 order by ctgid asc");
-			 
-	        	while (rs.next()){
-	        		double p = rs.getDouble(1);
-	        		int de = (p < cutoff ? 1 : 0); 
-	        		DE[n] = de;
-	        		n++;
-	        		cntDE += de;
-	        	}	
-			    re.assign("seqDE",DE);	Out.PrtSpMsg(1, "seqDE: DE binary vector (" + cntDE + " seq p-value < " + cutoff + ")" );
-				doCmd("names(seqDE) <- seqNames");
-				doCmd("deSeqNames <- seqNames");       // deSeqNames assigned null if no p-value
-				doCmd("gos <- vector(\"list\",nSeq)");
-				
-      /* get GOs for all direct and indirect per contig and write to R */
-				Out.PrtSpMsg(1, "For all n: gos[[n]] <- c(gonum list)");
-				
-				Vector<Integer> seqGOs = new Vector<Integer>();
-				boolean haveMore=true;
-				int gonum;
-				String curID = "", seqID="";
-				n = 1; 
-				
-				rs = mDB.executeQuery("select c.contigid, p.gonum " +
-						" from contig as c  " +
-						" left join pja_unitrans_go as p on p.ctgid=c.ctgid " +
-						" where c." + pid + "> 0 order by c.ctgid asc");	
-				
-				while (haveMore) {
-					haveMore = rs.next();
-					if (haveMore) { 
-						seqID = rs.getString(1);
-						gonum = rs.getInt(2);
-						if (curID.equals("")) curID = seqID;
-					} 
-					else { // last one
-						gonum=0;
-						curID="done";
-					}
-				
-					if (!seqID.equals(curID)) {
-						if (seqGOs.size() > 0) {
-							StringBuilder str = new StringBuilder("");
-							str.append("\"" + seqGOs.firstElement() + "\"");
-							for (int i = 1; i < seqGOs.size(); i++)
-							{
-								str.append(",\"" + seqGOs.get(i)  + "\"");
-							}
-							String cmd = "gos[[" + n + "]] <- c(" + str.toString() + ")";
-							re.eval(cmd);
-							seqGOs.clear();
-						}
-						else {   // this replaces name with NA; if pid is PIDgo, this will not happen
-							String cmd = "deSeqNames[" + n + "] <- NA";
-							re.eval(cmd);
-						}
-						curID = seqID;
-						n++;
-						if (n%1000 == 0) Out.r("Process sequence #" + n);
-					}
-					
-					if (gonum > 0)	seqGOs.add(gonum);
-				}
-				Out.r("                                                  ");
-					
-			/** run GOseq **/
-				doCmd("names(gos) = deSeqNames"); 
-				doCmd("np <- nullp(seqDE,'','',seqLens,FALSE)"); 
-				
-				String cmd = "pvals <- goseq(np,'','',gos)";
-				Out.prt("Executing command: " + cmd);
-	        	RList results = re.eval(cmd).asList();
-	        	Out.prt("Finish execution");
-	        	
-	        	String[] gonums = results.at("category").asStringArray();
-	        	double[] pvals = results.at("over_represented_pvalue").asDoubleArray();
-	        	assert(gonums.length == pvals.length);
-	        	
-		    /** save results **/
-	        	rs = mDB.executeQuery("show columns from go_info where field='" + pColName + "'");
-	        	if (!rs.first()) {
-	        		Out.PrtSpMsg(1, "Adding column to go_info table");
-	        		mDB.executeUpdate("alter table go_info add " + pColName + " double default " + Globalx.dStrNoDE);             
-	        	}
-	        	else mDB.executeUpdate("update go_info set " + pColName + "=" + Globalx.dStrNoDE);
-        
-	        	mDB.executeUpdate("update assem_msg set pja_msg=NULL");
-	        	n = gonums.length; 
-	        	int cntSave=0, cnt=0;
-	        	
-	        	Out.Print("\nSaving " + n + " values to database for " + colName);
-	        	mDB.openTransaction(); 
-				PreparedStatement ps = mDB.prepareStatement(
-						"update go_info set " + pColName + "=? where gonum=?");
-				int cnt05=0;
-				for (int i = 0; i < gonums.length; i++) {
-					gonum = Integer.parseInt(gonums[i]);
-					double score = pvals[i];
-					ps.setDouble(1,score);
-					ps.setInt(2,gonum);
-					ps.addBatch();
-					
-					cnt++; cntSave++;
-					if (cntSave==1000) {
-						Out.rp("Save ", cnt, n);
-						ps.executeBatch();
-						cntSave=0;
-					}
-					if (score<0.05) cnt05++;
-				}	
-				if (cntSave>0) ps.executeBatch();
-				ps.close();
-				mDB.closeTransaction(); 
-				
-				Out.PrtSpCntMsg(0, cnt05, "GO p-values < 0.05");
-				Out.Print("Finish saving "  + colName);
-        	} // complete loop through P columns to process  
-        	rs.close();
-        	saveGoDE("", dePvalMap);
-         	
-        	Out.Print("                                                          ");
-            Out.PrtMsgTimeMem("Finished GOseq execution for " + dbName, startTime);
-            Out.Print("\nThe console is in R, you may run R commands -- q() when done, or perform another Execute.");
+	    /** save results **/
+        	goSaveCols(pColName, scores, rScriptFile, cutoff);
+	      
+            Out.PrtMsgTime("Finished GO enrichment for " + colName, startTime);
 		}
 		catch(Exception e){
 			Out.PrtError("q() out of R in terminal window.");
-			ErrorReport.reportError(e, "running GOseq");
+			ErrorReport.reportError(e, "running GO enrichment");
 			return;
 		}
 	}
-	/*********************************************************
-	 * QRframe to remove a column.
+	/************************************************************8
+	 * Write R values
 	 */
-	public void saveGoDEforRemove(String colRm) {
-		TreeMap <String, Double> dePvalMap = new MetaData().getDegPvalMap(mDB);
-		if (dePvalMap==null) return;
-		saveGoDE(colRm, dePvalMap);
-	}
-	private void saveGoDE(String colRm, TreeMap <String, Double> dePvalMap) {
+	private boolean goLoadDEtoR(boolean b, String pColName, double cutoff, int nSeq) {
 		try {
-			int pLen = Globalx.PVALUE.length();
-			String colToRm = (colRm!=null && colRm.length()>pLen) ? 
-					colRm.substring(pLen).trim() : "";
-			
-			String goInfo="";
-        	for (String colName : dePvalMap.keySet()) {
-        		if (!colToRm.equals(colName)) {
-        			double th = dePvalMap.get(colName);
-        			if (goInfo=="") goInfo = colName + ":" + th;
-        			else goInfo += "," + colName + ":" + th;
-        		}
+			if (b) Out.Print("Assigning R variables");
+        	else   Out.Print("Assigning R variables (see #1)");
+	        doCmd(false, "rm(list=ls())"); // remove all variables from previous run
+	        
+	 /* get names, lengths and pvalue */
+			int[] lens = new int[nSeq]; 
+        	String[] names = new String[nSeq]; 
+        	int[] binaryDE = new int[nSeq]; 
+ 		    int cntDE = 0, n = 0;
+	    	
+        	ResultSet rs = mDB.executeQuery("select contigid, consensus_bases, " + pColName +
+        			" from contig where PIDgo > 0 order by ctgid asc"); 
+        	
+        	if (rs==null) {
+        		Out.Print("select contigid, consensus_bases, " + pColName  +
+            			" from contig where PIDgo > 0 order by ctgid asc");
+        		Out.die("null rs");
         	}
-        	mDB.tableCheckAddColumn("assem_msg", "goDE", "text", null);
-        	mDB.executeUpdate("update assem_msg set goDE='" + goInfo + "'");
+        	while (rs.next()) {
+        		names[n] = rs.getString(1);
+        		lens[n] =  rs.getInt(2);
+        		double p = Math.abs(rs.getDouble(3));
+        		int de = (p < cutoff ? 1 : 0); 
+        		binaryDE[n] = de;
+        		cntDE += de;
+        		n++;
+        	}
+        	rs.close();
+        	if (b) Out.PrtSpCntkMsg(0, n, "Sequences with GOs (from " + nSeq + ")");
+        	
+        	re.assign(seqNamesR, names);	if (b) Out.PrtSpMsg(1, seqNamesR + ": sequence names");
+        	re.assign(seqLensR, lens);		if (b) Out.PrtSpMsg(1, seqLensR + ":  sequence lengths");
+			doCmd(b, nSeqsR + " <- " + nSeq);		
+			
+        	re.assign(seqDEsR,binaryDE);	Out.PrtSpMsg(1, seqDEsR + ": DE binary vector (" + cntDE + " seq p-value < " + cutoff + ")" );
+        	doCmd(b, "names(" + seqDEsR + ") <- " + seqNamesR);
+        	
+        	//doCmd(b, "names(seqDE) <- seqNames");
+			//doCmd(b, "deSeqNames <- seqNames");       // deSeqNames assigned null if no p-value		
+			doCmd(b, seqGOsR + " <- vector(\"list\"," + nSeqsR + ")");
+			
+  /* get GOs for all direct and indirect per contig and write to R */
+			if (b) Out.PrtSpMsg(1, "For all n: seqGOs[[n]] <- c(gonum list)");
+			
+			Vector<Integer> seqGOs = new Vector<Integer>();
+			boolean haveMore=true;
+			int gonum;
+			String curID = "", seqID="";
+			n = 1; 
+			int noGO=0;
+			
+			rs = mDB.executeQuery("select c.contigid, p.gonum " +
+					" from contig as c  " +
+					" left join pja_unitrans_go as p on p.ctgid=c.ctgid " +
+					" where c.PIDgo > 0 order by c.ctgid asc");	
+			
+			while (haveMore) {
+				haveMore = rs.next();
+				if (haveMore) { 
+					seqID = rs.getString(1);
+					gonum = rs.getInt(2);
+					if (curID.equals("")) curID = seqID;
+				} 
+				else { // last one
+					gonum=0;
+					curID="done";
+				}
+			
+				if (!seqID.equals(curID)) {
+					if (seqGOs.size() > 0) {
+						StringBuilder str = new StringBuilder("");
+						str.append("\"" + seqGOs.firstElement() + "\"");
+						for (int i = 1; i < seqGOs.size(); i++) {
+							str.append(",\"" + seqGOs.get(i)  + "\"");
+						}
+						String cmd = seqGOsR + "[[" + n + "]] <- c(" + str.toString() + ")";
+						re.eval(cmd);  
+						seqGOs.clear();
+					}
+					else {   // this replaces name with NA; if pid is PIDgo, this will not happen
+						String cmd =  seqNamesR + "[" + n + "] <- NA";
+						re.eval(cmd);
+						noGO++;
+					}
+					curID = seqID;
+					n++;
+					if (n%1000 == 0) Out.r("Process sequence #" + n);
+				}
+				
+				if (gonum > 0)	seqGOs.add(gonum);
+			}
+			Out.r("                                                  ");
+			
+			doCmd(b, "names( " + seqGOsR + ") =  " + seqNamesR); 
+			//doCmd(b, "np <- nullp(seqDE,'','',seqLens,FALSE)"); 
+			
+			Out.PrtSpCntMsgNz(0, noGO, "No GOs for Sequences");
+			return true;
 		}
-		catch (Exception e) {ErrorReport.reportError(e, "Saving goDE values");}
+		catch (Exception e) {
+			ErrorReport.die(e, "Assigning R values for GO enrichment for " + pColName);
+			return false;
+		}
 	}
+	/*****************************************************
+	 * All data is loaded for R. Run DE script
+	 */
+	private boolean goRunScript(TreeMap<String,Double> scores, String rScriptFile) 
+	{
+		boolean b=true; // print
+     	Out.Print("\nStart R-script ");
+     	
+     	doCmd(b, "source('" + rScriptFile + "')");
+		 
+		REXP x;
+		double[] pvals=null;
+		try {
+			x = doCmdx(resultR);
+			pvals = x.asDoubleArray();
+		}
+		catch (Exception e) {Out.PrtError("No R variable 'results' exists"); return false;}
+		
+        if (pvals==null || pvals.length==0) {
+    		Out.PrtError(resultR + " R variable does not contain an array of results (type double)");
+    		return false;
+    	}
+    	x = doCmdx(gonumsR);
+    	String[] gos = x.asStringArray();
+    	
+    	if (gos.length==0) {
+    		Out.PrtError(gonumsR + " R variable does not contain an array of row names (type string)");
+    		return false;
+    	}
+     	
+    	for (int i = 0; i < gos.length; i++) {
+    		scores.put(gos[i], pvals[i]);
+    	}
+
+    	Out.Print("R-script done");
+    	return true;
+	}
+	/***************************************************************
+	 * Save GO
+	 */
+	private void goSaveCols(String pColName, TreeMap <String, Double> scores, String rScriptFile, double cutoff) {
+		try {
+			Out.Print("\nSaving " + scores.size() + " values to database");
+			
+			ResultSet rs = mDB.executeQuery("show columns from go_info where field='" + pColName + "'");
+        	if (!rs.first()) {
+        		Out.PrtSpMsg(1, "Adding column to go_info table");
+        		mDB.executeUpdate("alter table go_info add " + pColName + " double default " + Globalx.dStrNoDE);             
+        	}
+        	else mDB.executeUpdate("update go_info set " + pColName + "=" + Globalx.dStrNoDE);
+    
+        	mDB.executeUpdate("update assem_msg set pja_msg=NULL");
+        	int n = scores.size(); 
+        	int cntSave=0, cnt=0;
+        	
+        	mDB.openTransaction(); 
+			PreparedStatement ps = mDB.prepareStatement(
+					"update go_info set " + pColName + "=? where gonum=?");
+			int cnt05=0;
+			for (String goStr : scores.keySet()) {
+				int gonum = Integer.parseInt(goStr);
+				double pval = scores.get(goStr);
+				ps.setDouble(1, pval);
+				ps.setInt(2,gonum);
+				ps.addBatch();
+				
+				cnt++; cntSave++;
+				if (cntSave==1000) {
+					Out.rp("Save ", cnt, n);
+					ps.executeBatch();
+					cntSave=0;
+				}
+				if (pval<0.05) cnt05++;
+			}	
+			if (cntSave>0) ps.executeBatch();
+			ps.close();
+			mDB.closeTransaction(); 
+			
+			Out.PrtSpCntMsg(0, cnt05, "GO p-values < 0.05 ");
+			
+			String sMethod = "unknown";
+        	if (!rScriptFile.equals("")) {
+				String file = rScriptFile.substring(rScriptFile.lastIndexOf("/")+1);
+				if (file.length()>20) file = file.substring(0,20);
+				sMethod = file;
+			}
+        	mDB.executeUpdate("update libraryDE set goCutoff=" + cutoff + ",goMethod='" + sMethod + 
+        			"' where pCol='" + pColName + "'");
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "Saving p-values for GO enrichment " + pColName);}
+	}
+	
 	/***********************************************
 	 * XXX JRI
 	 */
-	void initJRI()
+	private void initJRI()
 	{
 		try {
 			if (re == null) {
-				Out.Print("Startup R");
+				Out.Print("\nStartup R");
 				Map<String, String> env = System.getenv();
 				boolean flag=false;
 			    for (String envName : env.keySet()) {
@@ -899,33 +906,33 @@ public class QRProcess {
 			}
 			else {
 				Out.Print("Use existing R session");
-				doCmd("rm(list=ls())");
+				doCmd(true, "rm(list=ls())");
 			}
 		}
 		catch(Exception e){ErrorReport.die(e, "starting JRI");}
 	}
-	private void doCmd (String cmd) {
-		Out.PrtSpMsg(1, cmd);
+	private void doCmd (boolean b, String cmd) {
+		if (b) Out.PrtSpMsg(1, cmd);
 		re.eval(cmd);
 	}
 	private REXP doCmdx (String cmd) {
 		Out.PrtSpMsg(1, cmd);
 		return re.eval(cmd);
 	}
-	void getPackages(HashSet<String> pkgs) {
+	private void getPackages(HashSet<String> pkgs) {
     	REXP x = re.eval("rownames(installed.packages())");
     	for (String pkg : x.asStringArray()) {
     		pkgs.add(pkg);
     	}		
 	}
-	boolean checkPackage(String pkg) {
+	private boolean checkPackage(String pkg) {
 		if (!packages.contains(pkg)) {
 			Out.Print("*****R package " + pkg + " needs to be installed.******");
 			return false;
 		}
 		return true;
 	}
-	class TextConsole implements RMainLoopCallbacks
+	private class TextConsole implements RMainLoopCallbacks
 	{
 	    public void rWriteConsole(Rengine re, String text, int oType) {
 	        System.err.print(text);
@@ -962,11 +969,14 @@ public class QRProcess {
 	    public void   rLoadHistory  (Rengine re, String filename) {}			
 	    public void   rSaveHistory  (Rengine re, String filename) {}			
 	}
-	
+	private String prtName(String pColName) {
+		return pColName.substring(2);
+	}
 	/** private variables **/
 	private DBConn mDB;
 	private static Rengine re = null;
 	private HashSet<String> packages;
 	private int nGroup1, nGroup2;
 	private String dbName="";
+	private int nSeq=0;
 }

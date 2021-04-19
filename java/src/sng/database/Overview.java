@@ -472,6 +472,7 @@ public class Overview {
 	    			int align = Math.abs(rs.getInt(4)-rs.getInt(3)+1);
 	    			int rank = rs.getInt(5);
 	    			int idx = rs.getInt(6);
+	    			/** CAS321 this happens cause duplicate hits can get in - need to fix in annotator
 	    			if (noHit[idx] && rank!=1) {
 	    				badRank++;
 	    				if (badRank<=3) Out.PrtWarn("First hit but rank is " + rank + " #DB" + dbid + 
@@ -480,6 +481,7 @@ public class Overview {
 	    					Out.PrtSpMsg(1,"Further messages surpressed; listed in log file. The hit file and DB fasta file may be inconsistent.");
 	    				}
 	    			}
+	    			**/
 	    			if (noHit[idx]) {
 	    				noHit[idx]=false;
 	    				if (pSim>=COVER1) {
@@ -771,7 +773,7 @@ public class Overview {
             strQ += " FROM " + table;
              
             if (title.equals("GO")) 
-            	lines.add("   Over-represented GOs: (% of " + dff.format(nTot) + ")");
+            	lines.add("   GOs enrichment: (% of " + dff.format(nTot) + ")");
             else 
             	lines.add("   Differential expression: (% of " + dff.format(nTot) + ")");
             
@@ -1353,28 +1355,38 @@ public class Overview {
 	        }
 	        
 	        // DE
-	        if (hasSeqDE && mDB.tableExists("libraryDE") && mDB.tableColumnExists("libraryDE", "method")) {
-        		lines.add("   DE (Differential Expression) computation: ");
-        		String msg = String.format("      %-12s %-30s %s", "DE column", "Conditions", "Method");
+	        if (!hasSeqDE) return false;
+    		lines.add("   DE (Differential Expression) computation: ");
+    		String msg = String.format("      %-12s %-20s %s", "Column",  "Method", "Conditions");
+    		lines.add(msg);
+    		
+    		ResultSet rs = mDB.executeQuery("Select pCol, title, method from libraryDE");
+    		while (rs.next()) {
+    			String de = rs.getString(1).substring(2); // remove P_
+    			msg = String.format("      %-12s %-20s %s", de, rs.getString(3), rs.getString(2));
         		lines.add(msg);
-        		
-        		ResultSet rs = mDB.executeQuery("Select pCol, title, method from libraryDE");
-        		while (rs.next()) {
-        			String de = rs.getString(1).substring(2); // remove P_
-        			msg = String.format("      %-12s %-30s %s", de, rs.getString(2), rs.getString(3));
-	        		lines.add(msg);
-        		}
-        		rs.close();
-        		lines.add("");
-        		
-        		if (mDB.tableColumnExists("assem_msg", "goDE")) { 
-	        		String goDE = mDB.executeString("Select goDE from assem_msg");
-	        		if (goDE!=null && !goDE.trim().equals("")) {
-	        			lines.add("   GOseq: " + goDE);
-	        			lines.add("");
-	        		}	
-        		}
-	        }
+    		}
+    		rs.close();
+    		lines.add("");
+	        
+    		// GO DE
+	        if (!hasGO) return true;
+    		lines.add("   GO enrichment computation: ");
+    		msg = String.format("      %-12s %-20s %-5s", "Column", "Method", "Cutoff");
+    		
+    		int cnt=0;
+    		rs = mDB.executeQuery("Select pCol, goCutoff, goMethod from libraryDE where goCutoff>0.0");
+    		while (rs.next()) {
+    			if (cnt==0) lines.add(msg);
+    			String de = rs.getString(1).substring(2); // remove P_
+				msg = String.format("      %-12s %-20s %5.4f", de, rs.getString(3).trim(), rs.getDouble(2));
+				lines.add(msg);
+				cnt++;
+    		}
+    		rs.close();
+    		if (cnt==0) lines.add("     Not computed");
+    		lines.add("");
+        
     		return true;
         }
         catch ( Exception err ) {

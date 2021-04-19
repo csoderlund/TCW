@@ -2,9 +2,11 @@ package sng.database;
 
 import java.sql.ResultSet;
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import util.database.DBConn;
+import util.database.Globalx;
 import util.file.FileHelpers;
 import util.methods.ErrorReport;
 import util.methods.Out;
@@ -42,7 +44,8 @@ enum DBVer
 	Ver53, // 5.3 add assem_msg.spAnno and assem_msg.go_ec
 	Ver54, // 5.4 add o_markov and rename p_coding fields; the Engine was not set for all tables.
 	Ver55, // MySQL V8 changed rank to best_rank
-	Ver56  // Pairwise changes
+	Ver56,  // Pairwise changes
+	Ver57
 }
 
 /********************************************
@@ -52,7 +55,6 @@ enum DBVer
  * 	P_<libLib> for pvalues -- add if computed						(QRProcess.saveDEcols)
  * 	assem_msg.peptide -- add if protein databases 					(Library)
  * 	assem_msg.hasLoc --  add if has location information 			(Library and AddRemarkPanel)
- *  assem_msg.goDE -- DE:Pval list for goseq p-values				(QRProcess)
  * 	contig.seq_ngroup -- add if group has number, e.g. scaffold123 	(AddRemarkPanel)
  * 	ORF tables -- tuple_orf, tuple_usage							(DoORF) 
  * 	GO tables -- go_info, pja_gotree, pja_uniprot_go, pja_unitrans_go (createGOtables)
@@ -60,13 +62,13 @@ enum DBVer
 public class Schema 
 {
 	DBConn mDB;
-	DBVer  dbVer =  DBVer.Ver56; // default to this, as in other cases we get it from the schemver table
+	DBVer  dbVer =  DBVer.Ver57; // default to this, as in other cases we get it from the schemver table
 	String dbVerStr = null;      // read from database
 	
-	DBVer  curVer = DBVer.Ver56; 
-	String curVerStr = "5.6";
-	public static String currentVerString() {return "5.6";}
-	public static DBVer  currentVer() 		{return DBVer.Ver56;}
+	DBVer  curVer = DBVer.Ver57; 
+	String curVerStr = "5.7";
+	public static String currentVerString() {return "5.7";}
+	public static DBVer  currentVer() 		{return DBVer.Ver57;}
 	
 	public Schema(DBConn db)
 	{
@@ -89,6 +91,7 @@ public class Schema
 			else if (dbVerStr.equals("5.4"))	dbVer = DBVer.Ver54;
 			else if (dbVerStr.equals("5.5"))	dbVer = DBVer.Ver55;
 			else if (dbVerStr.equals("5.6"))	dbVer = DBVer.Ver56;
+			else if (dbVerStr.equals("5.7"))	dbVer = DBVer.Ver57;
 			else System.err.println("Unknown version string " + dbVerStr + " in schemver table");
 		}
 		catch (Exception e){}
@@ -117,7 +120,6 @@ public class Schema
 		
 		 // assem_msg.peptide is added if protein databases
 		 // assem_msg.hasLoc  if has location information (Library.java) or AddRemarkPanel
-		 // assem_msg.goDE    if goseq has been run (QRProcess)
 		sql = 
 			"create table assem_msg ( " +
 			"	AID integer NOT NULL PRIMARY KEY, " +	// obsolete, but everywhere (always 1)
@@ -190,6 +192,16 @@ public class Schema
 			"	) ENGINE=MyISAM; ";
 		mDB.executeUpdate(sql);
 		
+		sql = "create table libraryDE (" + // CAS321 v57 make this part of schema and add fields
+				" pCol varchar(30), " +
+				" title varchar(100), " + 
+				" method varchar(40), " +
+				" goCutoff float, " +  
+				" goMethod varchar(40), " +
+				" index(pCol)" +
+				"	) ENGINE=MyISAM; ";
+		mDB.executeUpdate(sql);	
+			
 		// Not a clone, its a read or EST
 		sql = 
 			"create table clone ( " +
@@ -339,8 +351,8 @@ public class Schema
 			"create table contig_counts (" +
 			"	contigid varchar(30) NOT NULL, " +
 			"	libid varchar(30) NOT NULL, " +
-			"	 count int NOT NULL, " +
-			"	 PRIMARY KEY (contigid, libid) " +
+			"	count int NOT NULL, " +
+			"	PRIMARY KEY (contigid, libid) " +
 			" ) ENGINE=MyISAM; ";
 		mDB.executeUpdate(sql);
 		
@@ -819,8 +831,49 @@ public class Schema
 		if (dbVer==DBVer.Ver53) updateTo54();
 		if (dbVer==DBVer.Ver54) updateTo55();
 		if (dbVer==DBVer.Ver55) updateTo56();
+		if (dbVer==DBVer.Ver56) updateTo57();
 		return dbVerStr;
 	}
+	/*************************************************
+	 * Jan2021 v3.1.4 change for similar pairs
+	 */
+	private void updateTo57() { // CAS321 db57
+		try {
+			Out.Print("Update to sTCW schema db5.7 for " + Version.sTCWhead);
+			
+			if (mDB.tableExist("libraryDE")) {
+				mDB.tableCheckAddColumn("libraryDE", "goCutoff", "float", "method");
+				mDB.tableCheckAddColumn("libraryDE", "goMethod", "varchar(40)", "method");
+			}
+			else {
+				String sql = "create table libraryDE (" + // CAS321 v57 make this part of schema and add fields
+						" pCol varchar(30), " +
+						" title varchar(100), " + 
+						" method varchar(40), " +
+						" goCutoff float, " +  
+						" goMethod varchar(40), " +
+						" index(pCol)" +
+						") ENGINE=MyISAM; ";
+				mDB.executeUpdate(sql);	
+			}
+			// for pre-321
+			TreeMap <String, Double> pvalMap = new MetaData().getDegPvalMap(mDB);
+			if (pvalMap!=null) {
+				for (String pCol : pvalMap.keySet()) {
+					String sql = "update libraryDE set goMethod='GOseq', goCutoff=" + pvalMap.get(pCol) + 
+							" where pCol='" + Globalx.PVALUE + pCol + "'";
+					mDB.executeUpdate(sql);		
+				}
+			}
+			
+			mDB.executeUpdate("update schemver set schemver='5.7'");
+			dbVer = DBVer.Ver57;
+			dbVerStr = curVerStr;
+			Out.Print("Finish update for sTCW Schema db5.7");
+		}
+		catch (Exception e) {ErrorReport.reportError(e, "Error on update schema to v5.7");}	
+	}
+	
 	/*************************************************
 	 * Jan2021 v3.1.4 change for similar pairs
 	 */

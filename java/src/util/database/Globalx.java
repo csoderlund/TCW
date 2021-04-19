@@ -9,8 +9,8 @@ import java.text.DecimalFormat;
 public class Globalx {
 	public static boolean debug = false; // changed in STCWMain or MTCWMain from command line 
 	
-	public static final String strRelDate = "(29-Mar-21)"; 
-	public static final String strTCWver = "3.2.0"; 
+	public static final String strRelDate = "(19-Apr-21)"; 
+	public static final String strTCWver = "3.2.1"; 
 	public static final String URL = "http://www.agcol.arizona.edu ";
 	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate;
 	public static final String sTCWver = "sTCW v" + strTCWver;
@@ -99,8 +99,8 @@ public class Globalx {
 	public static final double dNoVal = 	-2.0; 
 	
 	public static final String dStrNoDE = 	"3.0"; // set in QRprocess
-	public static final double dNoDE =  	3.0;   // may also be a -3
-	public static final double dNaDE =		3.0;   // DE computation returns NA
+	public static final double dNoDE =  	3.0;   // may also be a -
+	public static final double dNaDE =		2.0;   // DE computation returns NA - CAS321 changed from 3
 	
 	public static final String frameField = "Frame";
 	public static final float  dNoScore = -100000; // Float.MAX_VALUE does not work

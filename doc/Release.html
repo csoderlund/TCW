@@ -8,11 +8,30 @@
 
 
 <h3>TCW Version 3.2</h3>
+<h4>v3.2.1  19-Apr-21</h4>
+<i>Update existing sTCW databases for this release</i>: There is a small sTCWdb schema change, which will be 
+updated the first time you access the database.
+<ul>
+<li><ttc>runDE</ttc>
+<ul>
+<li>The built-in <ttc>GOseq</ttc> has been changed to an <ttx>R-script</ttx>. This allows
+the user to make changes to the script or provide their own method. 
+<li>NOTE: The <tt>goSeq</tt> results are
+exactly the same as before, which are not <u>multiple hypothesis tested</u>. This has been made clear
+in the documentation, and now the user can alter the <tt>goSeq.R</tt> script to add the test.
+<li>Some changes to the interface to make it more obvious.
+</ul>
+<li>Software Details
+<ul>
+<li>The GO metadata has been moved from assem_msg.goDE column to two new columns in table libraryDE.
+This required changes in Schema, MetaData, Overview, runDE.QRprocess, annotator.DoGO
+</ul>
+</ul>
+<h4>v3.2.0  29-Mar-21</h4>
 Release v3.1.8 converted from using the GO file <tt>go_&lt;date&gt;-termdb-tables.tar.gz</tt> to the GO file <tt>go-basic.obo</tt>, 
 which is used to build the <tt>GOdb</tt>. This ended up to be a pretty big changed,
 hence, this release date is <u>v3.2</u> to indicate the new GO source.
 
-<h4>v3.2.0  29-Mar-21</h4>
 <p><i>Existing GOdb and sTCWdb</i>: 
 If you use GO evidence codes or EC (enzyme code), you will want to recreate the GOdb (i.e. <ttp>runAS</ttp>)
 and re-run <ttc>GO Only</ttc> from <ttp>runSingleTCW</ttp>.

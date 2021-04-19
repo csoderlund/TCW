@@ -35,7 +35,7 @@ This document uses the "<ttx>demoTra</ttx>" project as an example. See
 	<li><a href="#methods">Methods</a>
 		<ul>
 		<li><a href="#reps">Use of replicates</a>
-		<li><a href="#scripts">R-scripts</a>
+		<li><a href="#scripts">R-scripts for DE</a>
 		</ul>
 	<li><a href="#options">Options</a>
 		<ul>
@@ -50,7 +50,10 @@ This document uses the "<ttx>demoTra</ttx>" project as an example. See
 		<li><a href="#pfile">P-values from File</a>
 		</ul>
 	</ol>
-    <li><a href="#go">Over-represented GO categories</a>
+    <li><a href="#go">GO enhancement</a>
+    <ul>
+    <li><a href="#scripts2">R-scripts for GO</a>
+    </ul>
     <li><a href="#Rperms">R directory permissions</a>
 </ol>
 </table>
@@ -75,63 +78,73 @@ This document uses the "<ttx>demoTra</ttx>" project as an example. See
 <h2>2. Example: demoTra</h2>
 <td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
-From the command line, type:
+
+<table class="tablex">
+<tr>
+	<td class="top" >
+	From the command line, type:
 	<pre>
     >runDE tra
 	</pre>
 	Or, if you type  <ttx>runDE</ttx> with no arguments, the sTCW graphical chooser will appear
 	with all sTCW databases listed; select the <ttx>demoTra</ttx> database. 
 	Either way, this brings up the <ttp>runDE</ttp> interface shown at right.
-<table class="tablex">
-<tr>
-	<td class="top" >
+	<p>
 	Define a pairwise comparison by selecting "Stem" for <ttl>Group 1</ttl> and "Root" for <ttl>Group 2</ttl>, as shown. 
 	<p>
 	Check the box <ttl>Save results in p-value column</ttl>, the text box will display the column name "StRo", which can be changed.
 	<p>
-	Assuming you have installed <ttp>edgeR</ttp>, leave the method as is. 
+	Assuming you have installed <ttp>edgeR</ttp>, leave the <ttl>R-script/edgeRglm.R</ttl> . 
 	<p>
-	Execute <ttc>Group 1 - Group 2</ttc>. The default is to run the edgeRglm.R script. The output will be as follows:
-
-<pre>
-	   5 Stem replicates
-	   5 Root replicates
-	Collecting count data (may take several minutes)
-	Using CPM filter &gt; 1 for &gt;= 2
-	   1 filtered sequences
-	Assigning R variables
-	   gc: GC values of sequences
-	   rowNames: sequences (row) names
-	   grpNames: group (column) names
-	   repNames: replicate names
-	   counts: counts of sequences
-	   countData &lt;- array(counts,dim=c(210,10))
-	   rm(counts)
-	   rownames(countData) &lt;- rowNames
-	   nGroup1 &lt;- 5
-	   nGroup2 &lt;- 5
-
-	Start R-script
-	   source('R-scripts/edgeRglm.R')
-	Loading required package: limma
-	Using traditional glm (quasi-likelihood F-tests)
-	   results
-	   rowNames
-	R-script done
-
-	Number of DE results:
-	   &lt;1e-5 &lt;1e-4 &lt;0.001 &lt;0.01 &lt;0.05
-		   6    14    21    40    66
-  
-	Saving 210 scores for StRo    
-</pre>
-	</td>
+	Execute <ttc>Group 1 - Group 2</ttc>.  The output will be as follows:
+</td>
 	<td class="top">
-		<a href="img/DErun.png"><img src="img/DErun.png" alt="" style="border: 1px solid black; width: 400px"></a>
+		<a href="img/DErun.png"><img src="img/DErun.png" alt="" style="border: 1px solid black; width: 500px"></a>
 	</td>
 </tr>
 </table>
 
+<pre>
+> ****************************************************************
+******** Start DE execution for column: StRo *********
+****************************************************************
+Replicates:
+      5 Stem
+      5 Root
+Collecting count data (may take several minutes)
+Using CPM filter > 1 for >= 2
+      1 filtered sequences
+Assigning R variables
+   gc: GC values of sequences
+   rowNames: sequences (row) names
+   grpNames: group (column) names
+   repNames: replicate names
+   counts: counts of sequences
+   countData <- array(counts,dim=c(210,10))
+   rm(counts)
+   rownames(countData) <- rowNames
+   nGroup1 <- 5
+   nGroup2 <- 5
+
+Start R-script
+   source('R-scripts/edgeRglm.R')
+Loading required package: limma
+Using traditional glm (quasi-likelihood F-tests)
+   results
+   rowNames
+R-script done
+
+Number of DE results:
+   <1e-5 <1e-4 <0.001 <0.01 <0.05
+       6    17    32    65    97
+
+Saving 210 scores for StRo
+   Adding column to database...
+                            .
+Finished DE execution for StRo             0m:0s  (8Mb)
+Complete all Group1-Group2 for tra
+The console is in R, you may run R commands -- q() or Cntl-C when done, or perform another Execute.</pre>
+</pre>	
 The R console remains open and you can now manually explore the data using R, if desired. However, it easiest to explore it be
 selecting "Close" on <ttp>runDE</ttp>, which closed the java program but not R. Then do the following:
 <pre>
@@ -191,10 +204,10 @@ a useful estimate of variability.
 
 <a id="scripts"></a>
 <table style="width: 100%"><tr><td style="text-align: left">
-<h4>R-scripts</h4>
+<h4>R-scripts for DE</h4>
 <td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
-When the <b>R-script</b> option is selected, TCW performs the following:
+When the <b>Execute</b> is selected, TCW performs the following:
 <ol>
 <li>Writes the necessary information to the R environment based on the options selected.
 <li>Runs the R script using the <ttx>source</ttx> command.
@@ -245,7 +258,7 @@ The order should correspond to the input order; if changed, then change the orde
 		et &lt;- exactTest(y, dispersion=disp)
 		res &lt;- topTags(et, n=nrow(et), adjust.method="BH")
 	} else {
-		writeLines("Using tradional glm")
+		writeLines("Using traditional glm")
 		design &lt;- model.matrix(~grpNames)
 		y &lt;- estimateDisp(y, design)
 		fit &lt;- glmQLFit(y,design)
@@ -352,22 +365,13 @@ Groups of more than one condition may also be selected, however
 the conditions in each group will be treated as replicates, leading (probably) to an overestimation
 of biological variability and underestimation of DE. 
 <p>
-If multi-condition testing is desired, e.g. to find transcripts reduced in condition A compared to
+If multi-condition testing is desired, e.g. to find sequences reduced in condition A compared to
 any or all of conditions B,C,D, then the recommended process is to compute the individual
 pair DEs A-B, A-C, A-D, and then use filter options in <ttp>viewSingleTCW</ttp>
 to perform the screen. 
 
 <p>There are four options to add DE values to the sTCW database, as explained in the following four sections.
 <a id="groups"></a>
-<h4>Group 1 - Group 2</h4> 
-<ul>
-	<li>Select at least one condition from each group.
-	<li>If you want to store the results in the database, check <ttl>Save results in P-value column</ttl>.
-	If the groups have been selected, a column name will be auto-generated which you can change.
-	When you change the groups for a subsequent execution, uncheck-then-check the column box
-	to auto-generated a name for the new groups.
-	<li>Execute: The condition(s) in Group 1 will be compared with the condition(s) in group 2.
-</ul>
 
 <a id="all"></a>
 <h4>All Pairs for Group 1</h4>
@@ -385,6 +389,16 @@ compute:
 	Root  Oleaf  RoOl
 </pre>
 where the last column is the generated column name.
+
+<h4>Group 1 - Group 2</h4> 
+<ul>
+	<li>Select at least one condition from each group.
+	<li>If you want to store the results in the database, check <ttl>Save results in P-value column</ttl>.
+	If the groups have been selected, a column name will be auto-generated which you can change.
+	When you change the groups for a subsequent execution, uncheck-then-check the column box
+	to auto-generated a name for the new groups.
+	<li>Execute: The condition(s) in Group 1 will be compared with the condition(s) in group 2.
+</ul>
 
 <a id="file"></a>
 <h4>All Pairs from File</h4>
@@ -408,7 +422,7 @@ The last row shows how to select two or more from Group 1; no spaces are allowed
 Group 2 can only have one condition.
 <p>
 Keep the column names short but meaningful. A file similar to the above is in the <ttx>projects/demoTra</ttx> directory,
-filename <ttx>traDE</ttx> to allow user to try this option.
+filename <ttx>traDE.tsv</ttx> to allow user to try this option.
 
 <a id="pfile"></a>
 <h4>P-values from File</h4>
@@ -424,29 +438,64 @@ The p-values are read as absolute values since runDE makes values negative if Co
 
 <a id="go"></a>
 <table style="width: 100%"><tr><td style="text-align: left">
-<h2>4. Over-represented GO categories</h2>
+<h2>4. GO enrichment (over-represented categories)</h2>
 <td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
 If GO annotations are loaded (see <a href="UserGuide.html#anno" class="ext" target="_blank">User Guide</a>), you can
-compute p-values for enrichment of DE in GO categories using the <ttc>Execute GOseq</ttc> button. 
-For this, you first choose one of the DE comparison pairs (or all of them), and a p-value threshold
-to define DE of individual transcripts (or a percentage ranking). 
+compute p-values for enrichment of DE in GO categories (terms/IDs). 
+<ul>
+<li><u>R-script</u>: Use the default <ttc>goSeq.R</ttc> or supply your own. <i>NOTE: the <ttc>goSeq.R</ttc> 
+script does NOT apply multiple hypothesis testing.</i> 
+<li><u>P-value columns</u>: If one or more DE p-values have been added to the database, the &lt;---&gt; box will say <ttl>All p-values</ttl>;
+this can be changed to compute GO enrichment for just one p-value column.
+<li><u>P-value cutoff</u>: A <ttl>p-value</ttl> of 0.05 is the default; this applies to the DE p-value so that 
+all sequences with a p-value&lt;0.05 will be considered DE (which assumes FDR correction was applied).
+Since the DE p-values still contain considerable
+uncertainty as absolute measures of probability, there is an option to defined DE
+in terms of ranking, i.e., top 10% (the ranking is ordered by the p-values).
+</ul>The meaning of a low p-value for a given GO is that the sequences assigned the
+GO have a higher percentage of DE than the sequences as a whole. For example, if GO:000123 is assigned to
+1000 sequences, of which 500 are DE (50%), while only 25% of sequences as a whole are
+DE, then GO:000123 will receive a very low p-value. Note that the direction of the DE for
+each sequence (elevated or suppressed) is not relevant. 
 <p>
 The result is p-value columns for the GO, having
-the same names as the corresponding transcript DE columns, accessible through the <ttc>Basic GO Query</ttc> function of 
+the same names as the corresponding sequence DE columns, accessible through the <ttc>Basic GO Query</ttc> function of 
 <ttp>viewSingleTCW</ttp>.
-<p>
-The meaning of a low p-value for a given GO is that the transcripts labeled by that
-GO have a higher percentage of DE than the transcripts as a whole. For example, if GO:000123 has
-1000 labeled transcripts, of which 500 are DE (50%), while only 25% of transcripts as a whole are
-DE, then GO:000123 will receive a very low p-value. Note that the direction of the DE for
-each transcript (elevated or suppressed) is not relevant. 
-<p>
-To use <ttp>GOseq</ttp> therefore requires a threshold for defining DE of transcripts. The default is a 
-typical <ttx>.05</ttx> value (which assumes FDR correction was applied). 
-Since the DE p-values still contain considerable
-uncertainty as absolute measures of probability, we have also included an option to defined DE
-in terms of ranking, i.e., top 10% (the ranking is ordered by the p-values).
+
+<a id="scripts2"></a>
+<h3>R-scripts for GO</h3>
+This works like the <a href=#scripts>R-scripts for DE</a>, with the variables shown below in the GO enrichment output:
+<pre>
+****************************************************************
+******** 1. Start GO enrichment for column: StRo *********
+****************************************************************
+Assigning R variables
+   208  Sequences with GOs (from 208)
+   seqNames: sequence names
+   seqLens:  sequence lengths
+   nSeqs <- 208
+   seqDEs: DE binary vector (97 seq p-value < 0.05)
+   names(seqDEs) <- seqNames
+   seqGOs <- vector("list",nSeqs)
+   For all n: seqGOs[[n]] <- c(gonum list)
+   names( seqGOs) =  seqNames                       ...
+
+Start R-script
+   source('R-scripts/goSeq.R')
+Using manually entered categories.
+Calculating the p-values...
+   results
+   goNums
+R-script done
+
+Saving 6651 values to database
+    311 GO p-values < 0.05
+Finished GO enrichment for StRo                                          0m:2s
+</pre>
+See <tt>R-scripts/goSeq.R</tt> for an example. The p-values to be loaded must be in "results" and
+the associated GO numbers are in "goNums" (note that TCW removes the "GO:" prefix and just used the number).
+
 
 <a id="Rperms"></a>
 <table style="width: 100%"><tr><td style="text-align: left">

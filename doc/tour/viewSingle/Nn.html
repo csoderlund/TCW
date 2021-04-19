@@ -8,7 +8,7 @@
 Project:  Nn   #Seqs: 26,685   #Hits: 593,083   #GOs: 24,582    TPM  DE  GO-DE   Pairs
  
 06-Nov-20 Build Database  sequences loaded from external source
-18-Mar-21 Last Annotation with sTCW v3.1.8    Updated with v3.1.9
+28-Mar-21 Last Annotation with sTCW v3.2.0    Updated with v3.2.1
 
 INPUT
    Counts: 
@@ -56,11 +56,11 @@ ANNOTATIONS
    Gene Ontology Statistics:
       Unique GOs          24,582              Unique hits with GOs  410,922  (69.3%)  
       Sequences with GOs  24,670  (92.4%)     Seq best hit has GOs   20,283  (76.0%)  
-      Has goslim_plant        57                                                      
+      Has goslim_plant        97                                                      
                                                                                       
       biological_process  16,666  (67.8%)     is_a                   39,994           
       molecular_function   5,640  (22.9%)     part_of                 4,057           
-      cellular_component   2,276  ( 9.3%)     replaced_by                84           
+      cellular_component   2,276  ( 9.3%)                                             
 
 EXPRESSION
    TPM: (% of 26,685)
@@ -81,7 +81,7 @@ EXPRESSION
       RoOL  3,467(13%)  5,754(22%)   8,642(32%)  11,939(45%)  14,380(54%)  
       StOL    330 (1%)  1,188 (4%)   3,124(12%)   6,107(23%)   9,192(34%)  
 
-   Over-represented GOs: (% of 24,582)
+   GOs enrichment: (% of 24,582)
                <1E-5     <1E-4    <0.001       <0.01       <0.05  
       RzRo  101(<1%)  238 (1%)  697 (3%)  2,016 (8%)  3,909(16%)  
       RzSt  280 (1%)  379 (2%)  610 (2%)  1,241 (5%)  2,479(10%)  
@@ -131,7 +131,7 @@ PROCESSING INFORMATION:
       tr    plants         uniprot_trembl_plants.fasta.gz        17-Feb-21  18-Mar-21  Load Nn_TRpla.dmnd.tab  
       tf    tf             PlantTFDB_TCW.fa                      25-Jan-21  18-Mar-21  Load Nn_TFtf.dmnd.tab   
 
-   Gene Ontology: go-basic.obo-Feb2021  GOdb: go_Mar2021  [GOs added with sTCW v3.1.9]
+   Gene Ontology: go-basic.obo-Feb2021  GOdb: go_Mar2021  [GOs added with sTCW v3.2.0]
    GO Slim: goslim_plant
 
    ORF finder:
@@ -143,15 +143,22 @@ PROCESSING INFORMATION:
       Good coverage: Hit overlap >= 95% with Sim 60% (internal params)
 
    DE (Differential Expression) computation: 
-      DE column    Conditions                     Method
-      RzRo         Rhiz : Root                    source(edgeRglm.R)
-      RzSt         Rhiz : Stem                    source(edgeRglm.R)
-      RzOL         Rhiz : OLeaf                   source(edgeRglm.R)
-      RoSt         Root : Stem                    source(edgeRglm.R)
-      RoOL         Root : OLeaf                   source(edgeRglm.R)
-      StOL         Stem : OLeaf                   source(edgeRglm.R)
+      Column       Method               Conditions
+      RzRo         source(edgeRglm.R)   Rhiz : Root 
+      RzSt         source(edgeRglm.R)   Rhiz : Stem 
+      RzOL         source(edgeRglm.R)   Rhiz : OLeaf 
+      RoSt         source(edgeRglm.R)   Root : Stem 
+      RoOL         source(edgeRglm.R)   Root : OLeaf 
+      StOL         source(edgeRglm.R)   Stem : OLeaf 
 
-   GOseq: RoOL:0.05,RoSt:0.05,RzOL:0.05,RzRo:0.05,RzSt:0.05,StOL:0.05
+   GO enrichment computation: 
+      Column       Method               Cutoff
+      RzRo         GOseq                0.050
+      RzSt         GOseq                0.050
+      RzOL         GOseq                0.050
+      RoSt         GOseq                0.050
+      RoOL         GOseq                0.050
+      StOL         GOseq                0.050
 
 -------------------------------------------------------------------
 LEGEND:

@@ -101,8 +101,8 @@ public class DoGOs
 			tcwDB.executeUpdate("update contig set PIDgo=0");
 			tcwDB.executeUpdate("update pja_db_unitrans_hits set filter_gobest=0");
 			tcwDB.executeUpdate("update assem_msg set go_msg='', go_slim='', go_ec=null");
-			if (tcwDB.tableColumnExists("assem_msg", "goDE"))
-				tcwDB.executeUpdate("update assem_msg set goDE=''");
+			if (tcwDB.tableColumnExists("libraryDE", "goMethod"))
+				tcwDB.executeUpdate("update libraryDE set goMethod='', goCutoff=-1.0");
 			
 /** Create Overview message for processing info: assem_msg.go_msg **/
 			String msg = "GOdb: " + godbName + "  [GOs added with " + Globalx.sTCWver + "]"; // CAS318 added GOdb

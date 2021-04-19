@@ -1223,8 +1223,10 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
     		  HitListData hd = new HitListData( hitID, hitName, eval, typeTax, desc, species, goBrief,
     				  percent, len, start, end,  seq, blast, rank, filter,
     				  interpro, kegg, pfam, ec, nGo, pHitCov, pSeqCov, dbit);
-    		  hitMap.put(hitName, hd);
-    		  order.add(hitName);
+    		  if (!hitMap.containsKey(hitName)) { // CAS321 duplicate names were happening
+    			  	hitMap.put(hitName, hd);
+    		  		order.add(hitName);
+    		  }
 		}
 		nHits= hitMap.size();
 	

@@ -1467,6 +1467,7 @@ public class BasicGOFilterTab extends Tab {
 		
 			theTermTypes = Globalx.GO_TERM_LIST;
 			dePvalMap =   theParentFrame.getMetaData().getDegPvalMap(mDB);
+			mDB.close();
 		}
 		catch(Exception e) {
 			JOptionPane.showMessageDialog(null, "Query failed ");

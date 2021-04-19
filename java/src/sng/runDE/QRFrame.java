@@ -59,18 +59,20 @@ import util.ui.UserPrompt;
 
 /****************************************
  * Graphical interface for computing DE (runDE)
- * v2.11 - remove built-in DE methods
+ * v2.11 - remove built-in DE methods, make them scripts
  * v3.0.3 - change all showOptionDialog(null,.. to showOptionDialog(getInstance(); the null hide window on Java 14.
+ * v3.2.1 - changed GOseq to be script. Rearrange interface. Made Remove and GO separate
  */
 public class QRFrame extends JDialog implements WindowListener {
 	private static final long serialVersionUID = 6227242983434722745L;
 	
 	public static double dispersion = 0.1;
 	
-	public static final String allCols = "All p-value columns";
-	public static final String selCol = "Select p-value column";
+	public static final String allCols = "All P-value";
+	public static final String noCol = "No P-values";
 	
-	private final String RSCRIPT= Globalx.RSCRIPTSDIR + "/edgeRglm.R";
+	private final String RSCRIPT1= Globalx.RSCRIPTSDIR + "/edgeRglm.R";
+	private final String RSCRIPT2= Globalx.RSCRIPTSDIR + "/goSeq.R";
 	
 	private final String [] SELECTIONS = { "Conditions", "Group 1", "Group 2", "Exclude" };
 	private final int DEFAULT_SELECTION = 2; 
@@ -125,9 +127,13 @@ public class QRFrame extends JDialog implements WindowListener {
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); 
 		
 		addWindowListener(this);
+		
+		if (!dbObj.checkDBver(hostsObj)) System.exit(-1); // CAS321
 		dbSetConnection(dbObj.getdbName()); // opens mDB for this database
 		
+		hasGO = mDB.tableExists("go_info");
 		qrProcess = new QRProcess(dbObj.getID(), mDB);
+		
 		createMainPanel();
 
 		updateColumnList();
@@ -142,24 +148,21 @@ public class QRFrame extends JDialog implements WindowListener {
 		pack();
 	}
 	/********************************************************
-	 * XXX doExecute 
+	 * XXX Grp1 against Grp2 - one execute
 	 */
-	private void doExecute(){
+	private void exDeGrp1Grp2(){
 		// user selected groups of libraries
 		TreeSet<String> grp1 = new TreeSet <String> ();
 		TreeSet<String> grp2 = new TreeSet <String> ();		
-		for(int x=0; x<theLibraryNames.length; x++) 
-		{
+		for(int x=0; x<theLibraryNames.length; x++) {
 			if (isLibSelectedAt(x, 0)) 		grp1.add(theLibraryNames[x]);
 			else if (isLibSelectedAt(x, 1))	grp2.add(theLibraryNames[x]);
 		}
-		if (grp1.size() == 0)
-		{
+		if (grp1.size() == 0) {
 			JOptionPane.showMessageDialog(null,"Please select at least one Condition for Group 1.");
 			return;
 		}
-		if (grp2.size() == 0)
-		{
+		if (grp2.size() == 0) {
 			JOptionPane.showMessageDialog(null,"Please select at least one Condition for Group 2.");
 			return;
 		}
@@ -187,23 +190,31 @@ public class QRFrame extends JDialog implements WindowListener {
 		}
 	
 		String pColName = pValColPrefix + colName;
-		qrProcess.doExecute(rScriptFile, filCnt, filCPM, filCPMn, 
-					disp, doFDR,  pColName, addCol,  grp1, grp2);
+		
+		if (qrProcess.rStart(true)) {
+			Out.Print("****************************************************************");
+			Out.Print("******** Start DE execution for column: " + colName + " *********");
+			Out.Print("****************************************************************");
+			
+			qrProcess.deRun(true, rScriptFile, filCnt, filCPM, filCPMn, disp,  pColName, addCol,  grp1, grp2);
+			
+			Out.Print("Complete all Group1-Group2 for " + dbObj.getID());
+			qrProcess.rFinish();
+		}
 	}
-	
-	
-	private void doExecuteAll(){
+	/***********************************************
+	 * Grp1 entries against each other
+	 */
+	private void exDeGrp1All(){
 		TreeSet<String> grp1 = new TreeSet <String> ();
 		TreeSet<String> grp2 = new TreeSet <String> ();	
 		
 		Vector<String> libNames = new Vector<String>();
-		for(int x=0; x<theLibraryNames.length; x++) 
-		{
+		for(int x=0; x<theLibraryNames.length; x++) {
 			if (isLibSelectedAt(x, 0))
 				libNames.add(theLibraryNames[x]);
 		}
-		if (libNames.size() == 0)
-		{
+		if (libNames.size() == 0) {
 			JOptionPane.showMessageDialog(null,"Please select at least two conditions from Group 1.");
 			return;
 		}
@@ -212,13 +223,14 @@ public class QRFrame extends JDialog implements WindowListener {
 		String msg = "\nDo all pairs for " + libs + "\n and save to auto-named columns?";	
 		int ret = JOptionPane.showOptionDialog(getInstance(), msg,
 				"Confirm All Pairs", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-		if (ret != JOptionPane.YES_OPTION)
-		{
+		if (ret != JOptionPane.YES_OPTION) {
 			Out.Print("Abort All pairs from Group 1");
 			return;
 		}
 		chkSaveCol.setSelected(true);
 		
+		if (!qrProcess.rStart(true)) return;
+		int ex=0;
 		for(int x=0; x<libNames.size(); x++) 
 		{
 			grp1.clear();
@@ -234,22 +246,26 @@ public class QRFrame extends JDialog implements WindowListener {
 				String pColName = colNameCreate(lib1,lib2);
 		
 				Out.Print("****************************************************************");
-				Out.Print("******** Start DE execution for column: " + pColName + " *********");
+				Out.Print("******** " + (ex+1) + ". Start DE execution for column: " + pColName + " *********");
 				Out.Print("****************************************************************");
 				
 				pColName = pValColPrefix + pColName;
-				boolean rc = qrProcess.doExecute(rScriptFile, filCnt, filCPM, filCPMn, 
-						disp, doFDR,  pColName, addCol,  grp1, grp2);
+				boolean rc = qrProcess.deRun((ex==0), rScriptFile, filCnt, filCPM, filCPMn, 
+						disp,  pColName, addCol,  grp1, grp2);
 				if (!rc) {
 					Out.Print("*** Abort All pairs from Group 1");
 					return;
 				}
+				ex++;
 			}
 		}
-		Out.Print("Complete all pairs");
+		Out.Print("Complete all pairs for " + dbObj.getID());
+		qrProcess.rFinish();
 	}
-	// XXX read file of group1, group2, columnname
-	private void doExecuteFile(String fname){
+	/*********************************************************
+	 * XXX read file of group1, group2, columnname
+	 ********************************************************/
+	private void exDePairFile(String fname){
 		try {	
 			Out.Print("\nReading " + fname);
 			
@@ -328,20 +344,21 @@ public class QRFrame extends JDialog implements WindowListener {
 			// prompt the user
 			String msg = "Found " + cnt + " good entries";
 			if (warn>0) msg += " with " + warn + " overwrite (see terminal)";
-			if (err>0) msg += " and " + err + " ignored entries (see terminal)";
+			if (err>0)  msg += " and " + err + " ignored entries (see terminal)";
 
 			int ret = JOptionPane.showOptionDialog(getInstance(), msg,
 					"runDE", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 		
-			if (ret != JOptionPane.YES_OPTION)
-			{
-				Out.Print("Abort All pairs from File");
+			if (ret != JOptionPane.YES_OPTION) {
+				Out.Print("Abort all pairs from file");
 				return;
 			}
 			
 			// read and compute
 			TreeSet<String> grp1 = new TreeSet <String> ();
 			TreeSet<String> grp2 = new TreeSet <String> ();
+			
+			if (!qrProcess.rStart(true)) return;
 			
 			for (int j=0; j<addLines.size(); j++) {
 				line = addLines.get(j);
@@ -362,17 +379,18 @@ public class QRFrame extends JDialog implements WindowListener {
 				pColName = pValColPrefix + col[2];
 			
 				Out.Print("****************************************************************");
-				Out.Print("******** Start DE execution for column: " + col[2] + " *********");
+				Out.Print("******** " + (j+1) + ". Start DE execution for column: " + col[2] + " *********");
 				Out.Print("****************************************************************");
 			
-				boolean rc = qrProcess.doExecute(rScriptFile, filCnt, filCPM, filCPMn, 
-						disp, doFDR,  pColName, true,  grp1, grp2);
+				boolean rc = qrProcess.deRun((j==0), rScriptFile, filCnt, filCPM, filCPMn, 
+						                      disp, pColName, true,  grp1, grp2);
 				if (!rc) {
 					Out.Print("*** Abort All pairs from File");
 					return;
 				}
 			}
-			Out.Print("Complete adding from file");
+			Out.Print("Complete adding from file for " + dbObj.getID());
+			qrProcess.rFinish();
 		}
 		catch (Exception e) {
 			ErrorReport.reportError(e, "Cannot process file " + fname);
@@ -382,7 +400,7 @@ public class QRFrame extends JDialog implements WindowListener {
 	// seqID value
 	// ...
 	// read file, then call 
-	private void doLoadFile(String fname) {
+	private void exDeLoadFile(String fname) {
 		try {
 			Out.Print("\nLoad p-values from file " + fname);
 			
@@ -479,11 +497,12 @@ public class QRFrame extends JDialog implements WindowListener {
 						"# seqIDs in database but not in file: " + cntNo;
 				if (!UserPrompt.showContinue("seqID inconsistencies", msg)) return;
 			}
-			boolean rc = qrProcess.doLoadFile(pColName, grp1, grp2, scores, fname);
+			boolean rc = qrProcess.deReadPvalsFromFile(pColName, grp1, grp2, scores, fname);
 			if (!rc) {
 				Out.Print("*** Abort Load p-values from file");
 				return;
 			}
+			Out.Print("Complete adding p-values from file for " + dbObj.getID());
 		}
 		catch (Exception e) {ErrorReport.reportError(e, "Cannot process file " + fname);}
 	}
@@ -521,8 +540,7 @@ public class QRFrame extends JDialog implements WindowListener {
 			}
 		}
 		else {
-			for(int x=0; x<theLibraryNames.length; x++) 
-			{
+			for(int x=0; x<theLibraryNames.length; x++)  {
 				if (isLibSelectedAt(x, 0)) a += theLibraryNames[x].charAt(0);
 				else if (isLibSelectedAt(x, 1)) b += theLibraryNames[x].charAt(0);
 			}
@@ -631,46 +649,72 @@ public class QRFrame extends JDialog implements WindowListener {
 			return false;
 		}
 	}
-	private void doGOSeq() {
+	/*********************************************************
+	 * exGoSeq
+	 */
+	private void exGoSeq() {
 		boolean usePercent = btnPercent.isSelected();
 		String strThresh = (usePercent ? txtPercent.getText() : txtPVal.getText());
 		double thresh = Double.parseDouble(strThresh);
 		
+		String rScriptFile = txtRfile2.getText().trim();
+		if (rScriptFile.equals("")) {
+			JOptionPane.showMessageDialog(null,"Enter R-script file name.");
+			return;
+		}
+		if (!(new File(rScriptFile).exists())) {
+			JOptionPane.showMessageDialog(null,"R-script file does not exist.\nFile name: " + rScriptFile);
+			return;
+		}
+		
 		if (usePercent) {
-			if (thresh >= 100 || thresh <0)
-			{
+			if (thresh >= 100 || thresh <0) {
 				UserPrompt.showError("Invalid percentage for 'Top' " + thresh);
 				Out.PrtError("Invalid percentage " + thresh);
 				return;
 			}
 		}
 		else {
-			if (thresh >= 1.0 || thresh <0.0)
-			{
+			if (thresh >= 1.0 || thresh <0.0) {
 				UserPrompt.showError("Invalid cutoff for 'p-value' " + thresh);
 				Out.PrtError("Invalid cutoff for 'p-value' " + thresh);
 				return;
 			}
 		}
-		String selected = cmbPvalColumns.getSelectedItem();
-		boolean all = selected.equals(allCols);
+		String selected = cmbColGO.getSelectedItem();
+		boolean doAll = selected.equals(allCols);
 		
-		String [] cols = cmbPvalColumns.getColumns(); 
+		String [] colNames = cmbColGO.getColumns(); 
 		String colString="";
-		for (int i=0; i<cols.length; i++) {
-			if (!cols[i].equals(allCols) && !cols[i].equals(selCol)) {
-				if (colString=="") colString=cols[i];
-				else colString+= "," + cols[i];
-				cols[i] = pValColPrefix + cols[i];
+		for (int i=0; i<colNames.length; i++) {
+			if (!colNames[i].equals(allCols)) {
+				
+				if (colString=="") colString=colNames[i];
+				else colString += "," + colNames[i];
 			}
 		}
-		String msg = (all) ? "Compute GOseq for all DE columns" : "Compute GOseq for " + selected;
+		String msg = (doAll) ? "Compute GOseq for all DE columns" : "Compute GOseq for " + selected;
 		int ret = JOptionPane.showOptionDialog(getInstance(), msg + "\nContinue?",
 				"GOseq", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 		if (ret == JOptionPane.NO_OPTION) return;
 		
-		qrProcess.runGOSeq(cols, pValColPrefix + cmbPvalColumns.getSelectedItem(),
-				all, usePercent, thresh);
+		String col = cmbColGO.getSelectedItem();
+		String[] cols2do = (doAll ? colNames : new String[]{col});
+		
+		if (!qrProcess.rStart(false)) return;
+		int ex=1;
+		for (String colName : cols2do) {
+			if (colName.equals(allCols)) continue;
+				
+			Out.Print("****************************************************************");
+			Out.Print("******** " + ex + ". Start GO enrichment for column: " + colName + " *********");
+			Out.Print("****************************************************************");
+			
+			qrProcess.goRun((ex==1), colName, usePercent, thresh, rScriptFile);
+			ex++;
+		}
+		Out.Print("Complete GO enrichment for " + dbObj.getID());
+		qrProcess.rFinish();
 	}
 	/******************************************************
 	 * XXX QR panel methods	
@@ -683,22 +727,19 @@ public class QRFrame extends JDialog implements WindowListener {
 		
 		mainPanel.add(new JSeparator());
 		mainPanel.add(Box.createVerticalStrut(10));
-		createMethodPanel();
+		createDEmethodPanel();
+		
+		mainPanel.add(Box.createVerticalStrut(10));
+		createDEexecPanel();
 		
 		mainPanel.add(new JSeparator());
 		mainPanel.add(Box.createVerticalStrut(10));
-		createFilterPanel();
-		
-		mainPanel.add(new JSeparator());
-		mainPanel.add(Box.createVerticalStrut(10));
-		createExecutePanel();
-		mainPanel.add(Box.createVerticalStrut(10));
+		createGOPanel();
 		
 		mainPanel.add(new JSeparator());
 		mainPanel.add(Box.createVerticalStrut(10));
 		createRemovePanel();
-		mainPanel.add(Box.createVerticalStrut(10));
-		createGOPanel();
+		
 		mainPanel.add(Box.createVerticalStrut(10));
 		
 		mainPanel.add(new JSeparator());
@@ -793,46 +834,37 @@ public class QRFrame extends JDialog implements WindowListener {
 	private boolean isLibSelectedAt(int x, int y) { return libRadio[x][y].isSelected(); }
 	
 	// Methods
-	private void createMethodPanel() {
+	private void createDEmethodPanel() {
 		JPanel page = Static.createPagePanel();
-		page.add(new JLabel("METHOD") );
+		page.add(new JLabel("Differential Expression") );
+		page.add(Box.createVerticalStrut(3));
 		
 		JPanel row = Static.createRowPanel();
+		row.add(Box.createHorizontalStrut(5));
 		row.add(new JLabel("R-script"));
 		row.add(Box.createHorizontalStrut(1));
 		
-		txtRfile = new JTextField(FILE_WIDTH);
-		txtRfile.setText(RSCRIPT);
-		txtRfile.setMaximumSize(txtRfile.getPreferredSize());
-		row.add(txtRfile);
+		txtRfile1 = new JTextField(FILE_WIDTH);
+		txtRfile1.setText(RSCRIPT1);
+		txtRfile1.setMaximumSize(txtRfile1.getPreferredSize());
+		row.add(txtRfile1);
 		row.add(Box.createHorizontalStrut(1));
 		
-		btnRfile = new JButton("...");
-		btnRfile.addActionListener(new ActionListener()  {
+		btnRfile1 = new JButton("...");
+		btnRfile1.addActionListener(new ActionListener()  {
 			public void actionPerformed(ActionEvent arg0) {
 				FileRead fc = new FileRead(projDirName, FileC.bDoVer, FileC.bDoPrt);
-				if (fc.run(btnRfile, "R Script File", FileC.dRSCRIPTS, FileC.fR)) { // CAS316 was in-file chooser
-					txtRfile.setText(fc.getRelativeFile());
+				if (fc.run(btnRfile1, "R Script File", FileC.dRSCRIPTS, FileC.fR)) { // CAS316 was in-file chooser
+					txtRfile1.setText(fc.getRelativeFile());
 				}
 			}
 		});
-		row.add(btnRfile);
+		row.add(btnRfile1);
 		page.add(row);
-		
-		page.setMaximumSize(page.getPreferredSize());
-		page.setMinimumSize(page.getPreferredSize());
-		mainPanel.add(page);
-	}
+		page.add(Box.createVerticalStrut(3));
 
-	/**************************************************
-	 * Options
-	 */
-	private void createFilterPanel() {
-		JPanel page = Static.createPagePanel();
-		page.add(new JLabel("OPTIONS") );
-		
 		// Dispersion
-		JPanel  row = Static.createRowPanel();
+		row = Static.createRowPanel();
 		
 		filterRadio = new JRadioButton[3];
 		ButtonGroup fg = new ButtonGroup();
@@ -916,55 +948,63 @@ public class QRFrame extends JDialog implements WindowListener {
 		page.add(row);
 		page.add(Box.createVerticalStrut(5));
 		
-		// FDR
-		row = Static.createRowPanel();
-		chkFDR = new JCheckBox("Apply FDR to p-values");
-		chkFDR.setBackground(Color.white);
-		// CASX 7/7/19 doesn't work row.add(chkFDR);
-		chkFDR.setSelected(false);
-
-		page.add(row);
-		page.add(Box.createVerticalStrut(5));
-		
+		page.setMaximumSize(page.getPreferredSize());
+		page.setMinimumSize(page.getPreferredSize());
 		mainPanel.add(page);
 	}
 
 	/*************************************************
 	 * XXX row starting with Execute
 	 */
-	private void createExecutePanel() {
+	private void createDEexecPanel() {
 		JPanel page = Static.createPagePanel();
-		page.add(new JLabel("EXECUTE") );
+		page.add(new JLabel("Execute") );
+		page.add(Box.createVerticalStrut(3));
 		
 		String [] labels = new String []{
-			"Group 1 - Group 2",
 			"All Pairs for Group 1",
+			"Group 1 - Group 2",
 			"All Pairs from File",
 			"P-values from File"
 		};
 		JPanel row = Static.createRowPanel();
-		btnExecute = new JButton(labels[0]);
-		btnExecuteAll = new JButton(labels[1]);
-		btnExecuteFile = new JButton(labels[2]);
-		btnLoadPvalFile = new JButton(labels[3]);
-		int width = btnExecuteAll.getPreferredSize().width;
-		int height = btnExecuteAll.getPreferredSize().height;
+		btnGrp1All 	= 		new JButton(labels[0]);
+		btnGrp1Grp2 = 		new JButton(labels[1]);
+		btnPairFile  = 		new JButton(labels[2]);
+		btnLoadPvalFile = 	new JButton(labels[3]);
+		int width =  btnGrp1All.getPreferredSize().width;
+		int height = btnGrp1All.getPreferredSize().height;
 		Dimension dim = new Dimension(width, height);
-		btnExecute.setPreferredSize(dim);
-		btnExecuteFile.setPreferredSize(dim);
+		btnGrp1Grp2.setPreferredSize(dim);
+		btnPairFile.setPreferredSize(dim);
 		btnLoadPvalFile.setPreferredSize(dim);
 		
-	// Group 1 - Group 2
-		btnExecute.addActionListener(new ActionListener()  {
+	// All Pairs for Group 1
+		row = Static.createRowPanel();
+		btnGrp1All.addActionListener(new ActionListener()  {
 			public void actionPerformed(ActionEvent arg0) {
 				if (getMethodsFromPanel()) {
-					doExecute();
+					exDeGrp1All();
+					updateColumnList();
+				}
+			}
+		});
+		row.add(btnGrp1All);
+		page.add(row);
+		page.add(Box.createVerticalStrut(3));
+				
+	// Group 1 - Group 2
+		row = Static.createRowPanel();
+		btnGrp1Grp2.addActionListener(new ActionListener()  {
+			public void actionPerformed(ActionEvent arg0) {
+				if (getMethodsFromPanel()) {
+					exDeGrp1Grp2();
 					updateColumnList();
 				}
 			}
 		});		
-		row.add(btnExecute);
-		int w = btnExecute.getPreferredSize().width;
+		row.add(btnGrp1Grp2);
+		int w = btnGrp1Grp2.getPreferredSize().width;
 		if (w < width) row.add(Box.createHorizontalStrut(width - w));
 		row.add(Box.createHorizontalStrut(5));
 
@@ -986,18 +1026,14 @@ public class QRFrame extends JDialog implements WindowListener {
 		chkSaveCol.setSelected(false);
 		txtColName.setEnabled(false);
 		
-		chkSaveCol.addActionListener(new ActionListener() 
-		{
-			public void actionPerformed(ActionEvent arg0) 
-			{
-				if (chkSaveCol.isSelected())
-				{
+		chkSaveCol.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if (chkSaveCol.isSelected()){
 					txtColName.setEnabled(true);
 					TreeSet<String> grp1 = new TreeSet <String> ();
 					TreeSet<String> grp2 = new TreeSet <String> ();		
-					for(int x=0; x<theLibraryNames.length; x++) 
-					{
-						if (isLibSelectedAt(x, 0)) grp1.add(theLibraryNames[x]);
+					for(int x=0; x<theLibraryNames.length; x++) {
+						if (isLibSelectedAt(x, 0))      grp1.add(theLibraryNames[x]);
 						else if (isLibSelectedAt(x, 1)) grp2.add(theLibraryNames[x]);
 					}
 					if (grp1.size() != 0 && grp2.size() != 0) {
@@ -1011,36 +1047,22 @@ public class QRFrame extends JDialog implements WindowListener {
 		});
 		page.add(row);
 		page.add(Box.createVerticalStrut(3));
-			
-	// All Pairs for Group 1
-		row = Static.createRowPanel();
-		btnExecuteAll.addActionListener(new ActionListener()  {
-			public void actionPerformed(ActionEvent arg0) {
-				if (getMethodsFromPanel()) {
-					doExecuteAll();
-					updateColumnList();
-				}
-			}
-		});
-		row.add(btnExecuteAll);
-		page.add(row);
-		page.add(Box.createVerticalStrut(3));
 		
 	// All pairs from file
 		row = Static.createRowPanel();
-		btnExecuteFile.addActionListener(new ActionListener()  {
+		btnPairFile.addActionListener(new ActionListener()  {
 			public void actionPerformed(ActionEvent arg0) {
 				String fname = txtPairsFile.getText().trim();
 				if (fname != null && !fname.equals("")) {
 					if (getMethodsFromPanel()) {
-						doExecuteFile( fname);
+						exDePairFile( fname);
 						updateColumnList();
 					}
 				}
 			}
 		});
-		row.add(btnExecuteFile);
-		w = btnExecuteFile.getPreferredSize().width;
+		row.add(btnPairFile);
+		w = btnPairFile.getPreferredSize().width;
 		if (w < width) row.add(Box.createHorizontalStrut(width - w));
 		row.add(Box.createHorizontalStrut(5));
 		
@@ -1062,13 +1084,13 @@ public class QRFrame extends JDialog implements WindowListener {
 		page.add(row);
 		page.add(Box.createVerticalStrut(3));
 	    
-	    // All pvalues from file
+	// All pvalues from file
 	    row = Static.createRowPanel();
 		btnLoadPvalFile.addActionListener(new ActionListener()  {
 			public void actionPerformed(ActionEvent arg0) {
 				String fname = txtPvalFile.getText().trim();
 				if (fname != null && !fname.equals("")) {
-					doLoadFile( fname);
+					exDeLoadFile( fname);
 					updateColumnList();
 				}
 			}
@@ -1100,132 +1122,160 @@ public class QRFrame extends JDialog implements WindowListener {
 	// Select Column and Remove button
 	private void createRemovePanel() {
 		JPanel row = Static.createRowPanel();
-		row.add(new JLabel("Column Operations") );
-		mainPanel.add(row);
-		mainPanel.add(Box.createVerticalStrut(10));
+		row.add(new JLabel("Remove p-value column(s)"));
+		mainPanel.add(row); mainPanel.add(Box.createVerticalStrut(5));
 		
 		row = Static.createRowPanel();
-		lblRemoveColumns  = Static.createLabel("", false); 
-		cmbPvalColumns = new ButtonComboBox();
-		cmbPvalColumns.setEnabled(false);
-		cmbPvalColumns.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				if(cmbPvalColumns.getSelectedIndex() == 0 ) {
-					btnRemoveColumns.setEnabled(false);
-					btnGOSeq.setEnabled(false);
-					lblRemoveColumns.setEnabled(false);
-				}
-				else {
-					btnRemoveColumns.setEnabled(true);
-					btnGOSeq.setEnabled(true);
-					lblRemoveColumns.setEnabled(true);
-				}
-			}
-		});
+		row.add(Box.createHorizontalStrut(5));
 		btnRemoveColumns = Static.createButton("Remove", false, Globals.BGCOLOR);
 		btnRemoveColumns.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				try {
-					if(cmbPvalColumns.getSelectedIndex() > 0) {
-						String column = cmbPvalColumns.getSelectedItem(); // CAS304 remove (String)
-						if (!column.equals(allCols)) {
-							int ret = JOptionPane.showOptionDialog(getInstance(), "Remove " + column + "?",
-									"Remove column", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-							if (ret == JOptionPane.YES_OPTION)
-							{
-								dbRemoveColumn(column);
-							}
-						}
-						else {
-							int ret = JOptionPane.showOptionDialog(getInstance(), "Remove all p-value columns?",
-									"Remove column", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-							if (ret == JOptionPane.YES_OPTION)
-							{
-								dbRemoveColumnAll();
-							}
-						}
-						Out.Print("Completed removal ");
+				try {		
+					String column = cmbColRm.getSelectedItem(); // CAS304 remove (String)
+					if (!column.equals(allCols)) {
+						int ret = JOptionPane.showOptionDialog(getInstance(), "Remove " + column + "?",
+								"Remove column", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+						if (ret == JOptionPane.YES_OPTION) 
+							dbRemoveColumn(column);
 					}
+					else {
+						int ret = JOptionPane.showOptionDialog(getInstance(), "Remove all p-value columns?",
+								"Remove column", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+						if (ret == JOptionPane.YES_OPTION)
+							dbRemoveColumnAll();
+					}
+					Out.Print("Completed removal ");
 				}
-				catch(Exception e) {
-					ErrorReport.prtReport(e, "Error removing method column");
-				}
+				catch(Exception e) {ErrorReport.prtReport(e, "Error removing method column");}
 			}
 		});
+		row.add(btnRemoveColumns);row.add(Box.createHorizontalStrut(5));
 		
-		row.add(lblRemoveColumns);
-		row.add(cmbPvalColumns);
-		row.add(Box.createHorizontalStrut(10));
-		row.add(btnRemoveColumns);
+		cmbColRm = new ButtonComboBox();
+		cmbColRm.setEnabled(false);
+		cmbColRm.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int n = cmbColRm.getItemCount()	;
+				if (n == 1 ) btnRemoveColumns.setEnabled(false);
+				else btnRemoveColumns.setEnabled(true);
+			}
+		});
+		row.add(cmbColRm);	
 			
 		mainPanel.add(row);
 	}
 	private void updateColumnList() {
-		cmbPvalColumns.removeAllItems();
-		cmbPvalColumns.addItem(selCol);
-		String [] vals = dbLoadPvalColumns();
-		for(int x=0; x<vals.length; x++) 
-			vals[x] = vals[x].substring(2); 
-		if(vals.length > 1)					
-			cmbPvalColumns.addItem(allCols);
-			
-		for(int x=0; x<vals.length; x++)
-			cmbPvalColumns.addItem(vals[x]);
+		cmbColRm.removeAllItems();
+		cmbColGO.removeAllItems();
 		
-		cmbPvalColumns.setMaximumSize(cmbPvalColumns.getPreferredSize());
-		cmbPvalColumns.setMinimumSize(cmbPvalColumns.getPreferredSize());
-		cmbPvalColumns.setEnabled(cmbPvalColumns.getItemCount() > 1);
-		cmbPvalColumns.setSelectedIndex(0);
-		btnRemoveColumns.setEnabled(false);
-		btnGOSeq.setEnabled(false);
+		String [] vals = dbLoadPvalColumns();
+		boolean b = (vals.length>0);
+		
+		if (b) {
+			cmbColRm.addItem(allCols);
+			cmbColGO.addItem(allCols);
+			
+			for(int x=0; x<vals.length; x++) {
+				cmbColRm.addItem(vals[x]);
+				cmbColGO.addItem(vals[x]);
+			}
+		}
+		else {
+			cmbColRm.addItem(noCol);
+			cmbColGO.addItem(noCol);
+		}
+		cmbColRm.setSelectedIndex(0);
+		cmbColGO.setSelectedIndex(0);
+		
+		cmbColRm.setMaximumSize(cmbColRm.getPreferredSize());
+		cmbColRm.setMinimumSize(cmbColRm.getPreferredSize());
+		cmbColRm.setEnabled(b);
+		
+		cmbColGO.setMaximumSize(cmbColGO.getPreferredSize());
+		cmbColGO.setMinimumSize(cmbColGO.getPreferredSize());
+		cmbColGO.setEnabled(b);
+		
+		btnRemoveColumns.setEnabled(b);
+		btnGOSeq.setEnabled(b);
+		repaint();
 	}
 	// GO Panel
 	private void createGOPanel() {
 		JPanel row = Static.createRowPanel();
+		String msg = hasGO ? "GO enrichment" : "GO enrichment - no GOs";
+		row.add(new JLabel(msg));
+		mainPanel.add(row); mainPanel.add(Box.createVerticalStrut(3));
 		
-		btnGOSeq = Static.createButton("Execute GOseq", false);
-		btnGOSeq.addActionListener(new ActionListener() {
+		row = Static.createRowPanel();
+		row.add(Box.createHorizontalStrut(5));
+		row.add(new JLabel("R-script")); row.add(Box.createHorizontalStrut(1));
+		
+		txtRfile2 = new JTextField(FILE_WIDTH);
+		txtRfile2.setText(RSCRIPT2);
+		txtRfile2.setMaximumSize(txtRfile2.getPreferredSize());
+		row.add(txtRfile2); row.add(Box.createHorizontalStrut(1));
+		
+		btnRfile2 = new JButton("...");
+		btnRfile2.addActionListener(new ActionListener()  {
 			public void actionPerformed(ActionEvent arg0) {
-				doGOSeq();
+				FileRead fc = new FileRead(projDirName, FileC.bDoVer, FileC.bDoPrt);
+				if (fc.run(btnRfile2, "R Script File", FileC.dRSCRIPTS, FileC.fR)) { // CAS316 was in-file chooser
+					txtRfile2.setText(fc.getRelativeFile());
+				}
 			}
 		});
+		row.add(btnRfile2);
+		if (hasGO) {mainPanel.add(row); mainPanel.add(Box.createVerticalStrut(3));}
+		
+		row = Static.createRowPanel();
+		row.add(Box.createHorizontalStrut(5));
+		btnGOSeq = Static.createButton("Execute", false);
+		btnGOSeq.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				exGoSeq();
+			}
+		});
+		row.add(btnGOSeq); 	row.add(Box.createHorizontalStrut(5));
+		
+		cmbColGO = new ButtonComboBox();
+		cmbColGO.setEnabled(false);
+		cmbColGO.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int n = cmbColGO.getItemCount();	
+				if (n == 1 ) btnGOSeq.setEnabled(false);
+				else btnGOSeq.setEnabled(true);
+			}
+		});
+		row.add(cmbColGO);	row.add(Box.createHorizontalStrut(10));
 		
 		ButtonGroup group = new ButtonGroup();
 		btnPercent = new JRadioButton("Top");
 		btnPercent.setBackground(Color.WHITE);
-		btnPVal = new JRadioButton("p-value");
-		btnPVal.setBackground(Color.WHITE);
-		
-		group.add(btnPercent);
-		group.add(btnPVal);
-		
-		btnPVal.setSelected(true);
+		row.add(btnPercent);		row.add(Box.createHorizontalStrut(3));
 		
 		txtPercent = new JTextField(3);
 		txtPercent.setMaximumSize(txtPercent.getPreferredSize());
 		txtPercent.setMinimumSize(txtPercent.getPreferredSize());
 		txtPercent.setText(defPercent);
+		row.add(txtPercent);
+		row.add(new JLabel("%"));	row.add(Box.createHorizontalStrut(5));
+		row.add(new JLabel("or"));	row.add(Box.createHorizontalStrut(5));
+		
+		btnPVal = new JRadioButton("p-value");
+		btnPVal.setBackground(Color.WHITE);
+		btnPVal.setSelected(true);
+		row.add(btnPVal);			row.add(Box.createHorizontalStrut(3));
 		
 		txtPVal = new JTextField(5);
 		txtPVal.setMaximumSize(txtPercent.getPreferredSize());
 		txtPVal.setMinimumSize(txtPercent.getPreferredSize());
 		txtPVal.setText(defPVal);
+		row.add(txtPVal);			row.add(Box.createHorizontalStrut(35));
 		
-		row.add(btnGOSeq);
-		row.add(Box.createHorizontalStrut(5));
-		row.add(btnPercent);
-		row.add(Box.createHorizontalStrut(3));
-		row.add(txtPercent);
-		row.add(new JLabel("%"));
-		row.add(Box.createHorizontalStrut(5));
-		row.add(new JLabel("or"));
-		row.add(Box.createHorizontalStrut(5));
-		row.add(btnPVal);
-		row.add(Box.createHorizontalStrut(3));
-		row.add(txtPVal);
-		row.add(Box.createHorizontalStrut(35));
+		group.add(btnPercent);
+		group.add(btnPVal);
 		
-		mainPanel.add(row);
+		if (hasGO) mainPanel.add(row);
 	}	
 
 	private void createExitPanel() {
@@ -1278,7 +1328,7 @@ public class QRFrame extends JDialog implements WindowListener {
 	}
 	// this is used by the three types of execute
 	private boolean getMethodsFromPanel() {
-		rScriptFile = txtRfile.getText().trim();
+		rScriptFile = txtRfile1.getText().trim();
 		if (rScriptFile.equals("")) {
 			JOptionPane.showMessageDialog(null,"Enter R-script file name.");
 			return false;
@@ -1288,12 +1338,9 @@ public class QRFrame extends JDialog implements WindowListener {
 			return false;
 		}
 		
-		doFDR = chkFDR.isSelected();
-		
 		disp = -1.0;
-		if (chkDisp.isSelected())
-		{
-			try{disp = Double.parseDouble(txtDisp.getText());}
+		if (chkDisp.isSelected()){
+			try {disp = Double.parseDouble(txtDisp.getText());}
 			catch(Exception e){
 				JOptionPane.showMessageDialog(null,"Invalid dispersion:" + txtDisp.getText());
 				return false;
@@ -1301,16 +1348,14 @@ public class QRFrame extends JDialog implements WindowListener {
 		}
 		
 		filCnt = -1; filCPM = -1;
-		if (filterRadio[0].isSelected())
-		{
-			try{filCnt = Integer.parseInt(txtFilCnt.getText());}
+		if (filterRadio[0].isSelected()){
+			try {filCnt = Integer.parseInt(txtFilCnt.getText());}
 			catch(Exception e){
 				JOptionPane.showMessageDialog(null,"Invalid Count value:" + txtFilCnt.getText());
 				return false;
 			}
 		}
-		else if (filterRadio[1].isSelected())
-		{
+		else if (filterRadio[1].isSelected()) {
 			try { filCPM = Integer.parseInt(txtFilCPM.getText()); }
 			catch(Exception e){
 				JOptionPane.showMessageDialog(null,"Invalid CPM value:" + txtFilCPM.getText());
@@ -1559,43 +1604,36 @@ public class QRFrame extends JDialog implements WindowListener {
 	}
 	private void dbRemoveColumnAll() {
 		try {
-			int nItems = cmbPvalColumns.getItemCount();
+			int nItems = cmbColRm.getItemCount();
 			Vector<String> columns = new Vector<String>();
 			for (int i = 0; i < nItems; i++)
 			{
-				String column = cmbPvalColumns.getItemAt(i);
-				if (!column.equals(allCols) && !column.equals(selCol)) {
+				String column = cmbColRm.getItemAt(i);
+				if (!column.equals(allCols)) {
 					columns.add(column);
 				}
 			}
 			for (String name :columns) dbRemoveColumn(name);
-			
-			if (mDB.tableColumnExists("assem_msg", "goDE")) // CAS316
-				mDB.executeUpdate("update assem_msg set goDE=''"); 
 		}
 		catch(Exception e) {ErrorReport.prtReport(e, "Error removing column");}
 	}
-	private void dbRemoveColumn(String column) {
+	private void dbRemoveColumn(String column) { // CAS321 changed for new columns in libraryDE
 		try {
 			Out.Print("Removing column " + column + "...");
 			column =  pValColPrefix + column;
 			mDB.executeUpdate("ALTER TABLE contig DROP COLUMN " + column);
 			
-			ResultSet rs = mDB.executeQuery("show tables like 'libraryDE'");
-			if (rs.first()) {
-				rs = mDB.executeQuery("select title from libraryDE where pCol='" + column + "'");
-				if (rs.first()) {
-					mDB.executeUpdate("delete from libraryDE where pCol='" + column + "'");
+			if (mDB.tableExists("go_info")) {
+				String goMethod = mDB.executeString("select goMethod from libraryDE where pCol='" + column + "'");
+				if (goMethod!=null && !goMethod.trim().contentEquals("")) {
+					Out.PrtSpMsg(1, "from GO....");
+					mDB.tableCheckDropColumn("go_info", column);
 				}
 			}
-			rs.close(); 
+			mDB.executeUpdate("delete from libraryDE WHERE pCol='" + column + "'");
+			
 			mDB.executeUpdate("update assem_msg set pja_msg=NULL"); 
 			
-			if (mDB.tableExists("go_info")) {
-				Out.PrtSpMsg(1, "from GO....");
-				mDB.tableCheckDropColumn("go_info", column);
-				qrProcess.saveGoDEforRemove(column); 
-			}
 			updateColumnList();	
 		}
 		catch(Exception e) {ErrorReport.prtReport(e, "Error removing column");}
@@ -1608,7 +1646,7 @@ public class QRFrame extends JDialog implements WindowListener {
 			while(rset.next()) {
 				String row = rset.getString(1);
 				if(row.startsWith(Globals.PVALUE))
-					names.add(row);
+					names.add(row.substring(Globals.PVALUE.length()));
 			}
 			rset.close();
 		}
@@ -1658,24 +1696,27 @@ public class QRFrame extends JDialog implements WindowListener {
 	
 	private JRadioButton [][] libRadio = null;
 	
-	private JButton btnRfile = null;
-	private JTextField txtRfile = null;
+	private JButton btnRfile1 = null;
+	private JTextField txtRfile1 = null;
 	
 	private JRadioButton [] filterRadio = null;
-	private JCheckBox chkSaveCol, chkFDR, chkDisp;
+	private JCheckBox chkSaveCol, chkDisp;
 	private JTextField txtColName, txtDisp, txtFilCPM, txtFilCPMn, txtFilCnt;
 	
-	private JButton btnExecute = null, btnExecuteAll = null;
-	private JButton btnExecuteFile = null, btnPairsFile = null;
+	private JButton btnGrp1Grp2 = null, btnGrp1All = null;
+	private JButton btnPairFile = null, btnPairsFile = null;
 	private JTextField txtPairsFile = null;
 	
 	private JButton btnLoadPvalFile = null, btnPvalFile = null;
 	private JTextField txtPvalFile = null;
 	
-	private JLabel lblRemoveColumns = null;
-	private ButtonComboBox cmbPvalColumns = null;
-	private JButton btnRemoveColumns = null, btnGOSeq = null;
 	
+	private ButtonComboBox cmbColRm = null;
+	private ButtonComboBox cmbColGO = null;
+	
+	private JButton btnRfile2 = null;
+	private JTextField txtRfile2 = null;
+	private JButton btnRemoveColumns = null, btnGOSeq = null;
 	private JRadioButton btnPercent = null, btnPVal = null;
 	
 	private JTextField txtPercent = null, txtPVal = null;
@@ -1687,10 +1728,10 @@ public class QRFrame extends JDialog implements WindowListener {
 	private DBConn mDB=null;
 	private HostsCfg hostsObj=null;
 	private DBInfo dbObj=null;
-	
-	private boolean doFDR=false;
+
 	private double disp = -1;
 	private int filCPM = -1, filCPMn=-1, filCnt = -1;
 	private String rScriptFile="";
 	private String projDirName=null; // CAS316
+	private boolean hasGO=false;
 }

@@ -455,9 +455,9 @@ public class Summary {
 	        	// loop through all sequences
 	        	while (rs.next()) {
 					for(int i=1; i<=deCol.length; i++) {
-						double d = rs.getDouble(i);
-						if (d != Globalx.dNaDE) { 
-							if (Math.abs(d) < DEcutoff) deCnt[r][i]++;
+						double d = Math.abs(rs.getDouble(i)); // CAS321 moved abs from if statement to here
+						if (d < 2) { // CAS321 change from !=
+							if (d < DEcutoff) deCnt[r][i]++;
 							allCnt[r][i]++; // distinguish no DE for this column vs no <0.5 DE
 						}
 	       	 		}
