@@ -93,7 +93,8 @@ public class BasicHitFilterPanel extends JPanel {
 		"Row", "Hit ID", "Length", "#Seqs", "#Best", "#Rank1", 
 		"E-value*", "%Sim*", "%SeqCov*", "%HitCov*", "Align*", 
 		"Description", "Species", "DBtype", "Taxonomy"}; 
-	private static final String [] GO_STATIC_COLUMNS = {"nGO", "GO", "InterPro", "KEGG", "Pfam", "EC (enzyme)"};
+	private static final String [] GO_STATIC_COLUMNS = 
+		{"nGO", "Assigned GOs", "InterPro", "KEGG", "Pfam", "EC (enzyme)"}; // CAS322 GO => Assigned GOs
 	public final int NUM_SEQ_COL = SEQ_STATIC_COLUMNS.length;
 	public final int NUM_HIT_COL = GRP_STATIC_COLUMNS.length;
 	
@@ -139,7 +140,6 @@ public class BasicHitFilterPanel extends JPanel {
 		add(alignPanel);
 	}
 	private void initColumns() {
-		
 		if(metaData.hasExpLevels()) libColNames = metaData.getLibNames();
 		if(metaData.hasDE()) pvalColNames = metaData.getDENames();
 			
@@ -174,6 +174,9 @@ public class BasicHitFilterPanel extends JPanel {
 	/****************************************
 	 * Called by BasicHitQueryTab
 	 */
+	public int getStartPval() {
+		return startPval;
+	}
 	public String getFilters() {
 		return filters;
 	}
@@ -344,11 +347,11 @@ public class BasicHitFilterPanel extends JPanel {
 			isActive = false;
 			chkUseSim = Static.createCheckBox("%Sim>=", isActive);
 			chkUseSim.addActionListener(new ActionListener() {
-	    			public void actionPerformed(ActionEvent e) {
-	    				enableEvalSim();
-	    			}
-	    		});   
-	    		rowFilter1.add(chkUseSim);
+    			public void actionPerformed(ActionEvent e) {
+    				enableEvalSim();
+    			}
+	    	});   
+	    	rowFilter1.add(chkUseSim);
 			txtSim = Static.createTextField( DEFAULT_SIM, INT_SIZE,isActive);
 			rowFilter1.add(txtSim);
 			rowFilter1.add(Box.createHorizontalStrut(2));
@@ -356,25 +359,26 @@ public class BasicHitFilterPanel extends JPanel {
 			isActive = false;
 			chkUseAlign = Static.createCheckBox("%Hcov", isActive);
 			chkUseAlign.addActionListener(new ActionListener() {
-	    			public void actionPerformed(ActionEvent e) {
-	    				enableEvalSim();
-	    			}
-	    		});   
-	    		rowFilter1.add(chkUseAlign);
+    			public void actionPerformed(ActionEvent e) {
+    				enableEvalSim();
+    			}
+    		});   
+    		rowFilter1.add(chkUseAlign);
 			txtAlign = Static.createTextField( DEFAULT_SIM, INT_SIZE,isActive);
 			rowFilter1.add(txtAlign);
 			rowFilter1.add(Box.createHorizontalStrut(8));
 			
-			// RPKM and DE
+			// RPKM/TPM and DE
 			isActive = false;
 			chkCount = Static.createCheckBox("", isActive);
 			chkCount.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					boolean check = chkCount.isSelected();
+			public void actionPerformed(ActionEvent e) {
+				boolean check = chkCount.isSelected();
 					btnCount.setEnabled(check);
-	    			}
-	    		});  
+    			}
+    		});  
 			String label = metaData.getNorm(); // CAS305
+			if (metaData.hasDE()) label += ",DE"; // CAS322
 			btnCount = new JButton(label);
 			btnCount.setBackground(Globals.MENUCOLOR);
 			btnCount.addActionListener(new ActionListener() {
@@ -388,7 +392,6 @@ public class BasicHitFilterPanel extends JPanel {
 			btnCount.setEnabled(isActive);
 			
 			if (metaData.hasExpLevels()) {
-			// if (libColNames!=null && libColNames.length>0) { CAS305
 				rowFilter1.add(chkCount);
 				rowFilter1.add(btnCount);
 				rowFilter1.add(Box.createHorizontalStrut(6));
@@ -850,8 +853,7 @@ public class BasicHitFilterPanel extends JPanel {
 			buttonPanel.setAlignmentX(CENTER_ALIGNMENT);
 			add(buttonPanel);
 			setVisible(false);
-		}
-		
+		}	
 		private JPanel createSelectPanel() {
 			String [] annoDBs = metaData.getAnnoDBs();
 			if (annoDBs==null) annoDBs = new String [0];
@@ -983,7 +985,6 @@ public class BasicHitFilterPanel extends JPanel {
 						return "AnnoDB " + chkAnnoDB[x].getText() + tax;
 					}
 			}
-			
 			return num + " annoDBs selected"; 
 		}
 		public void clear() {
@@ -2501,7 +2502,7 @@ public class BasicHitFilterPanel extends JPanel {
 		}
 		private JPanel createColPvalPanel() {
 			if(pvalColNames == null || pvalColNames.length == 0) return null;
-			
+
 			chkPvalColNames = new JCheckBox[pvalColNames.length];
 			for(int x=0; x<chkPvalColNames.length; x++) chkPvalColNames[x] = null;
 			
@@ -2595,7 +2596,9 @@ public class BasicHitFilterPanel extends JPanel {
  			if(chkLibColNames != null)
  				for(int x=0; x<chkLibColNames.length; x++)
  					colName[index++] = chkLibColNames[x].getText();
- 			if(chkPvalColNames != null)
+ 			
+ 			startPval=index; // CAS322 even if there are no p-values
+ 			if(chkPvalColNames != null) 
  				for(int x=0; x<chkPvalColNames.length; x++)
  					colName[index++] = chkPvalColNames[x].getText();
  			
@@ -2981,4 +2984,5 @@ public class BasicHitFilterPanel extends JPanel {
 	private int totalSeqHitPairs=0;
 	private String filters="";
 	private String norm="RPKM";
+	private int startPval=0;
 }

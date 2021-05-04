@@ -3,48 +3,28 @@ package cmp.viewer.table;
 /*****************************************************
  * All Tables calls this for Export
  */
-import java.awt.Dimension;
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.Font;
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.sql.ResultSet;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Vector;
 import java.util.TreeMap;
 import java.util.HashSet;
+import java.util.HashMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JRadioButton;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
-import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableColumn;
 
 import cmp.database.Globals;
 import cmp.viewer.MTCWFrame;
@@ -52,7 +32,6 @@ import util.database.DBConn;
 import util.database.Globalx;
 import util.file.FileC;
 import util.file.FileWrite;
-import util.methods.BlastArgs;
 import util.methods.ErrorReport;
 import util.methods.Out;
 import util.methods.Static;
@@ -64,7 +43,6 @@ import util.ui.UserPrompt;
 public class TableUtil {
 	private final String delim =  FileC.TSV_DELIM;
 	
-	private static final String BLASTDIR = Globalx.rHITDIR; 
 	private static final String ID_SQL = FieldData.SEQ_SQLID; 
 	private static final String ID1_SQL = FieldData.ID1_SQLID; 
 	private static final String ID2_SQL = FieldData.ID2_SQLID; 
@@ -539,8 +517,9 @@ public class TableUtil {
 			
 			// Have all information necessary for GO/count option. Sorted by GOnum
 			if (et.isGOCnt()) {
-				outBW.write("GOterm\t#" + label + "\n");
-				Out.PrtSpMsg(1, "Columns: GOterm\t#" + label);
+				String id = Globalx.goID.replace(" ", "-"); // CAS322
+				outBW.write(id + "\t#" + label + "\n");
+				Out.PrtSpMsg(1, "Columns: " + id + "\t#" + label);
 				for (int gonum : goCntMap.keySet()) {
 					int cntGO = goCntMap.get(gonum);
 					if (cntGO <= cntLimit) continue;
@@ -561,6 +540,8 @@ public class TableUtil {
 				Out.prt("Complete writing " + goCntMap.size() + " GOs");
 				return;
 			}
+			HashMap <String, String> goAbbrMap = Static.getGOtermMap();
+			String [] abbr = Globalx.GO_TERM_ABBR;
 			
 			// Get more information for Verbose and Desc/Cnt options
 			int cntBio=0, cntCell=0, cntMol=0;
@@ -577,13 +558,13 @@ public class TableUtil {
 				gd.goStr = String.format(GO_FORMAT, gonum);
 				gd.cntStr = String.format("%5d", goCntMap.get(gonum));
 				gd.lev = rs.getInt(1);
-				gd.domain = rs.getString(2);
+				gd.domain = goAbbrMap.get(rs.getString(2));
 				gd.desc = rs.getString(3);
 				goList.add(gd);
 				
-				if (gd.domain.startsWith("bio")) cntBio++;
-				else if (gd.domain.startsWith("cell")) cntCell++;
-				else if (gd.domain.startsWith("mol")) cntMol++;
+				if (gd.domain.equals(abbr[0])) cntBio++;
+				else if (gd.domain.equals(abbr[1])) cntCell++;
+				else if (gd.domain.equals(abbr[2])) cntMol++;
 				
 				cnt++;
 				if (cnt==1000) {
@@ -591,11 +572,11 @@ public class TableUtil {
 					cnt=0;
 				}
 			}
-			Out.PrtSpMsg(1, "Biol: " + cntBio + "   Cell: " + cntCell + "   Mol: " + cntMol);
+			Out.PrtSpMsg(1, "BP: " + cntBio + "   CC: " + cntCell + "   MF: " + cntMol);
 			Collections.sort(goList);
 			cnt=0;
 			if (et.isAllColumns()) { 
-				String col = "GOterm\t#" + label + "\tLevel\tDomain\tDescription";
+				String col = Globalx.goID + "\t#" + label + "\tLevel\t" + Globalx.goOnt + "\t" + Globalx.goTerm;
 				outBW.write(col+"\n");
 				Out.Print("   Columns: " + col);
 				
@@ -609,7 +590,7 @@ public class TableUtil {
 				}
 			}
 			else {
-				String col = "Domain\tDescription\t#" + label;
+				String col = Globalx.goOnt + "\t" + Globalx.goTerm + "\t#" + label;
 				outBW.write(col+"\n");
 				Out.Print("   Columns: " + col);
 				String savDomain="";
@@ -657,7 +638,7 @@ public class TableUtil {
  			txtGOlevel.setText("2");
  			
  			cmbTermTypes = new ButtonComboBox();
-    		cmbTermTypes.addItem("Any domain");
+    		cmbTermTypes.addItem("Any " + Globalx.goFullOnt);
     		for(int x=0; x<Globalx.GO_TERM_LIST.length; x++)
     				cmbTermTypes.addItem(Globalx.GO_TERM_LIST[x]);
     		
@@ -873,220 +854,6 @@ public class TableUtil {
 		theViewerFrame.setStatus("");
 
 		return retVal.toString();
-	}
-	 /*********************************************************************/
-	
-	 public void runBlast(String name, String seq, boolean tabular) {
- 		try {
- 			boolean runFormat = false;
-				
-			File baseDir = new File(BLASTDIR);
-			
-			if(!baseDir.exists())
-				baseDir.mkdir();
-			
-			File combinedFasta = new File(baseDir.getAbsolutePath() + "/Combined_" + theViewerFrame.getDBName() + ".fasta");
-			if(!combinedFasta.exists()) {
-				if(!exportForBlast(combinedFasta))
-					return;
-			}					
-			File phrCombined = (new File(combinedFasta.getAbsolutePath() + ".phr"));
-			File pinCombined = (new File(combinedFasta.getAbsolutePath() + ".pin"));
-			File psqCombined = (new File(combinedFasta.getAbsolutePath() + ".psq"));
-				
-			runFormat = true;
-			if(phrCombined.exists() && pinCombined.exists() && psqCombined.exists()) 
-			{
-				if((combinedFasta.lastModified() < phrCombined.lastModified()) &&
-						(combinedFasta.lastModified() < pinCombined.lastModified()) &&
-							(combinedFasta.lastModified() < psqCombined.lastModified())) 
-					runFormat = false;
-			}
-
-			if(runFormat) {
-				String cmd = BlastArgs.getFormatp(combinedFasta.getAbsolutePath());
-				System.err.println("Executing: " + cmd);
-				Process pFormatDB = Runtime.getRuntime().exec(cmd);
-				pFormatDB.waitFor();
-			}
-
-			Calendar timeStamp = Calendar.getInstance();
-			SimpleDateFormat formatter = new SimpleDateFormat("yy_MM_dd_kk_mm_ss");
-			String strTimeStamp = formatter.format(timeStamp.getTime());
-
-			File sequenceFasta = new File(baseDir.getAbsolutePath() + "/" + name + "_" + strTimeStamp + ".fasta");
-			BufferedWriter out = new BufferedWriter(new FileWriter(sequenceFasta));
-			out.write(">" + name + "\n");
-			out.write(seq + "\n");
-			out.flush();
-			out.close();
-			
-			//Set output file name to the current date/time
-			File outFile = new File(baseDir.getAbsolutePath() + "/" + "Out_" + strTimeStamp + ".txt");
-
-			String blastCmd = BlastArgs.getBlastpCmdMTCW(sequenceFasta.getAbsolutePath(), combinedFasta.getAbsolutePath(),
-					outFile.getAbsolutePath(), tabular);
-			
-			Process pBlastall = Runtime.getRuntime().exec(blastCmd);
-			pBlastall.waitFor();
-			
-			Vector<String> lines = new Vector<String> ();
-			String line;
-			
-			if(tabular) {
-				line = "Query Subject %Sim Align MisMatch GapOpen qStart qEnd sStart sEnd E-value Bit";
-				lines.add(line);
-			}
-			BufferedReader br = new BufferedReader(new FileReader(outFile));
-			while((line = br.readLine()) != null) {
-				lines.add(line);
-			}
-			br.close(); 	
-			if(tabular) 
-				displayInfoTable(theViewerFrame, "Blast result for " + name, 
-						lines.toArray(new String[0]));
-			else
-				UserPrompt.displayInfoMonoSpace(theViewerFrame, "Blast result for " + name, 
-						lines.toArray(new String[0])); 
-			
-			sequenceFasta.delete();
-			outFile.delete();
- 		}
- 		catch (Exception e) {ErrorReport.prtReport(e, "Performing blast");}
-	 }
-	 private boolean exportForBlast(File target) {
-		try {
-			DBConn conn = theViewerFrame.getDBConnection();
-			int cntDS = conn.executeCount("SELECT COUNT(*) FROM assembly");
-			String [] asmPfx = new String [cntDS+1]; 
-			ResultSet rs = conn.executeQuery("SELECT ASMid, prefix FROM assembly");		
-			while(rs.next()) 
-				asmPfx[rs.getInt(1)] = rs.getString(2);
-					
-	        BufferedWriter pw = new BufferedWriter(new FileWriter(target));
-	        // we are allowing duplicate sequence identifiers, so need to search by ASMid
-	        for (int i=1; i<= cntDS;  i++) {
-	        	rs = conn.executeQuery("SELECT UTstr, aaSeq FROM unitrans" +
-	        			" WHERE ASMid=" + i);
-				while(rs.next()) {
-					String id = rs.getString(1);
-					String seq = rs.getString(2);
-					if (seq != null) {
-						pw.write(">" + id + "\n");
-						pw.write(seq + "\n");
-					}
-				}
-	        }
-			rs.close();
-			conn.close();	
-			pw.flush();
-			pw.close();
-			return true;
-		}
-		catch(Exception e) {
-			ErrorReport.prtReport(e, "Error generating fasta from database");
-			return false;
-		}
-	}
-	
-	/*******************************************************/
-	// used by runBlast
-	public static void displayInfoTable(JFrame parentFrame, String title, final String [] message) {
-		final class TheModel extends AbstractTableModel {
-			private static final long serialVersionUID = 2153498168030234218L;
-
-			public int getColumnCount() {
-				if(message == null || message.length == 0)
-					return 1;
-				return message[0].split("\\s").length; 
-			}
-			public int getRowCount() { return message.length; }
-			public Object getValueAt(int row, int col) {
-				if(row < message.length && col < message[row].split("\\s+").length)
-					return message[row].split("\\s+")[col];
-				return "";
-			}
-		}
-
-		JOptionPane pane = new JOptionPane();
-		final JButton btnCopySeqID = new JButton("Copy Seq ID");
-	
-		final JTable messageTable = new JTable();
-		messageTable.setModel(new TheModel());
-		messageTable.setFont(new Font("monospaced", Font.BOLD, 12));
-		messageTable.addMouseListener(new MouseAdapter() {
-			public void mousePressed(MouseEvent e) {
-				btnCopySeqID.setEnabled(messageTable.getSelectedRow() >= 0);
-			}
-		});
-
-		btnCopySeqID.setAlignmentX(Component.CENTER_ALIGNMENT);
-		btnCopySeqID.setEnabled(false);
-		btnCopySeqID.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				int row = messageTable.getSelectedRow();
-				
-				String rowVal = (String)messageTable.getValueAt(row, 1);
-				int strPos = 0;
-				if((strPos = rowVal.indexOf(' ')) >= 0)
-					rowVal = rowVal.substring(strPos+1);
-				
-				Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
-				cb.setContents(new StringSelection(rowVal), null);
-			}
-		});
-		
-		JScrollPane sPane = new JScrollPane(messageTable); 
-		messageTable.setTableHeader(null);
-		messageTable.setShowGrid(false);
-		messageTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		messageTable.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-		sPane.getViewport().setBackground(Color.WHITE);
-		
-		//Adjust column sizes
-        TableColumn column;
-        Component comp;
-        int cellWidth;
-        
-        for (int i = 0;  i < messageTable.getColumnCount();  i++) { // for each column
-            column = messageTable.getColumnModel().getColumn(i);
-            
-            cellWidth = 0;
-            for (int j = 0;  j < messageTable.getModel().getRowCount();  j++) { // for each row
-	            comp = messageTable.getDefaultRenderer(messageTable.getColumnClass(i)).
-	                             getTableCellRendererComponent(
-	                            	 messageTable, messageTable.getValueAt(j, i),
-	                                 false, false, j, i);
-
-	            if(comp != null) {
-		            cellWidth = Math.max(cellWidth, comp.getMinimumSize().width);
-	            }
-            }
-
-            column.setPreferredWidth(cellWidth);
-        }
-        
-		JPanel buttonRow = new JPanel();
-		buttonRow.setLayout(new BoxLayout(buttonRow, BoxLayout.LINE_AXIS));
-		
-		buttonRow.add(btnCopySeqID);
-		
-		JPanel mainPanel = new JPanel();
-		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
-		
-		mainPanel.add(buttonRow);
-		mainPanel.add(Box.createVerticalStrut(15));
-		mainPanel.add(sPane);
-		
-		pane.setMessage(mainPanel);
-		pane.setMessageType(JOptionPane.PLAIN_MESSAGE);
-
-		JDialog helpDiag = pane.createDialog(parentFrame, title);
-		helpDiag.setModal(false); 
-		helpDiag.setResizable(true);
-		helpDiag.setSize(new Dimension(620, 400));
-		
-		helpDiag.setVisible(true);		
 	}
 	
 	private MTCWFrame theViewerFrame = null;

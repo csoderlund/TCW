@@ -173,7 +173,9 @@ public class MetaData {
 				 		}
 				 	}
 			 	}
+			 	loadGoPvalMap(mDB); // could be done above but needed for schema
 		 	}
+		 	
 		 	loadLibrary(mDB);
 		 	checkVer(mDB);
 			return true;
@@ -266,20 +268,20 @@ public class MetaData {
 		return bHasReps;
 	}
 	 /*************************************************
-	 * used by BasicGOQueryTab upSeq, dnSeq
+	 * used by BasicGOQueryTab upSeq, dnSeq; and for columns by BasicGOFilter - can change to read on startup
 	 *************************************************/
-	 public TreeMap <String, Double> getDegPvalMap(DBConn mDB) {
-		 if (degPvalMap!=null) return degPvalMap;
+	 public TreeMap <String, Double> loadGoPvalMap(DBConn mDB) {
+		 if (goPvalMap!=null) return goPvalMap;
+		 goPvalMap = new TreeMap <String, Double> ();
+		 
 		 try {
-			degPvalMap = new TreeMap <String, Double> ();
-			
 			if (mDB.tableColumnExists("libraryDE", "goCutoff")) { // CAS321 (17-Apr-21)
 				ResultSet rs = mDB.executeQuery("select pCol, goCutoff from libraryDE");
 				while (rs.next()) {
 					double cutoff =  rs.getDouble(2);
-					if (cutoff>0) degPvalMap.put(rs.getString(1), cutoff);
+					if (cutoff>0) goPvalMap.put(rs.getString(1), cutoff);
 				}
-				if (degPvalMap.size()>0) return degPvalMap;
+				if (goPvalMap.size()>0) return goPvalMap;
 			}
 			// pre-v321
 			if (mDB.tableColumnExists("assem_msg", "goDE")) {
@@ -289,13 +291,13 @@ public class MetaData {
 				for (String x : tok) {
 					String [] tok2 = x.split(":");
 					if (tok2.length==2)
-						degPvalMap.put(tok2[0], Double.parseDouble(tok2[1]));
+						goPvalMap.put(tok2[0], Double.parseDouble(tok2[1]));
 				}
-				return degPvalMap;
+				return goPvalMap;
 			}
 		} 
 		catch (Exception e) {ErrorReport.reportError(e, "Error: reading database for GO DE Pvals");}
-		return null;
+		return goPvalMap; // CAS322 was return null
 	 }
 	/**********************************************************************
 	 * ContigFramePanel: load on first use
@@ -326,7 +328,7 @@ public class MetaData {
 	 /*********************************************************
 	  * Basic GO - loads on first use
 	  */
-	 public HashSet <String> getECinDB() {
+	 public HashSet <String> getEvCinDB() {
 		if (ecInDB==null) loadGoEC();
 		return ecInDB;
 	 }
@@ -489,6 +491,7 @@ public class MetaData {
 	 public String [] getLibTitles() { return expLibTitles; }
 	 public boolean hasDE() { return bHasDE;}
 	 public boolean hasExpLevels() { return bHasExpLevels; }
+	 public TreeMap <String, Double> getGoPvalMap() {return  goPvalMap;}
 	
 	 public String [] getAnnoDBs() { return annoDBs;}
 	 public String [] getTypeDBs() { return typeDBs;}
@@ -527,6 +530,7 @@ public class MetaData {
 	 private boolean bHasDE = false;
 	 private String [] deNames = null;
 	 private String [] deTitles = null;
+	 private TreeMap <String, Double> goPvalMap = null;
 	
 	 private String [] annoDBs = null, typeDBs = null, taxoDBs=null;
 	 private Vector <String> species = null;
@@ -553,7 +557,7 @@ public class MetaData {
 	 private HashMap <String, Double> tupleMap = new HashMap <String, Double> ();
 	 private int nPairs;
 	 
-	 private TreeMap <String, Double> degPvalMap = null;
+	 
 	 
 	 private STCWFrame theMainFrame;
 }

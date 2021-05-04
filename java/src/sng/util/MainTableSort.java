@@ -27,6 +27,7 @@ import javax.swing.event.ListSelectionEvent;
 import java.io.File;
 
 import sng.database.Globals;
+import sng.viewer.panels.DisplayDecimalTab;
 import util.database.Globalx;
 import util.methods.ErrorReport;
 import util.ui.DisplayFloat;
@@ -89,53 +90,51 @@ public class MainTableSort extends JTable implements TableModel
 		setAutoResizeMode(AUTO_RESIZE_OFF);
 		autofitColumns();
 	}
-	private void notifyDoubleClick ( )
-	{		
+	private void notifyDoubleClick ( ){		
 	    ActionEvent e = new ActionEvent ( this, ActionEvent.ACTION_PERFORMED, "DoubleClickSingleRow" );
 
 	    for ( int i = 0; i < doubleClickListeners.size(); ++i ) {
-	        	ActionListener curListener = doubleClickListeners.get(i);
-	        	curListener.actionPerformed( e );
+	        ActionListener curListener = doubleClickListeners.get(i);
+	        curListener.actionPerformed( e );
         }				
 	}
 	private void tableHeaderClicked( MouseEvent e ) 
 	{ 
 		//if (e.getClickCount() == 1) { // CAS304 same comment as above
-			JTableHeader h = null;
-			try {
-				// Figure out what column was clicked:
-				h = (JTableHeader)e.getSource();
-				h.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); 
-		        TableColumnModel columnModel = h.getColumnModel();
-		  
-		        String columnName = this.getColumnName(
-		        		getMappedColumn(this.getColumnModel().getColumnIndexAtX(e.getX()), false));
-		        int viewColumn = getMappedColumn(columnModel.getColumnIndexAtX(e.getX() + 1), false) - 1;
-		        viewColumn = getColumnModel().getColumnIndex(columnName);
-	            if ( viewColumn < 0 )
-	                return;   
-	            
-		        int nNewColumn = columnModel.getColumn(viewColumn).getModelIndex()-1;
-		        if (nNewColumn < 0 ) return;
-		        
-		        if(SwingUtilities.isLeftMouseButton(e))
-		        		bAscend[nNewColumn] = !bAscend[nNewColumn];
-		        else
-		        		bAscend[nNewColumn] = true;
-		        
-		        sortByColumn ( nNewColumn, bAscend[nNewColumn] );    
-			}
-			catch ( Exception err ) {
-				ErrorReport.reportError(err, "TCW error: sorting table");
-			}
-			finally { // ensure that cursor is restored
-				if (h != null) 
-					h.setCursor(Cursor.getDefaultCursor());
-			}
+		JTableHeader h = null;
+		try {
+			// Figure out what column was clicked:
+			h = (JTableHeader)e.getSource();
+			h.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); 
+	        TableColumnModel columnModel = h.getColumnModel();
+	  
+	        String columnName = this.getColumnName(
+	        		getMappedColumn(this.getColumnModel().getColumnIndexAtX(e.getX())));
+	        int viewColumn = getMappedColumn(columnModel.getColumnIndexAtX(e.getX() + 1)) - 1;
+	        viewColumn = getColumnModel().getColumnIndex(columnName);
+            if ( viewColumn < 0 )
+                return;   
+            
+	        int nNewColumn = columnModel.getColumn(viewColumn).getModelIndex()-1;
+	        if (nNewColumn < 0 ) return;
+	        
+	        if(SwingUtilities.isLeftMouseButton(e))
+	        		bAscend[nNewColumn] = !bAscend[nNewColumn];
+	        else
+	        		bAscend[nNewColumn] = true;
+	        
+	        sortByColumn ( nNewColumn, bAscend[nNewColumn] );    
+		}
+		catch ( Exception err ) {
+			ErrorReport.reportError(err, "TCW error: sorting table");
+		}
+		finally { // ensure that cursor is restored
+			if (h != null) 
+				h.setCursor(Cursor.getDefaultCursor());
+		}
 		//}
 	}
-	 private int[] getColumnWidths()
-    {
+	private int[] getColumnWidths(){
     	int numColumns = getModel().getColumnCount();
     	int[] widths = new int[numColumns];
     	for (int i = 0;  i < numColumns;  i++)
@@ -143,25 +142,19 @@ public class MainTableSort extends JTable implements TableModel
     	
     	return widths;
     }
-    
-    private void setColumnWidths(int[] widths)
-    {
+    private void setColumnWidths(int[] widths) {
 	    for (int i = 0;  i < getModel().getColumnCount();  i++)
 	    	getColumnModel().getColumn(i).setPreferredWidth(widths[i]);
-    }
-		
-	protected int getMappedColumn(int columnIndex, boolean debug) {
+    }	
+	protected int getMappedColumn(int columnIndex) {
 		return colListener.getFieldPositionFromColumn(columnIndex);
 	}
-	
 	protected int getReverseMappedColumn(int columnIndex) {
 		return colListener.getReverseFieldPositionFromColumn(columnIndex);
 	}
-	
 	protected boolean hasColumnMoved(int columnIndex) {
 		return colListener.hasColumnMoved(columnIndex);
 	}
-	
 	private static final int MAX_AUTOFIT_COLUMN_WIDTH = 90; // in pixels
     
 	protected void autofitColumns() {
@@ -176,8 +169,7 @@ public class MainTableSort extends JTable implements TableModel
             column = getColumnModel().getColumn(i);
 
             comp = headerRenderer.getTableCellRendererComponent(
-                                 this, column.getHeaderValue(),
-                                 false, false, 0, i);
+                      this, column.getHeaderValue(), false, false, 0, i);
             
             headerWidth = comp.getPreferredSize().width + 10; 
             
@@ -189,18 +181,19 @@ public class MainTableSort extends JTable implements TableModel
 	            cellWidth = Math.max(cellWidth, comp.getPreferredSize().width);
 	            if (j > 100) break; // only check beginning rows, for performance reasons
             }
-
             column.setPreferredWidth(Math.min(Math.max(headerWidth, cellWidth), MAX_AUTOFIT_COLUMN_WIDTH));
         }
     }
+	// XXX
 	private void sortByColumn ( int nColumn, final boolean bInAscending ) // override SortableTable
 	{	
 		final int nNewSortField = getFieldIdxFromColumnIdx ( nColumn );
         if ( nNewSortField < 0 ) return;
 		
-		// see if it's a DE column where we want to sort by abs and then +/-
+		// if it is a DE column, sort by abs and then +/-
 		final String dbName = fieldObj.getDBNameByID(nNewSortField);
-		// null column is n-fold, sort it like de
+		
+		// null column is n-fold, sort it like DE
 		final boolean negSort = (dbName == null || dbName.startsWith(Globals.PVALUE)) ? true : false;
 
 		Comparator<Object []> sortRows = new Comparator<Object []> () {
@@ -209,8 +202,7 @@ public class MainTableSort extends JTable implements TableModel
 				Object o1 = convertNull ( row1[1] );
 	            Object o2 = convertNull ( row2[1] );
 	            
-	            if (negSort)
-	            {
+	            if (negSort) {
 	            	Double d1 = Math.abs(((DisplayFloat)o1).getValue());
 	            	Double d2 = Math.abs(((DisplayFloat)o2).getValue());
 	            	int nRes = 0;
@@ -227,36 +219,36 @@ public class MainTableSort extends JTable implements TableModel
 	            else if ( o1 == null )	nRes = -1;
 	            else if ( o2 == null )	nRes = 1;
 	            else {
-	            		if (o1 instanceof String) { 
-	            			nRes = ((String) o1).compareToIgnoreCase((String) o2);
-	            		}
-	            		else if (o1 instanceof DisplayInt) {
-	            			nRes = ((DisplayInt) o1).compareTo((DisplayInt)o2);
-	            		}
-	            		else if (o1 instanceof DisplayFloat) {
-	            			nRes = ((DisplayFloat) o1).compareTo((DisplayFloat)o2);
-	            		}
-	            		else if (o1 instanceof Integer) {
-	            			nRes = ((Integer) o1).compareTo((Integer)o2);
-	            		}
-	            		else if (o1 instanceof Double) {
-	            			nRes = ((Double) o1).compareTo((Double)o2);
-	            		}
-	            		else if (o1 instanceof Boolean) {
-	            			nRes = ((Boolean) o1).compareTo((Boolean)o2);
-	            		}
-	            		else if (o1 instanceof Float) {
-	            			nRes = ((Float) o1).compareTo((Float)o2);
-	            		}
-	            		else if (o1 instanceof Long) {
-	            			nRes = ((Long) o1).compareTo((Long)o2);
-	            		}
-	            		else { // CAS304 was not checking types
-	            			//Comparable c1 = (Comparable)o1;
-	    	                //Comparable c2 = (Comparable)o2;
-	    	                //nRes = c1.compareTo( c2 );
-	            			Out.PrtWarn("No type for column: " + dbName + " " + o1.getClass().getName());
-	            		}
+            		if (o1 instanceof String) { 
+            			nRes = ((String) o1).compareToIgnoreCase((String) o2);
+            		}
+            		else if (o1 instanceof DisplayInt) {
+            			nRes = ((DisplayInt) o1).compareTo((DisplayInt)o2);
+            		}
+            		else if (o1 instanceof DisplayFloat) {
+            			nRes = ((DisplayFloat) o1).compareTo((DisplayFloat)o2);
+            		}
+            		else if (o1 instanceof Integer) {
+            			nRes = ((Integer) o1).compareTo((Integer)o2);
+            		}
+            		else if (o1 instanceof Double) {
+            			nRes = ((Double) o1).compareTo((Double)o2);
+            		}
+            		else if (o1 instanceof Boolean) {
+            			nRes = ((Boolean) o1).compareTo((Boolean)o2);
+            		}
+            		else if (o1 instanceof Float) {
+            			nRes = ((Float) o1).compareTo((Float)o2);
+            		}
+            		else if (o1 instanceof Long) {
+            			nRes = ((Long) o1).compareTo((Long)o2);
+            		}
+            		else { // CAS304 was not checking types
+            			//Comparable c1 = (Comparable)o1;
+    	                //Comparable c2 = (Comparable)o2;
+    	                //nRes = c1.compareTo( c2 );
+            			Out.PrtWarn("No type for column: " + dbName + " " + o1.getClass().getName());
+            		}
 	            }
 	            
 				// Invert the result if this is descending
@@ -289,27 +281,22 @@ public class MainTableSort extends JTable implements TableModel
 			String line = tempRows2[(Integer)row[0]];
 			tableRows.add(line);
 		}
-		
 		tempRows = null;	
 		tempRows2 = null;	
 		
         notifyTableRowsChanged ();
         tableSelectionChanged ();
 	}
-
-	private void notifyTableRowsChanged ( )
-	{
+	private void notifyTableRowsChanged ( ){
         TableModelEvent eventAllRows = new TableModelEvent ( this );
         TableModelListener curListener;
         
         for ( int i = 0; i < tableModelListeners.size(); ++i ) {
-	        	curListener = tableModelListeners.get(i);
-	        	curListener.tableChanged(eventAllRows);
+        	curListener = tableModelListeners.get(i);
+        	curListener.tableChanged(eventAllRows);
         }		
-	}
-	
-	private void tableSelectionChanged ( )
-	{
+	}	
+	private void tableSelectionChanged ( ){
         if ( actionListeners == null ) return;
 		
 		// Notify listeners:
@@ -317,51 +304,43 @@ public class MainTableSort extends JTable implements TableModel
         ActionListener curListener;
         
         for ( int i = 0; i < actionListeners.size(); ++i ) {
-	        	curListener = actionListeners.get(i);
-	        	curListener.actionPerformed( e );
+        	curListener = actionListeners.get(i);
+        	curListener.actionPerformed( e );
         }		
-	}
-	
+	}	
 	/*****************************************
 	 * Public methods
 	 */
-	public void setSelectedRows(int start, int end)
-	{
+	public void setSelectedRows(int start, int end) {
 		setRowSelectionInterval(start, end);
 	}
-	
-	public void addDoubleClickListener(ActionListener l)
-	{
+	public void addDoubleClickListener(ActionListener l) {
 		if ( !doubleClickListeners.contains( l ) )
 			doubleClickListeners.add ( l ); 		
 	}
-	
-	public void addSelectionChangeListener(ActionListener l) 
-	{ 
+	public void addSelectionChangeListener(ActionListener l) { 
 		if ( !actionListeners.contains( l ) )
 			actionListeners.add ( l ); 
 	};
-	
-	public TableCellRenderer getCellRenderer(int row, int column) 
-	{
+	public TableCellRenderer getCellRenderer(int row, int column) {
 		rendererWrapper.setRenderer( super.getCellRenderer ( row, column ) );
 		return rendererWrapper;
 	}
-	
-	private class SortableCellRenderer implements TableCellRenderer
-	{
-		void setRenderer ( TableCellRenderer inRenderer )
-		{
+	/*************************************************************
+	 * Sort class
+	 */
+	private class SortableCellRenderer implements TableCellRenderer{
+		void setRenderer ( TableCellRenderer inRenderer ){
 			renderer = inRenderer;
 		}
-		
 		public Component getTableCellRendererComponent (JTable table,
 				Object value, boolean isSelected, boolean hasFocus,
 				int row, int column )
 		{
-			boolean bHeader = row == -1;
-			boolean bBlueBG = row % 2 == 1;
-						
+	
+			boolean bHeader = (row == -1);
+			boolean bBlueBG = (row % 2 == 1);
+			
 			JLabel label = (JLabel)renderer.getTableCellRendererComponent( table, value, isSelected, hasFocus, row, column );				
 			if ( bHeader ) {
 				label.setBorder( BorderFactory.createEtchedBorder() );
@@ -377,16 +356,39 @@ public class MainTableSort extends JTable implements TableModel
 					else label.setBackground( null );
 				}
 			}
+			/* CAS322 */
+			if (!bHeader && DisplayDecimalTab.isHighPval()) {
+				int absColumn =  getMappedColumn(column)-1;	// remove Row#
+				if (absColumn>0) {
+					String dbName = fieldObj.getDBcolumnByIdx(absColumn);
+					
+					if (dbName!=null && dbName.startsWith(Globals.PVALUE)) { 
+						Object obj = getValueAt(row, column);
+						
+						if (obj!=null) {
+							double theVal=0.0;
+				        	if (obj instanceof DisplayFloat) {
+								theVal = ((DisplayFloat) obj).getValue();
+							}
+							else {
+								Out.prt(dbName + " Cannot read table obj '" + obj.toString() + "'   Column:"
+										+ column + " Abs:" + getMappedColumn(column));
+							}
+				        	Color high = DisplayDecimalTab.getPvalColor(theVal);
+				        	if (high!=null) label.setBackground(high);
+						}
+						//else Out.prt(dbName + " " + row + " " + column + " null object"); happens when no output
+					}
+				}
+			}
+		
 			label.setFont( theFont );
 			return label;
-		}		
-		
+		}				
 		TableCellRenderer renderer = null;
 	};
-	
 	/************** Implementation of TableModel interface *******************/
-	public Class<?> getColumnClass(int columnIndex) 
-	{ 
+	public Class<?> getColumnClass(int columnIndex) { 
 		try {
 			return Class.forName( "java.lang.String" ); 
 		}
@@ -394,16 +396,12 @@ public class MainTableSort extends JTable implements TableModel
 			return null;
 		}
 	}
-  
-	public int getColumnCount() 
-	{ 
+	public int getColumnCount() { 
 		if ( fieldObj == null ) return 0;
         else if ( visibleColumns != null ) return visibleColumns.length + 1;	
 		else return fieldObj.getNumFields() + 1;	
-	};
-    
-	public String getColumnName( int columnIndex )
-	{
+	};   
+	public String getColumnName( int columnIndex ){
 		if ( fieldObj == null ) return "";
 		else {
 			if (columnIndex-- == 0) return "Row #"; 
@@ -412,34 +410,27 @@ public class MainTableSort extends JTable implements TableModel
 		}
 	}
 	
-	public int getDataRowCount() 
-	{ 
-		return tableRows.size();
-	};
-	public int getRowCount() 
-	{ 
-		return tableRows.size();
-	};
+	public int getDataRowCount() { return tableRows.size();};
 	
-	public Object getValueAt( int rowIndex, int columnIndex )
-	{		
-		columnIndex = getMappedColumn(columnIndex, false);
+	public int getRowCount() { return tableRows.size();};
+	
+	public Object getValueAt( int rowIndex, int columnIndex ){	
+		int mapcol = getMappedColumn(columnIndex); 
 		if (  rowIndex > nTotalRows || nTotalRows == 0) return null;
 		else {	
 			Object obj = null;
 			try {
 				String line = tableRows.get(rowIndex);
-				if (columnIndex-- == 0)  return rowIndex+1;
+				if (mapcol-- == 0)  return rowIndex+1;
 				
-		        obj = fieldObj.extractFieldByID ( line, getFieldIdxFromColumnIdx ( columnIndex ) );
+		        obj = fieldObj.extractFieldByID ( line, getFieldIdxFromColumnIdx ( mapcol ) );
 		        obj = convertNull ( obj );
 			}
 			catch (Exception e) {return null;}
 			return obj;
 		}
 	}
-	private int getFieldIdxFromColumnIdx ( int columnIndex )
-    {
+	private int getFieldIdxFromColumnIdx ( int columnIndex ){
         if ( columnIndex < 0 )
             return columnIndex;
         
@@ -448,62 +439,46 @@ public class MainTableSort extends JTable implements TableModel
         else
             return columnIndex;
     }
-	private Object convertNull ( Object obj )
-    {
-        if ( obj instanceof Integer )
-        {
+	private Object convertNull ( Object obj ){
+        if ( obj instanceof Integer ) {
             Integer val = (Integer)obj;
             if ( val.intValue() == Integer.MIN_VALUE ) obj = null;
         }
-        else if ( obj instanceof Float )
-        {
+        else if ( obj instanceof Float ) {
             Float val = (Float)obj;
             if ( Math.abs( val.floatValue() ) == Float.MAX_VALUE ) obj = null;
         }
-        else if ( obj instanceof Double )
-        {
+        else if ( obj instanceof Double ) {
             Double val = (Double)obj;
             if ( Math.abs( val.doubleValue() ) == Double.MAX_VALUE ) obj = null;
         }
         return obj;
     }
-	public Object getRowAt(int nRow) 
-	{
+	public Object getRowAt(int nRow) {
 		if (tableRows == null || nRow < 0 || nRow >= nTotalRows) return null;
 		
 		String line = tableRows.get(nRow);
 		Object[] row = line.split(ROW_DELIMITER);
 		return row;
 	}
-	
-	public int getSelectedRow()
-	{
+	public int getSelectedRow() {
 		int nRow = super.getSelectedRow();
 		if (nRow >= nTotalRows) return -1;
 		return nRow;
 	}
-	
-	public int[] getSelectedRows()
-	{
-		return super.getSelectedRows();
-	}
+	public int[] getSelectedRows() {return super.getSelectedRows();}
 	
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex)  { super.setValueAt(aValue, rowIndex, columnIndex); } // never called
 	
 	public boolean isCellEditable(int rowIndex, int columnIndex) { return false; }
 	
-	public void removeTableModelListener(TableModelListener l) 
-	{
+	public void removeTableModelListener(TableModelListener l) {
 		// tableModelListeners.remove( tableModelListeners ); CAS304
 	}
-
-	public void addTableModelListener(TableModelListener l) 
-	{ 
+	public void addTableModelListener(TableModelListener l) { 
 		if ( !tableModelListeners.contains( l ) )
 				tableModelListeners.add ( l ); 
 	}
-    
-    
     /******************************************************************
      * EXPORT CODE - code is in MainTable
      **************************************************************/
@@ -527,22 +502,19 @@ public class MainTableSort extends JTable implements TableModel
     		for(int x=0; x<=numColumns; x++)
     			colMap[x] = x;
     	}
-    	
 		public void columnMoved(TableColumnModelEvent e) {
 		    int fromIndex = e.getFromIndex();
 		    int toIndex = e.getToIndex();
 
 		    if(fromIndex != toIndex)
 		    	swap(fromIndex, toIndex);
-		}
-		
+		}	
 		public int getFieldPositionFromColumn(int column) {
 			if (column<0) {
 				return colMap[0];
 			}
 			return colMap[column];
-		}
-		
+		}	
 		public boolean hasColumnMoved(int column) {
 			return colMap[column] == column;
 		}
@@ -554,7 +526,6 @@ public class MainTableSort extends JTable implements TableModel
 					retVal = x;
 			return retVal;
 		}
-
 		public void columnAdded(TableColumnModelEvent arg0) {}
 		public void columnMarginChanged(ChangeEvent arg0) {}
 		public void columnRemoved(TableColumnModelEvent arg0) {}
@@ -564,13 +535,12 @@ public class MainTableSort extends JTable implements TableModel
 			colMap[y] ^= colMap[x];
 			colMap[x] ^= colMap[y];
 		}
-		
 		private int [] colMap = null;
     }
 	public void clearTable() {
-    		tableRows.clear();
-    		tableModelListeners.clear();
-    		doubleClickListeners.clear();
+		tableRows.clear();
+		tableModelListeners.clear();
+		doubleClickListeners.clear();
 	}
 	/************************************************
 	 * Private variables

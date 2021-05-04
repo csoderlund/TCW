@@ -52,6 +52,7 @@ import util.methods.Out;
 import util.ui.UIHelpers;
 import util.ui.UserPrompt;
 import util.database.DBConn;
+import util.database.Globalx;
 
 
 public class SeqGOPanel extends JPanel {
@@ -313,6 +314,7 @@ public class SeqGOPanel extends JPanel {
 			DBConn mDB = theParentFrame.getNewDBC();
 			String strQuery;
 			
+			HashMap <String, String> goTermMap = Static.getGOtermMap();
 			for (GOinfo gi : goOrder) {
 				strQuery= "select gonum, descr, term_type, level " +
 					  " from go_info where gonum =" + gi.gonum;
@@ -324,7 +326,7 @@ public class SeqGOPanel extends JPanel {
 				}
 				
 				gi.desc=rs.getString(2);
-				gi.type = rs.getString(3).substring(0,3);
+				gi.type = goTermMap.get(rs.getString(3));
 				gi.level = rs.getInt(4);
 			}
 			Collections.sort(goOrder);
@@ -613,7 +615,7 @@ public class SeqGOPanel extends JPanel {
     			
     			int count=0;
     			String line = String.format("%-16s  %-3s  %6s  %4s  %5s  %4s  %s", 
-    					"Hit", "EC", "E-val", "%Sim", "Align", "Best", "Description");
+    					"Hit ID", Globalx.evCode, "E-val", "%Sim", "Align", "Best", "Description");
     			lines.add(line);
     			
     			// check all hits for sequence to see if they have this go
@@ -684,12 +686,13 @@ public class SeqGOPanel extends JPanel {
 		lines.add(line);
 		lines.add("");
 		
-		line = String.format("%-10s  %-30s  %4s  %5s", "GO ID", "Description", "Type", "Level");
+		line = String.format("%-10s  %-30s  %4s  %5s", 
+				Globalx.goID, Globalx.goTerm, Globalx.goOnt, "Level");
 		if (displayType==SHOW_ASSIGNED_GO) 
 			line += String.format("  %5s  %6s  %-15s", "#Hits", "E-val", "Best Hit ID");
 		else if (displayType==SHOW_ALL_GO)
-			line += String.format("  %5s  %-15s", "E-val", "Best Hit ID");
-		line += "  EC";
+			line += String.format("  %6s  %-15s", "E-val", "Best Hit ID");
+		line += "  " + Globalx.evCode;
 		lines.add(line);
 		
 		for (GOinfo gi : goOrder) {
@@ -707,7 +710,7 @@ public class SeqGOPanel extends JPanel {
 			if (displayType==SHOW_ASSIGNED_GO) 
 				line += String.format("  %5s  %6s  %-15s", gi.nHit, eval, hitID);
 			else if (displayType==SHOW_ALL_GO) 
-				line += String.format("  %5s  %-15s", eval, hitID);
+				line += String.format("  %6s  %-15s", eval, hitID);
 			line += "  " + gi.evidList + " ";
 			lines.add(line);	
 		}
@@ -832,14 +835,14 @@ public class SeqGOPanel extends JPanel {
 		}
 
 		public String getColumnName(int colIndex) {
-			if(colIndex == 0) return "GO ID";
-			if(colIndex == 1) return "Description";
-			if(colIndex == 2) return "Type";
+			if(colIndex == 0) return Globalx.goID;
+			if(colIndex == 1) return Globalx.goTerm;
+			if(colIndex == 2) return Globalx.goOnt;
 			if(colIndex == 3) return "Level";
 				
 			if (displayType==SHOW_ASSIGNED_GO) {
 				if (colIndex==4) return   "#Hits";
-				if (colIndex == 5) return "#:EC";
+				if (colIndex == 5) return "#:" + Globalx.evCode;
 				if (colIndex == 6) return "Best Hit ID";
 				if (colIndex == 7) return "E-value";
 			}
@@ -849,7 +852,7 @@ public class SeqGOPanel extends JPanel {
 				if (colIndex == 6) return "E-value";
 			}
 			else if (displayType>=SHOW_SEL_GO) {
-				if (colIndex == 4) return "EC";
+				if (colIndex == 4) return Globalx.evCode;
 			}
 			
 			return "error";

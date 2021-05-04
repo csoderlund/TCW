@@ -2,15 +2,14 @@ package util.database;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.text.DecimalFormat;
 
 // shared by sTCW and mTCW
 // They both have their own database/Globals.java
 public class Globalx {
 	public static boolean debug = false; // changed in STCWMain or MTCWMain from command line 
 	
-	public static final String strRelDate = "(19-Apr-21)"; 
-	public static final String strTCWver = "3.2.1"; 
+	public static final String strRelDate = "(4-May-21)"; 
+	public static final String strTCWver = "3.2.2"; 
 	public static final String URL = "http://www.agcol.arizona.edu ";
 	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate;
 	public static final String sTCWver = "sTCW v" + strTCWver;
@@ -108,9 +107,14 @@ public class Globalx {
 	static public final String GO_FORMAT = "GO:%07d";
 	static public final String GO_FORMAT_FNAME = "GO_%07d";
 	// the ECs are in MetaData. MetaData checks database for GO_TERMS, but not used
-	// multiple places use substring(0,3) to get abbr
+	// Static.getGOtermMap creates a hashmap; Keep the order, some methods expect it! 
 	static public final String [] GO_TERM_LIST = {"biological_process","cellular_component","molecular_function"};
-	static public final String [] GO_TERM_ABBR = {"bio", "cel", "mol"};
+	static public final String [] GO_TERM_ABBR = {"BP", "CC", "MF"};
+	static public final String goFullOnt = "Ontology";
+	static public final String goOnt = "GO"; // CAS322 there is no consensus for what to call this
+	static public final String goID = "GO ID";
+	static public final String goTerm = "GO Name";
+	static public final String evCode = "EvC";
 	
 	// runAS.DoGO builds; 
 	static public final String goTreeTable = "TCW_gotree"; // CAS318 were prefixed with PAVE_
@@ -158,6 +162,4 @@ public class Globalx {
 	public static final Font  boldUIFont = new Font("Sans", Font.BOLD, 12);
 	public static final Font  textFont = new Font("Sans", Font.PLAIN, 11);
 	public static final Color componentBGColor = Color.white;
-	
-	public DecimalFormat df = new DecimalFormat("#,###,###");
 }

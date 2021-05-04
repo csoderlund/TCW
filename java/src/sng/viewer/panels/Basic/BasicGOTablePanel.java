@@ -53,6 +53,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import sng.viewer.STCWFrame;
+import sng.viewer.panels.DisplayDecimalTab;
 import util.database.DBConn;
 import util.database.Globalx;
 import util.file.FileC;
@@ -74,7 +75,8 @@ public class BasicGOTablePanel {
 	public static final int GOindex=0;
 	public static final int GOdomain=1;
 	private static final int GOdesc=3;
-	public static final int GOnSeq=5;
+	private static final int GOnSeq=5;
+	
 	private static final String goPref= "_goPrefs";
 	private final String EVALUE = "Best E-val";
 	
@@ -84,13 +86,13 @@ public class BasicGOTablePanel {
 	 {"go_info.gonum","go_info.term_type", "go_info.level","go_info.descr","go_info.bestEval", "go_info.nUnitranHit" };
 	
 	private final String [] COL_NAMES = 
-		 {"GO ID", "Domain", "Level",  "Description", EVALUE , "#Seqs"};
-	private String []      ecColNames = null;
-	private Vector<String> deColNames = null;
-	private int endEC=0, endStatic=0;
+		 {Globalx.goID, Globalx.goOnt, "Level",  Globalx.goTerm, EVALUE , "#Seqs"};
+	private String []      evColNames = null;
+	private Vector<String> pvalColNames = null; // No P_
+	private int endEvC=0, endStatic=0;
 	
 	private boolean []     selectedCol = null;
-	private Vector<Object []> theResults = null;    // results in order COL+ecCol+deCol names
+	private Vector<Object []> theResults = null;    // results in order COL+evCol+deCol names
 	private HashMap<Integer,Integer> rowMap = null; // If Show DEtrim, not all rows shown	
 	
 	public BasicGOTablePanel(STCWFrame f, BasicGOFilterTab g) {
@@ -106,6 +108,9 @@ public class BasicGOTablePanel {
 		columnPanel = new ColumnPanel();
 		tablePanel = new TablePanel();
 	}
+	/**************************************************
+	 * Column Panel
+	 */
 	private class ColumnPanel extends JPanel {
 		private static final long serialVersionUID = -7235165216064464845L;
 		private ColumnPanel() {
@@ -155,68 +160,68 @@ public class BasicGOTablePanel {
 	//evidence code
 		 	JPanel ecColsPanel = Static.createPagePanel();
 		 	ecColsPanel.setAlignmentY(Component.TOP_ALIGNMENT);
-	    	if (ecColNames.length>0) { // pre v1.6.4 did not have EC in go_info   
-		    	ecColsPanel.add(new JLabel("Evidence Codes (Assigned Only)")); // CAS320 add ()
-		    	ecColsPanel.add(Box.createVerticalStrut(10));
-		    
-		    	int ecNum = ecColNames.length;
-		    	chkECColumns = new JCheckBox[ecNum];
-		    	int nRow = ecNum;
-		    	if (ecNum>rowBreak) nRow=(int) ((ecNum/2.0)+0.5);
-		  
-		    	JPanel subPanel1 = Static.createPagePanel();
-			    subPanel1.setAlignmentY(Component.TOP_ALIGNMENT);
-		    	JPanel subPanel2 = Static.createPagePanel();
-		    	subPanel2.setAlignmentY(Component.TOP_ALIGNMENT);
-		    	    	
-		    	for (int x=0; x<ecNum; x++) {
-		    		chkECColumns[x] = new JCheckBox(ecColNames[x], false);
-		    		chkECColumns[x].setBackground(BGCOLOR);
-		    		chkECColumns[x].addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						checkAllEC();
-					}
-				});
-		    		if (x<nRow) subPanel1.add(chkECColumns[x]);
-		    		else subPanel2.add(chkECColumns[x]);
-		    	}
-		    	if (nRow!=ecNum) {
-		    		JPanel subPanel =  Static.createRowPanel();
-			    	subPanel.add(subPanel1);
-			    	subPanel.add(Box.createHorizontalStrut(10));
-			    	subPanel.add(subPanel2);
-			    	ecColsPanel.add(subPanel);
-		    	}
-		    	else ecColsPanel.add(subPanel1);
-		    	ecColsPanel.add(Box.createVerticalStrut(10));
-		    	
-		    	JPanel checkECPanel = Static.createRowPanel();
-		    	chkSelectAllECs = new JCheckBox("Check/uncheck all");
-		    	chkSelectAllECs.setSelected(false);
-		    	chkSelectAllECs.setBackground(BGCOLOR);
-		    	chkSelectAllECs.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent arg0) {
-						for(int x=0; x<chkECColumns.length; x++) {
-							boolean isSel = chkSelectAllECs.isSelected();
-							chkECColumns[x].setSelected(isSel);
-						}
-					}
-				});
-		    	checkECPanel.add(chkSelectAllECs);
-		    	checkECPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		    	ecColsPanel.add(checkECPanel);
+	    	  
+	    	ecColsPanel.add(new JLabel("Evidence Codes (Assigned Only)")); // CAS320 add ()
+	    	ecColsPanel.add(Box.createVerticalStrut(10));
+	    
+	    	int ecNum = evColNames.length;
+	    	chkECColumns = new JCheckBox[ecNum];
+	    	int nRow = ecNum;
+	    	if (ecNum>rowBreak) nRow=(int) ((ecNum/2.0)+0.5);
+	  
+	    	JPanel subPanel1 = Static.createPagePanel();
+		    subPanel1.setAlignmentY(Component.TOP_ALIGNMENT);
+	    	JPanel subPanel2 = Static.createPagePanel();
+	    	subPanel2.setAlignmentY(Component.TOP_ALIGNMENT);
+	    	    	
+	    	for (int x=0; x<ecNum; x++) {
+	    		chkECColumns[x] = new JCheckBox(evColNames[x], false);
+	    		chkECColumns[x].setBackground(BGCOLOR);
+	    		chkECColumns[x].addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					checkAllEC();
+				}
+			});
+	    	if (x<nRow) subPanel1.add(chkECColumns[x]);
+	    		else subPanel2.add(chkECColumns[x]);
 	    	}
+	    	if (nRow!=ecNum) {
+	    		JPanel subPanel =  Static.createRowPanel();
+		    	subPanel.add(subPanel1);
+		    	subPanel.add(Box.createHorizontalStrut(10));
+		    	subPanel.add(subPanel2);
+		    	ecColsPanel.add(subPanel);
+	    	}
+	    	else ecColsPanel.add(subPanel1);
+	    	ecColsPanel.add(Box.createVerticalStrut(10));
+	    	
+	    	JPanel checkECPanel = Static.createRowPanel();
+	    	chkSelectAllECs = new JCheckBox("Check/uncheck all");
+	    	chkSelectAllECs.setSelected(false);
+	    	chkSelectAllECs.setBackground(BGCOLOR);
+	    	chkSelectAllECs.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					for(int x=0; x<chkECColumns.length; x++) {
+						boolean isSel = chkSelectAllECs.isSelected();
+						chkECColumns[x].setSelected(isSel);
+					}
+				}
+			});
+	    	checkECPanel.add(chkSelectAllECs);
+	    	checkECPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+	    	ecColsPanel.add(checkECPanel);
+	    	
 /////// DE
 	    	JPanel deColsPanel = Static.createPagePanel();
 	    	deColsPanel.setAlignmentY(Component.TOP_ALIGNMENT);
 	   
-	    	if (deColNames.size() > 0)
+	    	if (pvalColNames.size() > 0)
 	    	{
-	    	 	deColsPanel.add(new JLabel("GO DE P-value"));
+	    	 	deColsPanel.add(new JLabel("P-value"));
 		    	deColsPanel.add(Box.createVerticalStrut(10));
 		    	
-		    	int deNum = deColNames.size();
-			    int 	nRow = deNum;
+		    	int deNum = pvalColNames.size();
+			    nRow = deNum;
 		    	if (deNum>rowBreak) nRow=(int) ((deNum/2.0)+0.5);
 		    	
 	    		JPanel deSubPanel1 = Static.createPagePanel();
@@ -224,9 +229,9 @@ public class BasicGOTablePanel {
 	    		JPanel deSubPanel2 = Static.createPagePanel();
 	    		deSubPanel2.setAlignmentY(Component.TOP_ALIGNMENT);
 	    		
-		    	chkDEColumns = new JCheckBox[deColNames.size()];
+		    	chkDEColumns = new JCheckBox[pvalColNames.size()];
 		    	for(int x=0; x<chkDEColumns.length; x++) {
-		    		chkDEColumns[x] = new JCheckBox(deColNames.get(x), false);
+		    		chkDEColumns[x] = new JCheckBox(pvalColNames.get(x), false);
 		    		chkDEColumns[x].setBackground(BGCOLOR);
 		    		chkDEColumns[x].addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent e) {
@@ -320,32 +325,26 @@ public class BasicGOTablePanel {
 		/************************************************/
 		private void loadInitData() {
 			try {
-				DBConn mDB = theMainFrame.getNewDBC();
-				ResultSet rs=null;
+				TreeMap <String, Double> goPvalMap = theMainFrame.getMetaData().getGoPvalMap();
+				pvalColNames = new Vector<String> ();
+				for (String n : goPvalMap.keySet()) 
+					pvalColNames.add(n.substring(2)); // CAS322 was reading db for it
 				
-				// for DE columns
-				deColNames = new Vector<String> ();
-				rs = mDB.executeQuery("SHOW COLUMNS FROM go_info LIKE 'P\\_%'");
-				while(rs.next()) {
-					String deName = rs.getString(1).substring(2);
-					deColNames.add(deName);
-				}
-				rs.close();
-				mDB.close();
-				
-				// init rest of columns
-				HashSet <String> ecSet = theMainFrame.getMetaData().getECinDB();
-				String [] ecList = theMainFrame.getMetaData().getEClist();
-				ecColNames = new String [ecSet.size()];
+				// for evidence codes
+				HashSet <String> evSet = theMainFrame.getMetaData().getEvCinDB();
+				String [] evList = theMainFrame.getMetaData().getEClist();
+				evColNames = new String [evSet.size()];
 				int x=0;
-				for (String ec : ecList) {
-					if (ecSet.contains(ec))
-						ecColNames[x++] = ec;
+				for (String ec : evList) {
+					if (evSet.contains(ec))
+						evColNames[x++] = ec;
 				}
+				
+				// delimit column sections
 				endStatic = COL_NAMES.length;
-				endEC = endStatic + ecColNames.length;
+				endEvC = endStatic + evColNames.length;
 		
-				selectedCol = new boolean[COL_NAMES.length + ecColNames.length + deColNames.size()];		
+				selectedCol = new boolean[COL_NAMES.length + evColNames.length + pvalColNames.size()];		
 				for(int i=0; i<selectedCol.length; i++) {
 					if (i<endStatic) selectedCol[i] = true;
 					else selectedCol[i] = false;
@@ -381,7 +380,7 @@ public class BasicGOTablePanel {
 	    	chkSelectAllGen.setSelected(allSelected);
 		}
 	    private void checkAllEC() {
-    		if (ecColNames.length == 0) return;
+    		if (evColNames.length == 0) return;
     	
 	    	boolean allSelected = true;
 	    	for(int x=0; x<chkECColumns.length && allSelected; x++)
@@ -389,7 +388,7 @@ public class BasicGOTablePanel {
 	    	chkSelectAllECs.setSelected(allSelected);
 		}
 	    private void checkAllDE() {
-	    	if (deColNames.size() == 0) return;
+	    	if (pvalColNames.size() == 0) return;
 	    
 	    	boolean allSelected = true;
 	    	for(int x=0; x<chkDEColumns.length && allSelected; x++)
@@ -491,9 +490,9 @@ public class BasicGOTablePanel {
 		public String getColumnName(int columnIndex) {
 			int index = getMappedColumn(columnIndex);
 			
-			if (index < endStatic) 			return COL_NAMES[index];
-			if (index < endEC)          		return ecColNames[index - endStatic];
-			if (deColNames.size() > 0)   return deColNames.get(index - endEC);
+			if (index < endStatic) 		return COL_NAMES[index];
+			if (index < endEvC)          return evColNames[index - endStatic];
+			if (pvalColNames.size() > 0)  return pvalColNames.get(index - endEvC);
 			
 			System.err.println("Bad column:" + index + " diff:" + (index - COL_NAMES.length));
 			return "NA";
@@ -539,12 +538,12 @@ public class BasicGOTablePanel {
 				return theResults.get(row)[index];
 			}
 			
-			if (index >= endStatic && index < endEC) {
+			if (index >= endStatic && index < endEvC) {
 				int x = ((((Integer)theResults.get(row)[index]).intValue()));
 				if (x==1) return "Yes";
 				else return " - ";
 			}
-			if(index >= endEC) { 
+			if(index >= endEvC) { 
 				double theVal = ((((Double)theResults.get(row)[index]).doubleValue()));
 				return new DisplayFloat(theVal);
 			}
@@ -588,10 +587,10 @@ public class BasicGOTablePanel {
 					int sign = 1;
 					if(!ascend) sign = -1;
 	  	  			int mapCol = getMappedColumn(sortColumn);  	  			
-		  	  		if(mapCol >= endStatic && mapCol<endEC) {
+		  	  		if(mapCol >= endStatic && mapCol<endEvC) {
 		  	  			return sign * ((Integer)arg0[mapCol]).compareTo((Integer)arg1[mapCol]);
 	  				}
-	  				if(mapCol >= endEC) {
+	  				if(mapCol >= endEvC) {
 	  	  				return sign * ((Double)arg0[mapCol]).compareTo((Double)arg1[mapCol]);
 	  				}
 	  	  			
@@ -633,15 +632,32 @@ public class BasicGOTablePanel {
 			       
 				    if (theTable.isRowSelected(row)) 	c.setBackground(Globalx.selectColor);
 				    else if (isDEtrim) {
-				    	 	Integer gonum = (Integer)(theResults.get(rowMap.get(row))[GOindex]);
-				    		if (treeFilterIn.contains(gonum)) c.setBackground(DETRIMCOLOR);
-				    		else 							 c.setBackground(Color.WHITE);
+			    	 	Integer gonum = (Integer)(theResults.get(rowMap.get(row))[GOindex]);
+			    		if (treeFilterIn.contains(gonum)) c.setBackground(DETRIMCOLOR);
+			    		else 							  c.setBackground(Color.WHITE);
 				    }
 				    else {
-				    		boolean bBlueBG = ((row % 2) == 1);
-				    		if ( bBlueBG ) 					c.setBackground( Globalx.altRowColor );
-						else                             c.setBackground( null );
-				    }   
+				    	boolean bBlueBG = ((row % 2) == 1);
+				    	if ( bBlueBG ) 	c.setBackground( Globalx.altRowColor );
+						else            c.setBackground( null );
+				    }
+				    /* CAS322 */
+				    if (DisplayDecimalTab.isHighPval()) {
+					    int index = theTableModel.getMappedColumn(column);
+						
+					    if(index >= endEvC) { // CAS322 add columns 
+					    	Object obj = theTable.getValueAt(row,column);
+					    	double theVal=0.0;
+				        	if (obj instanceof DisplayFloat) {
+								theVal = ((DisplayFloat) obj).getValue();
+							}
+							else {
+								Out.prt("Cannot read table obj " + obj.toString());
+							}
+				        	Color high = DisplayDecimalTab.getPvalColor(theVal);
+				        	if (high!=null) c.setBackground(high);
+					    }
+				    }
 			        return c;
 			    }
 			};
@@ -734,16 +750,14 @@ public class BasicGOTablePanel {
 			bottomPanel.setMaximumSize(bottomPanel.getPreferredSize());
 			return bottomPanel;
 		}
-		 private void keepFromList()
-		{
+		private void keepFromList() {
 			int numElements = theTable.getRowCount();
 			int [] selValues = theTable.getSelectedRows();		
 
 			int [] opposite = new int[numElements - selValues.length];
 			int x=0, selPos=0, nextval=0;
 			
-			for(x=0; x<opposite.length; x++)
-			{
+			for(x=0; x<opposite.length; x++) {
 				while(selPos<selValues.length && selValues[selPos] == nextval) {
 					selPos++;
 					nextval++;
@@ -753,13 +767,11 @@ public class BasicGOTablePanel {
 			deleteFromList(opposite);
 		}
 			
-		private void deleteFromList()
-		{
+		private void deleteFromList(){
 			int [] selValues = theTable.getSelectedRows();
 			deleteFromList(selValues);
 		}
-		private void deleteFromList(int [] sels)
-		{
+		private void deleteFromList(int [] sels){
 			if (sels == null || sels.length==0) return;
 			isDEtrim=showDEtrim=false;
 			treeFilterIn.clear();
@@ -937,12 +949,12 @@ public class BasicGOTablePanel {
 	public int getRowCount() { return theTable.getRowCount();}
 	public int getNumStaticCols() {return COL_NAMES.length;}
 	public Class<?> [] getColumnTypes() {return COL_TYPES;}
-	public int getEndEC() { return endEC;}
-	public Vector <String> getDEcolumns() { return deColNames;}
+	public int getEndEC() { return endEvC;}
+	public Vector <String> getDEcolumns() { return pvalColNames;}
 	
 	public void toggleTrimmedView(boolean showDEisSelected) 
 	{	
-		showDEtrim = (deColNames.size() > 0 ? showDEisSelected : false);
+		showDEtrim = (pvalColNames.size() > 0 ? showDEisSelected : false);
 		
 		buildRowMap();
 		theTableModel.fireTableStructureChanged();
@@ -963,19 +975,16 @@ public class BasicGOTablePanel {
 	public void buildRowMap()
 	{
 		rowMap.clear();
-		for (int r1 = 0, r2=0; r1 < theResults.size(); r1++)
-		{
+		for (int r1 = 0, r2=0; r1 < theResults.size(); r1++) {
 			if (showDEtrim)
 			{
 				Integer go = (Integer)theResults.get(r1)[GOindex];
-				if (treeFilterIn.contains(go))
-				{
+				if (treeFilterIn.contains(go)){
 					rowMap.put(r2, r1);
 					r2++;
 				}
 			}
-			else
-			{
+			else {
 				rowMap.put(r1,r1);
 			}	
 		}	
@@ -988,11 +997,11 @@ public class BasicGOTablePanel {
 			if(COL_MYSQL[x].length() == 0) theQuery += ", NULL";
 			else  theQuery += ", " + COL_MYSQL[x];
 		}
-		for (String ec : ecColNames)
+		for (String ec : evColNames)
 			theQuery += ", go_info." + ec; 
 		
-		for(int x=0; x<deColNames.size(); x++)
-			theQuery += ", go_info.P_" + deColNames.get(x);
+		for(int x=0; x<pvalColNames.size(); x++)
+			theQuery += ", go_info.P_" + pvalColNames.get(x);
 		
 		theQuery += " FROM go_info ";
 		return theQuery;
@@ -1100,7 +1109,9 @@ public class BasicGOTablePanel {
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Show Paths for Selected");}
 	}
-	/***************************************************************/
+	/***************************************************************
+	 * Export Column
+	 */
 	private class ExportColumn extends JDialog {
 		private static final long serialVersionUID = 1L;
 		public ExportColumn(String tcwid) {
@@ -1161,6 +1172,9 @@ public class BasicGOTablePanel {
 		private JButton btnOK, btnCancel;
 		private JTextField txtColName;
 	}
+	/***********************************************************
+	 * XXX Export GO
+	 */
 	private class ExportGO {
 		private final String filePrefix="GOtable";
 		public ExportGO() {}
@@ -1374,9 +1388,11 @@ public class BasicGOTablePanel {
 					String desc = 	(String)  theTableModel.getValue(row, GOdesc);
 					if (isSeq) count = 	(Integer) theTableModel.getValue(row, GOnSeq);
 					else score =    theTableModel.getDE(row, colIdx);
-					if      (domain.startsWith("b")) domainAdd(biolMap, desc, score, count, j);
-	    				else if (domain.startsWith("c")) domainAdd(cellMap, desc, score, count, j);
-	    				else if (domain.startsWith("m")) domainAdd(moleMap, desc, score, count, j);
+					String [] abbr = Globalx.GO_TERM_ABBR;
+					if      (domain.equals(abbr[0])) domainAdd(biolMap, desc, score, count, j);
+	    			else if (domain.equals(abbr[1])) domainAdd(cellMap, desc, score, count, j);
+	    			else if (domain.equals(abbr[2])) domainAdd(moleMap, desc, score, count, j);
+	    			else Out.PrtWarn("Invalid " + domain + " "  + abbr[0]);
 					nGO++;
 				}
 				Out.PrtSpMsg(2,"Table Total GOs: " + nGO);
@@ -1398,7 +1414,7 @@ public class BasicGOTablePanel {
 						continue;
 					}
 	    			String [] tok = line.split("\t");
-	    			if (tok[0].equals("Domain")) {
+	    			if (tok[0].equals(Globalx.goOnt)) {
 	    				columnLine = line;
 	    				nCol = (tok.length-startNseq)+1;
 	    				continue;
@@ -1414,17 +1430,26 @@ public class BasicGOTablePanel {
 	    			for (int i=startNseq, j=0; i<tok.length; i++, j++) {
 		    			if (isSeq) {
 		    				count = Static.getInteger((tok[i].trim()));
-		    				if (count<0) return prtError("Incorrect #Seqs: " + tok[i]);
+		    				if (count<0) {
+		    					reader.close();
+		    					return prtError("Incorrect #Seqs: " + tok[i]);
+		    				}
 		    			}
 		    			else { // for DE
 		    				score = Static.getDouble(tok[i].trim());
-		    				if (score<0) return prtError("Incorrect p-value: " + tok[i]);
+		    				if (score<0) {
+		    					reader.close();
+		    					return prtError("Incorrect p-value: " + tok[i]);
+		    				}
 		    			}
-		    			
-		    			if (domain.startsWith("b")) 		domainAdd(biolMap, desc, score, count, j);
-		    			else if (domain.startsWith("c")) domainAdd(cellMap, desc, score, count, j);
-		    			else if (domain.startsWith("m")) domainAdd(moleMap, desc, score, count, j);
-		    			else return prtError("Bad domain: " + domain);
+		    			String [] list = Globalx.GO_TERM_LIST;
+		    			if (domain.equals(list[0])) 	 domainAdd(biolMap, desc, score, count, j);
+		    			else if (domain.equals(list[1])) domainAdd(cellMap, desc, score, count, j);
+		    			else if (domain.equals(list[2])) domainAdd(moleMap, desc, score, count, j);
+		    			else {
+		    				reader.close();
+		    				return prtError("Bad domain: " + domain);
+		    			}
 		    			nCnts++;
 	    			}
 		    		nGO++;
@@ -1458,9 +1483,10 @@ public class BasicGOTablePanel {
 				outF = new PrintWriter(new FileWriter(f));
 				outF.println(headerLine);
 				outF.println(columnLine);
-				domainWriteSet(biolMap, "biological_process");
-				domainWriteSet(cellMap, "cellular_component");
-				domainWriteSet(moleMap, "molecular_function");
+				String [] terms = Globalx.GO_TERM_LIST;
+				domainWriteSet(biolMap, terms[0]);
+				domainWriteSet(cellMap, terms[1]);
+				domainWriteSet(moleMap, terms[2]);
 				outF.close();
 				Out.PrtSpMsg(0, "Write " + cntOut + " GOs to " + f.getName());
 			}
@@ -1498,7 +1524,7 @@ public class BasicGOTablePanel {
 			double [] score = new double [nCol];
 		}
 		private int startNseq=2;
-		private String tcwid = null, headerLine="", columnLine="Domain\tDescription";
+		private String tcwid = null, headerLine="", columnLine= Globalx.goOnt + "\t" + Globalx.goTerm;
 		private int nCol=1;
 		
 		private PrintWriter outF;
@@ -1509,7 +1535,7 @@ public class BasicGOTablePanel {
 		
 		private boolean isSeq=false;
 		private int colIdx=-1; // column to print out
-	}
+	}// End Class ExportGO
 	/*************************************************************
 	 * Copied from BasicTablePanel
 	 */

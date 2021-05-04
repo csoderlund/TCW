@@ -5,10 +5,10 @@
 <h2>TCW overview for tra </h2>
 <table width=700 border=1><tr><td>
 <pre>
-Project:  tra   #Seqs: 211   #Hits: 12,307   #GOs: 6,651    TPM  DE  GO-DE   Pairs
+Project:  tra   #Seqs: 211   #Hits: 12,307   #GOs: 6,651    TPM  Seq-DE  GO-Enrich   Pairs
  
-29-Mar-21 Build Database  sequences loaded from external source
-29-Mar-21 Last Annotation with sTCW v3.2.0    Updated with v3.2.1
+19-Apr-21 Build Database  sequences loaded from external source
+22-Apr-21 Last Annotation with sTCW v3.2.2
 
 INPUT
    Counts: 
@@ -106,15 +106,15 @@ SEQUENCES
 PROCESSING INFORMATION:
    AnnoDB Files:
       Type  Taxo           FILE                                DB DATE    ADD DATE   EXECUTE                
-      sp    plants         uniprot_sprot_plants.fasta          27-Jan-21  29-Mar-21  diamond  --max-hsps 1  
-      sp    invertebrates  uniprot_sprot_invertebrates.fasta   27-Jan-21  29-Mar-21  diamond  --max-hsps 1  
-      sp    fungi          uniprot_sprot_fungi.fasta           27-Jan-21  29-Mar-21  diamond  --max-hsps 1  
-      sp    bacteria       uniprot_sprot_bacteria.fasta        27-Jan-21  29-Mar-21  diamond  --max-hsps 1  
-      sp    fullSubset     uniprot_sprot_fullSubset.fasta      27-Jan-21  29-Mar-21  diamond  --max-hsps 1  
-      tr    plants         uniprot_trembl_plants.fasta         27-Jan-21  29-Mar-21  diamond  --max-hsps 1  
-      tr    invertebrates  uniprot_trembl_invertebrates.fasta  27-Jan-21  29-Mar-21  diamond  --max-hsps 1  
+      sp    plants         uniprot_sprot_plants.fasta          27-Jan-21  19-Apr-21  diamond  --max-hsps 1  
+      sp    invertebrates  uniprot_sprot_invertebrates.fasta   27-Jan-21  19-Apr-21  diamond  --max-hsps 1  
+      sp    fungi          uniprot_sprot_fungi.fasta           27-Jan-21  19-Apr-21  diamond  --max-hsps 1  
+      sp    bacteria       uniprot_sprot_bacteria.fasta        27-Jan-21  19-Apr-21  diamond  --max-hsps 1  
+      sp    fullSubset     uniprot_sprot_fullSubset.fasta      27-Jan-21  19-Apr-21  diamond  --max-hsps 1  
+      tr    plants         uniprot_trembl_plants.fasta         27-Jan-21  19-Apr-21  diamond  --max-hsps 1  
+      tr    invertebrates  uniprot_trembl_invertebrates.fasta  27-Jan-21  19-Apr-21  diamond  --max-hsps 1  
 
-   Gene Ontology: go-basic.obo-Feb2021  GOdb: go_demo  [GOs added with sTCW v3.2.0]
+   Gene Ontology: go-basic.obo-Feb2021  GOdb: go_demo  [GOs added with sTCW v3.2.2]
    GO Slim: goslim_plant
 
    ORF finder:
@@ -133,9 +133,9 @@ PROCESSING INFORMATION:
 
    GO enrichment computation: 
       Column       Method               Cutoff
-      StRo         goSeq.R              0.050
-      StOl         goSeq.R              0.050
-      RoOl         goSeq.R              0.050
+      StRo         goSeqNoFDR.R         0.0500
+      StOl         goSeqNoFDR.R         0.0500
+      RoOl         goSeqNoFDR.R         0.0500
 
 -------------------------------------------------------------------
 LEGEND:

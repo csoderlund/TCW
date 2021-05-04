@@ -857,7 +857,7 @@ public class Schema
 				mDB.executeUpdate(sql);	
 			}
 			// for pre-321
-			TreeMap <String, Double> pvalMap = new MetaData().getDegPvalMap(mDB);
+			TreeMap <String, Double> pvalMap = new MetaData().loadGoPvalMap(mDB);
 			if (pvalMap!=null) {
 				for (String pCol : pvalMap.keySet()) {
 					String sql = "update libraryDE set goMethod='GOseq', goCutoff=" + pvalMap.get(pCol) + 

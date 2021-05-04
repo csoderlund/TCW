@@ -109,26 +109,26 @@ The first three are filters::
 <ol>
 <li><i>GO Level</i>: 
 <ol type='a'>
-<li>Level 1 is the three domains. Level 2 are the GO terms directly beneath
-a domain, etc (see GO annotations 'GO Help' for more explanation). 
+<li>Level 1 is the three ontologies (top level). Level 2 are the GO terms directly beneath
+the top level, etc (see GO annotations 'GO Help' for more explanation). 
 <li>If you leave this blank, it will output all GOs. 
 <li>If you just want a couple of levels, e.g. 2 and 3, first export level 2, then export level 3
 to the same file and use the append option (there will be a pop-up asking whether you want to append).
 </ol>
 
-<li><i>Any domain</i>: This toggles through the three main domains. If you select one, it will only 
-export the GOs in that domain.
+<li><i>Any Ontology</i>: This toggles through the three main ontology. If you select one, it will only 
+export the GOs in that ontology.
 
 <li><i>E-value</i>: If you leave this blank, it will ignore the E-value. Otherwise,
 the sequence must have at least one seq-hit with E-value&le; this value.
 
 <li><i>File Columns</i>:
 <ol type='a'>
-<li>Verbose: outputs columns 
+<li>Verbose: outputs columns (GO is the column for the ontology abbreviation)
 <tt>
-GOterm	#Seqs	Level	Term_type	Description
+GO-ID	#Seqs	Level	GO	GO-Name
 </tt>
-<li>Count only: only outputs the <tt>GOterm</tt> and <tt>#Seqs</tt>. 
+<li>Count only: only outputs the <tt>GO-ID</tt> and <tt>#Seqs</tt>. 
 <br>This can be used as input to input to REVIGO (http://revigo.irb.hr)
 </ol>
 </ul>

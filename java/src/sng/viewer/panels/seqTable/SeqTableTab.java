@@ -489,7 +489,7 @@ public class SeqTableTab extends Tab
 			txtGOlevel.setText("");
 			
 			cmbTermTypes = new ButtonComboBox();
-    		cmbTermTypes.addItem("Any domain");
+    		cmbTermTypes.addItem("Any " + Globalx.goFullOnt);
     		for(int x=0; x<Globalx.GO_TERM_LIST.length; x++)
     				cmbTermTypes.addItem(Globalx.GO_TERM_LIST[x]);
     		

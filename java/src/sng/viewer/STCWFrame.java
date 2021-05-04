@@ -109,11 +109,16 @@ public class STCWFrame extends JFrame {
 			int nY = userPrefs.getInt("frame_win_y", Integer.MAX_VALUE);
 			int nWidth = userPrefs.getInt("frame_win_width", Integer.MAX_VALUE);
 			int nHeight = userPrefs.getInt("frame_win_height", Integer.MAX_VALUE);
-			if (nX == Integer.MAX_VALUE) {
+			if (nX == Integer.MAX_VALUE) 
 				UIHelpers.centerScreen(this);
-			} else
+			 else
 				setBounds(nX, nY, nWidth, nHeight);
-			DisplayFloat.setRoundingPrefs(userPrefs.get("rounding", "").trim());
+			
+			String prefStr = userPrefs.get(DisplayFloat.getRoundingPrefID(), "").trim();
+			DisplayFloat.setRoundingPrefs(prefStr);
+			
+			prefStr = userPrefs.get(DisplayDecimalTab.getPvalCutPrefID(), "").trim(); // CAS322
+			DisplayDecimalTab.setPvalCutPrefs(prefStr);
 		}
 		else UIHelpers.centerScreen(this);
 		
@@ -181,7 +186,7 @@ public class STCWFrame extends JFrame {
 			Tab overviewTab = addOverviewTab(); 
 			tabbedPane.addTab(Overview, overviewTab);
 
-			decimalTab = new DecimalNumbersTab(this);
+			decimalTab = new DisplayDecimalTab(this);
 			tabbedPane.addTab(DecimalNumbers, decimalTab);
 			
 			blastTab = new BlastTab(this,metaData);
@@ -929,7 +934,7 @@ public class STCWFrame extends JFrame {
 	public HostsCfg getHosts() {return hostsObj;}
 	public DBConn getNewDBC() { return hostsObj.getDBConn(dbName);}
 	public Connection getNewConn() throws Exception {return hostsObj.getDBConn(dbName).getDBconn();}
-	public Preferences getPreferencesRoot() {return prefsRoot;}
+	public Preferences getPreferencesRoot() {return prefsRoot;} 
 	
 	/******************************
 	 * Constants
@@ -944,7 +949,7 @@ public class STCWFrame extends JFrame {
 	private static final String Instructions = "Instructions";
 	private static final String HTML = "/html/viewSingleTCW/instructions.html";
 	private static final String Overview = "Overview";
-	private static final String DecimalNumbers = "Decimal Numbers";
+	private static final String DecimalNumbers = "Decimal Display";
 	private static final String Blast = "Find Hits"; 
 	
 	private static final String BasicSection =  "Basic Queries ";
@@ -977,7 +982,7 @@ public class STCWFrame extends JFrame {
 	private JButton btnFiltered = null;
 
 	// TABs
-	private DecimalNumbersTab decimalTab = null;
+	private DisplayDecimalTab decimalTab = null;
 	private SeqQueryTab filterContigTab = null;
 	private FieldSeqTab fieldContigTab = null;
 	
@@ -992,6 +997,7 @@ public class STCWFrame extends JFrame {
 	private ResultsSummaryTab resultsPairTab = null;
 	private BlastTab blastTab  = null;
 	
+	// Linux: user/.java/.userPrefs/viewSingleTCW
 	private Preferences prefsRoot=null; // set once and pass to anyone who needs it
 	private MetaData metaData = null;
 	private HostsCfg hostsObj=null;

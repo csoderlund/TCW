@@ -1,7 +1,7 @@
 package sng.viewer.panels.Basic;
 
 /*******************************************************
- * Creates the 'Show' outputs for GO, e.g. ancestors, descendants, and hit lists
+ * Creates the 'Show' and 'Table' outputs for GO, e.g. ancestors, descendants, and hit lists
  * BasicGOQueryTab, ContigGOPanel and BasicQueryTab
  */
 import java.awt.event.ActionEvent;
@@ -44,10 +44,10 @@ import util.ui.UserPrompt;
 
 public class GOtree {
 	private static final String GO_FORMAT = Globalx.GO_FORMAT;
-	private static final String GO_PATH_FILE = "AllGoPaths";
-	private static final String GO_LONG_FILE = "AllGoLongestPaths";
-	private static final String GO_ANC_FILE = "AllGoAncestors";
-	private static final String GO_PAR_FILE = "EachGoParents";
+	private static final String GO_PATH_FILE = "GOallPaths"; // CAS322 put GO first
+	private static final String GO_LONG_FILE = "GOallLongestPaths";
+	private static final String GO_ANC_FILE =  "GOallAncestors";
+	private static final String GO_PAR_FILE =  "GOeachParents";
 	
 	public static final int ANCESTORS=0;
 	public static final int DESCENDENTS=1;
@@ -84,6 +84,7 @@ public class GOtree {
 	};
 	public GOtree(STCWFrame f) {
 		theMainFrame = f;
+		goTermMap = Static.getGOtermMap();
 	}
 	/****************************************************
 	 * Show Related
@@ -272,13 +273,13 @@ public class GOtree {
 			if (ancTab.size()>0) {
 				lines.add("");
 				lines.add("Ancestors in table");
-				lines.add(String.format("%-10s  %-5s  %s", "GO ID", "Level",  "Description"));		
+				lines.add(String.format("%-10s  %-5s  %s", Globalx.goID, "Level", Globalx.goTerm));		
 				for (String g: ancTab) lines.add(g);
 			}
 			if (descTab.size()>0) {
 				lines.add("");
 				lines.add("Descendants in table");
-				lines.add(String.format("%-10s  %-5s  %s", "GO ID", "Level",  "Description"));		
+				lines.add(String.format("%-10s  %-5s  %s", Globalx.goID, "Level", Globalx.goTerm));		
 				for (String g: descTab) lines.add(g);
 			}
 			if (cntTrim>0) {
@@ -301,7 +302,7 @@ public class GOtree {
 			
 			ResultSet rs=mDB.executeQuery("select term_type from go_info where gonum=" + gonum);
 			String term="";
-			if (rs.next()) term = "  (" + rs.getString(1) + ")";
+			if (rs.next()) term = "  (" + goTermMap.get(rs.getString(1)) + ")"; // CAS322
 			
 			HashSet <Integer> dups = new HashSet <Integer> (); // can have is_a and part_of
 			rs = mDB.executeQuery("select " +
@@ -337,7 +338,7 @@ public class GOtree {
 			lines.add("");
 			
 			if (goLines.size()>0) {
-				lines.add(String.format("%-10s  %-5s  %s", "GO ID", "Level",  "Description"));		
+				lines.add(String.format("%-10s  %-5s  %s", Globalx.goID, "Level",  Globalx.goTerm));		
 				for (String g : goLines) lines.add(g);
 			}
 			lines.add("");
@@ -355,7 +356,7 @@ public class GOtree {
 			
 			ResultSet rs=mDB.executeQuery("select term_type from go_info where gonum=" + gonum);
 			String term="";
-			if (rs.next()) term = "  (" + rs.getString(1) + ")";
+			if (rs.next()) term = "  (" + goTermMap.get(rs.getString(1)) + ")";
 			
 			rs = mDB.executeQuery("select " +
 					" p.ancestor, p.distance, p.relationship_type_id, g.descr " +
@@ -393,7 +394,7 @@ public class GOtree {
 			
 			lines.add(goIsA.size() + " Relation: is_a");
 			if (goIsA.size()>0) {	
-				lines.add(String.format("%-10s  %-5s  %s", "GO ID", "Dist",  "Description"));		
+				lines.add(String.format("%-10s  %-5s  %s", Globalx.goID, "Dist",  Globalx.goTerm));		
 				for (String g : goIsA) lines.add(g);
 			}
 			
@@ -401,13 +402,13 @@ public class GOtree {
 			
 			lines.add(goPartOf.size() + " Relation: part_of");
 			if (goPartOf.size()>0) {
-				lines.add(String.format("%-10s  %-5s  %s", "GO ID", "Dist",  "Description"));		
+				lines.add(String.format("%-10s  %-5s  %s", Globalx.goID, "Dist",  Globalx.goTerm));		
 				for (String g : goPartOf) lines.add(g);
 			}
 			
 			if (goAltID.size()>0) {
 				lines.add(goAltID.size() + " Alternate IDs: ");
-				lines.add(String.format("%-10s  %-5s  %s", "GO ID", "Dist",  "Description"));		
+				lines.add(String.format("%-10s  %-5s  %s", Globalx.goID, "Dist",  Globalx.goTerm));		
 				for (String g : goPartOf) lines.add(g);
 			}
 			
@@ -421,8 +422,11 @@ public class GOtree {
 	private Vector <String> showGoDescByLevelList(int gonum, String goDesc) {
 		try {
 			DBConn mDB = theMainFrame.getNewDBC();
-			ResultSet rs=null;
 			setRelTypes(mDB);
+			
+			ResultSet rs=mDB.executeQuery("select term_type from go_info where gonum=" + gonum);
+			String term="";
+			if (rs.next()) term = "  (" + goTermMap.get(rs.getString(1)) + ")"; // CAS322
 			
 			HashSet <Integer> dups = new HashSet <Integer> (); // can have is_a and part_of
 			int offset=3; // For Related, first GO at lines.get(3)
@@ -453,7 +457,7 @@ public class GOtree {
 			if (rs!=null) rs.close(); 
 			
 			Vector <String> lines = new Vector <String> ();
-			lines.add(goLines.size() + " Descendents of " + String.format(GO_FORMAT, gonum) + " - " + goDesc);
+			lines.add(goLines.size() + " Descendents of " + String.format(GO_FORMAT, gonum) + " - " + goDesc + term);
 			lines.add("");
 			
 			int rbGO=0;
@@ -467,7 +471,7 @@ public class GOtree {
 			mDB.close();
 			
 			if (goLines.size()>0) {
-				lines.add(String.format("%-10s %-5s %s ", "GO ID", "Level", "Description"));
+				lines.add(String.format("%-10s %-5s %s ", Globalx.goID, "Level", Globalx.goTerm));
 				for (String g : goLines) lines.add(g);
 			}
 			lines.add("");
@@ -488,7 +492,7 @@ public class GOtree {
 			
 			ResultSet rs=mDB.executeQuery("select term_type from go_info where gonum=" + gonum);
 			String term="";
-			if (rs.next()) term = "  (" + rs.getString(1) + ")";
+			if (rs.next()) term = "  (" + goTermMap.get(rs.getString(1)) + ")"; // CAS322
 			
 			Vector <String> tmpLines = new Vector <String> ();
 			
@@ -723,7 +727,7 @@ public class GOtree {
 			lines.add("Hits with assigned " + String.format(GO_FORMAT, gonum) + " - " + godesc);
 			lines.add("");
 			String line = String.format("%-16s  %-3s  %-40s  %s", 
-					"Hit ID", "EC", "Description", "Species");
+					"Hit ID", Globalx.evCode, "Description", "Species");
 			lines.add(line);
 				
 			int count=0;
@@ -787,7 +791,7 @@ public class GOtree {
 			
 			int count=0;
 			String line = String.format("%-16s %-3s %-30s   %-10s  %-5s  %-30s  ", 
-					 "Hit ID", "EC", "Description",   "Descendent","Level","Description");
+					"Hit ID", Globalx.evCode, "Description",   "Descendent","Level", Globalx.goTerm);
 			lines.add(line);
 
 			for (GOterm gt : goList) {
@@ -864,7 +868,7 @@ public class GOtree {
 			
 			int count=0;
 			String line = String.format("%-15s  %-20s  %6s  %5s  %5s  %3s", 
-					"Sequence", "Hit", "E-val", "Is EV", "Is AN", "EC");
+					"Sequence", "Hit", "E-val", "Is EV", "Is AN", Globalx.evCode);
 			lines.add(line);
 
 			for (SeqHit sh : hitList) {
@@ -878,7 +882,7 @@ public class GOtree {
 			lines.add("");
 			lines.add("Count: " + count);
 			lines.add("");
-			lines.add("EC (evidence code): If EC is in parenthesis, it is inherited.");
+			lines.add(Globalx.evCode + " (evidence code): If " + Globalx.evCode + " is in parenthesis, it is inherited.");
 			lines.add("");
 			lines.add("Note: Each sequence may have many hits with this GO, where the hits have different ECs.");
 			lines.add("      Only the hit with the best e-value is shown with its associated EC.");
@@ -912,13 +916,13 @@ public class GOtree {
 					"join go_info as  g on g.gonum=p.gonum " +
 					"WHERE p.duhid=" + duhid + " order by g.level, p.gonum"); 
 			lines.add(String.format("%-10s %-5s %-3s  %-4s  %s", 
-								"GO ID", "Level", "EC", "Type", "Description"));
+					Globalx.goID, "Level", Globalx.evCode, Globalx.goOnt, Globalx.goTerm));
 			while (rs.next()) {
 				String go = String.format(GO_FORMAT, rs.getInt(1));
 				String ec = rs.getString(2);
 				String desc = rs.getString(3);
 				String level = "  " + rs.getInt(4);
-				String term = rs.getString(5).substring(0,3);
+				String term = goTermMap.get(rs.getString(5));
 				String l = String.format("%-10s %-5s %-3s  %-4s  %s", go, level, ec, term, desc);
 				lines.add(l);
 				count++;
@@ -953,7 +957,7 @@ public class GOtree {
 					"join go_info as  g on g.gonum=p.gonum " +
 					"WHERE p.duhid=" + duhid + " order by g.term_type, g.level, p.gonum"); 
 			lines.add(String.format("%-10s %-5s %-3s  %-4s  %s", 
-								"GO ID", "Level", "EC", "Type", "Description"));
+					Globalx.goID, "Level", Globalx.evCode, "Type", Globalx.goTerm));
 			while (rs.next()) {
 				int gonum = rs.getInt(1);
 				String go = String.format(GO_FORMAT, gonum);
@@ -961,7 +965,7 @@ public class GOtree {
 				String ec = rs.getString(2);
 				String desc = rs.getString(3);
 				String level = "  " + rs.getInt(4);
-				String term = rs.getString(5).substring(0,3);
+				String term = goTermMap.get(rs.getString(5));
 				String l = String.format("%-10s %-5s %-3s  %-4s  %s", go, level, ec, term, desc);
 				goMap.put(gonum, l);
 				count++;
@@ -982,7 +986,7 @@ public class GOtree {
 					String go2 = String.format(GO_FORMAT, gonum2);
 					String desc = rs.getString(2);
 					String level = "  " + rs.getInt(3);
-					String term = rs.getString(4).substring(0,3);
+					String term = goTermMap.get(rs.getString(4));
 					String l = String.format("%-10s %-5s %-3s  %-4s  %s", go2, level, "", term, desc);
 					lines.add(l);
 					count++;
@@ -1034,7 +1038,7 @@ public class GOtree {
 		GOterm (int gonum, int level, String term, String desc) {//All ancestors
 			this.gonum = gonum;
 			this.level = level;
-			this.term = term.substring(0,3);
+			this.term = goTermMap.get(term);
 			this.desc = desc;
 		}
 		public void setMsg(String msg) {this.msg = msg;}
@@ -1281,14 +1285,14 @@ private class AllDialog extends JDialog {
 		
 		JPanel selectPanel = Static.createPagePanel();
 		
-		JRadioButton btnDesc = Static.createRadioButton("GO Descriptions", true);
+		JRadioButton btnDesc = Static.createRadioButton(Globalx.goTerm, true);
 		btnDesc.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				nInfo = INFO_DESC;
 			}
 		});
 	
-		JRadioButton btnTerm =  Static.createRadioButton("GO IDs", false);
+		JRadioButton btnTerm =  Static.createRadioButton(Globalx.goID, false);
     	btnTerm.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				nInfo = INFO_TERM;
@@ -1432,7 +1436,7 @@ private class AllDialog extends JDialog {
 			if (nMode==MODE_WRITE) {
 				Out.Print("Writing " + lines.size() + " lines ...");
 				PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(exportFH)));
-				
+			
 				for (String l : lines) pw.println(l);
 		
 				pw.close();
@@ -1494,7 +1498,7 @@ private class AllDialog extends JDialog {
 					
 					String desc = rs.getString(3);
 					
-					String term = rs.getString(4).substring(0,3);
+					String term = goTermMap.get(rs.getString(4));
 					
 					lines.add(String.format(format, x, go, term, desc));
 					cnt++; cnt1++;
@@ -1564,12 +1568,13 @@ private class AllDialog extends JDialog {
 			goDup.clear();
 			if (rs!=null) rs.close(); mDB.close();
 			
-			
 			Collections.sort(goList);
 			
 			String delim = (nMode==MODE_POP) ? " "  : FileC.TSV_DELIM; 
 			String format = "%-11s" + delim + "%6s" + delim +"%-5s" + delim + "%s";
-			lines.add(String.format(format, "GO ID", "Domain", "Level", "Description"));
+			String goid = (nMode==MODE_POP) ? Globalx.goID : Globalx.goID.replace(" ", "-");
+			String goterm = (nMode==MODE_POP) ? Globalx.goTerm : Globalx.goTerm.replace(" ", "-");
+			lines.add(String.format(format, goid,  Globalx.goOnt, "Level", goterm));
 			
 			for (GOterm gt : goList) { 
 				String go = String.format(GO_FORMAT, gt.gonum);
@@ -1815,6 +1820,7 @@ private class AllDialog extends JDialog {
 	
 	private HashMap <Integer, String> relTypeMap = new HashMap <Integer, String> ();
 	private HashMap <Integer, Integer> ancMap=null, descMap=null;
+	private HashMap <String, String> goTermMap; // CAS322
 	
 	private boolean bSORT_BY_DIST = false; // not used
 	private STCWFrame theMainFrame = null;

@@ -29,6 +29,7 @@ import util.ui.DisplayInt;
 public class MainTable extends MainTableSort {
 	private static final long serialVersionUID = 6393222947327727667L;
 	private static final String GO_FORMAT = "GO:%07d";
+	static public final String ROWn = "Row #";
 	
 	public MainTable (FieldMapper inFields, 
 						Vector <String> tableRows, 
@@ -45,8 +46,9 @@ public class MainTable extends MainTableSort {
     
     /************************************************************
      * Called from Main table to copy and export
+     * Copied from BasicTablePanel
+     * CAS322 wrong if columns moved - can't use getColumnName
      */
-	// Copied from BasicTablePanel
 	public String statsPopUpCompute(String sum) {
 		try {
 			String [] fields = 
@@ -61,9 +63,9 @@ public class MainTable extends MainTableSort {
 			double [] dArr = new double [tableRows];
 			
 		    for(int y=0; y < tableCols; y++) {
-		    		String colName = getColumnName(y);
-		    		if (colName.equals("Row #")) continue;
-		    		
+		    	String colName = (String)getColumnModel().getColumn(y).getHeaderValue();
+		    	if (colName.contentEquals(ROWn)) continue;
+		    	
 			 	Object obj = getValueAt(0,y);
 			 	if (obj==null) continue;      // if the first value is null, doesn't work
 			 	
@@ -128,31 +130,40 @@ public class MainTable extends MainTableSort {
 		
 		} catch(Exception e) {ErrorReport.reportError(e, "Error create column stats"); return "Error"; }
 	}
-	// Copy to clipboard
+	/***********************************************
+	 *  Copy to clipboard
+	 *  CAS322 was assuming Row# in column0, was skipping last row (use to be totals)
+	 */
     public String copyTableToString() {
-		StringBuilder target = new StringBuilder();
-		try {
-        // skip row# column
-        for(int x=1; x < getColumnCount()-1; x++) {
-            //Remove spaces from column headers
-            target.append(((String)getColumnModel().getColumn(x).getHeaderValue()).replaceAll("\\s", ""));
-            target.append("\t");
+	StringBuilder target = new StringBuilder();
+	try {
+        int nCol=getColumnCount(), nRow=getRowCount(), rowCol=0;
+        for(int x=0; x < nCol; x++) { 
+        	String head = (String)getColumnModel().getColumn(x).getHeaderValue();
+        	
+        	if (head.contentEquals(ROWn)) {
+        		rowCol=x;
+        		continue;
+        	}
+        	head = head.replaceAll("\\s", "-");//Remove spaces from column headers
+        	
+            target.append(head);
+            
+            if (x < nCol-1) target.append("\t");
         }
-        target.append(((String)getColumnModel().getColumn(getColumnCount()-1).getHeaderValue()).replaceAll("\\s", ""));
         target.append("\n");
         
-        // skip last row
-        for (int row = 0;  row < getRowCount()-1;  row++) {
-            for (int col = 1;  col < getColumnCount();  col++) {
+        for (int row = 0;  row < nRow;  row++) {
+            for (int col = 0;  col < nCol;  col++) {
+            	if (col==rowCol) continue;
+            	
                 Object obj = getValueAt(row, col);
                 String s = (obj == null ? "" : obj.toString()); 
-                // surrounds ',' with quotes
-                if(s.indexOf(',') >= 0)
-                    s = "\"" + s + "\"";
+                
+                if (s.indexOf(',') >= 0) s = "\"" + s + "\"";// surrounds ',' with quotes
                 
                 target.append(s);
-                if(col + 1 < getColumnCount())
-                    target.append('\t');
+                if (col + 1 < nCol) target.append('\t');
             }
             target.append("\n");
         }
@@ -160,6 +171,10 @@ public class MainTable extends MainTableSort {
     catch (Exception err) {ErrorReport.reportError(err, "Internal error copying table");}
     return target.toString();
     }
+    /******************************************************
+     * Save table to file
+     * CAS322 was assuming Row# was in col0
+     */
     public boolean saveToFileTabDelim(Component btnC, String fileName, STCWFrame frame) {
         String delim = FileC.TSV_DELIM;
         try {
@@ -167,35 +182,41 @@ public class MainTable extends MainTableSort {
         	PrintWriter pw = fwObj.getWriter(btnC, "Seq Columns", fileName, FileC.fTSV, FileC.wAPPEND);
             if (pw==null) return false;
            
-            int rowCnt = getRowCount();
-            int nCol = getColumnCount();
-            Out.prt("Writing " + rowCnt + " rows and " + nCol + " columns " );
+            int nCol=getColumnCount(), nRow=getRowCount(), rowCol=0;
+            Out.prt("Writing " + nRow + " rows and " + nCol + " columns " );
             
-            String val = "";
-            // skip row# column
             pw.print("#"); // CAS314 if append, makes it easier to view/remove column headings
-            for(int x=1; x < nCol; x++) {
-                //Replace spaces from column headers
-                val = ((String)getColumnModel().getColumn(x).getHeaderValue()).replaceAll("\\s", "-");
-                pw.print(val);
-                pw.print(delim);
+            for(int x=0; x < nCol; x++) {
+                String head = (String)getColumnModel().getColumn(x).getHeaderValue();
+            	
+            	if (head.contentEquals(ROWn)) {
+            		rowCol=x;
+            		continue;
+            	}
+            	head = head.replaceAll("\\s", "-");//Remove spaces from column headers
+            	
+                pw.print(head);
+                if (x < nCol-1) pw.print(delim);
             }
             pw.print("\n");
             
-            for (int row = 0;  row < rowCnt;  row++) {
+            for (int row = 0;  row < nRow;  row++) {
                 if(row % 100 == 0) Out.r("Wrote " + row);
-                for (int col = 1;  col < nCol;  col++) {
+                
+                for (int col = 0;  col < nCol;  col++) {
+                	if (col==rowCol) continue;
+                	
                     Object obj = getValueAt(row, col);
                     String s = (obj == null ? "" : obj.toString()); 
-                    // surrounds ',' with quotes
-                    if(s.indexOf(',') >= 0) s = "\"" + s + "\"";
+                   
+                    if(s.indexOf(',') >= 0) s = "\"" + s + "\""; // surrounds ',' with quotes
                     
                     pw.print(s);
-                    if(col + 1 < nCol) pw.print(delim);
+                    if(col < nCol-1) pw.print(delim);
                 }
                 pw.println();
             }
-            Out.prt("Complete writing " + rowCnt + " records to " + fileName);
+            Out.prt("Complete writing " + nRow + " records to " + fileName);
             pw.close();
             return true;
         }
@@ -491,10 +512,12 @@ public class MainTable extends MainTableSort {
     		DBConn mdb = frame.getNewDBC();
     		
     		HashMap <String, String> goMap = new HashMap <String, String> ();
+    		HashMap <String, String> goTermMap = Static.getGOtermMap();
+    		
     		ResultSet rs = mdb.executeQuery("select gonum, term_type, descr from go_info");
     		while(rs.next()) {
     			String gonum = String.format(Globalx.GO_FORMAT, rs.getInt(1));
-    			String type =  rs.getString(2).substring(0,3);
+    			String type =  goTermMap.get(rs.getString(2)); // CAS322
     			String descr = rs.getString(3);
     			goMap.put(gonum, type + "  " + descr);
     		}
@@ -622,25 +645,29 @@ public class MainTable extends MainTableSort {
 	       
 	// Step 2: Get go_info information and write to file        
 	      	// make sql - get the P__ columns
+	        HashMap <String, String> goAbbrMap = Static.getGOtermMap();
+	        
+	    	String query = "select level,  term_type,  descr ";
+	    	
+	        String [] de = frame.getMetaData().getDENames(); // CAS322 was reading database
 		    Vector<String> pcols = new Vector<String>();
-		    String prefix = Globalx.PVALUE;
-		    rs = mdb.executeQuery("show columns from go_info like '" + prefix + "%'");
-		    while (rs.next()) pcols.add(rs.getString(1));
-		    rs.close();
-		    
-		 	String query = "select level,  term_type,  descr ";
-		 	if (pcols.size() > 0) query += "," + Static.strVectorJoin(pcols, ",") ;
+		    String deCols="";
+		    if (de.length>0) {
+		    	for (String d : de) {
+		    		pcols.add(d);
+		    		deCols += "," + Globalx.PVALUE + d; 
+		    	}
+		    	query += deCols;
+		    }
 		 	query += " from go_info where gonum=";
 		            
 	        Out.prtSp(1,"Start writing....                    "); 
 	        pw.write("### #Seqs: " + rowCnt + "   #GOs: " + goCntMap.size() + "   #GO-seq pairs: " + cntGoSeqPairs + "\n");
-	        pw.write("GO" + delim + " #Seqs" + delim  + "Level" + delim  + " Term_type" + delim +  "Description");
+	        pw.write(Globalx.goID.replace(" ", "-") + delim + " #Seqs" + delim  + "Level" + delim  
+	        		+ " " + Globalx.goOnt + delim +  Globalx.goTerm.replace(" ", "-"));
 	        if (pcols.size() >0) {   
-	        	int x = prefix.length();
 		        pw.write(delim);
-		        for (String p : pcols)
-		        		pw.write(p.substring(x) + delim); 
-		        
+		        for (String p : pcols) pw.write(p + delim); 
 	        }
 	        pw.write("\n");
 	        int nrows = 0;
@@ -651,11 +678,10 @@ public class MainTable extends MainTableSort {
 	        		sb.append(String.format(GO_FORMAT,gonum));
 	        		sb.append(delim + String.format("%5d", goCntMap.get(gonum))); // count
 	        		sb.append(delim + rs.getString(1)); // level
-	        		sb.append(delim + rs.getString(2)); // term_type
+	        		sb.append(delim + goAbbrMap.get(rs.getString(2))); // term_type
 	        		sb.append(delim + rs.getString(3)); // desc 
 	        		int c=3;
-	        		for (int j = 1; j <= pcols.size(); j++)
-	        		{
+	        		for (int j = 1; j <= pcols.size(); j++) {
 	        			sb.append(delim + formatD(rs.getDouble(c+j))); 
 	        		}
 	        		pw.write(sb.toString());

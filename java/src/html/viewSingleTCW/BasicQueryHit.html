@@ -18,12 +18,15 @@ TCW as <i>annoDBs</i>. The comparison was performed with a <i>heuristic search</
 such as BLAST or DIAMOND, where the results are referred to as <i>hits</i>. 
 This panel allows searching against the set of <i>hits</i> to the sequences.
 <p>
-The result of a search creates two lists, which can be toggle between by checking/unchecking
-the <b>Group by Hit ID</b>, where uncheck is 'Sequence hits': 
-<ol>
-<li>Grouped by Hit ID: a list of the hits.
-<li>Sequence hits: a list of the sequence-hit pairs.
-</ol>
+
+<p>The results can be toggled between the <i>Hit table</i>  and <i>Seq-Hit table</i>.
+<ul>
+<li><i>Hit table</i>: If <b>Group by Hit ID</b> is selected, then the table has one entry for each annotation (i.e. Hit ID), 
+showing the number of sequences hit by that annotation, and the sum of count data for all of those 
+sequences. 
+<li><i>Seq-Hit table</i>: If <b>Group by Hit ID</b> is unselected, then the table shows each SeqID/HitID pair as a separate line. 
+</ul>
+
 <i>Beware: the list of sequence-hit pairs can
 be over a million</i>  (see the <b>Overview</b> "Total Sequence Hits"). If you do not set filters
 to reduce the size of the list, it can take a minute to display; you may also run out
@@ -58,13 +61,17 @@ If it is checked, then any filters from are also applied.
 <li>Pull-down:
 <ul>
 <li><u>None</u>: search all the seq-hit pairs; this will be a slow query as the number of pairs is typically
-very large.
-<li><u>Rank=1</u>: The best hit for the annoDB. If this is selected with a given annoDB, it lists all
-sequences that have at least one hit from the annoDB.
-<li><u>Best Bits</u>: List hits that have at least one sequence where the hit has the best bitscore.
-<li><u>Best Anno</u>: List hits that have at least one sequence where the hit has the best annotation.
-<li><u>Bits&amp;Anno</u>: List hits that are both Best Bits and Best Anno to at least one sequences.
-<li><u>Bits|Anno</u>: List hits that are both Best Bits or Best Anno to at least one sequences.
+very large. 
+<li>List hits that have at least one sequence where:
+<ol> 
+<li><u>Best Bits</u>: the hit has the best bitscore over all annoDBs.
+<li><u>Best Anno</u>: the hit has the best annotation over all annoDBs.
+<li><u>Bits&amp;Anno</u>: the hit has both Best Bits and Best Anno over all annoDBs.
+<li><u>Bits|Anno</u>: the hit has Best Bits or Best Anno over all annoDBs.
+<li><u>Rank=1</u>:  this is the best hit for the annoDB.
+<br>If Rank=1 is selected with a given annoDB, it lists all sequences that have at least one hit from the annoDB.
+</ol>
+
 </ul>
 
 <li><b>E-val:</b> The E-value assigned by the heuristic search program for
@@ -100,10 +107,17 @@ search, which builds a new table or adds to the existing table, respectively.
 <br>Columns can be added/removed (<b>Columns</b>), rearranged by dragging and sorted
 by clicking on a column heading.
  
-<p><b>Group by Hit ID:</b>
-If this option is selected, then the table has one entry for each annotation (i.e. hit ID), 
-showing the number of sequences hit by that annotation, and the sum of count data for all of those 
-sequences. If unselected, then the table shows each SeqID/HitID pair as a separate line. 
+
+<h4>Columns</h4>
+<ul>
+<li>The <i>Hit table</i> and <i>Seq-Hit table</i> have the same number of columns where many of them
+are the same, e.g. the Hit values such as <u>description</u> are the same. The "*" Hit
+columns are the best value from the Seq-Hit table. The '#' Hit columns is the count of the corresponding Seq-Hit
+columns.
+<li>The Hit and Seq-Hit tables can have different column selections, but both column panels have a 
+<b>Accept Hit/Seq Columns</b> to make one the same as the other.
+<li>P-values:  See <b>Decimal Display</b> on upper left panel.
+</ul>
 
 <h4>Modify Table</h4>
 <ul>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Decimal Numbers Display </title>
+</head>
+<body style="padding:20px;width:650px;font-family:Times">
+
+<h1>Decimal Numbers Display</h1>
+All options immediately change the decimal numbers in the main table, the Basic AnnoDB Hits, and
+the Basic GO Annotation tables, except for the <b>Cutoffs</b>, which take effect when the <b>Apply</b>
+is pressed.
+<p>All parameters are saved between sessions.
+
+<p>The two decimal display options use the following two parameters:
+<ol>
+<li><b>Significant figures</b>:  This is used for numbers &lt;1 and E-notation displays.
+This is the number of important digits (see Wikipedia for a good description),
+e.g. 0.012 and 1.2E-2 both have two significant figures. Minimum: 1, Suggested: 2.
+<br>&nbsp;
+
+<li><b>Decimal places</b>: This is used for numbers &gt;1. It is
+the number of digits after the decimal point, e.g.
+123.45 has two decimal places. Minimum: 0, Suggested: 2.
+
+</ol>
+Display decimal options:
+<ol>
+<li><b>E-notation</b>: This allows the user to set how big or small 
+the <i>absolute value</i> of the 
+number can be before switching to E-notation. 
+Note, E-notation is scientific notation where 'E' is used to represent the exponent.
+To view all numbers without using E-notation, enter 1E+20 and 0 in the two boxes, respectively.
+To view all numbers in E-notation, enter 1 in both boxes.
+<br>Suggested values: 999999.9 and 0.001
+<br>&nbsp;
+<li><b>Java defaults</b>: Java determines when to switch to E-notation.
+</ol>
+
+Highlight good p-values:
+<ul>
+<li><b>Highlight good p-values</b>: Turn this option on/off.  
+<br>&nbsp;
+<li><b>Cutoffs</b>: Change the cutoffs with the restriction that A&gt;B&gt;C&gt;D. Any of 
+them can be set to zero in order to be ignored, e.g. if you only want A and D to be applied,
+set the other two to zero. The cutoffs correspond to the ABCD in the color schemes.
+<br>Suggested values: 0.05, 0.01, 0.001, 0.0001
+<br>&nbsp;
+<li><b>Color Schemes [1-4]</b>: Select any of the 4 color schemes, where the color (A-D) corresponds
+to the cutoffs. For example, if color scheme 1 is selected and  cutoff A is 0.05, 
+a p-value will be highlighted light blue if its &lt;0.05.
+</ul>
+<h3>Round-off error</h3>
+This is easiest to explain with an example: say you filter on p-value&lt;0.05.
+Given default values for <b>Decimal Display</b>, all cells of the resulting table should be colored
+and have values &lt;0.05. However, you will see values of 0.05 due to round off error:
+<ol>
+<li>If you look in the MySQL database, you will
+see that an 0.05 p-value will actually has a value like 0.04999942811041529. 
+<li>When it is rounded for display, it becomes 0.05.
+<li>The filter is on the full value, which correctly determines that 0.04999942811041529 &lt; 0.05.
+<li>But when it is tested for highlighting, it is different between the Main and Basic tables, as discussed below.
+</ol>
+Main sequence table:
+<ol>
+<li>The result is rounded BEFORE testing for highlight, so an 0.05 cell will be white. This indicates
+its very close.
+<li>Changing the significant digits on the <b>Decimal Display</b> does not change the value.
+</ol>
+Basic Hit and GO tables:
+<ol>
+<li>The result is rounded AFTER testing for highlight, so an 0.05 cell while be highlighted. 
+<li>Changing the significant digits to 4 on the <b>Decimal Display</b> will show it as &lt;0.05 (e.g. 0.049).
+</ol>
+</body>
+</html>

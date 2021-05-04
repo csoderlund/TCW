@@ -5,10 +5,10 @@
 <h2>TCW overview for Nn </h2>
 <table width=700 border=1><tr><td>
 <pre>
-Project:  Nn   #Seqs: 26,685   #Hits: 593,083   #GOs: 24,582    TPM  DE  GO-DE   Pairs
+Project:  Nn   #Seqs: 26,685   #Hits: 593,083   #GOs: 24,582    TPM  Seq-DE  GO-Enrich   Pairs
  
 06-Nov-20 Build Database  sequences loaded from external source
-28-Mar-21 Last Annotation with sTCW v3.2.0    Updated with v3.2.1
+28-Mar-21 Last Annotation with sTCW v3.2.0    Updated with v3.2.2
 
 INPUT
    Counts: 
@@ -82,13 +82,13 @@ EXPRESSION
       StOL    330 (1%)  1,188 (4%)   3,124(12%)   6,107(23%)   9,192(34%)  
 
    GOs enrichment: (% of 24,582)
-               <1E-5     <1E-4    <0.001       <0.01       <0.05  
-      RzRo  101(<1%)  238 (1%)  697 (3%)  2,016 (8%)  3,909(16%)  
-      RzSt  280 (1%)  379 (2%)  610 (2%)  1,241 (5%)  2,479(10%)  
-      RzOL  137 (1%)  228 (1%)  446 (2%)  1,076 (4%)  2,288 (9%)  
-      RoSt  226 (1%)  411 (2%)  806 (3%)  1,854 (8%)  3,633(15%)  
-      RoOL  123 (1%)  222 (1%)  492 (2%)  1,303 (5%)  2,850(12%)  
-      StOL  155 (1%)  209 (1%)  379 (2%)    907 (4%)  2,138 (9%)  
+               <1E-5     <1E-4    <0.001     <0.01       <0.05  
+      RzRo    7(<1%)   28(<1%)   61(<1%)  236 (1%)    961 (4%)  
+      RzSt  179 (1%)  225 (1%)  283 (1%)  415 (2%)    643 (3%)  
+      RzOL   64(<1%)   87(<1%)  123 (1%)  221 (1%)    429 (2%)  
+      RoSt   67(<1%)  119(<1%)  225 (1%)  512 (2%)  1,044 (4%)  
+      RoOL   49(<1%)   63(<1%)  100(<1%)  210 (1%)    495 (2%)  
+      StOL  102(<1%)  114(<1%)  147 (1%)  201 (1%)    331 (1%)  
 
 SEQUENCES
    Sequence lengths:
@@ -153,12 +153,12 @@ PROCESSING INFORMATION:
 
    GO enrichment computation: 
       Column       Method               Cutoff
-      RzRo         GOseq                0.050
-      RzSt         GOseq                0.050
-      RzOL         GOseq                0.050
-      RoSt         GOseq                0.050
-      RoOL         GOseq                0.050
-      StOL         GOseq                0.050
+      RzRo         goSeqBH.R            0.0500
+      RzSt         goSeqBH.R            0.0500
+      RzOL         goSeqBH.R            0.0500
+      RoSt         goSeqBH.R            0.0500
+      RoOL         goSeqBH.R            0.0500
+      StOL         goSeqBH.R            0.0500
 
 -------------------------------------------------------------------
 LEGEND:

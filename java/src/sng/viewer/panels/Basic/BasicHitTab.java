@@ -66,7 +66,8 @@ public class BasicHitTab extends Tab {
 		add(Box.createVerticalStrut(6));
 		
 		theTablePanel = new BasicTablePanel(theParentFrame, this, 
-				theFilterPanel.getColNames(), theFilterPanel.getColSelect());
+				theFilterPanel.getColNames(), theFilterPanel.getColSelect(), 
+				theFilterPanel.getStartPval()); // CAS322 add last arg for highlights
 		add(theTablePanel);
 	}
 	/******************************************
@@ -440,7 +441,7 @@ public class BasicHitTab extends Tab {
 			int send   = 	Integer.parseInt((String) values[nCol++]);
 			int hstart = 	Integer.parseInt((String) values[nCol++]);
 			int hend = 		Integer.parseInt((String) values[nCol++]);
-			align = 			Integer.parseInt((String) values[nCol++]);
+			align = 		Integer.parseInt((String) values[nCol++]);
 			
 			String f = 		(String) values[nCol++];
 			int filtered = 	Integer.parseInt(f);
@@ -509,7 +510,7 @@ public class BasicHitTab extends Tab {
 				case 14: return strTaxo;	
 				}
 			}
-			nCol+=6;
+			if (hasGO) nCol+=6; // CAS322 was missing this
 			if (hasGO && column<nCol) {
 				switch(column) {
 				case 15: return nGO;
@@ -520,6 +521,7 @@ public class BasicHitTab extends Tab {
 				case 20: return strEC;
 				}
 			}
+			
 			if (column < (nCol+numLibs))
 				return new DisplayFloat(libCounts[column-nCol]);
 			nCol+=numLibs;
@@ -712,7 +714,6 @@ public class BasicHitTab extends Tab {
 			if (column < nCol+numLibs) {
 				return new DisplayFloat(nLibCounts[column-nCol]);
 			}
-			
 			nCol+= numLibs;
 			return new DisplayFloat(nPvalCounts[column-nCol]);
 		}

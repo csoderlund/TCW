@@ -201,8 +201,8 @@ public class Overview {
 	        	
 	        	h += "   ";
 	        	if (hasNorm) h += " " + normType + " ";
-	        	if (hasSeqDE) h += " DE ";
-	        	if (hasGODE) h += " GO-DE ";
+	        	if (hasSeqDE) h += " Seq-DE ";
+	        	if (hasGODE) h += " GO-Enrich ";
 	        	
 	        	if (hasPairwise) h += "  Pairs";
 	        	

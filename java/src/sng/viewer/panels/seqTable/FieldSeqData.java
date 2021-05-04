@@ -358,27 +358,27 @@ public class FieldSeqData implements Serializable
         }
     // Library Columns
         if(allLibraryNames != null) {
-	        	for(int x=0; x<allLibraryNames.length; x++)
-	        		mapper.addIntField(LIBRARY_COUNT_ALL + x, "#" + allLibraryNames[x], "contig", 
-	        				"L__" + allLibraryNames[x], GROUP_NAME_LIB, GROUP_DESC_LIB, 
-	        				"Library " + allLibraryNames[x]);
-	        	for(int x=0; x<allLibraryNames.length; x++)
-	        		mapper.addFloatField(N_LIBRARY_COUNT_ALL + x, allLibraryNames[x], "contig", 
-	        				"LN__" + allLibraryNames[x], GROUP_NAME_LIB, GROUP_DESC_LIB, 
-	        				allLibraryTitles[x]);    
+        	for(int x=0; x<allLibraryNames.length; x++)
+        		mapper.addIntField(LIBRARY_COUNT_ALL + x, "#" + allLibraryNames[x], "contig", 
+        				L + allLibraryNames[x], GROUP_NAME_LIB, GROUP_DESC_LIB, 
+        				"Library " + allLibraryNames[x]);
+        	for(int x=0; x<allLibraryNames.length; x++)
+        		mapper.addFloatField(N_LIBRARY_COUNT_ALL + x, allLibraryNames[x], "contig", 
+        				LN + allLibraryNames[x], GROUP_NAME_LIB, GROUP_DESC_LIB, 
+        				allLibraryTitles[x]);    
 	        	
-    // Nfold and Rstat
+        	// Nfold and Rstat
 	        mapper.addFloatField( RSTAT_FIELD, "Rstat", "contig", "rstat", 
-	            		GROUP_NAME_RSTAT, GROUP_DESC_RSTAT, 
+	            GROUP_NAME_RSTAT, GROUP_DESC_RSTAT, 
 	            		"Over all conditions for the sequence." );
 	        
-	// DE/pvals
+	        // DE/pvals
 	        if(pLabels != null) {
-		        	for(int x=0; x<pLabels.length; x++) {
-		        		mapper.addFloatField(P_VALUES + x, pLabels[x], "contig", 
-		        				PVAL + pLabels[x], GROUP_NAME_PVAL, GROUP_DESC_PVAL, 
-		        				pTitles[x]);
-		        	}
+	        	for(int x=0; x<pLabels.length; x++) {
+	        		mapper.addFloatField(P_VALUES + x, pLabels[x], "contig", 
+	        			PVAL + pLabels[x], GROUP_NAME_PVAL, GROUP_DESC_PVAL, 
+	        				pTitles[x]);
+	        	}
 	        } 
         }  
        
@@ -387,12 +387,12 @@ public class FieldSeqData implements Serializable
         
   // SNP
         if (metaData.hasAssembly()) {
-        		mapper.addIntField( SNP_COUNT_FIELD, "SNP Count", "contig", "snp_count", 
-            		GROUP_NAME_SNPORF, GROUP_DESC_SNPORF, 
-            		"Number of SNPs detected in the contig." );
-        		mapper.addIntField( SNP_INDEL_FIELD, "SNP InDel", "contig", "indel_count", 
-              		GROUP_NAME_SNPORF, GROUP_DESC_SNPORF, 
-              		"Number of SNP insertions/deletions." );        	
+    		mapper.addIntField( SNP_COUNT_FIELD, "SNP Count", "contig", "snp_count", 
+        		GROUP_NAME_SNPORF, GROUP_DESC_SNPORF, 
+        		"Number of SNPs detected in the contig." );
+    		mapper.addIntField( SNP_INDEL_FIELD, "SNP InDel", "contig", "indel_count", 
+          		GROUP_NAME_SNPORF, GROUP_DESC_SNPORF, 
+          		"Number of SNP insertions/deletions." );        	
         }
   // Open Reading Frames
         if(metaData.hasORFs()) {

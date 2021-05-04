@@ -8,6 +8,44 @@
 
 
 <h3>TCW Version 3.2</h3>
+<h4>v3.2.2  4-May-21</h4>
+<ul>
+<li>Terminology changes: 
+	<ul>
+	<li>GO: Domain =&gt; Ontology, the corresponding column heading is GO
+	<li>GO: Ontology abbreviations bio=&gt;BP, cel=&gt;CC, mol=&gt;MF
+	<li>GO: DE =&gt; Enrich 
+	<li>Evidence code: EC =&gt; EvC
+	</ul>
+<li><ttp>runDE</ttp>
+	<ul>
+	<li>The <ttp>GOseq</ttp> results are multiple hypothesis testing corrected (see <ttc>goSeqBH.R</ttc>).
+	<li>The results are in 'oResults' instead of 'results'.
+	</ul>
+<li><ttp>viewSingleTCW</ttp>
+	<ul>
+	<li><ttc>Decimal Display</ttc>
+	<ul>
+	<li>There is a new option to highlight p-values that are less than a given amount. See this panel and its
+	<ttl>Help</ttl> for more information
+	</ul>
+	</ul>
+<li>Bugs
+	<ul>
+	<li>On the Main table, if the <u>Row #</u> column is moved in the table, the <u>Copy Table</u> and <u>Export table of columns</u>
+	did not work right.
+	<li>On Basic Hit table, if there were no GOs, the DE P-values could not be viewed in the Seq-Hit mode.
+	<li> Recent tiny bug on <ttc>Basic GO Annotation</ttc>: For the <ttl>DE #Seqs</ttl>, it was suppose to be reading the original DE cutoff from the database, which
+	was not working.
+	</ul>
+<li>Software Details
+	<ul>
+	<li>All terminology changes are in Globalx and the GO abbreviation mapping is Static.goTermMap().
+	BasicGOTablePanel and MainTable were querying for p-value columns, which now gets it from Metadata.
+	<li>All Exports files have been rechecked - no problems found.
+	</ul>
+</ul>
+
 <h4>v3.2.1  19-Apr-21</h4>
 <i>Update existing sTCW databases for this release</i>: There is a small sTCWdb schema change, which will be 
 updated the first time you access the database.

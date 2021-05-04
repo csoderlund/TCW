@@ -72,7 +72,7 @@ public class QRFrame extends JDialog implements WindowListener {
 	public static final String noCol = "No P-values";
 	
 	private final String RSCRIPT1= Globalx.RSCRIPTSDIR + "/edgeRglm.R";
-	private final String RSCRIPT2= Globalx.RSCRIPTSDIR + "/goSeq.R";
+	private final String RSCRIPT2= Globalx.RSCRIPTSDIR + "/goSeqBH.R";
 	
 	private final String [] SELECTIONS = { "Conditions", "Group 1", "Group 2", "Exclude" };
 	private final int DEFAULT_SELECTION = 2; 

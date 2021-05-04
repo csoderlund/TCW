@@ -9,6 +9,7 @@ import java.awt.Window;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.HashMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -74,6 +75,13 @@ public class Static {
 		tmp.setBackground(Color.white);
 		tmp.setOpaque(true);  // allows the color to be changed on Mac
 		tmp.setEnabled(enable);
+		return tmp;
+	}
+	static public JLabel createLabel(String label, Color c) {
+		JLabel tmp = new JLabel(label);
+		tmp.setBackground(c);
+		tmp.setOpaque(true);  // allows the color to be changed on Mac
+		tmp.setEnabled(false);
 		return tmp;
 	}
 	static public JButton createButton(String label, boolean enable, Color color) {
@@ -474,5 +482,14 @@ public class Static {
             return str.substring( 1, str.length()-1 );
         else
             return str;
+    }
+    // CAS322 
+    public static HashMap <String, String> getGOtermMap() {
+    	HashMap <String, String> goMap = new HashMap <String, String>  ();
+    	
+    	for (int i=0; i<Globalx.GO_TERM_LIST.length; i++) {
+    		goMap.put(Globalx.GO_TERM_LIST[i], Globalx.GO_TERM_ABBR[i]);
+    	}
+    	return goMap;
     }
 }

@@ -40,6 +40,7 @@ import util.methods.Out;
 import util.methods.Static;
 import util.ui.UIHelpers;
 import util.database.DBConn;
+import util.database.Globalx;
 
 import cmp.viewer.MTCWFrame;
 
@@ -61,6 +62,7 @@ public class SeqGOPanel extends JPanel {
 		seqName = name;
 		hitInfo = hit;
 		displayType = dType;
+		goMap = Static.getGOtermMap(); // CAS322
 		
 		if (displayType==SHOW_ALL_GO) loadAllGOs();
 		else if (displayType==SHOW_ASSIGNED_GO) loadAssignedGOs();
@@ -155,7 +157,7 @@ public class SeqGOPanel extends JPanel {
 				}
 				
 				gi.desc=   rs.getString(2);
-				gi.type =  rs.getString(3).substring(0,3);
+				gi.type =  goMap.get(rs.getString(3));
 				gi.level = rs.getInt(4);
 			}
 			if (rs!=null) rs.close(); mDB.close();
@@ -170,8 +172,8 @@ public class SeqGOPanel extends JPanel {
 		catch(Exception e) {ErrorReport.reportError(e, "Generating GO table");}
  }
 	private void loadAllGOs() {
-	    	try {
-	    		DBConn mDB = theParentFrame.getDBConnection();
+	    try {
+	    	DBConn mDB = theParentFrame.getDBConnection();
 			ResultSet rs = mDB.executeQuery(
 					"select gonum, bestEval, direct, EC, bestHitstr " +
 					"from go_seq where UTid=" + seqID);
@@ -186,8 +188,8 @@ public class SeqGOPanel extends JPanel {
 				goOrder.add(gi);
 			}
 			if (rs!=null) rs.close(); mDB.close();
-    		}
-    		catch(Exception e) {ErrorReport.reportError(e, "Generating GO table");}
+    	}
+    	catch(Exception e) {ErrorReport.reportError(e, "Generating GO table");}
 	}
 	private void loadAssignedGOs() {
 		HashSet <String> hitList = seqDetailPanel.getHitNameGO();
@@ -259,10 +261,10 @@ public class SeqGOPanel extends JPanel {
 		catch (Exception e) {ErrorReport.prtReport(e, "Reading database for goList");}
 	}
     private void loadHitGOs() {
-	    	try {
-	    		if (hitInfo==null || hitInfo[0]==null) return;
+	    try {
+	    	if (hitInfo==null || hitInfo[0]==null) return;
 	    		
-	    		DBConn mDB = theParentFrame.getDBConnection();
+	    	DBConn mDB = theParentFrame.getDBConnection();
 			ResultSet rs = mDB.executeQuery(
 					"select goList from unique_hits where HITstr='" + hitInfo[0] + "'");
 			
@@ -357,14 +359,14 @@ public class SeqGOPanel extends JPanel {
 		}
 
 		public String getColumnName(int colIndex) {
-			if(colIndex == 0) return "GO ID";
-			if(colIndex == 1) return "Description";
-			if(colIndex == 2) return "Type";
+			if(colIndex == 0) return Globalx.goID;
+			if(colIndex == 1) return Globalx.goTerm;
+			if(colIndex == 2) return Globalx.goOnt;
 			if(colIndex == 3) return "Level";
 				
 			if (displayType==SHOW_ASSIGNED_GO) {
 				if (colIndex==4) return "#Hits";
-				if (colIndex == 5) return "#:EC";
+				if (colIndex == 5) return "#:" + Globalx.evCode;
 				if (colIndex == 6) return "Best Hit ID";
 				if (colIndex == 7) return "E-value";
 			}
@@ -374,7 +376,7 @@ public class SeqGOPanel extends JPanel {
 				if (colIndex == 6) return "E-value";
 			}
 			else if (displayType>=SHOW_SEL_GO) {
-				if (colIndex == 4) return "EC";
+				if (colIndex == 4) return Globalx.evCode;
 			}
 			
 			return "error";
@@ -535,29 +537,29 @@ public class SeqGOPanel extends JPanel {
 	}
 	
     private class GOinfo implements Comparable <GOinfo>{ // direct hits
-    		int gonum;
-    		String goStr;
+		int gonum;
+		String goStr;
 		String desc="";
 		String type="";
 		int level=0;
-    		String evidList="";
-    		boolean direct=true;
-    		double eval=-100;
-    		int nHit=0, nBest=0;
-    		String hitName="";
-    		TreeMap <String, Integer> evidMap = new TreeMap <String, Integer> ();
-    		
-    		public int compareTo(GOinfo gi) {
-    			if (type!=null && gi.type!=null) {
-    				if (type.compareTo(gi.type) < 0) return -1;
-    				if (type.compareTo(gi.type) > 0) return 1;
-    			}
-    			if (level<gi.level) return -1;
-    			if (level>gi.level) return 1;
-    			if (gonum<gi.gonum) return -1;
-    			return 1;
-    			//return (desc.compareTo(gi.desc));
-    		}
+		String evidList="";
+		boolean direct=true;
+		double eval=-100;
+		int nHit=0, nBest=0;
+		String hitName="";
+		TreeMap <String, Integer> evidMap = new TreeMap <String, Integer> ();
+		
+		public int compareTo(GOinfo gi) {
+			if (type!=null && gi.type!=null) {
+				if (type.compareTo(gi.type) < 0) return -1;
+				if (type.compareTo(gi.type) > 0) return 1;
+			}
+			if (level<gi.level) return -1;
+			if (level>gi.level) return 1;
+			if (gonum<gi.gonum) return -1;
+			return 1;
+			//return (desc.compareTo(gi.desc));
+		}
     }
     
     /********************************************************
@@ -581,4 +583,5 @@ public class SeqGOPanel extends JPanel {
 	private MTCWFrame theParentFrame = null;
 	private SeqDetailsPanel seqDetailPanel = null;
 	private int seqID;
+	private HashMap <String, String> goMap;
 }

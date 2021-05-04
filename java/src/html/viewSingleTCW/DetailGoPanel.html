@@ -10,8 +10,8 @@ See <b>GO Help</b> for explanation of terms.
 <p>First four columns of table:
 <ul>
 <li><u>GO ID</u>: The GO identifier.
-<li><u>Description</u>: The description from the GO database for the GO ID.
-<li><u>Type</u>: Abbreviation of top level: 'biol' is biological_process, 'cell' is cellular_component, 'mole' is molecular_function.
+<li><u>GO Name</u>: The term name from the GO database for the GO ID.
+<li><u>GO</u>: Abbreviation of the ontology (top level): BP is biological_process, CC is cellular_component, MF is molecular_function.
 <li><u>Level</u>: A GO ID can be at multiple levels in the tree. This is its maximum level.
 </ul>
 The remaining columns depends on the <b>GO...</b> pull-down view:
@@ -19,8 +19,8 @@ The remaining columns depends on the <b>GO...</b> pull-down view:
 
 <li><u>Assigned GOs for all hits</u> 
 <ul>
-<li><u>#:EC</u>: Each hit-GO association has a EC (evidence code). Each hit may have more
-than one assigned GO. This list provides the number of hits with a given EC for the GO.
+<li><u>#:EvC</u>: Each hit-GO association has a EvC (evidence code). Each hit may have more
+than one assigned GO. This list provides the number of hits with a given EvC for the GO.
 <li><u>Best Hit ID</u> and <u>E-value</u>: Of all the hits for the sequence with the GO,
 this is the Hit ID with its best E-value. NOTE: The GO may be assigned to a hit for
 the sequence,  but not necessarily to the Best Hit ID.
@@ -36,12 +36,12 @@ the sequence,  but not necessarily to the Best Hit ID.
 
 <li><u>Assigned GOs for selected hit</u>  
 <ul>
-<li><u>EC</u>: When a GO is assigned to a hit, it is assigned an evidence code.
+<li><u>EvC</u>: When a GO is assigned to a hit, it is assigned an evidence code.
 </ul>
 
 <li><u>All GOs for selected hit</u> 
 <ul>
-<li><u>EC</u>: If this is in parenthesis, it has been inherited.
+<li><u>EvC</u>: If this is in parenthesis, it has been inherited.
 </ul>
 </ol>
 

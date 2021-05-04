@@ -156,7 +156,6 @@ public class BasicGOFilterTab extends Tab {
 			}
 		});
 		btnViewSeqs.setEnabled(false);
-	
 		
         createTopCopy();
         createTopShow();
@@ -200,7 +199,7 @@ public class BasicGOFilterTab extends Tab {
 	private void createTopCopy() {
 		final JPopupMenu copypopup = new JPopupMenu();
 		
-		copypopup.add(new JMenuItem(new AbstractAction("GO ID") {
+		copypopup.add(new JMenuItem(new AbstractAction(Globalx.goID) {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -210,7 +209,7 @@ public class BasicGOFilterTab extends Tab {
 				} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
 			}
 		}));
-		copypopup.add(new JMenuItem(new AbstractAction("GO description") {
+		copypopup.add(new JMenuItem(new AbstractAction(Globalx.goTerm) {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -485,7 +484,7 @@ public class BasicGOFilterTab extends Tab {
 		
 		createFilterRow2SeqHit(); filterPanel.add(Box.createVerticalStrut(5));
 		createFilterRow3Level();  filterPanel.add(Box.createVerticalStrut(5));
-		createFilterRow4DE();
+		createFilterRow4Enrich();
 		
 	    filterPanel.add(Box.createVerticalStrut(3));
 		filterPanel.add(new JSeparator());
@@ -509,7 +508,7 @@ public class BasicGOFilterTab extends Tab {
 		row1.add(radUseSearch);
 		row1.add(lblSearch);
 		
-		lblGOID = Static.createLabel("GO ID", false);
+		lblGOID = Static.createLabel(Globalx.goID, false);
 		chkGOID = Static.createRadioButton("", true);
 		chkGOID.addActionListener(new ActionListener() {
 		      public void actionPerformed(ActionEvent ae) {
@@ -522,7 +521,7 @@ public class BasicGOFilterTab extends Tab {
 		row1.add(lblGOID);
 		row1.add(Box.createHorizontalStrut(2));
 		
-		lblDesc = Static.createLabel("Description (Substring)", false);
+		lblDesc = Static.createLabel(Globalx.goTerm + " (Substring)", false);
 		chkGODesc =  Static.createRadioButton("", false);
 		chkGODesc.addActionListener(new ActionListener() {
 		      public void actionPerformed(ActionEvent ae) {
@@ -639,7 +638,7 @@ public class BasicGOFilterTab extends Tab {
 		
 		// Dropdown
 		cmbTermTypes = new ButtonComboBox();
-		cmbTermTypes.addItem("Any domain");
+		cmbTermTypes.addItem("Any " + Globalx.goFullOnt);
 		for(int x=0; x<theTermTypes.length; x++)
 			cmbTermTypes.addItem(theTermTypes[x]);
 		cmbTermTypes.setSelectedIndex(0);
@@ -731,36 +730,31 @@ public class BasicGOFilterTab extends Tab {
 		}
 		filterPanel.add(row3);
 	}
-	private void createFilterRow4DE() {
-		if (deColumnNames.size()==0)  return;
-		
+	private void createFilterRow4Enrich() {
 		JPanel row4 = Static.createRowPanel();
 		row4.add(createLabel("", lblFilter.getPreferredSize().width + 
 				radUseFilter.getPreferredSize().width));
 		
-		row4.add(createLabel("DE:", lblSeqHit.getPreferredSize().width-2));
+		row4.add(createLabel("Enrich:", lblSeqHit.getPreferredSize().width-2));
 		
 		boolean enable=false;
-		chkUseDE = Static.createCheckBox("", enable);
-    	chkUseDE.addActionListener(new ActionListener() {
+		chkUseEnrich = Static.createCheckBox("", enable);
+    	chkUseEnrich.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				enableDESection(chkUseDE.isSelected());
+				enableDESection(chkUseEnrich.isSelected());
 			}
 		});  
-    	row4.add(chkUseDE);
-    	row4.add(Box.createHorizontalStrut(4));
-        	
+    	row4.add(chkUseEnrich);		row4.add(Box.createHorizontalStrut(4));
+    	
 		lblCutoff = Static.createLabel("Pval<", enable);
-		row4.add(lblCutoff);
+		row4.add(lblCutoff); 		row4.add(Box.createHorizontalStrut(1));
 		txtCutoff = Static.createTextField(DEF_PVAL,4, enable);
-	    row4.add(txtCutoff);
-	    row4.add(Box.createHorizontalStrut(2));
+	    row4.add(txtCutoff);		row4.add(Box.createHorizontalStrut(2));
 	     	
     	lblDErow = Static.createLabel(" for ", enable);
-    	row4.add(lblDErow);
-		row4.add(Box.createHorizontalStrut(2));
+    	row4.add(lblDErow);			row4.add(Box.createHorizontalStrut(1));
 		
-    	createDEPanel();
+    	createDEColPanel();
     	btnPval = Static.createButton(deColLabel, false, Globals.MENUCOLOR);
 		btnPval.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -768,31 +762,30 @@ public class BasicGOFilterTab extends Tab {
 				mainPanel.setVisible(false);
 			}
 		});
-		row4.add(btnPval);
-		row4.add(Box.createHorizontalStrut(30));
+		row4.add(btnPval);			row4.add(Box.createHorizontalStrut(30));
 		 
-    	lblShow = Static.createLabel("#Seqs", false);
+    	lblnDEseq = Static.createLabel("#Seqs", false);
     	String [] type = {"All", "DE", "upDE", "dnDE"};
-    	boxShowDE = new ButtonComboBox();
-    	boxShowDE.addItems(type);
-    	boxShowDE.setEnabled(false);
-    	boxShowDE.setSelectedIndex(0);
+    	boxDEseq = new ButtonComboBox();
+    	boxDEseq.addItems(type);
+    	boxDEseq.setEnabled(false);
+    	boxDEseq.setSelectedIndex(0);
     
-    	boxShowDE.setMaximumSize(boxShowDE.getPreferredSize());
-    	boxShowDE.setMinimumSize(boxShowDE.getPreferredSize());
+    	boxDEseq.setMaximumSize(boxDEseq.getPreferredSize());
+    	boxDEseq.setMinimumSize(boxDEseq.getPreferredSize());
     		
-		if (dePvalMap!=null) {
-			row4.add(lblShow);
-			row4.add(boxShowDE);
-		}				
+		row4.add(lblnDEseq);
+		row4.add(boxDEseq);	
+		
 		row4.add(Box.createHorizontalGlue());
 		row4.add(Box.createHorizontalStrut(15));
 		row4.add(btnClearAll);
 	
-		filterPanel.add(row4);
-		filterPanel.add(Box.createVerticalStrut(5));
-
-		enableDESection(false);
+		if (deColumnNames!=null && deColumnNames.size()>0) {
+			filterPanel.add(row4);
+			filterPanel.add(Box.createVerticalStrut(5));
+			enableDESection(false);
+		}
 	}
 	private void createFilterRow5Results() {
 	    	JPanel row5 = Static.createRowPanel();
@@ -861,10 +854,10 @@ public class BasicGOFilterTab extends Tab {
 		}
 		filterPanel.add(row5);
 	}
-	private void createDEPanel() { 
+	private void createDEColPanel() { 
 		deColumnsPanel = Static.createPageCenterPanel();
 		
-	 	JLabel header = new JLabel("<HTML><H2>Select DE p-value to filter</H2></HTML>");
+	 	JLabel header = new JLabel("<HTML><H2>Select p-value to filter</H2></HTML>");
 	 	header.setAlignmentX(Component.CENTER_ALIGNMENT);
 	 	header.setMaximumSize(header.getPreferredSize());
 	 	header.setMinimumSize(header.getPreferredSize());
@@ -895,20 +888,20 @@ public class BasicGOFilterTab extends Tab {
 		deColPanel.add(row);
 		deColPanel.add(Box.createVerticalStrut(10));
 		
-    	chkDEfilter = new JCheckBox[deColumnNames.size()];
-    	for(int x=0; x<chkDEfilter.length; x++) {
-    		chkDEfilter[x] = new JCheckBox(deColumnNames.get(x));
-    		chkDEfilter[x].setBackground(BGCOLOR);
-    		chkDEfilter[x].setSelected(true);
-    		chkDEfilter[x].addActionListener(new ActionListener() {
+    	chkDEcolFilter = new JCheckBox[deColumnNames.size()];
+    	for(int x=0; x<chkDEcolFilter.length; x++) {
+    		chkDEcolFilter[x] = new JCheckBox(deColumnNames.get(x));
+    		chkDEcolFilter[x].setBackground(BGCOLOR);
+    		chkDEcolFilter[x].setSelected(true);
+    		chkDEcolFilter[x].addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 				 	boolean allSelected = true;
-				 	for(int x=0; x<chkDEfilter.length && allSelected; x++)
-				 		allSelected = chkDEfilter[x].isSelected();
+				 	for(int x=0; x<chkDEcolFilter.length && allSelected; x++)
+				 		allSelected = chkDEcolFilter[x].isSelected();
 				 	chkSelectDEs.setSelected(allSelected);
 				}
 			});
-    		deColPanel.add(chkDEfilter[x]);
+    		deColPanel.add(chkDEcolFilter[x]);
     	}
     	deColPanel.add(Box.createHorizontalStrut(10));
 	    	
@@ -919,8 +912,8 @@ public class BasicGOFilterTab extends Tab {
     	chkSelectDEs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				boolean isSelected = chkSelectDEs.isSelected();
-				for(int x=0; x<chkDEfilter.length; x++)
-					chkDEfilter[x].setSelected(isSelected);
+				for(int x=0; x<chkDEcolFilter.length; x++)
+					chkDEcolFilter[x].setSelected(isSelected);
 			}
 		});
     	checkPanel.add(chkSelectDEs);
@@ -965,10 +958,10 @@ public class BasicGOFilterTab extends Tab {
 	
 	private void createECPanel() { 
 		MetaData md = theParentFrame.getMetaData();
-		if (md.getECinDB().size()==0) return;
+		if (md.getEvCinDB().size()==0) return;
 		String [] ecList = md.getEClist();
 		String [] ecDesc = md.getECdesc();
-		HashSet <String> ecInDB = md.getECinDB();
+		HashSet <String> ecInDB = md.getEvCinDB();
 		
 		evidCodePanel = Static.createPageCenterPanel();	
 		String html = "<HTML><H2>Select EC (evidence code) to filter (Assigned only)</H2></HTML>";
@@ -1267,8 +1260,7 @@ public class BasicGOFilterTab extends Tab {
 				theWhereStr = strAndMerge(theWhereStr, " go_info.nUnitranHit>=" + nseq);
 				theStatusStr = strMerge(theStatusStr, "#Seq " + nseq);
 			}
-			if (ecColumnNames.length > 0 && chkUseEC.isSelected())
-			{
+			if (ecColumnNames.length > 0 && chkUseEC.isSelected()) {
 				tmp = makeQueryECClause();
 				theWhereStr = strAndMerge(theWhereStr, tmp);
 			}
@@ -1294,8 +1286,7 @@ public class BasicGOFilterTab extends Tab {
 				theWhereStr = strAndMerge(theWhereStr, tmp);
 				theStatusStr = strMerge(theStatusStr, "Is Slim");
 			}
-			if (deColumnNames.size() > 0 && chkUseDE.isSelected())
-			{
+			if (deColumnNames.size() > 0 && chkUseEnrich.isSelected()) {
 				tmp = makeQueryDEClause();
 				theWhereStr = strAndMerge(theWhereStr, tmp);
 			}
@@ -1303,8 +1294,8 @@ public class BasicGOFilterTab extends Tab {
 			else theWhereStr = " where " + theWhereStr;
 			theStatusStr = "    Filter: " + theStatusStr;
 			
-			if (boxShowDE!=null && chkUseDE.isSelected())
-				theStatusStr += "   #Seqs: " + boxShowDE.getSelectedItem();
+			if (chkUseEnrich.isSelected())
+				theStatusStr += "   #Seqs: " + boxDEseq.getSelectedItem();
 		}
 		
 		theQuery += " " + theWhereStr + " order by go_info.gonum";
@@ -1323,13 +1314,11 @@ public class BasicGOFilterTab extends Tab {
 	}
 	// BasicGOTablePanel: if one DE column selected, use for Export #Seq Merge
 	public String selectOneDE() {
-		if (deColumnNames.size()==0 || !chkUseDE.isSelected()) return null;
+		if (deColumnNames.size()==0 || !chkUseEnrich.isSelected()) return null;
 		
 		String deCol=null;
-		for (int i = 0; i < deColumnNames.size(); i++)
-		{
-			if (chkDEfilter[i].isSelected())
-			{
+		for (int i = 0; i < deColumnNames.size(); i++) {
+			if (chkDEcolFilter[i].isSelected()) {
 				if (deCol!=null) return null;
 				deCol = deColumnNames.get(i);
 			}
@@ -1338,7 +1327,7 @@ public class BasicGOFilterTab extends Tab {
 	}
 	private String makeQueryDEClause()
 	{
-		if (deColumnNames.size()==0 || !chkUseDE.isSelected()) return "";
+		if (deColumnNames.size()==0 || !chkUseEnrich.isSelected()) return "";
 		String clause = "", summary="";
 		
 		String thresh = txtCutoff.getText().trim();
@@ -1346,22 +1335,21 @@ public class BasicGOFilterTab extends Tab {
 		
 		String ops = chkDEAny.isSelected() ? "|" : "&";
 		String opc = chkDEAny.isSelected() ? " or " : " and ";
-		String deg = "go_info." + Globals.PVALUE;
+		String pCol = "go_info." + Globals.PVALUE ;
 		
-		for (int i = 0; i < deColumnNames.size(); i++)
-		{
-			if (chkDEfilter[i].isSelected())
-			{
+		for (int i = 0; i < deColumnNames.size(); i++){
+			if (chkDEcolFilter[i].isSelected()) {
 				if (!summary.equals("")) {
 					clause += opc;
 					summary += ops;
 				}
 				summary += deColumnNames.get(i);
-				clause += deg + deColumnNames.get(i) + "<" + thresh; 
+			
+				clause += pCol + deColumnNames.get(i) + "<" + thresh; 
 			}
 		}
 		if (clause == "") {
-			chkUseDE.setSelected(false);
+			chkUseEnrich.setSelected(false);
 			enableDESection(false); 
 			return "";
 		}
@@ -1400,30 +1388,27 @@ public class BasicGOFilterTab extends Tab {
 		return " (" + clause + ") ";
 	}
 	/*************************
+	 *  Enrich: #nSeq Up, Down, either
 	 *  return: e.g. select c.contigid from pja_unitrans_go as g
 	 *	join contig as c on c.CTGID=g.CTGID 
 	 *	where (abs(c.P_RoSt) < 0.05 and c.P_RoSt<0) and g.gonum
-	 */
-	
+	 */	
 	public String  makeNseqClause(boolean doWhere) {
-		if (dePvalMap==null || boxShowDE==null || 
-				!chkUseDE.isSelected() || radUseSearch.isSelected()) return ""; 
-		int x = boxShowDE.getSelectedIndex();
+		if (!chkUseEnrich.isSelected() || radUseSearch.isSelected()) return ""; 
+		int x = boxDEseq.getSelectedIndex();
 		if (x==0) return "";
 		
 		String nSeqOp = null, clause=""; 
 		if (x==2) nSeqOp=">0"; else if (x==3) nSeqOp="<0";
 		String deOp = (chkDEAny.isSelected()) ? " or " : " and "; 
 		
-		for (int i = 0; i < deColumnNames.size(); i++)
-		{
-			if (chkDEfilter[i].isSelected())
-			{
+		for (int i = 0; i < deColumnNames.size(); i++) {
+			if (chkDEcolFilter[i].isSelected()) {
 				String de = deColumnNames.get(i);
-				String deTabCol = "c." + Globals.PVALUE +de;
+				String deTabCol = Globals.PVALUE + de; 
 				double cutoff = 0.05;
-				if (dePvalMap.containsKey(de)) cutoff = dePvalMap.get(de);
-				else Out.PrtWarn(de + "does not have a stored cutoff, use default 0.05");
+				if (goPvalMap.containsKey(deTabCol)) cutoff = goPvalMap.get(deTabCol); // CAS322 was de
+				else Out.PrtWarn(de + " does not have a stored cutoff, use default 0.05");
 				
 				if (!clause.equals("")) clause += deOp;
 				
@@ -1441,20 +1426,7 @@ public class BasicGOFilterTab extends Tab {
 	 */
 	private void loadInitData() {
 		try {
-			DBConn mDB = theParentFrame.getNewDBC();
-			ResultSet rs=null;
-			// for DE columns
-			deColumnNames = new Vector<String> ();
-			rs = mDB.executeQuery("SHOW COLUMNS FROM go_info LIKE 'P\\_%'");
-			while(rs.next()) {
-				String deName = rs.getString(1).substring(2);
-				deColumnNames.add(deName);
-			}
-			rs.close();
-			mDB.close();
-			
-			// init rest of columns
-			HashSet <String> ecSet = theParentFrame.getMetaData().getECinDB();
+			HashSet <String> ecSet = theParentFrame.getMetaData().getEvCinDB();
 			String [] ecList = theParentFrame.getMetaData().getEClist();
 			ecColumnNames = new String [ecSet.size()];
 			int x=0;
@@ -1463,11 +1435,15 @@ public class BasicGOFilterTab extends Tab {
 					ecColumnNames[x++] = ec;
 			}
 			
-			MAX_LEVEL = mDB.executeCount("select max(level) from go_info");
-		
 			theTermTypes = Globalx.GO_TERM_LIST;
-			dePvalMap =   theParentFrame.getMetaData().getDegPvalMap(mDB);
+			
+			DBConn mDB = theParentFrame.getNewDBC();
+			MAX_LEVEL = mDB.executeCount("select max(level) from go_info");
+			goPvalMap =   theParentFrame.getMetaData().getGoPvalMap();
 			mDB.close();
+			
+			deColumnNames = new Vector <String> ();
+			for (String c : goPvalMap.keySet()) deColumnNames.add(c.substring(2)); // Remove P_
 		}
 		catch(Exception e) {
 			JOptionPane.showMessageDialog(null, "Query failed ");
@@ -1492,7 +1468,7 @@ public class BasicGOFilterTab extends Tab {
 		chkShowDEtrim.setEnabled(true);
 		txtStatus.setText("Results: " + msg + theStatusStr);
 	}
-	public JCheckBox [] getDEselect() { return chkDEfilter;}
+	public JCheckBox [] getDEselect() { return chkDEcolFilter;}
 	public ButtonComboBox getCmbTermTypes() {return cmbTermTypes;}
 	
 	/**************************************************************/
@@ -1598,13 +1574,13 @@ public class BasicGOFilterTab extends Tab {
 	    txtCutoff.setEnabled(enable);
 	  
 	    btnPval.setEnabled(enable);
-	    lblShow.setEnabled(enable);
-	    boxShowDE.setEnabled(enable);
+	    lblnDEseq.setEnabled(enable);
+	    boxDEseq.setEnabled(enable);
     }
     private void enableDEtrim() {
 		if (deColumnNames.size() == 0) return;
 	
-		boolean enable = chkUseDE.isSelected();
+		boolean enable = chkUseEnrich.isSelected();
 		deTrimLabel.setEnabled(enable);
 		chkComputeDEtrim.setEnabled(enable);
 		if (!enable) chkComputeDEtrim.setSelected(false);
@@ -1640,10 +1616,10 @@ public class BasicGOFilterTab extends Tab {
 		lblSlims.setEnabled(false);
 		chkSlims.setSelected(false);
 			
-		if (chkUseDE!=null) {
-			chkUseDE.setSelected(false);
+		if (chkUseEnrich!=null) {
+			chkUseEnrich.setSelected(false);
 			txtCutoff.setText(DEF_PVAL);
-			boxShowDE.setSelectedIndex(0);
+			boxDEseq.setSelectedIndex(0);
 			enableDESection(false);
 		}
 		if (chkUseEC!=null) {
@@ -1677,9 +1653,8 @@ public class BasicGOFilterTab extends Tab {
 		if (chkSlims!=null) chkSlims.setEnabled(bfilter);
 		
 		// DE
-	  	if (deColumnNames.size() > 0)
-	  	{
-	  		chkUseDE.setEnabled(bfilter);
+	  	if (deColumnNames.size() > 0) {
+	  		chkUseEnrich.setEnabled(bfilter);
 	  	}
 		if (!bfilter) {
 			if (ecColumnNames.length>0)   btnEC.setEnabled(bfilter);
@@ -1689,20 +1664,20 @@ public class BasicGOFilterTab extends Tab {
 			if (ecColumnNames.length>0)
 				if (chkUseEC.isSelected()) btnEC.setEnabled(bfilter);
 			if (deColumnNames.size() > 0)
-				if (chkUseDE.isSelected()) btnPval.setEnabled(bfilter);
+				if (chkUseEnrich.isSelected()) btnPval.setEnabled(bfilter);
 		}
 	}
 	private void setPvalLabel() {
 		int cnt=0; 
 		String name="";
-		for(int x=0; x<chkDEfilter.length; x++)
-			if (chkDEfilter[x].isSelected()) {
+		for(int x=0; x<chkDEcolFilter.length; x++)
+			if (chkDEcolFilter[x].isSelected()) {
 				cnt++;
-				name = chkDEfilter[x].getText();
+				name = chkDEcolFilter[x].getText();
 			}
 		if (cnt==0) {
 			btnPval.setText(deColLabel);
-			chkUseDE.setSelected(false);
+			chkUseEnrich.setSelected(false);
 			enableDESection(false);
 		}
 		else {
@@ -1739,7 +1714,7 @@ public class BasicGOFilterTab extends Tab {
 	// DE Panel
 	private JPanel deColumnsPanel=null;
 	private JCheckBox chkSelectDEs = null;
-	private JCheckBox [] chkDEfilter = null;
+	private JCheckBox [] chkDEcolFilter = null;
 		
 //Search/Filter panel	
 	private JPanel filterPanel = null;
@@ -1768,13 +1743,13 @@ public class BasicGOFilterTab extends Tab {
 	private JLabel lblSlims = null;
 	private JCheckBox chkSlims = null;
 	
-	// DE row
-	private JCheckBox chkUseDE = null;
-	private JLabel lblCutoff = null, lblShow=null, lblDErow=null, lblDEAny=null, lblDEAll=null;
+	// Enrich row
+	private JCheckBox chkUseEnrich = null;
+	private JLabel lblCutoff = null, lblnDEseq=null, lblDErow=null, lblDEAny=null, lblDEAll=null;
 	private JTextField txtCutoff = null;
 	private JButton btnPval=null;
 	private JRadioButton chkDEAny = null, chkDEAll = null;
-	private ButtonComboBox boxShowDE = null;
+	private ButtonComboBox boxDEseq = null;
 
 	// Last row
 	private JButton btnBuildTable = null, btnAddTable = null, btnSelectColumns = null;
@@ -1789,13 +1764,13 @@ public class BasicGOFilterTab extends Tab {
 	private Vector <String> loadList = null;
 	private String loadStart=""; 
 	
-	private Vector<String> deColumnNames = null;
 	private String []      ecColumnNames = null;
 
 	private String [] theTermTypes = null;
 	private String currentGO = null; 
 	private BasicGOLoadFromDB loadObj=null;
-	private TreeMap <String, Double> dePvalMap = null;
+	private TreeMap <String, Double> goPvalMap = null;
+	private Vector<String> deColumnNames = null;   // dePvalMap.keySet - P_
 	
 	boolean singleMode = false;
 	private String theStatusStr="";

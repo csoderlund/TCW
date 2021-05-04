@@ -42,15 +42,15 @@ counted as having the GO. NOTE: it does NOT use the Pair "Best Anno Hit". The fi
 <ol>
 <li><i>GO Level</i>: 
 	<ol type='a'>
-	<li>Level 1 is the three domains. Level 2 are the GO terms directly beneath
-a domain, etc. 
+	<li>Level 1 is the three ontologies (top level). Level 2 are the GO terms directly beneath
+the top level, etc. 
 	<li>If you leave this blank, it will output all GOs. 
 	<li>If you just want a couple of levels, e.g. 2 and 3, first export level 2, then export level 3
 to the same file and use the append option (there will be a pop-up asking whether you want to append).
 	</ol>
 
-<li><i>Any domain</i>: This toggles through the three main domains. If you select one, it will only 
-export the GOs in that domain.
+<li><i>Any Ontology</i>: This toggles through the three main ontologies. If you select one, it will only 
+export the GOs in that ontology.
 
 <li><i>E-value</i>: If you leave this blank, it will ignore the E-value. Otherwise,
 at least one sequence in the cluster must have a seq-hit E-value&le; this value.
@@ -59,13 +59,13 @@ at least one sequence in the cluster must have a seq-hit E-value&le; this value.
 it is not written to file.
 <li><i>File Columns</i>:
 	<ol type='a'>
-	<li>Verbose: outputs columns 
+	<li>Verbose: outputs columns (GO is the column for the ontology abbreviation)
 	<tt>
-	GOterm	#Pair	Level	Term_type	Description
+	GO-ID	#Pair	Level	GO	GO-Name
 	</tt>
-	<li>Desc/Count: outputs the description and count by domain.
+	<li>Desc/Count: outputs the name and count by ontology.
 	<br>This can be used in Excel to create graphs.
-	<li>GO/Count: only outputs the <tt>GOterm</tt> and <tt>#Pairs</tt>. 
+	<li>GO/Count: only outputs the <tt>GO ID</tt> and <tt>#Pairs</tt>. 
 	<br>This can be used as input to input to REVIGO (http://revigo.irb.hr)
 	</ol>
 </ul>

@@ -93,7 +93,8 @@ in the section below.
 
 <h2>GO enrichment</h2>
 Select <b>Execute</b> to run the specified <u>R-script</u> on the selected column(s). The
-default R-script computes <tt>GOseq</tt>.
+default R-script is <tt>GOseqBH.R</tt> which executes <tt>GOseq</tt> followed by
+Benjamini and Hochberg multiple hypothesis testing correction.
 The data will be entered into the GO table of the database using the p-value column name.
 If the GO p-value column exists, it will overwrite the existing value.
 <p><u>Cutoff</u>:
@@ -102,8 +103,6 @@ If the GO p-value column exists, it will overwrite the existing value.
 it is considered DE. <tt>GOseq</tt>
 takes as input the information as to whether or not each sequence is DE, 
 where a 1 indicates it is and a 0 indicates it is not. 
-<i>According to the <tt>goSeq</tt> documentation, the results are 
-NOT multiple hypothesis tested.</i>
 <li>Top X%: Instead of a p-value, you can request that the X% of the sequences with the
 lowest DE be considered DE for input to <tt>GOseq</tt>.
 </ol> 
@@ -125,7 +124,7 @@ It will also display the overview; if there have been no changes, it will only d
 windows, exit R.
 </ol>
 <!----------------------------------------------------!>
-<h3>R environment</h3>
+<h2>R environment</h2>
 At the end of execution, the terminal will be in the "R environment" so that you can execute
 R commands to view graphs of the results. You can tell when it is in the R environment because there is only a ">" for the prompt.
 
@@ -214,12 +213,12 @@ root, root, root, rhiz, rhiz, rhiz
 <li>Other variables are also written. To view them, execute an existing script;
 the variables are written to standard out with explanations.
 </ul>
-<li>The R-script is execute with the "source" command.
+<li>The R-script is executed with the "source" command.
 <li>The results should be in an array called <i>results</i>, which is read by TCW.  Also,
 <i>rowNames</i> is read and should be in the same order as the <i>results</i>; this array
 is created before the R-script execution, so if the order is not changes, it does not
 need to be changed.
 </ol>
-See the existing scripts for example. The <u>GO enrichment</u> also uses an R-script in 
-a similar way (see <tt>goSeq.R</tt>).
+See the existing scripts for examples. The <u>GO enrichment</u> also uses an R-script in 
+a similar way (see <tt>goSeqBH.R</tt>) and the on-line documentation.
 </html>

@@ -46,7 +46,6 @@ public class FieldSeqTab extends Tab implements ActionListener {
 	private String sTCWdb = ""; // used for preference prefix 
 	private String prefID() {return sTCWdb + "_ctgID";}
 	private String prefLabel() {return sTCWdb + "_ctgLabel";}
-	private String prefRound() {return "rounding";}
 	
 	public FieldSeqTab ( STCWFrame inFrame) {
 		super(inFrame, null);
@@ -552,7 +551,8 @@ public class FieldSeqTab extends Tab implements ActionListener {
 	        prefsRoot.flush();
 	        prefsRoot.put ( prefLabel(), strLabelList );
 	        prefsRoot.flush();
-	        prefsRoot.put(prefRound(), DisplayFloat.getPrefString());
+	        //CAS322 don't need here prefsRoot.put(DisplayFloat.decimalPref, DisplayFloat.getDecimalPrefString());
+	        //prefsRoot.put(DisplayFloat.pvalCutPref, DisplayFloat.getPvalCutPrefString());
 			prefsRoot.flush();
 		}
 		catch (Exception err) { 

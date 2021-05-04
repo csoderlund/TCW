@@ -4,6 +4,10 @@ package util.ui;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.prefs.Preferences;
+
+import util.methods.ErrorReport;
+import util.methods.Out;
 
 /**
  * Used by Sequence Table Columns, and the Basic queries
@@ -11,15 +15,52 @@ import java.math.RoundingMode;
  */
 public class DisplayFloat implements Comparable<DisplayFloat>
 {
-	// set in UIfieldRounding and preferences
 	static public double Largest=999999.99, Smallest=0.01;
 	static public int Num_sig = 2, Num_dec = 2;
 	static public int Use_mode = 1;
 	
-	// used by UIfieldRounding for user to set rounding type
 	static public final int USE_FORMAT = 1;
 	static public final int USE_BIGDECIMAL = 2;
 	
+	/*************************************************
+	 * Set rounding from defaults or when changed in Columns
+	 * Color Pval equivalent methods are in DecimalNumbersTab
+	 */	
+	public static String getRoundingPrefID() {return "rounding";	}
+	public static String getRoundingPrefString() {
+		return Use_mode + "," + Num_sig + "," + Num_dec + "," + Largest + "," + Smallest;
+	}
+	public static void setRoundingPrefs(String str) {
+		if (str.trim().length()==0) return;
+		String[] arr = str.trim().split(",");
+		int n = arr.length;
+		try {
+			if (n>0) Use_mode = Integer.parseInt(arr[0]);
+			if (n>1) Num_sig = Integer.parseInt(arr[1]);
+			if (n>2) Num_dec = Integer.parseInt(arr[2]);
+			if (n>3) Largest = Double.parseDouble(arr[3]);
+			if (n>4) Smallest = Double.parseDouble(arr[4]);
+		}
+		catch(Exception e) {ErrorReport.prtReport(e, "Invalid rounding preferences:" + str);}
+	}
+	public static void setRoundingFields(int mode, int sig, int dec, double lg, double sm, Preferences prefs) {
+		Use_mode = mode;
+		Num_sig = sig;
+		Num_dec = dec;
+		Largest=lg;
+		Smallest=sm;
+		try{
+			if (prefs!=null) {
+				prefs.put(getRoundingPrefID(), getRoundingPrefString());
+				prefs.flush();
+			}
+		}
+		catch (Exception err) {ErrorReport.reportError(err, "setting rounding preferences");}
+    }
+	
+	/****************************************************************
+	 * DisplayFloat class for rounding numbers
+	 */
 	// this is for percent, so dMultiplier is always 100
 	public DisplayFloat ( Object inVal, double dMultiplier )
 	{
@@ -31,6 +72,7 @@ public class DisplayFloat implements Comparable<DisplayFloat>
 	public DisplayFloat ( Object inVal )
 	{
 		setValue ( inVal );
+		// Out.prt("Obj " + String.valueOf(inVal) + "   d: " + d);
 	}
 	
 	private void setValue ( Object inVal ) 
@@ -121,40 +163,6 @@ public class DisplayFloat implements Comparable<DisplayFloat>
 		}
 	}
 	
-	/*************************************************
-	 * Set rounding from defaults or when changed in Columns
-	 */	
-	public static String getPrefString()
-	{
-		return Use_mode + "," + Num_sig + "," + Num_dec 
-				+ "," + Largest + "," + Smallest;
-	}
-	public static void setRoundingPrefs(String str)
-	{
-		if (str.trim().length()==0) return;
-		String[] arr = str.trim().split(",");
-		int n = arr.length;
-		try
-		{
-			if (n>0) Use_mode = Integer.parseInt(arr[0]);
-			if (n>1) Num_sig = Integer.parseInt(arr[1]);
-			if (n>2) Num_dec = Integer.parseInt(arr[2]);
-			if (n>3) Largest = Double.parseDouble(arr[3]);
-			if (n>4) Smallest = Double.parseDouble(arr[4]);
-		}
-		catch(Exception e)
-		{
-			System.err.println(e.getMessage());
-			System.err.println("Invalid rounding preferences:" + str);
-		}
-	}
 	
-	public static void setFields(int mode, int sig, int dec, double lg, double sm) {
-    		Use_mode = mode;
-    		Num_sig = sig;
-    		Num_dec = dec;
-    		Largest=lg;
-    		Smallest=sm;
-    }
 	private double d;
 }

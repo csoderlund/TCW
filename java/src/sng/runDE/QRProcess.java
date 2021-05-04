@@ -58,6 +58,7 @@ public class QRProcess {
 	private final String seqGOsR 	= "seqGOs";
 	private final String gonumsR 	= "goNums";
 	private final String nSeqsR		= "nSeqs";
+	private final String oResultR = "oResults";
 	
 	private final String RPKM = Globals.LIBRPKM;
 	private final String pColPrefix = Globals.PVALUE; 
@@ -790,17 +791,18 @@ public class QRProcess {
      	doCmd(b, "source('" + rScriptFile + "')");
 		 
 		REXP x;
-		double[] pvals=null;
+		double[] oPvals=null;
 		try {
-			x = doCmdx(resultR);
-			pvals = x.asDoubleArray();
+			x = doCmdx(oResultR);
+			oPvals = x.asDoubleArray();
 		}
-		catch (Exception e) {Out.PrtError("No R variable 'results' exists"); return false;}
+		catch (Exception e) {Out.PrtError("No R variable 'oResults' exists"); return false;}
 		
-        if (pvals==null || pvals.length==0) {
-    		Out.PrtError(resultR + " R variable does not contain an array of results (type double)");
+        if (oPvals==null || oPvals.length==0) {
+    		Out.PrtError(resultR + " R variable does not contain an array of over-represented results (type double)");
     		return false;
     	}
+        
     	x = doCmdx(gonumsR);
     	String[] gos = x.asStringArray();
     	
@@ -808,9 +810,9 @@ public class QRProcess {
     		Out.PrtError(gonumsR + " R variable does not contain an array of row names (type string)");
     		return false;
     	}
-     	
+    	
     	for (int i = 0; i < gos.length; i++) {
-    		scores.put(gos[i], pvals[i]);
+    		scores.put(gos[i], oPvals[i]);
     	}
 
     	Out.Print("R-script done");

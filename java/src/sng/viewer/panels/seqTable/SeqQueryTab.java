@@ -38,6 +38,7 @@ import sng.util.RunQuery;
 import sng.util.Tab;
 import sng.viewer.STCWFrame;
 import util.methods.Converters;
+import util.methods.Out;
 import util.methods.Static;
 import util.ui.CollapsiblePanel;
 import util.ui.ToggleTextComboField;
@@ -49,7 +50,7 @@ public class SeqQueryTab extends Tab
 {
 	private static final long serialVersionUID = 4667335387617904461L;
 	private final int nIntField = 6;
-	private final static String HTML = "html/viewSingleTCW/SeqFilter.html";
+	private final static String HTML = Globals.helpDir + "SeqFilter.html";
 	
 	public SeqQueryTab ( STCWFrame inFrame, RunQuery inQuery ) throws Exception
 	{
@@ -1353,7 +1354,14 @@ public class SeqQueryTab extends Tab
 		else boolVal = "|";
 		
 		String sum = "p-value <" + String.format("%.0E ", dPValLimit)  +  pValCols[0];
+		
+		// CAS322 - kludge for 0.05, 0.01,... need to figure out how in general
+		// Obj 0.00000323   d: 3.23E-6			Obj -0.00158   d: -0.00158  By default, the string conversion
+		
 		String pValQuery = "(abs(contig.P_" + pValCols[0] + ") < " + dPValLimit + ")";
+		
+		// Needs more investigation: if (dPValLimit>0.0999) pValQuery = "(ROUND(abs(contig.P_" + pValCols[0] + "),4) < " + dPValLimit + ")";
+		
 		for(int i=1; i<pValCols.length; i++) {
 			pValQuery += boolVal + "(abs(contig.P_" + pValCols[i] + ") < " + dPValLimit + ")";
 			sum += boolVal + pValCols[i];
@@ -1384,6 +1392,7 @@ public class SeqQueryTab extends Tab
 			strSQL = appendANDPredicate(strSQL, sql);				
 		}
 		joinSum(sum);
+		
 		return strSQL;
 	}
 	private String getWhereHits(String strSQL) throws DataValidationError

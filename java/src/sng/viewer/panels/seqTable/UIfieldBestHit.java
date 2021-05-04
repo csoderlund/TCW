@@ -105,5 +105,5 @@ public class UIfieldBestHit extends JPanel implements ActionListener  {
 			"Percent coverage of sequence",
 			"Start of the match to the hit", "End of the match to the hit", 
 			"Percent coverage of hit",
-			"GO (Gene Ontology) ID", "InterPro Identifier", "KEGG Identifier", "Pfam Identifier", "EC (enzyme) ID"};	
+			"Assigned GO IDs with EvC", "InterPro Identifier", "KEGG Identifier", "Pfam Identifier", "EC (enzyme) ID"};	
 }

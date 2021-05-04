@@ -23,10 +23,10 @@ www.geneontology.org (the GO version is listed in the <b>Overview</b> panel).
 <ul>
 <li><b>GO ID:</b> The GO number, e.g. GO:0003674, or 3674. 
 (<i>Must use one of these formats!</i>).
-<li><b>Description:</b> All GO descriptions are searched for the substring.
+<li><b>GO Name:</b> All GO names are searched for the substring.
 </ul>
-<b>Load File</b>: The file should contain one GO ID or one description per line,
-depending on whether <b>GO ID</b> or <b>Description</b> is selected. <i>Description must
+<b>Load File</b>: The file should contain one GO ID or one GO Name per line,
+depending on whether <b>GO ID</b> or <b>GO Name</b> is selected. <i>GO Name must
 be the exact text when loaded from file</i>.
 <hr>
 
@@ -36,22 +36,24 @@ be the exact text when loaded from file</i>.
 <li><b>E-value:</b> The best e-value is assigned to each GO. That is,
 the hits are associated with zero or more GOs, and the sequence-hit pairs 
 have e-values; this is the best sequence-hit e-value associated with the GO.
+
 <li><b>#Seqs:</b> By default, the number of sequences with at least one hit
 that is assigned the GO or a descendant GO of this GO. See <b>#Seqs</b> section towards
 the end, which explains how this will be different if the <b>DE #Seqs</b> is changed.
-<li><b>Evidence Codes</b>: Check the box, then select <b>Evidence Codes</b> to bring
+
+<li><b>Evidence Codes</b> (EvC): Check the box, then select <b>Evidence Codes</b> to bring
 up a panel of available codes. The codes that are not found for any hit-to-GO
-assignment is listed but not selectable. The filter is passed if a GO
-has <b>any</b> of the selected ECs. 
-<br>NOTE: Only the assigned ECs are associated with the GO;
+assignment are listed but not selectable. The filter is passed if a GO
+has <b>any</b> of the selected EvCs. 
+<br>NOTE: Only the assigned EvCs are associated with the GO;
 you can view all inherited evidence codes by selected a GO followed by <u>Hits - inherited</u>.
 </ul>
 
 <b>Level</b>
 <br>See <b>GO Help</b> for a description of levels. 
 <ul>
-<li><b>All Top Level:</b> This toggles between "biological_process", "cellular_component"
-and "molecular_function".
+<li><b>All Ontology:</b> This toggles between "biological_process" (BP), "cellular_component" (CC)
+and "molecular_function" (MF).
 <li><b>Specific:</b> Specify a specific level.
 <li><b>Range:</b> Specify a range of levels.
 <li><b>Slim:</b> If GO slims were identified when the database was created, this option will be present.
@@ -59,21 +61,22 @@ If checked, only the GO slims will be shown (plus filtered by any other option, 
 The type of <tt>GO slims</tt> is shown on the <b>Overview</b> panel, e.g. <tt>goslims_plant</tt>.
 </ul>
 
-<b>DE</b>
-<br>If GO enrichment p-values have been computed (probably using 
-the <tt>GOseq</tt> package, see <tt>Overview</tt> for method,
-then you will see a row labeled <b>DE</b> on the main window; otherwise, ignore this section.
+<b>Enrich</b>
+<br>If GO enrichment p-values have been computed,
+you will see a row labeled <b>Enrich</b> on the main window; otherwise, ignore this section.
+By default, the p-values are computed using <tt>GOseq</tt> package, see the <tt>Overview</tt> for the method.
 <p>
-Filter on the DE values as follows:
+Filter on the p-values as follows:
 <ol>
 <li>Check the box to the left of <b>Cutoff:</b> and adjust the cutoff in the text entry
 box on the right.
-<li>This is followed by <b>for</b> and a button, which has a different label based on what
-has been selected. To change the selection, select the button which will bring up
-a panel of all DE column names; select the DE names to query on. Choose one of the two
+<li>This is followed by <b>for</b> and a button. This button will initially
+be labeled <b>Any N</b> where N is the number of p-value columns. 
+To change the selection, select the button which will bring up
+a panel of all p-value column names; select the columns to query on. Choose one of the two
 options for applying the cutoff, either:
 <ol type="a">
-<li>Any: show results for which any of the selected DE columns passes the threshold,
+<li>Any: show results for which any of the selected p-value columns passes the threshold,
 <li>Every: show results for which all columns pass.
 </ol>
 <li><b>#Seqs</b>: see the <b>#Seqs</b> section towards the end of this Help.
@@ -83,9 +86,16 @@ options for applying the cutoff, either:
 <h2>Results</h2>
 Select one or more filters, then click <b>BUILD TABLE</b> or <b>ADD to TABLE</b> to execute the 
 search, which builds a new table or adds to the existing table, respectively.
-<br>Columns can be added/removed (<b>Columns</b>), rearranged by dragging and sorted
-by clicking on a column heading.
- 
+<br>Using the <b>Columns</b> button, columns can be added/removed. 
+Columns can be rearranged by dragging and sorted
+by clicking on a column heading. 
+
+<p><b><i>Columns</i></b> 
+<ul>
+<li>These are all obvious except the column <b>GO</b>, which is the
+GO Ontology (BP, CC, MF).
+<li>P-values: See <b>Decimal Display</b> on upper left panel.
+ </ul>
 <p><b><i>Modify Table</i></b>
 <ul>
 <li><b>Delete Selected</b> and <b>Deleted Unselected</b>: 
@@ -152,8 +162,6 @@ NOTE: if a descendent GO does not have any assigned or inherited hits, it is not
 database so is not shown. 
 <br>&nbsp;
 
-
-
 <li><u>GO - Related in table by table order </u>:
 A list of the GOs ancestors and descendants will be listed IF they are also in the 
 table. The GOs will be listed in the same order as found in the table.
@@ -184,19 +192,19 @@ NOTE: Occasionally, this query may be slow when there are many paths for the GO;
 
 
 <li><u>Export Table</u>: A tab-delimited file of the contents of the table.
-<br>If you just select two columns, (GO ID,#Seqs) or (GO ID, P-value), 
+<br>If you just select two columns, (GO ID, #Seqs) or (GO ID, P-value), 
 the exported file can be used as input to REVIGO (http://revigo.irb.hr). 
 <br>&nbsp;
 
 <li><u>Export SeqIDs with GOs</u>: A tab-delimited file of each SeqID followed by
-its list of direct and indirect GOs. 
+its list of direct and indirect GOs (that are in the displayed GO table). 
 <br>This can be used as input to WeGO (http://wego.genomics.org.cn/) using native format.
 <br>&nbsp;
 
 <li><u>Export/Merge #Seqs</u>: A tab-delimited file that contains
-the GOs grouped by domain, followed by the GO description and #Seqs. The merge
-allows multiple columns of #Seqs based on different queries (e.g. two different DE
-values).  The file must not be edited until
+the GOs grouped by ontology, followed by the GO-Name and #Seqs. The merge
+allows multiple columns of #Seqs based on different queries (e.g. two different
+p-values).  The file must not be edited until
 all #Seqs columns are added (TCW needs the format exact). The resulting file can
 be used in Excel to make bar graphs.
 <br>&nbsp;
@@ -222,43 +230,44 @@ to compute and be large.
 
 <hr>
 <h2>#Seqs</h2>
-There are four occurrences that use <b>#Seqs</b> on this panel. 
+There are two occurrences <b>#Seqs</b> on this panel, and the second effects the column <b>#Seqs</b>. 
 <ol>
 <li><b>Seq-hit: #Seqs</b>: If this is set, the GOs displayed must
 have at least this many sequences associated with the GO ID.
 <br>&nbsp;
-<li> <b>Column#Seqs</b>: This is typically all sequences that have a hit
-associated with the GO, unless the <b>DE #Seqs</b> is changed from <b>All</b>.
-<br>&nbsp;
-<li><b>DE: #Seqs</b>: Briefly, if this is set to <b>DE</b>, the count is all sequences with the
+<li><b>Enrich: #Seqs</b>: Briefly, if this is set to <b>DE</b>, the count is all sequences with the
 GO that are considered DE for the selected set of p-values. If it is <b>upDE</b>, it is
-the count of the sequences that are up-regulated, and dnDE is the count of the
+the count of the sequences that are up-regulated, and <b>dnDE</b> is the count of the
 sequences that are down-regulated. The relation between the GOseq p-value and when
 a sequence is considered DE is explained below. NOTE: when this is it set to something
 other than <b>All</b>, it is much slower!
 <br>&nbsp;
+<li> <b>Column #Seqs</b>: This is typically all sequences that have a hit
+associated with the GO, unless the <b>Enrich: #Seqs</b> is changed from <b>All</b>.
+<br>&nbsp;
 <li><b>View Sequences</b>: This shows the sequences that correspond with the <u>#Seqs</u> column 
 in the table.
 </ol> 
-Each sequence has the following annotations:
+<i>DE Sequence</i>: Each sequence has the following annotations:
 <ol>
 <li>Sequence length.
 <li>Zero or more hits, where many are associated with GO IDs.
-<li>Read counts for different conditions along with DE values 
+<li>Read counts for different conditions along with DE p-values 
 between pairs of conditions.
 </ol>
-<tt>GOseq</tt> uses all these annotations to determine the over-represented GOs for
-two conditions using their DE value.
+<tt>GOseq</tt> uses all the above information to determine the over-represented GOs for
+two conditions.
 For input to <tt>GOseq</tt>, a binary vector is created of N sequences (where N
-is the number of annotated sequences); the value for a sequence is a 1
+is the number of sequences with GOs); the value for a sequence is a 1
 if it is DE, else it is 0. The scientist that executes <tt>GOseq</tt> via <tt>runDE</tt> sets 
 the cutoff for DE, e.g. 0.05. The <b>Overview</b> panel under 
 "Processing" states what the cutoff was, e.g. RoSt:0.05 indicates that the 
 corresponding DE p-values
 used a cutoff of 0.05. Hence, the DE count is the number that was used by <tt>GOseq</tt>
-to calculate the GO p-value. The DE=upDE+dnDE. <i>TO BE CLEAR:</i> The #DE sequences
+to calculate the GO p-value, where DE=upDE+dnDE. <i>TO BE CLEAR:</i> The #DE sequences
 is not based on the cutoff from the panel, but based on the cutoff used for input to <tt>GOseq</tt>.
-<p>If you "and" two or more conditions, the #Seqs is an "or" of the individual conditions (
+<p>If the <b>for</b> filter is on two or more conditions where "and" is used (e.g. StRo and StOl), 
+the #Seqs is an "or" of the individual conditions (
 this is confusing, but its done that way to account for the sequences that went into the GO P-values).
 
 <hr>

@@ -36,6 +36,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import sng.viewer.STCWFrame;
+import sng.viewer.panels.DisplayDecimalTab;
 import util.database.Globalx;
 import util.file.FileC;
 import util.file.FileWrite;
@@ -52,8 +53,9 @@ public class BasicTablePanel extends JPanel {
 	private final Color altRowColor = Globalx.altRowColor;
 	private final Color selectColor = Globalx.selectColor;
 	
-	public BasicTablePanel (STCWFrame mf, BasicHitTab t, String [] col, boolean [] b) {
+	public BasicTablePanel (STCWFrame mf, BasicHitTab t, String [] col, boolean [] b, int pval) {
 		hitTab = t;
+		startPval = pval;
 		setColumns(col, b);
 		
 		createBasicTable();
@@ -75,16 +77,33 @@ public class BasicTablePanel extends JPanel {
 
 			public Component prepareRenderer(
 			        TableCellRenderer renderer, int row, int column)
-			    {
-			        Component c = super.prepareRenderer(renderer, row, column);
-			        if (theTable.isRowSelected(row)) c.setBackground(selectColor);
-			        else {
-				        boolean bBlueBG = row % 2 == 1;
-				        if ( bBlueBG )c.setBackground( altRowColor );
-						else c.setBackground( Globalx.BGCOLOR );
-			        }
-			        return c;
-			    }
+		    {
+		        Component c = super.prepareRenderer(renderer, row, column);
+		        if (theTable.isRowSelected(row)) c.setBackground(selectColor);
+		        else {
+			        boolean bBlueBG = row % 2 == 1;
+			        if ( bBlueBG )c.setBackground( altRowColor );
+					else c.setBackground( Globalx.BGCOLOR );
+		        }
+		        /* CAS322 */
+		        if (DisplayDecimalTab.isHighPval()) {
+			        int index = theTableModel.getMappedColumn(column);
+			        if(index >= startPval) { // CAS322 add highlight
+			        	Object obj = theTable.getValueAt(row,column);
+			        	double theVal=0.0;
+			        	if (obj instanceof DisplayFloat) {
+							theVal = ((DisplayFloat) obj).getValue();
+						}
+						else {
+							Out.prt("Cannot read table obj " + obj.toString());
+						}
+			        	Color high = DisplayDecimalTab.getPvalColor(theVal);
+			        	if (high!=null) c.setBackground(high);
+				    }
+		        }
+		        
+		        return c;
+		    }
 		};
 		theTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		theTable.setCellSelectionEnabled(false);
@@ -196,8 +215,8 @@ public class BasicTablePanel extends JPanel {
 			double [] dArr = new double [tableRows];
 
 		    for(int y=0; y < tableCols; y++) {
-		    		String colName = theTable.getColumnName(y);
-		    		if (colName.equals("Row")) continue;
+		    	String colName = theTable.getColumnName(y);
+		    	if (colName.equals("Row")) continue;
 		    		
 			 	Object obj = theTable.getValueAt(0,y);
 			 	if (obj==null) continue; 
@@ -350,23 +369,23 @@ public class BasicTablePanel extends JPanel {
 				colIsVisList[x] = visible[x];	
 		}
 		public int getColumnCount() {
-	        	int count = 0;
-	        	
-	        	for(int x=0; x<colIsVisList.length; x++)
-	        		if(colIsVisList[x]) count++;        	
-	        	return count;
+        	int count = 0;
+        	
+        	for(int x=0; x<colIsVisList.length; x++)
+        		if(colIsVisList[x]) count++;        	
+        	return count;
         }
         public int getRowCount() {
-        		return getNumRow();
+        	return getNumRow();
         }
         public Object getValueAt(int row, int col) {
-        		int index = getMappedColumn(col);
-        		return getValue(row, index);
+        	int index = getMappedColumn(col);
+        	return getValue(row, index);
         }
         public String getColumnName(int col) { 
-        		int index = getMappedColumn(col);
-        		return colNamesList[index]; 
-        	}
+        	int index = getMappedColumn(col);
+        	return colNamesList[index]; 
+        }
         /************************
          * 1 2 3 4 5 6
          * a b c x y z
@@ -388,12 +407,12 @@ public class BasicTablePanel extends JPanel {
 		    protected JTable table;
 
 		    public ColumnListener(JTable t) {
-		    		table = t;
-			    	bAscend = new boolean[table.getColumnCount()];
-			    	for(int x=0; x<bAscend.length; x++) bAscend[x] = true;
+	    		table = t;
+		    	bAscend = new boolean[table.getColumnCount()];
+		    	for(int x=0; x<bAscend.length; x++) bAscend[x] = true;
 		    }
 		    public void mouseClicked(MouseEvent e) {
-		    		sortTable(e.getX(), SwingUtilities.isLeftMouseButton(e));						
+		    	sortTable(e.getX(), SwingUtilities.isLeftMouseButton(e));						
 		    }
   	  		private void sortTable(int xLoc, boolean leftclick) {
   	  			TableColumnModel colModel = table.getColumnModel();
@@ -615,4 +634,5 @@ public class BasicTablePanel extends JPanel {
 	
 	private BasicHitTab hitTab=null;
 	private BasicSeqTab seqTab=null;
+	private int startPval=0;
 }

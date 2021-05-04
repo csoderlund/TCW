@@ -47,14 +47,14 @@ counted as having the GO. NOTE: it does NOT use the Cluster "Best Anno Hit". The
 <ol>
 <li><i>GO Level</i>: 
 <ol type='a'>
-<li>Level 1 is the three domains. Level 2 are the GO terms directly beneath
-a domain, etc (see GO annotations 'GO Help' for more explanation). 
+<li>Level 1 is the three ontologies (top level). Level 2 are the GO terms directly beneath
+the top level, etc (see GO annotations 'GO Help' for more explanation). 
 <li>If you leave this blank, it will output all GOs. 
 <li>If you just want a couple of levels, e.g. 2 and 3, first export level 2, then export level 3
 to the same file and use the append option (there will be a pop-up asking whether you want to append).
 </ol>
 
-<li><i>Any domain</i>: This toggles through the three main domains. If you select one, it will only 
+<li><i>Any Ontology</i>: This toggles through the three ontologies. If you select one, it will only 
 export the GOs in that domain.
 
 <li><i>E-value</i>: If you leave this blank, it will ignore the E-value. Otherwise,
@@ -62,11 +62,11 @@ at least one sequence in the cluster must have a seq-hit E-value&le; this value.
 
 <li><i>File Columns</i>:
 <ol type='a'>
-<li>Verbose: outputs columns 
+<li>Verbose: outputs columns (GO is the column for the ontology abbreviation)
 <tt>
-GOterm	#Cluster	Level	Term_type	Description
+GO-ID	#Cluster	Level	GO	GO-Name
 </tt>
-<li>Count only: only outputs the <tt>GOterm</tt> and <tt>#Cluster</tt>. 
+<li>Count only: only outputs the <tt>GO-ID</tt> and <tt>#Cluster</tt>. 
 <br>This can be used as input to REVIGO (http://revigo.irb.hr)
 </ol>
 </ol>
@@ -91,8 +91,6 @@ in the lower left corner.
 </ul>
 <p> The following describes the columns that need more explanation then is provided by
 the mouse over that is shown in the lower left corner.
-
-
 
 <table border=0 cellspacing=3>
 <tr><td colspan=2><i>General</i>
