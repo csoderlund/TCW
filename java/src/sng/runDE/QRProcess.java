@@ -33,7 +33,7 @@ import util.methods.Out;
  * go over-represented
  * 	input is boolean vector of contigs.P_colName<cutoff; set p-value of DE for GO
  * 	add and set go_info.P_colName (same name as in contig table, e.g. P_RoSt)
- * 	enter assem_msg.goDE all P_colName with cutoffs
+ * 	enter libraryDE.cutoff and enter libraryDE.method where libraryDE.P_colName
  */
 public class QRProcess {
 	private final int NUM_PRT_FILTER=25;

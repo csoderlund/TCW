@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.TreeSet;
 import java.util.Vector;
-import java.util.Arrays;
 
 import sng.viewer.STCWFrame;
 import util.database.DBConn;
@@ -22,7 +21,7 @@ public class MetaData {
 	private  final String LN = Globals.LIBRPKM;
 	private  final String P = Globals.PVALUE;
 	
-	public MetaData () {} // For GO.java so can get evidence code list, which is pre-built
+	public MetaData () {}// For DoGO.java so can get evidence code list, do not need mDB
 	
 	public MetaData (STCWFrame frame, String cap3) { 
 		if (cap3!=null && cap3!="") {
@@ -34,8 +33,7 @@ public class MetaData {
 		setMetaData(mDB);
 		mDB.close();
 	}
-	public boolean setMetaData(DBConn mDB) 
-	{
+	public boolean setMetaData(DBConn mDB) {
 		try {
 			ResultSet rs; 
 			int cnt;
@@ -172,10 +170,9 @@ public class MetaData {
 				 			deTitles[i++] = rs.getString(2);
 				 		}
 				 	}
-			 	}
-			 	loadGoPvalMap(mDB); // could be done above but needed for schema
+			 	}	
 		 	}
-		 	
+		 	loadGoPvalMap(mDB); // could be done above but needed for schema; needs to be initialized
 		 	loadLibrary(mDB);
 		 	checkVer(mDB);
 			return true;
@@ -270,7 +267,7 @@ public class MetaData {
 	 /*************************************************
 	 * used by BasicGOQueryTab upSeq, dnSeq; and for columns by BasicGOFilter - can change to read on startup
 	 *************************************************/
-	 public TreeMap <String, Double> loadGoPvalMap(DBConn mDB) {
+	 public TreeMap <String, Double> loadGoPvalMap(DBConn mDB) { // called on schema.undateTo57
 		 if (goPvalMap!=null) return goPvalMap;
 		 goPvalMap = new TreeMap <String, Double> ();
 		 
@@ -282,18 +279,6 @@ public class MetaData {
 					if (cutoff>0) goPvalMap.put(rs.getString(1), cutoff);
 				}
 				if (goPvalMap.size()>0) return goPvalMap;
-			}
-			// pre-v321
-			if (mDB.tableColumnExists("assem_msg", "goDE")) {
-				String goDE = mDB.executeString("select goDE from assem_msg");
-				
-				String [] tok = goDE.split(",");
-				for (String x : tok) {
-					String [] tok2 = x.split(":");
-					if (tok2.length==2)
-						goPvalMap.put(tok2[0], Double.parseDouble(tok2[1]));
-				}
-				return goPvalMap;
 			}
 		} 
 		catch (Exception e) {ErrorReport.reportError(e, "Error: reading database for GO DE Pvals");}
@@ -326,111 +311,48 @@ public class MetaData {
 	}
 	
 	 /*********************************************************
-	  * Basic GO - loads on first use
+	  * Basic GO Evidence - loads on first use
 	  */
-	 public HashSet <String> getEvCinDB() {
-		if (ecInDB==null) loadGoEC();
-		return ecInDB;
+	 // runAS.DoUPdat only to ensure all Known EvCs 
+	 public HashSet <String> getEvChash() {
+		 createGoEvC();
+		 HashSet <String> allEv = new HashSet <String> ();
+		 for (String cat : evcCatMap.keySet()) {
+			 String [] tok = evcCatMap.get(cat).split(",");
+			 for (String t : tok) allEv.add(t);
+		 }
+		 return allEv;
 	 }
-	 
-	 public HashSet <String> getEChash() {return new HashSet<String> (Arrays.asList(ecList));}
-	 public String [] getEClist() {
-		 return ecList;
+	 // runSingleTCW.DoGO
+	 public HashMap <String, String> getEvCatMap() {
+		 createGoEvC();
+		 return evcCatMap;
 	 }
-	 public String [] getECdesc() {
-		 return ecDesc;
+	 private void createGoEvC() { // no spaces between EvC
+		 evcCatMap.put("EXP", "EXP,IDA,IPI,IMP,IGI,IEP");
+		 evcCatMap.put("HTP", "HTP,HDA,HMP,HGI,HEP");
+		 evcCatMap.put("PHY", "IBA,IBD,IKR,IRD");
+		 evcCatMap.put("CA", "ISS,ISO,ISA,ISM,IGC,RCA");
+		 evcCatMap.put("AS", "TAS,NAS");
+		 evcCatMap.put("CS", "IC,ND");
+		 evcCatMap.put("IEA", "IEA");
 	 }
-	 public int getECnum() {
-		return ecList.length;
-	 }
-	 private void loadGoEC() {
-		try {
-			ecInDB = new HashSet <String>();
-			DBConn mDB = theMainFrame.getNewDBC();
-			
-			if (!mDB.tableColumnExists("go_info", "IEA")) return;
-			
-			String ecStr = mDB.executeString("SELECT go_ec from assem_msg");
-			if (ecStr!=null) {
-				String [] ec = ecStr.split(",");
-				for (String x : ec) ecInDB.add(x);
-				return;
-			}
-			
-			// first time its run after annotation, create list
-			ResultSet rs = mDB.executeQuery("SELECT DISTINCT EC FROM pja_uniprot_go");
-			while(rs.next()) {
-				String ec = rs.getString(1).trim();
-            		ecInDB.add(ec);
-            		if (ecStr==null) ecStr=ec;
-            		else ecStr += ","+ec;
-            }
-            rs.close();
-            mDB.executeUpdate("UPDATE assem_msg set go_ec='" + ecStr + "'");
-            
-            mDB.close();
-              
-	    		for (String ec : ecInDB) {
-	    			boolean found=false;
-	    			for (String ect : ecList) 
-	    				if (ec.equals(ect)) {
-	    					found=true;
-	    					break;
-	    				}
-	    			if (!found) {
-	    				System.err.println("Error: no known evidence code " + ec);
-	    				if (!ecInDB.contains("UNK")) ecInDB.add("UNK");
-	    			}
-	    		}
-		} 
-		catch (Exception e) {ErrorReport.reportError(e, "Error: reading database for GO EC");} 
-	}
-
-	private HashSet <String> ecInDB = null;
+	private HashMap <String, String> evcCatMap = new HashMap <String, String> ();
 	
-	// 27 - order must stay
-	private String [] ecList = {
-			"EXP", "IDA","IMP","IGI","IPI","IEP", // experimental
-			"HTP", "HDA", "HMP", "HGI", "HEP",   // high throughput
-     		"ISS","ISO","ISA","ISM","IGC","IBA","IBD","IKR","IRD","RCA", // computational
-     		"TAS","NAS",  // author
-     		"IC", "ND",   // curator statement
-     		"IEA", 		  // electronic
-     		"UNK"};
-	private String [] ecDesc = {
-			"Inferred from Experimental",
-			"Inferred from Direct Assay",
-      		"Inferred from Mutant Phenotype",
-      		"Inferred from Genetic Interaction",
-      		"Inferred from Physical Interaction",
-      		"Inferred from Expression Pattern",
-      		
-      		"Inferred from High Throughput Experiment",
-      		"Inferred from High Throughput Direct Assay",
-      		"Inferred from High Throughput Mutant Phenotype",
-      		"Inferred from High Throughput Genetic Interaction",
-      		"Inferred from High Throughput Expression Pattern",
-      		
-      		"Inferred from Sequence or structural Similarity",
-      		"Inferred from Sequence Orthology",
-      		"Inferred from Sequence Alignment",
-      		"Inferred from Sequence Model",
-      		"Inferred from Genomic Context",
-      		"Inferred from Biological aspect of Ancestor",
-      		"Inferred from Biological aspect of Descendant",
-      		"Inferred from Key Residues",
-      		"Inferred from Rapid Divergence", 
-      		"Inferred from Reviewed Computational Analysis",
-      		
-      		"Inferred from Traceable Author Statement",
-      		"Non-traceable Author Statement",
-      		"Inferred by Curator",
-      		"No Biological Data Available", 
-      		
-      		"Inferred from Electronic Annotation",
-      		"Unknown"};
+	// BasicGOFilter (need cats) and BasicGOTable (need cats)
+	public String [] getEvClist() {return evcCatList;}
+	public String [] getEvCdesc() {return evcDescList;}
 	
-	
+	private String [] evcCatList = {"EXP", "HTP", "PHY", "CA", "AS", "CS", "IEA"}; // Schema checks for "PHY" column
+	private String [] evcDescList = 
+		{"Experimental (EXP, IDA, IPI, IMP, IGI, IEP)",
+		 "High throughput experimental (HTP, HDA, HMP, HGI, HEP)",
+		 "Phylogenetically-inferred (IBA, IBD, IKR, IRD)",
+		 "Computational analysis (ISS, ISO, ISA, ISM, IGC, RCA)",
+		 "Author Statement (TAS, NAS)",
+		 "Curator statement (IC, ND)",
+		 "Electronic annotation (IEA)"
+		};
 	 /*********************************************************
 	  * Basic GO - CAS319 overview needs this to be static
 	  * alt_id is not really a relation, but is treated as one.
@@ -556,8 +478,6 @@ public class MetaData {
 	 private String [] libNames2 = null;
 	 private HashMap <String, Double> tupleMap = new HashMap <String, Double> ();
 	 private int nPairs;
-	 
-	 
 	 
 	 private STCWFrame theMainFrame;
 }

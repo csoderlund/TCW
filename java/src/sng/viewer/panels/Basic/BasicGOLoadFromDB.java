@@ -57,10 +57,10 @@ public class BasicGOLoadFromDB  {
 	 */
 	public void loadBuildTable() {
 		try {
-			String query = goQueryPanel.makeQuerySelectClause();	
-			Class<?> [] COLUMN_TYPES = goTablePanel.getColumnTypes();
-			int endStatic = goTablePanel.getNumStaticCols();
-			int endEC = goTablePanel.getEndEC();
+			String query 				= goQueryPanel.makeQuerySelectClause();	
+			Class<?> [] COLUMN_TYPES 	= goTablePanel.getColumnTypes();
+			int endStatic 				= goTablePanel.getNumStaticCols();
+			int endEvC 					= goTablePanel.getEndEvC();
 			
 			DBConn mDB = theMainFrame.getNewDBC();
 			ResultSet rs = mDB.executeQuery(query);
@@ -75,13 +75,13 @@ public class BasicGOLoadFromDB  {
 			String [] abbr =  Globalx.GO_TERM_ABBR;
 			
 			while(rs.next()) {
-				Object [] vals = new Object[numCols]; //COLUMN_MYSQL.length + theDENames.size()];
+				Object [] vals = new Object[numCols]; //COLUMN_MYSQL.length + theEvCat.size() + thePvalNames.size()];
 				for(int x=0; x<vals.length; x++) {
-					if (x>=endEC) vals[x] = rs.getDouble(x+1);
-					else if (x>=endStatic) vals[x] = rs.getInt(x+1); 
-					else if(COLUMN_TYPES[x] == Long.class) vals[x] = rs.getLong(x+1);
-					else if(COLUMN_TYPES[x] == Integer.class) vals[x] = rs.getInt(x+1);
-					else if(COLUMN_TYPES[x] == Double.class) vals[x] = rs.getDouble(x+1);
+					if (x>=endEvC) 								vals[x] = rs.getDouble(x+1); // pval
+					else if (x>=endStatic) 						vals[x] = rs.getString(x+1); // EvC
+					else if(COLUMN_TYPES[x] == Long.class) 		vals[x] = rs.getLong(x+1);
+					else if(COLUMN_TYPES[x] == Integer.class) 	vals[x] = rs.getInt(x+1);
+					else if(COLUMN_TYPES[x] == Double.class) 	vals[x] = rs.getDouble(x+1);
 					else if(COLUMN_TYPES[x] == String.class) {
 						vals[x] = rs.getString(x+1);
 		
@@ -275,7 +275,7 @@ public class BasicGOLoadFromDB  {
 		if (deColumnNames.size() == 0) return 1.0;
 		
 		JCheckBox [] chkDEfilter = goQueryPanel.getDEselect() ;
-		int endEC = goTablePanel.getEndEC();
+		int endEC = goTablePanel.getEndEvC();
 		boolean hasDE=false;
 		Double ret = 1.0;
 		for (int i = 0; i < deColumnNames.size(); i++)

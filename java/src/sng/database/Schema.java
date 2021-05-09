@@ -45,7 +45,8 @@ enum DBVer
 	Ver54, // 5.4 add o_markov and rename p_coding fields; the Engine was not set for all tables.
 	Ver55, // MySQL V8 changed rank to best_rank
 	Ver56,  // Pairwise changes
-	Ver57
+	Ver57,	// Changed libraryDE
+	Ver58	// changed go evidence code
 }
 
 /********************************************
@@ -62,13 +63,13 @@ enum DBVer
 public class Schema 
 {
 	DBConn mDB;
-	DBVer  dbVer =  DBVer.Ver57; // default to this, as in other cases we get it from the schemver table
+	DBVer  dbVer =  DBVer.Ver58; // default to this, as in other cases we get it from the schemver table
 	String dbVerStr = null;      // read from database
 	
-	DBVer  curVer = DBVer.Ver57; 
-	String curVerStr = "5.7";
-	public static String currentVerString() {return "5.7";}
-	public static DBVer  currentVer() 		{return DBVer.Ver57;}
+	DBVer  curVer = DBVer.Ver58; 
+	String curVerStr = "5.8";
+	public static String currentVerString() {return "5.8";}
+	public static DBVer  currentVer() 		{return DBVer.Ver58;}
 	
 	public Schema(DBConn db)
 	{
@@ -92,6 +93,7 @@ public class Schema
 			else if (dbVerStr.equals("5.5"))	dbVer = DBVer.Ver55;
 			else if (dbVerStr.equals("5.6"))	dbVer = DBVer.Ver56;
 			else if (dbVerStr.equals("5.7"))	dbVer = DBVer.Ver57;
+			else if (dbVerStr.equals("5.8"))	dbVer = DBVer.Ver58;
 			else System.err.println("Unknown version string " + dbVerStr + " in schemver table");
 		}
 		catch (Exception e){}
@@ -131,7 +133,6 @@ public class Schema
 			"   pair_msg tinytext default null, " + // CAS314 added in CoreAnno
 			"	gc_msg text default null,"  +  //  added in DoORF
 			"   go_msg text default null, "	+  //  name of goterm file, which contains date
-			"   go_ec  text default null, " +  //  evidence codes in db
 			"	go_slim tinytext default null,"  +  // either goDB subset 
 			"	go_rtypes text default null,"  +  // isa, partof, replaceby
 			"   norm tinytext default null" +	// CAS304 RPKM or TPM
@@ -709,9 +710,10 @@ public class Schema
 			db.tableCheckAddColumn("pja_db_unitrans_hits", "filter_gobest", "boolean default 0", "filter_ovbest");
 			
 			// entry for every direct and ancestor
-			String [] ecList = new MetaData().getEClist();
-			String ecStr = "";
-			for (int i=0; i<ecList.length; i++)  ecStr += ecList[i] + " boolean default 0, ";
+			String [] ecList = new MetaData().getEvClist();
+			String ecStr = ""; // CAS323 EvC Cat list - now tinyint
+			for (int i=0; i<ecList.length; i++)  
+				ecStr += Globalx.GO_EvC + ecList[i] + " tinytext default null, ";
 			
 			db.executeUpdate(
 				"create table go_info (" + // GOdb.term table
@@ -832,10 +834,30 @@ public class Schema
 		if (dbVer==DBVer.Ver54) updateTo55();
 		if (dbVer==DBVer.Ver55) updateTo56();
 		if (dbVer==DBVer.Ver56) updateTo57();
+		if (dbVer==DBVer.Ver57) updateTo58();
+	
 		return dbVerStr;
 	}
+	private void updateTo58() {  // CAS323
+		try {
+			Out.Print("Update to sTCW schema db5.8 for " + Version.sTCWhead);
+			//mDB.tableCheckDropColumn("assem_msg", "go_ec"); // leave this so old will still work
+			if (mDB.tableExist("go_info")) {
+				if (mDB.tableColumnExists("go_info", "PHY")) return;
+				
+				Out.PrtSpMsg(1, "The GO evidence codes computation has changed.");
+				Out.PrtSpMsg(2, "To update, re-run runSingleTCW 'GO Only'.");
+				Out.PrtSpMsg(2, "If you do not re-run GO, the v3.2.3 viewSingleTCW Basic GO will fail.");
+			}
+			mDB.executeUpdate("update schemver set schemver='5.8'");
+			dbVer = DBVer.Ver58;
+			dbVerStr = curVerStr;
+			Out.Print("Finish update for sTCW Schema db5.8");
+		}
+		catch (Exception e) {ErrorReport.reportError(e, "Error on check schema v3.2.3");}	
+	}
 	/*************************************************
-	 * Jan2021 v3.1.4 change for similar pairs
+	 * V3.2.2 (4-May-21) Change to libarayDE
 	 */
 	private void updateTo57() { // CAS321 db57
 		try {

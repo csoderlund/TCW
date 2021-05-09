@@ -42,11 +42,9 @@ that is assigned the GO or a descendant GO of this GO. See <b>#Seqs</b> section 
 the end, which explains how this will be different if the <b>DE #Seqs</b> is changed.
 
 <li><b>Evidence Codes</b> (EvC): Check the box, then select <b>Evidence Codes</b> to bring
-up a panel of available codes. The codes that are not found for any hit-to-GO
-assignment are listed but not selectable. The filter is passed if a GO
-has <b>any</b> of the selected EvCs. 
-<br>NOTE: Only the assigned EvCs are associated with the GO;
-you can view all inherited evidence codes by selected a GO followed by <u>Hits - inherited</u>.
+up a panel of available evidence categories.  The filter is passed if a GO
+has <b>any</b> of the selected categories. See <b>Info</b> for the mapping of Evidence Codes
+to Categories.
 </ul>
 
 <b>Level</b>
@@ -87,14 +85,16 @@ options for applying the cutoff, either:
 Select one or more filters, then click <b>BUILD TABLE</b> or <b>ADD to TABLE</b> to execute the 
 search, which builds a new table or adds to the existing table, respectively.
 <br>Using the <b>Columns</b> button, columns can be added/removed. 
-Columns can be rearranged by dragging and sorted
+Columns can be rearranged by dragging (temporarily disabled) and sorted
 by clicking on a column heading. 
 
 <p><b><i>Columns</i></b> 
 <ul>
-<li>These are all obvious except the column <b>GO</b>, which is the
-GO Ontology (BP, CC, MF).
+<li>These are all obvious except the column <b>GO</b>, which is the GO Ontology (BP, CC, MF).
 <li>P-values: See <b>Decimal Display</b> on upper left panel.
+<li>Evidence categories: The <u>Long</u> format shows the evidence codes found for the category,
+where the inherited codes are in parenthesis. The <u>Short</u> format just states 'Yes' if it 
+has one or move evidence codes in the category.
  </ul>
 <p><b><i>Modify Table</i></b>
 <ul>

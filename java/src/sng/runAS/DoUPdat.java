@@ -51,12 +51,15 @@ SQ   SEQUENCE   336 AA;  37370 MW;  DECEB0ECA469A9E3 CRC64;
 //
  */
 public class DoUPdat {
-	public DoUPdat(ASFrame asf) {frameObj=asf; ecHash= new MetaData().getEChash();}
+	public DoUPdat(ASFrame asf) {
+		frameObj=asf; 
+		evcHash= new MetaData().getEvChash();
+	}
 	
 	private String errFile = "parseErrors";
 	private String errPath;
 	private int cntErr=0;
-	private HashSet <String> ecHash;
+	private HashSet <String> evcHash;
 	
 	// dat2godb and dat2fasta
 	private final Pattern patID = Pattern.compile("ID\\s+(\\S*)"); 
@@ -64,8 +67,8 @@ public class DoUPdat {
 	// dat2godb
 	private final Pattern patAC = Pattern.compile("AC\\s+(\\S*);");
 	private final Pattern patGO = Pattern.compile("DR\\s+GO;");
-	private final Pattern patGOec = Pattern.compile("DR\\s+GO;\\s*(GO:\\d*);[^;]*;\\s*(\\w{2,3})"); // CAS320 included IC, ND
-	private final Pattern patGOnoec = Pattern.compile("DR\\s+GO;\\s*(GO:\\d*);[^;]*;");
+	private final Pattern patGOev = Pattern.compile("DR\\s+GO;\\s*(GO:\\d*);[^;]*;\\s*(\\w{2,3})"); // CAS320 included IC, ND
+	private final Pattern patGOnoev = Pattern.compile("DR\\s+GO;\\s*(GO:\\d*);[^;]*;");
 	private final Pattern patEC = Pattern.compile("DE\\s+EC=");
 	private final Pattern patECfull = Pattern.compile("DE\\s+EC=(\\S+)[ ;]"); // CAS320 was matching enter line
 	private final Pattern patKG = Pattern.compile("DR\\s+KEGG; ([^;]*);");
@@ -179,19 +182,19 @@ public class DoUPdat {
         	 	// DR   GO; GO:0016491; F:oxidoreductase activity; IEA:UniProtKB-KW.
         	 	x = patGO.matcher(line);
         	 	if (x.find()) { 
-        	 		x = patGOec.matcher(line);
+        	 		x = patGOev.matcher(line);
         	 		if (x.find()) {
         	 			String goStr = x.group(1);
         	 			String goec = x.group(2);
-        	 			if (!ecHash.contains(goec)) { 
+        	 			if (!evcHash.contains(goec)) { 
         	 				if (!badEC.containsKey(goec)) {
         	 					Out.PrtWarn("Unknown EC: " + line);
         	 					badEC.put(goec, 1);
         	 				}
         	 				else badEC.put(goec, badEC.get(goec)+1);
         	 				
-        	 				if (!allbadEC.containsKey(goec)) allbadEC.put(goec, 1);
-        	 				else allbadEC.put(goec, allbadEC.get(goec)+1);
+        	 				if (!allbadEvC.containsKey(goec)) allbadEvC.put(goec, 1);
+        	 				else allbadEvC.put(goec, allbadEvC.get(goec)+1);
         	 		
         	 				goec = "UNK";
         	 			}
@@ -204,7 +207,7 @@ public class DoUPdat {
         	 			cntGO++;
         	 			continue;
         	 		}
-        	 		x = patGOnoec.matcher(line);
+        	 		x = patGOnoev.matcher(line);
         	 		if (x.find()) {
         	 			String gx = x.group(1) + ":" + "UNK";
         	 			if (goList=="") goList=gx;
@@ -280,9 +283,9 @@ public class DoUPdat {
 	}
 	public boolean prtTotals() {
 		Out.PrtSpMsg(2, "Totals:");
-		if (allbadEC.size()>0) { 
+		if (allbadEvC.size()>0) { 
 			String x="";
-			for (String ec : allbadEC.keySet()) x += " " + ec + ":" + allbadEC.get(ec);
+			for (String ec : allbadEvC.keySet()) x += " " + ec + ":" + allbadEvC.get(ec);
 			Out.PrtSpMsg(3, "Unknown ECs: " + x);
 		}
 		
@@ -409,7 +412,7 @@ public class DoUPdat {
 		return false;
 	}
 	
-	private HashMap <String, Integer> allbadEC = new HashMap <String, Integer> ();
+	private HashMap <String, Integer> allbadEvC = new HashMap <String, Integer> ();
 	private int cntGO=0, cntKG=0, cntEC=0, cntIP=0, cntPF=0;
 	private ASFrame frameObj=null;
 }

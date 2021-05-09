@@ -8,8 +8,8 @@ import java.awt.Font;
 public class Globalx {
 	public static boolean debug = false; // changed in STCWMain or MTCWMain from command line 
 	
-	public static final String strRelDate = "(4-May-21)"; 
-	public static final String strTCWver = "3.2.2"; 
+	public static final String strRelDate = "(9-May-21)"; 
+	public static final String strTCWver = "3.2.3"; 
 	public static final String URL = "http://www.agcol.arizona.edu ";
 	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate;
 	public static final String sTCWver = "sTCW v" + strTCWver;
@@ -84,6 +84,7 @@ public class Globalx {
 	public static final String LIBCNT =  "L__";
 	public static final String LIBRPKM = "LN__";
 	public static final String PVALUE =  "P_"; // note just one dash
+	public static final String GO_EvC = "EV__"; // CAS323 - necessary because AS is reserved word
 	
 	// Its messy about what the values of 'no value' where
 	// See Stats.average - 

@@ -86,6 +86,7 @@ public class BasicTablePanel extends JPanel {
 					else c.setBackground( Globalx.BGCOLOR );
 		        }
 		        /* CAS322 */
+		        /* CAS323 screws up for Sequence, and can't move DE before static - 
 		        if (DisplayDecimalTab.isHighPval()) {
 			        int index = theTableModel.getMappedColumn(column);
 			        if(index >= startPval) { // CAS322 add highlight
@@ -101,7 +102,7 @@ public class BasicTablePanel extends JPanel {
 			        	if (high!=null) c.setBackground(high);
 				    }
 		        }
-		        
+		        */
 		        return c;
 		    }
 		};
@@ -359,6 +360,7 @@ public class BasicTablePanel extends JPanel {
 		public TableModel() {
 			changeColumns(columns, visible);
 		}
+		// CAS323 THIS doesn't do anything
 		public void changeColumns(String [] columns, boolean [] visible) {
 			colNamesList = new String[columns.length];
 			for(int x=0; x<columns.length; x++)
@@ -367,6 +369,7 @@ public class BasicTablePanel extends JPanel {
 			colIsVisList = new boolean[visible.length];
 			for(int x=0; x<visible.length; x++)
 				colIsVisList[x] = visible[x];	
+			
 		}
 		public int getColumnCount() {
         	int count = 0;

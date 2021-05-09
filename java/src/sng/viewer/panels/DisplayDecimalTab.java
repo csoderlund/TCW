@@ -36,12 +36,16 @@ public class DisplayDecimalTab  extends Tab {
 	 * The parameters changed in this class are static. The rounding parameters are in DisplayFloat
 	 */
 	/**************************************************************
-	 * CAS322 Highlight pvalue
+	 * CAS322 Highlight pvalue; 323 changed 1,2,3 
 	 */
 	static final int NCUTS=4, NSCH=4;
-	static private final Color [] colSch1 = {new Color(196, 216, 243),new Color(185, 191, 255),new Color(216, 150,255),new Color(170, 82, 188)};
-	static private final Color [] colSch2 = {new Color(248, 255, 168),new Color(222, 255, 165),new Color(250, 216, 137),new Color(205, 133, 63)};
-	static private final Color [] colSch3 = {new Color(150, 204, 244), new Color(116, 189, 240),new Color(23, 142, 226),new Color(19, 122, 194)};
+	// light blue to purple
+	static private final Color [] colSch1 = {new Color(220, 230, 250),new Color(185, 191, 255),new Color(216, 150,255),new Color(174, 96, 184)};
+	// yellow, green, brown
+	static private final Color [] colSch2 = {new Color(248, 255, 168),new Color(199, 255, 164),new Color(250, 216, 137),new Color(219, 161, 99)};
+	// blues 
+	static private final Color [] colSch3 = {new Color(196, 216, 243), new Color(171, 196, 245),new Color(140, 165, 247),new Color(109, 127, 242)};
+	// brown, pink, red
 	static private final Color [] colSch4 = {new Color(215, 192, 177),new Color(191, 154, 130),Color.pink,new Color(205, 92, 92)};
 	
 	static private boolean bHighPval=true;
@@ -163,12 +167,12 @@ public class DisplayDecimalTab  extends Tab {
 		page.setMaximumSize(page.getPreferredSize());
 		
 		page.add(createRound());
-		page.add(createColor());
 		
+		if (sf.getMetaData().hasDE()) // CAS323
+			page.add(createColor());
 		
 		page.add(Box.createVerticalGlue());
 		page.setMaximumSize(page.getPreferredSize());
-		
 		
 		add(page);
 		add(Box.createVerticalGlue());
