@@ -5,19 +5,16 @@
 </head>
 
 <body style="padding:20px;width:650px;font-family:Times">
-
 <h1>Basic Queries for AnnoDB Hits</h1>
 
 <i>Overview</i>: 
 Check <b>Search</b> to search for the substring in the text box, and/or check <b>Filters</b> to apply
 the filters set. Select a check box or radio button to enable the search or filter to its right.
-
 <p>When the TCW database was created, the sequences were compared to zero or more 
 annotation databases (e.g. UniProt taxonomic plant), which are referred to by
 TCW as <i>annoDBs</i>. The comparison was performed with a <i>heuristic search</i> program 
 such as BLAST or DIAMOND, where the results are referred to as <i>hits</i>. 
 This panel allows searching against the set of <i>hits</i> to the sequences.
-<p>
 
 <p>The results can be toggled between the <i>Hit table</i>  and <i>Seq-Hit table</i>.
 <ul>
@@ -35,8 +32,8 @@ of memory.
 <hr>
 <h2>Search</h2>
 <ul>
-<li><b>Hit IDs:</b> Identifier of the hit, e.g. UniProt ID
-<li><b>Descriptions:</b> Hit description, e.g. UniProt description string
+<li><b>Hit IDs</b>&nbsp;&nbsp;Identifier of the hit, e.g. UniProt ID. Only one Hit ID is allowed unless loaded from file.
+<li><b>Descriptions</b>&nbsp;&nbsp;Hit description, e.g. UniProt description string
 </ul>
 <i><b>Search rules:</b></i> 
 <ul>
@@ -49,7 +46,7 @@ NOTE: since '%' is a special character, it cannot be in a search string as a lit
 <b>Load File</b>: The file should contain one Hit ID per line (make sure <b>Hit ID</b> is selected)
 or one description per line (make sure <b>Description</b> is selected).
 <i>This performs a complete search, not a substring search.</i> Also, beware that it will
-use the filters set if <b>Filters</b> is checked.
+use the filters if <b>Filters</b> is checked.
 
 <p><b>Filters</b>: If this is not checked, then the query is only on the entered substring.
 If it is checked, then any filters from are also applied.
@@ -60,37 +57,37 @@ If it is checked, then any filters from are also applied.
 <ul>
 <li>Pull-down:
 <ul>
-<li><u>None</u>: search all the seq-hit pairs; this will be a slow query as the number of pairs is typically
+<li><u>None</u>&nbsp;&nbsp;search all the seq-hit pairs; this will be a slow query as the number of pairs is typically
 very large. 
 <li>List hits that have at least one sequence where:
 <ol> 
-<li><u>Best Bits</u>: the hit has the best bitscore over all annoDBs.
-<li><u>Best Anno</u>: the hit has the best annotation over all annoDBs.
-<li><u>Bits&amp;Anno</u>: the hit has both Best Bits and Best Anno over all annoDBs.
-<li><u>Bits|Anno</u>: the hit has Best Bits or Best Anno over all annoDBs.
-<li><u>Rank=1</u>:  this is the best hit for the annoDB.
+<li><u>Best Bits</u>&nbsp;&nbsp;The hit has the best bitscore over all annoDBs.
+<li><u>Best Anno</u>&nbsp;&nbsp;The hit has the best annotation over all annoDBs.
+<li><u>Bits&amp;Anno</u>&nbsp;&nbsp;The hit has both Best Bits and Best Anno over all annoDBs.
+<li><u>Bits|Anno</u>&nbsp;&nbsp;The hit has Best Bits or Best Anno over all annoDBs.
+<li><u>Rank=1</u>&nbsp;&nbsp;This is the best hit for the annoDB.
 <br>If Rank=1 is selected with a given annoDB, it lists all sequences that have at least one hit from the annoDB.
 </ol>
-
 </ul>
 
-<li><b>E-val:</b> The E-value assigned by the heuristic search program for
+<li><b>E-val&lt;=</b>&nbsp;&nbsp;The E-value assigned by the heuristic search program for
 the sequence-hit pair.
-<li><b>%Sim:</b> The percent similarity assigned by the heuristic search program for
+<li><b>%Sim&gt;=</b>&nbsp;&nbsp;The filters on the "%Sim" column, which is the 
+percent similarity assigned by the heuristic search program for
 the sequence-hit pair.
-<li><b>%Hcov:</b> This filters on the "HitCov" column, which is the percentage of
-the hit length covered by the alignment, where the alignment is the difference between the hit
-start and hit end.
+<li><b>%HitCov&gt;=</b>&nbsp;&nbsp;This filters on the "%HitCov" column, which is the percentage of
+the <i>hit length</i> covered by the <i>alignment</i>, where the <i>alignment</i> is the difference between 
+the <i>hit start</i> and <i>hit end</i>.
 
-<li><b>TPM (or RPKM):</b> A hit is listed if it assigned to at least one sequence that 
-has the selected TPM (or RPKM) and/or DE p-values.
+<li><b>TPM/DE</b> A hit is listed if it assigned to at least one sequence that 
+has the selected TPM (or RPKM) and/or DE p-values (if they exist in the sTCWdb).
 </ul>
 
 <p><b>Hit</b>: filters on values associated with the hit (e.g. protein).
 <ul>
-<li><b>AnnoDBs:</b> Show results from one or more annotation databases. 
-<li><b>Species:</b> Show results from one or more species.
-<li><b>GO, etc:</b> Has GO, KEGG, Interpro, EC and/or PFam (only exists if GO processing was performed). 
+<li><b>AnnoDBs</b>&nbsp;&nbsp;Show results from one or more annotation databases. 
+<li><b>Species</b>&nbsp;&nbsp;Show results from one or more species.
+<li><b>GO, etc</b>&nbsp;&nbsp;Has GO, KEGG, Interpro, EC and/or PFam (only exists if GO processing was performed). 
 <ol>
 <li>If <b>Has GO</b> is checked and no string is entered, all hits that have a GO will be shown.
 <li>If a GO ID is entered, <b>Has GO</b> must be checked; all hits with the GO ID <i>assigned</i> to it will be shown. If only
@@ -104,22 +101,31 @@ where the rest are substrings, so it is best to enter the exact string, e.g. IPR
 <h2>Results</h2>
 Select one or more filters, then click <b>BUILD TABLE</b> or <b>ADD to TABLE</b> to execute the 
 search, which builds a new table or adds to the existing table, respectively.
-<br>Columns can be added/removed (<b>Columns</b>), rearranged by dragging and sorted
+Columns can be added/removed (<b>Columns</b>), rearranged by dragging and sorted
 by clicking on a column heading.
  
-
-<h4>Columns</h4>
+<p><b><i>Columns</i></b> 
 <ul>
-<li>The <i>Hit table</i> and <i>Seq-Hit table</i> have the same number of columns where many of them
-are the same, e.g. the Hit values such as <u>description</u> are the same. The "*" Hit
-columns are the best value from the Seq-Hit table. The '#' Hit columns is the count of the corresponding Seq-Hit
-columns.
-<li>The Hit and Seq-Hit tables can have different column selections, but both column panels have a 
+<li>If <b>Group by Hit ID</b> is selected, this will show the <b>Hit Columns</b>;
+otherwise it will show the <b>Seq Columns</b> (i.e. Seq-hit pairs).
+The <i>Hit table</i> and <i>Seq-Hit table</i> have the same number of columns, and correspond as follows:
+<ul>
+<li>The Hit values such as "Description" are the same. 
+<li>The "*" Hit columns are the best value from the Seq-Hit table. 
+<li>The '#' Hit columns is the count of the corresponding Seq-Hit columns.
+<li>The "+" Seq-Hit columns are directly from the heuristic search tabular file, or computed from them (e.g. <b>HitCov</b> uses the heuristic tabular columns of <i>Alignment length</i>,
+<i>Hit start</i> and <i>Hit end</i>).
+</ul>
+<li>The Hit and Seq-Hit tables can have different column selections, but both column panels have an 
 <b>Accept Hit/Seq Columns</b> to make one the same as the other.
 <li>P-values:  See <b>Decimal Display</b> on upper left panel.
 </ul>
 
-<h4>Modify Table</h4>
+<p><i>Heuristic search (Hit) values</i>: When the database was built, the sequences were searched
+against the annoDBs using an heuristic search program (BLAST or DIAMOND); for simplicity,
+the results are referred to as <i>hits</i>.
+
+<p><b><i>Modify Table</i></b> 
 <ul>
 <li><b>Delete Selected</b> and <b>Deleted Unselected</b>: 
 The selected rows or unselected rows will be removed, respectively. The corresponding rows will
@@ -131,62 +137,44 @@ order. To order the 2nd list according to the 1st list, click this button. Bewar
 the sort takes a while if the sequence-hit pair list is very large.
 </ul>
 <hr>
-<h2>Columns</h2>
-If <b>Group by Hit ID</b> is selected, this will show the <b>Hit Columns</b>;
-otherwise it will show the <b>Seq Columns</b> (i.e. Seq-hit pairs). 
-There is the same number of columns for both and in the same order, e.g.
-where <b>Hit Columns</b> will have <b>#Seq</b> for the number of sequences with the hit,
-the corresponding column for Sequences is <b>Hit ID</b>. 
-<p><b>Sync Hit/Seq Columns</b>: If the <b>Hit Columns</b> are changed, the corresponding
-<b>Seq Columns</b> are not automatically changed; to sync them, (1) uncheck <b>Hit Columns</b>,
-(2) select <b>Seq Columns</b>, (3) select <b>Accept Hit Columns</b>. This also works the other
-way around, i.e. if the <b>Seq Columns</b> are changed.
 
-
-<p><i><b>Heuristic search (Hit) values</b></i>
-<ul>
-<li>When the database was built, the sequences were searched
-against the annoDBs using an heuristic search program (BLAST or DIAMOND); for simplicity,
-the results are referred to as <i>hits</i>.
-<li><b>Hit columns</b>: those that have an '*' at the end are values
-from the hit with the best e-value.
-<li><b>Seq columns</b>: columns ending with '+' are from the hit results. 
-<li>The <b>SeqStart</b> column is
-the start of the alignment; if the sequence is nucleotide, it is in nucleotide coordinates. If 
-the hit has a start coordinate greater than the end,
-the start coordinate is adjusted for the reserve strand.
-</ul>
-<hr>
 <h2>Top Row of Options</h2>
 
-<b>View Sequence</b>: Select a one or more hitIDs or seqIDs in the table, 
-then select <b>View Sequences</b>.
-The sequences will be shown in the main table, where you can select it to view the
-<b>Sequence Details</b>.
+<b>View Seqs</b>&nbsp;&nbsp;Select a one or more hitIDs or seqIDs in the table, 
+then select <b>View Seqs</b>.
+The sequences will be shown in the main table, where you can select it to view the <b>Sequence Details</b>.
 <p>
-<b>Align</b>:  Select a one or more hitIDs or seqIDs in the table, 
+<b>Align</b>&nbsp;&nbsp;Select a one or more hitIDs or seqIDs in the table, 
 then select <b>Align</b>. Each hit-sequence pair will be aligned; the resulting panel
 will replace the visible panel, i.e. annoDB hits panel. <i>The alignment uses
 dynamic programming, so the coordinates may appear different from the hit values.</i>
 <p>
-<b>Show...</b>: Select one sequence or hit, then select one of the 
+<b>Show...</b>&nbsp;&nbsp;Select one sequence or hit, then select one of the 
 following to get a popup window of the information:
 <ul>
-<li><u>Assigned GOs for hit</u>: UniProt has assigned GOs to many proteins. This options
+<li><u>Assigned GOs for hit</u>&nbsp;&nbsp;UniProt has assigned GOs to many proteins. This options
 show the assigned GOs with their level and description. 
-<li><u>Assigned and inherited GOs for hit</u>: All ancestors of a GO ID inherit the protein-GO
+<br>&nbsp;
+<li><u>All GOs for hit</u>&nbsp;&nbsp;All ancestors of a GO ID inherit the protein-GO
 association. This option shows the assigned GOs (as the previous option), but also all
 inherited GOs. See the <b>GO Help</b> on the <b>Basic GO</b> for a more detailed explanation.
-<li><u>All columns</u>: All columns for the selected sequence or hit. A benefit of this window
+<br>&nbsp;
+<li><u>All columns of selected</u> All columns for the selected sequence or hit. A benefit of this window
 is that the values can be copied to be pasted elsewhere, e.g. KEGG identifier.
 </ul>
 <p>
-<u><b>Table...</b></u>: 
+<u><b>Export...</b></u>&nbsp;&nbsp;This has the same first two items as <b>Show...</b>, but the results
+are written to file. The "*" is at the end of each option indicates that there will 
+be a choice between writing <u>All Info</u> or <u>ID only</u>; writing the "IDs only" is useful for loading in the <b>Basic GOs</b> panel to view.
+<p>
+<u><b>Table...</b></u> 
 <ul>
-<li><u>Show column stats</u>: A window will pop-up with statistics for all numeric columns
+<li><u>Show column stats</u>&nbsp;&nbsp;A window will pop-up with statistics for all numeric columns
 that are displayed.
-<li><u>Copy table</u>: The table will be copied so that you can paste it into a file.
-<li><u>Export</u>: A window will pop-up with a file chooser, and the table will be
+<br>&nbsp;
+<li><u>Copy table</u>&nbsp;&nbsp;The table will be copied so that you can paste it into a file.
+<br>&nbsp;
+<li><u>Export table</u>&nbsp;&nbsp;A window will pop-up with a file chooser, and the table will be
 written to the selected file.
 </ul>
 </body>

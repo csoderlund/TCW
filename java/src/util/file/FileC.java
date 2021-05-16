@@ -69,10 +69,7 @@ public class  FileC {
 		if (lastDir==null) return System.getProperty("user.dir");
 		else return lastDir;
 	}
-	public static void setLastDir(String lastUsedDir, int lastUsed) {
-		lastDir = lastUsedDir;
-		lastDirType = lastUsed;
-	}
+	
 	public static void setLastDirFile(String lastUsedDir, int lastUsed) {
 		lastDir = lastUsedDir.substring(0, lastUsedDir.lastIndexOf("/"));
 		lastDirType = lastUsed;
@@ -173,6 +170,7 @@ public class  FileC {
 		else if (pathType==dCMPHIT)   	d = CMPDIR + projName + "/" + Globalx.pHITDIR + "/";
 		
 		else if (pathType==dRSCRIPTS)   d = Globalx.RSCRIPTSDIR + "/";
+		else if (pathType==dRESULTEXP)  d = Globalx.rEXPORTDIR; // CAS324 was missing this
 		else 							d = System.getProperty("user.dir");
 		
 		File f = new File(d);

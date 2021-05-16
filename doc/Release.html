@@ -8,6 +8,55 @@
 
 
 <h3>TCW Version 3.2</h3>
+Release v3.1.8 converted from using the GO file <tt>go_&lt;date&gt;-termdb-tables.tar.gz</tt> to the GO file <tt>go-basic.obo</tt>, 
+which is used to build the <tt>GOdb</tt>. This ended up to be a pretty big changed,
+hence, this release date is <u>v3.2</u> to indicate the new GO source.
+
+<h4>v3.2.4  16-May-21</h4>
+This release has improvements to <ttp>viewSingleTCW</ttp> for exploring GOs. 
+<ul>
+<li>The two display problems from v3.2.2 have been fixed correctly.
+	
+<li><ttl>Basic GO, Basic Hit, Sequence Detail GO Panel</ttl>
+	<ul>
+	<li>These three panels now have separate <b>Show</b> and <b>Export</b> buttons.
+	There are various new <b>Show..</b> and <b>Export...</b> options.
+	<li>Many of the <b>Export</b> options allow the output to be <u>All info</u> or <u>IDs only</u>.
+	The <u>IDs only</u> is very useful for then exploring the IDs in their respective Basic panel
+	using the <b>Load File</b>.
+	<li>Terminology, file names and displays have been made systematic. 
+	<li>The <b>Basic GO</b> option <u>Hits with inherited GO</u> listed had duplicate hits. 
+	</ul>
+<li><ttl>Display Decimal</ttl>
+	<ul>
+	<li>All parameters are saved between sessions.
+	<li>A <b>Set Defaults</b> button returns all parameters to their defaults.
+	</ul>
+</ul>
+<h4>v3.2.3  9-May-21</h4>
+Removed two small features in order to fix two display bugs introduced in the last release:
+<ol>
+<li>The Basic Hit Table no longer has the highlighted p-value option (only of interest in the Hit-Seq mode).
+<br>Problem: It shares table code with Basic Sequence, which was messed up by this.
+<li>The Basic GO table no longer allows the columns to be moved, but sorting is still possible.
+<br>Problem: Some combinations of moving columns seriously messed up.
+</ol> 
+There will be a new release soon with the above two items working.
+<p>Additionally in this release, the approach for GO evidence codes has been changed.
+<ul>
+<li>For existing sTCWdbs, there is a small schema update and its necessary to redo the <ttp>runSingleTCW</ttp> <ttc>GO only</ttc>
+options.
+<br>&nbsp;
+<li><ttp>viewSingleTCW</ttp> <ttc>Basic GO</ttc>
+	<ul>
+	
+		<li>The columns and filters for evidence code now use the six GO-defined evidence categories
+		instead of the 27 individual evidence codes.
+		<li>The evidence category columns can be shown in a long or short format, where the long 
+		shows all evidence codes that were found in the category. The short format just shows
+		a 'Yes' that it has EvCs in the category.
+	</ul>
+</ul>
 <h4>v3.2.2  4-May-21</h4>
 <ul>
 <li>Terminology changes: 
@@ -66,9 +115,6 @@ This required changes in Schema, MetaData, Overview, runDE.QRprocess, annotator.
 </ul>
 </ul>
 <h4>v3.2.0  29-Mar-21</h4>
-Release v3.1.8 converted from using the GO file <tt>go_&lt;date&gt;-termdb-tables.tar.gz</tt> to the GO file <tt>go-basic.obo</tt>, 
-which is used to build the <tt>GOdb</tt>. This ended up to be a pretty big changed,
-hence, this release date is <u>v3.2</u> to indicate the new GO source.
 
 <p><i>Existing GOdb and sTCWdb</i>: 
 If you use GO evidence codes or EC (enzyme code), you will want to recreate the GOdb (i.e. <ttp>runAS</ttp>)

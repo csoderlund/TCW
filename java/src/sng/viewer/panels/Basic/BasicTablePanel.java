@@ -53,9 +53,9 @@ public class BasicTablePanel extends JPanel {
 	private final Color altRowColor = Globalx.altRowColor;
 	private final Color selectColor = Globalx.selectColor;
 	
-	public BasicTablePanel (STCWFrame mf, BasicHitTab t, String [] col, boolean [] b, int pval) {
-		hitTab = t;
-		startPval = pval;
+	public BasicTablePanel (STCWFrame mf, BasicHitTab hitTab, String [] col, boolean [] b, String [] pvalColNames) {
+		this.hitTab = hitTab;
+		this.pvalColNames = pvalColNames;
 		setColumns(col, b);
 		
 		createBasicTable();
@@ -85,24 +85,25 @@ public class BasicTablePanel extends JPanel {
 			        if ( bBlueBG )c.setBackground( altRowColor );
 					else c.setBackground( Globalx.BGCOLOR );
 		        }
-		        /* CAS322 */
-		        /* CAS323 screws up for Sequence, and can't move DE before static - 
-		        if (DisplayDecimalTab.isHighPval()) {
-			        int index = theTableModel.getMappedColumn(column);
-			        if(index >= startPval) { // CAS322 add highlight
-			        	Object obj = theTable.getValueAt(row,column);
-			        	double theVal=0.0;
-			        	if (obj instanceof DisplayFloat) {
-							theVal = ((DisplayFloat) obj).getValue();
-						}
-						else {
-							Out.prt("Cannot read table obj " + obj.toString());
-						}
-			        	Color high = DisplayDecimalTab.getPvalColor(theVal);
-			        	if (high!=null) c.setBackground(high);
-				    }
+		        /* CAS322 added, CAS323 removed because problems, CAS324 fixed */
+		        if (hitTab!=null && DisplayDecimalTab.isHighPval() && pvalColNames!=null) { 
+		        	String displayCol = theTable.getColumnName(column);
+		        	for (String cn : pvalColNames) {
+			    		if (cn.contentEquals(displayCol)) {
+			    			Object obj = theTable.getValueAt(row,column);
+					    	double theVal=0.0;
+				        	if (obj instanceof DisplayFloat) {
+								theVal = ((DisplayFloat) obj).getValue();
+							}
+							else {
+								Out.prt("Cannot read table obj " + obj.toString());
+							}
+				        	Color high = DisplayDecimalTab.getPvalColor(theVal);
+				        	if (high!=null) c.setBackground(high);
+				        	break;
+			    		}
+			    	}
 		        }
-		        */
 		        return c;
 		    }
 		};
@@ -290,15 +291,50 @@ public class BasicTablePanel extends JPanel {
 		}
 		return retVal.toString();
 	}
+	// CAS324 was in TableModel, which exported in original order
 	public void tableExportToFile(Component btnC, String type) {
-		String prefix = (type.equals("Seq")) ? "BasicSeqTableColumns" : "HitTableColumns";
+		String prefix = (type.equals("Seq")) ? "SeqBasicTable" : "HitBasicTable";
 		String fileName = prefix + Globalx.CSV_SUFFIX;
 		
 		FileWrite fw = new FileWrite(FileC.bNoVer, FileC.bNoPrt);
 		PrintWriter pw = fw.getWriter(btnC, "table", fileName, FileC.fTSV, FileC.wAPPEND);
-		if (pw!=null) {
-			theTableModel.exportTableColumns(prefix, pw); 
+		if (pw==null) return;
+		
+		String delim = Globalx.CSV_DELIM;
+		String line = "", val="";
+		
+		int colCnt = theTable.getColumnCount();
+		int rowCnt = theTable.getRowCount();
+		Out.prtSp(0, "Processing " + rowCnt + " rows and " + colCnt + " columns");
+		
+		int x, y;
+		
+		pw.print("#"); // CAS314
+		for(y=0; y<colCnt; y++) {
+			if (y>0) line += delim;
+			line += theTable.getColumnName(y).replaceAll("\\s", "-"); 
 		}
+		pw.print(line + "\n");
+		line="";
+		
+		for(x=0; x<rowCnt; x++) {
+			for(y=0; y<colCnt; y++) {
+				if(theTable.getValueAt(x, y) != null) val = theTable.getValueAt(x, y).toString();
+				else val = "";
+				if (y>0) line += delim;
+				
+				String outVal;
+				if (val==null) outVal="";
+				else outVal = val.toString();
+				
+				line += outVal;
+			}
+			pw.print(line + "\n");
+			line="";
+			if (x%1000==0) Out.r("Wrote " + x); 
+		}
+		pw.close();
+		Out.prtSp(0, "Complete writing " + theTable.getRowCount() + " rows");
 	}
 	
 	public void tableResizeColumns() {
@@ -438,47 +474,7 @@ public class BasicTablePanel extends JPanel {
   	  		
   	  		private boolean [] bAscend = null;
   	  	}
-  	  	private String convertToCSV(Object val) {
-			if(val == null) return "";
-			if(val.getClass() == String.class) {
-				if(((String)val).indexOf(',') >= 0) {
-					return "\"" + ((String)val) + "\"";
-				}
-			}
-			return val.toString();
-		}
-		private void exportTableColumns(String type, PrintWriter pw) {
-			String delim = Globalx.CSV_DELIM;
-			String line = "", val="";
-			
-			int colCnt = getColumnCount();
-			int rowCnt = getRowCount();
-			Out.prtSp(0, "Processing " + rowCnt + " rows and " + colCnt + " columns");
-			
-			int x, y;
-			
-			pw.print("#"); // CAS314
-			for(y=0; y<colCnt; y++) {
-				if (y>0) line += delim;
-				line += getColumnName(y).replaceAll("\\s", "-"); 
-			}
-			pw.print(line + "\n");
-			line="";
-			
-			for(x=0; x<rowCnt; x++) {
-				for(y=0; y<colCnt; y++) {
-					if(getValueAt(x, y) != null) val = getValueAt(x, y).toString();
-					else val = "";
-					if (y>0) line += delim;
-					line += convertToCSV(val);
-				}
-				pw.print(line + "\n");
-				line="";
-				if (x%1000==0) Out.r("Wrote " + x); 
-			}
-			pw.close();
-			Out.prtSp(0, "Complete writing " + getRowCount() + " rows");
-		}
+  	 
         private String [] colNamesList = null;
 		private boolean [] colIsVisList = null;		
 	} // end TableModelClass
@@ -637,5 +633,5 @@ public class BasicTablePanel extends JPanel {
 	
 	private BasicHitTab hitTab=null;
 	private BasicSeqTab seqTab=null;
-	private int startPval=0;
+	private String [] pvalColNames;
 }

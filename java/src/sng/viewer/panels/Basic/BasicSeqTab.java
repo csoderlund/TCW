@@ -62,7 +62,7 @@ public class BasicSeqTab extends Tab {
 	 * Top button panel
 	 */
 	private void createTopRowPanel() {
-		btnViewSeqs = new JButton("View Sequences");
+		btnViewSeqs = new JButton("View Seqs");
 		btnViewSeqs.setBackground(Globals.FUNCTIONCOLOR);
 		btnViewSeqs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -73,7 +73,6 @@ public class BasicSeqTab extends Tab {
 		
 		// Copy
 		final JPopupMenu copypopup = new JPopupMenu();
-		
 		
 		copypopup.add(new JMenuItem(new AbstractAction("Seq ID") {
 			private static final long serialVersionUID = 4692812516440639008L;
@@ -143,6 +142,7 @@ public class BasicSeqTab extends Tab {
 				} catch (Exception er) {ErrorReport.reportError(er, "Error copying table"); }
 			}
 		}));
+		tablepopup.addSeparator();
 		tablepopup.add(new JMenuItem(new AbstractAction("Export Table") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
@@ -169,14 +169,15 @@ public class BasicSeqTab extends Tab {
 		});
 
 		topRowPanel = Static.createRowPanel();
-		topRowPanel.add(new JLabel("For selected:"));
-		topRowPanel.add(Box.createHorizontalStrut(2));
+		topRowPanel.add(new JLabel("Selected:"));
+		topRowPanel.add(Box.createHorizontalStrut(1));
 		topRowPanel.add(btnViewSeqs);
-		topRowPanel.add(Box.createHorizontalStrut(2));
+		topRowPanel.add(Box.createHorizontalStrut(1));
 		topRowPanel.add(btnCopy);
-		topRowPanel.add(Box.createHorizontalStrut(30));
-		topRowPanel.add(btnTable);
 		topRowPanel.add(Box.createHorizontalStrut(60));
+		topRowPanel.add(btnTable);
+		topRowPanel.add(Box.createHorizontalStrut(280));
+		topRowPanel.add(Box.createHorizontalGlue());
 		topRowPanel.add(btnHelp);
 		topRowPanel.setMaximumSize(topRowPanel.getPreferredSize());
 		topRowPanel.setMinimumSize(topRowPanel.getPreferredSize());

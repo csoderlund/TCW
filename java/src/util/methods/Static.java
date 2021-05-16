@@ -492,4 +492,8 @@ public class Static {
     	}
     	return goMap;
     }
+    // CAS324
+    public static String goFormat(int gonum) {
+    	return String.format(Globalx.GO_FORMAT, gonum);
+    }
 }

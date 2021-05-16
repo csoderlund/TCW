@@ -17,7 +17,10 @@ import util.methods.ErrorReport;
 import util.methods.Out;
 import util.ui.ButtonComboBox;
 
-
+/**********************************************************
+ * Load data from database for the GO table
+ * Trim code is in this file - it is currently disabled; needs repairing
+ */
 public class BasicGOLoadFromDB  {
 	private static final int GOindex=BasicGOTablePanel.GOindex;
 	private static final int GOdomain=BasicGOTablePanel.GOdomain;
@@ -259,10 +262,10 @@ public class BasicGOLoadFromDB  {
 			{
 				if (!removeNode.contains(i))
 				{
-					goTablePanel.treeAdd((Integer)theResults.get(i)[GOindex]);
+					//goTablePanel.treeAdd((Integer)theResults.get(i)[GOindex]);
 				}
 			}
-			goQueryPanel.trimFinish();
+			//goQueryPanel.trimFinish();
 		}
 		catch(Exception e){
 			ErrorReport.prtReport(e, "Compute trimmed set");
@@ -271,10 +274,10 @@ public class BasicGOLoadFromDB  {
 	}
 	public Double combinedGODEValue(Object[] r)
 	{
-		Vector <String> deColumnNames = goTablePanel.getDEcolumns();
+		Vector <String> deColumnNames = new Vector <String> (); // Is array now - fix goTablePanel.getDEcolumns();
 		if (deColumnNames.size() == 0) return 1.0;
 		
-		JCheckBox [] chkDEfilter = goQueryPanel.getDEselect() ;
+		JCheckBox [] chkDEfilter = goQueryPanel.getPvalSelect() ;
 		int endEC = goTablePanel.getEndEvC();
 		boolean hasDE=false;
 		Double ret = 1.0;

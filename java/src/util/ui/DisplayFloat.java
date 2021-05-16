@@ -1,4 +1,3 @@
-
 package util.ui;
 
 import java.math.BigDecimal;
@@ -7,15 +6,14 @@ import java.math.RoundingMode;
 import java.util.prefs.Preferences;
 
 import util.methods.ErrorReport;
-import util.methods.Out;
 
 /**
- * Used by Sequence Table Columns, and the Basic queries
- * User set in UIfieldRounding. 
+ * Used by all Tables for display
  */
 public class DisplayFloat implements Comparable<DisplayFloat>
 {
-	static public double Largest=999999.99, Smallest=0.01;
+	// DisplayDecimalTab.setDefaults and setPrefStringRounding sets values
+	static public double Largest=999999.99, Smallest=0.01; 
 	static public int Num_sig = 2, Num_dec = 2;
 	static public int Use_mode = 1;
 	
@@ -26,11 +24,11 @@ public class DisplayFloat implements Comparable<DisplayFloat>
 	 * Set rounding from defaults or when changed in Columns
 	 * Color Pval equivalent methods are in DecimalNumbersTab
 	 */	
-	public static String getRoundingPrefID() {return "rounding";	}
-	public static String getRoundingPrefString() {
+	public static String getPrefIDRounding() {return "rounding";	}
+	public static String getPrefStringRounding() {
 		return Use_mode + "," + Num_sig + "," + Num_dec + "," + Largest + "," + Smallest;
 	}
-	public static void setRoundingPrefs(String str) {
+	public static void setPrefStringRounding(String str) {
 		if (str.trim().length()==0) return;
 		String[] arr = str.trim().split(",");
 		int n = arr.length;
@@ -43,7 +41,7 @@ public class DisplayFloat implements Comparable<DisplayFloat>
 		}
 		catch(Exception e) {ErrorReport.prtReport(e, "Invalid rounding preferences:" + str);}
 	}
-	public static void setRoundingFields(int mode, int sig, int dec, double lg, double sm, Preferences prefs) {
+	public static void prefFlushRounding(int mode, int sig, int dec, double lg, double sm, Preferences prefs) {
 		Use_mode = mode;
 		Num_sig = sig;
 		Num_dec = dec;
@@ -51,7 +49,7 @@ public class DisplayFloat implements Comparable<DisplayFloat>
 		Smallest=sm;
 		try{
 			if (prefs!=null) {
-				prefs.put(getRoundingPrefID(), getRoundingPrefString());
+				prefs.put(getPrefIDRounding(), getPrefStringRounding());
 				prefs.flush();
 			}
 		}

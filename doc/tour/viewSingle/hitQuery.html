@@ -6,8 +6,19 @@
 <!--#include virtual="../ssi/start2t.html" -->
 <a id=top></a>
 <!--#include virtual="./ssi/view_stcw.html" -->
-<div style="text-align: center"><big><ttc>Anno Hit Query</ttc></big></div>
+<div style="text-align: center"><big><ttc>AnnoDB Hit Query</ttc></big></div>
 
+<table style="padding: 2;  border-spacing:0; border-collapse:collapse;  margin-left: auto; margin-right: auto;">
+<tr><td style="background-color: #666666; padding-bottom:4px; "> 
+<a href="#tab" class="white">Table</a> <mark class="white">|</mark>
+<a href="#ali" class="white">Align</a> <mark class="white">|</mark>
+<a href="#fil" class="white">Filters</a> <mark class="white">|</mark>
+<a href="#col" class="white">Columns</a> <mark class="white">|</mark>
+<a href="#show" class="white">Show and Export</a>
+</td></tr>
+</table>
+
+<a id=tab></a>
 <p>The  <ttc>annoDB Hits</ttc>  option under  <ttc>Basic Query</ttc>  searches by hit ID, hit Description and/or filters.
 <ul>
 <li>Select the <ttc>Search</ttc> checkbox to enter a substring for searching. 
@@ -16,16 +27,27 @@
 <li>The line above the table shows the filters applied.
 <li>Select a hit followed by  <ttc>View Sequences</ttc>  will show all the associated sequences in the <ttx>Sequence Table</ttx>.
 </ul>
-<p><img src="img/hitQuery.png" alt="" style="border: 1px solid black; width: 800px">
+<p><a href="img/hitQuery.png">
+<img src="img/hitQuery.png" alt="" style="border: 1px solid black; width: 800px"></a>
 <br>The decimal number display can be changed with <a href=decimal.html class=ext target="_blank">Decimal Display</a>.
 
 <p>Uncheck the <ttc>Group by Hit ID</ttc> to view the sequences.
-<br><img  src="img/hitQuerySeq.png" alt="" style="border: 1px solid black; width: 800px">
+<br><a href="img/hitQuerySeq.png">
+<img  src="img/hitQuerySeq.png" alt="" style="border: 1px solid black; width: 800px"></a>
 
-<p>The align option shows the alignment of all sequences that have been assigned to a hit. The alignment shown below uses dynamic programming.
-<br><img  src="img/hitAlign.png" alt="" style="border: 1px solid black; width: 800px">
+<a id=ali></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Align</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+The <b>Align</b> option shows the alignment of all sequences that have been assigned to a hit. The alignment shown below uses dynamic programming.
+<br><a href="img/hitAlign.png">
+<img  src="img/hitAlign.png" alt="" style="border: 1px solid black; width: 700px"></a>
 
-<h3>Filters and Columns</h3>
+<a id=fil></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Filters</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+<a href="img/hitFilters.png"><img  src="img/hitFilters.png" alt="" style="border: 1px solid black; width: 800px"></a>
 <table>
 <tr><td class="top">
 <ttc>Filters Seq</ttc>: This row of options apply to the sequences that align to the annoDB hit (generally protein, but can be nucleotide).
@@ -33,7 +55,8 @@
 counts of Root compared to Stem, the result would be all annoDB hits that have at least one sequence
 with RoSt&lt;0.05. 
 </ul>
-<td><img  src="img/hitCount.png" alt="" style="border: 1px solid black; width: 500px">
+<td><a href="img/hitCount.png">
+  <img  src="img/hitCount.png" alt="" style="border: 1px solid black; width: 500px"></a>
 
 <tr><td class="top">
 	<ttc>Filters Hit</ttc>: This row of options apply to the annotation assigned to the annoDB hit.
@@ -43,17 +66,47 @@ with RoSt&lt;0.05.
 	they are all selected.
 	<li>Selecting <ttc>GO, etc</ttc> brings up the window shown below.
 	</ul>
-	<img  src="img/hitGO.png" alt="" style="border: 1px solid black; width: 300px">
+	<a href="img/hitGOFilter.png"><img  src="img/hitGOFilter.png" alt="" style="border: 1px solid black; width: 300px"></a>
 
-	<td><img  src="img/hitSpecies.png" alt="" style="border: 1px solid black; width: 500px">
+	<td><a href="img/hitSpecies.png">
+	<img src="img/hitSpecies.png" alt="" style="border: 1px solid black; width: 500px"></a>
+</table>
 
-<tr><td>&nbsp;<td>&nbsp;
-<tr><td>&nbsp;<td>&nbsp;
-
-<tr><td class="top"><ttc>Columns</ttc>: The window on the right are the available columns for this table. These can be changed without running <ttc>BUILD TABLE</ttc> again.
-	<td><img  src="img/hitColumns.png" alt="" style="border: 1px solid black; width: 500px">
+<a id=col></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Columns</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+The windows below are the available columns for the hit table and sequence table. These can be changed without running <ttc>BUILD TABLE</ttc> again.
+<table>
+<tr>
+<td><a href="img/hitColumns.png">
+	<img  src="img/hitColumns.png" alt="" style="border: 1px solid black; width: 440px"></a>
+<td><a href="img/hitSeqColumns.png">
+	<img  src="img/hitSeqColumns.png" alt="" style="border: 1px solid black; width: 450px"></a>
 </table>
  
+
+<a id=show></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Show and Export</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+<a href="img/hitTopButtons.png"><img  src="img/hitTopButtons.png" alt="" style="border: 1px solid black; width: 800px"></a>
+<table>
+<tr><td>
+<p><b>Selected:</b> 
+<ul>
+<li><b>Copy...</b> provides copying to clipboard the <u>Hit ID</u>, <u>Description</u> or <u>Hit Sequence</u> of the selected
+sequence. 
+<li><b>Show...</b> is shown above, with a <u>Assigned GO for hit</u> example on the right.
+<li><b>Export...</b> has the same first two items as  <b>Show...</b>,
+but writes to file the <u>GO info</u> or <u>GO IDs</u>; the GO IDs can be loaded in the <b>GO Basic</b> panel
+with its <b>Load File</b>.
+</ul>
+<td><a href="img/hitAssignedGO.png"><img  src="img/hitAssignedGO.png" alt="" style="border: 1px solid black; width: 340px"></a>
+</table>
+<p><b>Table...</b> has <u>Show column stats</u>, <u>Copy table</u> and <u>Export table</u>.
+
+
 <table style="width: 100%"><tr><td style="text-align: left">
 <td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 

@@ -15,8 +15,7 @@ See <b>GO Help</b> for explanation of terms.
 <li><u>Level</u>: A GO ID can be at multiple levels in the tree. This is its maximum level.
 </ul>
 The remaining columns depends on the <b>GO...</b> pull-down view:
-<ol>
-
+<ul>
 <li><u>Assigned GOs for all hits</u> 
 <ul>
 <li><u>#:EvC</u>: Each hit-GO association has a EvC (evidence code). Each hit may have more
@@ -43,20 +42,56 @@ the sequence,  but not necessarily to the Best Hit ID.
 <ul>
 <li><u>EvC</u>: If this is in parenthesis, it has been inherited.
 </ul>
-</ol>
+</ul>
 
 
 <h3>GO Options - second row of buttons</h3>
-<p>All five result in pop-up windows
-of information, and the first three require a GO ID to be selected:
-<ol>
-<li><b>Hits</b>: The sequence hits that have the GO assigned will be shown (hits will only be shown if the 'Assign' column is true).
-<li><b>Ancestors</b>: The ancestors of the GO will be shown. The second column is the distance 
-in the tree from the selected GO.
-<li><b>Paths</b>: Displays a table of all paths of the tree for the selected GO.
-Note: this can take a time to display as the tree has to be computed.
-<li><b>Table</b>: This creates a popup of the table (slightly modified). It will stay active as you select other options.
-<li><b>GO sets</b>: (Assigned GOs only) Different sets of GOs may be assigned to the different proteins
+<b>Selected:</b> The four <b>GO</b> options produce exactly the same output as their
+counterparts on <b>Basic GO</b>.
+<ul>
+<li><b>Show...</b>
+	<ul>
+	<li><u>Seq Hits - assigned</u>&nbsp;&nbsp;Hits to the current sequence that have the GO assigned.
+	<br>&nbsp;
+	<li><u>Seq Hits - inherited</u>&nbsp;&nbsp;Hits to the current sequence that have the GO assigned or inherited.
+	<br>&nbsp;
+	<li><u>GO - Neighborhood with relations</u> 
+The immediate parents and children of the GO ID. 
+The relation of 'is_a' or 'part_of' is shown for this option.
+NOTE: same note as for descendants. Starting with sTCW v3.1.8, there is also a relation 'replaced_by'
+and 'replaces'.
+<br>&nbsp;
+
+	<li><u>GO - Ancestors</u>&nbsp;&nbsp;  All ancestors of the GO ID sorted by level. 
+<br>&nbsp;
+
+	<li><u>GO - Descendants</u>&nbsp;&nbsp;  All descendants of the GO ID sorted by level. 
+NOTE: if a descendant  GO does not have any assigned or inherited hits, it is not in the
+database so is not shown. 
+<br>&nbsp;
+	<li><u>GO - Ancestor path table</u>&nbsp;&nbsp;  
+The same GOs as in the Ancestor List, but shows the paths in table form. If all paths have the 
+same GOs at the top and bottom of the graph, they are only shown once and the row will be gray.
+NOTE: Occasionally, this query may be slow when there are many paths for the GO; some GOs have over 1000 paths.
+<br>&nbsp;
+	<li><u>GO - Related in table</u>&nbsp;&nbsp; 
+A list of the GOs ancestors and descendants will be listed IF they are also in the 
+table. The GOs will be listed in the same order as found in the table.
+</ul>
+
+<li><b>Export...</b>&nbsp;&nbsp; The exact same options as above, but the results are written
+to file. When an "*" is at the end of the option, this indicates that there will 
+be a choice between writing <u>All Info</u> or <u>ID only</u>. For example, if the <u>Hits - assigned*</u>
+is selected and <u>ID only</u> is then selected in the popup window, the HitIDs will be written
+to file; this is useful for loading in the <b>Basic Hit</b> panel to view.
+</ul>
+<b>Table:</b>
+<ul>
+<li><b>Show...</b>
+<ul>
+<li><u>Table columns</u>&nbsp;&nbsp;A copy of the table in a popup window. 
+<br>&nbsp;
+<li><u>GO sets</u>: (Assigned GOs only) Different sets of GOs may be assigned to the different proteins
 that hit the sequence. This shows how they group. For example:
 <pre>
           Sets   1   2  #Sets
@@ -71,6 +106,12 @@ that hit the sequence. This shows how they group. For example:
 </pre>
 The first set only has one GO, and 25 hits were assigned the GO. The second
 set has 5 GOs, but only one hit was assigned the 5 GOs.
-</ol>
+</ul>
+<li><b>Export...</b>
+<ul>
+<li><u>Table columns</u>&nbsp;&nbsp;The table is written to file in a tab-delimited format.
+<li><u>GO IDs only</u>&nbsp;&nbsp;The GO IDs are written to file, one per line.
+</ul>
+</ul>
 </body>
 </html>

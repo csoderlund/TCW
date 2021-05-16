@@ -23,17 +23,17 @@ exported, or view the individual sequences with <b>View Selected Sequence</b>.
 <p>
 Choose one of four search modes and enter a string to search on.  
 <ul>
-<li><b>Seq ID:</b> Sequence name 
-<li><b>Orig ID or Longest or None:</b> (1) Original name if Seq ID != Orig ID  (2) Longest read of contig
+<li><b>Seq ID</b>&nbsp;&nbsp;Sequence name. Only one name is allowed unless loaded from file. 
+<li><b>Orig ID or Longest or None</b>&nbsp;&nbsp; (1) Original name if Seq ID != Orig ID  (2) Longest read of contig
 if assembled, (3) no query if neither of the previous. 
-<li><b>TCW:</b> TCW Remarks are entered when the database is built; they provide information
+<li><b>TCW</b>&nbsp;&nbsp;TCW Remarks are entered when the database is built; they provide information
 on the ORFs, and if the sequence has hits in multiple frames.
-<li><b>User:</b> User Remarks may be associated with each sequence (entered with <tt>runSingleTCW</tt>).
+<li><b>User</b>&nbsp;&nbsp;User Remarks may be associated with each sequence (entered with <tt>runSingleTCW</tt>).
 </ul>
 
 <b><i>Search rules</i></b> 
 <ul>
-<li>It first tries to find an exact match. If found, the results are listed.
+<li>The search first tries to find an exact match. If found, the results are listed.
 If not found, it then tries to match the substring anywhere in the hit ID or description.
 <li>To force it to match at the beginning of the string, enter a '%' at the end of the
 substring, e.g. 'mitochondrial%' to match everything that starts with 'mitochondrial'.
@@ -72,17 +72,17 @@ be removed from the other (not-displayed) list.
 <hr>
 <h2>Top row of options</h2>
 
-<b>View Sequence</b>: Select a one or more seqIDs in the table, 
+<b>View Seqs</b>&nbsp;&nbsp;Select a one or more seqIDs in the table, 
 then select <b>View Sequences</b>.
 The sequences will be shown in the main table, where you can select it to view the
 <b>Sequence Details</b>.
 
-<p><b>Copy...</b>: Select one sequence to copy to clipboard the SeqID, Best HitID, or Longest.
+<p><b>Copy...</b>&nbsp;&nbsp;Select one sequence to copy to clipboard the SeqID, Best HitID, or Orig ID.
 
-<p><b>Table...</b>: 
+<p><b>Table...</b> 
 <ul>
-<li><u>Copy table</u>: The table will be copied so that you can paste it into a file.
-<li><u>Export</u>: A window will pop-up with a file chooser, and the table will be
+<li><u>Copy table</u> The table will be copied so that you can paste it into a file.
+<li><u>Export</u> A window will pop-up with a file chooser, and the table will be
 written to the selected file.
 </ul>
 

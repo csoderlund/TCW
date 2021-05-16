@@ -36,7 +36,7 @@ public class SortTable extends JTable implements ListSelectionListener {
         theClickListeners = new Vector<ActionListener> ();
         theDoubleClickListeners = new Vector<ActionListener> ();
         
-    		theModel = new SortTableModel(tData);
+    	theModel = new SortTableModel(tData);
     	
         setAutoCreateColumnsFromModel( true );
        	setColumnSelectionAllowed( false );
@@ -69,127 +69,120 @@ public class SortTable extends JTable implements ListSelectionListener {
 					}					
 				}
 			}
-			
         });
     }  
     
     public void removeListeners() {
-	    	theClickListeners.clear();
-	    	theDoubleClickListeners.clear();
-    }
-    
+	    theClickListeners.clear();
+	    theDoubleClickListeners.clear();
+    }  
     public void addSingleClickListener(ActionListener l) {
-    		theClickListeners.add(l);
+    	theClickListeners.add(l);
     }
-    
     public void addDoubleClickListener(ActionListener l) {
-    		theDoubleClickListeners.add(l);
+    	theDoubleClickListeners.add(l);
     }
-    
     public void sortAtColumn(int column, boolean ascending) {
-	    	if(!theModel.getColumnName(column).equals(ROWNUM))
-	    		theModel.sortAtColumn(column, ascending);
-    }
-   
+	    if(!theModel.getColumnName(column).equals(ROWNUM))
+	    	theModel.sortAtColumn(column, ascending);
+    }   
     private Component getFormattedComponent(Component comp, int Index_row, int Index_col) {
-	    	if(!(comp instanceof JLabel)) return comp;
+	    if(!(comp instanceof JLabel)) return comp;
 	    	
-        	JLabel compLbl = (JLabel)comp;
+        JLabel compLbl = (JLabel)comp;
     
-        	Class<?> cl = getColumnClass(Index_col);
-        	String colName = getColumnName(Index_col);
-      	
-        	//even index, selected or not selected
-        	if(isRowSelected(Index_row)) {
-        		compLbl.setBackground(bgColorHighlight);
-        		compLbl.setForeground(bgColor);
-        	}
-        	else if (Index_row % 2 == 0) {
-        		compLbl.setBackground(bgColorAlt);
-        		compLbl.setForeground(txtColor);
+    	Class<?> cl = getColumnClass(Index_col);
+    	String colName = getColumnName(Index_col);
+  	
+    	//even index, selected or not selected
+    	if(isRowSelected(Index_row)) {
+    		compLbl.setBackground(bgColorHighlight);
+    		compLbl.setForeground(bgColor);
+    	}
+    	else if (Index_row % 2 == 0) {
+    		compLbl.setBackground(bgColorAlt);
+    		compLbl.setForeground(txtColor);
         } 
         else {
-            	compLbl.setBackground(bgColor);
-            	compLbl.setForeground(txtColor);
+            compLbl.setBackground(bgColor);
+            compLbl.setForeground(txtColor);
         }
         	
-        	//Both fields use numeric representation for their values for speed
-        	if(colName.equals(ROWNUM)) {
-        		compLbl.setText("" + (Index_row + 1));
-        		compLbl.setHorizontalAlignment(SwingConstants.LEFT);
-        	}
-        	else if (getValueAt(Index_row, Index_col) == null) {
-        		compLbl.setText(Globalx.sNoVal);
+    	//Both fields use numeric representation for their values for speed
+    	if(colName.equals(ROWNUM)) {
+    		compLbl.setText("" + (Index_row + 1));
+    		compLbl.setHorizontalAlignment(SwingConstants.LEFT);
+    	}
+    	else if (getValueAt(Index_row, Index_col) == null) {
+    		compLbl.setText(Globalx.sNoVal);
+    	 	compLbl.setHorizontalAlignment(SwingConstants.RIGHT); 
+    	}
+    	else if((cl == Integer.class || cl == Long.class)) {
+    		String x = compLbl.getText();
+    		if (x.equals(Globalx.iStrNoVal)) compLbl.setText(Globalx.sNoVal);
+    		else if (x.length() == 0)        compLbl.setText(Globalx.sNoVal);
+    	 	compLbl.setHorizontalAlignment(SwingConstants.RIGHT); 
+    	}
+    	else if (cl == Double.class) {
+    		boolean showVal = true;
+    		String noVal="-"; 
+    		try {
+    			double val = ((Double)getValueAt(Index_row, Index_col));
+      		
+    			if (SeqDEs.contains(colName)) {
+    				if (Math.abs(val)>=Globalx.dNoDE) showVal=false;  // 3,-3 no display of DE
+    			}
+    			// distinguish value not computed versus null value
+    			else if (val <= Globalx.dNullVal) {//-2 no value, 1.5 = null value
+    				showVal = false; 
+    				if (val == Globalx.dNullVal)  noVal=Globalx.sNullVal;  
+    			}
+    			else if(compLbl.getText().length() == 0) showVal=false;
+    			
+        		if (showVal)	compLbl.setText(formatDouble(val, false));
+        		else compLbl.setText(noVal);
         	 	compLbl.setHorizontalAlignment(SwingConstants.RIGHT); 
-        	}
-        	else if((cl == Integer.class || cl == Long.class)) {
-        		String x = compLbl.getText();
-        		if (x.equals(Globalx.iStrNoVal)) compLbl.setText(Globalx.sNoVal);
-        		else if (x.length() == 0)        compLbl.setText(Globalx.sNoVal);
-        	 	compLbl.setHorizontalAlignment(SwingConstants.RIGHT); 
-        	}
-        	else if (cl == Double.class) {
-        		boolean showVal = true;
-        		String noVal="-"; 
-        		try {
-        			double val = ((Double)getValueAt(Index_row, Index_col));
-          		
-        			if (SeqDEs.contains(colName)) {
-        				if (Math.abs(val)>=Globalx.dNoDE) showVal=false;  // 3,-3 no display of DE
-        			}
-        			// distinguish value not computed versus null value
-        			else if (val <= Globalx.dNullVal) {//-2 no value, 1.5 = null value
-        				showVal = false; 
-        				if (val == Globalx.dNullVal)  noVal=Globalx.sNullVal;  
-        			}
-        			else if(compLbl.getText().length() == 0) showVal=false;
-        			
-	        		if (showVal)	compLbl.setText(formatDouble(val, false));
-	        		else compLbl.setText(noVal);
-	        	 	compLbl.setHorizontalAlignment(SwingConstants.RIGHT); 
-	        }
-        		catch(Exception e) {compLbl.setText("");}
-        	}
+    		}
+    		catch(Exception e) {compLbl.setText("");}
+    	}
          else if (cl == Float.class) { 
-        		boolean showVal = true;
-        		String noVal=Globalx.sNoVal;
-        		try {
-        			float val = ((Float)getValueAt(Index_row, Index_col));
-        			 
-        			boolean isPerc = colName.startsWith("%");  
-        			
-        			if (val <= Globalx.dNullVal) {
-        				showVal = false; // -2 no display for everything else
-        				if (val == Globalx.dNullVal)  noVal=Globalx.sNullVal;  
-        			}
-        			else if(compLbl.getText().length() == 0) showVal=false;
-        			
-	        		if (showVal)	compLbl.setText(formatDouble(val, isPerc));
-	        		else compLbl.setText(noVal);
-	        	 	compLbl.setHorizontalAlignment(SwingConstants.RIGHT); 
-	        }
-        		catch(Exception e) {compLbl.setText("");}
-        	}
-        	else {
-        	   	if(compLbl.getText().length() == 0) compLbl.setText(Globalx.sNoVal);
-        	 	compLbl.setHorizontalAlignment(SwingConstants.LEFT); 
-        	}
+    		boolean showVal = true;
+    		String noVal=Globalx.sNoVal;
+    		try {
+    			float val = ((Float)getValueAt(Index_row, Index_col));
+    			 
+    			boolean isPerc = colName.startsWith("%");  
+    			
+    			if (val <= Globalx.dNullVal) {
+    				showVal = false; // -2 no display for everything else
+    				if (val == Globalx.dNullVal)  noVal=Globalx.sNullVal;  
+    			}
+    			else if(compLbl.getText().length() == 0) showVal=false;
+    			
+        		if (showVal)	compLbl.setText(formatDouble(val, isPerc));
+        		else compLbl.setText(noVal);
+        	 	compLbl.setHorizontalAlignment(SwingConstants.RIGHT); 
+    		}
+    		catch(Exception e) {compLbl.setText("");}
+    	}
+    	else {
+    	   	if(compLbl.getText().length() == 0) compLbl.setText(Globalx.sNoVal);
+    	 	compLbl.setHorizontalAlignment(SwingConstants.LEFT); 
+    	}
         return compLbl;    		
     }
     
     public Component prepareRenderer(TableCellRenderer renderer,int Index_row, int Index_col) {
-	    	Component comp = super.prepareRenderer(renderer, Index_row, Index_col);
-	    	return getFormattedComponent(comp, Index_row, Index_col);
-    }
-    
+	    Component comp = super.prepareRenderer(renderer, Index_row, Index_col);
+	    return getFormattedComponent(comp, Index_row, Index_col);
+    }  
     public int getColumnHeaderIndex(String columnName) {
-	    	for(int x=0; x<getColumnModel().getColumnCount(); x++) {    		
-	    		if(((String)getColumnModel().getColumn(x).getHeaderValue()).equals(columnName))
-	    			return x;
-	    	}
-	    	return -1;
+    	for(int x=0; x<getColumnModel().getColumnCount(); x++) {    		
+    		if(((String)getColumnModel().getColumn(x).getHeaderValue()).equals(columnName))
+    			return x;
+    	}
+    	return -1;
     }
- 
     public void setDEnames(String [] seq) {
 		for (int i=0; i<seq.length; i++) SeqDEs.add(seq[i]);
 	}
@@ -198,14 +191,14 @@ public class SortTable extends JTable implements ListSelectionListener {
     static DecimalFormat df2 = new DecimalFormat("0.#E0;0.##E0");
     
     static public String formatDouble(double val, boolean isP) {
-	    	if (val == 0) return "0.000"; 
-	    	if (isP) return String.format("%.1f", val); 
-	    	
-	    	double a = Math.abs(val);
-	    	if (a>=10.0)    return String.format("%.1f", val); 
-	    	if (a>=1.0)     return String.format("%.2f", val); 
-	    	if (a>=0.001)  return String.format("%.3f", val);  
-	    	return  String.format("%.1E", val);
+    	if (val == 0) return "0.000"; 
+    	if (isP) return String.format("%.1f", val); 
+    	
+    	double a = Math.abs(val);
+    	if (a>=10.0)    return String.format("%.1f", val); 
+    	if (a>=1.0)     return String.format("%.2f", val); 
+    	if (a>=0.001)  return String.format("%.3f", val);  
+    	return  String.format("%.1E", val);
 	}
    
 	private static final int MAX_AUTOFIT_COLUMN_WIDTH = 120; // in pixels
@@ -220,17 +213,15 @@ public class SortTable extends JTable implements ListSelectionListener {
             column = getColumnModel().getColumn(i);
             
             comp = headerRenderer.getTableCellRendererComponent(
-                                 this, column.getHeaderValue(),
-                                 false, false, 0, i);
+                   this, column.getHeaderValue(), false, false, 0, i);
             
             headerWidth = comp.getPreferredSize().width + 10;
             
             cellWidth = 0;
             for (int j = 0;  j < getModel().getRowCount();  j++) { // for each row
 	            comp = getDefaultRenderer(theModel.getColumnClass(i)).
-	                             getTableCellRendererComponent(
-	                                 this, theModel.getValueAt(j, i),
-	                                 false, false, j, i);
+	                    getTableCellRendererComponent(
+	                       this, theModel.getValueAt(j, i), false, false, j, i);
 
 	            comp = getFormattedComponent(comp, j, i);
 	             
@@ -246,30 +237,30 @@ public class SortTable extends JTable implements ListSelectionListener {
     }
     
     public class SortTableModel extends AbstractTableModel {
-	    	private static final long serialVersionUID = -2360668369025795459L;
-	
-	    	public SortTableModel(TableData values) {
-	    		theData = values;
-	    	}
-	
-	    	public boolean isCellEditable(int row, int column) { return false; }
-	    	public Class<?> getColumnClass(int columnIndex) { return theData.getColumnType(columnIndex); }
-	    	public String getColumnName(int columnIndex) { return theData.getColumnName(columnIndex); }
-	    	public int getColumnCount() { return theData.getNumColumns(); }
-	    	public int getRowCount() { return theData.getNumRows(); }
-	    	public Object getValueAt(int rowIndex, int columnIndex) {
-	    		return theData.getValueAt(rowIndex, columnIndex); 
-	    	}
-	    	public void setValueAt(Object obj, int rowIndex, int columnIndex) { 
-	    		theData.setValueAt(obj, rowIndex, columnIndex); 
-	    	}
-	    	public void sortAtColumn(int columnIndex, boolean ascending) {
-	    		theData.sortByColumn(columnIndex, ascending);
-	    		this.fireTableDataChanged();
-	    		theData.sortMasterList(theData.getColumnName(columnIndex), ascending);
-	    	}
-	
-	    	private TableData theData = null;
+    	private static final long serialVersionUID = -2360668369025795459L;
+
+    	public SortTableModel(TableData values) {
+    		theData = values;
+    	}
+
+    	public boolean isCellEditable(int row, int column) { return false; }
+    	public Class<?> getColumnClass(int columnIndex) { return theData.getColumnType(columnIndex); }
+    	public String getColumnName(int columnIndex) { return theData.getColumnName(columnIndex); }
+    	public int getColumnCount() { return theData.getNumColumns(); }
+    	public int getRowCount() { return theData.getNumRows(); }
+    	public Object getValueAt(int rowIndex, int columnIndex) {
+    		return theData.getValueAt(rowIndex, columnIndex); 
+    	}
+    	public void setValueAt(Object obj, int rowIndex, int columnIndex) { 
+    		theData.setValueAt(obj, rowIndex, columnIndex); 
+    	}
+    	public void sortAtColumn(int columnIndex, boolean ascending) {
+    		theData.sortByColumn(columnIndex, ascending);
+    		this.fireTableDataChanged();
+    		theData.sortMasterList(theData.getColumnName(columnIndex), ascending);
+    	}
+
+    	private TableData theData = null;
     }
     private Color bgColor = Globals.BGCOLOR;
     private Color bgColorAlt = new Color(240,240,255);

@@ -6,6 +6,7 @@ package sng.viewer.panels.Basic;
  * query: go_info for everything except:
  * 		pja_gotree for making the 'show tree' view and DEtrim
  * 		pja_unitrans_go for selecting sequences to view
+ * CAS324 removed Trim stuff for now....
  */
 import java.awt.Color;
 import java.awt.Component;
@@ -60,12 +61,9 @@ import util.ui.UserPrompt;
 public class BasicGOFilterTab extends Tab {
 	private static final long serialVersionUID = 5545816581105885864L;
 	
-	private boolean isGOTRIM=false; // CAS318 trim is currently disabled
 	private final String helpHTML =   Globals.helpDir + "BasicQueryGO.html";
 	private final String goHelpHTML = Globals.helpDir + "goHelp/index.html"; // CAS318 new GO help
 	private final String goEvCHTML =  Globals.helpDir + "goHelp/evc.html"; // CAS323
-			
-	private boolean doDEtrim=true; // this seems to work, but doesn't reduce by much. Not working now.
 	
 	private static final Color BGCOLOR = Globals.BGCOLOR;
 	
@@ -148,7 +146,7 @@ public class BasicGOFilterTab extends Tab {
 	private void createTopRowPanel() {
 		topRowPanel = Static.createRowPanel();
 		
-		btnViewSeqs = new JButton("View Sequences");
+		btnViewSeqs = new JButton("View Seqs");
 		btnViewSeqs.setBackground(Globals.FUNCTIONCOLOR);
 		btnViewSeqs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -158,7 +156,7 @@ public class BasicGOFilterTab extends Tab {
 		btnViewSeqs.setEnabled(false);
 		
         createTopCopy();
-        createTopShow();
+        createTopSelected();
 	    createTopTable();
 		
 		JButton btnHelp = new JButton("Help");
@@ -169,29 +167,27 @@ public class BasicGOFilterTab extends Tab {
 						"Basic GO Query", helpHTML);
 			}
 		});
-		JButton btnGoHelp = new JButton("GO Help");
-		btnGoHelp.setBackground(Globals.HELPCOLOR);
-		btnGoHelp.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(theParentFrame, 
-						"Go Help", goHelpHTML);
-			}
-		});
-		topRowPanel.add(new JLabel("For selected: "));
-		topRowPanel.add(Box.createHorizontalStrut(2));
+		
+		topRowPanel.add(new JLabel("Selected: "));
+		topRowPanel.add(Box.createHorizontalStrut(1));
 		topRowPanel.add(btnViewSeqs);
-		topRowPanel.add(Box.createHorizontalStrut(2));
-		topRowPanel.add(btnCopy);
-		topRowPanel.add(Box.createHorizontalStrut(2));
-		topRowPanel.add(btnShow);
-		topRowPanel.add(Box.createHorizontalStrut(20));
-		topRowPanel.add(btnTable);
-		topRowPanel.add(Box.createHorizontalStrut(20));
+		topRowPanel.add(Box.createHorizontalStrut(1));
+		topRowPanel.add(btnSelCopy);
+		topRowPanel.add(Box.createHorizontalStrut(1));
+		topRowPanel.add(btnSelShow);
+		topRowPanel.add(Box.createHorizontalStrut(1));
+		topRowPanel.add(btnSelExport);
+		topRowPanel.add(Box.createHorizontalStrut(5));
+		
+		topRowPanel.add(new JLabel("Table: "));
+		topRowPanel.add(Box.createHorizontalStrut(1));
+		topRowPanel.add(btnTableShow);
+		topRowPanel.add(Box.createHorizontalStrut(1));
+		topRowPanel.add(btnTableExport);
+		topRowPanel.add(Box.createHorizontalStrut(5));
 		
 		topRowPanel.add( Box.createHorizontalGlue() );
 		topRowPanel.add(btnHelp);
-		topRowPanel.add(Box.createHorizontalStrut(3));
-		topRowPanel.add(btnGoHelp);
 		topRowPanel.setMaximumSize(topRowPanel.getPreferredSize());
 		topRowPanel.setMinimumSize(topRowPanel.getPreferredSize());
 	}
@@ -219,98 +215,145 @@ public class BasicGOFilterTab extends Tab {
 				} catch (Exception er) {ErrorReport.reportError(er, "Error copying  description"); }
 			}
 		}));
-		btnCopy = new JButton("Copy...");
-		btnCopy.setBackground(Color.WHITE);
-		btnCopy.addMouseListener(new MouseAdapter() {
+		btnSelCopy = Static.createButton("Copy...", false);
+		btnSelCopy.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 copypopup.show(e.getComponent(), e.getX(), e.getY());
             }
         });
-		btnCopy.setEnabled(false);
 	}
-	/**************************************************************/
-	private void createTopShow() {
-		final JPopupMenu showpopup = new JPopupMenu();
-		showpopup.add(new JMenuItem(new AbstractAction("Hits - assigned") {
+	/**************************************************************
+	 * Selected popup and export
+	 */
+	private void createTopSelected() {
+	// Selected show
+		final JPopupMenu selPopup = new JPopupMenu();
+		selPopup.add(new JMenuItem(new AbstractAction("Hits - assigned") {
 			private static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent e) {
-				goTablePanel.showHitsForSelected(GOtree.HITS, btnShow);
+				goTablePanel.showExportGOtreeSelected(GOtree.GO_HITS, GOtree.DO_POPUP, btnSelShow);
 			}
 		}));
-		showpopup.add(new JMenuItem(new AbstractAction("Hits - inherited") {
+		selPopup.add(new JMenuItem(new AbstractAction("Hits - inherited") {
 			private static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent e) {
-				goTablePanel.showHitsForSelected(GOtree.ALL_HITS, btnShow);
+				goTablePanel.showExportGOtreeSelected(GOtree.GO_ALL_HITS, GOtree.DO_POPUP, btnSelShow);
 			}
 		}));	
-		showpopup.add(new JMenuItem(new AbstractAction("Sequence - has hit with GO") {
+		selPopup.add(new JMenuItem(new AbstractAction("Sequence - has hit with GO") {
 			private static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent e) {
-				goTablePanel.showHitsForSelected(GOtree.HIT_GO_SEQ, btnShow);
+				goTablePanel.showExportGOtreeSelected(GOtree.GO_SEQ, GOtree.DO_POPUP, btnSelShow);
 			}
 		}));	
-		showpopup.addSeparator();
+		selPopup.addSeparator();
 		
-		showpopup.add(new JMenuItem(new AbstractAction("GO - Neighborhood with relations") { // CAS318 put first
+		selPopup.add(new JMenuItem(new AbstractAction("GO - Neighborhood with relations") { // CAS318 put first
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
-				goTablePanel.showPathsForSelected(GOtree.NEIGHBORS, btnShow);
+				goTablePanel.showExportGOtreeSelected(GOtree.NEIGHBORS,GOtree.DO_POPUP,  btnSelShow);
 			}
 		}));
-		showpopup.add(new JMenuItem(new AbstractAction("GO - Ancestors by level") {
+		selPopup.add(new JMenuItem(new AbstractAction("GO - Ancestors") {
 			private static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent e) {
-				goTablePanel.showPathsForSelected(GOtree.ANCESTORS, btnShow);
+				goTablePanel.showExportGOtreeSelected(GOtree.ANCESTORS, GOtree.DO_POPUP, btnSelShow);
 			}
 		}));	
-		showpopup.add(new JMenuItem(new AbstractAction("GO - Descendants by level") {
+		selPopup.add(new JMenuItem(new AbstractAction("GO - Descendants") {
 			private static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent e) {
-				goTablePanel.showPathsForSelected(GOtree.DESCENDENTS, btnShow);
+				goTablePanel.showExportGOtreeSelected(GOtree.DESCENDANTS, GOtree.DO_POPUP, btnSelShow);
 			}
 		}));	
 		
-		showpopup.add(new JMenuItem(new AbstractAction("GO - Related in table by table order") {
+		selPopup.add(new JMenuItem(new AbstractAction("GO - Ancestor path table") {
 			private static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent e) {
-				goTablePanel.showRelatedFromTable(btnShow);
-			}
-		}));	
-		/** Disabled for v3.1.8
-		showpopup.add(new JMenuItem(new AbstractAction("GO - Ancestor list by distance and relation") {
-			private static final long serialVersionUID = 1L;
-			public void actionPerformed(ActionEvent e) {
-				goTablePanel.showPathsForSelected(GOtree.ANC_DIST, btnShow);
+				goTablePanel.showExportGOtreeSelected(GOtree.PATHS, GOtree.DO_POPUP, btnSelShow);
 			}
 		}));
-		**/	
-		showpopup.add(new JMenuItem(new AbstractAction("GO - Ancestor path table") {
-			private static final long serialVersionUID = 1L;
-			public void actionPerformed(ActionEvent e) {
-				goTablePanel.showPathsForSelected(GOtree.PATHS, btnShow);
-			}
-		}));	
-		/** the numbering is slightly off - not as useful as the above
-		showpopup.add(new JMenuItem(new AbstractAction("GO - Ancestor Tree (slow)") {
-			private static final long serialVersionUID = 1L;
-			public void actionPerformed(ActionEvent e) {
-				goTablePanel.showPathsForSelected(GOtree.TREE, btnShow);
-			}
-		}));	
-		**/
 		
-		btnShow = Static.createButton("Show...", false);
-		btnShow.addMouseListener(new MouseAdapter() {
+		selPopup.add(new JMenuItem(new AbstractAction("GO - Related in table") {
+			private static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent e) {
+				goTablePanel.showRelatedFromTable(GOtree.DO_POPUP, btnSelShow);
+			}
+		}));	
+		
+		btnSelShow = Static.createButton("Show...", false);
+		btnSelShow.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
-                showpopup.show(e.getComponent(), e.getX(), e.getY());
+                selPopup.show(e.getComponent(), e.getX(), e.getY());
+            }
+        });
+		/**************************************************************************/
+		final JPopupMenu selExport = new JPopupMenu();
+		selExport.add(new JMenuItem(new AbstractAction("Hits - assigned*") {
+			private static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent e) {
+				goTablePanel.showExportGOtreeSelected(GOtree.GO_HITS, GOtree.DO_EXPORT_ASK, btnSelExport);
+			}
+		}));
+		selExport.add(new JMenuItem(new AbstractAction("Hits - inherited*") {
+			private static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent e) {
+				goTablePanel.showExportGOtreeSelected(GOtree.GO_ALL_HITS, GOtree.DO_EXPORT_ASK, btnSelExport);
+			}
+		}));	
+		selExport.add(new JMenuItem(new AbstractAction("Sequence - has hit with GO*") {
+			private static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent e) {
+				goTablePanel.showExportGOtreeSelected(GOtree.GO_SEQ, GOtree.DO_EXPORT_ASK, btnSelExport);
+			}
+		}));	
+		selExport.addSeparator();
+		
+		selExport.add(new JMenuItem(new AbstractAction("GO - Neighborhood with relations") { // CAS318 put first
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				goTablePanel.showExportGOtreeSelected(GOtree.NEIGHBORS,GOtree.DO_EXPORT_ALL,  btnSelExport);
+			}
+		}));
+		selExport.add(new JMenuItem(new AbstractAction("GO - Ancestors*") {
+			private static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent e) {
+				goTablePanel.showExportGOtreeSelected(GOtree.ANCESTORS, GOtree.DO_EXPORT_ASK, btnSelExport);
+			}
+		}));	
+		selExport.add(new JMenuItem(new AbstractAction("GO - Descendants*") {
+			private static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent e) {
+				goTablePanel.showExportGOtreeSelected(GOtree.DESCENDANTS, GOtree.DO_EXPORT_ASK, btnSelExport);
+			}
+		}));		
+		selExport.add(new JMenuItem(new AbstractAction("GO - Ancestor path table") {
+			private static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent e) {
+				goTablePanel.showExportGOtreeSelected(GOtree.PATHS, GOtree.DO_EXPORT_ALL, btnSelExport);
+			}
+		}));	
+		selExport.add(new JMenuItem(new AbstractAction("GO - Related in table") {
+			private static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent e) {
+				goTablePanel.showRelatedFromTable(GOtree.DO_EXPORT_ALL, btnSelExport);
+			}
+		}));		
+		
+		btnSelExport = Static.createButton("Export...", false);
+		btnSelExport.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                selExport.show(e.getComponent(), e.getX(), e.getY());
             }
         });
 	}
-	/************************************************************/
+	/************************************************************
+	 * Table popup and export - All in BasicGOTable
+	 */
 	private void createTopTable() {
-		final JPopupMenu tablepopup = new JPopupMenu();
 		
-		tablepopup.add(new JMenuItem(new AbstractAction("Show Column Stats") {
+		final JPopupMenu tablePopup = new JPopupMenu();
+		tablePopup.add(new JMenuItem(new AbstractAction("Column Stats") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -319,140 +362,227 @@ public class BasicGOFilterTab extends Tab {
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error column stats", null);}
 			}
 		}));
-		tablepopup.addSeparator();
+		tablePopup.addSeparator();
 		
-		tablepopup.add(new JMenuItem(new AbstractAction("Copy Table") {
+		tablePopup.add(new JMenuItem(new AbstractAction("Each GO parents with relation") {
 			private static final long serialVersionUID = 1L;
+
 			public void actionPerformed(ActionEvent e) {
 				try {
-					Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
-					String ts = goTablePanel.makeCopyTableString("\t");
-					cb.setContents(new StringSelection(ts), null);
-				} catch (Exception er) {ErrorReport.reportError(er, "Error copy table"); }
-			}
-		}));
-		tablepopup.addSeparator();
-		
-		tablepopup.add(new JMenuItem(new AbstractAction("Export Table ("+Globalx.TSV_SUFFIX+")") {
-			private static final long serialVersionUID = 1L;
-			public void actionPerformed(ActionEvent e) {
-				try {
-					btnTable.setEnabled(false);
+					btnTableShow.setEnabled(false); 
 					enabledFunctions(false);
 					
-					goTablePanel.exportTable(btnTable, 0);
+					goTablePanel.showExportGOtreeTable(btnTableShow, GOtree.ALL_PARENTS, GOtree.DO_POPUP);
 					
 					enabledFunctions(true);
-					btnTable.setEnabled(true);
+					btnTableShow.setEnabled(true);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error all paths for table");
+				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error all paths for table", null);}
+			}
+		}));
+		tablePopup.add(new JMenuItem(new AbstractAction("Set of ancestors") {
+			private static final long serialVersionUID = 1L;
+
+			public void actionPerformed(ActionEvent e) {
+				try {
+					btnTableShow.setEnabled(false); 
+					enabledFunctions(false);
+					
+					goTablePanel.showExportGOtreeTable(btnTableShow, GOtree.ALL_ANCESTORS, GOtree.DO_POPUP);
+					
+					enabledFunctions(true);
+					btnTableShow.setEnabled(true);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error all paths for table");
+				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error all paths for table", null);}
+			}
+		}));
+		tablePopup.add(new JMenuItem(new AbstractAction("Longest paths (slow and large results)") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					btnTableShow.setEnabled(false); 
+					enabledFunctions(false);
+					
+					goTablePanel.showExportGOtreeTable(btnTableShow, GOtree.LONGEST_PATHS, GOtree.DO_POPUP);
+					
+					enabledFunctions(true);
+					btnTableShow.setEnabled(true);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error all paths for table");
+				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error all paths for table", null);}
+			}
+		}));
+		
+		tablePopup.add(new JMenuItem(new AbstractAction("All paths (slow and very large results)") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					btnTableShow.setEnabled(false); 
+					enabledFunctions(false);
+					
+					goTablePanel.showExportGOtreeTable(btnTableShow, GOtree.ALL_PATHS, GOtree.DO_POPUP);
+					
+					enabledFunctions(true);
+					btnTableShow.setEnabled(true);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error all paths for table");
+				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error all paths for table", null);}
+			}
+		}));
+		
+		btnTableShow = Static.createButton("Show...", false);
+		btnTableShow.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                tablePopup.show(e.getComponent(), e.getX(), e.getY());
+            }
+        });
+		
+	/*************** Export *****************************
+	 ***********************************************/
+		final JPopupMenu tableExport = new JPopupMenu();
+		
+		tableExport.add(new JMenuItem(new AbstractAction("Table columns") {
+			private static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					btnTableExport.setEnabled(false);
+					enabledFunctions(false);
+					
+					goTablePanel.tableExport(btnTableExport, 0);
+					
+					enabledFunctions(true);
+					btnTableExport.setEnabled(true);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error export table");
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error export table", null);}
 			}
 		}));
-		tablepopup.add(new JMenuItem(new AbstractAction("Export SeqID with GOs ("+Globalx.TSV_SUFFIX+")") {
+		tableExport.add(new JMenuItem(new AbstractAction("GO IDs only") {
 			private static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent e) {
 				try {
-					btnTable.setEnabled(false);
+					btnTableExport.setEnabled(false);
 					enabledFunctions(false);
 					
-					goTablePanel.exportTable(btnTable, 1);
+					goTablePanel.tableExport(btnTableExport, 4); // CAS324 new
 					
 					enabledFunctions(true);
-					btnTable.setEnabled(true);
+					btnTableExport.setEnabled(true);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error export table");
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error export table", null);}
 			}
 		}));
-		tablepopup.add(new JMenuItem(new AbstractAction("Export/Merge #Seq ("+Globalx.TSV_SUFFIX+")") {
+		tableExport.add(new JMenuItem(new AbstractAction("SeqID with GOs") {
 			private static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent e) {
 				try {
-					btnTable.setEnabled(false);
+					btnTableExport.setEnabled(false);
 					enabledFunctions(false);
 					
-					goTablePanel.exportTable(btnTable, 2);
+					goTablePanel.tableExport(btnTableExport, 1);
 					
 					enabledFunctions(true);
-					btnTable.setEnabled(true);
+					btnTableExport.setEnabled(true);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error export table");
+				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error export table", null);}
+			}
+		}));
+		tableExport.add(new JMenuItem(new AbstractAction("Create/Merge #Seq") {
+			private static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					btnTableExport.setEnabled(false);
+					enabledFunctions(false);
+					
+					goTablePanel.tableExport(btnTableExport, 2);
+					
+					enabledFunctions(true);
+					btnTableExport.setEnabled(true);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error export table");
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error export table", null);}
 			}
 		}));
 		
 		// Export using GOtree.java
-		tablepopup.addSeparator();
-		tablepopup.add(new JMenuItem(new AbstractAction("Each GO parents with relation") {
+		tableExport.addSeparator();
+		tableExport.add(new JMenuItem(new AbstractAction("Each GO parents with relation") {
 			private static final long serialVersionUID = 1L;
 
 			public void actionPerformed(ActionEvent e) {
 				try {
-					btnTable.setEnabled(false); 
+					btnTableExport.setEnabled(false); 
 					enabledFunctions(false);
 					
-					goTablePanel.showExportAllPaths(btnTable, GOtree.ALL_PARENTS);
+					goTablePanel.showExportGOtreeTable(btnTableExport, GOtree.ALL_PARENTS, GOtree.DO_EXPORT_ALL);
 					
 					enabledFunctions(true);
-					btnTable.setEnabled(true);
+					btnTableExport.setEnabled(true);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error all paths for table");
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error all paths for table", null);}
 			}
 		}));
-		tablepopup.add(new JMenuItem(new AbstractAction("Set of ancestors") {
+		tableExport.add(new JMenuItem(new AbstractAction("Set of ancestors") {
 			private static final long serialVersionUID = 1L;
 
 			public void actionPerformed(ActionEvent e) {
 				try {
-					btnTable.setEnabled(false); 
+					btnTableExport.setEnabled(false); 
 					enabledFunctions(false);
 					
-					goTablePanel.showExportAllPaths(btnTable, GOtree.ALL_ANCESTORS);
+					goTablePanel.showExportGOtreeTable(btnTableExport, GOtree.ALL_ANCESTORS, GOtree.DO_EXPORT_ALL);
 					
 					enabledFunctions(true);
-					btnTable.setEnabled(true);
+					btnTableExport.setEnabled(true);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error all paths for table");
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error all paths for table", null);}
 			}
 		}));
-		tablepopup.add(new JMenuItem(new AbstractAction("Longest paths (slow and large results)") {
+		tableExport.add(new JMenuItem(new AbstractAction("Longest paths (slow and large results)") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
 				try {
-					btnTable.setEnabled(false); 
+					btnTableExport.setEnabled(false); 
 					enabledFunctions(false);
 					
-					goTablePanel.showExportAllPaths(btnTable,GOtree.LONGEST_PATHS);
+					goTablePanel.showExportGOtreeTable(btnTableExport,GOtree.LONGEST_PATHS,GOtree.DO_EXPORT_ALL);
 					
 					enabledFunctions(true);
-					btnTable.setEnabled(true);
+					btnTableExport.setEnabled(true);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error all paths for table");
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error all paths for table", null);}
 			}
 		}));
 		
-		tablepopup.add(new JMenuItem(new AbstractAction("All paths (slow and very large results)") {
+		tableExport.add(new JMenuItem(new AbstractAction("All paths (slow and very large results)") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
 				try {
-					btnTable.setEnabled(false); 
+					btnTableExport.setEnabled(false); 
 					enabledFunctions(false);
 					
-					goTablePanel.showExportAllPaths(btnTable, GOtree.ALL_PATHS);
+					goTablePanel.showExportGOtreeTable(btnTableExport, GOtree.ALL_PATHS, GOtree.DO_EXPORT_ALL);
 					
 					enabledFunctions(true);
-					btnTable.setEnabled(true);
+					btnTableExport.setEnabled(true);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error all paths for table");
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error all paths for table", null);}
 			}
 		}));
+		tableExport.addSeparator();	
+		tableExport.add(new JMenuItem(new AbstractAction("Copy Table") {
+			private static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+					String ts = goTablePanel.tableCopyString("\t");
+					cb.setContents(new StringSelection(ts), null);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error copy table"); }
+			}
+		}));
 		
-		btnTable = new JButton("Table...");
-		btnTable.setBackground(Color.WHITE);
-		btnTable.addMouseListener(new MouseAdapter() {
+		btnTableExport = Static.createButton("Export...", false);
+		btnTableExport.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
-                tablepopup.show(e.getComponent(), e.getX(), e.getY());
+                tableExport.show(e.getComponent(), e.getX(), e.getY());
             }
         });
-		btnTable.setEnabled(false);
 	}
 	 /*****************************
      *  CONTROL panel -- filters
@@ -546,7 +676,7 @@ public class BasicGOFilterTab extends Tab {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
 					FileRead fr = new FileRead("GO", FileC.bNoVer, FileC.bNoPrt); // CAS316
-					if (fr.run(btnFindFile, "GO File", FileC.dUSER, FileC.fTXT)) {
+					if (fr.run(btnFindFile, "GO File", FileC.dRESULTEXP, FileC.fTXT)) {
 						loadFile(fr.getRelativeFile());
 					}
 				}
@@ -747,7 +877,7 @@ public class BasicGOFilterTab extends Tab {
 		chkUseEnrich = Static.createCheckBox("", enable);
     	chkUseEnrich.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				enableDESection(chkUseEnrich.isSelected());
+				enablePvalSection(chkUseEnrich.isSelected());
 			}
 		});  
     	row4.add(chkUseEnrich);		row4.add(Box.createHorizontalStrut(4));
@@ -783,14 +913,14 @@ public class BasicGOFilterTab extends Tab {
 		row4.add(lblnDEseq);
 		row4.add(boxDEseq);	
 		
-		row4.add(Box.createHorizontalGlue());
-		row4.add(Box.createHorizontalStrut(15));
-		row4.add(btnClearAll);
-	
-		if (pvalColumnNames!=null && pvalColumnNames.size()>0) {
+		if (pvalColumnNames.size()>0) {
+			row4.add(Box.createHorizontalGlue());
+			row4.add(Box.createHorizontalStrut(15));
+			row4.add(btnClearAll);
+		
 			filterPanel.add(row4);
 			filterPanel.add(Box.createVerticalStrut(5));
-			enableDESection(false);
+			enablePvalSection(false);
 		}
 	}
 	private void createFilterRow5Results() {
@@ -814,7 +944,6 @@ public class BasicGOFilterTab extends Tab {
 		btnAddTable.setBackground(Globals.FUNCTIONCOLOR);
 		btnAddTable.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				goTablePanel.clearTrim();
 				loadBuildStart();
 			}
 		});
@@ -830,34 +959,22 @@ public class BasicGOFilterTab extends Tab {
 			}
 		});
 		row5.add(btnSelectColumns);
-	    
-		deTrimLabel = new JLabel("DE-trim: ");
-		chkComputeDEtrim = new JCheckBox("Compute");
-		chkComputeDEtrim.setSelected(false);
-		chkComputeDEtrim.addActionListener(new ActionListener() {
+		
+		JButton btnGoHelp = new JButton("GO Help");
+		btnGoHelp.setBackground(Globals.HELPCOLOR);
+		btnGoHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				trimStart();
+				UserPrompt.displayHTMLResourceHelp(theParentFrame, "GO Help", goHelpHTML);
 			}
-		});   
-		chkComputeDEtrim.setBackground(Globals.BGCOLOR);
-		
-		chkShowDEtrim = new JCheckBox("Show Only");
-		chkShowDEtrim.setSelected(false);
-		chkShowDEtrim.addActionListener(new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-			goTablePanel.toggleTrimmedView(chkShowDEtrim.isSelected());
-		}
-		});   
-		chkShowDEtrim.setBackground(Globals.BGCOLOR);
-		
-		if (isGOTRIM && pvalColumnNames.size() > 0 && doDEtrim)
-		{				
-			row5.add(Box.createHorizontalStrut(15));
-			row5.add(deTrimLabel);
-	    		row5.add(chkComputeDEtrim);
-			row5.add(chkShowDEtrim);
-			enableDEtrim();
-		}
+		});
+		btnGoHelp.setAlignmentX(RIGHT_ALIGNMENT);
+		row5.add(Box.createHorizontalGlue());
+		row5.add(Box.createHorizontalStrut(160));
+	    row5.add(btnGoHelp);
+	    
+	   
+	    row5.setMaximumSize(row5.getPreferredSize());
+	    
 		filterPanel.add(row5);
 	}
 	private void createPvalColPanel() { 
@@ -1123,8 +1240,9 @@ public class BasicGOFilterTab extends Tab {
 		boolean enable = (goTablePanel.getSelectedRowCount()>0);
 		btnViewSeqs.setEnabled(enable);
 		enable = (goTablePanel.getSelectedRowCount()==1);
-		btnShow.setEnabled(enable);
-		btnCopy.setEnabled(enable);
+		btnSelShow.setEnabled(enable);
+		btnSelCopy.setEnabled(enable);
+		btnSelExport.setEnabled(enable);
 	}
     /**************************
      * BUILD TABLE
@@ -1135,11 +1253,6 @@ public class BasicGOFilterTab extends Tab {
 		updateTopButtons();
 		btnBuildTable.setSelected(true);
 		btnBuildTable.setEnabled(false);
-		
-		chkComputeDEtrim.setSelected(false);
-		chkShowDEtrim.setSelected(false); 
-		enableDEtrim();
-		
 		btnBuildTable.setSelected(false);
 		
 		try {
@@ -1163,19 +1276,15 @@ public class BasicGOFilterTab extends Tab {
 			msg = String.format("Results: %,d (add %,d) GOs   %s", rowcnt, rowadd, theStatusStr);
 		txtStatus.setText(msg);
 	
-		enableDEtrim();
-		
-		goTablePanel.buildRowMap();
+		goTablePanel.tableRefresh();
 		
 		btnBuildTable.setSelected(false);
 		btnBuildTable.setEnabled(true);
-		btnTable.setEnabled(goTablePanel.getRowCount() > 0);
+		btnTableShow.setEnabled(goTablePanel.getRowCount() > 0);
+		btnTableExport.setEnabled(goTablePanel.getRowCount() > 0);
 	}
 	public void deleteFinish(int rowcnt) {
 		txtStatus.setText(String.format("Results: %,d GOs", rowcnt));
-		chkComputeDEtrim.setSelected(false);
-		chkShowDEtrim.setSelected(false);
-		enableDEtrim();
 	}
 	
 	private void checkIFvalues() {
@@ -1364,7 +1473,7 @@ public class BasicGOFilterTab extends Tab {
 		}
 		if (clause == "") {
 			chkUseEnrich.setSelected(false);
-			enableDESection(false); 
+			enablePvalSection(false); 
 			return "";
 		}
 		
@@ -1461,24 +1570,7 @@ public class BasicGOFilterTab extends Tab {
 		}
 	}
 	
-	/*************************************************************
-	 * Compute Trimmed (BasicGOLoadFromDB) 
-	 */
-	private void trimStart() {
-		txtStatus.setText("Computing DE-trim set....");
-		chkComputeDEtrim.setEnabled(false);
-		btnBuildTable.setEnabled(false);
-		
-		loadObj.runQuery(BasicGOLoadFromDB.TRIM);	
-	}
-	public void trimFinish() {
-		String msg = goTablePanel.trimTable();
-		
-		btnBuildTable.setEnabled(true);
-		chkShowDEtrim.setEnabled(true);
-		txtStatus.setText("Results: " + msg + theStatusStr);
-	}
-	public JCheckBox [] getDEselect() { return chkPvalColFilter;}
+	public JCheckBox [] getPvalSelect() { return chkPvalColFilter;}
 	public ButtonComboBox getCmbTermTypes() {return cmbTermTypes;}
 	
 	/**************************************************************/
@@ -1576,7 +1668,7 @@ public class BasicGOFilterTab extends Tab {
 		txtLevelMin.setEnabled(isRg & isF);
 		txtLevelMax.setEnabled(isRg & isF);
 	}
-	private void enableDESection(boolean enable)
+	private void enablePvalSection(boolean enable)
     {
 	 	lblDErow.setEnabled(enable);
 	 	
@@ -1587,15 +1679,7 @@ public class BasicGOFilterTab extends Tab {
 	    lblnDEseq.setEnabled(enable);
 	    boxDEseq.setEnabled(enable);
     }
-    private void enableDEtrim() {
-		if (pvalColumnNames.size() == 0) return;
-	
-		boolean enable = chkUseEnrich.isSelected();
-		deTrimLabel.setEnabled(enable);
-		chkComputeDEtrim.setEnabled(enable);
-		if (!enable) chkComputeDEtrim.setSelected(false);
-		chkShowDEtrim.setEnabled(chkComputeDEtrim.isSelected());
-    }
+    
     private void enabledFunctions(boolean b) {
 		btnBuildTable.setEnabled(b);
 		btnAddTable.setEnabled(b);
@@ -1604,9 +1688,12 @@ public class BasicGOFilterTab extends Tab {
 		loadList=null; 
 		loadStart="";
 		txtSubString.setText("");
+		
+		/* CAS324
 		chkGOID.setSelected(true);
 		lblGOID.setEnabled(true);
 		lblDesc.setEnabled(false);
+		*/
 		
 		chkUseEval.setSelected(false);
 		txtEvalVal.setText(DEF_EVAL);
@@ -1630,7 +1717,7 @@ public class BasicGOFilterTab extends Tab {
 			chkUseEnrich.setSelected(false);
 			txtCutoff.setText(DEF_PVAL);
 			boxDEseq.setSelectedIndex(0);
-			enableDESection(false);
+			enablePvalSection(false);
 		}
 		if (chkUseEvC!=null) {
 			chkUseEvC.setSelected(false);
@@ -1688,7 +1775,7 @@ public class BasicGOFilterTab extends Tab {
 		if (cnt==0) {
 			btnPval.setText(pvalColLabel);
 			chkUseEnrich.setSelected(false);
-			enableDESection(false);
+			enablePvalSection(false);
 		}
 		else {
 			if (cnt==1) btnPval.setText(name);
@@ -1711,7 +1798,8 @@ public class BasicGOFilterTab extends Tab {
 	
 	//Top button panel
 	private JPanel topRowPanel = null;
-	private JButton btnViewSeqs = null, btnTable = null, btnCopy = null, btnShow = null;
+	private JButton btnViewSeqs = null, btnSelCopy = null, btnSelShow = null, btnSelExport = null;
+	private JButton btnTableShow = null, btnTableExport = null;
 	
 	//Column select panel
 	private BasicGOTablePanel goTablePanel=null;
@@ -1763,9 +1851,6 @@ public class BasicGOFilterTab extends Tab {
 
 	// Last row
 	private JButton btnBuildTable = null, btnAddTable = null, btnSelectColumns = null;
-	
-	private JLabel deTrimLabel=null;
-	private JCheckBox chkShowDEtrim = null, chkComputeDEtrim = null;
 
 	//Data members
 	private int nLevelMin = -1, nLevelMax = -1;

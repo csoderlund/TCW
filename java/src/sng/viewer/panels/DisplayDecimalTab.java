@@ -36,30 +36,31 @@ public class DisplayDecimalTab  extends Tab {
 	 * The parameters changed in this class are static. The rounding parameters are in DisplayFloat
 	 */
 	/**************************************************************
-	 * CAS322 Highlight pvalue; 323 changed 1,2,3 
+	 * CAS322 Highlight pvalue; 323 changed 1,2,3 ; CAS324 make sure all save preference, add Set Default 
 	 */
 	static final int NCUTS=4, NSCH=4;
+	// brown, pink, red
+	static private final Color [] colSch1 = {new Color(215, 192, 177),new Color(191, 154, 130),Color.pink,new Color(205, 92, 92)};
 	// light blue to purple
-	static private final Color [] colSch1 = {new Color(220, 230, 250),new Color(185, 191, 255),new Color(216, 150,255),new Color(174, 96, 184)};
-	// yellow, green, brown
-	static private final Color [] colSch2 = {new Color(248, 255, 168),new Color(199, 255, 164),new Color(250, 216, 137),new Color(219, 161, 99)};
+	static private final Color [] colSch2 = {new Color(220, 230, 250),new Color(185, 191, 255),new Color(216, 150,255),new Color(174, 96, 184)};
 	// blues 
 	static private final Color [] colSch3 = {new Color(196, 216, 243), new Color(171, 196, 245),new Color(140, 165, 247),new Color(109, 127, 242)};
-	// brown, pink, red
-	static private final Color [] colSch4 = {new Color(215, 192, 177),new Color(191, 154, 130),Color.pink,new Color(205, 92, 92)};
+	// yellow, green, brown (cannot see highlight cell in yellow)
+	static private final Color [] colSch4 = {new Color(248, 255, 168),new Color(199, 255, 164),new Color(250, 216, 137),new Color(219, 161, 99)};
 	
+	// setDefaults and setPrefStringPvalCut set value
 	static private boolean bHighPval=true;
 	static private String colScheme="1";
 	static private Color [] selC=colSch1;
 	static private double [] pCuts = {0.05, 0.01, 0.001, 0.0001};
 	
 	/******** Preferences ************************/
-	static public String getPvalCutPrefID() {return "pvalCutoff";}
-	public static String getPvalCutPrefString(){
+	static public String getPrefIDPvalCut() {return "pvalCutoff";}
+	public static String getPrefStringPvalCut(){
 		int b = (bHighPval) ? 1 : 0;
 		return b + "," + colScheme + "," + pCuts[0] + "," + pCuts[1] + "," + pCuts[2] + "," + pCuts[3];
 	} 
-	static public void setPvalCutPrefs(String str) {
+	static public void setPrefStringPvalCut(String str) {
 		if (str.trim().length()==0) return;
 		String[] arr = str.trim().split(",");
 		int n = arr.length;
@@ -77,7 +78,7 @@ public class DisplayDecimalTab  extends Tab {
 			ErrorReport.prtReport(e, "Invalid pvalue highlight preferences:" + str);
 		}
 	}
-	/*** Set static values from interface **/
+	/*** Set static values from interface and prefs **/
 	private static void setColScheme(String n) {
 		try {
 			int x = Integer.parseInt(n);
@@ -90,11 +91,7 @@ public class DisplayDecimalTab  extends Tab {
 		else if (n.contentEquals("3")) 	selC=colSch3;
 		else if (n.contentEquals("4")) 	selC=colSch4;
 	}
-    private static void setPcuts(double [] cuts) {
-    	for (int i=0; i<NCUTS; i++ ) 
-    		pCuts[i] = cuts[i];
-    }
-    static private void setHighPval(boolean b) {bHighPval=b;}
+    
     /************************************************
      * CAS322 called by highlighting
      */
@@ -166,11 +163,25 @@ public class DisplayDecimalTab  extends Tab {
 		page.add(Box.createVerticalGlue());
 		page.setMaximumSize(page.getPreferredSize());
 		
+		// Round
 		page.add(createRound());
 		
+		// Colors
 		if (sf.getMetaData().hasDE()) // CAS323
 			page.add(createColor());
 		
+		// Default
+		JPanel defRow = Static.createRowPanel();
+		JButton setDefs = Static.createButton("Set Defaults", true);
+		setDefs.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				setDefaults();
+			}
+		});
+		defRow.add(setDefs);
+		page.add(Box.createVerticalStrut(20));
+		page.add(defRow);
+		page.add(Box.createVerticalStrut(20));
 		page.add(Box.createVerticalGlue());
 		page.setMaximumSize(page.getPreferredSize());
 		
@@ -183,16 +194,16 @@ public class DisplayDecimalTab  extends Tab {
 		
 		JPanel placeRow = Static.createRowPanel();
    		placeRow.add(Box.createHorizontalStrut(7));
-		fldNumDec =  Static.createTextField(String.valueOf(DisplayFloat.Num_dec),2, true); 
+		
+   		placeRow.add(new JLabel("Significant figures: "));
 		fldNumSigs = Static.createTextField(String.valueOf(DisplayFloat.Num_sig),2, true);
-		
-		fldNumDec.getDocument().addDocumentListener(roundTextListener);
 		fldNumSigs.getDocument().addDocumentListener(roundTextListener);
-		
-		placeRow.add(new JLabel("Significant figures: "));
 		placeRow.add(fldNumSigs);		placeRow.add(Box.createHorizontalStrut(5));
+		
 		placeRow.add(new JLabel("Decimal places: "));
-		placeRow.add(fldNumDec);			placeRow.add(Box.createHorizontalGlue());
+		fldNumDec =  Static.createTextField(String.valueOf(DisplayFloat.Num_dec),2, true); 
+		fldNumDec.getDocument().addDocumentListener(roundTextListener);
+		placeRow.add(fldNumDec);		placeRow.add(Box.createHorizontalGlue());
 		
 		page.add(placeRow);
 		page.add(Box.createVerticalStrut(10));
@@ -209,6 +220,7 @@ public class DisplayDecimalTab  extends Tab {
 		fldLarge = Static.createTextField(String.valueOf(DisplayFloat.Largest),7, true); 
 		fldLarge.getDocument().addDocumentListener(roundTextListener);
 		eRow.add(fldLarge);					eRow.add(Box.createHorizontalStrut(3));
+		
 		eRow.add(new JLabel(" or <  "));	eRow.add(Box.createHorizontalStrut(1));
 		fldSmall = Static.createTextField(String.valueOf(DisplayFloat.Smallest),7, true);
 		fldSmall.getDocument().addDocumentListener(roundTextListener);
@@ -245,64 +257,72 @@ public class DisplayDecimalTab  extends Tab {
 	/****************************************************************/
 	JPanel createColor() {
 		JPanel page = Static.createPagePanel();
-		
+	
+	// Highlight
 		JPanel highRow = Static.createRowPanel();
 		highRow.add(Box.createHorizontalStrut(5));
 		String msg="Highlight good p-values ";
 		chkHighPval = Static.createCheckBox(msg, bHighPval); 
 		chkHighPval.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				setHighPval(chkHighPval.isSelected());
+				updateChkHigh(chkHighPval.isSelected());
 			}
 		});
 		highRow.add(chkHighPval);	highRow.add(Box.createHorizontalStrut(5));
 		page.add(highRow);
 		page.add(Box.createVerticalStrut(15));
-		
-		JPanel pvalRow = Static.createRowPanel();
-		pvalRow.add(Box.createHorizontalStrut(20));
-		pvalRow.add(new JLabel("Cutoffs: ")); pvalRow.add(Box.createHorizontalStrut(5));
-		for (int i=0; i<NCUTS; i++) {
-			pvalRow.add(new JLabel(p[i]));	pvalRow.add(Box.createHorizontalStrut(1));
-			
-			txtPval[i] = Static.createTextField(pCuts[i]+"", 5);
-			
-			pvalRow.add(txtPval[i]); 		        pvalRow.add(Box.createHorizontalStrut(1));
-			if (i<3) pvalRow.add(new JLabel(">"));	pvalRow.add(Box.createHorizontalStrut(5));
-		}
-		JButton apply = Static.createButton("Apply Cutoffs", true);
-		apply.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				apply();
-			}
-		});
-		pvalRow.add(apply);
-		page.add(pvalRow);
-		page.add(Box.createVerticalStrut(15));
-		
+	
+	// Color schemes
 		JPanel colRow = Static.createRowPanel();
 		colRow.add(Box.createHorizontalStrut(20));
 		colRow.add(new JLabel("Color Scheme [1-" + NSCH + "]: ")); colRow.add(Box.createHorizontalStrut(5));
 		txtColSch = Static.createTextField(colScheme, 2);
-		txtColSch.getDocument().addDocumentListener(colorTextListener);
+		txtColSch.getDocument().addDocumentListener(colorTextListener); // Save
 		colRow.add(txtColSch); colRow.add(Box.createHorizontalStrut(3));
 		page.add(colRow);
 		page.add(Box.createVerticalStrut(10));
 		
-	    page.add(createHigh("1.", colSch1)); page.add(Box.createVerticalStrut(10));
-	    page.add(createHigh("2.", colSch2)); page.add(Box.createVerticalStrut(10));
-	    page.add(createHigh("3.", colSch3)); page.add(Box.createVerticalStrut(10));
-	    page.add(createHigh("4.", colSch4)); page.add(Box.createVerticalStrut(10));
+	    page.add(createColorRow("1.", colSch1)); page.add(Box.createVerticalStrut(10));
+	    page.add(createColorRow("2.", colSch2)); page.add(Box.createVerticalStrut(10));
+	    page.add(createColorRow("3.", colSch3)); page.add(Box.createVerticalStrut(10));
+	    page.add(createColorRow("4.", colSch4)); page.add(Box.createVerticalStrut(10));
+	    page.add(Box.createVerticalStrut(15));
+		
+	 // Pvals
+ 		JPanel pvalRow = Static.createRowPanel();
+ 		pvalRow.add(Box.createHorizontalStrut(20));
+ 		pvalRow.add(new JLabel("Cutoffs: ")); pvalRow.add(Box.createHorizontalStrut(5));
+ 		for (int i=0; i<NCUTS; i++) {
+ 			pvalRow.add(new JLabel(p[i]));	pvalRow.add(Box.createHorizontalStrut(1));
+ 			
+ 			txtPval[i] = Static.createTextField(pCuts[i]+"", 5);
+ 			txtPval[i].getDocument().addDocumentListener(pvalTextListener); 
+ 			
+ 			pvalRow.add(txtPval[i]); 		        pvalRow.add(Box.createHorizontalStrut(1));
+ 			if (i<3) pvalRow.add(new JLabel(">"));	pvalRow.add(Box.createHorizontalStrut(5));
+ 		}
+ 		btnApply = Static.createButton("Apply Cutoffs", false);
+ 		btnApply.addActionListener(new ActionListener() {
+ 			public void actionPerformed(ActionEvent e) {
+ 				updatePvalsApply();											// Save
+ 				btnApply.setEnabled(false);
+ 			}
+ 		});
+ 		pvalRow.add(btnApply);
+ 		page.add(pvalRow);
 	   
 	    page.add(Box.createVerticalGlue());
 	    page.setMaximumSize(page.getPreferredSize());
 		return page;
 	}
-	ActionListener roundActionListener = new ActionListener() 
+	/****************************************************
+	 * Rounding
+	 */
+	private ActionListener roundActionListener = new ActionListener() 
 	{
         public void actionPerformed(ActionEvent ae) {updateRoundingTextFields();}        
     };
-    DocumentListener roundTextListener = new DocumentListener() 
+    private DocumentListener roundTextListener = new DocumentListener() 
     {
     	public void changedUpdate(DocumentEvent e) {updateRoundingTextFields();}
     	public void removeUpdate(DocumentEvent e) {updateRoundingTextFields();}
@@ -333,7 +353,7 @@ public class DisplayDecimalTab  extends Tab {
 			int mode = 1;
 			if (chkUseJava.isSelected()) mode = 2;
 		    
-			DisplayFloat.setRoundingFields(mode, sigFigs, dec, lg, sm, frame.getPreferencesRoot());
+			DisplayFloat.prefFlushRounding(mode, sigFigs, dec, lg, sm, frame.getPreferencesRoot());
 	    }
 	    catch(Exception e) { ; // in the middle of editing
 	    }
@@ -342,7 +362,7 @@ public class DisplayDecimalTab  extends Tab {
     /************************************************************************
 	 * Color scheme and pvalue cutoffs
 	 */
-	private JPanel createHigh(String msg, Color [] c1) {
+	private JPanel createColorRow(String msg, Color [] c1) {
 		 JPanel highRow = Static.createRowPanel();
 		 highRow.add(Box.createHorizontalStrut(20));
 		 highRow.add(new JLabel(msg)); 
@@ -354,13 +374,17 @@ public class DisplayDecimalTab  extends Tab {
 	     highRow.add(Box.createHorizontalStrut(5));
 	     return highRow;
 	}
+	private void updateChkHigh(boolean b) {
+		 bHighPval=b;
+		 prefFlushColor();							     
+	}
 	// Change Color scheme
 	private DocumentListener colorTextListener = new DocumentListener() {
-    	public void changedUpdate(DocumentEvent e) {chgColScheme();}
+    	public void changedUpdate(DocumentEvent e) {updateColScheme();}
     	public void removeUpdate(DocumentEvent e) {}
-    	public void insertUpdate(DocumentEvent e) {chgColScheme();}
+    	public void insertUpdate(DocumentEvent e) {updateColScheme();}
 	}; 
-	private void chgColScheme() {
+	private void updateColScheme() {
 		boolean b=true;
 		try {
 			String n = txtColSch.getText().trim();
@@ -368,7 +392,7 @@ public class DisplayDecimalTab  extends Tab {
 			if (x>0 && x<=NSCH) {
 				colScheme=n;
 				setColScheme(n);
-				flushColorPrefs();
+				prefFlushColor();
 			}
 			else {b=false;}
 		}
@@ -377,8 +401,13 @@ public class DisplayDecimalTab  extends Tab {
 			UserPrompt.showError ("Value must be integer between 1-" + NSCH); 
 		}
 	}
+	private DocumentListener pvalTextListener = new DocumentListener() {
+    	public void changedUpdate(DocumentEvent e) {btnApply.setEnabled(true);}
+    	public void removeUpdate(DocumentEvent e) {}
+    	public void insertUpdate(DocumentEvent e) {btnApply.setEnabled(true);}
+	}; 
 	// Change pvalues
-	private void apply() {
+	private void updatePvalsApply() {
 		try {
 			double [] cuts = new double [NCUTS];
 			boolean b=true;
@@ -408,24 +437,55 @@ public class DisplayDecimalTab  extends Tab {
 				return;
 			}
 			
-			setPcuts(cuts);
+			for (int i=0; i<NCUTS; i++ ) pCuts[i] = cuts[i];
+			prefFlushColor();
 		}
 		catch (Exception err) {
 			ErrorReport.reportError(err, "Saving p-values");
 		}
 	}
-	
-	private void flushColorPrefs() {
+	// prefRound
+	private void prefFlushColor() {
 		try {
 			Preferences prefs = frame.getPreferencesRoot();
 			if (prefs!=null) {
-				prefs.put(getPvalCutPrefID(), getPvalCutPrefString());
+				prefs.put(getPrefIDPvalCut(), getPrefStringPvalCut());
 				prefs.flush();
 			}
 		}
 		catch (Exception err) {
 			ErrorReport.reportError(err, "Internal error: setting color preferences");
 		}
+	}
+	/*******************************************************
+	 * Set defaults
+	 */
+	private void setDefaults() {
+		// set rounding defaults and save preferences
+		DisplayFloat.prefFlushRounding(1, 2, 2, 999999.99, 0.01, frame.getPreferencesRoot()); 
+		
+		chkUseFormat.setSelected(true);
+		fldNumSigs.setText("2");
+		fldNumDec.setText("2");
+		fldLarge.setText("999999.99");
+		fldSmall.setText("0.01");
+		
+		// set color defaults and save preferences
+		bHighPval=true;
+		colScheme="1";
+		selC=colSch1;
+		pCuts[0] = 	0.05;
+		pCuts[1] =	0.01;
+		pCuts[2] =	0.001;
+		pCuts[3] =	0.0001;
+	
+		chkHighPval.setSelected(true);
+		txtColSch.setText("1");
+		for (int i=0; i< NCUTS; i++)
+			txtPval[i].setText(String.valueOf(pCuts[i]));
+		btnApply.setEnabled(false);
+		
+		prefFlushColor();	
 	}
 	private STCWFrame frame = null;
 	private JTextField fldNumSigs=null, fldNumDec=null;
@@ -434,6 +494,7 @@ public class DisplayDecimalTab  extends Tab {
 	
 	private JCheckBox chkHighPval = null;
 	private JTextField txtColSch;
+	private JButton btnApply=null;
 	private JTextField [] txtPval = new JTextField [NCUTS];
 	private String [] p = {"A ", "B ", "C ", "D "};
 }

@@ -159,7 +159,7 @@ public class BasicSeqFilterPanel extends JPanel {
 				public void actionPerformed(ActionEvent arg0) {
 					try {
 						FileRead fr = new FileRead("Seq", FileC.bNoVer, FileC.bNoPrt); // CAS316
-						if (fr.run(btnFindFile, "Seq File", FileC.dUSER, FileC.fTXT)) {
+						if (fr.run(btnFindFile, "Seq File", FileC.dRESULTEXP, FileC.fTXT)) {
 							loadFile(fr.getRelativeFile());
 						}
 					}
@@ -171,7 +171,6 @@ public class BasicSeqFilterPanel extends JPanel {
 			clearall.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					try {
-						radSeqID.setSelected(true);
 						txtField.setText("");
 					}
 					catch(Exception e) {ErrorReport.prtReport(e, "GO etc");}

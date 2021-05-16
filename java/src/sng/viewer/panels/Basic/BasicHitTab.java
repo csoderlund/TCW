@@ -67,14 +67,14 @@ public class BasicHitTab extends Tab {
 		
 		theTablePanel = new BasicTablePanel(theParentFrame, this, 
 				theFilterPanel.getColNames(), theFilterPanel.getColSelect(), 
-				theFilterPanel.getStartPval()); // CAS322 add last arg for highlights
+				theFilterPanel.getPvalColNames()); // CAS322 add last arg for highlights
 		add(theTablePanel);
 	}
 	/******************************************
 	 * Top button panel
 	 */
 	private void createTopRowPanel() {
-		btnViewSeqs = new JButton("View Sequences");
+		btnViewSeqs = new JButton("View Seqs");
 		btnViewSeqs.setBackground(Globals.FUNCTIONCOLOR);
 		btnViewSeqs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -92,36 +92,7 @@ public class BasicHitTab extends Tab {
 		});
 		btnAlignSeqs.setEnabled(false);
 		
-		//Show
-		final JPopupMenu showpopup = new JPopupMenu();
-		if (metaData.hasGOs()) {
-			showpopup.add(new JMenuItem(new AbstractAction("Assigned GOs for hit") {
-				private static final long serialVersionUID = 1L;
-				public void actionPerformed(ActionEvent e) {
-					showGoForSelected(GOtree.SELECTED_HIT_ASSIGNED);
-				}
-			}));
-			showpopup.add(new JMenuItem(new AbstractAction("Assigned and inherited GOs for hit") {
-				private static final long serialVersionUID = 1L;
-				public void actionPerformed(ActionEvent e) {
-					showGoForSelected(GOtree.SELECTED_HIT_ALL);
-				}
-			}));
-		}
-		showpopup.add(new JMenuItem(new AbstractAction("All columns") {
-			private static final long serialVersionUID = 1L;
-			public void actionPerformed(ActionEvent e) {
-				showInfoForSelected();
-			}
-		}));
-		btnShow = Static.createButton("Show...", false);
-		btnShow.addMouseListener(new MouseAdapter() {
-            public void mousePressed(MouseEvent e) {
-                showpopup.show(e.getComponent(), e.getX(), e.getY());
-            }
-        });
-	
-		// Copy
+// Copy
 		final JPopupMenu copypopup = new JPopupMenu();
 		copypopup.add(new JMenuItem(new AbstractAction("Hit ID") {
 			private static final long serialVersionUID = 4692812516440639008L;
@@ -135,7 +106,6 @@ public class BasicHitTab extends Tab {
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error copying Hit ID", null);}
 			}
 		}));
-		
 		copypopup.add(new JMenuItem(new AbstractAction("Description") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
@@ -148,7 +118,6 @@ public class BasicHitTab extends Tab {
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error copying Desc", null);}
 			}
 		}));
-		
 		copypopup.add(new JMenuItem(new AbstractAction("Hit Sequence") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
@@ -173,10 +142,62 @@ public class BasicHitTab extends Tab {
             }
         });
 		btnCopy.setEnabled(false);
+				
+//Show
+		final JPopupMenu selPopup = new JPopupMenu();
+		if (metaData.hasGOs()) {
+			selPopup.add(new JMenuItem(new AbstractAction("Assigned GOs for hit") {
+				private static final long serialVersionUID = 1L;
+				public void actionPerformed(ActionEvent e) {
+					showExportGOtree(GOtree.HIT_ASSIGNED, GOtree.DO_POPUP);
+				}
+			}));
+			selPopup.add(new JMenuItem(new AbstractAction("All GOs for hit") {
+				private static final long serialVersionUID = 1L;
+				public void actionPerformed(ActionEvent e) {
+					showExportGOtree(GOtree.HIT_ALL, GOtree.DO_POPUP);
+				}
+			}));
+		}
+		selPopup.add(new JMenuItem(new AbstractAction("All columns of selected") {
+			private static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent e) {
+				showInfoForSelected();
+			}
+		}));
+		btnShow = Static.createButton("Show...", false);
+		btnShow.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                selPopup.show(e.getComponent(), e.getX(), e.getY());
+            }
+        });
+	
+// Export
+		final JPopupMenu selExport = new JPopupMenu();
+		if (metaData.hasGOs()) {
+			selExport.add(new JMenuItem(new AbstractAction("Assigned GOs for hit*") {
+				private static final long serialVersionUID = 1L;
+				public void actionPerformed(ActionEvent e) {
+					showExportGOtree(GOtree.HIT_ASSIGNED, GOtree.DO_EXPORT_ASK);
+				}
+			}));
+			selExport.add(new JMenuItem(new AbstractAction("All GOs for hit*") {
+				private static final long serialVersionUID = 1L;
+				public void actionPerformed(ActionEvent e) {
+					showExportGOtree(GOtree.HIT_ALL, GOtree.DO_EXPORT_ASK);
+				}
+			}));
+		}
+		btnExport = Static.createButton("Export...", false);
+		btnExport.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                selExport.show(e.getComponent(), e.getX(), e.getY());
+            }
+        });
 		
 		// Table
 		final JPopupMenu tablepopup = new JPopupMenu();
-		tablepopup.add(new JMenuItem(new AbstractAction("Show Column Stats") {
+		tablepopup.add(new JMenuItem(new AbstractAction("Show column stats") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -188,7 +209,7 @@ public class BasicHitTab extends Tab {
 		}));
 		tablepopup.addSeparator();
 		
-		tablepopup.add(new JMenuItem(new AbstractAction("Copy Table") {
+		tablepopup.add(new JMenuItem(new AbstractAction("Copy table") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -202,7 +223,7 @@ public class BasicHitTab extends Tab {
 		}));
 		tablepopup.addSeparator();
 		
-		tablepopup.add(new JMenuItem(new AbstractAction("Export Table") {
+		tablepopup.add(new JMenuItem(new AbstractAction("Export table") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -230,7 +251,7 @@ public class BasicHitTab extends Tab {
 		});
 
 		topRowPanel = Static.createRowPanel();
-		topRowPanel.add(new JLabel("For selected:"));
+		topRowPanel.add(new JLabel("Selected:"));
 		topRowPanel.add(Box.createHorizontalStrut(2));
 		topRowPanel.add(btnViewSeqs);
 		topRowPanel.add(Box.createHorizontalStrut(2));
@@ -239,6 +260,10 @@ public class BasicHitTab extends Tab {
 		topRowPanel.add(btnCopy);
 		topRowPanel.add(Box.createHorizontalStrut(2));
 		topRowPanel.add(btnShow);
+		if (metaData.hasGOs()) {
+			topRowPanel.add(Box.createHorizontalStrut(2));
+			topRowPanel.add(btnExport);
+		}
 		
 		topRowPanel.add(Box.createHorizontalStrut(25));
 		topRowPanel.add(btnTable);
@@ -368,14 +393,15 @@ public class BasicHitTab extends Tab {
 	/****************************************************
 	 * Show GOs for selected
 	 */
-	private void showGoForSelected(int type) {
+	private void showExportGOtree(int actionType, int outType) {
 		try {
-	    		String hitID = getSelectedHitID();
+	    	String hitID = getSelectedHitID();
+	    	String desc = getSelectedDesc(); // CAS324 add desc
 			if (hitID=="") {
 				JOptionPane.showMessageDialog(null, "No selected row ");
 				return;
 			}
-			new GOtree(theParentFrame).popup(hitID, btnShow, type);
+			new GOtree(theParentFrame).computeSelected(hitID, desc, actionType, outType, btnShow);
 		}
 		catch (Exception e) {
 			JOptionPane.showMessageDialog(null, "Query failed");
@@ -1011,12 +1037,14 @@ public class BasicHitTab extends Tab {
 		btnViewSeqs.setEnabled(row>0);
 		btnAlignSeqs.setEnabled(row>0);
 		btnShow.setEnabled(row==1);
+		btnExport.setEnabled(row==1);
 		btnCopy.setEnabled(row==1);
 	}
 	public void enableTopButtons(boolean b) {
 		btnViewSeqs.setEnabled(b);
 		btnAlignSeqs.setEnabled(b);
 		btnShow.setEnabled(b);
+		btnExport.setEnabled(b);
 		btnCopy.setEnabled(b);
 	}
 	public void tableHitRecalc() { // called after delete objects from table
@@ -1048,6 +1076,7 @@ public class BasicHitTab extends Tab {
 	private JButton btnShow = null;
 	private JButton btnTable = null;
 	private JButton btnCopy = null;
+	private JButton btnExport = null;
 	private JButton btnHelp = null;
 	
 	private JPanel topRowPanel = null;

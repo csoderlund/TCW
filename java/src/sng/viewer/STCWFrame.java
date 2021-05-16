@@ -114,11 +114,11 @@ public class STCWFrame extends JFrame {
 			 else
 				setBounds(nX, nY, nWidth, nHeight);
 			
-			String prefStr = userPrefs.get(DisplayFloat.getRoundingPrefID(), "").trim();
-			DisplayFloat.setRoundingPrefs(prefStr);
+			String prefStr = userPrefs.get(DisplayFloat.getPrefIDRounding(), "").trim();
+			DisplayFloat.setPrefStringRounding(prefStr);
 			
-			prefStr = userPrefs.get(DisplayDecimalTab.getPvalCutPrefID(), "").trim(); // CAS322
-			DisplayDecimalTab.setPvalCutPrefs(prefStr);
+			prefStr = userPrefs.get(DisplayDecimalTab.getPrefIDPvalCut(), "").trim(); // CAS322
+			DisplayDecimalTab.setPrefStringPvalCut(prefStr);
 		}
 		else UIHelpers.centerScreen(this);
 		
@@ -997,7 +997,8 @@ public class STCWFrame extends JFrame {
 	private ResultsSummaryTab resultsPairTab = null;
 	private BlastTab blastTab  = null;
 	
-	// Linux: user/.java/.userPrefs/viewSingleTCW
+	// Linux: user/.java/.userPrefs/viewSingleTCW - can view with 'more'
+	// Mac: ~/Library/Preferences/com.apple.java.util.prefs.plist - open with Finder 
 	private Preferences prefsRoot=null; // set once and pass to anyone who needs it
 	private MetaData metaData = null;
 	private HostsCfg hostsObj=null;

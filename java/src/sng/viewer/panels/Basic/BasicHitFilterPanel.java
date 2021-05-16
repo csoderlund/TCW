@@ -174,8 +174,8 @@ public class BasicHitFilterPanel extends JPanel {
 	/****************************************
 	 * Called by BasicHitQueryTab
 	 */
-	public int getStartPval() {
-		return startPval;
+	public String [] getPvalColNames() {
+		return pvalColNames;
 	}
 	public String getFilters() {
 		return filters;
@@ -264,7 +264,7 @@ public class BasicHitFilterPanel extends JPanel {
 			rowSearch.add(radHitID);
 			rowSearch.add(lblID);
 			
-			lblDesc = Static.createLabel("Description", true);
+			lblDesc = Static.createLabel("Description", false);
 			radDesc = Static.createRadioButton("", false);
 			radDesc.addActionListener(new ActionListener() {
 			      public void actionPerformed(ActionEvent ae) {
@@ -273,7 +273,7 @@ public class BasicHitFilterPanel extends JPanel {
 			    	  	lblDesc.setEnabled(enable);
 			      }
 			 });
-			radDesc.setSelected(true);
+			radHitID.setSelected(true);
 			rowSearch.add(radDesc);
 			rowSearch.add(lblDesc);
 			rowSearch.add(Box.createHorizontalStrut(5));
@@ -283,7 +283,8 @@ public class BasicHitFilterPanel extends JPanel {
 			allbg.add(radDesc); 
 			
 			
-			rowSearch.add(new JLabel("  Substring: "));
+			lblSubstring = new JLabel("  Substring: ");
+			rowSearch.add(lblSubstring);
 			txtField  = Static.createTextField("", 20, false);
 			txtField.setMaximumSize(txtField.getPreferredSize());
 			rowSearch.add(txtField);
@@ -294,7 +295,7 @@ public class BasicHitFilterPanel extends JPanel {
 				public void actionPerformed(ActionEvent arg0) {
 					try {
 						FileRead fr = new FileRead("Hit", FileC.bNoVer, FileC.bNoPrt); // CAS316
-						if (fr.run(btnFindFile, "Hit File", FileC.dUSER, FileC.fTXT)) {
+						if (fr.run(btnFindFile, "Hit File", FileC.dRESULTEXP, FileC.fTXT)) {
 							loadFile(fr.getRelativeFile());
 						}
 					}
@@ -339,7 +340,7 @@ public class BasicHitFilterPanel extends JPanel {
 	    				enableEvalSim();
 	    			}
 	    		});   
-	    		rowFilter1.add(chkUseEval);
+	    	rowFilter1.add(chkUseEval);
 			txtEval = Static.createTextField(formatd.format(DEFAULT_EVAL), DOUBLE_SIZE, isActive);
 			rowFilter1.add(txtEval);
 			rowFilter1.add(Box.createHorizontalStrut(2));
@@ -357,7 +358,7 @@ public class BasicHitFilterPanel extends JPanel {
 			rowFilter1.add(Box.createHorizontalStrut(2));
 			
 			isActive = false;
-			chkUseAlign = Static.createCheckBox("%Hcov", isActive);
+			chkUseAlign = Static.createCheckBox("%HitCov>=", isActive);
 			chkUseAlign.addActionListener(new ActionListener() {
     			public void actionPerformed(ActionEvent e) {
     				enableEvalSim();
@@ -366,7 +367,7 @@ public class BasicHitFilterPanel extends JPanel {
     		rowFilter1.add(chkUseAlign);
 			txtAlign = Static.createTextField( DEFAULT_SIM, INT_SIZE,isActive);
 			rowFilter1.add(txtAlign);
-			rowFilter1.add(Box.createHorizontalStrut(8));
+			rowFilter1.add(Box.createHorizontalStrut(4));
 			
 			// RPKM/TPM and DE
 			isActive = false;
@@ -696,14 +697,14 @@ public class BasicHitFilterPanel extends JPanel {
 			return sum;
 		}
 		public void clear() {
+			/* CAS324 quite changing - be like Basic GO
 			chkUseSearch.setSelected(false); lblSearch.setEnabled(false);
 			chkUseFilters.setSelected(true); lblFilters.setEnabled(true);
-			
-			txtField.setText("");
-			radDesc.setSelected(true); 
-			
 			lblDesc.setEnabled(true);
 			lblID.setEnabled(false);
+			radDesc.setSelected(true); 
+			*/
+			txtField.setText("");
 			
 			chkUseAlign.setSelected(false);
 			txtAlign.setText(DEFAULT_SIM); txtAlign.setEnabled(false);
@@ -731,7 +732,7 @@ public class BasicHitFilterPanel extends JPanel {
 			boolean sec2 = chkUseFilters.isSelected();
 			
 			lblSearch.setEnabled(sec1);
-			lblID.setEnabled(sec1);     lblDesc.setEnabled(sec1);
+			lblID.setEnabled(sec1);     lblDesc.setEnabled(sec1); lblSubstring.setEnabled(sec1);
 			radHitID.setEnabled(sec1);  radDesc.setEnabled(sec1);
 			txtField.setEnabled(sec1);  btnFindFile.setEnabled(sec1);
 			if (sec1) {
@@ -768,7 +769,7 @@ public class BasicHitFilterPanel extends JPanel {
 		private JLabel lblSearch=null, lblFilters=null;
 		
 		// Search:
-		private JLabel lblID=null, lblDesc=null;
+		private JLabel lblID=null, lblDesc=null, lblSubstring =null;
 		
 		public JRadioButton radHitID = null, radDesc = null;
 		public JTextField txtField = null;
@@ -2404,7 +2405,10 @@ public class BasicHitFilterPanel extends JPanel {
 			staticPanel.add(genChkRow);
 			staticPanel.add(Box.createVerticalStrut(2));
 			if (isGrp) staticPanel.add(new JLabel("*Hit values of best"));
-			else  staticPanel.add(new JLabel("+Hit values or computed from the hit values"));
+			else  {
+				staticPanel.add(new JLabel("+Hit values or"));
+				staticPanel.add(new JLabel(" computed from them"));
+			}
 			staticPanel.setMinimumSize(staticPanel.getPreferredSize());
 			staticPanel.setMaximumSize(staticPanel.getPreferredSize());
 			staticPanel.setAlignmentX(CENTER_ALIGNMENT);
@@ -2597,7 +2601,6 @@ public class BasicHitFilterPanel extends JPanel {
  				for(int x=0; x<chkLibColNames.length; x++)
  					colName[index++] = chkLibColNames[x].getText();
  			
- 			startPval=index; // CAS322 even if there are no p-values
  			if(chkPvalColNames != null) 
  				for(int x=0; x<chkPvalColNames.length; x++)
  					colName[index++] = chkPvalColNames[x].getText();
@@ -2984,5 +2987,4 @@ public class BasicHitFilterPanel extends JPanel {
 	private int totalSeqHitPairs=0;
 	private String filters="";
 	private String norm="RPKM";
-	private int startPval=0;
 }

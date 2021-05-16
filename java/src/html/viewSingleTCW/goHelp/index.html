@@ -101,14 +101,14 @@ has an e-value indicating how well it aligned to the sequence. The GO-protein hi
 best e-value over all the hit-sequence pairs. 
 
 <h3>Examples</h3>
-Say protein X (proX) aligns to sequence Y (seqY) with an e-value, and GO:0000166 is assigned to proX with an evidence code EC, 
+Say protein X (proX) aligns to sequence Y (seqY) with an e-value, and GO:0000166 is assigned to proX with an evidence code EvC, 
 then seqY is also said to be annotated with GO:0000166. 
 <ul>
 <li>Since proX is assigned GO:0000166, it also inherits all GO:0000166 ancestors.
 <li>Since seqY has annotation of GO:0000166, it also inherits all GO:0000166 ancestors.
 <li>Since GO:0000166 is assigned to proX, all its ancestors inherit proX.
 <li>Since GO:0000166 annotates seqY, all its ancestors also annotate seqY.
-<li>GO:0000166 has EC from proX and the e-value from the proX-seqY hit.
+<li>GO:0000166 has EvC from proX and the e-value from the proX-seqY hit.
 </ul>
 
 <b>Searching in TCW</b>: If you search for GO:0000166 in a TCW database in the GO 
@@ -122,7 +122,7 @@ or inherited.
 
 <p>In the resulting table of sequences, select a sequence followed by <b>View Selected Sequence</b>; 
 the <b>Sequence Detail</b> view will be shown for the sequence.
-Select <b>Show GO for all hits</b> to see whether it is assigned (has EC) or inherited (no EC). 
+Select <b>Show GO for all hits</b> to see whether it is assigned (has EvC) or inherited (no EvC). 
 
 
 </body>

@@ -1099,6 +1099,10 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		if (hitMap.containsKey(id)) return hitMap.get(id).strDesc;
 		else return null;
 	}
+	public String getHitSpecies(String id) {
+		if (hitMap.containsKey(id)) return hitMap.get(id).strSpecies;
+		else return null;
+	}
 	public String getHitKEGG(String id) {
 		if (hitMap.containsKey(id)) return hitMap.get(id).strKEGG;
 		else return null;

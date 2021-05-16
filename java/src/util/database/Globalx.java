@@ -8,8 +8,8 @@ import java.awt.Font;
 public class Globalx {
 	public static boolean debug = false; // changed in STCWMain or MTCWMain from command line 
 	
-	public static final String strRelDate = "(9-May-21)"; 
-	public static final String strTCWver = "3.2.3"; 
+	public static final String strRelDate = "(16-May-21)"; 
+	public static final String strTCWver = "3.2.4"; 
 	public static final String URL = "http://www.agcol.arizona.edu ";
 	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate;
 	public static final String sTCWver = "sTCW v" + strTCWver;
@@ -78,6 +78,7 @@ public class Globalx {
 	public static final String TSV_SUFFIX = ".tsv"; 
 	public static final String FASTA_SUFFIX = ".fa";
 	public static final String TEXT_SUFFIX = ".txt";
+	public static final String HTML_SUFFIX = ".html";
 	
 	public static final int numDB = 40; // number of annoDBs
 	
@@ -106,7 +107,6 @@ public class Globalx {
 	public static final float  dNoScore = -100000; // Float.MAX_VALUE does not work
 	
 	static public final String GO_FORMAT = "GO:%07d";
-	static public final String GO_FORMAT_FNAME = "GO_%07d";
 	// the ECs are in MetaData. MetaData checks database for GO_TERMS, but not used
 	// Static.getGOtermMap creates a hashmap; Keep the order, some methods expect it! 
 	static public final String [] GO_TERM_LIST = {"biological_process","cellular_component","molecular_function"};
