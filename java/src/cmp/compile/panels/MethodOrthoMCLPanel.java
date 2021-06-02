@@ -50,9 +50,6 @@ public class MethodOrthoMCLPanel extends JPanel {
 		row.add(txtInflation);
 		add(row);
 		add(Box.createVerticalStrut(30));
-		
-		add(new JLabel("This may not work on your system - see Help"));
-		add(Box.createVerticalStrut(10));
 	
 		setMaximumSize(getPreferredSize());
 		setMinimumSize(getPreferredSize());

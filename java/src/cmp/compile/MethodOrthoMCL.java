@@ -18,7 +18,6 @@ import util.file.FileHelpers;
 import util.methods.ErrorReport;
 import util.methods.TCWprops;
 import util.methods.Out;
-import util.methods.Static;
 
 public class MethodOrthoMCL {
 	private final static String iDELIM = Globals.Methods.inDELIM;
@@ -187,9 +186,7 @@ public class MethodOrthoMCL {
 		Out.PrtSpMsgTime(3, "Finish", t);
 		
 		t = Out.getTime();
-		String inflVal = inflation;
-		inflVal = cmpPanel.getMethodPanel().getSettingsAt(idx).split(":")[1];
-		cmd = binDir.getAbsolutePath() + "/mcl mclInput --abc -I " + inflVal + " -o mclOutput";
+		cmd = binDir.getAbsolutePath() + "/mcl mclInput --abc -I " + inflation + " -o mclOutput";
 		
 		Out.PrtSpMsg(2, "Running mcl");
 		rc = RunCmd.runCommand(cmd.split("\\s+"), tmpDir, false, false, null,0);
@@ -216,26 +213,31 @@ public class MethodOrthoMCL {
 		
 		Out.PrtSpMsg(2, "Groups written to " + groupFile);
 		odb.close();
+	
 		cmpDBC.executeUpdate("drop database " + tempDB);
 		FileHelpers.deleteDir(tmpDir);
 		return true;
 	}catch (Exception e) {ErrorReport.reportError(e, "Error in OrthoMCL"); return false; }
 	}
 	private boolean setParams(int idx, DBConn db, CompilePanel panel) {
-		MethodPanel theMethod = panel.getMethodPanel();
-		String [] settings = theMethod.getSettingsAt(idx).split(iDELIM);
-
-		prefix = theMethod.getMethodPrefixAt(idx);		// Groups should be prefixed with this
-		
-		if (settings.length<2) 	inflation = Globals.Methods.OrthoMCL.INFLATION;
-		else 					inflation = settings[1];					// mcl parameter
-		
 		cmpDBC = db;
 		cmpPanel = panel;
+		
 		blastFile = cmpPanel.getBlastPanel().getBlastFileForMethods(0);
 		if (blastFile == null) return false;
-		String x = inflation.replace(".", "");
-		if (x.length()==1) x += "0";
+		
+		MethodPanel theMethod = cmpPanel.getMethodPanel();
+		
+		prefix = theMethod.getMethodPrefixAt(idx);		// Groups should be prefixed with this
+		
+		String [] settings = theMethod.getSettingsAt(idx).split(iDELIM);
+		if (settings.length<2) 	{
+			Out.PrtError("Incorrect parameters: '" + theMethod.getSettingsAt(idx) + "' - using defaults");
+			inflation = Globals.Methods.OrthoMCL.INFLATION;
+		}
+		else 	inflation = settings[1];					// mcl parameter
+		
+		String x = inflation.replace(".", "_");
 		groupFile = cmpPanel.getCurProjMethodDir() +  groupFile + "." + prefix + "-" + x;
 		
 		Out.PrtSpMsg(1, "Prefix:    " + prefix);
@@ -247,7 +249,7 @@ public class MethodOrthoMCL {
 	private DBConn cmpDBC;			// database connection
 	private CompilePanel cmpPanel;	// get all parameters from this
 	
-	static private String prefix;
-	static private String inflation;
-	static private String blastFile;
+	private String prefix;
+	private String inflation;
+	private String blastFile;
 }

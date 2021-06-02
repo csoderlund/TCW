@@ -225,7 +225,7 @@ public class TCWprops
 				mProps.setProperty("CLST_method_prefix"+ Integer.toString(i), "");
 				mProps.setProperty("CLST_file"+ Integer.toString(i), "");
 				mProps.setProperty("CLST_comment"+ Integer.toString(i), "");
-				mProps.setProperty("CLST_setting"+ Integer.toString(i), "");
+				mProps.setProperty("CLST_settings"+ Integer.toString(i), ""); // CAS325 missing 's'
 			}
 			break;
 			

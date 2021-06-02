@@ -729,15 +729,6 @@ public class DBConn
 					Out.PrtSpMsg(1, "Suggest: SET GLOBAL max_allowed_packet=1073741824;");
 			}
 			
-			Out.PrtSpMsg(1, "For some configuration, the following is necessary for runAS:");
-			rs = st.executeQuery("show variables like 'local_infile'");
-			if (rs.next()) {
-				String s = rs.getString(2).toLowerCase();
-				Out.PrtSpMsg(2,"local_infile=" + s);
-				if (s.contentEquals("no") || s.contentEquals("off") || s.contentEquals("0")) // CAS318 add off/0
-					Out.PrtSpMsg(2, "Suggest: SET GLOBAL local_infile = 1;");
-			}
-			
 			Out.PrtSpMsg(1, "For runSingle assembly on MariaDB:");
 			rs = st.executeQuery("show variables like 'innodb_buffer_pool_size'");
 			if (rs.next()) {

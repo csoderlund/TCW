@@ -8,8 +8,8 @@ import java.awt.Font;
 public class Globalx {
 	public static boolean debug = false; // changed in STCWMain or MTCWMain from command line 
 	
-	public static final String strRelDate = "(16-May-21)"; 
-	public static final String strTCWver = "3.2.4"; 
+	public static final String strRelDate = "(2-June-21)"; 
+	public static final String strTCWver = "3.2.5"; 
 	public static final String URL = "http://www.agcol.arizona.edu ";
 	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate;
 	public static final String sTCWver = "sTCW v" + strTCWver;

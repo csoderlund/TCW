@@ -81,6 +81,7 @@ public class MethodClosure {
 		Out.PrtSpMsg(1, "Prefix:     " + prefix);
 		Out.PrtSpMsg(1, "Coverage:   " + covCutoff + " (" + covTypes[covMode] + ")");
 		Out.PrtSpMsg(1, "Similarity: " + simCutoff);
+		if (type==1) Out.PrtSpMsg(1, "Hit File:   " + strType[type]);
 		Out.PrtSpMsg(1, "");
 		
 		if (type == 1 && panel.getNumNTdb()<=0) {

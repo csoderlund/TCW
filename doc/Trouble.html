@@ -24,10 +24,7 @@
 		<td class="top"><ttx>max_allowed_packet</ttx></td>
 		<td>This should be at least 500M if possible (the units are bytes). </td>
 	</tr>	
-	<tr>
-		<td  class="top"><ttx>local_infile</ttx></td>
-		<td>Set to 1. </td>
-	</tr>	
+	
 </table>
 
 <br>For all TCW software, the mySQL variable <ttx>max_allowed_packet</ttx> must be a reasonable
@@ -38,14 +35,17 @@ or, start mysql and type:
 To change this variable, start mysql and type:
 <pre>	set global max_allowed_packet=1073741824;</pre>
 
-For <ttp>runAS</ttp> (pre-v3.1.8 only), the following is necessary:
-<pre>
-	set global local_infile=1
-</pre>
-Testing TCW on MacOS Catalina with MySQL v8.0.17: 
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the above two seem to be the only important ones.
-<br>Testing TCW on Linux x86.64 (Centos 7) with MariaDB v10.4.12:
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; may be more sensitive, as discussed in next section.
+Testing on:
+<table class="tabley">
+	<tr>
+		<td class="top">MacOS Catalina with MySQL v8.0.17</td>
+		<td>the above variable seems to be the only important one. </td>
+	</tr>	
+	<tr>
+		<td class="top">Linux x86.64 (Centos 7) with MariaDB v10.4.12</td>
+		<td>two more variable are important for assembly, as discussed in the next section. </td>
+	</tr>
+</table>
 
 <h3>MariaDB</h3>
 Two MySQL settings are especially important for assembly performance (and generally for InnoDB table

@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import util.methods.Out;
 import util.methods.Static;
 import util.ui.ButtonComboBox;
 
@@ -106,7 +107,7 @@ public class MethodClosurePanel extends JPanel {
 	public void setSettings(String settings) {
 		String [] theSettings = settings.split(iDELIM);
 		if (theSettings.length<3) return; // earlier versions
-		
+	
 		txtCovCutoff.setText(theSettings[1]);
 		try {
 			int i = Integer.parseInt(theSettings[2]);

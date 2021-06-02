@@ -12,6 +12,20 @@ Release v3.1.8 converted from using the GO file <tt>go_&lt;date&gt;-termdb-table
 which is used to build the <tt>GOdb</tt>. This ended up to be a pretty big changed,
 hence, this release date is <u>v3.2</u> to indicate the new GO source.
 
+<h4>v3.2.5  2-June-21</h4>
+This release fixed some <ttp>runMultiTCW</ttp> problems when adding clusters.
+<ul>
+<li><ttp>OrthoMCL</ttp>
+<ul>
+<li>This did not work with MariaDB v10.4.12. This has been fixed by editing  the <ttx>orthoLoadBlast</ttx>
+script to set the MySQL <ttx>local_infile<ttx> from within the script.
+<li>TCW recently changed to using ".fa" suffixes for FASTA files, where OrthoMCL requires ".fasta" suffixes.
+This has been fixed by editing the <ttx>orthoBlastParser</ttx> to accept ".fa" suffixes.
+</ul>
+<li>Methods: Non-default parameters were not used if the following order was followed:
+A method was added for a project with non-default parameters, exit <ttp>runMultiTCW</ttp>, restart
+<ttp>runMultiTCW</ttp>, then <ttx>Add New Clusters</ttx>.
+</ul>
 <h4>v3.2.4  16-May-21</h4>
 This release has improvements to <ttp>viewSingleTCW</ttp> for exploring GOs. 
 <ul>
