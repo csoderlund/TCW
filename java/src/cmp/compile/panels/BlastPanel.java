@@ -125,13 +125,13 @@ public class BlastPanel extends JPanel {
 			
 			Pairwise pw = new Pairwise(theCompilePanel);
 			if (editPanel.isBlast(AA)) {
-				String blastFile = editPanel.getBlastFileToProcess(AA);
+				String blastFile = editPanel.getBlastFile(AA);
 				pw.savePairsFromHitFile(blastFile, true);
 			}
 			else Out.PrtSpMsg(2, "No AA (protein) results file to load");
 			
 			if (editPanel.isBlast(NT)) {
-				String blastFile = editPanel.getBlastFileToProcess(NT);
+				String blastFile = editPanel.getBlastFile(NT);
 				pw.savePairsFromHitFile(blastFile, false);
 			}
 			else Out.PrtSpMsg(2, "No NT (nucleotide) results file to load");
@@ -257,7 +257,7 @@ public class BlastPanel extends JPanel {
 	public String getBlastFileForMethods(int type) { // 0 AA, 1 NT
 		try {
 			String blastFile;
-			blastFile = editPanel.getBlastFileToProcess(type);
+			blastFile = editPanel.getBlastFile(type);
 			if ( new File(blastFile).exists()) return blastFile;
 			
 			String msg = (type==0) ? "AA" : "NT";

@@ -259,6 +259,10 @@ public class TCWprops
 	{
 		return mProps.containsKey(key);
 	}
+	public boolean hasSetKey(String key) // CAS325
+	{
+		return mUserKeys.contains(key);
+	}
 	public String fixCase(String in) throws Exception
 	{
 		String out = in;

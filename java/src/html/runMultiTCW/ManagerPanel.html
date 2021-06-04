@@ -31,28 +31,28 @@ Select <b>Overview</b> to view the state of the database.
 <h2>1. sTCWdbs (single TCW databases)</h2>
 
 Add one or more sTCWdbs, using the <b>Add</b> button, which brings up a
-new window, which has its own <b>Help</b>. 
+new panel that has its own <b>Help</b>. 
 <p>
 When you are finished adding sTCWdbs, click <b>Build Database</b>. 
-This extracts the necessary singeTCW data and enters it into an mTCWdb. 
+This extracts the necessary sTCWdb data and enters it into the mTCWdb. 
 
 <h3>Add GOs</h3>
 If the sTCWdbs have GOs, they will be added to the mTCWdb, which are useful
-in viewMultiTCW for downloading tables of GOs. This step takes the longest. 
-It can be done at any time after the "Build Database", i.e. GOs are not used
+in <b>viewMultiTCW</b> for downloading tables of GOs. This step takes the longest. 
+It can be done at any time after the <b>Build Database</b>, i.e. GOs are not used
 for clustering or statistics, so can be added after everything else is added.
 
 <h2>2. Compare Sequences</h2>
 To cluster the sequences,  the database sequences needs to be searched against itself
 to see what pairs are similar. 
 Use the <b>Settings</b> button to set the search program and parameters;
-this opens a new window which has further <b>Help</b>. 
+this opens a new panel which has further <b>Help</b>. 
 <p>
 Press <b>Run Search</b> to run the search. If this button is disabled, it means
 the file exists. 
-If you want to run the search again, you must removed, which can be done with the 
-<b>Remove...</b> button at the top. Alternatively, you may rename the file "hitsAA" or "hitsNT"
-under the directory "projcmp/&lt;project-name&gt;/hitResults".
+If you want to run the search again, you must remove the current file, which can be done with the 
+<b>Remove...</b> button at the top. Alternatively, you may rename the file <tt>hitsAA.fa</tt> or <tt>hitsNT.fa</tt>
+file under the directory <tt>projcmp/&lt;project-name&gt;/hitResults</tt>.
 <p>
 After running the search, select <b>Add Pairs</b>, which adds all pairs from the
 hit file(s) to the database.
@@ -60,7 +60,7 @@ hit file(s) to the database.
 <h2>3. Cluster Sets</h2>
 
 To create clusters (e.g. putative ortholog sets), click <b>Add</b>, which brings
-up a new window with its own <b>Help</b>. After adding one or more cluster methods, 
+up a new panel with its own <b>Help</b>. After adding one or more cluster methods, 
 click <b>Add New Clusters</b> to run the calculations for each
 new method and store the clusters to the database. 
 
@@ -68,10 +68,10 @@ new method and store the clusters to the database.
 You can add new clusters or remove existing clusters.
 <p>
 If there are really big clusters, the parameters were probably not tight enough; remove
-the cluster method and add a new one with tighter parameters. 
+the cluster set and add a new one with tighter parameters. 
 
 <h2> 4. Statistics</h2>
-After you add Cluster, execute this function to do the following:
+After you the clusters, execute <b>Run Stats</b> to do the following:
 
 <table border=1 cellpadding=3>
 <tr><td colspan=2><i>1. Compute for all pairs</i>
@@ -97,7 +97,7 @@ run the <tt>KaKs_calculator</tt>, which must be in the 'projcmp' directory.
 <td>The <tt>MAFFT</tt> program is run on each cluster, the resulting alignment is scored,
 and the results entered into the database. 
 </table> 
-<br><br>
+<br>
 
 <h2>Remove...</h2>
 

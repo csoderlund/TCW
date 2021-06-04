@@ -17,6 +17,7 @@ import javax.swing.JTextField;
 import java.util.Vector;
 
 import sng.database.Globals;
+import util.database.Globalx;
 import util.file.FileC;
 import util.file.FileRead;
 import util.methods.BlastArgs;
@@ -198,7 +199,7 @@ public class EditAnnoPanel extends JPanel {
 		btnGenHitFile.setSelected(true);
 		
 		// Bottom buttons
-		JButton btnKeep = new JButton("Keep");
+		JButton btnKeep = new JButton(Globalx.keepBtn);
 		btnKeep.setBackground(Globals.BGCOLOR);
 		btnKeep.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -213,7 +214,7 @@ public class EditAnnoPanel extends JPanel {
 			}
 		});
 		
-		JButton btnResetDefaults = new JButton("Reset To Default");
+		JButton btnResetDefaults = new JButton(Globalx.defaultBtn);
 		btnResetDefaults.setBackground(Globals.BGCOLOR);
 		btnResetDefaults.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -221,7 +222,7 @@ public class EditAnnoPanel extends JPanel {
 			}
 		});
 		
-		JButton btnDiscard = new JButton("Cancel");
+		JButton btnDiscard = new JButton(Globalx.cancelBtn);
 		btnDiscard.setBackground(Globals.BGCOLOR);
 		btnDiscard.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {

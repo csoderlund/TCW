@@ -29,6 +29,7 @@ import javax.swing.table.AbstractTableModel;
 
 
 import sng.database.Globals;
+import util.database.Globalx;
 import util.methods.ErrorReport;
 import util.methods.TCWprops;
 import util.methods.Static;
@@ -38,6 +39,7 @@ public class AssmOptionsPanel extends JPanel {
 	private static final long serialVersionUID = 6967674088911400148L;
 	private static final String [] THREE_INT_VALS = { "Minimal Overlap", "Minimal % Identity", "Maximal Overhang" };
 	private static final int TEXTFIELD_WIDTH = 15;
+	private final String helpHTML = Globals.helpRunDir + "AssemblyOptions.html";
 	
 	public AssmOptionsPanel(ManagerFrame parentFrame) {
 		try {
@@ -270,7 +272,7 @@ public class AssmOptionsPanel extends JPanel {
 			row.add(TCTableCtrlPanel);
 			innerPanel.add(row);
 			
-			JButton btnResetDefaults = new JButton("Reset To Defaults");
+			JButton btnResetDefaults = new JButton(Globalx.defaultBtn);
 			btnResetDefaults.setBackground(Globals.BGCOLOR);
 			btnResetDefaults.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent ev) {
@@ -312,7 +314,7 @@ public class AssmOptionsPanel extends JPanel {
 				}
 			});
 			
-			btnKeepAssem = new JButton("Keep");
+			btnKeepAssem = new JButton(Globalx.keepBtn);
 			btnKeepAssem.setBackground(Globals.BGCOLOR);
 			btnKeepAssem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -340,7 +342,7 @@ public class AssmOptionsPanel extends JPanel {
 					theParentFrame.setFrameMode(ManagerFrame.FRAME_MODE_MAIN);
 				}
 			});
-			JButton btnDiscard = new JButton("Cancel");
+			JButton btnDiscard = new JButton(Globalx.cancelBtn);
 			btnDiscard.setBackground(Globals.BGCOLOR);
 			btnDiscard.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -355,7 +357,7 @@ public class AssmOptionsPanel extends JPanel {
 			btnHelp.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					UserPrompt.displayHTMLResourceHelp(theParentFrame, 
-							"Assembly options help", "html/runSingleTCW/AssemblyOptions.html");
+							"Assembly options help", helpHTML);
 				}
 			});
 			

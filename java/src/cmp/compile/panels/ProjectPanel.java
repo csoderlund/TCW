@@ -36,7 +36,7 @@ import cmp.database.Globals;
 
 public class ProjectPanel extends JPanel {
 	private static final long serialVersionUID = -5440876354212703010L;
-	private final String HTML = "html/runMultiTCW/ManagerPanel.html";
+	private final String helpHTML = Globals.helpRunDir + "ManagerPanel.html";
 	
 	public ProjectPanel(CompilePanel parentPanel) {
 		theCompilePanel = parentPanel;
@@ -51,8 +51,8 @@ public class ProjectPanel extends JPanel {
 				theCompilePanel.updateClearInterface();
 				addProject();
 				
-				if (theCompilePanel.mTCWcfgNew()) 
-					theCompilePanel.mTCWcfgRead();
+				theCompilePanel.mTCWcfgNew(); 
+				theCompilePanel.mTCWcfgRead();
 			}
 		});
 		btnHelp = new JButton("Help");
@@ -60,7 +60,7 @@ public class ProjectPanel extends JPanel {
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				UserPrompt.displayHTMLResourceHelp(theCompilePanel.getParentFrame(), 
-						"runMultiTCW", HTML);
+						"runMultiTCW", helpHTML);
 			}
 		});
 		row1.add(btnAdd);
@@ -254,17 +254,18 @@ public class ProjectPanel extends JPanel {
 		cmbProject.removeAllItems();
 		for(int x=0; x<projNames.length; x++)
 			cmbProject.addItem(projNames[x]);
-		if(projectName == null) cmbProject.setSelectedIndex(0);
+		
+		if (projectName == null) cmbProject.setSelectedIndex(0);
 		else {
 			cmbProject.setSelectedItem(projectName);
-			System.out.println("Project: " + projectName);
+			Out.Print("Project: " + projectName);
 		}
 		
 		cmbProject.setBackground(Globals.BGCOLOR);
 		cmbProject.setMaximumSize(cmbProject.getPreferredSize());
 		cmbProject.setMinimumSize(cmbProject.getPreferredSize());
 		
-		if(cmbProject.getSelectedIndex() > 0)
+		if (cmbProject.getSelectedIndex() > 0)
 			txtDBName.setText(Globals.MTCW + "_" + projectName);
 	}
 	/*****************************************************/

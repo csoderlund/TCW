@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JCheckBox;
 import javax.swing.JTextField;
 
+import util.database.Globalx;
 import util.methods.BlastArgs;
 import util.methods.Out;
 import util.methods.Static;
@@ -40,13 +41,13 @@ public class EditBlastPanel extends JPanel {
 		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setBackground(Globals.BGCOLOR);
-		add(Box.createVerticalStrut(5));
+		add(Box.createVerticalStrut(15));
 		
 		add(createBlast(AA)); 
 		add(createBlast(NT)); 
 		
 	// Lower buttons
-		btnKeep = new JButton("Keep");
+		btnKeep = new JButton(Globalx.keepBtn);
 		btnKeep.setBackground(Globals.BGCOLOR);
 		btnKeep.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -58,7 +59,7 @@ public class EditBlastPanel extends JPanel {
 			}
 		});
 		
-		btnDiscard = new JButton("Cancel");
+		btnDiscard = new JButton(Globalx.cancelBtn);
 		btnDiscard.setBackground(Globals.BGCOLOR);
 		btnDiscard.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -66,6 +67,13 @@ public class EditBlastPanel extends JPanel {
 				theCompilePanel.getBlastPanel().setBlastSummary();
 				setVisible(false);
 				theCompilePanel.setMainPanelVisible(true);
+			}
+		});
+		btnDef = new JButton(Globalx.defaultBtn);
+		btnDef.setBackground(Globals.BGCOLOR);
+		btnDef.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				setDefaults();
 			}
 		});
 		
@@ -81,8 +89,8 @@ public class EditBlastPanel extends JPanel {
 		buttonPanel.add(Box.createHorizontalGlue());
 		buttonPanel.add(btnKeep);    buttonPanel.add(Box.createHorizontalStrut(5));
 		buttonPanel.add(btnDiscard); buttonPanel.add(Box.createHorizontalStrut(5));
+		buttonPanel.add(btnDef); 	 buttonPanel.add(Box.createHorizontalStrut(5));
 		buttonPanel.add(btnHelp);
-		buttonPanel.add(Box.createHorizontalStrut(5));
 		buttonPanel.add(Box.createHorizontalGlue());
 		add(buttonPanel);
 		add(Box.createVerticalStrut(30));
@@ -90,6 +98,9 @@ public class EditBlastPanel extends JPanel {
 		setMaximumSize(getPreferredSize()); 
 		setMinimumSize(getPreferredSize());
 	}
+	/*******************************************************
+	 * AA and NT interface
+	 */
 	private JPanel createBlast(int tp) {
 		JPanel page = Static.createPagePanel();
 		int index2=40;
@@ -164,8 +175,8 @@ public class EditBlastPanel extends JPanel {
 	}
 
 	private String getSearchArgs(String selected) {
-		if (selected.equals("blast")) return BlastArgs.getBlastArgsORF();
-		else if (selected.equals("diamond")) return BlastArgs.getDiamondArgsORF();
+		if (selected.equals("blast")) 			return BlastArgs.getBlastArgsORF();
+		else if (selected.equals("diamond")) 	return BlastArgs.getDiamondArgsORF();
 		else return "";
 	}
 	
@@ -178,14 +189,16 @@ public class EditBlastPanel extends JPanel {
 		}
 	}
 	
-	/******************************************************************/
+	/******************************************************************
+	 * Startup of Settings, Read mTCW.cfg, and changes
+	 */
 	public void updatePanel() {
-		if (!theCompilePanel.dbIsExist()) return;
 		save();
-		
-		for (int tp=0; tp<2; tp++) {
+	
+		boolean dbExists = (theCompilePanel.dbIsExist()); // CAS325 was exiting on !dbExists
+		for (int tp=0; tp<2; tp++) {			
 			boolean bUse = chkBlast[tp].isSelected();
-			if (tp==1) {
+			if (dbExists && tp==1) {
 				if (theCompilePanel.getDBInfo().nNTdb()==0) {
 					chkBlast[tp].setSelected(false);
 					chkBlast[tp].setEnabled(false); 
@@ -212,21 +225,21 @@ public class EditBlastPanel extends JPanel {
 	}
 		
 	// called for processing blast file
-	public String getBlastFileToProcess(int tp) {return lblBlastFile[tp].getText();}
+	public String getBlastFile(int tp) {return lblBlastFile[tp].getText();}
 	public boolean isBlastExists(int tp) {return blastExists[tp];}
 	
 	public String getSearchPgm(int tp) { 
-		if (tp==0) return cmbSearchPgms[tp].getSelectedItem();
-		else return "blastn";
+		if (tp==0) 	return cmbSearchPgms[tp].getSelectedItem();
+		else 		return "blastn";
 	}
-	public String getBlastFile(int tp) {return lblBlastFile[tp].getText();}
 	public String getBlastParams(int tp) { return txtParams[tp].getText(); }
 	
 	public void clearInterface() {
-		chkBlast[AA].setSelected(true);
-		chkBlast[NT].setSelected(true);
-		cmbSearchPgms[AA].setSelectedIndex(0);
+		setDefaults();
+		
 		resetFile();
+		
+		save(); // CAS325
 	}
 	public void resetFile() { // when blast directory removed
 		for (int tp=0; tp<2; tp++) {
@@ -248,7 +261,7 @@ public class EditBlastPanel extends JPanel {
 	}
 	public void cfgFileDefaults() { // called at startup of edit panel, when summary is computed, and resetFiles
 		String projPath = theCompilePanel.getBlastPanel().getDefaultBlastDirRelPath();
-		
+	
 		for (int tp=0; tp<2; tp++) {
 			if (tp==0) 	fullBlastPath[tp] = projPath + "/"  + BLAST_AA_TAB;
 			else 		fullBlastPath[tp] = projPath + "/"  + BLAST_NT_TAB;
@@ -278,32 +291,7 @@ public class EditBlastPanel extends JPanel {
 		else 
 			Out.PrtWarn("mTCW.cfg defined unavailable search program:" + pgm);
 	}
-	
-	public void cfgSetBlast(int tp, String file) { 
-		if (file.equals("")) return;
-	
-		try {
-			if (!file.startsWith("/") && !file.startsWith(".")) file = "./" + file;
-			boolean exists = new File(file).exists();
-			if (!exists) return;
-			
-			boolean isBlast = (tp==AA) ?
-					(file.equals(fullBlastPath[AA]) || file.equals(BLAST_AA_TAB)) : 
-					(file.equals(fullBlastPath[NT]) || file.equals(BLAST_NT_TAB));
-			
-			if (isBlast) {
-				chkBlast[tp].setSelected(true);
-				lblBlastFile[tp].setText(file); 
-				
-				String msg = (exists) ? fexists : "";
-				lblBlastExists[tp].setText(msg);
-				blastExists[tp] = exists;
-			}
-			else Out.PrtError("Determing file type: " + file);
-			updatePanel();	
-		}
-		catch (Exception e) {ErrorReport.reportError(e, "setting parameters from MTCW.cfg");}
-	}
+	/*********************************************************/
 	private void save() {
 		for (int i=0; i<2; i++) {
 			schkBlast[i] 		= chkBlast[i].isSelected();
@@ -322,6 +310,14 @@ public class EditBlastPanel extends JPanel {
 			txtParams[i].setText(stxtParams[i]);
 		}
 	}
+	private void setDefaults() { // CAS325 from Defaults and on clearInterface
+		chkBlast[AA].setSelected(true);
+		cmbSearchPgms[AA].setSelectedIndex(0);
+		txtParams[AA].setText(BlastArgs.getDiamondArgsORF());
+		
+		chkBlast[NT].setSelected(true);
+		txtParams[NT].setText(BlastArgs.getBlastnArgs()); 
+	}
 	private JPanel buttonPanel = null;
 	
 	// Blast
@@ -339,7 +335,7 @@ public class EditBlastPanel extends JPanel {
 	private String [] scmbSearchPgms = 	new String [2]; // NT is not used at this time
 	private String [] stxtParams = 		new String [2]; 
 	
-	private JButton btnKeep = null, btnDiscard = null,  btnHelp = null;
+	private JButton btnKeep = null, btnDiscard = null,  btnHelp = null, btnDef = null;
 	private CompilePanel theCompilePanel = null;
 	private String [] fullBlastPath = new String [2];
 }

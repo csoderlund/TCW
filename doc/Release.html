@@ -12,20 +12,39 @@ Release v3.1.8 converted from using the GO file <tt>go_&lt;date&gt;-termdb-table
 which is used to build the <tt>GOdb</tt>. This ended up to be a pretty big changed,
 hence, this release date is <u>v3.2</u> to indicate the new GO source.
 
-<h4>v3.2.5  2-June-21</h4>
-This release fixed some <ttp>runMultiTCW</ttp> problems when adding clusters.
+<h4>v3.2.5  4-June-21</h4>
+This release make fixes and small changes to <ttp>runMultiTCW</ttp>.
+<ul>
+<li>Search <ttc>Settings</ttc>
+<ul>
+<li>Added <ttc>Defaults</ttc> button which set everything back to default.
+<li>Tiny bugs:
+<ul>
+<li>This got the wrong blast file in the following scenario: (1) Load an existing project.
+(2) Create a new project. (3) Build Database. (4) Search - used the initial existing project files.
+<li>If loaded existing project, then created new project, it used existing projects search parameters.
+<li>If search parameters where set to blank, they showed as defaults on the <ttc>Settings</ttc> panel
+on a new loading of the <ttx>mTCW.cfg</ttx> file.
+</ul>
+</ul>
+<li>Methods
 <ul>
 <li><ttp>OrthoMCL</ttp>
 <ul>
-<li>This did not work with MariaDB v10.4.12. This has been fixed by editing  the <ttx>orthoLoadBlast</ttx>
-script to set the MySQL <ttx>local_infile<ttx> from within the script.
+<li>This did not work with MariaDB v10.4.12. 
+<br>This has been fixed by editing  the <ttx>orthoLoadBlast</ttx>
+script to set the MySQL <ttx>local_infile</ttx> from within the script.
 <li>TCW recently changed to using ".fa" suffixes for FASTA files, where OrthoMCL requires ".fasta" suffixes.
-This has been fixed by editing the <ttx>orthoBlastParser</ttx> to accept ".fa" suffixes.
+<br>This has been fixed by editing the <ttx>orthoBlastParser</ttx> to accept ".fa" suffixes.
 </ul>
-<li>Methods: Non-default parameters were not used if the following order was followed:
+<li>Tiny bug: Non-default parameters were not used if the following order was followed:
 A method was added for a project with non-default parameters, exit <ttp>runMultiTCW</ttp>, restart
 <ttp>runMultiTCW</ttp>, then <ttx>Add New Clusters</ttx>.
 </ul>
+<li>Added a <ttx>projcmp/ex</ttx> directory with the results of running <ttp>OrthoMCL</ttp> within
+TCW on the three 'ex' demos; this can be added as an "User Defined" method.
+</ul>
+
 <h4>v3.2.4  16-May-21</h4>
 This release has improvements to <ttp>viewSingleTCW</ttp> for exploring GOs. 
 <ul>

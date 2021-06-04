@@ -22,6 +22,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 
+import sng.database.Globals;
 import util.database.HostsCfg;
 import util.database.DBConn;
 import util.database.Globalx;
@@ -53,6 +54,7 @@ public class AnnoOptionsPanel extends JPanel {
 	private static final int NUM_LG_FIELD_WIDTH = 4;
 	private static final int NUM_SM_FIELD_WIDTH = 2;
 	private static final int INDENT_RADIO = 25;
+	private final String helpHTML = Globals.helpRunDir + "AnnotationOptions.html";
 	
 	public AnnoOptionsPanel(ManagerFrame parentFrame) {
 		theManFrame = parentFrame;
@@ -89,7 +91,7 @@ public class AnnoOptionsPanel extends JPanel {
 		pnlAnnoDBOptions.add(innerPanel);
 		
 		// buttons
-		JButton btnResetDefaults = new JButton("Reset To Default");
+		JButton btnResetDefaults = new JButton(Globalx.defaultBtn);
 		btnResetDefaults.setBackground(Globalx.BGCOLOR);
 		btnResetDefaults.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -97,7 +99,7 @@ public class AnnoOptionsPanel extends JPanel {
 			}
 		});
 
-		JButton btnKeep = new JButton("Keep");
+		JButton btnKeep = new JButton(Globalx.keepBtn);
 		btnKeep.setBackground(Globalx.BGCOLOR);
 		btnKeep.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -111,7 +113,7 @@ public class AnnoOptionsPanel extends JPanel {
 			}
 		});
 		
-		JButton btnDiscard = new JButton("Cancel");
+		JButton btnDiscard = new JButton(Globalx.cancelBtn);
 		btnDiscard.setBackground(Globalx.BGCOLOR);
 		btnDiscard.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -126,7 +128,7 @@ public class AnnoOptionsPanel extends JPanel {
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				UserPrompt.displayHTMLResourceHelp(theManFrame, 
-						"Annotation Options Help", "html/runSingleTCW/AnnotationOptions.html");
+						"Annotation Options Help", helpHTML);
 			}
 		});
 		

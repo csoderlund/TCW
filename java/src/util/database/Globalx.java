@@ -8,7 +8,7 @@ import java.awt.Font;
 public class Globalx {
 	public static boolean debug = false; // changed in STCWMain or MTCWMain from command line 
 	
-	public static final String strRelDate = "(2-June-21)"; 
+	public static final String strRelDate = "(4-June-21)"; 
 	public static final String strTCWver = "3.2.5"; 
 	public static final String URL = "http://www.agcol.arizona.edu ";
 	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate;
@@ -163,4 +163,9 @@ public class Globalx {
 	public static final Font  boldUIFont = new Font("Sans", Font.BOLD, 12);
 	public static final Font  textFont = new Font("Sans", Font.PLAIN, 11);
 	public static final Color componentBGColor = Color.white;
+	
+	// common button names
+	public static String keepBtn = "Keep";
+	public static String cancelBtn = "Cancel";
+	public static String defaultBtn = "Defaults";
 }

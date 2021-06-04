@@ -354,16 +354,19 @@ public class CompilePanel extends JPanel {
 			String aa = props.getProperty("MTCW_DBsearch_pgm").trim();
 			if (!aa.equals("")) editPanel.cfgSetPgm(tp, aa);
 				
-			aa = props.getProperty("MTCW_search_params").trim(); // Must be after cfgSetPgm
-			if (!aa.equals("")) editPanel.cfgSetParams(tp, aa);
-			
+			if (props.hasSetKey("MTCW_search_params")) { // CAS325 may be blank
+				aa = props.getProperty("MTCW_search_params").trim(); // Must be after cfgSetPgm
+				editPanel.cfgSetParams(tp, aa);
+			}
 			// nt selfblast
 			tp = Globals.NT;
 			String runBlastNT = props.getProperty("MTCW_run_blastn"); 
 			if (runBlastNT.equals("0")) editPanel.cfgFileNoBlastN();
-			else {		
-				String nt = props.getProperty("MTCW_blastn_params").trim();
-				if (!nt.equals("")) editPanel.cfgSetParams(tp, nt);
+			else {	
+				if (props.hasSetKey("MTCW_blastn_params")) { // CAS325 may be blank
+					String nt = props.getProperty("MTCW_blastn_params").trim();
+					editPanel.cfgSetParams(tp, nt);
+				}
 			}
 		// updates Method panel
 			String method = "";
