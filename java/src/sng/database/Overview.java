@@ -29,11 +29,15 @@ public class Overview {
 	public Overview(DBConn dbC) {
 		mDB = dbC;
 	}
-	public Overview(DBConn dbC, int c1, int c2) { // update overview from execAnno
+	public Overview(DBConn dbC, int c1, int c2) { // update overview from execAnno when COVER set
 		mDB = dbC;
 		if (c1!=0) COVER1 = c1;
 		if (c2!=0) COVER2 = c2;
 		Out.Print("Using Cover values " + c1 + " " + c2);
+		try { // CAS326
+			mDB.executeUpdate("update assem_msg set anno_msg=''");
+		}
+		catch ( Exception err ) {ErrorReport.reportError(err,"Regenerate overview");}
 	}
 	/*****************************************************
 	 * called from runSTCMain, ManagerFrame (Get Start if pja_msg==null), QRFrame, Schema (updateTo41)
@@ -370,12 +374,50 @@ public class Overview {
 		if (hasAnno && nUniqueHits>0) { 
 			lines.add( "ANNOTATIONS" ); 
 			Out.prtSp(1, "Annotation statistics....");
-			if (!annoStats(lines, ask)) return false;	
-			if (!annoDatabases(lines)) return false;
-			if (!annoSpecies(lines)) return false;
+			
+			try { 
+	        	String annoMsg = mDB.executeString( "Select anno_msg from assem_msg");
+	        	
+	        	if (annoMsg==null || annoMsg.equals("")) {
+	        		annoMsg = annoCreate(ask);
+	        		if (annoMsg == null) return false;
+	        	}
+	        	// create lines from anno_msg
+    			String [] tok = annoMsg.split(Globals.tcwDelim);
+    			for (int i=0; i<tok.length; i++) 
+    				lines.add(tok[i]);	
+        		lines.add("");
+			}
+			catch (Exception err) {
+				ErrorReport.reportError(err,"Error: reading database for overview annoDBs");
+				return false;
+			}
+			
+			/** Always redo GO **/
 			if (!annoGO(lines)) return false;
 		}
 		return true;
+    }
+    /*************************************************************
+     * CAS326 create once and store
+     */
+    private String annoCreate(boolean ask) {
+    	try {
+    		String msg="";
+    		Vector<String> tlines = new Vector <String> ();
+    		if (!annoStats(tlines, ask)) return null;	
+			if (!annoDatabases(tlines)) return null;
+			if (!annoSpecies(tlines)) return null;
+			
+			for (String l : tlines) msg += l + Globals.tcwDelim;
+			mDB.executeUpdate("update assem_msg set anno_msg='" + msg + "'");
+			
+    		return msg;
+    	}
+    	catch (Exception err) {
+			ErrorReport.reportError(err,"Error: reading database for overview annoDBs");
+			return null;
+		}
     }
     /* make Annotation stat */
     private boolean annoStats(Vector<String> lines, boolean ask) {     				
@@ -455,7 +497,6 @@ public class Overview {
 	     	boolean [] noHit = new boolean [maxIdx];
 	     
 	     	for (int dbid=1; dbid < nDB; dbid++) {
-	     		int badRank=0;
 	     		for (int i=0; i<maxIdx; i++) noHit[i]=true;
 	     		
 	     		// BasicHitQuery:443 and SeqDetail for hit table use prot_start and prot_end
@@ -470,7 +511,7 @@ public class Overview {
 	    			int hLen = rs.getInt(1);
 	    			int pSim = rs.getInt(2);
 	    			int align = Math.abs(rs.getInt(4)-rs.getInt(3)+1);
-	    			int rank = rs.getInt(5);
+	    			//int rank = rs.getInt(5);
 	    			int idx = rs.getInt(6);
 	    			/** CAS321 this happens cause duplicate hits can get in - need to fix in annotator
 	    			if (noHit[idx] && rank!=1) {
@@ -633,8 +674,6 @@ public class Overview {
     		
 		    int nCtgGOs=0, nCtgBestGOs=0, nHitGOs=0, nSlims=0;
 		    String  slimSubset="";
-		     
-	    	Out.prtSpCnt(1, nUniqueGOs,"Unique GOs");
 	        
 	        nCtgGOs = mDB.executeCount( "SELECT count(DISTINCT CTGID) FROM pja_unitrans_go" );        
 	        
@@ -644,10 +683,8 @@ public class Overview {
 	        nHitGOs = mDB.executeCount( "select count(*) from pja_db_unique_hits where goList!=''");
 	        
 	        nSlims = mDB.executeCount("select count(*) from go_info where slim=1");
-	        if (nSlims>0) {
+	        if (nSlims>0) 
 	        	slimSubset = mDB.executeString("select go_slim from assem_msg");
-	        	Out.prtSpCnt(1,nSlims, "Slims from " + slimSubset);
-	        }
 	        
 	        int nBio=0, nMol=0, nCel=0, nISA=0, nPOF=0;
 	        
@@ -724,7 +761,6 @@ public class Overview {
             rows[r][c++] = dff.format(nCel);
             rows[r][c++] = Out.perFtxtP(nCel, nUniqueGOs);
             
-          
 	        makeTable(just.length, r+1, null, just, lines); 
            
     		return true;
@@ -757,13 +793,15 @@ public class Overview {
         return true;
     }
     private boolean expStatsDE(double nTot, String title, String table, Vector<String> lines) {
-        try {        
+        try {     
+        	boolean isGO = table.contentEquals("go_info");
             String strQ=  "SELECT ";
-            ResultSet rset = mDB.executeQuery("SHOW COLUMNS FROM " + table); //table=contig or go_info
+            ResultSet rset = mDB.executeQuery("select pCol, goCutoff from libraryDE"); // CAS326 changed to use libraryDE
             Vector <String> rowLab = new Vector <String> ();
             while(rset.next()) {
                 String col = rset.getString(1);
-                if(col.startsWith(Globals.PVALUE)) {
+                double cut = rset.getDouble(2);
+                if (!isGO || (isGO && cut>0.0)) {
                     if (rowLab.size() > 0) strQ += ",";
                     strQ +=  col;
                     rowLab.add(col);
@@ -773,9 +811,9 @@ public class Overview {
             strQ += " FROM " + table;
              
             if (title.equals("GO")) 
-            	lines.add("   GOs enrichment: (% of " + dff.format(nTot) + ")");
+            	lines.add("   Gene ontology enrichment: (% of " + dff.format(nTot) + ")");
             else 
-            	lines.add("   Differential expression: (% of " + dff.format(nTot) + ")");
+            	lines.add("   Differential expression:  (% of " + dff.format(nTot) + ")");
             
             double [] cuts =    {     1e-5,    1e-4,    0.001,   0.01,     0.05};
             String [] dfields = {"", "<1E-5", "<1E-4", "<0.001", "<0.01", "<0.05"};
@@ -1472,7 +1510,7 @@ public class Overview {
   	       if (libs.size()>0) {
 	  	       	Vector <String> del = new Vector <String> ();
 	  	       	for (String lib : libs) {
-  	    	   		String col = "L__" + lib;
+  	    	   		String col = Globalx.LIBCNT + lib;
   	    	   		int cnt = mDB.executeCount( "Select count(*) from contig where " + col + ">1");
   	    	   		if (cnt==0) del.add(lib);
 	  	       	}
@@ -1486,8 +1524,7 @@ public class Overview {
   	       }
   	       if (libs.size()>0) {
   	    	   hasNorm=true;
-  	    	   // CAS304
-  	    	   if (mDB.tableColumnExists("assem_msg", "norm")) 
+  	    	   if (mDB.tableColumnExists("assem_msg", "norm"))  // CAS304
   	    		   normType = mDB.executeString("select norm from assem_msg");
   	    	   else 
   	    		 normType="RPKM";

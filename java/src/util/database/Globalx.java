@@ -8,8 +8,8 @@ import java.awt.Font;
 public class Globalx {
 	public static boolean debug = false; // changed in STCWMain or MTCWMain from command line 
 	
-	public static final String strRelDate = "(4-June-21)"; 
-	public static final String strTCWver = "3.2.5"; 
+	public static final String strRelDate = "(6-July-21)"; 
+	public static final String strTCWver = "3.2.6"; 
 	public static final String URL = "http://www.agcol.arizona.edu ";
 	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate;
 	public static final String sTCWver = "sTCW v" + strTCWver;
@@ -38,6 +38,7 @@ public class Globalx {
 	public static final String ANNODIR 	= 	 PROJDIR + "/DBfasta";
 	public static final String USERDIR = 	"Userfiles";   
 	public static final String HTMLDIR = 	"OverviewHTML";
+	public static final String DEDIR = 		"RunDE"; // CAS326
 	
 	// for specific project
 	public final static String pLOGDIR =   "logs";
@@ -112,7 +113,7 @@ public class Globalx {
 	static public final String [] GO_TERM_LIST = {"biological_process","cellular_component","molecular_function"};
 	static public final String [] GO_TERM_ABBR = {"BP", "CC", "MF"};
 	static public final String goFullOnt = "Ontology";
-	static public final String goOnt = "GO"; // CAS322 there is no consensus for what to call this
+	static public final String goOnt = "Ont"; // CAS322 there is no consensus for what to call this
 	static public final String goID = "GO ID";
 	static public final String goTerm = "GO Name";
 	static public final String evCode = "EvC";

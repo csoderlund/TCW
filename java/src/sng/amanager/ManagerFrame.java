@@ -1343,6 +1343,7 @@ public class ManagerFrame extends JFrame {
 				if (files[x].equals(Globalx.ANNOSUBDIR)) continue;
 				if (files[x].equals(Globalx.HTMLDIR)) continue;
 				if (files[x].equals(Globalx.USERDIR)) continue;
+				if (files[x].equals(Globalx.DEDIR)) continue;
 				
 				File temp = new File(PROJDIR + files[x]);
 				if(temp.exists() && temp.isDirectory() && !temp.isHidden())
@@ -1740,7 +1741,7 @@ public class ManagerFrame extends JFrame {
         	private void removeDB() {
         		try {
         			if(!dbExists) {
-        				System.err.println("Database " + curManData.getTCWdb() + " does not exist");
+        				Out.Print("Database " + curManData.getTCWdb() + " does not exist");
         				return;
         			}
         			if (!UserPrompt.showConfirm("runSingleTCW", "Remove database " + curManData.getTCWdb())) return;
@@ -1754,7 +1755,7 @@ public class ManagerFrame extends JFrame {
         				curManData.getAnnoDBAt(x).setLoaded(false);
         			dbExists=false;
         			
-        			System.out.println("Removed database " + curManData.getTCWdb() + " successfully");
+        			Out.Print("Removed database " + curManData.getTCWdb() + " successfully");
         		} 
         		catch (Exception e){ErrorReport.reportError(e, "Cannot delete database " + curManData.getTCWdb());}
         	}

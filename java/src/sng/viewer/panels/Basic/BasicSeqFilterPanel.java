@@ -47,7 +47,7 @@ public class BasicSeqFilterPanel extends JPanel {
 	
 	// Any change here will work in this file, but needs to be changed in BasicSeqQueryTab.SeqData class!!!
 	// These are columns from database and do not include row#
-	private static final String rowCol = "Row#";
+	private static final String rowCol = "Row";
 	private static int idxLong = 4;
 	private static String [] STATIC_COLUMNS   = { "Seq ID", "TCW Remark", "User Remark", "Counts", "Longest", "Best HitID"};
 	private static final Class<?> [] COLUMN_TYPES =   { String.class, String.class, String.class, Integer.class, String.class , String.class}; 
@@ -130,8 +130,8 @@ public class BasicSeqFilterPanel extends JPanel {
 			radSeqID = Static.createRadioButton("Seq ID", true); 
 			row1.add(radSeqID); row1.add(Box.createHorizontalStrut(2));
 			
+			radLong = Static.createRadioButton(longLabel, true); // CAS311 add, CAS326 create even if not use
 			if (!bUseOrigName) {
-				radLong = Static.createRadioButton(longLabel, true); // CAS311 add
 				row1.add(radLong); row1.add(Box.createHorizontalStrut(2));
 			}
 			radTCW = Static.createRadioButton("TCW", false);
@@ -253,7 +253,7 @@ public class BasicSeqFilterPanel extends JPanel {
 		
 		public String getSearchCol() {
 			if (radSeqID.isSelected()) return "contig.contigid";
-			else if (radLong.isSelected()) return "contig.longest_clone";
+			else if (radLong!=null && radLong.isSelected()) return "contig.longest_clone"; // CAS326
 			else if (radTCW.isSelected()) return "contig.notes";
 			else return "contig.user_notes";
 		}
@@ -268,7 +268,7 @@ public class BasicSeqFilterPanel extends JPanel {
 		}
 		public String getStatusCol() {
 			if (radSeqID.isSelected()) return "Seq ID";
-			else if (radLong.isSelected()) return longLabel;
+			else if (radLong!=null && radLong.isSelected()) return longLabel;
 			else if (radTCW.isSelected()) return "TCW Remark";
 			else return "User Remark";
 		}
@@ -511,7 +511,7 @@ public class BasicSeqFilterPanel extends JPanel {
 				String statusSearch = queryPanel.getStatusStr();
 				
 				ArrayList<Object []> results = loadFromDatabase(false);
-				if(results.isEmpty() && queryPanel.loadList==null 
+				if (results.isEmpty() && queryPanel.loadList==null 
 						&& !searchStr.equals("") && !searchStr.contains("%")) {
 					results = loadFromDatabase(true); // search with wild chars
 					statusSearch = queryPanel.getStatusCol() + " contains " + statusSearch;

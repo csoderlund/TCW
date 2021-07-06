@@ -1051,10 +1051,10 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		String e = "0.0";
 		if (hd.eval!=0) e =  String.format("%.0E", hd.eval); 
 		
-		String h = " Hit: " +  e        + ", "  + 
-							hd.nPercent + "%, Align " + hd.nAlignLen  + "    " +
-							hd.strType  + " " + hd.strDesc;
-		return h;
+		String msg = String.format("Hit: %d%s, %s, %.1f, Align %d", hd.nPercent, "%", e, hd.dBit, hd.nAlignLen);
+		msg +=  "    " + hd.strType  + " " + hd.strDesc;
+		
+		return msg;
 	}
 	
 	// SeqGOPanel

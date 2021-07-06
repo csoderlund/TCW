@@ -1,7 +1,6 @@
-package sng.viewer.panels.align;
+package util.align;
 
 import sng.database.Globals;
-import util.align.AAStatistics;
 
 
 /***********************************************************
@@ -59,7 +58,7 @@ public class AlignPairAA {
 	private int score;
 	private String method="";
 	public AlignPairAA(int gap, int extend, String seq1, String seq2, int type) {
-		 Substitution sub = new Blosum50();
+		 Substitution sub = new Blosum62(); // CAS326 changed from 50
 		 
 		 Align saf;
 		 if (type==1) {
@@ -78,7 +77,6 @@ public class AlignPairAA {
 		 for (int i=0; i<alignOne.length(); i++) {
 			char c1 = alignOne.charAt(i);
 			char c2 = alignTwo.charAt(i);
-			// using blosum62 for substitution, should use blosum50 below - or change to 62
 			sb.append(AAStatistics.getSubChar(c1, c2));
 		 }
 		 alignMatch=sb.toString();
@@ -150,6 +148,43 @@ class Blosum50 extends Substitution {
 	  };
 
 	  public Blosum50() 
+	  { buildscore(residues, residuescores); }
+}
+// CAS326
+class Blosum62 extends Substitution {
+
+	  private String residues = "ARNDCQEGHILKMFPSTWYVBZX*";
+	  
+	  public String getResidues() { return residues; }
+
+	  private int[][] residuescores = {
+		    { 4},
+	    	{-1,  5},
+	    	{-2,  0,  6},
+	    	{-2, -2,  1,  6},
+	    	{ 0, -3, -3, -3,  9},
+	    	{-1,  1,  0,  0, -3,  5},
+	    	{-1,  0,  0,  2, -4,  2,  5},
+	    	{ 0, -2,  0, -1, -3, -2, -2,  6},
+	    	{-2,  0,  1, -1, -3,  0,  0, -2,  8},
+	    	{-1, -3, -3, -3, -1, -3, -3, -4, -3,  4},
+	    	{-1, -2, -3, -4, -1, -2, -3, -4, -3,  2,  4},
+	    	{-1,  2,  0, -1, -3,  1,  1, -2, -1, -3, -2,  5},
+	    	{-1, -1, -2, -3, -1,  0, -2, -3, -2,  1,  2, -1,  5},
+	    	{-2, -3, -3, -3, -2, -3, -3, -3, -1,  0,  0, -3,  0,  6},
+	    	{-1, -2, -2, -1, -3, -1, -1, -2, -2, -3, -3, -1, -2, -4,  7},
+	    	{ 1, -1,  1,  0, -1,  0,  0,  0, -1, -2, -2,  0, -1, -2, -1,  4},
+	    	{ 0, -1,  0, -1, -1, -1, -1, -2, -2, -1, -1, -1, -1, -2, -1,  1,  5},
+	    	{-3, -3, -4, -4, -2, -2, -3, -2, -2, -3, -2, -3, -1,  1, -4, -3, -2, 11},
+	    	{-2, -2, -2, -3, -2, -1, -2, -3,  2, -1, -1, -2, -1,  3, -3, -2, -2,  2,  7},
+	    	{ 0, -3, -3, -3, -1, -2, -2, -3, -3,  3,  1, -2,  1, -1, -2, -2,  0, -3, -1,  4},
+	    	{-2, -1,  3,  4, -3,  0,  1, -1,  0, -3, -4,  0, -3, -3, -2,  0, -1, -4, -3, -3,  4},
+	    	{-1,  0,  0,  1, -3,  3,  4, -2,  0, -3, -3,  1, -1, -3, -1,  0, -1, -3, -2, -2,  1,  4},
+	    	{ 0, -1, -1, -1, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2,  0,  0, -2, -1, -1, -1, -1, -1},
+	    	{-4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4,  1}
+	    	};
+
+	  public Blosum62() 
 	  { buildscore(residues, residuescores); }
 }
 /**********************************************************************

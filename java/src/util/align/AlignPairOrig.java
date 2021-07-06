@@ -15,17 +15,17 @@ public class AlignPairOrig
 	private final char stopCh = Globalx.stopCh;
 	private float matchScore = 1.8f;
 	private float mismatchScore = -1.0f;
-	private float gapOpen =   4.0f;	// 3.0f changed to negative in code
-	private float gapExtend = 0.5f;	// 0.7f
+	private float gapOpen =   7.0f; // 4.0f;	// 3.0f changed to negative in code
+	private float gapExtend = 0.7f; // 0.5f;	// 0.7f
 	private boolean bFreeEndGaps = true;  // semi-global; don't penalize gaps at ends
 	private boolean bUseAffineGap = true; 
 	  
-	public void setMatchScore (float f) {matchScore=f;}
-	public void setMismatchScore (float f) {mismatchScore=f;}
-	public void setGapOpen (float f) 	{gapOpen=f;}
-	public void setGapExtend (float f) 	{gapExtend=f;}
+	public void setMatchScore (float f) 	{matchScore=f;}
+	public void setMismatchScore (float f) 	{mismatchScore=f;}
+	public void setGapOpen (float f) 		{gapOpen=f;}
+	public void setGapExtend (float f) 		{gapExtend=f;}
 	public void setDPaffine (boolean b) 	{bUseAffineGap = b;}
-	public void setDPfreeEnds (boolean b) {bFreeEndGaps = b;}
+	public void setDPfreeEnds (boolean b) 	{bFreeEndGaps = b;}
 	
     public boolean DPalign ( String strHorz, String strVert, boolean dna )
     {

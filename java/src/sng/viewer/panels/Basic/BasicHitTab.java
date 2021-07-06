@@ -561,7 +561,7 @@ public class BasicHitTab extends Tab {
 			int nCol=theFilterPanel.NUM_SEQ_COL;
 			if (column<nCol) {
 				switch(column) {
-				case 0: return order * ((Integer) nRowNum).compareTo((Integer) obj.nRowNum);
+				case 0: return 0; // CAS326 order * ((Integer) nRowNum).compareTo((Integer) obj.nRowNum);
 				case 1: return order * compareStrings(strSeqID, obj.strSeqID);
 				case 2: return order * ((Integer) seqLen).compareTo((Integer) obj.seqLen);
 				
@@ -750,7 +750,7 @@ public class BasicHitTab extends Tab {
 			int nCol=theFilterPanel.NUM_HIT_COL;
 			if (column<nCol) {
 				switch(column) {
-				case 0: return order * ((Integer) nRowNum).compareTo((Integer) obj.nRowNum);
+				case 0: return 0; // CAS326 order * ((Integer) nRowNum).compareTo((Integer) obj.nRowNum);
 				case 1: return order * compareStrings(strHitID, obj.strHitID);
 				case 2: return order * ((Integer) hitLen).compareTo((Integer) obj.hitLen);
 				

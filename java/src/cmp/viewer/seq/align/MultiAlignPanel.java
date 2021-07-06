@@ -258,7 +258,7 @@ public class MultiAlignPanel extends BaseAlignPanel {
 		
 		numSeq = seqArr.length;
 		numCol = seqArr[0].length(); // all aligned sequences are the same length
-		
+	
 		seqStarts = new int[numSeq];
 		seqStops =  new int[numSeq];
 		
@@ -332,12 +332,14 @@ public class MultiAlignPanel extends BaseAlignPanel {
 			aaMap.clear(); prtSet.clear();
 			
 			for (r=1; r<numSeq; r++) {
-				char a = seqArr[r].charAt(c);
-				if (a==Globalx.gapCh) 
-					if (c < seqStarts[r] || c > seqStops[r]) a=Globalx.hangCh;
-				
-				if (aaMap.containsKey(a)) aaMap.put(a, aaMap.get(a)+1);
-				else aaMap.put(a, 1);
+				if (c<seqArr[r].length()) { // CAS326 DP for MultiAlign is one off
+					char a = seqArr[r].charAt(c);
+					if (a==Globalx.gapCh) 
+						if (c < seqStarts[r] || c > seqStops[r]) a=Globalx.hangCh;
+					
+					if (aaMap.containsKey(a)) aaMap.put(a, aaMap.get(a)+1);
+					else aaMap.put(a, 1);
+				}
 			}
 			for (char a : aaMap.keySet()) 
 				prtSet.add(String.format("%02d:%c", aaMap.get(a), a)); // need leading zeros
@@ -360,7 +362,7 @@ public class MultiAlignPanel extends BaseAlignPanel {
 				colInfo[c] = String.format("-%6s   %s", col,  colCh);
 		}
 	}
-	catch (Exception e) {Out.prt("MultiAlign initColInfo");ErrorReport.reportError(e);}
+	catch (Exception e) {Out.prt("MultiAlign initColInfo ");ErrorReport.reportError(e);}
 	}
 	/****************************************************************************/
 	private MultiViewPanel viewPanel=null;

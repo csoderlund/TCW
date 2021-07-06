@@ -22,9 +22,18 @@ public class PairAlignData implements Comparable<PairAlignData> {
 	private final String  indel = gapStr+gapStr+gapStr;
 	
 	public PairAlignData () {}
+	
 	/*********************************************************
-	 * aa or nt sequence: 
-	 * viewMulti and runMulti
+	 * CAS326 runMulti - align cluster when only 2 seqs 
+	 */
+	public PairAlignData(String aaSeq1, String aaSeq2) { 
+		isNT=false; isCDS=false;
+		alignType = AlignCDS_AA;
+		align(aaSeq1, aaSeq2);
+	}
+	
+	/*********************************************************
+	 * viewMulti aa or nt sequence: 
 	 */
 	public PairAlignData(DBConn mDB, String [] seqIDs, int type) { 
 		run(mDB, seqIDs, type);

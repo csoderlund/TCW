@@ -46,7 +46,8 @@ enum DBVer
 	Ver55, // MySQL V8 changed rank to best_rank
 	Ver56,  // Pairwise changes
 	Ver57,	// Changed libraryDE
-	Ver58	// changed go evidence code
+	Ver58,	// changed go evidence code
+	Ver59	// v326 add anno_msg and index on libraryDE
 }
 
 /********************************************
@@ -63,13 +64,13 @@ enum DBVer
 public class Schema 
 {
 	DBConn mDB;
-	DBVer  dbVer =  DBVer.Ver58; // default to this, as in other cases we get it from the schemver table
+	DBVer  dbVer =  DBVer.Ver59; // default to this, as in other cases we get it from the schemver table
 	String dbVerStr = null;      // read from database
 	
-	DBVer  curVer = DBVer.Ver58; 
-	String curVerStr = "5.8";
-	public static String currentVerString() {return "5.8";}
-	public static DBVer  currentVer() 		{return DBVer.Ver58;}
+	DBVer  curVer = DBVer.Ver59; 
+	String curVerStr = "5.9";
+	public static String currentVerString() {return "5.9";}
+	public static DBVer  currentVer() 		{return DBVer.Ver59;}
 	
 	public Schema(DBConn db)
 	{
@@ -94,6 +95,7 @@ public class Schema
 			else if (dbVerStr.equals("5.6"))	dbVer = DBVer.Ver56;
 			else if (dbVerStr.equals("5.7"))	dbVer = DBVer.Ver57;
 			else if (dbVerStr.equals("5.8"))	dbVer = DBVer.Ver58;
+			else if (dbVerStr.equals("5.9"))	dbVer = DBVer.Ver59;
 			else System.err.println("Unknown version string " + dbVerStr + " in schemver table");
 		}
 		catch (Exception e){}
@@ -126,16 +128,17 @@ public class Schema
 			"create table assem_msg ( " +
 			"	AID integer NOT NULL PRIMARY KEY, " +	// obsolete, but everywhere (always 1)
 			"	msg text, " +
-			"   pja_msg text default null," +  // contains OVERVIEW
-			"   meta_msg text default null," +     // contains test at bottom of overview
-			"	spAnno boolean default false,"  +  // if SP takes precedence for Best Anno
-			"	orf_msg text default null,"  +  // added in DoORF
-			"   pair_msg tinytext default null, " + // CAS314 added in CoreAnno
-			"	gc_msg text default null,"  +  //  added in DoORF
-			"   go_msg text default null, "	+  //  name of goterm file, which contains date
-			"	go_slim tinytext default null,"  +  // either goDB subset 
-			"	go_rtypes text default null,"  +  // isa, partof, replaceby
-			"   norm tinytext default null" +	// CAS304 RPKM or TPM
+			"   pja_msg text default null," +  		// contains OVERVIEW
+			"   meta_msg text default null," +     	// contains legend at bottom of overview
+			"   norm tinytext default null," +		// CAS304 RPKM or TPM
+			"	anno_msg text default null," +		// CAS326 added in Overview - null in DoUniProt; no version update
+			"	spAnno boolean default false,"  +  	// if SP takes precedence for Best Anno - added in DoUniProt
+			"	orf_msg text default null,"  +  	// added in DoORF
+			"	gc_msg text default null,"  +  		// added in DoORF
+			"   go_msg text default null, "	+  		// name of goterm file, which contains date
+			"	go_slim tinytext default null," +  	// either goDB subset 
+			"	go_rtypes text default null,"   +   // isa, partof, replaceby		
+			"   pair_msg tinytext default null " + 	// CAS314 added in CoreAnno
 			"	) ENGINE=MyISAM; ";
 		mDB.executeUpdate(sql);
 			
@@ -194,6 +197,7 @@ public class Schema
 		mDB.executeUpdate(sql);
 		
 		sql = "create table libraryDE (" + // CAS321 v57 make this part of schema and add fields
+				" ID integer PRIMARY KEY AUTO_INCREMENT, " + // CAS326 force DE to go in as created
 				" pCol varchar(30), " +
 				" title varchar(100), " + 
 				" method varchar(40), " +
@@ -723,6 +727,7 @@ public class Schema
 				" level smallint default 0, " + 
 				" bestEval double, " + // new 4.0
 				" nUnitranHit int unsigned default 0, " +
+				" nDirectHit int unsigned default 0, " + // CAS326
 				" slim boolean default 0, " +   
 				ecStr +
 				" unique(gonum), " +
@@ -835,8 +840,26 @@ public class Schema
 		if (dbVer==DBVer.Ver55) updateTo56();
 		if (dbVer==DBVer.Ver56) updateTo57();
 		if (dbVer==DBVer.Ver57) updateTo58();
+		if (dbVer==DBVer.Ver58) updateTo59();
 	
 		return dbVerStr;
+	}
+	private void updateTo59() {  // CAS326
+		try {
+			Out.Print("Update to sTCW schema db5.9 for " + Version.sTCWhead);
+			
+			mDB.tableCheckAddColumn("assem_msg", "anno_msg", "text", ""); 
+			mDB.tableCheckAddColumn("libraryDE", "ID", "integer PRIMARY KEY AUTO_INCREMENT", "");
+			
+			if (mDB.tableExist("go_info"))
+				mDB.tableCheckAddColumn("go_info", "nDirect", "integer", "");
+			
+			mDB.executeUpdate("update schemver set schemver='5.9'");
+			dbVer = DBVer.Ver58;
+			dbVerStr = curVerStr;
+			Out.Print("Finish update for sTCW Schema db5.8");
+		}
+		catch (Exception e) {ErrorReport.reportError(e, "Error on check schema v3.2.3");}	
 	}
 	private void updateTo58() {  // CAS323
 		try {
@@ -1182,7 +1205,6 @@ public class Schema
 		catch (Exception e) {ErrorReport.reportError(e, "Error on update v1.40");}
 	}
 	
-	
 	private void updateTo40() throws Exception
 	{
 		if (!mDB.tableColumnExists("library", "reps"))
@@ -1312,7 +1334,6 @@ public class Schema
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Cannot add GI column");}
 	}
-	
 	
 	/********************************************************
 	 * XXX Dynamic columns

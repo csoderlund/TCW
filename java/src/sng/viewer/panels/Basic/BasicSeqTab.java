@@ -252,7 +252,7 @@ public class BasicSeqTab extends Tab {
 			if(!ascOrder) order = -1;
 			
 			switch(column) {
-			case 0: return order * ((Integer) nRowNum).compareTo((Integer) obj.nRowNum);
+			case 0: return 0; // CAS326 order * ((Integer) nRowNum).compareTo((Integer) obj.nRowNum);
 			case 1: return order * strSeqID.compareTo(obj.strSeqID);	
 			case 2: return order * compareStrings(strTCW, obj.strTCW);
 			case 3: return order * compareStrings(strUser, obj.strUser);

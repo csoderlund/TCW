@@ -36,6 +36,7 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 
 import sng.database.Globals;
+import util.align.AlignPairAA;
 import util.database.Globalx;
 import util.methods.ErrorReport;
 import util.methods.Static;

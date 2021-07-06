@@ -14,35 +14,33 @@ as follows:
 <li>It is <i>important</i> that you study the documentation for the respective DE method to determine the
 best approach for your data. You may either use one of the existing scripts,
 customize an existing script, or create a new one. 
-<li>The <a href="#scripts">R-scripts for DE</a> sections explains how <ttp>runDE</ttp> writes the data to R variables, 
+<li>The <a href="#DEscripts">R-scripts for DE</a> sections explains how <ttp>runDE</ttp> writes the data to R variables, 
 executes the R-script, then reads the results into sTCWdb.
 </ul>
 
 <li>GO enhancement: R script for <ttp>GOseq</ttp>. 
 <ul>
-<li>Same comments above. See <a href="#scripts">R-scripts for GO</a>.
+<li>Same comments above. See <a href="#GOscripts">R-scripts for GO</a>.
 </ul>
 </ol>
 This document uses the "<ttx>demoTra</ttx>" project as an example. The
 <a href="UserGuide.html" class="ext" target="_blank">User Guide</a> explains how to built it.
 
 <p><b>Contents:</b>
-<table style="width:50%">
-<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<td class="top">
+
 <ol type="1">
     <li><a href="#install">Installing R and packages</a>
     <li><a href="#demo">Example: demoTra</a>
     	<ul>
 		<li><a href="#execDE">Execute DE output</a>
 		<li><a href="#execGO">Execute GO output</a>
+		<li><a href="#view">View Results</a>
 		</ul>
     <li><a href="#libDE">DE between conditions</a>
 	<ol type="A">
 	<li><a href="#methods">Methods and Options</a>
 		<ul>
 		<li><a href="#script1">R-script</a>
-		<li><a href="#reps">Use of replicates</a>
 		<li><a href="#filter">Pre-filtering</a>
 		<li><a href="#disp">Fixed dispersion</a>
 		</ul>
@@ -66,7 +64,6 @@ This document uses the "<ttx>demoTra</ttx>" project as an example. The
     </ul>
     <li><a href="#Rperms">R directory permissions</a>
 </ol>
-</table>
 
 <a id="install"></a>
 <h2>1. Installing R and packages</h2>
@@ -106,17 +103,17 @@ This document uses the "<ttx>demoTra</ttx>" project as an example. The
 	Assuming you have installed <ttp>edgeR</ttp>, leave the 
 	<ttl>Differential Expression R-script</ttl> as <ttl>edgeRglm.R</ttl> . 
 	<p>
-	Execute <ttc>Group 1 - Group 2</ttc>. See <a href=execGO>Execute DE</a> for the output.
+	Execute <ttc>Group 1 - Group 2</ttc>. See <a href=#execDE>Execute DE</a> for the output.
 	
 	<p>The <ttl>GO enrichment R-script</ttl> will be <ttc>goSeqBH.R</ttc> by default, which
 	performs BH multiple hypothesis testing correction. However, 
 	this results in 0 p-value&lt;0.05 for the demo,
 	hence, <i>for the demo only</i>, change this to <ttc>goSeqNoFDR.R</ttc>. Then select
-	<ttc>Execute</ttc>. See <a href=execGO>Execute GO</a> for the output.
+	<ttc>Execute</ttc>. See <a href=#execGO>Execute GO output</a>.
 	 
 </td>
 	<td class="top">
-		<a href="img/DErun.png"><img src="img/DErun.png" alt="" style="border: 1px solid black; width: 500px"></a>
+		<a href="img/DErun.png"><img src="img/DErun.png" alt="" style="border: 1px solid black; width: 480px"></a>
 	</td>
 </tr>
 </table>
@@ -162,9 +159,9 @@ Saving 210 scores for StRo
                             .
 Finished DE execution for StRo             0m:0s  (8Mb)
 Complete all Group1-Group2 for tra
-The console is in R, you may run R commands -- q() or Cntl-C when done, or perform another Execute.</pre>
-</pre>	
-The R console remains open and you can now manually explore the data using R, if desired. However, it easiest to explore it be
+The console is in R, you may run R commands -- q() or Cntl-C when done, or perform another Execute.
+</pre>
+<p>The R console remains open and you can now manually explore the data using R, if desired. However, it easiest to explore it be
 selecting "Close" on <ttp>runDE</ttp>, which closed the java program but not R. Then do the following:
 <pre>
 	>q()
@@ -179,37 +176,20 @@ explore the data, e.g.
 	> plotMDS(y, labels=grpNames)
 </pre>
 
-<h4>View DE Results</h4>
-<table class="tablex">
-<tr>
-	<td>
-	To view the resulting p-values, run '<ttx>viewSingleTCW tra</ttx>' from the command line,  
-	and click <ttc>&gt;&gt; Columns</ttc>. The column options has a section 
-	<ttx>Differential Expression</ttx> with the DE columns listed, e.g. the DE columns for <ttx>demoTra</ttx> are shown on the right. There is also
-	a section for <ttx>Conditions</ttx>, which has the "Stem", "Root, and "Oleaf" column options. Select the desired columns (
-	e.g. "Stem", "Root", "StRo"); you may then select a filter (e.g. all sequences that have an absolute p-value &lt; 0.05).
-
-	Note in the below figure that if Stem &lt; Root, the p-value StRo is negative, else it is positive. 
-	<td>
-		<ttp>viewSingleTCW</ttp> DE section with all pairs computed.
-		<a href="img/DEcolumn.png"><img src="img/DEcolumn.png" alt="" style="border: 1px solid black; width: 250px; padding-left:20px"></a>
-</tr>
-<tr><td colspan=2>
-<a href="img/DEtable.png"><img src="img/DEtable.png" alt="" style="border: 1px solid black; width: 700px"></a>
-</table>
-
 <a id="execGO"></a>
 <h3>Execute GO output</h3>
 <pre>
+Trace output to stderr and Log file (append): projects/DElogs/tra.log   Size: 11.0kb
 ****************************************************************
-******** 1. Start GO enrichment for column: StRo *********
+******** 1/1. GO enrichment for column: RoOl *********
 ****************************************************************
 Assigning R variables
-   208  Sequences with GOs (from 208)
+  6,651 Numbers GOs
+    208 Sequences with GOs from 211 (98.6%)
    seqNames: sequence names
    seqLens:  sequence lengths
-   nSeqs <- 208
-   seqDEs: DE binary vector (97 seq p-value < 0.05)
+   nSeqs <- 211
+   seqDEs: DE binary vector (110 p-value < 0.05)
    names(seqDEs) <- seqNames
    seqGOs <- vector("list",nSeqs)
    For all n: seqGOs[[n]] <- c(gonum list)
@@ -223,28 +203,86 @@ Calculating the p-values...
    goNums
 R-script done
 
-Saving 6651 values to database
-   Adding column to go_info table
-    311 GO p-values < 0.05
-Finished GO enrichment for StRo                                          0m:2s
+Saving 6,651 values to database
+    172 GO p-values < 0.05
+Finished GO enrichment for RoOl                                          0m:1s
+Summary:
+   ColName       #DEseq (%)   DEseq%GO   DEavgLen   DEstdLen     avgPWF     stdPWF     #<0.05
+      RoOl      110 (52.9%)      82.3%    1073.89     679.84   0.528607   0.073576        172
 Complete GO enrichment for tra
 The console is in R, you may run R commands -- q() or Cntl-C when done, or perform another Execute.
 </pre>
-The R console remains open and you can now manually explore the data using R, if desired. However, it easiest to explore it be
-selecting "Close" on <ttp>runDE</ttp>, which closed the java program but not R. Then do the following:
+
+<p>The R console remains open and you can now manually explore the data using R, if desired. 
+However, it easiest to explore it be selecting <ttc>Close</ttc> on <ttp>runDE</ttp>, which closed the java program but not R. 
+Then do the following:
 <pre>
 	>q()
 	Save workspace image? [y/n/c]: y
 	R
 </pre>
-This saves all variables written by <ttp>runDE</ttp> and the scripts (in this case <ttp>goSeqNoFDR.R</ttp>). By restarting R, you can now
-explore the data.
+This saves all variables written by runDE and the script. By restarting R, you can now explore the data for the
+last enrichment computation, e.g.
+<pre>
+	> library(goseq)
+	> plotPWF(pwf)
+</pre>
+<h4>GO output summary</h4>
+At the end of execution, a summary will be printed to the terminal and log file. For example, if
+all enrichment p-values are computed for <ttx>demoTra</ttx>, the following will be output:
+<pre>
+Summary:
+   ColName       #DEseq (%)   DEseq%GO   DEavgLen   DEstdLen     avgPWF     stdPWF     #<0.05
+      StRo       97 (46.6%)      80.7%    1075.12     703.22   0.464116   0.000063        311
+      StOl      100 (48.1%)      79.5%     991.49     595.44   0.480768   0.065060         48
+      RoOl      110 (52.9%)      82.3%    1073.89     679.84   0.528607   0.073576        172
+</pre>
+<table class="tabley">
+<tr><td>ColName</td><td>The DE column used as input for the GO enrichment.
+<tr><td>#DEseq (%)</td><td>The number of DE sequences for the DE column, where a sequence is DE based on the value
+supplied (<ttl>Top</ttl> or <ttl>p-value</ttl>).
+<tr><td>DEseq%GO</td><td>The percent of unique direct or inherited GOs for the set of DE sequences. Due to inheritance,
+this tends to be a high percentage.
+<tr><td>DEavgLen</td><td>The average length of the DE sequences.
+<tr><td>DEstdLen</td><td>The standard deviation of the length of the DE sequences.
+<tr><td>avgPWF</td><td>The average of the PWF (probability weighting function).
+<tr><td>stdPWF</td><td>The standard deviation of the PWF.
+<tr><td>#&lt;0.05</td><td>The number of GOs that have a enrichment p-value &lt;0.05.
+</table>
+Note the low <ttx>stdPWF</ttx> for <ttl>StRo</ttl> indicating the values are very close; 
+the <ttp>plotPWF</ttp> for it is non-existent. This may be too small of a sample size. 
 
-<h4>View GO Enhancement Results</h4>
+
+<a id="view"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>View Results</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<h4>View DE Results</h4>
 <table class="tablex">
 <tr>
 	<td>
+	To view the resulting p-values, run '<ttx>viewSingleTCW tra</ttx>' from the command line,  
+	and click <ttc>&gt;&gt; Columns</ttc>. The column options has a section 
+	<ttx>Differential Expression</ttx> with the DE columns listed, e.g. the DE columns for 
+	<ttx>demoTra</ttx> are shown on the right. There is also
+	a section for <ttx>Conditions</ttx>, which has the "Stem", "Root, and "Oleaf" column options. 
+	Select the desired columns (e.g. "Stem", "Root", "StRo"); you may then select a filter 
+	(e.g. all sequences that have an absolute p-value &lt; 0.05).
+
+	Note in the below figure that if Stem &lt; Root, the p-value StRo is negative, else it is positive. 
+	<td>
+		<ttp>viewSingleTCW</ttp> DE section with all pairs computed.
+		<a href="img/DEcolumn.png"><img src="img/DEcolumn.png" alt="" style="border: 1px solid black; width: 250px; padding-left:20px"></a>
+</tr>
+
 </table>
+<br><a href="img/DEtable.png"><img src="img/DEtable.png" alt="" style="border: 1px solid black; width: 700px"></a>
+<br>The highlighting and significant digits can be changed in by the <a href=../tour/viewSingle/decimal.html class=ext target="_blank">Decimal Display</a> panel.
+
+
+<h4>View GO Enhancement Results</h4>
+<a href="img/GOtable.png"><img src="img/GOtable.png" alt="" style="border: 1px solid black; width: 700px"></a>
 	
 <!--  ========= DE  ==============   -->
 <a id="libDE"></a>
@@ -258,98 +296,83 @@ explore the data.
 <a id="script1"></a>
 <h4>R-script</h4>
 The default R-script is <ttc>edgeR.R</ttc>, however, there are other scripts in the <ttx>R-script</ttx>, or the
-user can supply there own (see <a href="#DEscript">R-script for DE</a>).
-
-<a id="reps"></a>
-<h4>Use of replicates</h4>
-
-Biological replicates are valuable for RNA-seq to provide the baseline estimate of variability.
-This is incorporated into the models (typically as dispersion of the negative-binomial distribution)
-and makes a big difference in the result DE scores. 
-<p>
-If replicates are provided for a condition, they will automatically be used for the applicable
-R packages (e.g., <ttp>edgeR</ttp>). All of the methods also work without replicates, but are likely to
-overestimate DE. 
-<p>
-Replicates should be biological replicates, i.e. sequencing from distinct individuals having the
-same treatments, rather than technical replicates, i.e. re-sequencing of the same individuals. 
-Technical replicates can be input to TCW and will be used in the same way, but do not provide
-a useful estimate of variability. 
+user can supply there own (see <a href="#DEscripts">R-script for DE</a>).
 
 <a id="filter"></a>
 <h4>Pre-filter</h4>
-This example uses a database with 26k sequences and 5 replicates for root and stem.
+This example uses a database with 48k sequences and 5 replicates for root and stem.
 The three filtering options were run with defaults (table on lower left)
 before input to <ttp>edgeR</ttp> (results in figure on lower right). 
-The first option filtered 1713 sequences and the second option filtered 7518; 
+The first option filtered 7,333 sequences and the second option filtered 1,290; 
 with <ttp>edgeR</ttp>, the number of analyzed sequences effects the resulting DE value.
 
 <table>
 <tr>
-	<td style="width: 50%; vertical-align: top;">
+	<td style="width: 45%; vertical-align: top;">
 		<table class="tabley">
 			<tr><td><i>Filter</i><td><i>Description</i><td><i>Column</i><sup>1</sup>
 			</tr>
+			<tr><td class="nw">CPM<sup>2</sup> >=[n] for >[m]
+				<td>Filter all sequences that do not have more than m replicates with CPM >= n (used m=2 and n=1)
+				<td>RoSt
+			</tr>
 			<tr><td>Count >[n]
-				<td>Filter all sequences that do not have any replicates with a count &gt; n (default 1) 
+				<td>Filter all sequences that do not have any replicates with a count &gt; n (used n=10) 
 				<td>RoSt1
 			</tr>
-			<tr><td class="nw">CPM<sup>2</sup> >=[n] for >[m]
-				<td>Filter all sequences that do not have more than m replicates with CPM >= n (default 2 and 1)
-				<td>RoSt2
-			</tr>
-			<tr><td>None<td> No filtering <td>RoSt3
+			<tr><td>None<td> No filtering <td>RoSt2
 			</tr>		
 		</table>
 		<small>
 		<sup>1</sup> Column in table on right.
-		<br><sup>2</sup> CPM (Counts per million).
+		<br><sup>2</sup> CPM (Counts per million) = (count/library size)*1M.
 		</small>
-	<td style="width: 50%; vertical-align: top; padding-left:10px;">
-		<a href="img/DEfilter.png"><img src="img/DEfilter.png" alt="" style="width:400px; border: 1px solid black; "></a>	
+	<td style="vertical-align: top; padding-left:10px;">
+		<a href="img/DEfilter.png"><img src="img/DEfilter.png" alt="" style="width:450px; border: 1px solid black; "></a>	
 		<small>
 		<br>The DE value (RoSt) is set to negative if Root&lt;Stem.
 		<br>The columns prefixed with '#' are the counts, which are used by the filters.
-		<br>The two columns at the end (Root and Stem) are the RPKM values. 
+		<br>The columns with no prefix, Root and Stem, are the TPM values. 
 		</small>
 </table>
 
 In the figure on the right:
 <ol>
-	<li>DE value 3.00: the filtered sequences have a value of 3.
-	<li>DE value 2.00: the sequences that received an NA from the DE computation have a value of 2.
+	<li>DE value 3.00: the filtered sequences.
+	<li>DE value 2.00: assigned an NA from the DE computation.
 </ol>
   
 <p>
 To view the first 50 filtered sequences that do not have 'all' zero count values, 
 execute <ttx>runDE</ttx> with the ID or database name and a -v, 
-<br>e.g. <ttx>runDE NnR -v</ttx>.
-<p>
-Using Count > 1, the following are the Counts of the filtered sequences.
+<br>e.g. <ttx>runDE OlR -v</ttx>.
+<p>Using CPM filter > 1 for >= 2, the following shows the first few filtered sequences:
 <pre>
-	NnR_00003    0    0    0    1    0    0    0    0    0    0
-	NnR_00016    0    0    0    0    0    0    1    0    0    0
-	NnR_00032    0    0    0    0    0    1    0    0    0    0
-	NnR_00090    1    0    0    1    0    1    0    0    0    0
-	NnR_00095    1    1    1    1    0    1    0    0    0    0
-	NnR_00112    0    0    0    1    0    0    0    0    0    0
-	...
-	1713 filtered sequences
+Rep Names       Root1    Root2    Root3    Root4    Root5    Stem1    Stem2    Stem3    Stem4    Stem5
+Lib Sizes    25267201 26691329 20806376 24815333 29748103 36131457 25997359 21874134 25691566 31637621
+SeqID                                             Counts : CpM
+OlR_000003       41   2  16   8   8   7   7   7   4   6  : 1.6 0.1 0.8 0.3 0.3 0.2 0.3 0.3 0.2 0.2
+OlR_000016       23   5  37  21  17  26  16  12  13  23  : 0.9 0.2 1.8 0.8 0.6 0.7 0.6 0.5 0.5 0.7
+OlR_000053       17  12  10  26  18  30  12  15  25  27  : 0.7 0.4 0.5 1.0 0.6 0.8 0.5 0.7 1.0 0.9
+OlR_000063       18   4  21  15  10  24  20  19  24  26  : 0.7 0.1 1.0 0.6 0.3 0.7 0.8 0.9 0.9 0.8
+OlR_000066        8   3   1   0   0  20  15  13  34  28  : 0.3 0.1 0.0 0.0 0.0 0.6 0.6 0.6 1.3 0.9
+OlR_000083       11  12  13  22  12  11  15   2   3   6  : 0.4 0.4 0.6 0.9 0.4 0.3 0.6 0.1 0.1 0.2
+OlR_000100       14   6  21  15  12   7  10   8   2   8  : 0.6 0.2 1.0 0.6 0.4 0.2 0.4 0.4 0.1 0.3
+OlR_000162       11  10   7  17   5   8  15   7  18  10  : 0.4 0.4 0.3 0.7 0.2 0.2 0.6 0.3 0.7 0.3
+OlR_000181       25   1  24  10   7   6  13   3   4   7  : 1.0 0.0 1.2 0.4 0.2 0.2 0.5 0.1 0.2 0.2
 </pre>
-Using CPM >=2 for >1 replicates, the following are the Counts:CPM values of the filtered sequences.
-<pre style="font-size: 12px">
-	NnR_00002   6   10   13    8   21   20   16    9   13    3  :  0.2  0.4  0.4  0.3  0.6  0.8  0.5  0.3  0.4  0.1
-	NnR_00003   0    0    0    1    0    0    0    0    0    0  :  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
-	NnR_00004  19   27   18   15   17   16   17    4   22   10  :  0.8  1.0  0.6  0.5  0.5  0.6  0.5  0.1  0.7  0.3
-	NnR_00007  34   23   29   29   31   12    6    1    7    2  :  1.4  0.9  0.9  1.0  0.9  0.5  0.2  0.0  0.2  0.1
-	NnR_00009  45   23   33   22   46   17   26    7   22    3  :  1.8  0.9  1.1  0.8  1.3  0.6  0.8  0.3  0.7  0.1
-	NnR_00010  19   16   29   23   26    5    4    3    4    1  :  0.8  0.6  0.9  0.8  0.7  0.2  0.1  0.1  0.1  0.0
-	NnR_00014  28   21   38   26   31   13   13   15   14   11  :  1.1  0.8  1.2  0.9  0.9  0.5  0.4  0.5  0.5  0.4
-	NnR_00016   0    0    0    0    0    0    1    0    0    0  :  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
-	NnR_00017   5    4    4   10   11    0    0    2    1    0  :  0.2  0.2  0.1  0.4  0.3  0.0  0.0  0.1  0.0  0.0
-	...
-	7518 filtered sequences
+
+Using Count > 10, the following shows the first few filtered sequences.
+<pre>
+SeqID           Root1 Root2 Root3 Root4 Root5 Stem1 Stem2 Stem3 Stem4 Stem5
+OlR_000238        4   1   4   1   4   0   0   0   0   0
+OlR_000264        8   2   5   2   7   1   0   0   0   1
+OlR_000489        0   0   3   0   2   2   1   2   0   1
+OlR_000519        0   0   2   0   0   0   0   0   0   0
+OlR_000625        5   0   3   2   1   0   1   1   0   1
+OlR_000642        7   3   6   4   9   5   4   1   9   8
 </pre>
+
 
 <a id="disp"></a>
 <h4>Fixed dispersion</h4>
@@ -371,6 +394,7 @@ pair DEs A-B, A-C, A-D, and then use filter options in <ttp>viewSingleTCW</ttp>
 to perform the screen. 
 
 <p>There are four options to add DE values to the sTCW database, as explained in the following four sections.
+<p><i>The DE p-value columns will be displayed in <ttp>viewSingleTCW</ttp> in the order created.</i>
 <a id="groups"></a>
 
 <a id="all"></a>
@@ -429,7 +453,7 @@ filename <ttx>traDE.tsv</ttx> to allow user to try this option.
 The first line defines the two groups and the p-value column name, using the same format as the "Get Pairs from File". All remaining lines have a seqID followed by the p-value. For example,
 <pre>
 	#Example p-value file 
-	root stem RoSt
+	Root Stem RoSt
 	tra_001	0.14
 	tra_002	0.14
 	tra_003	0.65
@@ -454,13 +478,10 @@ all sequences with a p-value&lt;0.05 will be considered DE (which assumes FDR co
 Since the DE p-values still contain considerable
 uncertainty as absolute measures of probability, there is an option to defined DE
 in terms of ranking, i.e., top 10% (the ranking is ordered by the p-values).
-</ul>The meaning of a low p-value for a given GO is that the sequences assigned the
-GO have a higher percentage of DE than the sequences as a whole. For example, if GO:000123 is assigned to
-1000 sequences, of which 500 are DE (50%), while only 25% of sequences as a whole are
-DE, then GO:000123 will receive a very low p-value. Note that the direction of the DE for
-each sequence (elevated or suppressed) is not relevant. 
+</ul>
+
 <p>
-The result is p-value columns for the GO, having
+The result is a p-value column for the GOs, having
 the same names as the corresponding sequence DE columns, accessible through the <ttc>Basic GO Query</ttc> function of 
 <ttp>viewSingleTCW</ttp>.
 
@@ -469,21 +490,24 @@ the same names as the corresponding sequence DE columns, accessible through the 
 <table style="width: 100%"><tr><td style="text-align: left">
 <h2>5. Remove</h2>
 <td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+When a DE p-value column is removed, the corresponding GO p-value column will be removed.
+Removing a GO p-value column does not effect the corresponding DE column.
+In both cases, either all columns can be removed or a selected column.
 
 <!-- ============= R-scripts ============== -->
 <a id="rscripts"></a>
 <table style="width: 100%"><tr><td style="text-align: left">
-<h2>5. R-scripts</h2>
+<h2>6. R-scripts</h2>
 <td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
-<a id="DEscript"></a>
+<a id="DEscripts"></a>
 <h3>R-scripts for DE</h3>
 
 When the <b>Execute</b> is selected, TCW performs the following:
 <ol>
 <li>Writes the necessary information to the R environment based on the options selected.
 <li>Runs the R script using the <ttx>source</ttx> command.
-<li>Reads the <ttx>results</ttx> variable from the R environment, which should contain the p-values.
+<li>Reads the <u><ttx>results</ttx></u> variable from the R environment, which should contain the p-values.
 </ol>
 TCW writes the following variables to the R environment (the following assignments are from the above demo example):
 <pre>
@@ -512,16 +536,16 @@ The variables displayed with a ":" after them are assigned with the <ttx>assign<
 	> grpNames
 	 [1] "Stem" "Stem" "Stem" "Stem" "Stem" "Root" "Root" "Root" "Root" "Root"
 </pre>
-The R script should put the p-values in the <ttx>results</ttx> variables, e.g. 
+The R script should put the p-values in the <u><ttx>results</ttx></u> variable, e.g. 
 <pre>
 	> head(results)
 	[1] 1.537634e-07 1.695981e-07 2.478791e-07 2.478791e-07 4.026519e-06
 	[6] 4.600047e-06
 </pre>
-The order should correspond to the input order; if changed, then change the order in <ttx>rowNames</ttx> to correspond.
+The order should correspond to the input order; if changed, then change the order in <u><ttx>rowNames</ttx></u> to correspond.
 <p>An example script is:
 <pre>
-	# edgeR gln method unless no replicates
+	# edgeR glm method unless no replicates
 	library(edgeR)
 	y &lt;- DGEList(counts=countData,group=grpNames)
 	y &lt;- calcNormFactors(y)
@@ -542,41 +566,38 @@ The order should correspond to the input order; if changed, then change the orde
 	rowNames &lt;- rownames(res)
 </pre>
 
-<a id="GOscript"></a>
+<a id="GOscripts"></a>
 <h3>R-scripts for GO</h3>
-This works like the <a href=""#DEscript"">R-scripts for DE</a>, with the variables shown below in the GO enrichment output:
+This works like the <a href="#DEscripts">R-scripts for DE</a>, with the variables shown below in the GO enrichment 
+example output:
 <pre>
-****************************************************************
-******** 1. Start GO enrichment for column: StRo *********
-****************************************************************
 Assigning R variables
-   208  Sequences with GOs (from 208)
+  6,651 Numbers GOs
+    208 Sequences with GOs from 211 (98.6%)
    seqNames: sequence names
    seqLens:  sequence lengths
-   nSeqs <- 208
-   seqDEs: DE binary vector (97 seq p-value < 0.05)
+   nSeqs <- 211
+   seqDEs: DE binary vector (97 p-value < 0.05)
    names(seqDEs) <- seqNames
    seqGOs <- vector("list",nSeqs)
    For all n: seqGOs[[n]] <- c(gonum list)
-   names( seqGOs) =  seqNames                       ...
-
-Start R-script
-   source('R-scripts/goSeqBH.R')
-Using manually entered categories.
-Calculating the p-values...
-   oResults
-   goNums
-R-script done
-
-Saving 6651 values to database
-    0 GO p-values < 0.05
-Finished GO enrichment for StRo                                          0m:2s
+   names( seqGOs) =  seqNames
 </pre>
-See <tt>R-scripts/goSeqBH.R</tt> for an example. The p-values to be loaded must be in "oResults" and
-the associated GO numbers are in "goNums" (note that TCW removes the "GO:" prefix and just used the number).
-
-<h4>seqGOs</h4>
 The GOs assigned to each sequence are both the direct and indirect.
+<p>
+The p-values to be loaded must be in <u><ttx>oResults</ttx></u> and
+the associated GO numbers are in <u><ttx>goNums</u></ttx> (note that TCW removes the "GO:" prefix and just used the number).
+If the R-script file name contains "goseq" (case-insensitive) , it expects the variable <u><ttx>pwf</u></ttx> (case-sensitive) to exist.
+<p>The following is the <ttp>goSeqBH.R</ttp> script:
+<pre>
+# goSeq with Benjamini and Hochberg FDR
+
+suppressPackageStartupMessages(library(goseq))
+pwf <- nullp(seqDEs,'','',seqLens,FALSE)
+GO.wall <- goseq(pwf,'','',seqGOs)
+goNums  <- GO.wall$category
+oResults <- p.adjust(GO.wall$over_represented_pvalue, method="BH")
+</pre>
 
 <h4>FDR</h4>
 According to the GOseq Manual: "Having performed the GO analysis, you may now wish to 
@@ -587,7 +608,7 @@ testing correction. For example, GO categories over enriched using a .05 FDR cut
 <pre>
 > enriched.GO=GO.wall$category[p.adjust(GO.wall$over_represented_pvalue, + method="BH")<.05]
 </pre>
-Hence, the values loaded into "oResults" for the TCW supplied <ttc>GOseqBH.R</ttc>:
+Hence, the values loaded into "oResults" for the TCW supplied <ttx>goSeqBH.R</ttx>:
 <pre>
 oResults <- p.adjust(GO.wall$over_represented_pvalue, method="BH")
 </pre>
@@ -595,8 +616,7 @@ The p.adjust methods are: c("holm", "hochberg", "hommel", "bonferroni", "BH", "B
 <p>
 <u>demoTra</u>: The TCW supplied demo result in 0 p-values&lt;0.05. 
 In order to view some p-values&lt;0.05 results
-for the demo, use <ttc>GOseqNoFDR.R</ttc>, which has no multiple testing correction.
-
+for the demo, use <ttx>goSeqNoFDR.R</ttx>, which has no multiple testing correction.
 
 <a id="fname"></a>
 <table style="width: 100%"><tr><td style="text-align: left">
@@ -620,7 +640,7 @@ DE (Differential Expression) computation:
 
 <a id="Rperms"></a>
 <table style="width: 100%"><tr><td style="text-align: left">
-<h2>6. R Directory Permissions</h2>
+<h2>7. R Directory Permissions</h2>
 <td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 The following was written in 2014, so may be dated. 
 

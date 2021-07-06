@@ -23,11 +23,11 @@ the pairs have been added.
 If you execute <b>Run Stats</b> with <b>Compute statistics</b> and <b>KaKs files - Write</b> selected, 
 the following will occur:
 <ol>
-<li>Perform alignments using dynamic programming on all pairs that (i) have a hit and (ii) are in
+<li>Perform CDS and UTR alignments using dynamic programming on all pairs that (i) have a hit and (ii) are in
  a cluster together.
 <li>Compute statistics for each pair and store the results in the database for query by <tt>viewMultiTCW</tt>.
 <li>Compute summary statistics for the <tt>viewMultiTCW</tt> overview page.
-<li>Write the alignments to file for input to <tt>KaKs_calculator</tt>
+<li>Write the CDS alignments to file for input to <tt>KaKs_calculator</tt>
 </ol>
 Dynamic programming is a more precise alignment but takes longer than blast, moreover, it has
 not be parallelized. To align over 200k pairs took over 2 hours on a linux machine (if you have
@@ -51,10 +51,14 @@ sh runKaKs
 See KaKs below for more information.
 
 <h3>Multiple alignment of cluster</h3>
-This will execute the program <tt>MAFFT</tt> on each cluster, score each MSA, and enter the
-resulting MSAs and scores into the database. Occassionally, <tt>MAFFT</tt> fails, in which case, <tt>MUSCLE</tt> is run.
+Compute the alignment, score each MSA, and enter the resulting MSAs and scores into the database. To compute the
+alignment:
+<table cellspacing=3>
+<tr><td nowrap valign=top>Clusters of size =2<td>Use dynamic programming.
+<tr><td nowrap valign=top>Clusters of size &gt;2<td>Use the program <tt>MAFFT</tt>. Occasionally, <tt>MAFFT</tt> fails, in which case, <tt>MUSCLE</tt> is run.
+</table>
 
-<p>The MSA scores are the Sum-of-Pairs and Wentropy, where Wentropy is computed just like the 
+<br>The MSA scores are the Sum-of-Pairs and Wentropy, where Wentropy is computed just like the 
 <tt>MstatX</tt> program except the score is (1 - score) to make 1 the best score.  
 The Sum-of-Pairs is normalized to be between 0-1, where 1 is the best score.
 

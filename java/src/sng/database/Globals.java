@@ -50,21 +50,25 @@ public class Globals {
 	public static final String ROW_DELIMITER = "\t";
 	
 	// For sequence remark column - all assigned in DoORF except MultiFrame, which is assigned in DoUniProt
-	static public final String RMK_MultiFrame = 	"Multi-frame";
-	static public final String RMK_HIT_hitSTOP = 	"StopsIn";
-	static public final String RMK_ORF_exact =     	"ORF=Hit";
-	static public final String RMK_ORF_gtHit =  	"ORF>Hit";
-	static public final String RMK_ORF_ltHit = 		"ORF<Hit"; 
-	static public final String RMK_ORF_appxHit =  	"ORF~Hit";
-	static public final String RMK_ORF_NOTLONG = 	"ORF!LG";
-	static public final String RMK_ORF_NOTMarkovBest3 = "ORFmk!b!g"; // !best !good
-	static public final String RMK_ORF_NOTMarkovBest =   "ORFmk!b";  // !b is good
-	static public final String RMK_ORF_NOTMarkov3 =      "ORFmk!g";  // is best !good
+	static public final String RMK_MultiFrame = 		"Multi-frame";
+	static public final String RMK_HIT_hitSTOP = 		"StopsIn";
+	static public final String RMK_ORF_exact =     		"ORF=Hit";
+	static public final String RMK_ORF_gtHit =  		"ORF>Hit";
+	static public final String RMK_ORF_ltHit = 			"ORF<Hit"; 
+	static public final String RMK_ORF_appxHit =  		"ORF~Hit";
+	static public final String RMK_ORF_NOTLONG = 		"ORF!LG";
+	// GOOD: A good Markov score is positive and the best score for all frames of the given ORF (see the Scores/AA display). 
+	// BEST: This is in contrast to the best Markov score, which is the best over all ORFs shown in the ORFs/NT display.
+	// CAS326  just report if !best
+	static public final String RMK_ORF_MarkovNotBest =  "ORF!mk"; 
+	//static public final String RMK_ORF_NOTMarkovBest3 = "ORFmk!b!g"; // !best !good (>0 and best for given frame)
+	//static public final String RMK_ORF_NOTMarkovBest =  "ORFmk!b";  // !b is good
+	//static public final String RMK_ORF_NOTMarkov3 =     "ORFmk!g";  // is best !good
 	static public final String RMK_ORF_NOTHit = 		"ORF!Hit";
 	static public final String RMK_ORF_Ns = 			"ORF>=9Ns";
-	static public final String RMK_ORF_ANNO = 		"ORF:AN";
-	static public final String ORF_MARK = Globalx.stopStr;
-	static public final String ORF_NoMARK = "-";
+	static public final String RMK_ORF_ANNO = 			"ORF:AN";
+	static public final String ORF_MARK = 				Globalx.stopStr;
+	static public final String ORF_NoMARK = 			"-";
 	
 	// Anno Option parameters - put in one place
 	static public final String pHIT_EVAL = "1E-10";

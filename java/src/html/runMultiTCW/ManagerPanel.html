@@ -84,7 +84,7 @@ all conditions that are shared between the two sequences of a pair.
 <td>Computes coding and nucleotide statistics for each pair.
 <br>Compute summary statistics.
 <tr><td nowrap>KaKs write
-<td>Write alignments to file for input to the <tt>KaKs_calculator</tt>.
+<td>Write the CDS alignments to file for input to the <tt>KaKs_calculator</tt>.
 <br>Use the command 'sh runKaKs' in the project's KaKs directory to
 run the <tt>KaKs_calculator</tt>, which must be in the 'projcmp' directory.
 
@@ -94,7 +94,8 @@ run the <tt>KaKs_calculator</tt>, which must be in the 'projcmp' directory.
 
 <tr><td colspan=2><i>3. Multiple alignment of cluster</tt></i>
 <tr><td nowrap>MSA Score
-<td>The <tt>MAFFT</tt> program is run on each cluster, the resulting alignment is scored,
+<td>The dynamic programming algorithm is run on clusters of size 2.
+The <tt>MAFFT</tt> program is run on clusters of size &gt;2. In both cases, the resulting AA alignment is scored,
 and the results entered into the database. 
 </table> 
 <br>
@@ -103,23 +104,30 @@ and the results entered into the database.
 
 The following explains options of the "Remove..." button.
 <table border=1>
-<tr><td nowrap>1. Pairs and clusters from database<td>
+<tr><td nowrap>1. Clusters from database<td>
+This removes all clusters from the database. 
+<br><b>NOTE:</b> If you have already run <tt>Compute pair stats</tt>,
+the statistics will not be removed; however, after you have entered your new clusters, run this
+again so it will update the <tt>Overview</tt> statistics with just those pairs in clusters.
+
+
+<tr><td nowrap>2. Clusters and Pairs from database<td>
 This removes all pairs and clusters from the database, which allows you to start
 over at the 'Add Pairs from Hits' step.
-You probably want to remove pairs and methods from disk also (#3).
 
-<tr><td nowrap>2. mTCW database<td>
-Removes the database. If you are done with the project, then select #5 also.
-If you are rebuilding, you may want to select #3 and/or #4 also.
-<tr><td nowrap>3. Pair and method files from disk <br>(KaKs, Stats, Methods)<td>
+
+<tr><td nowrap>3. mTCW database<td>
+Removes the database. If you are done with the project, then select #6 also.
+If you are rebuilding, you may want to select #4 and/or #5 also.
+<tr><td nowrap>4. Pair and method files from disk <br>(KaKs, Stats, Methods)<td>
 If you are starting over adding methods, it is best to clean up 
 the past work so mTCW does not inadvertently read a file from the previous
 methods.
-<tr><td nowrap>4. Hit files from disk<td>
+<tr><td nowrap>5. Hit files from disk<td>
 If you remove the database in order to recreate it with datasets that
 have any differences from the previous datasets, you must remove the hit files
 and redo the search.
-<tr><td nowrap>5. All files from disk for this mTCW project<td>
+<tr><td nowrap>6. All files from disk for this mTCW project<td>
 Remove the <tt>projcmp/&lt;project-name&gt;</tt> directory.
 </table>
 </html>

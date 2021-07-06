@@ -75,19 +75,25 @@ public class MultiStats {
 			PreparedStatement psM = mDB.prepareStatement("update pog_members set " +
 					" alignMap=? where UTstr=? and PGid=?");
 			
-			int cnt=0, cntErr=0;
+			int cnt=0, cntSeq = 0, cntPrt=100, cntErr=0;
 			mDB.openTransaction(); 
 			for (int grpID=nGrpMin; grpID<=nGrpMax; grpID++) 
 			{
 				int hasRun = mDB.executeInteger("select conLen from pog_groups where PGid=" + grpID);
-				if (hasRun>0) continue;
+				if (hasRun!=0) continue; // CAS326 -1 not exist; >0 been done; 0 exist with no consensus
 				
 				multiObj.clear();
 				cnt++;
-				Out.r("Process cluster #" + cnt + " with " + nSeqs + " members ");
 				
 				nSeqs = loadSeqFromDB(grpID); // global seqName and seqStr
-				if (seqName.size()==0) continue; // some may have been removed
+				if (nSeqs==0) continue; // some may have been removed
+				
+				cntSeq+=nSeqs;
+				cntPrt+=nSeqs;
+				if (cntPrt>=100) { // CAS326
+					Out.r("Process clusters " + cnt + " and sequences " + cntSeq);
+					cntPrt=0;
+				}
 				
 			// Alignment
 				if (!runAlign(grpID, multiObj)) { 

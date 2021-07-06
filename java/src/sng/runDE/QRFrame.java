@@ -13,7 +13,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.util.TreeSet;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -62,14 +61,18 @@ import util.ui.UserPrompt;
  * v2.11 - remove built-in DE methods, make them scripts
  * v3.0.3 - change all showOptionDialog(null,.. to showOptionDialog(getInstance(); the null hide window on Java 14.
  * v3.2.1 - changed GOseq to be script. Rearrange interface. Made Remove and GO separate
+ * v3.2.6 - Add GO Remove. Only add GO enrich if not exist. Redo the checking...
+ * 			Use getInstance() for all Popups
  */
 public class QRFrame extends JDialog implements WindowListener {
 	private static final long serialVersionUID = 6227242983434722745L;
 	
 	public static double dispersion = 0.1;
 	
-	public static final String allCols = "All P-value";
-	public static final String noCol = "No P-values";
+	public static final String allColsDE = "All DE p-value";
+	public static final String noColsDE = "No DE p-value";
+	public static final String allColsGO = "All GO p-value";
+	public static final String noColsGO = "No GO p-value";
 	
 	private final String RSCRIPT1= Globalx.RSCRIPTSDIR + "/edgeRglm.R";
 	private final String RSCRIPT2= Globalx.RSCRIPTSDIR + "/goSeqBH.R";
@@ -78,10 +81,13 @@ public class QRFrame extends JDialog implements WindowListener {
 	private final int DEFAULT_SELECTION = 2; 
 	
 	private final String pValColPrefix = Globals.PVALUE; 
+	private final int    pValPrefixSize = Globals.PVALUE.length();
+	
 	private final String defPercent = "10";
 	private final String defPVal = ".05";
 	
 	private final String BADCOLNAME = "Invalid column name, use up to 15 letters/numbers/underscores";
+	private boolean bPopUp=false, bStderr=true;
 	private final int COLUMN_LABEL_WIDTH = 80;
 	private final int COLUMN_WIDTH = 140;
 	private final int NUMBER_WIDTH = 2;
@@ -92,8 +98,7 @@ public class QRFrame extends JDialog implements WindowListener {
 	/************************************************
 	 * Called from QRmain to open TCW selection panel
 	 */
-	public QRFrame(HostsCfg h, Vector <DBInfo> list) 
-	{		
+	public QRFrame(HostsCfg h, Vector <DBInfo> list) {		
 		hostsObj = h;
 		hasChooser=true;
 		
@@ -116,8 +121,7 @@ public class QRFrame extends JDialog implements WindowListener {
 	 * with the name of the TCWdb. 
 	 * The DE window will open with the libraries of the specified TCWdb
 	 */
-	public QRFrame(HostsCfg h, DBInfo d)  throws Exception
-	{
+	public QRFrame(HostsCfg h, DBInfo d)  throws Exception {
 		hostsObj = h;
 		dbObj = d;
 		
@@ -140,7 +144,7 @@ public class QRFrame extends JDialog implements WindowListener {
 
 		setResizable(true);
 		add(mainPanel);
-		setWindowSettings("QRframemainview");
+		setWindowSettings("runDE");
 		setVisible(true);
 	}
 	private void setWindowSettings(final String prefix) {
@@ -148,7 +152,7 @@ public class QRFrame extends JDialog implements WindowListener {
 		pack();
 	}
 	/********************************************************
-	 * XXX Grp1 against Grp2 - one execute
+	 * XXX Grp1 against Grp2 - computes one column
 	 */
 	private void exDeGrp1Grp2(){
 		// user selected groups of libraries
@@ -159,20 +163,17 @@ public class QRFrame extends JDialog implements WindowListener {
 			else if (isLibSelectedAt(x, 1))	grp2.add(theLibraryNames[x]);
 		}
 		if (grp1.size() == 0) {
-			JOptionPane.showMessageDialog(null,"Please select at least one Condition for Group 1.");
+			JOptionPane.showMessageDialog(getInstance(),"Please select at least one Condition for Group 1.");
 			return;
 		}
 		if (grp2.size() == 0) {
-			JOptionPane.showMessageDialog(null,"Please select at least one Condition for Group 2.");
+			JOptionPane.showMessageDialog(getInstance(),"Please select at least one Condition for Group 2.");
 			return;
 		}
 		String colName = txtColName.getText();
-		boolean addCol = true;
-		if (!chkSaveCol.isSelected()) addCol=false;
-		else {
-			if (!colNameOK(colName, 1)) return; 
-			if (!colNameUnique(colName, 1)) return;
-		}
+		boolean addCol = chkSaveCol.isSelected();
+		if (addCol) 
+			if (!colNameOK(colName, bPopUp)) return; 
 
 		if (addCol) {
 			int ret = JOptionPane.showOptionDialog(getInstance(), // CAS303 change null to getInstance()
@@ -214,13 +215,41 @@ public class QRFrame extends JDialog implements WindowListener {
 			if (isLibSelectedAt(x, 0))
 				libNames.add(theLibraryNames[x]);
 		}
-		if (libNames.size() == 0) {
-			JOptionPane.showMessageDialog(null,"Please select at least two conditions from Group 1.");
+		if (libNames.size() <= 1) {
+			JOptionPane.showMessageDialog(getInstance(),"Please select at least two conditions from Group 1.");
 			return;
 		}
+		
 		String libs = libNames.get(0);
 		for (int i= 1; i<libNames.size(); i++) libs += "," + libNames.get(i);
+		
+		// CAS326 add check for what columns have already been done
+		TreeSet <String> doCol = new TreeSet <String> ();
+		String newCol=null, oldCol=null;
+		for(int x=0; x<libNames.size(); x++) 
+		{
+			String lib1 = libNames.get(x);
+			for(int x2=x+1; x2<libNames.size(); x2++) {
+				String lib2 = libNames.get(x2);
+				
+				String pColName = colNameCreate(lib1,lib2);
+				
+				if (deGoColMap.containsKey(pColName)) {
+					if (oldCol==null) oldCol=pColName;
+					else oldCol += "," + pColName;
+				}
+				else {
+					if (newCol==null) newCol=pColName;
+					else newCol += "," + pColName;
+					doCol.add(pColName);
+				}
+			}
+		}
+		
 		String msg = "\nDo all pairs for " + libs + "\n and save to auto-named columns?";	
+		if (oldCol!=null)
+			msg += "\nThe following columns will not be redone: " + oldCol;
+		
 		int ret = JOptionPane.showOptionDialog(getInstance(), msg,
 				"Confirm All Pairs", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 		if (ret != JOptionPane.YES_OPTION) {
@@ -230,20 +259,21 @@ public class QRFrame extends JDialog implements WindowListener {
 		chkSaveCol.setSelected(true);
 		
 		if (!qrProcess.rStart(true)) return;
+		
 		int ex=0;
-		for(int x=0; x<libNames.size(); x++) 
-		{
+		for(int x=0; x<libNames.size(); x++) {
 			grp1.clear();
 			String lib1 = libNames.get(x);
 			grp1.add(lib1);
-			for(int x2=x+1; x2<libNames.size(); x2++) 
-			{
+			
+			for(int x2=x+1; x2<libNames.size(); x2++) {
 				grp2.clear();
 				String lib2 = libNames.get(x2);
 				grp2.add(lib2);
 				
 				boolean addCol = true;			
 				String pColName = colNameCreate(lib1,lib2);
+				if (!doCol.contains(pColName)) continue;
 		
 				Out.Print("****************************************************************");
 				Out.Print("******** " + (ex+1) + ". Start DE execution for column: " + pColName + " *********");
@@ -263,21 +293,23 @@ public class QRFrame extends JDialog implements WindowListener {
 		qrProcess.rFinish();
 	}
 	/*********************************************************
-	 * XXX read file of group1, group2, columnname
+	 * XXX read file of conditions and column name to process
+	 * group1, group2, columnname
+	 * where group1 and/or group2 can be multiple conditions separated by ":"
 	 ********************************************************/
 	private void exDePairFile(String fname){
 		try {	
 			Out.Print("\nReading " + fname);
 			
-			Vector <String> addLines = new Vector <String> ();
-			
 			chkSaveCol.setSelected(true);
-			BufferedReader file = new BufferedReader(new FileReader(fname));
-			String line, colSaveStr="", pColName;
 			
-			// read file and check
+			String line, pColName;
+			TreeSet <String> pCol = new TreeSet <String> ();
 			TreeSet<String> libs = new TreeSet <String> ();
-			int cnt=0, err=0, warn=0;
+			Vector <String> addLines = new Vector <String> ();
+			int cnt=0, err=0;
+			
+			BufferedReader file = new BufferedReader(new FileReader(fname));
 			while((line = file.readLine()) != null) {
 				line = line.trim();
 				if (line.equals("")) continue;
@@ -297,17 +329,15 @@ public class QRFrame extends JDialog implements WindowListener {
 				// columns can be multiple groups delimited by :
 				if (col[0].contains(":")) {
 					String [] set = col[0].split(":");
-					for (int i=0; i< set.length; i++) {
+					for (int i=0; i< set.length; i++) 
 						libs.add(set[i]);
-					}
 				}
 				else libs.add(col[0]); 
 				
 				if (col[1].contains(":")) {
 					String [] set = col[1].split(":");
-					for (int i=0; i< set.length; i++) {
+					for (int i=0; i< set.length; i++) 
 						libs.add(set[i]);
-					}
 				}
 				else libs.add(col[1]); 
 				
@@ -316,6 +346,7 @@ public class QRFrame extends JDialog implements WindowListener {
 					boolean found=false;
 					for(int x=0; x<theLibraryNames.length && !found; x++) 
 						if (lib.equals(theLibraryNames[x])) found = true;
+					
 					if (!found) {
 						Out.PrtWarn("Condition not found - ignore: " + lib);
 						err++; good=false;
@@ -323,27 +354,24 @@ public class QRFrame extends JDialog implements WindowListener {
 				}
 				
 				// check for proper name and uniqueness
-				if (!colNameOK(col[2], 2)) {
+				if (!colNameOK(col[2], bStderr)) {
 					err++; good=false;
 				}
-				else if (colSaveStr.contains(" " + col[2] + " ")) {
+				else if (pCol.contains(col[2])) {
 					Out.PrtWarn("Duplicate column - ignore: " + col[2]);
 					err++; good=false;
 				}
-				else if (!colNameUnique(col[2], 2)) {
-					warn++; 
-				}
 				
 				if (good) {
-					colSaveStr += " " + col[2] + " ";
+					pCol.add(col[2]);
 					addLines.add(line);
 					cnt++;
 				}
 			}
 			file.close();
+			
 			// prompt the user
 			String msg = "Found " + cnt + " good entries";
-			if (warn>0) msg += " with " + warn + " overwrite (see terminal)";
 			if (err>0)  msg += " and " + err + " ignored entries (see terminal)";
 
 			int ret = JOptionPane.showOptionDialog(getInstance(), msg,
@@ -385,7 +413,7 @@ public class QRFrame extends JDialog implements WindowListener {
 				boolean rc = qrProcess.deRun((j==0), rScriptFile, filCnt, filCPM, filCPMn, 
 						                      disp, pColName, true,  grp1, grp2);
 				if (!rc) {
-					Out.Print("*** Abort All pairs from File");
+					Out.Print("*** Failed All pairs from File");
 					return;
 				}
 			}
@@ -396,10 +424,12 @@ public class QRFrame extends JDialog implements WindowListener {
 			ErrorReport.reportError(e, "Cannot process file " + fname);
 		}
 	}
-	// lib1_name lib2_nane  new_pvalue_column_name
-	// seqID value
-	// ...
-	// read file, then call 
+	/**********************************************************
+	 * Enter p-values for one column
+	 * lib1_name lib2_nane  new_pvalue_column_name
+	 * seqID value
+	 * ...
+	 */
 	private void exDeLoadFile(String fname) {
 		try {
 			Out.Print("\nLoad p-values from file " + fname);
@@ -423,14 +453,16 @@ public class QRFrame extends JDialog implements WindowListener {
 					readCol=true;
 					if (tok.length!=3) {
 						JOptionPane.showMessageDialog(getInstance(), 
-								"First line must be of format: group1 group2 column_name\nSee Help for more information", "Error", JOptionPane.PLAIN_MESSAGE);
+							"First line must be of format: group1 group2 column_name\nSee Help for more information", "Error", JOptionPane.PLAIN_MESSAGE);
 						file.close();
 						return;
 					}
 					String [] g1 = tok[0].split(":");
 					for (String g : g1) grp1.add(g);
+					
 					String [] g2 = tok[1].split(":");
 					for (String g : g2) grp2.add(g);
+					
 					pColName = tok[2];
 					Out.Print("Group1=" + tok[0] + " Group2=" + tok[1] + "; P-value column=" + tok[2]);
 				}
@@ -452,8 +484,7 @@ public class QRFrame extends JDialog implements WindowListener {
 					}
 					catch (Exception e){
 						JOptionPane.showMessageDialog(getInstance(), 
-								"Incorrect line: " + line + 
-								"\nThe second value must be the p-value.", 
+								"Incorrect line: " + line +  "\nThe second value must be the p-value.", 
 								"Error", JOptionPane.PLAIN_MESSAGE);
 						file.close();
 						return;
@@ -461,7 +492,8 @@ public class QRFrame extends JDialog implements WindowListener {
 				}
 			}
 			file.close();
-			// check that these correspond to conditions (i.e. library names)
+			
+			// check grp1 and grp2 that these correspond to conditions (i.e. library names)
 			for (String g : grp1) {
 				boolean found=false;
 				for (String l : theLibraryNames) {
@@ -478,9 +510,23 @@ public class QRFrame extends JDialog implements WindowListener {
 					return;
 				}
 			}
-			// P-value column ok?
-			if (!colNameOK(pColName, 1)) return; 
-			if (!colNameUnique(pColName, 1)) return;
+			for (String g : grp2) {
+				boolean found=false;
+				for (String l : theLibraryNames) {
+					if (l.equals(g)) {
+						found=true;
+						break;
+					}
+				}
+				if (!found) {
+					JOptionPane.showMessageDialog(getInstance(), 
+							"Incorrect Condition name: " + g + 
+							"\nThe condition names must match those listed under 'Condition'.", 
+							"Error", JOptionPane.PLAIN_MESSAGE);
+					return;
+				}
+			}
+			if (!colNameOK(pColName, bPopUp)) return; 
 			
 			// check seqIDs are in database
 			int cntHave=0, cntNo=0, cntAll=0;
@@ -497,9 +543,11 @@ public class QRFrame extends JDialog implements WindowListener {
 						"# seqIDs in database but not in file: " + cntNo;
 				if (!UserPrompt.showContinue("seqID inconsistencies", msg)) return;
 			}
+			
+			// Add
 			boolean rc = qrProcess.deReadPvalsFromFile(pColName, grp1, grp2, scores, fname);
 			if (!rc) {
-				Out.Print("*** Abort Load p-values from file");
+				Out.Print("*** Failed Load p-values from file");
 				return;
 			}
 			Out.Print("Complete adding p-values from file for " + dbObj.getID());
@@ -508,8 +556,8 @@ public class QRFrame extends JDialog implements WindowListener {
 	}
 	
 	/********************************************************
-	 * Creates a default column name for the libraries selected
-	 * It tries to 'guess' what kind of naming scheme these are using
+	 * Creates a default column name for the libraries selected in Group1 and Group2
+	 * This is entered in the p-column box. It can be duplicate
 	 */
 	private String colNameCreate(TreeSet<String> grp1, TreeSet<String> grp2, String colName) {
 		String col="";
@@ -522,7 +570,7 @@ public class QRFrame extends JDialog implements WindowListener {
 			
 			for(int x=0; x<theLibraryNames.length; x++) 
 			{
-				if (isLibSelectedAt(x, 0)) a = theLibraryNames[x];
+				if (isLibSelectedAt(x, 0)) 		a = theLibraryNames[x];
 				else if (isLibSelectedAt(x, 1)) b = theLibraryNames[x];
 			}
 			
@@ -546,14 +594,18 @@ public class QRFrame extends JDialog implements WindowListener {
 			}
 			col =   a + "x" + b; // can't use '_" because of L_ and LN_ columns in sTCW
 		}
-		if (!colNameOK(col, 2)) {
-			if (colNameOK(col+"2", 2)) col += "2";
-			else if (colNameOK(col+"3", 2)) col += "3";
-			else return "";
+		int i=1;
+		String savCol=col;
+		while (deGoColMap.containsKey(col)) {
+			col = savCol + i;
+			i++;
 		}
 		return col;
 	}
-	// For the looping mode, since it can't use the interface selection
+	/***************************************************
+	 * Create colName for two conditions for "All Pairs in Group 1"
+	 * If creates an existing name, the calling method ignores
+	 */
 	private String colNameCreate(String a, String b) {
 		String col="";
 		boolean isLt4 = (a.length() < 4 && b.length() < 4);
@@ -570,44 +622,43 @@ public class QRFrame extends JDialog implements WindowListener {
 				col = aaa+bbb;
 			}
 		}
-		if (!colNameOK(col, 2)) {
-			if (colNameOK(col+"2", 2)) col += "2";
-			else if (colNameOK(col+"3", 2)) col += "3";
-			else return "";
-		}
 		return col;
 	}
 	/************************************************************
-	 * Column checking
-	 * L__ cannot have the same name as the table crashes
+	 * Column checking 
+	 * Group1-Group2 - check for overwrite
+	 * All Pairs in File - no check as duplicate column is ignore
+	 * All values from file - check for overwrite
 	 */
-	private boolean colNameOK(String colName, int msg) {// msg=0 none, 1 dialog, 2 stderr
+	private boolean colNameOK(String colName, boolean isStderr) {
 		try {
-			if (colName.length() <= 0) {
-				if (msg==1) JOptionPane.showMessageDialog(null, "No column name.\nUncheck-check box to auto-create a name, enter enter in test box.");
-				else if (msg==2) 
-					Out.PrtWarn("No column name - ignore: " + colName);
+			if (colName.length() > 15 || !colName.matches("[\\w]+")) {
+				if (!isStderr) 	 JOptionPane.showMessageDialog(null, colName + " " + BADCOLNAME);
+				else Out.PrtWarn(BADCOLNAME + " - ignore: " + colName);			
 				return false;
+			}
+			if (colName.startsWith(Globalx.LIBCNT) || colName.startsWith(Globalx.LIBRPKM)) {
+				String msg = "Invalid: " + colName + ". Do not prefix a column name with " + Globalx.LIBCNT + " or " + Globalx.LIBRPKM;
+				if (!isStderr) JOptionPane.showMessageDialog(getInstance(),msg);
+				else Out.PrtWarn(BADCOLNAME + " - ignore: " + colName);	
+				return false;				
 			}
 			
-			if (colName.length() > 15 || !colName.matches("[\\w]+"))
-			{
-				if (msg==1) JOptionPane.showMessageDialog(null, colName + " " + BADCOLNAME);
-				else if (msg==2) 
-					Out.PrtWarn(BADCOLNAME + " - ignore: " + colName);			
-				return false;
-			}
-			// but P_ would be added as prefix??
-			String [] L_Col = dbLoadPrefixedColumns("L__");
-			for (int i=0; i<L_Col.length; i++) {
-				if (L_Col[i].equals(colName)) {
-					if (msg==1)
-						JOptionPane.showMessageDialog(null,"Invalid: " + colName + 
-						"\nPlease do not prefix a column name with L__, as that is used internally/\n");
-					else if (msg==2) 
-						Out.PrtWarn("Condition name exists - ignore: " + colName);
-					return false;				
+			if (deGoColMap.containsKey(colName)) {
+				if (!isStderr) {
+					int ret = JOptionPane.showOptionDialog(getInstance(), 
+							"Column '" + colName + "' exists in database. Overwrite?\n",
+							"Existing column", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+					if (ret != JOptionPane.YES_OPTION) {
+						Out.Print("*** Abort Execute");
+						return false;
+					}
 				}
+				else {
+					Out.Print("Column exists in database - ignore: " + colName);
+					return false; 
+				}
+				return true;
 			}
 			return true;
 		}
@@ -617,38 +668,6 @@ public class QRFrame extends JDialog implements WindowListener {
 		}
 	}
 
-	private boolean colNameUnique(String colName, int msg) {
-		try { 
-			String [] P_Col = dbLoadPrefixedColumns(Globals.PVALUE);
-		
-			for (int i=0; i<P_Col.length; i++) {
-				if (P_Col[i].equals(colName)) {			
-					if (msg==1) {
-						int ret = JOptionPane.showOptionDialog(getInstance(), "Column " + colName + 
-				" is already used. Do you want to overwrite the previous scores?\n" +
-				"(see Help about generating column names)",
-				"Existing column", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-		
-						if (ret != JOptionPane.YES_OPTION)
-						{
-							Out.Print("*** Abort Execute");
-							return false;
-						}
-					}
-					else if (msg==2)  {
-						Out.Print("Exists in database - overwrite: " + colName);
-						return false; 
-					}
-					return true;
-				}
-			}
-			return true;
-		}
-		catch (Exception e) {
-			ErrorReport.reportError("checking column exists" + colName, e);
-			return false;
-		}
-	}
 	/*********************************************************
 	 * exGoSeq
 	 */
@@ -659,11 +678,11 @@ public class QRFrame extends JDialog implements WindowListener {
 		
 		String rScriptFile = txtRfile2.getText().trim();
 		if (rScriptFile.equals("")) {
-			JOptionPane.showMessageDialog(null,"Enter R-script file name.");
+			JOptionPane.showMessageDialog(getInstance(),"Enter R-script file name.");
 			return;
 		}
 		if (!(new File(rScriptFile).exists())) {
-			JOptionPane.showMessageDialog(null,"R-script file does not exist.\nFile name: " + rScriptFile);
+			JOptionPane.showMessageDialog(getInstance(),"R-script file does not exist.\nFile name: " + rScriptFile);
 			return;
 		}
 		
@@ -681,38 +700,56 @@ public class QRFrame extends JDialog implements WindowListener {
 				return;
 			}
 		}
-		String selected = cmbColGO.getSelectedItem();
-		boolean doAll = selected.equals(allCols);
+		/** Get DE columns to process CAS326 rewrote to not replace done GO columns **/
+		String selCol = cmbAddColGO.getSelectedItem();
+		boolean doAll = selCol.equals(allColsDE);
+		Vector <String> doCols = new Vector <String> ();
 		
-		String [] colNames = cmbColGO.getColumns(); 
-		String colString="";
-		for (int i=0; i<colNames.length; i++) {
-			if (!colNames[i].equals(allCols)) {
-				
-				if (colString=="") colString=colNames[i];
-				else colString += "," + colNames[i];
-			}
+		if (!doAll) { // one selected
+			String msg = (deGoColMap.containsKey(selCol) && deGoColMap.get(selCol)) ? "Column exists. Redo" : "Compute";
+			msg += " GO enrichment for " + selCol;
+			int ret = JOptionPane.showOptionDialog(getInstance(), msg + "\nContinue?",
+					"GO enrichment", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+			if (ret == JOptionPane.NO_OPTION) return;
+			doCols.add(selCol);
 		}
-		String msg = (doAll) ? "Compute GOseq for all DE columns" : "Compute GOseq for " + selected;
-		int ret = JOptionPane.showOptionDialog(getInstance(), msg + "\nContinue?",
-				"GOseq", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-		if (ret == JOptionPane.NO_OPTION) return;
-		
-		String col = cmbColGO.getSelectedItem();
-		String[] cols2do = (doAll ? colNames : new String[]{col});
-		
+		else { // all selected
+			String doneString="";
+			for (String col : orderedDE) {
+				if (deGoColMap.get(col)) {
+					if (doneString=="") doneString=col;
+					else 				doneString += "," + col;
+				}
+				else doCols.add(col);
+			}
+			if (doCols.size()==0) {
+				String msg = (doneString!=null) ? "No new columns to compute" : "Nothing to compute";
+				JOptionPane.showMessageDialog(getInstance(), 
+						msg, "Nothing to compute", JOptionPane.PLAIN_MESSAGE);
+				return;
+			}
+			String msg = "Compute GO enrichment for all DE columns";
+			if (!doneString.contentEquals("")) 
+				msg = "Compute GO enrichment for new DE columns\n" +
+						"The following will not be redone: " + doneString;
+			
+			int ret = JOptionPane.showOptionDialog(getInstance(), msg + "\nContinue?",
+					"GO enrichment", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+			if (ret == JOptionPane.NO_OPTION) return;
+		}
 		if (!qrProcess.rStart(false)) return;
 		int ex=1;
-		for (String colName : cols2do) {
-			if (colName.equals(allCols)) continue;
-				
+		for (String colName : doCols) {	
 			Out.Print("****************************************************************");
-			Out.Print("******** " + ex + ". Start GO enrichment for column: " + colName + " *********");
+			Out.Print("******** " + ex + "/" + doCols.size() + ". GO enrichment for column: " + colName + " *********");
 			Out.Print("****************************************************************");
 			
 			qrProcess.goRun((ex==1), colName, usePercent, thresh, rScriptFile);
 			ex++;
 		}
+		qrProcess.printGoSummary();
+		
+		updateColumnList();
 		Out.Print("Complete GO enrichment for " + dbObj.getID());
 		qrProcess.rFinish();
 	}
@@ -1059,6 +1096,10 @@ public class QRFrame extends JDialog implements WindowListener {
 						updateColumnList();
 					}
 				}
+				else {
+					JOptionPane.showMessageDialog(getInstance(), 
+						"Enter name of the file containing the pairs", "Error", JOptionPane.PLAIN_MESSAGE);
+				}
 			}
 		});
 		row.add(btnPairFile);
@@ -1093,6 +1134,10 @@ public class QRFrame extends JDialog implements WindowListener {
 					exDeLoadFile( fname);
 					updateColumnList();
 				}
+				else {
+					JOptionPane.showMessageDialog(getInstance(), 
+						"Enter name of file containing the p-values", "Error", JOptionPane.PLAIN_MESSAGE);
+				}
 			}
 		});
 		row.add(btnLoadPvalFile);
@@ -1122,81 +1167,127 @@ public class QRFrame extends JDialog implements WindowListener {
 	// Select Column and Remove button
 	private void createRemovePanel() {
 		JPanel row = Static.createRowPanel();
-		row.add(new JLabel("Remove p-value column(s)"));
+		row.add(new JLabel("Remove column(s)"));
 		mainPanel.add(row); mainPanel.add(Box.createVerticalStrut(5));
 		
 		row = Static.createRowPanel();
 		row.add(Box.createHorizontalStrut(5));
-		btnRemoveColumns = Static.createButton("Remove", false, Globals.BGCOLOR);
-		btnRemoveColumns.addActionListener(new ActionListener() {
+		btnRmColDE = Static.createButton("Remove", false, null);
+		btnRmColDE.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {		
-					String column = cmbColRm.getSelectedItem(); // CAS304 remove (String)
-					if (!column.equals(allCols)) {
-						int ret = JOptionPane.showOptionDialog(getInstance(), "Remove " + column + "?",
+					String column = cmbRmColDE.getSelectedItem(); // CAS304 remove (String)
+					if (!column.equals(allColsDE)) {
+						int ret = JOptionPane.showOptionDialog(getInstance(), "Remove DE p-value " + column + "?",
 								"Remove column", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-						if (ret == JOptionPane.YES_OPTION) 
-							dbRemoveColumn(column);
+						if (ret == JOptionPane.YES_OPTION) {
+							dbRmColDE(column);
+							dbFinishRm();
+						}
 					}
 					else {
-						int ret = JOptionPane.showOptionDialog(getInstance(), "Remove all p-value columns?",
+						int ret = JOptionPane.showOptionDialog(getInstance(), "Remove all DE p-value columns?",
 								"Remove column", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-						if (ret == JOptionPane.YES_OPTION)
-							dbRemoveColumnAll();
+						if (ret == JOptionPane.YES_OPTION) {
+							dbRmColDEall();
+							dbFinishRm();
+						}
 					}
-					Out.Print("Completed removal ");
 				}
 				catch(Exception e) {ErrorReport.prtReport(e, "Error removing method column");}
 			}
 		});
-		row.add(btnRemoveColumns);row.add(Box.createHorizontalStrut(5));
+		row.add(btnRmColDE);row.add(Box.createHorizontalStrut(3));
 		
-		cmbColRm = new ButtonComboBox();
-		cmbColRm.setEnabled(false);
-		cmbColRm.addActionListener(new ActionListener() {
+		cmbRmColDE = new ButtonComboBox();
+		cmbRmColDE.setEnabled(false);
+		row.add(cmbRmColDE); row.add(Box.createHorizontalStrut(28));
+		
+		/***********************************************************/
+		
+		btnRmColGO = Static.createButton("Remove", false, null);
+		btnRmColGO.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				int n = cmbColRm.getItemCount()	;
-				if (n == 1 ) btnRemoveColumns.setEnabled(false);
-				else btnRemoveColumns.setEnabled(true);
+				try {		
+					String column = cmbRmColGO.getSelectedItem(); 
+					if (!column.equals(allColsGO)) {
+						int ret = JOptionPane.showOptionDialog(getInstance(), "Remove GO p-value " + column + "?",
+								"Remove column", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+						if (ret == JOptionPane.YES_OPTION) {
+							dbRmColGO(column);
+							dbFinishRm();
+						}
+					}
+					else {
+						int ret = JOptionPane.showOptionDialog(getInstance(), "Remove all GO enrichment columns?",
+								"Remove column", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+						if (ret == JOptionPane.YES_OPTION) {
+							dbRmColGOall();
+							dbFinishRm();
+						}
+					}
+				}
+				catch(Exception e) {ErrorReport.prtReport(e, "Error removing method column");}
 			}
 		});
-		row.add(cmbColRm);	
+		row.add(btnRmColGO);row.add(Box.createHorizontalStrut(3));
+		
+		cmbRmColGO = new ButtonComboBox();
+		cmbRmColGO.setEnabled(false);
+		row.add(cmbRmColGO);	
 			
 		mainPanel.add(row);
 	}
+	/***************************************************
+	 * Update all drop down lists
+	 */
 	private void updateColumnList() {
-		cmbColRm.removeAllItems();
-		cmbColGO.removeAllItems();
+		cmbRmColDE.removeAllItems();
+		cmbRmColGO.removeAllItems();
+		cmbAddColGO.removeAllItems();
 		
-		String [] vals = dbLoadPvalColumns();
-		boolean b = (vals.length>0);
+		dbLoadPvalColumns();
+		boolean b = (orderedDE.size()>0);
+		boolean g = hasGOpval;
 		
 		if (b) {
-			cmbColRm.addItem(allCols);
-			cmbColGO.addItem(allCols);
+			cmbRmColDE.addItem(allColsDE);
+			if (g)	cmbRmColGO.addItem(allColsGO);
+			else 	cmbRmColGO.addItem(noColsGO);
+			cmbAddColGO.addItem(allColsDE);
 			
-			for(int x=0; x<vals.length; x++) {
-				cmbColRm.addItem(vals[x]);
-				cmbColGO.addItem(vals[x]);
+			for(String v : orderedDE) {
+				cmbRmColDE.addItem(v);
+				cmbAddColGO.addItem(v);
+				
+				if (deGoColMap.get(v))
+					cmbRmColGO.addItem(v);
 			}
 		}
 		else {
-			cmbColRm.addItem(noCol);
-			cmbColGO.addItem(noCol);
+			cmbRmColDE.addItem(noColsDE);
+			cmbRmColGO.addItem(noColsGO);
+			cmbAddColGO.addItem(noColsDE);
 		}
-		cmbColRm.setSelectedIndex(0);
-		cmbColGO.setSelectedIndex(0);
+		btnRmColDE.setEnabled(b);
+		cmbRmColDE.setEnabled(b);
+		cmbRmColDE.setSelectedIndex(0);
+		cmbRmColDE.setMaximumSize(cmbRmColDE.getPreferredSize());
+		cmbRmColDE.setMinimumSize(cmbRmColDE.getPreferredSize());
 		
-		cmbColRm.setMaximumSize(cmbColRm.getPreferredSize());
-		cmbColRm.setMinimumSize(cmbColRm.getPreferredSize());
-		cmbColRm.setEnabled(b);
+		btnRmColGO.setEnabled(g);
+		cmbRmColGO.setEnabled(g);
+		cmbRmColGO.setSelectedIndex(0);
+		cmbRmColGO.setMaximumSize(cmbRmColGO.getPreferredSize());
+		cmbRmColGO.setMinimumSize(cmbRmColGO.getPreferredSize());
 		
-		cmbColGO.setMaximumSize(cmbColGO.getPreferredSize());
-		cmbColGO.setMinimumSize(cmbColGO.getPreferredSize());
-		cmbColGO.setEnabled(b);
+		btnAddColGO.setEnabled(b);
+		cmbAddColGO.setEnabled(b);
+		cmbAddColGO.setSelectedIndex(0);
+		cmbAddColGO.setMaximumSize(cmbAddColGO.getPreferredSize());
+		cmbAddColGO.setMinimumSize(cmbAddColGO.getPreferredSize());
 		
-		btnRemoveColumns.setEnabled(b);
-		btnGOSeq.setEnabled(b);
+		
 		repaint();
 	}
 	// GO Panel
@@ -1229,24 +1320,17 @@ public class QRFrame extends JDialog implements WindowListener {
 		
 		row = Static.createRowPanel();
 		row.add(Box.createHorizontalStrut(5));
-		btnGOSeq = Static.createButton("Execute", false);
-		btnGOSeq.addActionListener(new ActionListener() {
+		btnAddColGO = Static.createButton("Execute", false, null);
+		btnAddColGO.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				exGoSeq();
 			}
 		});
-		row.add(btnGOSeq); 	row.add(Box.createHorizontalStrut(5));
+		row.add(btnAddColGO); 	row.add(Box.createHorizontalStrut(5));
 		
-		cmbColGO = new ButtonComboBox();
-		cmbColGO.setEnabled(false);
-		cmbColGO.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				int n = cmbColGO.getItemCount();	
-				if (n == 1 ) btnGOSeq.setEnabled(false);
-				else btnGOSeq.setEnabled(true);
-			}
-		});
-		row.add(cmbColGO);	row.add(Box.createHorizontalStrut(10));
+		cmbAddColGO = new ButtonComboBox();
+		cmbAddColGO.setEnabled(false);
+		row.add(cmbAddColGO);	row.add(Box.createHorizontalStrut(10));
 		
 		ButtonGroup group = new ButtonGroup();
 		btnPercent = new JRadioButton("Top");
@@ -1280,7 +1364,7 @@ public class QRFrame extends JDialog implements WindowListener {
 
 	private void createExitPanel() {
 		JPanel row = Static.createRowPanel();
-		JButton btnFinishExit = Static.createButton("Update Overview", true);
+		JButton btnFinishExit = Static.createButton("Update Overview", true, null);
 		btnFinishExit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				dbOverview(dbObj.getdbName(), mDB);
@@ -1294,6 +1378,7 @@ public class QRFrame extends JDialog implements WindowListener {
 			public void actionPerformed(ActionEvent arg0) {
 				openWindows.remove(getInstance()); // CAS316 was 'this'
 				dispose();
+				if  (qrProcess==null || qrProcess.noR()) System.exit(0);// CAS326
 			}
 		});
 		row.add(btnClose);
@@ -1330,11 +1415,11 @@ public class QRFrame extends JDialog implements WindowListener {
 	private boolean getMethodsFromPanel() {
 		rScriptFile = txtRfile1.getText().trim();
 		if (rScriptFile.equals("")) {
-			JOptionPane.showMessageDialog(null,"Enter R-script file name.");
+			JOptionPane.showMessageDialog(getInstance(),"Enter R-script file name.");
 			return false;
 		}
 		if (!(new File(rScriptFile).exists())) {
-			JOptionPane.showMessageDialog(null,"R-script file does not exist.\nFile name: " + rScriptFile);
+			JOptionPane.showMessageDialog(getInstance(),"R-script file does not exist.\nFile name: " + rScriptFile);
 			return false;
 		}
 		
@@ -1342,7 +1427,7 @@ public class QRFrame extends JDialog implements WindowListener {
 		if (chkDisp.isSelected()){
 			try {disp = Double.parseDouble(txtDisp.getText());}
 			catch(Exception e){
-				JOptionPane.showMessageDialog(null,"Invalid dispersion:" + txtDisp.getText());
+				JOptionPane.showMessageDialog(getInstance(),"Invalid dispersion:" + txtDisp.getText());
 				return false;
 			}
 		}
@@ -1351,19 +1436,19 @@ public class QRFrame extends JDialog implements WindowListener {
 		if (filterRadio[0].isSelected()){
 			try {filCnt = Integer.parseInt(txtFilCnt.getText());}
 			catch(Exception e){
-				JOptionPane.showMessageDialog(null,"Invalid Count value:" + txtFilCnt.getText());
+				JOptionPane.showMessageDialog(getInstance(),"Invalid Count value:" + txtFilCnt.getText());
 				return false;
 			}
 		}
 		else if (filterRadio[1].isSelected()) {
 			try { filCPM = Integer.parseInt(txtFilCPM.getText()); }
 			catch(Exception e){
-				JOptionPane.showMessageDialog(null,"Invalid CPM value:" + txtFilCPM.getText());
+				JOptionPane.showMessageDialog(getInstance(),"Invalid CPM value:" + txtFilCPM.getText());
 				return false;
 			}
 			try { filCPMn = Integer.parseInt(txtFilCPMn.getText()); }
 			catch(Exception e){
-				JOptionPane.showMessageDialog(null,"Invalid CPM for :" + txtFilCPMn.getText());
+				JOptionPane.showMessageDialog(getInstance(),"Invalid CPM for :" + txtFilCPMn.getText());
 				return false;
 			}
 		}
@@ -1566,26 +1651,6 @@ public class QRFrame extends JDialog implements WindowListener {
 		}
 		return db;
 	}
-	private String [] dbLoadPrefixedColumns(String prefix) {
-	    Vector<String> retval = new Vector<String>();
-	    try {
-			ResultSet rs = mDB.executeQuery("SELECT * FROM contig LIMIT 1");
-			
-			ResultSetMetaData rsmd = rs.getMetaData();
-			int numCols = rsmd.getColumnCount();
-			for(int x=1; x<=numCols; x++) {
-				if(rsmd.getColumnName(x).startsWith(prefix)) {
-					retval.add(rsmd.getColumnName(x).substring(prefix.length()));
-				}
-			}
-			
-			return retval.toArray(new String [0]);
-	    }
-		catch ( Exception err ) {
-			ErrorReport.reportError(err, "Error: reading database for getLibs");
-            return null;
-        }
-	}
 
 	private String [] dbLoadLibraryNames() {
 		try {
@@ -1602,26 +1667,48 @@ public class QRFrame extends JDialog implements WindowListener {
 		}		
 		return null;
 	}
-	private void dbRemoveColumnAll() {
+	private boolean dbLoadPvalColumns() {
+		orderedDE.clear();
+		deGoColMap.clear();
+		hasGOpval=false;
+		
 		try {
-			int nItems = cmbColRm.getItemCount();
-			Vector<String> columns = new Vector<String>();
-			for (int i = 0; i < nItems; i++)
-			{
-				String column = cmbColRm.getItemAt(i);
-				if (!column.equals(allCols)) {
-					columns.add(column);
-				}
+			ResultSet rset = mDB.executeQuery("select pCol, goCutoff from libraryDE");
+			while(rset.next()) {
+				String col = rset.getString(1).substring(pValPrefixSize);
+				orderedDE.add(col);
+				boolean hasCut = (rset.getDouble(2)>0);
+				if (hasCut) hasGOpval=true;
+				deGoColMap.put(col, hasCut);
 			}
-			for (String name :columns) dbRemoveColumn(name);
+			rset.close();
+			return true;
+		}
+		catch (Exception e){ErrorReport.prtReport(e, "Error getting method columns"); return false;}
+	}
+	/************************************************************
+	 * Remove columns
+	 */
+	private void dbRmColDEall() {
+		try {
+			int nItems = cmbRmColDE.getItemCount();
+			Vector<String> columns = new Vector<String>();
+			for (int i = 0; i < nItems; i++) {
+				String column = cmbRmColDE.getItemAt(i);
+				if (!column.equals(allColsDE)) 
+					columns.add(column);
+			}
+			for (String name :columns) dbRmColDE(name);
+			
+			mDB.tableDelete("libraryDE"); 
 		}
 		catch(Exception e) {ErrorReport.prtReport(e, "Error removing column");}
 	}
-	private void dbRemoveColumn(String column) { // CAS321 changed for new columns in libraryDE
+	private void dbRmColDE(String column) { // CAS321 changed for new columns in libraryDE
 		try {
-			Out.Print("Removing column " + column + "...");
+			Out.Print("Removing DE column " + column + "...");
 			column =  pValColPrefix + column;
-			mDB.executeUpdate("ALTER TABLE contig DROP COLUMN " + column);
+			mDB.tableCheckDropColumn("contig", column);
 			
 			if (mDB.tableExists("go_info")) {
 				String goMethod = mDB.executeString("select goMethod from libraryDE where pCol='" + column + "'");
@@ -1631,29 +1718,47 @@ public class QRFrame extends JDialog implements WindowListener {
 				}
 			}
 			mDB.executeUpdate("delete from libraryDE WHERE pCol='" + column + "'");
+		}
+		catch(Exception e) {ErrorReport.prtReport(e, "Error removing DE column");}
+	}
+	private void dbRmColGOall() {
+		try {
+			int nItems = cmbRmColGO.getItemCount();
+			Vector<String> columns = new Vector<String>();
+			for (int i = 0; i < nItems; i++) {
+				String column = cmbRmColGO.getItemAt(i);
+				if (!column.equals(allColsGO)) 
+					columns.add(column);
+			}
+			for (String name :columns) dbRmColGO(name);
+		}
+		catch(Exception e) {ErrorReport.prtReport(e, "Error removing GO column");}
+	}
+	private void dbRmColGO(String column) { 
+		try {
+			Out.Print("Removing GO column " + column + "...");
+			column =  pValColPrefix + column;
 			
-			mDB.executeUpdate("update assem_msg set pja_msg=NULL"); 
+			mDB.tableCheckDropColumn("go_info", column);
 			
-			updateColumnList();	
+			mDB.executeUpdate("update libraryDE set goCutoff=0.0, goMethod='' WHERE pCol='" + column + "'");	
 		}
 		catch(Exception e) {ErrorReport.prtReport(e, "Error removing column");}
 	}
-	
-	private String [] dbLoadPvalColumns() {
-		Vector<String> names = new Vector<String> ();
+	private void dbFinishRm() {
 		try {
-			ResultSet rset = mDB.executeQuery("SHOW COLUMNS FROM contig");
-			while(rset.next()) {
-				String row = rset.getString(1);
-				if(row.startsWith(Globals.PVALUE))
-					names.add(row.substring(Globals.PVALUE.length()));
-			}
-			rset.close();
+			int cnt = mDB.executeCount("SELECT COUNT(*) FROM libraryDE");
+		    mDB.executeUpdate ("ALTER TABLE libraryDE AUTO_INCREMENT = " + cnt+1);   
+		       
+			mDB.executeUpdate("update assem_msg set pja_msg=NULL"); 
+			
+			updateColumnList();	
+			
+			Out.Print("Finish column removal");
 		}
-		catch (Exception e){ErrorReport.prtReport(e, "Error getting method columns");}
-		
-		return names.toArray(new String[0]);
+		catch(Exception e) {ErrorReport.prtReport(e, "Error finish removing column");}
 	}
+	/************************************************************/
 	private void dbOverview(String dbName, DBConn dbc) {
 		try {
 			String val = null;
@@ -1710,13 +1815,11 @@ public class QRFrame extends JDialog implements WindowListener {
 	private JButton btnLoadPvalFile = null, btnPvalFile = null;
 	private JTextField txtPvalFile = null;
 	
-	
-	private ButtonComboBox cmbColRm = null;
-	private ButtonComboBox cmbColGO = null;
+	private ButtonComboBox cmbRmColDE = null, cmbRmColGO = null, cmbAddColGO = null;
 	
 	private JButton btnRfile2 = null;
 	private JTextField txtRfile2 = null;
-	private JButton btnRemoveColumns = null, btnGOSeq = null;
+	private JButton btnRmColDE = null, btnRmColGO = null, btnAddColGO = null;
 	private JRadioButton btnPercent = null, btnPVal = null;
 	
 	private JTextField txtPercent = null, txtPVal = null;
@@ -1734,4 +1837,8 @@ public class QRFrame extends JDialog implements WindowListener {
 	private String rScriptFile="";
 	private String projDirName=null; // CAS316
 	private boolean hasGO=false;
+	
+	private boolean hasGOpval=false;
+	private TreeMap <String, Boolean> deGoColMap = new TreeMap <String, Boolean> ();
+	private Vector <String> orderedDE = new Vector <String> ();  
 }

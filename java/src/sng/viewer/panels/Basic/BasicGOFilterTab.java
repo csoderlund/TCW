@@ -454,6 +454,21 @@ public class BasicGOFilterTab extends Tab {
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error export table", null);}
 			}
 		}));
+		tableExport.add(new JMenuItem(new AbstractAction("Table columns with -log10(Pval)") {
+			private static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					btnTableExport.setEnabled(false);
+					enabledFunctions(false);
+					
+					goTablePanel.tableExport(btnTableExport, 5); // CAS326 new
+					
+					enabledFunctions(true);
+					btnTableExport.setEnabled(true);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error export table");
+				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error export table", null);}
+			}
+		}));
 		tableExport.add(new JMenuItem(new AbstractAction("GO IDs only") {
 			private static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent e) {
@@ -1530,7 +1545,8 @@ public class BasicGOFilterTab extends Tab {
 				String de = pvalColumnNames.get(i);
 				String deTabCol = Globals.PVALUE + de; 
 				double cutoff = 0.05;
-				if (goPvalMap.containsKey(deTabCol)) cutoff = goPvalMap.get(deTabCol); // CAS322 was de
+				if (goPvalMapWithP.containsKey(deTabCol)) 
+					 cutoff = goPvalMapWithP.get(deTabCol); // CAS322 was de
 				else Out.PrtWarn(de + " does not have a stored cutoff, use default 0.05");
 				
 				if (!clause.equals("")) clause += deOp;
@@ -1557,12 +1573,12 @@ public class BasicGOFilterTab extends Tab {
 			MAX_LEVEL = mDB.executeCount("select max(level) from go_info");
 			mDB.close();
 			
-			goPvalMap =   theParentFrame.getMetaData().getGoPvalMap();
-			pvalColumnNames = new Vector <String> ();
-			for (String c : goPvalMap.keySet()) {
-				if (c!=null && c.length()>3)
-					pvalColumnNames.add(c.substring(2)); // Remove P_
-			}
+			goPvalMapWithP =   theParentFrame.getMetaData().getGoPvalPcolMap();
+			
+			String [] cols = theParentFrame.getMetaData().getGoPvalCols();
+			pvalColumnNames = new Vector<String>();
+			for (int i = 0; i < cols.length; i++)
+	            pvalColumnNames.addElement(cols[i]);
 		}
 		catch(Exception e) {
 			JOptionPane.showMessageDialog(null, "Query failed ");
@@ -1864,7 +1880,7 @@ public class BasicGOFilterTab extends Tab {
 	private String [] theTermTypes = null;
 	private String currentGO = null; 
 	private BasicGOLoadFromDB loadObj=null;
-	private TreeMap <String, Double> goPvalMap = null;
+	private TreeMap <String, Double> goPvalMapWithP = null;
 	private Vector<String> pvalColumnNames = null;   // dePvalMap.keySet - P_
 	
 	boolean singleMode = false;

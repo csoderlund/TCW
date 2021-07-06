@@ -10,8 +10,64 @@
 <h3>TCW Version 3.2</h3>
 Release v3.1.8 converted from using the GO file <tt>go_&lt;date&gt;-termdb-tables.tar.gz</tt> to the GO file <tt>go-basic.obo</tt>, 
 which is used to build the <tt>GOdb</tt>. This ended up to be a pretty big changed,
-hence, this release date is <u>v3.2</u> to indicate the new GO source.
+hence, this release version is <u>v3.2</u> to indicate the new GO source.
 
+<h4>v3.2.6  6-July-21</h4>
+There is a small schema update (dbVer 5.9) for <ttp>singleTCW</ttp>; the first time a sTCWdb is accessed, it will be updated.
+<p>
+<ttp>Dynamic Programming</ttp> - used by both singleTCW and multiTCW
+<ul>
+<li>The Gap Open parameter has been changed from 4 to 7, which reduces gaps but increases mismatches.
+</ul>
+
+<ttp>runMultiTCW</ttp>
+<ul>
+<li>Multi Align: Use built-in DP to create Multi-alignment if the cluster is size 2; this greatly speeds up 
+this step.
+<li><font color=blue>New</font> Remove...: Add <tt>Remove clusters from database</tt>.
+<li>BUG FIX - Remove cluster: If a cluster set was removed after Multi Stats was run, then new clusters added, it did not work.
+</ul>
+
+<ttp>runDE</ttp>
+<ul>
+<li>goSeq: <ttp>runDE</ttp> has the option to run this script on data written to R by <ttp>runDE</ttp>. Sometimes,
+its not clear why there is more or less enrichment p-values &lt; 0.05; <font color=blue>New</font> a summary of statistics is written 
+to help give some indication.
+<li><font color=blue>New</font> Remove: The GO enrichment columns can be removed.
+<li><font color=blue>New</font> The output to the terminal is appended to the file <ttx>projects/RunDE/&lt;dbName&gt;.log</ttx>.
+<li>DE for All Pairs: This option will not overwrite existing columns of the same name; the other three DE options
+ask the user if they want to over-write an existing column.
+<li>GO Enrichment: If executed on "All DE p-values", it will not overwrite an existing column. If executed
+on a selected DE p-value, it will overwrite an existing column.
+<li>The DE and GO p-value columns will be displayed in <ttp>viewSingleTCW</ttp> in the order that
+the DE p-value columns are created (only guaranteed if created with v3.2.6 or later).
+<li>The online <a href=stcw/DiffExp.html>DE User Manual</a> was significantly updated.
+</ul>
+
+<ttp>runSingleTCW</ttp> - <b>Overview</b>
+<ul>
+<li>AnnoDB: Stores annoDB stats so that it does not keep recomputing every time there is a change.
+<li>ORF Finder: Slight changes in <tt>Overview</tt> statistics, the <tt>anno.log</tt> stats removed, and the only Markov
+remark assigned to a sequence is if its not the best over all 6-frame ORFs.
+<li>GO: Save the number of sequences that have a hit with the GO directly assigned.
+</ul>
+
+<ttp>viewSingleTCW</ttp>
+<ul>
+<li>Basic GO: 
+<ul>
+<li><font color=blue>New</font> Export option to output p-value columns as -log10(p-value).
+<li><font color=blue>New</font> Column #Assign, i.e. number of sequences with hits that directly have the GO assigned.
+This is useless for any kind of analysis, but is good for providing intuition and understanding of the
+complex Hit-Seq-GO assigned-inherited relations.
+</ul>
+<li>Pair alignment: The bit score was added to the header.
+<li>Pair text alignment: Local and Affine Gap - changed from Blosum50 to Blosum62, which is
+what the semi-global (default) algorithm uses.
+<li>BUG FIX - Basic Sequence: If the database was built using the original sequence names, the
+Search did not work.
+</ul>
+<hr>
 <h4>v3.2.5  4-June-21</h4>
 This release make fixes and small changes to <ttp>runMultiTCW</ttp>.
 <ul>
@@ -44,7 +100,7 @@ A method was added for a project with non-default parameters, exit <ttp>runMulti
 <li>Added a <ttx>projcmp/ex</ttx> directory with the results of running <ttp>OrthoMCL</ttp> within
 TCW on the three 'ex' demos; this can be added as an "User Defined" method.
 </ul>
-
+<hr>
 <h4>v3.2.4  16-May-21</h4>
 This release has improvements to <ttp>viewSingleTCW</ttp> for exploring GOs. 
 <ul>
@@ -66,6 +122,7 @@ This release has improvements to <ttp>viewSingleTCW</ttp> for exploring GOs.
 	<li>A <b>Set Defaults</b> button returns all parameters to their defaults.
 	</ul>
 </ul>
+<hr>
 <h4>v3.2.3  9-May-21</h4>
 Removed two small features in order to fix two display bugs introduced in the last release:
 <ol>
@@ -90,6 +147,7 @@ options.
 		a 'Yes' that it has EvCs in the category.
 	</ul>
 </ul>
+<hr>
 <h4>v3.2.2  4-May-21</h4>
 <ul>
 <li>Terminology changes: 
@@ -127,7 +185,7 @@ options.
 	<li>All Exports files have been rechecked - no problems found.
 	</ul>
 </ul>
-
+<hr>
 <h4>v3.2.1  19-Apr-21</h4>
 <i>Update existing sTCW databases for this release</i>: There is a small sTCWdb schema change, which will be 
 updated the first time you access the database.
@@ -147,6 +205,8 @@ in the documentation, and now the user can alter the <tt>goSeq.R</tt> script to 
 This required changes in Schema, MetaData, Overview, runDE.QRprocess, annotator.DoGO
 </ul>
 </ul>
+
+<hr>
 <h4>v3.2.0  29-Mar-21</h4>
 
 <p><i>Existing GOdb and sTCWdb</i>: 
@@ -184,7 +244,8 @@ is removed, e.g. "<tt>2.4.1.- {ECO:0000256|RuleBase:RU362057}</tt>" is
 </ul>
 <li>Updated the <a href="stcw/AnnoDBs.html#obo" class=ext target="_blank">runAS</a> documentation to describe parsing the OBO file.
 </ul>
-
+<hr>
+<hr>
 <h3>TCW Version 3.1</h3>
 <h4>v3.1.9  25-Mar-21</h4>
 This release fixes a few tiny bugs created by the last release.
@@ -221,7 +282,7 @@ part_of         GO:0042273      bio     ribosomal large subunit biogenesis
 <li>A new GO Help page, see <a href="./tour/viewSingle/goHelp/go794.html" a class=ext target="_blank">GO:0000794</a>
 </ul>
 </ul>
-
+<hr>
 <h4>v3.1.8  19-Mar-21</h4>
 <ul>
 <li><ttp>runAS</ttp> - building the <tt>GOdb</tt> mysql database of GOs and UniProts.
@@ -263,7 +324,7 @@ part_of         GO:0042273      bio     ribosomal large subunit biogenesis
 	
 	</ul>
 </ul>
-
+<hr>
 <h4>v3.1.7  21-Feb-21</h4>
 Update existing sTCW databases for this release: it is a good idea to reload the hits
 to make the database consistent with the interface (e.g. Best Bitscore has replace Best Eval).
@@ -313,7 +374,7 @@ as this project has examples of most input files.
 of a NCBI RNA file for use with TCW.
 </ul>
 </ul>
-
+<hr>
 <h4>v3.1.6  11-Feb-21</h4>
 
 <ul>
@@ -338,7 +399,7 @@ the previous page were displayed.
 exception of the <ttp>runAS</ttp> and sTCW "Count file generator".
 </ul>
 </ul>
-
+<hr>
 <h4>v3.1.5  28-Jan-21</h4>
 <ul>
 <li>Compressed files allowed (i.e. suffix .gz)
@@ -359,7 +420,7 @@ The accepted suffixes are "fa","fasta","fna", "ffn", "faa", "frn","fa.gz","fasta
 the ".cfg" suffix, which works for the <ttx>AnnoDB_UniProt_&lt;date&gt;.cfg</ttx> and <ttx>sTCW.cfg</ttx> files.
 </ol>
 </ul>
-
+<hr>
 <h4>v3.1.4  20-Jan-21</h4>
 This release deals mainly with the singleTCW "Similar Pairs" option and updating with the latest DIAMOND.
 <p>Changes that will effect existing sTCWdbs: 
@@ -441,7 +502,7 @@ result in the incorrect frame for a protein hit.
 </ul>
 </ul>
 
-
+<hr>
 <h4>v3.1.3  30-Dec-20</h4>
 This release continues to improve on the multiTCW MSA scores and viewing alignments.
 <ul>
@@ -521,6 +582,8 @@ A few confusing aspects of the interface were fixed, mainly dealing with paramet
 </ul>
 
 </ul>
+
+<hr>
 <h4>v3.1.2  4-Dec-20</h4>
 This release concentrates on improving the multiTCW MSA scores and viewing alignments.
 <ul>
@@ -576,6 +639,7 @@ For developers:
 The alignment classes are now in a new seq.align package. The SumStats method is renamed to PairSumStats.
 A <ttx>./runMultiTCW -x</ttx> will remove clusters before re-scoring clusters. 
 
+<hr>
 <h4>v3.1.1  10-Nov-20</h4>
 It is often easier to use the TCW generated sequence names (e.g. Os_00001) than the sequence names supplied
 in the file (e.g. NM_001048268.2), but it is important to be able to access the original names, hence, the 
@@ -606,7 +670,7 @@ and add it to the <ttx>Copy...</ttx> drop-down.
 </ul>
 <li>Update all of Tour.
 </ul>
-
+<hr>
 <h4>v3.1.0  5-Nov-20</h4>
 
 <ul>
@@ -665,7 +729,9 @@ selected seqID in Pairs table or hitID in Hit Table.
 </ul>
 <li>Updated the Tour for <ttp>runMulti</ttp>.
 </ul>
-<h3>TCW Version 3.0</h3>
+
+<hr>
+
 <h4>v3.0.5 7-Oct-20</h4>
 <ol>
 <li><ttp>runMultiTCW</ttp>:
@@ -713,7 +779,7 @@ be changed to <ttx>Coatomer subunit zeta-2</ttx>.
 <br>Also, "View Selected Sequence" for Find Hit was using the Query, and has been changed to the Subject seqName.
 </ul>
 </ol>
-
+<hr>
 <h4>v3.0.4 4-Sept-20</h4>
 This release is  mainly some clean-up, along with the computation of TPM replacing RPKM.
 <ol>
@@ -739,7 +805,7 @@ Also, the <ttx>Basic Sequence</ttx> panel allows the longest sequence name to be
 <li>Internal clean-up to remove Java warnings 
 <li>The <ttx>/doc</ttx> has been updated.
 </ol>
-
+<hr>
 <h4>v3.0.3 16-June-20</h4>
 <ol>
 <li>Update for MySQL v8:
@@ -763,12 +829,12 @@ and <a href="./Trouble.html"  class="ext" target="_blank">Trouble Shooting</a> h
 <li>SingleTCW has a little more information on the first line of the overview.
 <li>The documentation has been updated.
 </ol>
-
+<hr>
 <h4>v3.0.2 5-May-20</h4>
 
 <p>runDE: The R-script/edgeRglm.R has been changed from importing the p-values to importing the FDR values.
 <br>Github: The /doc directory of html instructions has been added to Github.
-
+<hr>
 <h4>v3.0.1 30-Oct-19</h4>
 <ul>
 <li>SingleTCW:
@@ -782,13 +848,18 @@ and <a href="./Trouble.html"  class="ext" target="_blank">Trouble Shooting</a> h
 	<li>In viewMultiTCW, the KaKs columns and queries are only available if the data has been loaded.
 </ol>
 </ul>
+<hr>
 
+<h3>TCW Version 3.0</h3>
 <h4>v3.0 10-Aug-19</h4>
 <ol>
 	<li>With this release, the code is on github.com/csoderlund/tcw.
 	<li>There was a major internal code cleanup.
 </ol>
 
+<hr>
+<hr>
+<hr>
 <h3>Lost release notes after 1Apr19</h3>
 The release notes got lost in a corrupted backup. From 1Apr19 to 10Aug19 are lost.
 

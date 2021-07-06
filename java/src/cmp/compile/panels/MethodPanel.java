@@ -183,6 +183,7 @@ public class MethodPanel extends JPanel {
 				if(result.equals("Remove from database") || result.equals("Remove from database and table")) {
 					Out.PrtSpMsg(1, "Removing Method '" + prefixName + "' from database...");
 					removeFromDB(prefixName);
+					
 					Out.PrtSpMsg(1, "Method removed");
 					theTable.methodsInDB(true);
 				}
@@ -195,6 +196,7 @@ public class MethodPanel extends JPanel {
 		}
 		catch(Exception e) {ErrorReport.prtReport(e, "Error removing method");}
 	}
+	// Cluster removal is also in ProjectPanel
 	private void removeFromDB(String methodPrefix) {
 		try {
 			DBConn mDB = runMTCWMain.getDBConnection(theCompilePanel);
@@ -227,6 +229,7 @@ public class MethodPanel extends JPanel {
 				mDB.executeUpdate("TRUNCATE TABLE pog_method");
 				mDB.executeUpdate("TRUNCATE TABLE pog_groups");
 				mDB.executeUpdate("TRUNCATE TABLE pog_members");
+				mDB.executeUpdate("TRUNCATE TABLE pog_scores"); // CAS326 add
 				Out.PrtSpMsg(2, "Set flags to zero for all pairs...");
 				mDB.executeUpdate("update pairwise set hasGrp=0, hasBBH=0");
 			}
@@ -234,7 +237,6 @@ public class MethodPanel extends JPanel {
 				Out.PrtSpMsg(2, "Remove method...");
 				mDB.executeUpdate("DELETE FROM pog_method where PMid = " + PMid);
 				count = mDB.executeCount("SELECT MAX(PMid) FROM pog_method");
-				
 				mDB.executeUpdate("ALTER TABLE pog_method AUTO_INCREMENT = " + (count+1));
 				
 				Out.PrtSpMsg(2, "Remove cluster members...");
@@ -246,13 +248,22 @@ public class MethodPanel extends JPanel {
 				count = mDB.executeCount("SELECT MAX(MEMid) FROM pog_members");
 				mDB.executeUpdate("ALTER TABLE pog_members AUTO_INCREMENT = " + (count+1));
 				
+				Out.PrtSpMsg(2, "Remove cluster scores..."); // CAS326 add
+				mDB.openTransaction(); 
+				mDB.executeUpdate("DELETE pog_scores.* " +
+						"FROM pog_scores, pog_groups " +
+						"WHERE pog_groups.pgid=pog_scores.pgid AND pog_groups.pmid=" + PMid);
+				mDB.closeTransaction();
+				count = mDB.executeCount("SELECT MAX(PGid) FROM pog_scores");
+				mDB.executeUpdate("ALTER TABLE pog_scores AUTO_INCREMENT = " + (count+1));
+				
 				Out.PrtSpMsg(2, "Remove clusters...");
 				mDB.openTransaction(); 
 				mDB.executeUpdate("DELETE FROM pog_groups where PMid = " + PMid);
 				mDB.closeTransaction();
-				
 				count = mDB.executeCount("SELECT MAX(PGid) FROM pog_groups");
 				mDB.executeUpdate("ALTER TABLE pog_groups AUTO_INCREMENT = " + (count+1));	
+				
 				new Pairwise(theCompilePanel).fixFlagsPairwise(mDB); 
 			}
 			
@@ -260,6 +271,7 @@ public class MethodPanel extends JPanel {
 			mDB.close();
 		} catch (Exception e) {ErrorReport.die(e, "removing method");}
 	}
+	
 	/*************************************************************/
 	public void update(boolean dbExists) {
 		if (dbExists) {

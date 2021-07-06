@@ -34,13 +34,14 @@ The resulting panel will have these 3 alignments.
 <br>&nbsp;
 
 <li><u>MSAdb</u> (Cluster set of sequences only) 
-The MAFFT-AA alignment has been stored in the database, so can be displayed
-without running the program. However, this option does not produce the alignment 
-file, where the MSA... option does.
+The alignment has been stored in the database, so can be displayed
+without running the program; for a cluster of two, the alignment was computed using the dynamic programming
+algorithm (i.e. <tt>Pairwise...</tt>, <tt>AA for each pair</tt> option); for a cluster &gt; 2, MAFFTA-AA was
+computed.
 <br>&nbsp;
 
 <li><u>MSA...</u> 
-All the following provide the alignment file in the <tt>ResultAlign</tt> directory.
+All the following display the alignment and provide the alignment file in the <tt>ResultAlign</tt> directory.
 <p>
 <ul>
 <li><b>MUSCLE-AA</b>: 

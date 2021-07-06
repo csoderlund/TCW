@@ -167,7 +167,7 @@ public class CoreDB {
 	   		Schema s = new Schema(mDB);
 			if (!s.current()) s.update();
 			
-			mDB.executeUpdate("UPDATE assem_msg set pja_msg=null, meta_msg=null," +
+			mDB.executeUpdate("UPDATE assem_msg set pja_msg=null, meta_msg=null, anno_msg=null, " +
 					"spAnno=false, orf_msg=null, gc_msg=null, go_msg=null,go_slim=null");
 			
        	    mDB.executeUpdate("UPDATE contig " +

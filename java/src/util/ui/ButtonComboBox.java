@@ -1,19 +1,30 @@
 package util.ui;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.MouseInfo;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
 import java.util.Vector;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.plaf.basic.BasicArrowButton;
 
 import util.methods.Out;
 
+/*************************************************
+ * Drop-down selection with arrows on end
+ */
 public class ButtonComboBox extends JPanel {
 	private static final long serialVersionUID = -2875371221678221795L;
 
@@ -190,4 +201,89 @@ public class ButtonComboBox extends JPanel {
 	private BasicArrowButton btnIncrement = null;
 	private Dimension thePanePrefSize = null, theButtonPrefSize = null;
 	private Vector<ActionListener> theListeners = null;
+	
+	/*************************************************************************
+	 * CAS326 was in separate file, but only used by ButtonCombobox
+	 */
+	private class ButtonOptionDialog extends JDialog {
+		private static final long serialVersionUID = 8508408134439829394L;
+		
+		public ButtonOptionDialog(String [] theOptions) {
+			setModal(true);
+			setUndecorated(true);
+			JPanel mainPanel = new JPanel();
+			mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
+			
+			JPanel selectionPanel = new JPanel();
+			selectionPanel.setLayout(new BoxLayout(selectionPanel, BoxLayout.PAGE_AXIS));
+			
+			theSelections = new JButton[theOptions.length];
+			for(int x=0; x<theSelections.length; x++) {
+				theSelections[x] = new JButton(theOptions[x]);
+				final int pos = x;
+				theSelections[x].addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent arg0) {
+						strClickedItem = theSelections[pos].getText();
+						setVisible(false);
+					}
+				});
+			}
+			btnCancel = new JButton("Cancel");
+			btnCancel.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					strClickedItem = null;
+					setVisible(false);
+				}
+			});
+			btnCancel.setAlignmentX(Component.LEFT_ALIGNMENT);
+			JPanel buttonPanel = new JPanel();
+			buttonPanel.add(btnCancel);
+			
+			Dimension maxSize = btnCancel.getPreferredSize();
+			for(int x=0; x<theSelections.length; x++) {
+				maxSize.height = Math.max(maxSize.height, theSelections[x].getPreferredSize().height);
+				maxSize.width = Math.max(maxSize.width, theSelections[x].getPreferredSize().width);
+			}
+			for(int x=0; x<theSelections.length; x++) {
+				theSelections[x].setPreferredSize(maxSize);
+			}
+			
+			for(int x=0; x<theSelections.length; x++) {
+				JPanel row = new JPanel();
+				row.setLayout(new BoxLayout(row, BoxLayout.LINE_AXIS));
+				row.add(Box.createHorizontalGlue());
+				row.add(theSelections[x]);
+				row.add(Box.createHorizontalGlue());
+				selectionPanel.add(row);
+			}
+			
+			JScrollPane sPane = new JScrollPane(selectionPanel);
+			Dimension d = sPane.getPreferredSize();
+			d.height = Math.min(d.height, 100);
+			sPane.setPreferredSize(d);
+			sPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+			mainPanel.add(sPane);
+			mainPanel.add(Box.createVerticalStrut(10));
+			mainPanel.add(buttonPanel);
+			mainPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+			add(mainPanel);
+			
+			pack();
+		}
+		
+		public void windowLostFocus(WindowEvent e) {
+		    System.out.println("lost focus");
+		  }
+		
+		public String getSelection(Point center) {
+			setLocation(center);
+			setVisible(true);
+			return strClickedItem;
+		}
+		
+		private JButton [] theSelections = null;
+		private JButton btnCancel = null;
+		private String strClickedItem = "";
+	}
+
 }

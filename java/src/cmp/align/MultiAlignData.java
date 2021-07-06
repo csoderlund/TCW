@@ -7,17 +7,13 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-import java.util.Collections;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Vector;
 import java.sql.ResultSet;
 
 import cmp.database.Globals;
 import cmp.database.DBinfo;
 import cmp.compile.runMTCWMain;
-
+import util.align.Consensus;
 import util.database.DBConn;
 import util.database.Globalx;
 import util.methods.ErrorReport;
@@ -45,10 +41,9 @@ public class MultiAlignData {
 	private final String mstatxPre = "MstatX";
 	private final String consName = Globals.MSA.consName;
 	
-	/*******************************************************
-	 * Already aligned: Get the MSA from database
-	 */
+	/***************************************************************
 	// Run:  compile.MultiStats - score type can be changed in runMultiTCW
+	***********************************************************/
 	public MultiAlignData() {
 		this.isRun = true;
 		
@@ -73,7 +68,9 @@ public class MultiAlignData {
 		Out.PrtSpMsg(1,"MSA Score1 " + prt1);
 		Out.PrtSpMsg(1,"MSA Score2 " + prt2);
 	}
+	/***************************************************************
 	// View: seq.align.MultiViewPanel - get score type from DBinfo
+	 * ***********************************************************/
 	public MultiAlignData(DBinfo info) {
 		this.isRun = false;
 		if (info==null) return; // MSAdb
@@ -160,6 +157,7 @@ public class MultiAlignData {
 			ErrorReport.reportError(e, "Cannot get alignment from db " + grpID); return false;
 		}
 	}
+	
 	private boolean rcPrt(String msg) {
 		Out.PrtErr("Stored wrong: " + grpName + " " + msg);
 		return false;
@@ -180,19 +178,48 @@ public class MultiAlignData {
 	}
 	/*************************************************************************
 	 * XXX multi-alignment with scores
-	 * viewMulti: bView true - write scores to file
-	 * runMulti:  bView false - write scores to DB
+	 * viewMulti: isRun false - write scores to file
+	 * runMulti:  isRun true  - write scores to DB
 	 */
 	public int runAlignPgm(int alignPgm, boolean isAA) {
-		int rc = runAlign(alignPgm, isAA);
+		int rc = 0;
+		
+		if (isRun && nameVec.size()==2) { // CAS326 - no reason to run MAFFT for 2
+			if (!runDPalign())
+				rc = runMultiAlign(alignPgm, isAA);
+		}
+		else {
+			rc = runMultiAlign(alignPgm, isAA);
+		}
 		if (rc!=0) return rc;
 		
-		alignConsensus(isAA);
+		conObj.alignConsensus(isAA, nameVec, algnSeqVec);
 		if (isAA) scoreMSA(); 
 			
 		return 0;
 	}
-	private int runAlign(int alignPgm, boolean isAA) {
+	/*****************************************************
+	 * CAS326 - Use Pairs DP if only two
+	 */
+	private boolean runDPalign() {
+		try {	
+			PairAlignData align = new PairAlignData(origSeqVec.get(0), origSeqVec.get(1));
+			String seq1 = align.getAlignFullSeq1();
+			String seq2 = align.getAlignFullSeq2();
+			
+			if (seq1.length()==0 || seq2.length()==0) {
+				Out.PrtWarn("Could not DP align " + nameVec.get(0) + " and " + nameVec.get(1));
+				return false;
+			}
+			algnSeqVec.add(seq1);
+			algnSeqVec.add(seq2);
+			return true;
+		}
+		catch(Exception e) {
+			ErrorReport.reportError(e, "Cannot get DP alignment for " + nameVec.get(0) + " " + nameVec.get(1)); return false;
+		}
+	}
+	private int runMultiAlign(int alignPgm, boolean isAA) {
 		String cmd=""; 
 		int rc=0;
 		
@@ -239,104 +266,7 @@ public class MultiAlignData {
 		catch(Exception e) {ErrorReport.reportError(e, "Exec: " + cmd); return -1;}
 	}
 	
-	/************************************************
-	 * Compute consensus for alignment
-	 */
-	private void alignConsensus(boolean isAA) {
-		String conSeq = "";
-		
-		int seqLen = algnSeqVec.get(0).length(); //All sequences are aligned.. they are all the same length
-		
-		//Get counts of each symbol
-		Hashtable<Character, Integer> counts = new Hashtable<Character, Integer>();
-		for(int x=0; x<seqLen; x++) {
-			counts.clear();
-			for (String seq : algnSeqVec) {
-				char c= seq.charAt(x);
-				if (counts.containsKey(c)) counts.put(c, counts.get(c) + 1);
-				else counts.put(c, 1);
-			}
-			
-			//Convert counts to a ordered list
-			Vector <AlignSymbol> cList = new Vector<AlignSymbol> ();
-			for(Map.Entry<Character, Integer> val : counts.entrySet())
-				cList.add(new AlignSymbol(val.getKey(), val.getValue()));
-		
-			//Map no longer needed at this point
-			counts.clear();
-			Collections.sort(cList);
-			
-			//Test if the there is one symbol most frequent
-			if( alignTotalCount(cList) <= 1)
-				conSeq += Globals.gapCh;
-			else if(cList.size() == 1 || (cList.get(0).count>cList.get(1).count && cList.get(0).symbol!=Globals.gapCh))
-				conSeq += cList.get(0).symbol;
-			else if (cList.get(0).symbol == Globals.gapCh && (cList.size()==2 || cList.get(1).count>cList.get(2).count))
-				conSeq += cList.get(1).symbol;
-			else
-				conSeq += alignBestChar(cList, isAA);
-		}
-		nameVec.insertElementAt(consName, 0);
-		algnSeqVec.insertElementAt(conSeq, 0);
-	}
-	private Character alignBestChar(Vector<AlignSymbol> symbols, boolean isAA) {
-		//Special case: need at least 2 non-gap values to have consensus
-		if(alignTotalCount(symbols) == 1)
-			return Globals.gapCh;
-		
-		int [] relateCounts = new int[symbols.size()];
-		for(int x=0; x<relateCounts.length; x++)
-			relateCounts[x] = 0;
-		
-		//Going with the assumption that relationships are not mutually inclusive
-		for(int x=0; x<relateCounts.length; x++) {
-			for(int y=x+1; y<relateCounts.length; y++) {
-				if (isAA) {
-					if(scoreObj.isHighSub(symbols.get(x).symbol, symbols.get(y).symbol)) {
-						relateCounts[x]++;
-						relateCounts[y]++;
-					}
-				}
-				else {
-					if (symbols.get(x).symbol == symbols.get(y).symbol) {
-						relateCounts[x]++;
-						relateCounts[y]++;
-					}
-				}
-			}
-		}
-		//Find highest value
-		int maxPos = 0;
-		
-		for(int x=1; x<relateCounts.length; x++) {
-			if( (relateCounts[x]) > (relateCounts[maxPos]) )
-				maxPos = x;
-		}
-		return symbols.get(maxPos).symbol;
-	}
-	private static int alignTotalCount(Vector <AlignSymbol> cList) {
-		int retVal = 0;
-		
-		Iterator<AlignSymbol> iter = cList.iterator();
-		while(iter.hasNext()) {
-			AlignSymbol temp = iter.next();
-			if(temp.symbol != Globals.gapCh)
-				retVal += temp.count;
-		}
-		return retVal;
-	}
-	//Data structure for sorting/retrieving counts
-	private class AlignSymbol implements Comparable<AlignSymbol> {
-		public AlignSymbol(Character symbol, Integer count) {
-			this.symbol = symbol;
-			this.count = count;
-		}
-		public int compareTo(AlignSymbol arg) {
-			return -1 * count.compareTo(arg.count);
-		}
-		public Character symbol;
-		public Integer count;
-	}
+	
 	// viewMultiTCW will try to display - 
 	private void alignFailure(String msg, String name) {
 		try {
@@ -347,7 +277,7 @@ public class MultiAlignData {
 	}
 	/*********************************************************
 	// Compute MSA score
-	 * bView -  true - print to file if builtin, false - save to DB
+	 * isRun - false - print to file if builtin, true - save to DB
 	 * prtCmd - MstatX - print command
 	******************************************************/
 	private void scoreMSA() {
@@ -527,9 +457,9 @@ public class MultiAlignData {
 	
 	// holds column scores
 	private String strColScores1=null, strColScores2=null; // comma delimited list
-	
-	private ScoreAA scoreObj = new ScoreAA ();
 	private String grpName=""; // Only for loadAlignFromDB
 	
-	private boolean isRun=false;
+	private Consensus conObj = new Consensus ();
+	
+	private boolean isRun=false; // true - called from runMulti; false - called from viewMulti
 }

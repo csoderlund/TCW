@@ -28,7 +28,7 @@ public class PairStats {
 		theCompilePanel = compilePanel;
 		isKaKs = bKaKs;
 		long startTime = Out.getTime();
-		Out.PrtDateMsg("Compute DP alignment for all cluster pairs");
+		Out.PrtDateMsg("Align and score CDS/UTR for all cluster pairs");
 		
 		if (isKaKs) {
 			kaksEx = FileHelpers.getUserDir() + "/" + FileHelpers.getExtDir() + Globals.Ext.kaksExe + " ";
@@ -51,7 +51,7 @@ public class PairStats {
 			PairAlignData utr5AlnObj = new PairAlignData();
 			PairAlignData utr3AlnObj = new PairAlignData();
 			
-			for (Pair p : pairSet) {
+			for (Pair p : pairSet) { // TODO parallelize
 				curPair = p;		
 				
 				// Aligns AA and fits to CDS
@@ -84,7 +84,7 @@ public class PairStats {
 				cdsAlnObj.clear(); utr5AlnObj.clear(); utr3AlnObj.clear();
 				
 				cntAligned++;
-				if (cntAligned%100==0) {
+				if (cntAligned%1000==0) {
 					 Out.r("aligned " + cntAligned);
 					 Thread.sleep(1000);
 				}
@@ -113,8 +113,7 @@ public class PairStats {
 	
 	
 	/***************************************************************
-	 * Writes for file.
-	 * Called from Pairwise.saveStatsAndKaKsWrite
+	 * Writes for file
 	 */
 	private void kaksWrite() {
 		try {

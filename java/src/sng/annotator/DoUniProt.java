@@ -65,6 +65,9 @@ public class DoUniProt
 	 	seqMap  = seqs;
 	 	isAAstcwDB = isAA;
 	 	
+	 	init();
+		if (!pRC) return false;  
+		
 	 	// Annotated sequences are added to annoSeq set and entered into database
 	 	Step1_processAllHitFiles();
 	 	if (!pRC) return false;  
@@ -74,24 +77,16 @@ public class DoUniProt
 	 	if (!pRC) return false;  
 	 	
 	 	// final things
-	 	if (annoSeqSet.size() > 0) {
-	 		Step3_saveSpeciesSQLTable();
-	 	}
+	 	Step3_saveSpeciesSQLTable();
 	 	if (!pRC) return false;  
 	 	
 	 	Out.Print("");
-	 	if (nTotalBadHits > 0) 
-	 		Out.PrtSpMsg(2, nTotalBadHits + " hits ignored -- see " + badHitFile);
-	 	if (notFoundSeq.size()>0)
-	 		Out.PrtSpMsg(2, notFoundSeq.size() + " not found in database  -- see file " + badHitFile);
-	 	if (nSeqTooLong>0)
-	 		Out.PrtSpMsg(2, nSeqTooLong + " sequence > " + 
-	 				maxHitSeq + ": truncated -- see file " + badHitFile);
-	 	if (LineParser.badSpeciesLen>0)
-	 		Out.PrtSpMsg(2, LineParser.badSpeciesLen + " hits with species length> " + 
+	 	Out.PrtSpCntMsgZero(1, nTotalBadHits, "hits ignored -- see " + badHitFile);
+	 	Out.PrtSpCntMsgZero(1, notFoundSeq.size(), "not found in database  -- see file " + badHitFile);
+	 	Out.PrtSpCntMsgZero(1, nSeqTooLong, "sequence > " + maxHitSeq + ": truncated -- see file " + badHitFile);
+	 	Out.PrtSpCntMsgZero(1, LineParser.badSpeciesLen, "hits with species length> " + 
 	 				LineParser.maxSpeciesLen + ": truncated -- see file " + badHitFile);
-	 	if (LineParser.badDescriptLen>0)
-	 		Out.PrtSpMsg(2, LineParser.badDescriptLen + " hits with description length> " + 
+	 	Out.PrtSpCntMsgZero(1, LineParser.badDescriptLen, "hits with description length> " + 
 	 				LineParser.maxDescriptLen + ": truncated -- see file " + badHitFile);
 	 	
 	 	Out.PrtSpMsgTime(1, 
@@ -102,7 +97,16 @@ public class DoUniProt
 	 	
 	 	return pRC; 
 	}
-	
+	private void init() { // CAS326
+		try {
+			if (mDB.tableColumnExists("assem_msg", "anno_msg"))
+		 		mDB.executeUpdate("update assem_msg set anno_msg=''");
+		}
+		catch (Exception e) {
+			pRC = false;
+			ErrorReport.prtReport(e, "Processing annoDB hit files");
+		}
+	}
 	/**********************************************************
 	 * Read all files, add hits, annoDB and unique hit information to db
 	 */
@@ -889,6 +893,8 @@ public class DoUniProt
      */
     private boolean Step3_saveSpeciesSQLTable() {	
 		try {
+			if (annoSeqSet.size() == 0) return true;
+			
 			System.err.println();
 	 		Out.PrtSpMsg(2, "Creating species table");
 			long t = Out.getTime();

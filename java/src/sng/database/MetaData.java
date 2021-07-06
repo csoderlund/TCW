@@ -266,20 +266,29 @@ public class MetaData {
 	}
 	 /*************************************************
 	 * used by BasicGOQueryTab upSeq, dnSeq; and for columns by BasicGOFilter - can change to read on startup
+	 * RunDE and Overview query libraryDE in their own method
 	 *************************************************/
 	 public TreeMap <String, Double> loadGoPvalMap(DBConn mDB) { // called on schema.undateTo57
 		 if (goPvalMap!=null) return goPvalMap;
 		 goPvalMap = new TreeMap <String, Double> ();
 		 
+		 Vector <String> goCol = new Vector <String> ();
 		 try {
 			if (mDB.tableColumnExists("libraryDE", "goCutoff")) { // CAS321 (17-Apr-21)
 				ResultSet rs = mDB.executeQuery("select pCol, goCutoff from libraryDE");
 				while (rs.next()) {
 					double cutoff =  rs.getDouble(2);
-					if (cutoff>0) goPvalMap.put(rs.getString(1), cutoff);
+					if (cutoff>0) {
+						goPvalMap.put(rs.getString(1), cutoff);
+						goCol.add((rs.getString(1)));
+					}
 				}
-				if (goPvalMap.size()>0) return goPvalMap;
+				goPvalCols = new String[goCol.size()]; // CAS326
+				int i=0;
+				for (String c : goCol) goPvalCols[i++] = c.substring(2);
+ 				if (goPvalMap.size()>0) return goPvalMap;
 			}
+			
 		} 
 		catch (Exception e) {ErrorReport.reportError(e, "Error: reading database for GO DE Pvals");}
 		return goPvalMap; // CAS322 was return null
@@ -413,7 +422,8 @@ public class MetaData {
 	 public String [] getLibTitles() { return expLibTitles; }
 	 public boolean hasDE() { return bHasDE;}
 	 public boolean hasExpLevels() { return bHasExpLevels; }
-	 public TreeMap <String, Double> getGoPvalMap() {return  goPvalMap;}
+	 public String [] getGoPvalCols() { return goPvalCols;} // CAS326 no P__
+	 public TreeMap <String, Double> getGoPvalPcolMap() {return  goPvalMap;} // has P_
 	
 	 public String [] getAnnoDBs() { return annoDBs;}
 	 public String [] getTypeDBs() { return typeDBs;}
@@ -453,6 +463,7 @@ public class MetaData {
 	 private String [] deNames = null;
 	 private String [] deTitles = null;
 	 private TreeMap <String, Double> goPvalMap = null;
+	 private String [] goPvalCols = null;
 	
 	 private String [] annoDBs = null, typeDBs = null, taxoDBs=null;
 	 private Vector <String> species = null;

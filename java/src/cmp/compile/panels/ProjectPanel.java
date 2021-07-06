@@ -314,32 +314,37 @@ public class ProjectPanel extends JPanel {
 	private class RemoveType extends JDialog {
 		private static final long serialVersionUID = 1L;
 		public static final int OK = 1;
-	    	public static final int CANCEL = 2;
-	    	private static final String blastDir = Globals.Search.BLASTDIR;
-	    	private static final String kaksDir = Globals.KaKsDIR;
-	    	private static final String methodDir = Globals.Methods.METHODDIR;
-	    	private static final String statsDir = Globals.StatsDIR;
-	    	   
-        	public RemoveType() {
-        		setModal(true);
-        		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        		setTitle("Remove.... ");
+    	public static final int CANCEL = 2;
+    	private static final String blastDir = Globals.Search.BLASTDIR;
+    	private static final String kaksDir = Globals.KaKsDIR;
+    	private static final String methodDir = Globals.Methods.METHODDIR;
+    	private static final String statsDir = Globals.StatsDIR;
+    	   
+    	public RemoveType() {
+    		setModal(true);
+    		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+    		setTitle("Remove.... ");
+		
+    		// Database
+    		boolean bDB = theCompilePanel.dbIsExist();
+    		DBinfo info = theCompilePanel.getDBInfo();
+    		boolean bPairs = (info!=null) ? (info.getCntPair()>0) : false;
     		
-        		// Database
-        		boolean bDB = theCompilePanel.dbIsExist();
-        		DBinfo info = theCompilePanel.getDBInfo();
-        		boolean bPairs = (info!=null) ? (info.getCntPair()>0) : false;
-        		
-        		JPanel selectPanel = Static.createPagePanel();
-        		btnPair = Static.createCheckBox("Pairs and clusters from database", false, bPairs);
-        		selectPanel.add(btnPair);
-	    		selectPanel.add(Box.createVerticalStrut(5));
-	    		
-	    		btnDB = Static.createCheckBox("mTCW database", false, bDB);
+    		JPanel selectPanel = Static.createPagePanel();
+    		
+    		btnClust = Static.createCheckBox("Clusters from database", false, bPairs);
+    		selectPanel.add(btnClust);
+    		selectPanel.add(Box.createVerticalStrut(5));
+    		
+    		btnPair = Static.createCheckBox("Clusters and Pairs from database", false, bPairs);
+    		selectPanel.add(btnPair);
+    		selectPanel.add(Box.createVerticalStrut(5));
+    		
+    		btnDB = Static.createCheckBox("mTCW database", false, bDB);
 	        selectPanel.add(btnDB);
 	        selectPanel.add(Box.createVerticalStrut(5));
 	        selectPanel.add(new JSeparator());
-	         		
+         		
 	        // Files 
 	        boolean b1=true, b2=true;
 	        try {
@@ -356,7 +361,7 @@ public class ProjectPanel extends JPanel {
 	        }
 	        catch (Exception e) {ErrorReport.reportError(e, "Project: could not determine if project directories exist");}
 	        
-    		btnPairDir = Static.createCheckBox("Pair and method files from disk (KaKs, Stats, Methods)", false, b2);
+    		btnPairDir = Static.createCheckBox("Pair and cluster files from disk (KaKs, Stats, Methods)", false, b2);
     		selectPanel.add(btnPairDir);
 	        selectPanel.add(Box.createVerticalStrut(5));
 	               
@@ -429,6 +434,29 @@ public class ProjectPanel extends JPanel {
     		catch (Exception e){ErrorReport.reportError(e, "Cannot delete database " + getDBName());}
     	}
       
+    	public void removeMethods() { // CAS326 added
+    		try {
+    			DBinfo info = theCompilePanel.getDBInfo();
+    			if (info==null) {
+    				Out.PrtWarn("Database does not exist");
+    				return;
+    			}
+    			boolean ret = UserPrompt.showConfirm("Remove...", 
+    					"Remove all clusters from database");
+    			if (!ret) return;
+    			
+    			Out.PrtSpMsg(0, "Remove clusters from database");
+    			DBConn mDB = runMTCWMain.hosts.getDBConn(getDBName());
+    			
+    			removeClust(mDB, info.getMethodPrefix());
+    			
+    			mDB.executeUpdate("update pairwise set hasGrp=0, hasBBH=0");
+    			
+    			Out.PrtSpMsg(0, "Finish cluster removal");
+    			theCompilePanel.updateAll(); 
+    		}
+    		catch (Exception e){ErrorReport.reportError(e, "Cannot remove clusters " + getDBName());}
+    	}
     	public void removePairsAndMethods() {
     		try {
     			DBinfo info = theCompilePanel.getDBInfo();
@@ -437,36 +465,50 @@ public class ProjectPanel extends JPanel {
     				return;
     			}
     			boolean ret = UserPrompt.showConfirm("Remove...", 
-    					"Remove pairs and methods from database");
+    					"Remove clusters and pairs from database");
     			if (!ret) return;
     			
-    			Out.PrtSpMsg(0,"Remove pairs and cluster from database ");
+    			Out.PrtSpMsg(0,"Remove clusters and pairs from database ");
     			DBConn mDB = runMTCWMain.hosts.getDBConn(getDBName());
-    			String [] prefixes = info.getMethodPrefix(); // get prefixes before truncate pog_method
     			
-    			Out.PrtSpMsg(1, "Remove clusters and pairs....");
-    			// clusters
-    			mDB.executeUpdate("TRUNCATE TABLE pog_method");
-    			mDB.executeUpdate("TRUNCATE TABLE pog_groups");
-    			mDB.executeUpdate("TRUNCATE TABLE pog_members");
-    			mDB.executeUpdate("TRUNCATE TABLE pog_scores");
+    			// Clusters
+    			Out.PrtSpMsg(1, "Remove clusters....");
+    			removeClust(mDB, info.getMethodPrefix());
+    			
     			// Pairs
+    			Out.PrtSpMsg(1, "Remove pairs....");
     			mDB.executeUpdate("TRUNCATE TABLE pairwise"); 
     			mDB.executeUpdate("TRUNCATE TABLE pairMap");
-    			
-    			Out.PrtSpMsg(1, "Remove columns....");
-    			for (String methodPrefix: prefixes) { // truncate pairwise before remove prefix
-    				mDB.tableCheckDropColumn("pairwise", methodPrefix);
-    				mDB.tableCheckDropColumn("unitrans", methodPrefix);
-    			}
-    			Out.PrtSpMsg(1, "Remove from sequence table ....");
     			mDB.executeUpdate("update unitrans set nPairs=0");  
     			
     			new Summary(mDB).removeSummary();      
     			mDB.executeUpdate("update info set kaksInfo='', pairInfo='', aaInfo='', ntInfo='', "
     					+ "hasMA=0, hasPCC=0"); // CAS310 add these two
-    			Out.PrtSpMsg(0, "Finish pairs and method removal");
+    			
+    			Out.PrtSpMsg(0, "Finish clusters and pairs removal");
     			theCompilePanel.updateAll(); 
+    		}
+    		catch(Exception e) {ErrorReport.prtReport(e, "Error removing pairs and methods from database");}
+    	}
+    	// Cluster removal is also in MethodPanel.removeFromDB
+    	private void removeClust(DBConn mDB, String [] prefixes) {
+    		try {
+    			mDB.executeUpdate("TRUNCATE TABLE pog_method");
+    			mDB.executeUpdate("TRUNCATE TABLE pog_groups");
+    			mDB.executeUpdate("TRUNCATE TABLE pog_members");
+    			mDB.executeUpdate("TRUNCATE TABLE pog_scores");
+    			
+    			int nSeq = mDB.executeCount("select count(*) from unitrans");
+    			Out.PrtSpMsg(1, "Remove method columns from " + nSeq + " sequence table rows...");
+    			for (String methodPrefix: prefixes) { 
+    				mDB.tableCheckDropColumn("unitrans", methodPrefix);
+    			}
+    			
+    			int nPair = mDB.executeCount("select count(*) from pairwise");
+    			Out.PrtSpMsg(1, "Remove method columns from " + nPair + " pair table rows...");
+    			for (String methodPrefix: prefixes) { // truncate pairwise before remove prefix
+    				mDB.tableCheckDropColumn("pairwise", methodPrefix);
+    			}
     		}
     		catch(Exception e) {ErrorReport.prtReport(e, "Error removing pairs and methods from database");}
     	}
@@ -494,8 +536,7 @@ public class ProjectPanel extends JPanel {
     		catch(Exception e) {ErrorReport.prtReport(e, "Error removing directories");}
     	}
     	private void removeBlast() {
-    		try
-    		{
+    		try {
     			boolean ret = UserPrompt.showConfirm("Remove...", 
     					"Remove hit files\n");
     			if (!ret) return;
@@ -539,6 +580,9 @@ public class ProjectPanel extends JPanel {
     			btnPairDir.setEnabled(false);
     			btnBlast.setEnabled(false);
     		}
+    		if (btnClust.isSelected()) {
+    			removeMethods();
+    		}
     		if (btnPair.isSelected()) {
     			removePairsAndMethods();
     		}
@@ -549,7 +593,7 @@ public class ProjectPanel extends JPanel {
     			removeBlast();
     		}		
     	}
-    	JCheckBox btnPair = null, btnPairDir = null;
+    	JCheckBox btnClust = null, btnPair = null, btnPairDir = null;
     	JCheckBox btnDB = null, btnBlast = null, btnAll = null;
     	JButton btnOK = null, btnCancel = null;
     	int nMode = -1;

@@ -560,16 +560,16 @@ public class Pairwise {
 	 */
 	public void fixFlagsPairwise(DBConn mDB) {
 		try {
-		// create methodsBBHMap -- method name if whether it is BBH
+		// create methodsMap -- method name and whether it is BBH
 			//  the removed method has been removed
-			HashMap <String, Boolean> methodsBBHMap = new HashMap<String, Boolean> ();
+			HashMap <String, Boolean> methodsMap = new HashMap<String, Boolean> ();
 			ResultSet rs = mDB.executeQuery("select prefix, PMtype from pog_method");
 			while (rs.next()) {
 				String type = rs.getString(2);
 				boolean b = (type.equals(Globals.Methods.BestRecip.TYPE_NAME)) ? true : false;
-				methodsBBHMap.put(rs.getString(1), b);
+				methodsMap.put(rs.getString(1), b);
 			}
-			if (methodsBBHMap.size()==0) {
+			if (methodsMap.size()==0) {
 				Out.PrtWarn("All methods have been removed"); // should not happen
 				return;
 			}
@@ -579,18 +579,18 @@ public class Pairwise {
 			HashMap <Integer, Boolean> pairGrpMap  = new HashMap <Integer, Boolean> ();
 					
 			String sql ="select PAIRid ";
-			for (String m : methodsBBHMap.keySet()) sql += "," + m;
+			for (String m : methodsMap.keySet()) sql += "," + m;
 			sql += " from pairwise where hasGrp=1";
 			rs = mDB.executeQuery(sql);
 			
 			while (rs.next()) {
 				int pairid = rs.getInt(1);
 				
-				for (String m : methodsBBHMap.keySet()) {
+				for (String m : methodsMap.keySet()) {
 					String grpName = rs.getString(m);
 					if (grpName==null || grpName.equals("")) continue;
 					
-					boolean isBBH = methodsBBHMap.get(m);
+					boolean isBBH = methodsMap.get(m);
 					pairGrpMap.put(pairid, isBBH);
 				}
 				cnt++;

@@ -81,6 +81,7 @@ public class ErrorReport {
 
 		if(debugInfo != null) {
 			pWriter.println("Error: " + debugInfo);
+			System.err.print("                                                     \r"); // CAS326
 			System.err.println("Error: " + debugInfo);
 			System.err.println("See " + strFileName);
 		}

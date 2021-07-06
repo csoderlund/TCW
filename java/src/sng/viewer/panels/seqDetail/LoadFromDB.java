@@ -153,7 +153,7 @@ public class LoadFromDB {
 	public BlastHitData loadBlastHitData(String seqID, String hitID) {
 		try {
 			 String strQ = 	"SELECT t.ctg_start, t.ctg_end, t.isProtein, " +
-			 	"t.e_value, t.percent_id, t.alignment_len" +	
+			 	"t.e_value, t.percent_id, t.alignment_len, t.bit_score" +	
 		         " FROM  pja_db_unitrans_hits as t " +
 		         " WHERE t.uniprot_id = '" + hitID + "'" +
 		         " AND   t.contigid = '" + seqID + "'";
@@ -167,11 +167,12 @@ public class LoadFromDB {
 			double eval = rs.getDouble(4);
 			int pid = rs.getInt(5);
 			int nAlign = rs.getInt(6); 
+			double bit = rs.getDouble(7); // CAS400
 			
 			// Msg is shown in the header line of AnnoDB Hits (should be same as SeqDetailPanel.getHitMsg
 			String e = "0.0";
 			if (eval!=0) e =  String.format("%.0E", eval); 
-			String msg = String.format("Hit: %s, %d%s, Align %d", e, pid, "%", nAlign);
+			String msg = String.format("Hit: %d%s, %s, %.1f, Align %d", pid, "%", e, bit, nAlign);
 			
 			BlastHitData blastData = new BlastHitData(hitID, isP, start, end, msg);
 			

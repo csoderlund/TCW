@@ -84,12 +84,13 @@ public class BasicGOTablePanel {
 	private final String EVALUE = "Best E-val";
 	
 	private  final Class<?> [] COL_TYPES = 
-	 {Integer.class,  String.class, Integer.class, String.class, Double.class, Integer.class }; 
+	 {Integer.class,  String.class, Integer.class, String.class, Double.class, Integer.class, Integer.class }; 
 	private  final String [] COL_MYSQL = 
-	 {"go_info.gonum","go_info.term_type", "go_info.level","go_info.descr","go_info.bestEval", "go_info.nUnitranHit" };
+	 {"go_info.gonum","go_info.term_type", "go_info.level","go_info.descr","go_info.bestEval", 
+			 "go_info.nUnitranHit", "go_info.nDirectHit" };
 	
 	private final String [] COL_NAMES = 
-		 {Globalx.goID, Globalx.goOnt, "Level",  Globalx.goTerm, EVALUE , "#Seqs"};
+		 {Globalx.goID, Globalx.goOnt, "Level",  Globalx.goTerm, EVALUE , "#Seqs", "#Assign"};
 	private String []      evColNames = null;
 	private String []	 pvalColNames = null; // No P_	// CAS324 changed from Vector
 	private int endEvC=0, endStatic=0;
@@ -100,6 +101,7 @@ public class BasicGOTablePanel {
 	public BasicGOTablePanel(STCWFrame f, BasicGOFilterTab g) {
 		theMainFrame=f;
 		theGOQuery=g;
+		projName = theMainFrame.getdbID();
 		
 		theResults = 	new Vector<Object []> ();
 		
@@ -338,11 +340,7 @@ public class BasicGOTablePanel {
 		/************************************************/
 		private void initColumns() {
 			try {
-				TreeMap <String, Double> goPvalMap = theMainFrame.getMetaData().getGoPvalMap();
-				pvalColNames = new String [goPvalMap.size()]; // may be zero length
-				int x=0;
-				for (String n : goPvalMap.keySet()) 
-					pvalColNames[x++] = (n.substring(2)); // CAS322 was reading db for it
+				pvalColNames = theMainFrame.getMetaData().getGoPvalCols(); // CAS326 was using TreeMap
 				
 				// for evidence codes - no EV__
 				evColNames = theMainFrame.getMetaData().getEvClist();
@@ -649,7 +647,7 @@ public class BasicGOTablePanel {
 				    	if ( bBlueBG ) 	c.setBackground( Globalx.altRowColor );
 						else            c.setBackground( null );
 				    }
-				    /* CAS322 added, CAS324 fixed so works with moving columns */
+				    /* XXX CAS322 added, CAS324 fixed so works with moving columns */
 				    if (DisplayDecimalTab.isHighPval()) {
 				    	String displayCol = theTable.getColumnName(column);
 				    	for (String cn : pvalColNames) {
@@ -1148,18 +1146,23 @@ public class BasicGOTablePanel {
 			if (type==0) {
 				msg="Append";
 				title=" columns of table ";
-				file = filePrefix+"Columns" + FileC.TSV_SUFFIX;
+				file = filePrefix+"Columns_" + projName + FileC.TSV_SUFFIX;
+			}
+			else if (type==5) {
+				msg="Append";
+				title=" columns of table with log10(Pval)";
+				file = filePrefix+"ColPval_"+ projName  + FileC.TSV_SUFFIX;
 			}
 			else if (type==1){
 				msg="Append";
 				title= " SeqIDs with GOs ";
-				file = filePrefix+"BySeq"+ FileC.TSV_SUFFIX;
+				file = filePrefix+"BySeq_"+ projName + FileC.TSV_SUFFIX;
 			}
 			else if (type==2) {
 				wtype=FileC.wMERGE;
 				msg="Merge";
 				title = " #Seqs Column ";
-				file = filePrefix+"NSeqs"+ FileC.TSV_SUFFIX;
+				file = filePrefix+"NSeqs_" + projName  + FileC.TSV_SUFFIX;
 			}
 			else return false;
 			
@@ -1172,14 +1175,16 @@ public class BasicGOTablePanel {
 			if (bAppend) Out.PrtSpMsg(0, msg + title +  out.getAbsolutePath());
 			else         Out.PrtSpMsg(0, "Write " + title +  out.getAbsolutePath());
 			
-			if (type==0) 		return exportTableColumns(bAppend, out);
+			if (type==0) 		return exportTableColumns(bAppend, out, false);
+			else if (type==5) 	return exportTableColumns(bAppend, out, true);
 			else if (type==1)	return exportSeqIDwithGOs(bAppend, out);
 			else if (type==2)	return exportDomainMerge(bAppend, out); 
 			else return false;
 		}
 		
 		// CAS324 changed theTableModel to theTable - outputs the table order
-		private boolean exportTableColumns(boolean bAppend, File out) {
+		// CAS326 add bLog
+		private boolean exportTableColumns(boolean bAppend, File out, boolean bLog) {
 			try {
 				PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(out, bAppend)));
 				headerLine = String.format("### %s %d GOs   %s   %s", 
@@ -1192,32 +1197,47 @@ public class BasicGOTablePanel {
 				int rowCnt = getRowCount();
 				Out.prtSp(1, "Processing " + rowCnt + " rows and " + colCnt + " columns...");
 				
-				for(int x=0; x<theTable.getColumnCount()-1; x++) {
+				boolean [] isDE = new boolean [theTable.getColumnCount()];
+				for(int x=0; x<theTable.getColumnCount(); x++) {
 					String colName = theTable.getColumnName(x).replaceAll("\\s", "-"); 
 					line.append(colName);
-					line.append(Globalx.TSV_DELIM);
+					if (x!=theTable.getColumnCount()-1) 
+						line.append(Globalx.TSV_DELIM);
+					isDE[x] = false;
+					
+					if (bLog) {
+						String displayCol = theTable.getColumnName(x);
+					    for (String cn : pvalColNames) {
+					    	if (displayCol.equals(cn)) {
+					    		isDE[x] = true;
+					    		break;
+					    	}
+						}
+					}
 				}	
-				line.append(theTable.getColumnName(theTable.getColumnCount()-1));
 				pw.println(line.toString());
 			
-				int x, y, cnt=0;
+				int x, y, cnt=0, nCol=theTable.getColumnCount();
 				String val = "";
 				for(x=0; x<getRowCount(); x++) {
 					line.delete(0, line.length());
-					for(y=0; y<theTable.getColumnCount()-1; y++) {
+					
+					for(y=0; y<nCol; y++) {
 						if(theTable.getValueAt(x, y) != null) 
 							val = theTable.getValueAt(x, y).toString();
 						else val = "";
 						
+						if (isDE[y]) {
+							try {
+								double d = Double.parseDouble(val);
+								double l = -Math.log10(d);
+								val = l+"";
+							}
+							catch (Exception e) {Out.prt("Not double " + val);}
+						}
 						line.append(val);
-						line.append(Globalx.TSV_DELIM);
+						if (y!=nCol-1) line.append(Globalx.TSV_DELIM);
 					}
-					if(theTable.getValueAt(x, y) != null) 
-						val = theTable.getValueAt(x, y).toString();
-					else  val = "";
-					
-					line.append(val);
-					
 					pw.println(line.toString());
 					cnt++;
 				}
@@ -1598,4 +1618,5 @@ public class BasicGOTablePanel {
 	private STCWFrame theMainFrame;
 	private BasicGOFilterTab theGOQuery;
 	private boolean isEvCcolor=true;
+	private String projName="";
 }

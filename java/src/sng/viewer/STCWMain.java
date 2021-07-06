@@ -42,7 +42,7 @@ public class STCWMain
 					+ "	If a singleTCW ID or dbName is NOT provided, a panel of sTCW databases will be shown.\n"
 					+ "\n"
 					+ "A singleTCW ID or dbName must be provided to use either of the following options:\n"
-					+ "  -o Regenerate Overview. o1 and o2 can be used with this option.\n" 
+					+ "  -o Regenerate Overview. Set o1 and/or o2 to regenerate annoDB overview.\n" 
 					+ "     -o1 N  set the 1st cover cutoff to N (default N=50)\n"
 					+ "     -o2 N  set the 2nd cover cutoff to N (default N=90)\n"
 					+ "  -w Output overview to terminal and exit.\n"

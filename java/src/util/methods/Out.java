@@ -24,19 +24,30 @@ public class Out {
 	/****************************************************
     * XXX Open/close log file
     ****************************************************/
+	// Used by runAS can use stdout
 	static public void createLogFile(String path, String file, boolean stdout) {
 		bStdout=stdout;
 		createLogFile(path,file);
 	}
-    static public void createLogFile(String path, String file) 
+	// CAS326 runDE may not know project name, so all logs go into projects/DElogs
+	 static public void createDELogFile(String path, String file) 
 	{	  
+		createLog(path, file);
+		PrtDateMsg("RunDE v" + Globalx.strTCWver);	
+	}
+	// Used by everything else
+    static public void createLogFile(String path, String file) 
+	{	
+		createLog(path + "/" + Globalx.pLOGDIR, file);
+	}
+    
+    static private void createLog(String logPath, String file) // CAS326 separate from createLogFile
+    {
 		if (logFileObj!=null) {
 			System.err.println("TCW error: previous log file not closed");
 			logFileObj.close();
 		}
-		String dir = Globalx.pLOGDIR;
-		String logPath = path +  "/" + dir;
-
+		
 		// Make sure log directory exists
 		File logDir = new File(logPath);
 		if (!logDir.exists()) {
@@ -62,12 +73,9 @@ public class Out {
 			FileWriter out = new FileWriter(logFile.getAbsolutePath(), true); // append
 			logFileObj = new PrintWriter(out); 
 		}
-		catch (Exception e)
-        {
-            ErrorReport.reportError(e, "Error writing to " + logFile.getAbsoluteFile());
-            return;
-        }
-	}
+		catch (Exception e) {ErrorReport.reportError(e, "Error writing to " + logFile.getAbsoluteFile());}
+    }
+  
 	static public void close() {
 		if (logFileObj==null) return;
 		

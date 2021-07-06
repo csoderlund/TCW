@@ -10,6 +10,9 @@ an R-script for a given R package that computes DE.
 DE-enriched GO categories can also be found using <tt>GOSeq</tt> or a user-supplied R-script.
 See the Online Guide for assistance installing the R packages.
 
+<p>The DE and GO p-value columns will be displayed in <tt>viewSingleTCW</tt>
+in the order that the DE p-value columns are created.
+
 <h2>Compute p-values for DE</h2>
 The following gives the basic facts. Details can be found in the last section.
 <ol>
@@ -50,7 +53,8 @@ Execute
 <li><b>All Pairs for Group 1</b>: 
 <ul>
 <li>Only check conditions in Group 1.
-<li>Results will be saved in the database with auto-generated column names.
+<li>Results will be saved in the database with auto-generated column names. If the auto-generated
+name exists in the database, it will not be re-computed.
 <li>Each pair of conditions selected in group 1 will compared; any selections
 in Group 2 are ignored.
 </ul>
@@ -67,7 +71,7 @@ to auto-generated a name for the new groups.
 </ul>
 <li>This is the only option that allows you to compute DE without writing to the database,
 e.g. if you want to view the results in R first.
-<li>This is the only option that checks to see if you are over-writing an existing column.
+<li>This option allows you to over-write an existing column with the same name.
 </ul>
 
 <li><b>All Pairs from File</b>: 
@@ -75,13 +79,13 @@ e.g. if you want to view the results in R first.
 <li>The Condition section is ignored; the conditions to
 compare are specified in the file (see file format in "Details").
 <li>Results will be saved in the database with the provided column names.
-<li>All pairs from the file will be compared with the selected method
-and options.
+<li>If a column name exists in the database, it will not be over-written.
 </ul>
 <li><b>P-values from file</b>
 <ul>
 <li>The Conditions and options are ignored, and R is not used.
 <li>The p-values are read from file (see "Details" below for file format). 
+<li>This option allows you to over-write an existing column with the same name.
 </ul>
 </ol>
 <p><i>A p-value does not distinguish whether condition 1 is greater than condition 2 or vice versa.
@@ -96,7 +100,15 @@ Select <b>Execute</b> to run the specified <u>R-script</u> on the selected colum
 default R-script is <tt>GOseqBH.R</tt> which executes <tt>GOseq</tt> followed by
 Benjamini and Hochberg multiple hypothesis testing correction.
 The data will be entered into the GO table of the database using the p-value column name.
-If the GO p-value column exists, it will overwrite the existing value.
+<p><u>All DE p-value</u>: 
+<ol>
+<li>If this drop-down has value "All DE p-value", then the R-script will be run on all DE columns
+in the database. If a GO p-value column exists for one or more of the DE columns, they will <i>not</i>
+be overwritten.
+<li>Either double click this drop-down box, or scroll through the DE p-value columns using the
+arrows. If a DE p-value column is selected, the corresponding GO enrichment will be computed; 
+if the column exists, it <i>will</i> be overwritten.
+</ol>
 <p><u>Cutoff</u>:
 <ol>
 <li>P-value: If a sequence has a DE p-value less than this amount (e.g. 0.05), 
@@ -106,13 +118,20 @@ where a 1 indicates it is and a 0 indicates it is not.
 <li>Top X%: Instead of a p-value, you can request that the X% of the sequences with the
 lowest DE be considered DE for input to <tt>GOseq</tt>.
 </ol> 
-NOTE: It does not check if the GO p-value column exists, it will automatically replace it.
+
 <!----------------------------------------------------!>
-<h2>Remove p-value columns</h2>
+<h2>Remove columns</h2>
 
-Select <b>Remove</b> to remove the selected p-value column(s) and corresponding GO column (if it exists).
-A value of <u>All p-values</u> will remove all p-value columns.
+Select <b>Remove</b> beside the <b>DE P-val</b> dropdown 
+to remove the selected p-value column(s) and corresponding GO column (if it exists).
+A value of <u>All DE p-values</u> will remove all p-value columns.
 
+<p>Select <b>Remove</b> beside the <b>GO Enrich</b> dropdown 
+to remove the selected GO enrichment column(s).
+A value of <u>All GO enrich</u> will remove all GO enrichment columns.
+<p>For either "Remove", select a existing column as follows:
+Either double click the drop-down box, or scroll through the DE p-value columns using the
+arrows.
 <!----------------------------------------------------!>
 <h2>Update, Close and Exit</h2>
 <ol>

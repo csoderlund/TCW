@@ -537,7 +537,7 @@ public class DoGOs
 		try {	 
 			// if UniProt has a GO that is not in the GO database, causes an inconsistency
 			PreparedStatement ps2 = tcwDB.prepareStatement("INSERT into go_info SET " +
-					"gonum=?, descr=?, term_type=?, level=?, bestEval=?, nUnitranHit=?, slim=?");
+			"gonum=?, descr=?, term_type=?, level=?, bestEval=?, nUnitranHit=?, nDirectHit=?, slim=?");
 
 			String [] types = Globalx.GO_TERM_LIST; 
 			
@@ -557,6 +557,8 @@ public class DoGOs
 				
 				int nUnitranHit = tcwDB.executeCount("select count(*) from pja_unitrans_go" +
 						" where gonum=" + gonum);
+				int nDirectHit = tcwDB.executeCount("select count(*) from pja_unitrans_go" +
+						" where direct=1 and gonum=" + gonum);
 				
 				// from goDB.GO_TERM
 				String name="obsolete - not in " + godbsrc;
@@ -587,7 +589,8 @@ public class DoGOs
 				ps2.setInt(4, level);
 				ps2.setDouble(5, eval);
 				ps2.setInt(6, nUnitranHit);
-				ps2.setInt(7, 0);
+				ps2.setInt(7, nDirectHit);
+				ps2.setInt(8, 0);
 				ps2.addBatch();
 				cnt++; cntSave++;
 				if (cntSave==NLOOP) {

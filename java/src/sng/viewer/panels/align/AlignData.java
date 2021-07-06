@@ -181,15 +181,11 @@ public class AlignData
 		if (num != 0) s = num + ". ";
 		if (isNTalign) s+= "DP: NT "; else s += "DP: AA "; 
 	
-		s += String.format("Sim %3.1f%s ", dSim, "%"); // "Sim " + new DisplayFloat(dSim) + "% ";
+		s += String.format("%3.1f%s ", dSim, "%"); // CAS400 remove Sim
 		if (!isNTalign) s += ", #Stops " + nStops; 
 
 		if (ctgData2 == null) { // seq to hit (where either can be AA or NT)
-			if (isNTsTCW) {
-				if (isNTalign) 							s += "    " + blastData.getHitBlast(); // NT hit
-				else if (nFrame1==orfData1.getFrame()) 	s += "    " + blastData.getHitBlast(); // AA hit 
-			}
-			else 										s += "    " + blastData.getHitBlast(); // AAsTCW
+			s += "    " + blastData.getHitBlast(); // CAS326 (nFrame1!=orfData1.getFrame()) was not getting description
     	}
 		else { 					// pairwise
 			if (isNTalign) 								s += "    " + blastData.getHitBlast(isNTalign); 
