@@ -141,7 +141,7 @@ However, the three 'ex' demos, which are included in the package, have more homo
 <table class="tablex">
 <tr>
 	<td><b>Create mTCW_ex</b>: A skeleton <ttx>mTCW_ex</ttx> project is provided with the release;
-	to create a project where the results are similar to <a href=ex.html class="ext" target="_blank">Overview</a>,
+	to create a project where the results are similar to <a href=../ov/mDemo.html class="ext" target="_blank">Overview</a>,
 	do the following: From the command line, execute <ttx>./runMultiTCW</ttx>, which brings up the interface.
 	<ol>
 		<li>Click the arrow beside <ttl>Project</ttl> to select 'ex'.
@@ -167,7 +167,7 @@ However, the three 'ex' demos, which are included in the package, have more homo
 			</ol>
 		<li><ttc>Add GOs</ttc> can be run anytime after the <ttc>Build Database</ttc>
 	</ol>
-	The overview will look similar to this <a href=ex.html class="ext" target="_blank">Overview</a>
+	The overview will look similar to this <a href=../ov/mDemo.html class="ext" target="_blank">Overview</a>
 	(counts may vary slightly).
 	<p>In this example, the <ttp>orthoMCL</ttp> method was run on a machine that had DBD::mysql installed, and the output file
 	was transferred to a machine without DBD:mysql installed, and added as an "User Defined" method.
@@ -516,14 +516,20 @@ After the KaKs files have been created using <ttc>Run Stats</ttc>:
 There will be 
 multiple files with the name <ttx>oTCWn.awt</ttx> where n starts at '1'. They
 each have pairs of aligned sequences minus the gaps. There is also a file
-called <ttx>runKaKs</ttx> which has the commands to run <ttp>KaKs_calculator</ttp>
+called <ttx>runKaKs</ttx> which has the commands to run the <ttp>KaKs_calculator</ttp>
 on each file, e.g. 
 <pre>
-	/Users/cari/Workspace/TCW_3/Ext/mac/KaKs_Calculator -i oTCW1.awt -o iTCW1.tsv -m YN &amp;
-	/Users/cari/Workspace/TCW_3/Ext/mac/KaKs_Calculator -i oTCW2.awt -o iTCW2.tsv -m YN &amp;
+/Users/cari/Workspace/TCW_3/Ext/mac/KaKs_Calculator -i oTCW1.awt -o iTCW1.tsv -m YN &amp;
+/Users/cari/Workspace/TCW_3/Ext/mac/KaKs_Calculator -i oTCW2.awt -o iTCW2.tsv -m YN &amp;
 </pre>
-If you prefer to use a different method than 'YN', edit this file to change it to
-whatever method you want (see the <ttp>KaKs_Calculator</ttp> documentation).
+The only reason the method "YN" is used here is because it is fastest; this should probably
+be changed. The default method is "MA", which will be used if you remove the "-m YN" on all lines.
+Alternatively, you can edit the file to replace the "YN" with a different method.
+To view the different methods, run (replace 'mac' with 'linux' if you are on a linux machine):
+<pre>
+ ./Ext/mac/KaKs_Calculator -h	
+</pre>
+
 <li>From the command line, type: <ttx>sh runKaKs</ttx>.
 <li>Read the KaKs files into the mTCWdb:
 <ul>

@@ -1,16 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>sTCW overview</title>
+<title>singleTCW Overview</title>
+
 <style>
-.tabley    		{border: 1px  solid black; border-spacing: 0px;  border-collapse: collapse;}
-.tabley td 		{border: 1px  solid black; padding: 3px; }
+.nw {vertical-align: top; white-space: nowrap;}	
+.top {vertical-align: top; }	
+table.y, .y td, th { border: 1px solid black; border-collapse: collapse; border-spacing: 5px;}
+th, td {padding: 5px;}
 </style>
 </head>
-<body style="padding:20px;width:650px;font-family:Times">
 
-<h2>Reproduce sTCW overview</h2>
+<body style="font-family: Arial, sans-serif;  font-size: 14px;">
+<table style="width:70%; margin-left: auto; margin-right: auto;">
+<tr><td>&nbsp;
+<tr><td>&nbsp;
 
+<tr><td>
+<h2>Reproduce singleTCW overview</h2>
 This describes how to obtain the table of results corresponding to statistics
 in the overview. The following short-hand is used:
 <ul>
@@ -22,7 +29,7 @@ in the overview. The following short-hand is used:
 <h3>INPUT</h3>
 Most of the input section is data supplied by the user with runSingleTCW. The following
 two are computed:
-<table class=tabley>
+<table class=y>
 <tr><td>Counts: SIZE<td>Show all<td>Column:Counts for all conditions: Stats, column:Sum
 <tr><td>AVG-len<td>Show All<td>Column:Length; Stats, column:Average
 <tr><td>MED-len<td>Show All<td>Column:Length; Stats, column:Median
@@ -33,31 +40,22 @@ because they are computed differently.
 <h3>ANNOTATION</h3>
 <h3>Hit Statistics:</h3>
 
-<table class=tabley>
+<table class=y>
 <tr><th>Column<th>Search<th>Obtain number
-<tr><td>Sequences with hits
-	<td>Filters: Annotated
-	<td>Number of rows
-<tr><td>Unique hits
-	<td>AnnoDB Hits: Seq:None(slow)<sup>*</sup>
-	<td>Hits number at top of table
-<tr><td>Total sequence hits
-	<td>AnnoDB Hits: Seq:None(slow)<sup>*</sup>
-	<td>Pairs number at top of table
-<tr><td>Bases covered by hit
-	<td>AnnoDB Hits: Seq:Best Bits
-	<td>Unselect Group by Hit ID; column:Align; 
+<tr><td>Sequences with hits<td>Filters: Annotated<td>Number of rows
+<tr><td>Unique hits<td>AnnoDB Hits: Seq:None(slow)<sup>*</sup><td>Hits # above table
+<tr><td>Total sequence hits<td>AnnoDB Hits: Seq:None(slow)<sup>*</sup><td>Pairs # above table
+<tr><td>Bases covered by hit<td>AnnoDB Hits: Seq:Best Bits<td>Unselect "Group by Hit ID""; column:Align; 
 	<br>Stats, column:Sum; for NT, multiply by 3
 <tr><td>Total bases 
 	<br>(residues for AA seqs)
-	<td>Show All 
-	<td>Column:Length; Stats, column:Sum
+	<td>Show All<td>Column:Length; Stats, column:Sum
 </table>
 <sup>*</sup> Use Clear All
 
 <h3>AnnoDBs:</h3>
 
-<table class=tabley>
+<table class=y>
 <tr><th>Column<th>Search<th>Obtain number
 <tr><td>ONLY
 	<td>Filters: Annotated, Best Bits, 
@@ -65,30 +63,23 @@ because they are computed differently.
 	<br>&nbsp;&nbsp;&nbsp; values for AnnoDB,
 	<br>General &lt;=1 annoDB
  	<td>Number of rows
-<tr><td colspan=3><i>The following all use AnnoDB Hits, 
-and select the correct ANNODB from the AnnoDBs panel.</i>	
-<tr><td>BITS<td>Seq:Best Bits<td>Seqs number above the table
-<tr><td>ANNO<td>Seq:Best Anno<td>Seqs number above the table
+<tr><td colspan=3><i>The following all use AnnoDB Hits panel with the correct ANNODB selected from the AnnoDBs panel.
+</i>	
+<tr><td>BITS<td>Seq:Best Bits<td>Seqs # above table
+<tr><td>ANNO<td>Seq:Best Anno<td>Seqs # above table
 
-<tr><td>UNIQUE<td>Seq:None(slow)
-	<td>Hits number above the table
-<tr><td>TOTAL<td>Seq:None(slow)
-	<td>Pairs number above the table
+<tr><td>UNIQUE<td>Seq:None(slow)<td>Hits # above table
+<tr><td>TOTAL<td>Seq:None(slow) <td>Pairs # above table
 
-<tr><td>AVG-SIM<td>Seq:None(slow)
-	<td>Unselect Group by Hit ID; column:%Sim; Stats, column:Average
+<tr><td>AVG-SIM<td>Seq:None(slow)<td>Unselect "Group by Hit ID""; column:%Sim; Stats, column:Average
 
-<tr><td>HIT-SEQ<td>Seq:Rank=1
-	<td>Seqs number, the percentage is of the #Seqs
-
-<tr><td>AVG-SIM<td>Seq:Rank=1 
-    <td>Column:%Sim; Stats, column:Average
-
-<tr><td>Cover &gt;=N<td>Seq:Rank=1,%Sim&gt;=N,%Hcov&gt;=N
-	<td>Seqs number, the percentage is of the HIT-SEQ number
+<tr><td colspan=3>Rank=1 is the best hit for a sequence for a given annoDB.
+<tr><td>HAS SEQ<td>Seq:Rank=1<td>Seqs # above table; percentage of total #Seqs
+<tr><td>AVG-SIM<td>Seq:Rank=1 <td>Uncheck "Group by Hit""; Column:%Sim; Stats, column:Average
+<tr><td>Cover &gt;=N<td>Seq:Rank=1,%Sim&gt;=N,%HitCov&gt;=N
+	<td>Seqs # above table; percentage of HIT-SEQ
 </table>
-Halign is short for HitAlign, which is the difference between the hit stop and start coordinates
-divided by the length of the protein.
+HitCov is the difference between the hit stop and start coordinates divided by the length of the protein.
 
 <h3>Top 15 species from total: N</h3>
 The N is the number of unique species based on the first two words of the
@@ -101,7 +92,7 @@ the species are listed in the table.
 
 <h3>Gene Ontology Statistics:</h3>
 
-<table class=tabley>
+<table class=y>
 <tr><th>Column<th>Search<th>Obtain number
 <tr><td>Unique GOs
 	<td>GO Annotation: no filters<sup>*</sup>
@@ -138,7 +129,7 @@ the species are listed in the table.
 <h2>EXPRESSION</h2>
 The following sections may not exist if the input had no count files or the DE methods
 were not executed.
-<table class=tabley>
+<table class=y>
 <tr><td>TPM*
 	<td>Filter: select Condition under Exclude; set "At Most" to 1.99. 
 	<td>This will continue using 4.99, 9.99, etc, where the previous results are
@@ -172,23 +163,24 @@ that are found in un-assembled sequences.
 	to the row number that start having #n&gt;10.
 </table>
 
-<h3>Total ORFs:</h3>
-<table class=tabley>
+<h3>ORFs stats:</h3>
+<table class=y>
 <tr><th>Column<th>Search<th>Obtain number
 <tr><td colspan=3><i>The following use the Basic Sequence. Select "TCW" and enter
 the Substring indicated.</i>
 <tr><td>Is Longest ORF<td>!LG<td>#Seqs minus Result number
 <tr><td>Markov Best Score<td>!mk<td>#Seqs minus Result number
+<tr><td>ORF=Hit<td>ORF=Hit<td>#Seqs minus Result number
 <tr><td>MultiFrame<td>Multi-frame<td>Result number
 <tr><td>&gt;=9 Ns in ORF<td>9N<td>Result number. View in Sequence Frame to see n's in ORF (CDS). 
 Others may have n's, but not in the CDS.
-<tr><td>Stops in Hit (Best Bits)<td>Stops<td>Result number
+<tr><td>Stops in Hit<td>Stops<td>Result number
 
 <tr><td colspan=3><i>The following use the Filters, SNPs and ORFs.</i>
 <tr><td>Has Hit<td>Protein confirmation<td>Number of rows
 
 <tr><td>All of the above<td>Protein confirmation<td>
-Use the Basic Sequence (as above), search !LG, then add to that mk!b; 
+Use the Basic Sequence (as above), search !LG, then add to that !mk using "Add to Table"; 
 select all sequences and show in Sequence table with the 'Is PR Frame'
 column; take the number that have use the protein frame and subtract
 from the total number from 'Protein confirmation'.
@@ -202,7 +194,7 @@ find where the rows start with 'No','No'.
 <h3>GC Content:</h3>
 The only number reproducible is the GC Content, which is the %GC over the entire sequence..
 
-<table class=tabley>
+<table class=y>
 <tr><td>GC Content<td>Show All<td>Column:%GC; Stats, column:Average
 <br>Note, there will be some slight difference in the number due to round-off error.
 </table>

@@ -44,7 +44,8 @@ public class LoadSingleTCW {
 		if (!step4_seqTable()) return false;		// create seqMap and expMap    
 		if (!step5_seqHitsTable()) return false;
 		if (!step6_updateUniqueHits() ) return false;  
-		if (!step7_computeInfo()) return false;
+		if (!step7_computeCpG()) return false;
+		if (!step8_finish()) return false;
 		Out.PrtSpMsgTime(0, "Finish loading from database", startTime);
 		return true;
 	}
@@ -208,7 +209,7 @@ public class LoadSingleTCW {
 		int seqCnt = 0, ASMid=0;
     		
 		String sqlSR1 = "SELECT pja_db_unitrans_hits.uniprot_id, pja_db_unitrans_hits.e_value," +
-				"contig.contigid, contig.consensus, contig.numclones,  " +
+				"contig.contigid, contig.longest_clone, contig.consensus, contig.numclones,  " +
 				"contig.totalexp, contig.totalexpN, " +
 				"contig.o_frame, contig.o_coding_start, contig.o_coding_end ";
 		String sqlSR3 = " FROM contig " +
@@ -288,10 +289,10 @@ public class LoadSingleTCW {
 			}
 
 			PreparedStatement ps2 = mDB.prepareStatement("INSERT INTO unitrans " +
-					"(UTid, UTstr, ASMid, numAlign, totExp, totExpN, orf_frame, orf_start, orf_end," +
+					"(UTid, UTstr, origStr, ASMid, numAlign, totExp, totExpN, orf_frame, orf_start, orf_end," +
 					" ntSeq, ntLen, aaSeq, aaLen, HITid, HITstr, e_value" +
 					libSQL + deSQL + ", expList, expListN)" +
-					" values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?" + 
+					" values(?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?" + 
 					qSQL + ",?,?)");
 			
 			int cntSave=0;
@@ -303,16 +304,19 @@ public class LoadSingleTCW {
 	   		rs = stcwDBC.executeQuery(sqlSR1 + sqlSR2 + sqlSR3);
 
 	   		while(rs.next()) {
-				String HITstr = rs.getString(1); // uniprot_id
-				String seqName = rs.getString(3); // contigid
-				String seqTmp = rs.getString(4); // consensus
-				int numAlign = rs.getInt(5);  // numclones
-				int totalExp = rs.getInt(6);  // totalexp
-				int totalExpN = rs.getInt(7); // totalexpN
+	   			int kk=1;
+				String HITstr = rs.getString(kk++); // uniprot_id
+				double evalue = rs.getDouble(kk++);
+				String seqName = rs.getString(kk++); // contigid
+				String origName = rs.getString(kk++); // origID if not assembled, else longest_clone
+				String seqTmp = rs.getString(kk++); // consensus
+				int numAlign = rs.getInt(kk++);  // numclones
+				int totalExp = rs.getInt(kk++);  // totalexp
+				int totalExpN = rs.getInt(kk++); // totalexpN
 				
-				int frame = rs.getInt(8); 	// o_frame
-				int start = rs.getInt(9); 	// o_coding_start
-				int end = rs.getInt(10);    // o_coding_end
+				int frame = rs.getInt(kk++); 	// o_frame
+				int start = rs.getInt(kk++); 	// o_coding_start
+				int end = rs.getInt(kk++);    // o_coding_end
 				
     			nAlign += (long) numAlign;
         		nExp   += (long) totalExp;  		
@@ -347,30 +351,31 @@ public class LoadSingleTCW {
         			if (c==Globalx.stopCh) cntStop--; // stop codon
         			if (cntStop>0) Out.PrtWarn(seqName + " has stop " + nSeq + " codons in translation");
         		}
-        		ps2.setInt(1, seqCnt);
-        		ps2.setString(2, seqName);
-        		ps2.setInt(3, ASMid);
-        		ps2.setInt(4, numAlign);
-        		ps2.setInt(5, totalExp);
-        		ps2.setInt(6, totalExpN);
-        		ps2.setInt(7, frame);
-        		ps2.setInt(8, start);
-        		ps2.setInt(9, end);
-        		ps2.setString(10, ntSeq);
-        		ps2.setInt(11, ntSeq.length());
-        		ps2.setString(12, aaSeq);
-        		ps2.setInt(13, aaSeq.length());
+        		kk=1;
+        		ps2.setInt(kk++, seqCnt);
+        		ps2.setString(kk++, seqName);
+        		ps2.setString(kk++, origName);
+        		ps2.setInt(kk++, ASMid);
+        		ps2.setInt(kk++, numAlign);
+        		ps2.setInt(kk++, totalExp);
+        		ps2.setInt(kk++, totalExpN);
+        		ps2.setInt(kk++, frame);
+        		ps2.setInt(kk++, start);
+        		ps2.setInt(kk++, end);
+        		ps2.setString(kk++, ntSeq);
+        		ps2.setInt(kk++, ntSeq.length());
+        		ps2.setString(kk++, aaSeq);
+        		ps2.setInt(kk++, aaSeq.length());
         		
 	        	// add HITid, HITstr - this is best annotation (PIDov)
         		 int HITid=0; // sTCW has the default HITid=null; mTCW uses HITid=0
         		 if (HITstr != null) {
         		 	nAnnoUT++;
-        		 	if (hitMap.containsKey(HITstr)) 
-        			{
+        		 	if (hitMap.containsKey(HITstr)) {
         				HITid = hitMap.get(HITstr);
-        				ps2.setInt(14, HITid);
-        				ps2.setString(15, HITstr);
-        				ps2.setDouble(16, rs.getDouble(2)); // e_value
+        				ps2.setInt(kk++, HITid);
+        				ps2.setString(kk++, HITstr);
+        				ps2.setDouble(kk++, evalue); 
         		 	}
         		 	else {
         		 		Out.PrtError("No unique hit for dataset ID " + ASMid + " hit " + HITstr);
@@ -378,12 +383,12 @@ public class LoadSingleTCW {
         		 	}
         		 }
         		 else {
-        			ps2.setInt(14, 0);
-        			ps2.setString(15, null);
-        			ps2.setDouble(16, Globalx.dNoVal); // was setting to null
+        			ps2.setInt(kk++, 0);
+        			ps2.setString(kk++, null);
+        			ps2.setDouble(kk++, Globalx.dNoVal); // was setting to null
         		 }
 
-        		 int k=17;
+        		 int k=kk;
 	        	// add expList, expListN plus the actual LN values
         		 String expList="", expListN="";
         		 for (int i=0; i<libList.size(); i++) {
@@ -431,7 +436,7 @@ public class LoadSingleTCW {
         		mDB.executeUpdate("update assembly set " +
     				"nUT = " 		+ nSeq 		+ "," +
     				"nAnnoUT = " 	+ nAnnoUT 	+ "," +
-    				"nAlign = " 		+ nAlign 	+ "," +
+    				"nAlign = " 	+ nAlign 	+ "," +
     				"nExp = " 		+ nExp		+ ", " +
     				"nLib = "		+ nLib		+ " " +
         			"where ASMid = " + ASMid);
@@ -630,7 +635,7 @@ public class LoadSingleTCW {
 	 * For each sequence: compute CpG[o/e], GC, lengths for UTRs and CDS
 	 * For overview: compute avg length of UTRs, CDS, GC and CpG -- SE for GC and CpG
 	 */
-	private boolean step7_computeInfo() {
+	private boolean step7_computeCpG() {
 		try {
 			if (nNT==0) return true;
 			
@@ -817,8 +822,7 @@ public class LoadSingleTCW {
 	}
 
 	private String quote(String word) {
-		if (word==null || word.equalsIgnoreCase("null"))
-		{
+		if (word==null || word.equalsIgnoreCase("null")){
 			return word;
 		}
 		return "\"" + word + "\""; 
@@ -846,6 +850,15 @@ public class LoadSingleTCW {
 		default: 		
 			return chBase;
 		}
+	}
+	private boolean step8_finish() {
+		try {
+			int cntOrig = mDB.executeInteger("select count(*) from unitrans where UTstr!=origStr limit 1");
+			mDB.executeUpdate("update info set hasOrig=" + (cntOrig>0));
+			return true;
+		}
+		catch (Exception e) {ErrorReport.die(e, "Cannot determine if there are original names");}
+		return false;
 	}
 	private boolean prtError(String msg) {
 		JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.PLAIN_MESSAGE);

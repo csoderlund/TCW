@@ -1,11 +1,14 @@
-package sng.viewer.panels;
+package cmp.viewer.panels;
 
+/***********************************************************
+ * Display decimal for MTCW - copied from STCW
+ * The color is currently not being used.
+ */
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -20,24 +23,26 @@ import javax.swing.JCheckBox;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-
-import sng.database.Globals;
-import sng.util.Tab;
-import sng.viewer.STCWFrame;
+import cmp.viewer.MTCWFrame;
+import cmp.database.Globals;
 import util.methods.ErrorReport;
 import util.methods.Static;
-import util.ui.DisplayFloat;
 import util.ui.UserPrompt;
+import util.ui.DisplayFloat;
 
-public class DisplayDecimalTab  extends Tab {
+public class DisplayDecimalTab  extends JPanel {
 	private static final long serialVersionUID = -6819426351584345568L;
 	
-	/************************************************
-	 * The parameters changed in this class are static. The rounding parameters are in DisplayFloat
+	/***************************************************************
+	 * SortTable calls formatDouble, which is used for all tables.
+	 * The parameters changed in this class are static.
 	 */
-	/**************************************************************
-	 * CAS322 Highlight pvalue; 323 changed 1,2,3 ; CAS324 make sure all save preference, add Set Default 
-	 */
+	static DisplayFloat disfl = new DisplayFloat();
+	static public String formatDouble(double val, boolean isP) {
+    	return disfl.getString(val);
+	}
+	
+	/***************************************************************/
 	static final int NCUTS=4, NSCH=4;
 	// brown, pink, red
 	static private final Color [] colSch1 = {new Color(215, 192, 177),new Color(191, 154, 130),Color.pink,new Color(205, 92, 92)};
@@ -111,15 +116,15 @@ public class DisplayDecimalTab  extends Tab {
 	 */
 	private final String HTML = Globals.helpDir + "DisplayDecimal.html";
 	
-	public DisplayDecimalTab(STCWFrame sf)
+	public DisplayDecimalTab(MTCWFrame parentFrame)
 	{
-		super(sf, null);
 		setBackground(Color.WHITE);
 		setAlignmentX(Component.CENTER_ALIGNMENT);
 		setLayout( new BoxLayout ( this, BoxLayout.PAGE_AXIS ) );
 		setBorder( BorderFactory.createEmptyBorder(10, 10, 10, 10) );
 		
-		frame = sf;
+		frame = parentFrame;
+		frame.getSettings().initDecimalDisplay();
 		
 		JPanel page = Static.createPagePanel();
 		page.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -166,10 +171,9 @@ public class DisplayDecimalTab  extends Tab {
 		// Round
 		page.add(createRound());
 		
-		// Colors
-		JPanel cPanel = createColor(); // CAS327
-		if (sf.getMetaData().hasDE()) // CAS323
-			page.add(cPanel);
+		// Colors CAS327 will add later
+		createColor();
+		// page.add(createColor());
 		
 		// Default
 		JPanel defRow = Static.createRowPanel();
@@ -364,7 +368,8 @@ public class DisplayDecimalTab  extends Tab {
 			int mode = 1;
 			if (chkUseJava.isSelected()) mode = 2;
 		    
-			DisplayFloat.prefFlushRounding(mode, eFigs, sigFigs, dec, lg, sm, frame.getPreferencesRoot());
+			DisplayFloat.prefFlushRounding(mode, eFigs, sigFigs, dec, lg, sm, null); 
+			frame.getSettings().setDecimalDisplay(DisplayFloat.getPrefIDRounding(), DisplayFloat.getPrefStringRounding());
 	    }
 	    catch(Exception e) { ; // in the middle of editing
 	    }
@@ -457,6 +462,7 @@ public class DisplayDecimalTab  extends Tab {
 	}
 	// prefRound
 	private void prefFlushColor() {
+		/** FIXME
 		try {
 			Preferences prefs = frame.getPreferencesRoot();
 			if (prefs!=null) {
@@ -467,16 +473,19 @@ public class DisplayDecimalTab  extends Tab {
 		catch (Exception err) {
 			ErrorReport.reportError(err, "Internal error: setting color preferences");
 		}
+		**/
 	}
 	/*******************************************************
 	 * set rounding defaults and save preferences
 	 */
 	private void setDefaults() {
+		
 		double Largest=DisplayFloat.dLargest, Smallest=DisplayFloat.dSmallest; 
 		int Num_sig = DisplayFloat.dNum_sig, Num_dec = DisplayFloat.dNum_dec, Num_E = DisplayFloat.dNum_E;
 		int Use_mode = DisplayFloat.dUse_mode;
 		
-		DisplayFloat.prefFlushRounding(Use_mode, Num_E, Num_sig, Num_dec, Largest, Smallest, frame.getPreferencesRoot());
+		DisplayFloat.prefFlushRounding(Use_mode, Num_E, Num_sig, Num_dec, Largest, Smallest, null);
+		frame.getSettings().setDecimalDisplay(DisplayFloat.getPrefIDRounding(), DisplayFloat.getPrefStringRounding());
 		
 		chkUseFormat.setSelected(Use_mode==1);
 		fldNumE.setText(Num_E+"");
@@ -502,7 +511,10 @@ public class DisplayDecimalTab  extends Tab {
 		
 		prefFlushColor();	
 	}
-	private STCWFrame frame = null;
+	
+	/***************************************************************/
+	private MTCWFrame getParentFrame() { return frame; }
+	private MTCWFrame frame = null;
 	private JTextField fldNumSigs=null, fldNumDec=null, fldNumE=null;
 	private JTextField fldLarge=null, fldSmall=null;
 	private JRadioButton chkUseJava=null, chkUseFormat=null;

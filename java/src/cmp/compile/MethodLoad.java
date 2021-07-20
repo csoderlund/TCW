@@ -171,13 +171,13 @@ public class MethodLoad {
 	/************************************************************
 	* load the groups into pog_groups and group_members
 	* orthoMCL format; the prefix of names are ASMstr, example input:
-	* D3: dm1|cari_01 dm2|demo_mix_01
+	* D7: bar|bar_002 foo|foo_045 fly|fly_031
 	*************************************************************/
 	private void step3_readFileofClusters() {
 	try {		
 		Out.PrtSpMsg(2, "Start adding...");
 		String line;
-		int group=0, skip=0, add=0, badPre=0, cntUnique=0, cntWithGO=0, cntPrt=0;
+		int group=0, skipTotal=0, addTotal=0, badPre=0, cntUnique=0, cntWithGO=0, cntPrt=0;
 		long ts = Out.getTime();
 		
 		File file = new File(groupFile);
@@ -192,16 +192,16 @@ public class MethodLoad {
 		PreparedStatement psGrp = mDB.prepareStatement("update pog_groups set " +
 				"HITid=?, HITstr=?, e_value=?, perAnno=? where PGid=?");
 		
+		// One cluster per line
 		while ((line = reader.readLine()) != null) 
-		{
-			
+		{	
 			if ( line.length() == 0 || line.charAt(0) == '#' ) continue;  			
-			String [] members = line.split(" ");
+			String [] members = line.split("\\s+"); // CAS327 change for " "
 			if (members == null || members.length < 2) {
-				System.err.println("Bad line: " + line);
+				Out.PrtErr("Bad line: " + line);
 				continue;
 			}
-			if (members.length==2) continue;
+			if (members.length==2) continue; // can't have one member
 
 			group++; cntPrt++;
 			if (group > 999999) 
@@ -212,12 +212,8 @@ public class MethodLoad {
 				Out.r("Adding cluster #" + group);
 				cntPrt=0;
 			}
-			if (debug>0) {
-				Out.prt(">>> " + PGstr);
-				if (group>debug) Out.die("Debugging MethodLoad");
-			}
 			
-    	/** compute # of members per sTCW to be loaded with sTCW information **/				
+    	/** check members && compute # of members per sTCW to be loaded with sTCW information **/				
 			int cntMem=0;
 			int sTCWcnt [] = new int [nSTCW+1]; // count how many from each assm	
 			for (int i=0; i<= nSTCW; i++) sTCWcnt[i] = 0;
@@ -227,11 +223,25 @@ public class MethodLoad {
 				if (!m.find()) continue;
 				
 				String preStr = m.group(1);
+				String seqName = m.group(2);
+				if (!seqMap.containsKey(seqName)) {
+					if (skipTotal < 5)
+		    			Out.PrtWarn("File contains sequence identifer not in database '" + seqName + "'");
+					else if (skipTotal==10) Out.PrtWarn("Surpressing further such error messages");
+					
+					skipTotal++;
+					if (skipTotal>100 && addTotal==0) {
+						Out.PrtError("Too many bad indentifiers and no good ones -- check file");
+						bSuccess=false;
+						reader.close();
+						return;
+					}
+					continue;
+				}
 				if (prefMap.containsKey(preStr)) {
 					int j = prefMap.get(preStr);
 					sTCWcnt[j]++;
-					cntMem++;
-    				}
+    			}
 				else {
 					Out.PrtWarn("Invalid prefix: " + preStr);
 					badPre++;
@@ -244,14 +254,16 @@ public class MethodLoad {
 					}
 					continue;
 				}
-	    		}
+				cntMem++;
+				addTotal++;
+	    	}
+			if (cntMem<2) continue; // CAS327 check for bad ID here instead of below
 			
 	    	/** add group to database -- need PGid for adding members **/
 			int PGid = step3b_loadGroup(POGsql, PGstr, GRPid, cntMem, sTCWcnt);
 			sTCWcnt = null;
                
     	/** find members and add to database **/  
-			add=skip=0;
 			Vector <Integer> memIdVec = new Vector <Integer> ();
 			for (int i=1; i< members.length; i++) {
 				String seqName = "";  				
@@ -261,19 +273,8 @@ public class MethodLoad {
 				
 				int seqID=0;
 		    	if (seqMap.containsKey(seqName)) seqID = seqMap.get(seqName); 
-		    	else {
-		    		if (skip < 5)
-		    			Out.PrtWarn("File contains sequence identifer not in database '" + seqName + "'");
-				else if (skip==10) Out.PrtWarn("Surpressing further such error messages");
-				skip++;
-				if (skip>100 && add==0) {
-					Out.PrtError("Too many bad indentifiers and no good ones -- check file");
-					bSuccess=false;
-					reader.close();
-					return;
-				}
-				continue;
-		    	}
+		    	else continue;
+		    	
 		    	//"(PGid, PGstr, UTid, UTstr) values
 	    		psMem.setInt(1, PGid);
 	    		psMem.setString(2, PGstr);
@@ -287,7 +288,6 @@ public class MethodLoad {
 	    		cntSeqs++;
 		    		
 				memIdVec.add(seqMap.get(seqName));
-				add++;
 			}
 			
     	/** add entry to pog_hits and compute best hit **/
@@ -311,6 +311,7 @@ public class MethodLoad {
 		reader.close(); 
 	
 		System.err.print("                                                        \r");
+		Out.PrtSpCntMsgZero(3, skipTotal, "Identifiers not found in databases");
 		Out.PrtSpCntMsg(3, group, "Total Clusters    " + Out.df(cntSeqs) + " Sequences in clusters");
 		Out.PrtSpCntMsgZero(3, cntUnique, "Unique - Clusters without hits");
 		Out.PrtSpCntMsgZero(3, cntWithGO, "Best Hit has GO annotation");
@@ -486,6 +487,10 @@ public class MethodLoad {
 		/*******************************************************************/
 		private boolean loadBestAnnoFromDB(String grpSeqList) {
 			try {
+				if (grpSeqList==null || grpSeqList.contentEquals("")) {
+					Out.PrtErr("Fatal error");
+					return false;
+				};
 				ResultSet rs = mDB.executeQuery(
 						"SELECT tr.HITid, tr.HITstr, tr.e_value, uq.description, uq.dbtype, uq.nGO " +
 						"FROM unitrans_hits as tr " +

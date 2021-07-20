@@ -166,14 +166,26 @@ the amino acid sequences in the cluster.<td>Avg(sdLen)<sup>1</sup>
     <br>CpG-JI; see<sup>3</sup>
     
 <tr><td nowrap valign="top" colspan=3><i>KaKs method</i><sup>5</sup>
+<tr><td><i>Ka/Ks</i><td>Selective strength. A score &lt;1 is purifying, &gt;1 is positive, 
+and significantly &gt;1 implies that at least some of the mutations are probably advantageous. 
+It is rare for KaKs to be exactly 1, so the following rules are used:
+<pre>
+If KaKs &gt;= 0.995 and KaKs &lt; 1.006, then KaKs~1
+If KaKs &gt;= 1.006, then KaKs &gt; 1
+If KaKs &lt;  0.995, then KaKs &lt; 1
+</pre>
+<td>Set Filter according to rules on the left.
+
+<tr><td><i>Quartiles</i><td>Of the KaKs values. It uses the method of splitting the list in half; 
+Q1 is the median of the lower half and Q3 is the median of the upper
+half.
+
+<td>Q2=Median(KaKs)<sup>1</sup>
 <tr><td nowrap valign="top" colspan=3><i>Average
 <tr><td>&nbsp;&nbsp;Ka<td>Nonsynonymous substitution rate<td>Avg(Ka)<sup>1</sup> 
 <tr><td>&nbsp;&nbsp;Ks<td>Synonymous substitution rate<td>Avg(Ks)<sup>1</sup>
-<tr><td>&nbsp;&nbsp;KaKs<td>Selective strength. A score &lt;1 is purifying, &gt;1 is positive, 
-and significantly &gt;1 implies that at least some of the mutations are probably advantageous. <td>KaKs
-<tr><td><i>Quartiles</i><td>Of the KaKs values. It uses the method of splitting the list in half; 
-Q1 is the median of the lower half and Q3 is the median of the upper
-half.<td>Q2=Median(KaKs)<sup>1</sup>
+<tr><td>&nbsp;&nbsp;P-value<td>KaKs p-value<td>Avg(p-value)<sup>1</sup>
+
 <tr><td><i>P-value</i><td>The 'other' count includes pairs where the KaKs_calculator did not provide
 a p-value though did provide a KaKs value.<td>p-value
 

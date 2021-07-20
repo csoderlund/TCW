@@ -14,6 +14,7 @@ import javax.swing.JOptionPane;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -259,6 +260,12 @@ public class AnnoOptionsPanel extends JPanel {
 			}
 		});
 		row.add(btnTrainCDSfile);
+		
+		ButtonGroup group = new ButtonGroup(); // CAS327
+		group.add(chkTrainHit);
+		group.add(chkTrainCDSfile);
+		chkTrainHit.setSelected(true);
+		
 		innerPanel.add(row);
 		innerPanel.add(Box.createVerticalStrut(5));
 		
@@ -670,7 +677,12 @@ public class AnnoOptionsPanel extends JPanel {
 		else return rcMsg("Minimum Set", "Must be integer '" + x + "'");
 		
 		if (!chkTrainCDSfile.isSelected()) annoObj.setORFtrainCDSfile("");
-		else annoObj.setORFtrainCDSfile(txtTrainCDSfile.getText());
+		else {
+			x = txtTrainCDSfile.getText();
+			if (x.contentEquals("") || x.contentEquals("-")) 
+				return rcMsg("Train CDS File", "Cannot be blank with this option selected");
+			annoObj.setORFtrainCDSfile(x);
+		}
 		
 		// Similarity
 		if (chkSelfN.isSelected() && txtSelfNargs.getText().length()==0) 
@@ -724,7 +736,7 @@ public class AnnoOptionsPanel extends JPanel {
 		
 		txtLenDiff.setEnabled(bNTdb);
 		
-		chkTrainHit.setEnabled(bNTdb);
+		chkTrainHit.setEnabled(bNTdb); 
 		chkTrainCDSfile.setEnabled(bNTdb);
 		
 		txtTrainCDSfile.setEnabled(bNTdb);
@@ -753,7 +765,7 @@ public class AnnoOptionsPanel extends JPanel {
 		boolean check = (bAlt.equals("1")) ? true : false;
 		chkAltStart.setSelected(check);
 		
-		chkTrainHit.setEnabled(true);
+		chkTrainHit.setSelected(true);  // CAS327 was enabled
 		txtHitEval.setText(mProps.getProperty("Anno_ORF_hit_evalue")); 
 		txtHitSim.setText(mProps.getProperty("Anno_ORF_hit_sim")); 
 		

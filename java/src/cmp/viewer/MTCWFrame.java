@@ -39,6 +39,7 @@ import cmp.viewer.panels.DatabaseSelectPanel;
 import cmp.viewer.panels.MenuPanel;
 import cmp.viewer.panels.ResultPanel;
 import cmp.viewer.panels.BlastTab;
+import cmp.viewer.panels.DisplayDecimalTab;
 import cmp.viewer.panels.TextPanel;
 import cmp.viewer.seq.SeqsQueryPanel;
 import cmp.viewer.seq.SeqsTopRowPanel;
@@ -76,13 +77,16 @@ public class MTCWFrame extends JFrame {
 	
 	// CAS305 moved Sampled to last section; add Find Hit
 	// CAS310 moved List Results and added Hit stuff
+	// CAS327 add Display Decimal
 	public static final String [] MAIN_SECTIONS = {"General",  "Filters",  "Samples"};
 	private static final String [] MAIN_MENU = { 
-		">Instructions", ">Overview", ">Find Hits", ">List Results", 
+		">Instructions", ">Overview", ">Display Decimal",">Find Hits", ">List Results", 
 		 ">Cluster", ">Pair", ">Sequence", ">Hit",
 		 ">Clusters", ">Pairs", ">Sequences", ">Hits"}; // s is added to not duplicate the above set
 	private static final String [] MENU_DESCRIP = { 
-		"Basic instructions for using multiTCW", "Information about the database",  "Run Blast or Diamond", "List all result panels" ,
+		"Basic instructions for using multiTCW", "Information about the database", 
+		"Change significan digits", 
+		"Run Blast or Diamond", "List all result panels" ,
 		 "Filter clusters", "Filter Pairs", "Filter sequences", "Filter hits",
 		 "Sample set of clusters", "Sample set of pairs", "Sample set of sequences", "Sample set of hits"
 		 };
@@ -317,12 +321,14 @@ public class MTCWFrame extends JFrame {
 		
 		resultPanel = new ResultPanel(this);
 		blastPanel = new BlastTab(this);
+		decimalPanel = new DisplayDecimalTab(this);
 
 		int i=0, s=0;
 		JPanel general = Static.createRowPanel();
 		menuPanel.addTopItem(general, MAIN_SECTIONS[s++], "General: Select a > item");
 		menuPanel.addMenuItem(general, instructionsPanel, MAIN_MENU[i], MENU_DESCRIP[i++]);
 		menuPanel.addMenuItem(general, overviewPanel,     MAIN_MENU[i], MENU_DESCRIP[i++]);
+		menuPanel.addMenuItem(general, decimalPanel,  MAIN_MENU[i], MENU_DESCRIP[i++]);
 		menuPanel.addMenuItem(general, blastPanel,  MAIN_MENU[i], MENU_DESCRIP[i++]);
 		menuPanel.addMenuItem(general, resultPanel, MAIN_MENU[i], MENU_DESCRIP[i++]); // CAS310 moved from Filter to Genral
 		
@@ -353,6 +359,7 @@ public class MTCWFrame extends JFrame {
 		mainPanel.add(hitQueryPanel);
 		mainPanel.add(resultPanel);
 		mainPanel.add(blastPanel);
+		mainPanel.add(decimalPanel);
 		menuPanel.setSelected(overviewPanel);
 		
 		sPane = new JScrollPane(menuPanel);
@@ -601,6 +608,7 @@ public class MTCWFrame extends JFrame {
 	private TextPanel overviewPanel = null;
 	private ResultPanel resultPanel = null;
 	private BlastTab blastPanel = null;
+	private DisplayDecimalTab decimalPanel = null;
 	
 	private GrpTablePanel grpTablePanel = null;
 	private PairTablePanel pairTablePanel = null;

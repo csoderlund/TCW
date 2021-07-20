@@ -7,35 +7,69 @@
 <!--#include virtual="../ssi/start2t.html" -->
 <!--#include virtual="./ssi/view_stcw.html" -->
 
-<div style="text-align: center"><big><ttc>Overview</ttc></big></div>
+<div style="text-align: center"><big><ttc>Start</ttc></big></div>
+<table  class="tablex" style="margin-left: auto;margin-right: auto;">
+<tr><td class="white" style="text-align:left; background-color:#666666; padding-bottom:4px;">
+<a href="#decimal" class="white">Decimal Display</a>  <mark class="white">|</mark>
+<a href="#hits" class="white">Find Hits</a>  <mark class="white">|</mark>
+<a href="#list" class="white">Results</a>  <mark class="white">
+</td></tr>
+</table>
+
 <ttp>viewSingleTCW</ttp> provides query and display of the sTCW database built with
 <a href="../runSingle" class=ext target="_blank">runSingleTCW</a>. It allows the user to explore 
 all aspects of their data and annotation.
 
+
 <table>
 <tr><td class="top">
-<p><b><ttc>General</ttc></b>
-<br>&#10148;<ttc>Overview</ttc>: <a href="Nn.html">Overview</a> is a link to the complete overview, where the first
-part is shown on the right.
-<p><a href="reproduce.html">Reproduce</a> are instructions on how obtain the table of results corresponding to the overview statistics.
+<p>&#10148;<ttc>Overview</ttc>: The top part of the Overview is shown on the right and can be scrolled
+to view the entire page.
+<p><a href="reproduce.html" class="ext" target="_blank">Reproduce</a> describes how the statistics were computed
+and <a href="../../ov/sDemo.html" class="ext" target="_blank">Overview</a> shows the HTML of the overview on the right.
 
-<p>&#10148;<ttc>Find Hits</ttc>: Search an user supplied sequence against the sequences in the database or an external database.
+<p>&#10148;<ttc>Decimal Display</ttc> allows the formatting of decimal numbers to be changed (<a href="#decimal">View</a>).
+
+<p>&#10148;<ttc>Find Hits</ttc> allows a sequence to be searched against the 
+mTCWdb sequences or a selected database (<a href="#hits">View</a>).
+
+<p>&#10148;<ttc>Results</ttc> provides a table of all results along with the query 
+(<a href="#list">View</a>).
+
 
 <p><b><ttc>Sequences</ttc></b> 
-<br> The items under this label produces
-the <ttx>Sequence Table</ttx>. A row can be selected to view the <ttx>Sequence Details</ttx>.
+<br>The items under this label produces a table of sequences.
 
 <p><b><ttc>Basic Queries</ttc></b>
-<br>&#10148;<ttc>Sequences</ttc>: Search by seqID or remark.
-<p>&#10148;<ttc>AnnoDB Hits</ttc>: Search by hitID, taxonomy, e-value, etc.
-<p>&#10148;<ttc>GO Annotation</ttc>: Search by GO term, term_type, etc.
+<br>&#10148;<ttc>Sequences</ttc>: Query on seqID, origID, and remarks.
+<br>&#10148;<ttc>AnnoDB Hits</ttc>: Query on the seq-hit properties.
+<br>&#10148;<ttc>GO Annotation</ttc>: Query on the GO properties.
 
 </td>
 <td class="top"><fcap>The initial <ttp>viewSingleTCW</ttp> display.</fcap>
 <a href="img/initialView.png"><img src="img/initialView.png" alt="" style="border: 1px solid black; width: 600px"></a>
 </td></tr>
 </table>
-<p><ttc>Similar Pairs</ttc>: The items under this label produces a Pairs table of similar sequences.
+
+<ttc>Similar Pairs</ttc>: The items under this label produces a Pairs table of similar sequences.
+
+<a id=decimal></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Decimal Display</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+<a  href="img/decimal.png"><img src="img/decimal.png" alt="" style="border: 1px solid black; width: 650px"></a>
+
+<a id=hits></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Find Hits</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+<a  href="img/find.png"><img src="img/find.png" alt="" style="border: 1px solid black; width: 650px"></a>
+
+<a id=list></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Results</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+<a  href="img/list.png"><img src="img/list.png" alt="" style="border: 1px solid black; width: 650px"></a>
 
 <!--#include virtual="../../ssi/end.html" -->
 </body>

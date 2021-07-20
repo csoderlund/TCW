@@ -101,7 +101,7 @@ public class  FileC {
 		fp = System.getProperty("user.dir") + "/" + filePath;
 		if (new File(fp).exists()) return fp;
 		
-		Out.PrtError("File does not exist: " + filePath); 
+		Out.PrtErr("File does not exist: " + filePath); // CAS327 changed from PrtError which includes /n
 		return null;
 	}
 	// Remove for display; anything under project/<dir> and project/annodb remains

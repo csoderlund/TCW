@@ -244,13 +244,14 @@ public class STCWFrame extends JFrame {
 			general.addChild(new MenuTreeNode(Overview, overviewTab));
 			general.addChild(new MenuTreeNode(DecimalNumbers, decimalTab));
 			general.addChild(blastNode);
+			general.addChild(new MenuTreeNode(ContigsResults, resultsContigTab)); // CAS327 move from contig
 			root.addChild(general);
 
 			MenuTreeNode contigHeader = new MenuTreeNode(SequenceSection);
 			contigHeader.addChild(new MenuTreeNode(ShowAllContigs));
 			contigHeader.addChild(new MenuTreeNode(ContigsColumns, fieldContigTab));
 			contigHeader.addChild(new MenuTreeNode(ContigsFilters, filterContigTab));
-			contigHeader.addChild(new MenuTreeNode(ContigsResults, resultsContigTab));
+			
 			root.addChild(contigHeader);	
 
 			MenuTreeNode basicHeader = new MenuTreeNode(BasicSection);

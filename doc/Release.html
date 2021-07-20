@@ -12,6 +12,63 @@ Release v3.1.8 converted from using the GO file <tt>go_&lt;date&gt;-termdb-table
 which is used to build the <tt>GOdb</tt>. This ended up to be a pretty big changed,
 hence, this release version is <u>v3.2</u> to indicate the new GO source.
 
+<h4>v3.2.7  20-July-2021</h4>
+This release has improved <ttc>Decimal Display</ttc> and multiple tiny improvements.
+
+<p><ttc>Decimal Display</ttc>
+<ul>
+<li>This existed for <ttp>viewSingleTCW</ttp> and has been added to <ttp>viewMultiTCW</ttp>, though the
+latter does not have the color coding.
+<li>A third parameter has been added for the leading digits for E-notation, i.e. 1.2E-02 versus 1E-02.
+</ul>
+
+<p><ttp>runSingleTCW</ttp> - all minor
+<ul>
+<li>Overview: slight changes to the AnnoDB and ORF section. 
+<li>Compute ORFs:
+<ul>
+<li>The <ttc>Default</ttc> button resets to "Train with Best Hits"". 
+If "Train with CDS file" is selected but no file entered, an error message will be written.
+<li>The ORF remark for Stop in frame was using "EV", which has been changed to "BS" for best bit score.
+</ul>
+</ul>
+
+<ttp>viewSingleTCW</ttp>
+<ul>
+<li>Basic Sequence and AnnoDB Hits: The search rules have changed so that it is always 
+searches on "contained" unless the user adds an "%".
+<li>Sequence Detail (Bug Fix): The "Best Bits" hit should be listed first, but in some situation it was not,
+so the wrong hit was shown on the "Frame".
+<li>Very minor stuff:
+<ul>
+<li>Filter: only show User Remark option if there are user remarks.
+<li>Basic Sequence: The "Orig ID" has been moved so it follows the "Seq ID".
+<li>GO Basic GO ID: Failed if the substring started with spaces.
+<li>Moved "Results" under "General".
+</ul>
+</ul>
+
+<ttp>runMultiTCW</ttp>
+<ul>
+<li>mTCW db v64: The OrigID (original ID) has been added to the sequence records .
+<li>There is better error checking on loading User Defined file.
+<li>Stats: Percentages with a numerator of 0 were being saved as "-" when the numerator was 0; they 
+are now saved as 0.
+<li>The Overview .html file has centered contents.
+</ul>
+
+<ttp>viewMultiTCW</ttp>
+<ul>
+<li>KaKs will use NA instead of "--" to better distinguish it from "-", where NA is computed but gives an NA result
+when that is the KaKs_calculator result; the "-" indicates it was not computed because the alignment was too short.
+<li>View OrigID for sequence table and details.
+<li>List of cluster methods for filters and columns will be in order of creation, i.e. the same as shown on the overview.
+</ul>
+
+Software Details
+<ul>
+<li>mTCW db v64: the OrigID was added to the sequence table and hasOrig to the info table.
+</ul>
 <h4>v3.2.6  6-July-21</h4>
 There is a small schema update (dbVer 5.9) for <ttp>singleTCW</ttp>; the first time a sTCWdb is accessed, it will be updated.
 <p>

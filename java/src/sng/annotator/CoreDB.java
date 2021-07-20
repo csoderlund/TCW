@@ -70,7 +70,7 @@ public class CoreDB {
 	    		rs = mDB.executeQuery ( strQ );
 		    	if ( !rs.next() ) Out.die("Has Instantiate been executed?");
 		    	strAssemblyID = rs.getString("assemblyid");
-		    	Out.PrtWarn("singleTCW ID=" + stcw + " internal ID=" + strAssemblyID);
+		    	Out.PrtWarn("Database: " + stcw + " singleTCW ID: " + strAssemblyID);
 	    	}
 	   
 	    	username = rs.getString("username");

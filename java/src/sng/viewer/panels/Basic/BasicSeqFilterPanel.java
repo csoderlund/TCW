@@ -48,12 +48,12 @@ public class BasicSeqFilterPanel extends JPanel {
 	// Any change here will work in this file, but needs to be changed in BasicSeqQueryTab.SeqData class!!!
 	// These are columns from database and do not include row#
 	private static final String rowCol = "Row";
-	private static int idxLong = 4;
-	private static String [] STATIC_COLUMNS   = { "Seq ID", "TCW Remark", "User Remark", "Counts", "Longest", "Best HitID"};
-	private static final Class<?> [] COLUMN_TYPES =   { String.class, String.class, String.class, Integer.class, String.class , String.class}; 
-	private static final String [] MYSQL_COLUMNS = {
-		"contig.contigid", "contig.notes", "contig.user_notes", 
-		"contig.totalexp", "contig.longest_clone ", "contig.bestmatchid"};
+	private static int idxLong = 1;
+	private static String [] STATIC_COLUMNS   = { "Seq ID", "Longest", "TCW Remark", "User Remark", "Counts",  "Best HitID"};
+	private static final Class<?> [] COLUMN_TYPES =   { String.class, String.class, String.class, String.class , Integer.class,  String.class}; 
+	private static final String [] MYSQL_COLUMNS = { // CAS327 moved longest after contigid
+		"contig.contigid", "contig.longest_clone ", "contig.notes", "contig.user_notes", 
+		"contig.totalexp", "contig.bestmatchid"};
 	
 	private boolean isOnByDefault(int x) {
 		if (x!=4) return true;
@@ -259,12 +259,17 @@ public class BasicSeqFilterPanel extends JPanel {
 		}
 		public String getSearchStr() { 
 			String x = txtField.getText().trim(); 
+			
 			if (x.equals("") || x.equals("...") || x.equals("...")) return ""; 
 			
-			if (x.contains("...")) return Static.addQuoteDBList(loadList);
+			if (x.contains("...") && loadList!=null) return Static.addQuoteDBList(loadList);
+			
 			loadList=null;
 			
-			return Static.addQuoteDB(x);
+			x = Static.addQuoteDB(x);
+			if (!x.contains("%")) 	x = Static.addWildDB(x);
+			
+			return x;
 		}
 		public String getStatusCol() {
 			if (radSeqID.isSelected()) return "Seq ID";
@@ -272,6 +277,7 @@ public class BasicSeqFilterPanel extends JPanel {
 			else if (radTCW.isSelected()) return "TCW Remark";
 			else return "User Remark";
 		}
+		public boolean isLoadFile() { return loadList!=null;}
 		public String getStatusStr() { 
 			String x = txtField.getText().trim(); 
 			if (x.equals("")) return "";
@@ -507,19 +513,15 @@ public class BasicSeqFilterPanel extends JPanel {
 				theParentTab.setStatus("Loading Sequences. Please Wait..");
 				queryPanel.enableAddToTable(false);
 					
-				String searchStr = queryPanel.getSearchStr();
+				ArrayList<Object []> results = loadFromDatabase();
+				
+				// CAS327 changed rules to always use contains (was doing =, and if failed, do contain)
 				String statusSearch = queryPanel.getStatusStr();
-				
-				ArrayList<Object []> results = loadFromDatabase(false);
-				if (results.isEmpty() && queryPanel.loadList==null 
-						&& !searchStr.equals("") && !searchStr.contains("%")) {
-					results = loadFromDatabase(true); // search with wild chars
-					statusSearch = queryPanel.getStatusCol() + " contains " + statusSearch;
+				if (!statusSearch.equals("")) {
+					String op = (queryPanel.isLoadFile()) ? " = " : " contains ";
+					statusSearch = queryPanel.getStatusCol() + op + statusSearch;
 				}
-				else if (!statusSearch.equals(""))
-					statusSearch = queryPanel.getStatusCol() + " = " + statusSearch;
-				
-				statusSearch = "Filter: " + statusSearch;
+				statusSearch = "Search: " + statusSearch;
 				
 				queryPanel.enableAddToTable(true);
 				if (bBuild) theParentTab.tableBuild(results, statusSearch);
@@ -535,25 +537,20 @@ public class BasicSeqFilterPanel extends JPanel {
 		thread.setPriority(Thread.MIN_PRIORITY);
 		thread.start();
 	}
-	 public ArrayList<Object []> loadFromDatabase (boolean bSecond) throws Exception
-	 {
+	 public ArrayList<Object []> loadFromDatabase () throws Exception {
         try {
-    	  		String searchStr = queryPanel.getSearchStr();
-    	  		if (bSecond) searchStr = Static.addWildDB(searchStr);
-    	  		String searchCol = queryPanel.getSearchCol();
-    	  		
 		    String strQuery = "SELECT " + mysqlCols + " FROM contig";
 		  	
-	        if (!searchStr.equals("")) {
-	        		strQuery += " where " + searchCol;
-	        		if (queryPanel.loadList!=null)    strQuery+= " IN ("  + searchStr + ")"; 
-	        		else if (searchStr.contains("%")) strQuery+= " LIKE " + searchStr; 
-	        		else                              strQuery+= " = "    + searchStr; 
-	        		strQuery += " ORDER BY contig.contigid ASC";
+		    String searchStr = queryPanel.getSearchStr();
+		    if (!searchStr.equals("")) {
+	        	strQuery += " where " + queryPanel.getSearchCol();
+	        	
+	        	if (queryPanel.isLoadFile())  strQuery+= " IN ("  + searchStr + ")"; 
+	        	else 						  strQuery+= " LIKE " + searchStr; 
 	        }
-	        else {
-	        	 	strQuery += " ORDER BY contig.contigid ASC";       
-	        }
+	        
+	        strQuery += " ORDER BY contig.contigid ASC"; 
+	        
 	        DBConn dbc = theMainFrame.getNewDBC();
 	        ResultSet rset = dbc.executeQuery( strQuery );
 	        
@@ -562,19 +559,17 @@ public class BasicSeqFilterPanel extends JPanel {
 	        ArrayList<Object []> retVal = new ArrayList<Object []> ();
 	       
 	        while( rset.next() ) {
-	        		Object [] buffer = new Object[numStaticFields];
-	        	 	for (int i=0; i<numStaticFields; i++) { 
-	        	 		if (staticColTypes[i] == String.class) buffer[i] = rset.getString((i+1));
-	        	 		else                                   buffer[i] = rset.getInt((i+1));
-	        	 	}
-	    			retVal.add(buffer);
-	    		}
+        		Object [] buffer = new Object[numStaticFields];
+        	 	for (int i=0; i<numStaticFields; i++) { 
+        	 		if (staticColTypes[i] == String.class) buffer[i] = rset.getString((i+1));
+        	 		else                                   buffer[i] = rset.getInt((i+1));
+        	 	}
+    			retVal.add(buffer);
+    		}
 	        rset.close(); dbc.close(); 
-	    		return retVal;
+	    	return retVal;
 	    }
-	    catch(Exception e) {
-	        	ErrorReport.reportError(e,"Error: reading database loadFromDatabase");
-	    }
+	    catch(Exception e) {ErrorReport.reportError(e,"Error: reading database loadFromDatabase");}
         return null;
 	}
 	

@@ -68,7 +68,11 @@ public class runSTCWMain
 		System.out.println("Project: " + projName);
 		long startTime = Out.getTime();
 		
-		if (args.length>1) checkArgs(args);
+		if (args.length>1) {
+			checkArgs(args);
+			if (contMsg!=null) 
+				if (!yesNo(contMsg)) Out.die("Terminate");
+		}
 		
 		hostsObj = new HostsCfg(); // Read HOSTS.cfg
 		
@@ -86,13 +90,10 @@ public class runSTCWMain
 			return;
 		}
 		
-		if (contMsg!=null) 
-			if (!yesNo(contMsg)) Out.die("Terminate");
-		
 		// 3. create log file
 		if (bdoAnno || doGO || doRecalcORF) {
 			Out.createLogFile(getCurProjPath(), Globals.annoFile);
-			Out.PrtDateMsg("\n--------------- Annotate Sequences " + Globalx.strTCWver + "---------------");
+			Out.PrtDateMsg("\n--------------- Annotate Sequences ---------------");
 		}
 		
 		// 4. create database connection

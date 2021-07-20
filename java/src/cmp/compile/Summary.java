@@ -13,7 +13,6 @@ import java.text.DecimalFormat;
 import cmp.database.DBinfo;
 import cmp.database.Globals;
 import util.database.DBConn;
-import util.database.Globalx;
 import util.methods.ErrorReport;
 import util.methods.TimeHelpers;
 import util.methods.Out;
@@ -234,7 +233,7 @@ public class Summary {
 	        int nCol=fields.length;
 			String [][] rows = new String[nMethod][nCol];
 	
-	        String strQ = "SELECT PMid, PMtype, prefix, description from pog_method order by PMtype";
+	        String strQ = "SELECT PMid, PMtype, prefix, description from pog_method order by PMid"; // CAS327 changed from PMtype
 	   		rs = mDB.executeQuery(strQ);
 	   		int r=0;
 	   		while(rs.next()) {

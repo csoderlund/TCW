@@ -189,7 +189,7 @@ public class TCWprops
 			
 			mProps.setProperty("Anno_ORF_train_evalue", "1E-75"); // obsolete.
 			mProps.setProperty("Anno_ORF_train_min_set", Globals.pTRAIN_MIN); 
-			mProps.setProperty("Anno_ORF_train_CDS_file", "-1");
+			mProps.setProperty("Anno_ORF_train_CDS_file", "-"); // CAS327 was -1
  
 			mProps.setProperty("Anno_GO_DB", ""); 
 			mProps.setProperty("Anno_SLIM_SUBSET", ""); 

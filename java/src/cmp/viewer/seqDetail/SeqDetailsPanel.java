@@ -79,7 +79,7 @@ public class SeqDetailsPanel extends JPanel {
 	private void loadTextArea() {
 		try {
 			String sql = "SELECT UTstr, expListN, expList, ntLen, aaLen, " +
-					" orf_frame, orf_start, orf_end " +
+					" orf_frame, orf_start, orf_end, origStr " +
 					" from unitrans where UTid=" + seqIndex;
 			ResultSet rs = mDB.executeQuery(sql);
 			rs.next();
@@ -93,6 +93,9 @@ public class SeqDetailsPanel extends JPanel {
 			int frame = rs.getInt(6);
 			int start = rs.getInt(7);
 			int end = rs.getInt(8);
+			String origStr = rs.getString(9); // CAS327
+			if (origStr==null || origStr.contentEquals(seqName)) origStr="";
+			else origStr = "   " + origStr;
 
 			String grps="   Clusters: ";
 			sql = "SELECT PGstr from pog_members where UTid=" + seqIndex;
@@ -115,7 +118,7 @@ public class SeqDetailsPanel extends JPanel {
 				if (tok.length==2)
 					normStr += String.format("%9s ", tok[1]);	
 			}
-			textArea = " " + seqName + "   AA Len: " + aaLen;
+			textArea = " " + seqName + origStr + "   AA Len: " + aaLen;
 			if (!bAAonly)
 				textArea += "   NT Len: " + ntlen + "  Best ORF: RF" + frame + " " + start +".." + end ;
 			textArea += "\n\n";
@@ -191,7 +194,7 @@ public class SeqDetailsPanel extends JPanel {
 				" uq.description, uq.species, uq.nGO, uq.length " + 
 				" FROM unitrans_hits as tr " +
 				" JOIN " + HIT_TABLE + " as uq on tr.HITid=uq.HITid " + 
-				" WHERE tr.UTid=" + seqIndex + " order by tr.e_value ASC";
+				" WHERE tr.UTid=" + seqIndex + " order by tr.bit_score DESC, tr.e_value ASC"; // CAS327 add bit_score
 		ResultSet rs = mDB.executeQuery(sql);
 		if (rs == null) ErrorReport.die("null result on database query in SeqDetails loadHitTable");
 		

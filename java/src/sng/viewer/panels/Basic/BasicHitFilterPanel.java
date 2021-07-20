@@ -605,12 +605,8 @@ public class BasicHitFilterPanel extends JPanel {
 		public boolean isDesc() {
 			return radDesc.isSelected();
 		}
-		
-		public int getTypeSearch() {
-			String x = txtField.getText().trim(); 
-			if (loadList!=null || x.contains("%")) return 1; // 1st search only
-			else if (radDesc.isSelected()) return 2;			// 2nd search only
-			else return 3;									// 2nd search with % added
+		public boolean isLoadFile() {
+			return (loadList!=null);
 		}
 		public int getAlign() {
 			if (!chkUseAlign.isSelected()) return 0;
@@ -622,30 +618,29 @@ public class BasicHitFilterPanel extends JPanel {
 				return 0;
 			}
 		}
-		public String getWhere(boolean bSecond) {
+		public String getWhereSearch() {
 			if (!chkUseSearch.isSelected()) return "";
 			
 			String searchStr = txtField.getText().trim();
 			if (searchStr.equals("")) return ""; 
 
-			if (searchStr.endsWith("...") && loadList==null)       searchStr = searchStr.replace("...", "");
+			if (searchStr.endsWith("...") && loadList==null)  searchStr = searchStr.replace("...", "");
 			else if (!searchStr.endsWith("...") && loadList!=null) loadList = null;
 			
 			if (loadList!=null) searchStr = Static.addQuoteDBList(loadList);
 			else {
 				searchStr = Static.addQuoteDB(searchStr);
-				if (bSecond) searchStr = Static.addWildDB(searchStr);
+				if (!searchStr.contains("%")) searchStr = Static.addWildDB(searchStr);
 			}
 		      
             String col = "";
             if (radHitID.isSelected()) col = "tn.uniprot_id";
 			else col = "uq.description";
              
-        		String strQuery = " AND " + col;
-        		if (loadList!=null)    strQuery+=	" IN ("  + searchStr + ")";
-        		else if (searchStr.contains("%")) strQuery+=	" LIKE " + searchStr; 
-        		else                              strQuery+=	" = "    + searchStr; 
-            
+    		String strQuery = " AND " + col;
+    		if (loadList!=null)  strQuery+=	" IN ("  + searchStr + ")";
+    		else 				 strQuery+=	" LIKE " + searchStr; 
+   
 			return strQuery;
 		}
 		public String getWhere() {
@@ -2736,33 +2731,11 @@ public class BasicHitFilterPanel extends JPanel {
 				theParentTab.setStatus(status);
 				queryPanel.enableAddToTable(false);		
 				
-				// Search: (1) Do search, if not found, do again with wildcards.
-				// (2) Description - only do second wildcard search. (3) LoadFile - only do first exact search.
-				boolean firstSearch=true, secondSearch=false;
-				if (useSearch) {
-					int type = queryPanel.getTypeSearch();
-					if (type == 2) {
-						firstSearch=false; secondSearch=true;
-					}
-					else if (type == 3) {
-						secondSearch=true;
-					}
-				}
-				
-				ArrayList<Object []> results = null;
-				if (firstSearch) results = loadFromDatabase(false);
-				
-				String statusSearch = queryPanel.getSummaryText();
-				if(secondSearch && (results == null || results.size()==0)) {
-					results = loadFromDatabase(true); // search with wild chars
-					statusSearch = queryPanel.getSummaryColumn() + " contains " + statusSearch;
-				}
-				else if (useSearch) 
-					statusSearch = queryPanel.getSummaryColumn() + " = " + statusSearch;
+				ArrayList<Object []> results = loadFromDatabase();
 				
 				theParentTab.setStatus("Populating table with " + results.size() + " sequence-hit pairs... ");
 				
-				// create/update status
+				// create status
 				boolean useFilter = queryPanel.useFilter();
 				filters = status="";
 				if (useFilter) {
@@ -2775,6 +2748,8 @@ public class BasicHitFilterPanel extends JPanel {
 					status = "  Filters: " + status;
 				}
 				if (useSearch) {
+					String op = (queryPanel.isLoadFile()) ? " = " : " contains ";
+					String statusSearch = queryPanel.getSummaryColumn() + op + queryPanel.getSummaryText();
 					filters = statusSearch + ";" + filters;
 					status = "  Search: " + statusSearch + status;
 				}
@@ -2798,16 +2773,16 @@ public class BasicHitFilterPanel extends JPanel {
 	 * XXX Database calls
 	 */
 	/* the following two are called by BasicHitQueryTab */
-	 public ArrayList<Object []> loadFromDatabase (boolean bSecond) throws Exception
+	 public ArrayList<Object []> loadFromDatabase () throws Exception
 	 {
         ArrayList<Object []> resultList = null;
         try {
-        		String whereBegin =  		// more clauses added below. 
-        			" FROM pja_db_unitrans_hits as tn, " +
-        			"     pja_db_unique_hits as uq, " +
-        			"     contig as ct" + 
-            		" WHERE tn.DUHID = uq.DUHID" +
-            		" AND   tn.CTGID = ct.CTGID";
+    		String whereBegin =  		// more clauses added below. 
+    			" FROM pja_db_unitrans_hits as tn, " +
+    			"     pja_db_unique_hits as uq, " +
+    			"     contig as ct" + 
+        		" WHERE tn.DUHID = uq.DUHID" +
+        		" AND   tn.CTGID = ct.CTGID";
         		
             // create columns to search on; the order is read in BasicHitQueryTab.HitSeqData
             int numSetFields = (libColNames == null) ? 0 : libColNames.length;
@@ -2821,21 +2796,21 @@ public class BasicHitFilterPanel extends JPanel {
             	"uq.description, uq.species, uq.dbtype, uq.taxonomy, uq.length, ct.consensus_bases ";
             			
             if (hasGO) {
-            		fields += ",uq.goBrief,uq.goList, uq.interpro,uq.kegg, uq.pfam, uq.ec "; 
-            		numStaticFields += 6;
+            	fields += ",uq.goBrief,uq.goList, uq.interpro,uq.kegg, uq.pfam, uq.ec "; 
+            	numStaticFields += 6;
             }
             if(libColNames != null) {
-            		String col = ", ct." + Globals.LIBRPKM;
-	            	for(int x=0; x<libColNames.length; x++) 
-	            		fields += col + libColNames[x];
+            	String col = ", ct." + Globals.LIBRPKM;
+	            for(int x=0; x<libColNames.length; x++) 
+	            	fields += col + libColNames[x];
             }
             if(pvalColNames != null) {
-            		String col = ", ct." + Globals.PVALUE;
-            		for(int x=0; x<pvalColNames.length; x++) 
-            			fields += col + pvalColNames[x];
+            	String col = ", ct." + Globals.PVALUE;
+            	for(int x=0; x<pvalColNames.length; x++) 
+            		fields += col + pvalColNames[x];
             }
             // build where clause
-            String strQuery = "SELECT " + fields + whereBegin + queryPanel.getWhere(bSecond);
+            String strQuery = "SELECT " + fields + whereBegin + queryPanel.getWhereSearch();
            
             if (queryPanel.useFilter()) { 
             	strQuery += queryPanel.getWhere();

@@ -25,6 +25,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import cmp.database.Globals;
+import cmp.viewer.panels.DisplayDecimalTab;
 import util.database.Globalx;
 
 public class SortTable extends JTable implements ListSelectionListener {
@@ -125,7 +126,7 @@ public class SortTable extends JTable implements ListSelectionListener {
     	}
     	else if (cl == Double.class) {
     		boolean showVal = true;
-    		String noVal="-"; 
+    		String noVal=Globalx.sNoVal; 
     		try {
     			double val = ((Double)getValueAt(Index_row, Index_col));
       		
@@ -139,7 +140,7 @@ public class SortTable extends JTable implements ListSelectionListener {
     			}
     			else if(compLbl.getText().length() == 0) showVal=false;
     			
-        		if (showVal)	compLbl.setText(formatDouble(val, false));
+        		if (showVal)	compLbl.setText(DisplayDecimalTab.formatDouble(val, false));
         		else compLbl.setText(noVal);
         	 	compLbl.setHorizontalAlignment(SwingConstants.RIGHT); 
     		}
@@ -159,7 +160,7 @@ public class SortTable extends JTable implements ListSelectionListener {
     			}
     			else if(compLbl.getText().length() == 0) showVal=false;
     			
-        		if (showVal)	compLbl.setText(formatDouble(val, isPerc));
+        		if (showVal)	compLbl.setText(DisplayDecimalTab.formatDouble(val, isPerc));
         		else compLbl.setText(noVal);
         	 	compLbl.setHorizontalAlignment(SwingConstants.RIGHT); 
     		}
@@ -190,16 +191,6 @@ public class SortTable extends JTable implements ListSelectionListener {
     static DecimalFormat df1 = new DecimalFormat("#0.0###;#0.0###");
     static DecimalFormat df2 = new DecimalFormat("0.#E0;0.##E0");
     
-    static public String formatDouble(double val, boolean isP) {
-    	if (val == 0) return "0.000"; 
-    	if (isP) return String.format("%.1f", val); 
-    	
-    	double a = Math.abs(val);
-    	if (a>=10.0)    return String.format("%.1f", val); 
-    	if (a>=1.0)     return String.format("%.2f", val); 
-    	if (a>=0.001)  return String.format("%.3f", val);  
-    	return  String.format("%.1E", val);
-	}
    
 	private static final int MAX_AUTOFIT_COLUMN_WIDTH = 120; // in pixels
     public void autofitColumns() {
@@ -211,6 +202,12 @@ public class SortTable extends JTable implements ListSelectionListener {
         
         for (int i = 0;  i < getModel().getColumnCount();  i++) { // for each column
             column = getColumnModel().getColumn(i);
+           
+            int buf=0;
+            if      (theModel.getColumnClass(i) == String.class) buf=2;
+            else if (theModel.getColumnClass(i) == Double.class) buf=4; 
+            else if (theModel.getColumnClass(i) == Float.class)  buf=4; 
+           
             
             comp = headerRenderer.getTableCellRendererComponent(
                    this, column.getHeaderValue(), false, false, 0, i);
@@ -225,13 +222,12 @@ public class SortTable extends JTable implements ListSelectionListener {
 
 	            comp = getFormattedComponent(comp, j, i);
 	             
-	            int width = comp.getMinimumSize().width;
-	            if(theModel.getColumnClass(i) == String.class) width += 2;
-	            else if(theModel.getColumnClass(i) == Double.class) width += 2; 
+	            int width = comp.getMinimumSize().width + buf;
+	  
 	            cellWidth = Math.max(cellWidth, width);
-	            
+	           
 	            if (j > 100) break; // only check beginning rows, for performance reasons
-            }         
+            }        
             column.setPreferredWidth(Math.min(Math.max(headerWidth, cellWidth), MAX_AUTOFIT_COLUMN_WIDTH));
         }
     }

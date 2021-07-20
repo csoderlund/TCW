@@ -8,14 +8,23 @@ import java.util.prefs.Preferences;
 import util.methods.ErrorReport;
 
 /**
- * Used by all Tables for display
+ * Used by all Tables 
+ * 		sTCW display - controlled by sng.viewer.panels.DisplayDecimal
+ * 						all decimal have an DisplayFloat object
+ * 		mTCW display - controlled by cmp.viewer.panel.DisplayDecimal
+ * 						one DisplayFloat object in the above file
  */
 public class DisplayFloat implements Comparable<DisplayFloat>
 {
 	// DisplayDecimalTab.setDefaults and setPrefStringRounding sets values
 	static public double Largest=999999.99, Smallest=0.01; 
-	static public int Num_sig = 2, Num_dec = 2;
+	static public int Num_sig = 2, Num_dec = 2, Num_E = 2;
 	static public int Use_mode = 1;
+	
+	// used for Set Defaults
+	static public double dLargest=999999.99, dSmallest=0.01; 
+	static public int dNum_sig = 2, dNum_dec = 2, dNum_E = 2;
+	static public int dUse_mode = 1;
 	
 	static public final int USE_FORMAT = 1;
 	static public final int USE_BIGDECIMAL = 2;
@@ -26,7 +35,8 @@ public class DisplayFloat implements Comparable<DisplayFloat>
 	 */	
 	public static String getPrefIDRounding() {return "rounding";	}
 	public static String getPrefStringRounding() {
-		return Use_mode + "," + Num_sig + "," + Num_dec + "," + Largest + "," + Smallest;
+		return Use_mode + "," + Num_sig + "," + Num_dec + "," + Largest 
+				+ "," + Smallest + "," + Num_E;
 	}
 	public static void setPrefStringRounding(String str) {
 		if (str.trim().length()==0) return;
@@ -38,17 +48,20 @@ public class DisplayFloat implements Comparable<DisplayFloat>
 			if (n>2) Num_dec = Integer.parseInt(arr[2]);
 			if (n>3) Largest = Double.parseDouble(arr[3]);
 			if (n>4) Smallest = Double.parseDouble(arr[4]);
+			if (n>5) Num_E = Integer.parseInt(arr[5]);
+			else Num_E = Num_sig;
 		}
 		catch(Exception e) {ErrorReport.prtReport(e, "Invalid rounding preferences:" + str);}
 	}
-	public static void prefFlushRounding(int mode, int sig, int dec, double lg, double sm, Preferences prefs) {
+	public static void prefFlushRounding(int mode, int enot, int sig, int dec, double lg, double sm, Preferences prefs) {
 		Use_mode = mode;
+		Num_E = enot;
 		Num_sig = sig;
 		Num_dec = dec;
 		Largest=lg;
 		Smallest=sm;
 		try{
-			if (prefs!=null) {
+			if (prefs!=null) { // sTCW only - mTCW does its own setting after this
 				prefs.put(getPrefIDRounding(), getPrefStringRounding());
 				prefs.flush();
 			}
@@ -56,6 +69,14 @@ public class DisplayFloat implements Comparable<DisplayFloat>
 		catch (Exception err) {ErrorReport.reportError(err, "setting rounding preferences");}
     }
 	
+	/********************************************************
+	 * For mTCW - v327
+	 */
+	public DisplayFloat() {}
+	public String getString(Object inVal) {
+		setValue(inVal);
+		return toString();
+	}
 	/****************************************************************
 	 * DisplayFloat class for rounding numbers
 	 */
@@ -100,12 +121,12 @@ public class DisplayFloat implements Comparable<DisplayFloat>
         }
         else if ( inVal instanceof String )
         {
-	        	String str = (String)inVal;
-	        	if (!(str == null || str.length() == 0)) 
-	        		d = Double.parseDouble( str );
-	        }
-	        else
-	        	throw new RuntimeException ( "Unexepected numeric type of " + inVal.getClass() );
+        	String str = (String)inVal;
+        	if (!(str == null || str.length() == 0)) 
+        		d = Double.parseDouble( str );
+        }
+        else
+        	throw new RuntimeException ( "Unexepected numeric type of " + inVal.getClass() );
 	}
 	
 	public double getValue ( ) { return d; }
@@ -126,16 +147,16 @@ public class DisplayFloat implements Comparable<DisplayFloat>
     // 45.678 --> 45.68, .00045678 --> .00046
     private String useBigDecimal()
     {
-	    	BigDecimal bd1 = new BigDecimal(d);
-	  
-	    	int numSig = Math.min(bd1.precision(), Num_sig); // can't ask for more sig figs than we started with
-	    	
-	    	BigDecimal bd2 = bd1.setScale(Num_dec, RoundingMode.HALF_UP);
-	    	if (bd2.precision() >= numSig) 
-	    		return bd2.toString();// didn't lose sig figs with the decimal rounding
-	    
-	    	BigDecimal bd3 = new BigDecimal(d, new MathContext(numSig));
-    		return bd3.toString();
+    	BigDecimal bd1 = new BigDecimal(d);
+  
+    	int numSig = Math.min(bd1.precision(), Num_sig); // can't ask for more sig figs than we started with
+    	
+    	BigDecimal bd2 = bd1.setScale(Num_dec, RoundingMode.HALF_UP);
+    	if (bd2.precision() >= numSig) 
+    		return bd2.toString();// didn't lose sig figs with the decimal rounding
+    
+    	BigDecimal bd3 = new BigDecimal(d, new MathContext(numSig));
+		return bd3.toString();
     }
     
 	private String useFormat() {
@@ -145,14 +166,14 @@ public class DisplayFloat implements Comparable<DisplayFloat>
 		double ad = Math.abs(d);
 		
 		if (ad>=1) {
-			if (ad>Largest) format = "%." + Num_sig + "E";
+			if (ad>Largest) format = "%." + (Num_E-1) + "E";
 			else            format = "%." + Num_dec + "f";
 			
 			return String.format(format, d);
 		}
 		else {
 			if (ad<Smallest) {
-				format =  "%." + (Num_sig-1) + "E";
+				format =  "%." + (Num_E-1) + "E";
 				return String.format(format, d);
 			}
 			else {
@@ -160,7 +181,6 @@ public class DisplayFloat implements Comparable<DisplayFloat>
 			}
 		}
 	}
-	
 	
 	private double d;
 }

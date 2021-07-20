@@ -225,10 +225,10 @@ public class BasicSeqTab extends Tab {
 		public SeqData(int r, Object [] values) {
 			nRowNum = r;
 			strSeqID = (String) values[0];
-			strTCW = (String) values[1];
-			strUser = (String) values[2];
-			nTotalExp = (Integer) values[3];
-			longestRead = (String) values[4];
+			longestRead = (String) values[1];
+			strTCW = (String) values[2];
+			strUser = (String) values[3];
+			nTotalExp = (Integer) values[4];
 			strBestHit = (String) values[5];
 			if (strBestHit==null) strBestHit=""; 
 		}
@@ -237,10 +237,10 @@ public class BasicSeqTab extends Tab {
 			switch(column) {
 				case 0: return nRowNum;
 				case 1: return strSeqID;
-				case 2: return strTCW;
-				case 3: return strUser;
-				case 4: return nTotalExp;
-				case 5: return longestRead;
+				case 2: return longestRead;
+				case 3: return strTCW;
+				case 4: return strUser;
+				case 5: return nTotalExp;
 				case 6: return strBestHit;
 				default:
 					return 0;
@@ -253,11 +253,12 @@ public class BasicSeqTab extends Tab {
 			
 			switch(column) {
 			case 0: return 0; // CAS326 order * ((Integer) nRowNum).compareTo((Integer) obj.nRowNum);
-			case 1: return order * strSeqID.compareTo(obj.strSeqID);	
-			case 2: return order * compareStrings(strTCW, obj.strTCW);
-			case 3: return order * compareStrings(strUser, obj.strUser);
-			case 4: return order * ((Integer) nTotalExp).compareTo((Integer) obj.nTotalExp);
-			case 5: return order * compareStrings(longestRead, obj.longestRead);
+			case 1: return order * strSeqID.compareTo(obj.strSeqID);
+			case 2: return order * compareStrings(longestRead, obj.longestRead);
+			case 3: return order * compareStrings(strTCW, obj.strTCW);
+			case 4: return order * compareStrings(strUser, obj.strUser);
+			case 5: return order * ((Integer) nTotalExp).compareTo((Integer) obj.nTotalExp);
+			
 			case 6: return order * compareStrings(strBestHit, obj.strBestHit);
 			default: return 0;
 			}

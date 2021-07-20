@@ -7,7 +7,6 @@ package cmp.viewer.table;
 import java.util.Iterator;
 import java.util.Vector;
 
-import util.database.Globalx;
 import util.methods.ErrorReport;
 import util.methods.Out;
 import cmp.database.DBinfo;
@@ -50,7 +49,8 @@ public class FieldData {
 	private static String msaScore1="", msaScore2="";
 	
 	private static DBinfo theInfo;
-	public static boolean hasNTdb=false, hasGO=false, hasPCC=false, hasKaKs=false, hasStats=false, hasNTblast=false, hasMultiScore=false;
+	public static boolean hasNTdb=false, hasGO=false, hasPCC=false, hasKaKs=false;
+	public static boolean hasStats=false, hasNTblast=false, hasMultiScore=false, hasOrig=false;
 	public static void setState(DBinfo info) {
 		theInfo = info;
 		hasNTdb=theInfo.nNTdb()>1;
@@ -62,6 +62,7 @@ public class FieldData {
 		hasKaKs = theInfo.hasKaKs();
 		msaScore1 = theInfo.getMSA_Score1();
 		msaScore2 = theInfo.getMSA_Score2();
+		hasOrig = theInfo.hasOrig();
 		
 		if (theInfo.nNTdb()==0) System.out.println("   This is an AA-mTCW.");
 	}
@@ -443,7 +444,6 @@ public class FieldData {
 	/**********************************************
 	 * XXX Sequence columns 
 	 **********************************************/
-	
 	private static String [] SEQ_SECTION;
 	private static  String [] SEQ_COLUMNS, SEQ_SQLCOL, SEQ_SQLTAB, SEQ_DESCRIP ; 
 	public static  boolean [] SEQ_DEFAULTS;
@@ -453,6 +453,7 @@ public class FieldData {
 	private static void buildSeq() {
 		int nCol=20, nNT=9;
 		if (hasGO) nCol++;
+		if (hasOrig) nCol++;
 		
 		if (!hasNTdb) {
 			nCol -= nNT;
@@ -486,6 +487,8 @@ public class FieldData {
 		int c=0;
 		addSeq(c++, ROWNUM, Integer.class, null, null, "Row number", false);
 		addSeq(c++, SEQID, String.class,  SEQ_TABLE, "UTstr", "Name of sequence", false);
+		if (hasOrig) 
+			addSeq(c++, "OrigID", String.class,  SEQ_TABLE, "origStr", "Name of original sequence", false);
 		addSeq(c++,  AALEN, Integer.class, SEQ_TABLE, "aaLen", "Amino acid length", false);
 		//addSeq(c++, "Total Count", Integer.class, SEQ_TABLE, "totExp", "Sum of the counts for all conditions", false);
 		if (hasNTdb) {

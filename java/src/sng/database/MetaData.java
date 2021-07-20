@@ -50,6 +50,8 @@ public class MetaData {
 				bHasPairwise = true;
 				nPairs = cnt;
 			}
+			cnt = mDB.executeCount("SELECT COUNT(*) FROM contig where user_notes is not null LIMIT 1");
+			if (cnt>0) bHasUser=true;
 			
 			cnt = mDB.executeCount("SELECT COUNT(*) FROM contig WHERE numclones > 1 LIMIT 1"); 	
 			if (cnt>0) bHasAssembly = true;
@@ -189,7 +191,7 @@ public class MetaData {
 			String n = annoVer.replace(".","");
 			int v = Static.getInteger(n);
 			if (v<317) {
-				Out.prt("+++Database was annotated before v3.1.7 - It was built with 'Best Eval', not 'Best Bits'.");
+				Out.prt("+++Database was annotated before v3.1.7 (" + annoVer + ") - It was built with 'Best Eval', not 'Best Bits'.");
 			}
 		}
 		catch (Exception e) {ErrorReport.prtReport(e,"Checking version");}
@@ -400,6 +402,7 @@ public class MetaData {
 	 public int nContigSets() {if (seqLibNames==null) return 0; else return seqLibNames.length;}
 	 public boolean hasContigSets() { return bHasSeqSets; }
 	 public boolean hasNs() { return bHasNs; }
+	 public boolean hasUserRemark() {return bHasUser;}
 
 	 public String getLongLabel() {if (bHasAssembly) return "Longest"; else return "Orig ID";} // CAS311
 	 public boolean bUseOrigName() {return bUseOrigName;} // CAS311
@@ -479,6 +482,7 @@ public class MetaData {
 	 private boolean bHasLoc = false;
 	 private boolean bHasNgroup = false;
 	 private boolean bHasORFs = false;
+	 private boolean bHasUser = false;	// CAS327
 	 
 	 private boolean bHasCAP3 = false;
 	 private String pathCAP3 = null;

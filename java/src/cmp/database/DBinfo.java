@@ -55,6 +55,7 @@ public class DBinfo {
 			col.clear(); 
 			
 			hasCounts = (mDB.executeCount("select count(*) from unitrans where totExp>0")>0); // CAS305
+			hasOrig = mDB.executeBoolean("select hasOrig from info");
 		}
 		catch (Exception e){ErrorReport.prtReport(e, "Error getting datasets");}	
 	}
@@ -67,7 +68,7 @@ public class DBinfo {
 			methodPrefix = new String [nMethods];
 			
 			ResultSet rs = mDB.executeQuery("select PMid, PMstr, prefix from pog_method" +
-					" order by PMstr"); 
+					" order by PMid"); // CAS327 was PMstr, which is not input order
 			
 			int x=0;
 			while (rs.next()) {
@@ -587,13 +588,14 @@ public class DBinfo {
 		return (allSeqLib.length>0);
 	}
 	
+	public boolean hasOrig() { return hasOrig;}
+	
 	// XXX - EditStatsPanel only
 	public int getCntPCC() {return cntPCC;}  
 	public int getCntKaKs() { return cntKaKs;}
 	public int getCntMultiScore() {return cntMulti;}
 	public int getCntStats() {return cntStats;} 
 	public int getCntPairGrp() {return cntPairGrp;} 
-	
 	
 	public boolean hasPCC() 	{ return hasPCC;}
 	public boolean hasStats() 	{return hasStats;}
@@ -628,7 +630,7 @@ public class DBinfo {
 	private String msaScore1="", msaScore2="";
 	
 	private boolean hasDBalign=false, hasNTblast=false, isNTonly=false, hasCounts=true;
-	private boolean hasPCC=false, hasStats=false, hasKaKs=false, hasMulti=false;
+	private boolean hasPCC=false, hasStats=false, hasKaKs=false, hasMulti=false, hasOrig=true;
 	
 	private int cntAAdb=0, cntNTdb=0;
 	private int cntSeq=-1, cntGrp=-1, cntPair=-1, cntGO=-1;

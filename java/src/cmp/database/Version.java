@@ -14,8 +14,8 @@ import cmp.compile.LoadSingleTCW; // db62 only
  * If columns are being added for a version, add them here and to schema
  */
 public class Version {
-	public static final String DBver = "6.3"; 
-	private final double nVer=6.3;
+	public static final String DBver = "6.4"; 
+	private final double nVer=6.4;
 	
 	/************************************************
 	 * CAS310 added this with return value as nothing works if not updated
@@ -35,7 +35,7 @@ public class Version {
 			if (d>nVer) {
 				Out.PrtError("The mTCW database was created with a newer version of TCW.");
 				Out.prt("   This version of the software uses database mdb" + DBver);
-				return false;
+				return true; // CAS327 let it continue
 			}
 			if (!UserPrompt.showContinue("Database update", "The database needs a few small changes.")) 
 				return false;
@@ -49,6 +49,7 @@ public class Version {
 			if (d < 6.1) addv61(mDB);
 			if (d < 6.2) addv62(mDB);
 			if (d < 6.3) addv63(mDB);
+			if (d < 6.4) addv64(mDB);
 			
 			Out.prt("Complete update for mdb" + DBver);
 			return true;
@@ -56,6 +57,17 @@ public class Version {
 		catch (Exception e) {ErrorReport.die(e, "Error checking schema"); return false;}
 	}
 	//--------------------------------------------------------//
+	
+	private void addv64(DBConn mDB) { // CAS327 July 2021
+		try {
+			Out.PrtSpMsg(1, "Updating for mdb6.4");
+			mDB.tableCheckAddColumn("unitrans", "origStr", "VARCHAR(30)", "");
+			mDB.tableCheckAddColumn("info", "hasOrig", "tinyint default 0", ""); 
+			mDB.executeUpdate("update info set schemver='6.4'");
+		}
+		catch (Exception e) {ErrorReport.die(e, "Updating for mdb6.1");}
+	}
+	
 	private void addv63(DBConn mDB) { //v3.1.2 Nov/2020
 		try {
 			Out.PrtSpMsg(1, "Updating for mdb6.3 (v3.1.2) - add infoKeys");

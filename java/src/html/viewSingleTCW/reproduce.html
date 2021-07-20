@@ -36,23 +36,14 @@ because they are computed differently.
 
 <table class=tabley>
 <tr><th>Column<th>Search<th>Obtain number
-<tr><td>Sequences with hits
-	<td>Filters: Annotated
-	<td>Number of rows
-<tr><td>Unique hits
-	<td>AnnoDB Hits: Seq:None(slow)<sup>*</sup>
-	<td>Hits number at top of table
-<tr><td>Total sequence hits
-	<td>AnnoDB Hits: Seq:None(slow)<sup>*</sup>
-	<td>Pairs number at top of table
-<tr><td>Bases covered by hit
-	<td>AnnoDB Hits: Seq:Best Bits
-	<td>Unselect Group by Hit ID; column:Align; 
+<tr><td>Sequences with hits<td>Filters: Annotated<td>Number of rows
+<tr><td>Unique hits<td>AnnoDB Hits: Seq:None(slow)<sup>*</sup><td>Hits # above table
+<tr><td>Total sequence hits<td>AnnoDB Hits: Seq:None(slow)<sup>*</sup><td>Pairs # above table
+<tr><td>Bases covered by hit<td>AnnoDB Hits: Seq:Best Bits<td>Unselect "Group by Hit ID""; column:Align; 
 	<br>Stats, column:Sum; for NT, multiply by 3
 <tr><td>Total bases 
 	<br>(residues for AA seqs)
-	<td>Show All 
-	<td>Column:Length; Stats, column:Sum
+	<td>Show All<td>Column:Length; Stats, column:Sum
 </table>
 <sup>*</sup> Use Clear All
 
@@ -66,30 +57,23 @@ because they are computed differently.
 	<br>&nbsp;&nbsp;&nbsp; values for AnnoDB,
 	<br>General &lt;=1 annoDB
  	<td>Number of rows
-<tr><td colspan=3><i>The following all use AnnoDB Hits, 
-and select the correct ANNODB from the AnnoDBs panel.</i>	
-<tr><td>BITS<td>Seq:Best Bits<td>Seqs number above the table
-<tr><td>ANNO<td>Seq:Best Anno<td>Seqs number above the table
+<tr><td colspan=3><i>The following all use AnnoDB Hits panel with the correct ANNODB selected from the AnnoDBs panel.
+</i>	
+<tr><td>BITS<td>Seq:Best Bits<td>Seqs # above table
+<tr><td>ANNO<td>Seq:Best Anno<td>Seqs # above table
 
-<tr><td>UNIQUE<td>Seq:None(slow)
-	<td>Hits number above the table
-<tr><td>TOTAL<td>Seq:None(slow)
-	<td>Pairs number above the table
+<tr><td>UNIQUE<td>Seq:None(slow)<td>Hits # above table
+<tr><td>TOTAL<td>Seq:None(slow) <td>Pairs # above table
 
-<tr><td>AVG-SIM<td>Seq:None(slow)
-	<td>Unselect Group by Hit ID; column:%Sim; Stats, column:Average
+<tr><td>AVG-SIM<td>Seq:None(slow)<td>Unselect "Group by Hit ID""; column:%Sim; Stats, column:Average
 
-<tr><td>HIT-SEQ<td>Seq:Rank=1
-	<td>Seqs number, the percentage is of the #Seqs
-
-<tr><td>AVG-SIM<td>Seq:Rank=1 
-    <td>Column:%Sim; Stats, column:Average
-
-<tr><td>Cover &gt;=N<td>Seq:Rank=1,%Sim&gt;=N,%Hcov&gt;=N
-	<td>Seqs number, the percentage is of the HIT-SEQ number
+<tr><td colspan=3>Rank=1 is the best hit for a sequence for a given annoDB.
+<tr><td>HAS SEQ<td>Seq:Rank=1<td>Seqs # above table; percentage of total #Seqs
+<tr><td>AVG-SIM<td>Seq:Rank=1 <td>Uncheck "Group by Hit""; Column:%Sim; Stats, column:Average
+<tr><td>Cover &gt;=N<td>Seq:Rank=1,%Sim&gt;=N,%HitCov&gt;=N
+	<td>Seqs # above table; percentage of HIT-SEQ
 </table>
-Halign is short for HitAlign, which is the difference between the hit stop and start coordinates
-divided by the length of the protein.
+HitCov is the difference between the hit stop and start coordinates divided by the length of the protein.
 
 <h3>Top 15 species from total: N</h3>
 The N is the number of unique species based on the first two words of the
@@ -173,23 +157,24 @@ that are found in un-assembled sequences.
 	to the row number that start having #n&gt;10.
 </table>
 
-<h3>Total ORFs:</h3>
+<h3>ORFs stats:</h3>
 <table class=tabley>
 <tr><th>Column<th>Search<th>Obtain number
 <tr><td colspan=3><i>The following use the Basic Sequence. Select "TCW" and enter
 the Substring indicated.</i>
 <tr><td>Is Longest ORF<td>!LG<td>#Seqs minus Result number
 <tr><td>Markov Best Score<td>!mk<td>#Seqs minus Result number
+<tr><td>ORF=Hit<td>ORF=Hit<td>#Seqs minus Result number
 <tr><td>MultiFrame<td>Multi-frame<td>Result number
 <tr><td>&gt;=9 Ns in ORF<td>9N<td>Result number. View in Sequence Frame to see n's in ORF (CDS). 
 Others may have n's, but not in the CDS.
-<tr><td>Stops in Hit (Best Bits)<td>Stops<td>Result number
+<tr><td>Stops in Hit<td>Stops<td>Result number
 
 <tr><td colspan=3><i>The following use the Filters, SNPs and ORFs.</i>
 <tr><td>Has Hit<td>Protein confirmation<td>Number of rows
 
 <tr><td>All of the above<td>Protein confirmation<td>
-Use the Basic Sequence (as above), search !LG, then add to that mk!b; 
+Use the Basic Sequence (as above), search !LG, then add to that !mk using "Add to Table"; 
 select all sequences and show in Sequence table with the 'Is PR Frame'
 column; take the number that have use the protein frame and subtract
 from the total number from 'Protein confirmation'.

@@ -1351,7 +1351,7 @@ public class BasicGOFilterTab extends Tab {
 			singleMode = true;
 			if(chkGOID.isSelected()) {
 				String theVal = searchStr.replaceAll("[A-Za-z:]", "");
-				
+				theVal = theVal.trim(); // CAS327
 				try {
 					if (loadList!=null && searchStr.startsWith(loadStart)) { // gonums checked in loadFile
 						theStatusStr = "GO ID=" + searchStr;

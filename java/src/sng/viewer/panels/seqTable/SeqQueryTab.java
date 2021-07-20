@@ -170,12 +170,14 @@ public class SeqQueryTab extends Tab
 			hasNQuery = new UIqueryIncEx("Has N's:", "Yes", "No", "Ignore",  2 , width);
 			addRowToPanel( hasNQuery, thePanel );
 		}
-		hasRemarkQuery =  new UIqueryIncEx("Has User Remark:", "Yes", "No", "Ignore", 2, width);
-		addRowToPanel( hasRemarkQuery, thePanel );
-		
+		if (metaData.hasUserRemark()) { // CAS327 check
+			hasRemarkQuery =  new UIqueryIncEx("Has User Remark:", "Yes", "No", "Ignore", 2, width);
+			addRowToPanel( hasRemarkQuery, thePanel );
+		}
 		if (metaData.hasLoc()) {
 			hasLocQuery =    new UIqueryIncEx("Has a Location:", "Yes", "No", "Ignore", 2, width);
 			addRowToPanel( hasLocQuery, thePanel );
+			
 			chkLocN = new ToggleTextField("N group", "0", "", nIntField, null);
 			chkLocStart = new ToggleTextField("Start ", "0", "",  nIntField, null);
 			chkLocEnd = new ToggleTextField("End ", "", "",  nIntField, null);
@@ -1162,16 +1164,18 @@ public class SeqQueryTab extends Tab
 			}
 		}
 		
-		inc = hasRemarkQuery.getValue();
-		if ( inc == FILTER_INCLUDE ) {
-			strSQL = appendANDPredicate ( strSQL, 
-					"(contig.user_notes IS NOT NULL AND contig.user_notes != \"\")" );
-			joinSum("Has User Remarks");
-		}
-		else if ( inc == FILTER_EXCLUDE ) {
-			strSQL = appendANDPredicate ( strSQL, 
-					"(contig.user_notes IS NULL or contig.user_notes='')");
-			joinSum("No User Remarks");
+		if (metaData.hasUserRemark()) { // CAS327 check
+			inc = hasRemarkQuery.getValue();
+			if ( inc == FILTER_INCLUDE ) {
+				strSQL = appendANDPredicate ( strSQL, 
+						"(contig.user_notes IS NOT NULL AND contig.user_notes != \"\")" );
+				joinSum("Has User Remarks");
+			}
+			else if ( inc == FILTER_EXCLUDE ) {
+				strSQL = appendANDPredicate ( strSQL, 
+						"(contig.user_notes IS NULL or contig.user_notes='')");
+				joinSum("No User Remarks");
+			}
 		}
 		
 		if (metaData.hasLoc()) {

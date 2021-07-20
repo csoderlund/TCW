@@ -1183,7 +1183,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
           		"JOIN pja_db_unitrans_hits as t " +
           		"WHERE t.DUHID = q.DUHID " + 
           		"AND   t.CTGID = " + ctgData.getCTGID() + 
-          		" order by t.best_rank DESC, t.bit_score DESC, t.e_value ASC"; // CAS317 added rank, bit to sort
+          		" order by t.bit_score DESC, t.e_value ASC"; // CAS317 added rank, bit to sort; CAS327 removed rank
        
 		  HashSet <String> annodbs = new HashSet <String> (); 
 		  Vector <String> order = new Vector <String> (); // to keep ordered by e-value

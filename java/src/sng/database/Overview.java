@@ -29,11 +29,12 @@ public class Overview {
 	public Overview(DBConn dbC) {
 		mDB = dbC;
 	}
-	public Overview(DBConn dbC, int c1, int c2) { // update overview from execAnno when COVER set
+	// update overview from execAnno when COVER set (see below for update overview from viewSingle)
+	public Overview(DBConn dbC, int c1, int c2) { 
 		mDB = dbC;
 		if (c1!=0) COVER1 = c1;
 		if (c2!=0) COVER2 = c2;
-		Out.Print("Using Cover values " + c1 + " " + c2);
+		Out.Print("Using Cover values " + COVER1 + " " + COVER2);
 		try { // CAS326
 			mDB.executeUpdate("update assem_msg set anno_msg=''");
 		}
@@ -59,37 +60,42 @@ public class Overview {
     public void overview (Vector<String> lines ) {   
         try {   
         	boolean found=true;
-        	String pga_msg="", meta_msg="";
+        	String pga_msg=null, meta_msg=null;
     		
-            ResultSet rset = mDB.executeQuery("SELECT pja_msg FROM assem_msg");
-            if (rset.next() ) {
-            	pga_msg = rset.getString(1);
-            	try {
-            		rset = mDB.executeQuery("SELECT meta_msg FROM assem_msg");
-            		if (rset.next()) meta_msg = rset.getString(1);
-            	} catch (Exception e) {};
-            }
-            else{
-            	lines.add("Error creating overview (email tcw@agcol.arizona.edu for fix)");
-            	found=false;
-            }
-            rset.close();
-            if (!found) return;
-          
-            // Sanity check overview
-            if (pga_msg != null && !pga_msg.startsWith("Project: Not") && !STCWMain.updateMSG) {
-                lines.add(pga_msg);
-                lines.add(meta_msg);
-            }
-            else { // Update overview from viewSingleTCW
+        	if (!STCWMain.updateMSG) {
+	            ResultSet rset = mDB.executeQuery("SELECT pja_msg FROM assem_msg");
+	            if (rset.next() ) {
+	            	pga_msg = rset.getString(1);
+	            	try {
+	            		rset = mDB.executeQuery("SELECT meta_msg FROM assem_msg");
+	            		if (rset.next()) meta_msg = rset.getString(1);
+	            	} catch (Exception e) {};
+	            }
+	            else{
+	            	lines.add("Error creating overview (email tcw@agcol.arizona.edu for fix)");
+	            	found=false;
+	            }
+	            rset.close();
+	            if (!found) return;
+        	}
+        	else {// Update overview from viewSingleTCW
         		if (STCWMain.COVER1!=0) {
         			COVER1 = STCWMain.COVER1;
         			Out.prtSp(1, "Using Cover1 values " + COVER1);
+        			mDB.executeUpdate("update assem_msg set anno_msg=''");
         		}
         		if (STCWMain.COVER2!=0) {
         			COVER2 = STCWMain.COVER2;
         			Out.prtSp(1, "Using Cover2 values " + COVER2);
+        			mDB.executeUpdate("update assem_msg set anno_msg=''");
         		}
+        	}
+          
+            if (pga_msg != null) {
+                lines.add(pga_msg);
+                lines.add(meta_msg);
+            }
+            else { 
             	computeOverview(lines);
             }     
             return;
@@ -105,10 +111,11 @@ public class Overview {
      ****************************************************/
     private String computeOverview(Vector <String> lines)  {
     	try { 
-    /* All sections except processing info */
+    /* Compute */
     		setFlags();
 		    computeSections(lines, true); 
 		    
+	/* save & put together results */
 		    if (lines.size()<3)  lines.add("Error creating overview");
     	    
     		String text = "";
@@ -542,9 +549,9 @@ public class Overview {
 	    		for (int i=0; i<maxIdx; i++) if (!noHit[i]) hitSeq[dbid]++;
 	    	   	Out.prtSpCnt(1, hitSeq[dbid], "Seqs with hits for DB#" + dbid + "             ");
 	     	}
-	   /* Loop through annoDBs creating table */
-	        String [] dfields =  {"ANNODB",  "ONLY", "BITS", "ANNO", "UNIQUE", "TOTAL", "AVG", "HIT-SEQ (#SEQ)", "BEST  AVG", "COVER", "COVER"};
-	        String [] dfields2 = {"",          "",     "", "",  "",        "",     "%SIM",   "",                 "HIT  %SIM", ">="+COVER1, ">="+COVER2};
+	   /* Loop through annoDBs creating table */ // CAS327 change BEST HIT to Rank=1
+	        String [] dfields =  {"ANNODB",  "ONLY", "BITS", "ANNO", "UNIQUE", "TOTAL", "AVG", "Rank", "HAS (%Seqs)", "AVG", "COVER", "COVER"};
+	        String [] dfields2 = {"",          "",     "",    "",    "",        "",     "%SIM"," =1 ", "HIT        ", "%SIM", ">="+COVER1, ">="+COVER2};
 	        int [] djust = {1,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	        
 	        ResultSet rs = mDB.executeQuery("SELECT DBID, dbtype, taxonomy, nUniqueHits, " +
@@ -570,8 +577,12 @@ public class Overview {
     	        	
     	        j = rs.getInt(4);		rows[r][c++] = Out.kbFText(j);    //nUniqueHits
     	        
+    	       
     	        int totPairs = rs.getInt(8);	rows[r][c++] = Out.kbFText(totPairs);  //total hit-seq pairs    	        
     	       	rows[r][c++] = Out.avg(totSimSum[dbid], totPairs);  
+    	       	
+    	        rows[r][c++] = " | "; // rank=1
+    	        
    	       	
     	       	int hseq = hitSeq[dbid];
     	      	rows[r][c++] =  Out.kbFText(hseq) + " " + Out.perFtxtP(hseq, numSeqs); 

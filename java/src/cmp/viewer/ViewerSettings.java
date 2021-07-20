@@ -7,15 +7,17 @@ package cmp.viewer;
  *   and mTCW_xx also has x1 and x2, they will be shown. 
  * But if mTCW_y with dataset y1 and y2 are shown and selected, 
  *   then next time mTCW_x is displayed, they x1 and x2 will no longer be shown.
+ *   
+ * // Linux: user/.java/.userPrefs/viewSingleTCW - can view with 'more'
+ * // Mac: ~/Library/Preferences/com.apple.java.util.prefs.plist - open with Finder
  */
 import java.awt.Color;
 import java.awt.Font;
 import java.util.prefs.Preferences;
 
 import cmp.database.Globals;
-
-
 import util.methods.ErrorReport;
+import util.ui.DisplayFloat;
 
 public class ViewerSettings {
 	static final String DEFAULT_NAME = "mTCW"; 
@@ -107,6 +109,16 @@ public class ViewerSettings {
 	public void setProfileName(String name) { strProfileName = name; }
 	public String getProfileName() { return strProfileName; }
 	
+	// CAS327 these two are called from cmp.viewer.panels.DisplayDecimalTab
+	public void initDecimalDisplay() { 
+		String prefStr = getString(DisplayFloat.getPrefIDRounding());
+		if (prefStr!=null)
+			DisplayFloat.setPrefStringRounding(prefStr);
+	}
+	public void setDecimalDisplay(String id, String vals) {
+		putString(id, vals);
+	}
+	/* *************************************************** */
 	public class FrameSettings {
 		public Color getBGColor()    { return getColor("BGCOLOR"); }
 		public Font getDefaultFont() { return getFont("DEFAULTFONT"); }
@@ -119,6 +131,7 @@ public class ViewerSettings {
 		public void setFrameHeight(int height) { putInt("FRAMEHEIGHT", height); } 
 	}
 
+	
 	public class GrpSettings {
 		public String [] getSelectedColumns() { return getString("GRPCOLUMNS").split(","); }
 		

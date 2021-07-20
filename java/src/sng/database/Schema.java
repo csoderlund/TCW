@@ -857,7 +857,7 @@ public class Schema
 			mDB.executeUpdate("update schemver set schemver='5.9'");
 			dbVer = DBVer.Ver58;
 			dbVerStr = curVerStr;
-			Out.Print("Finish update for sTCW Schema db5.8");
+			Out.Print("Finish update for sTCW Schema db5.9");
 		}
 		catch (Exception e) {ErrorReport.reportError(e, "Error on check schema v3.2.3");}	
 	}

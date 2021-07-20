@@ -50,7 +50,7 @@ public class Schema {
 					+ " values(" 
 					+ quote(Version.DBver)	+ ","
 					+ quote(Sver) 			+ "," 
-					+ quote("start")			+ ","
+					+ quote("start")		+ ","
 					+ "NOW()" 				+ "," 
 					+ quote(user) 			+ ", " 
 					+ quote(path) 	+ "," 
@@ -84,6 +84,7 @@ public class Schema {
 					"ntPgm		tinytext, " + // BlastPanel - always the same, but in case that changes
 					"aaInfo		tinytext, " + // Pairwise 
 					"ntInfo		tinytext, " + // Pairwise 
+					"hasOrig	tinyint default 0," + // CAS327 SeqID!=OrigID for at least one dataset
 					"hasLib 	tinyint default 0," +
 					"hasDE 		tinyint default 0," +
 					"hasPCC 	tinyint default 0," + // CAS310 db62
@@ -135,25 +136,26 @@ public class Schema {
 			sqlU =  "CREATE TABLE unitrans ( " +
 					"UTid 		int NOT NULL PRIMARY KEY AUTO_INCREMENT, " +
 					"UTstr 		VARCHAR(30), " +		// seqeunce name
+					"origStr	VARCHAR(30), " +		// CAS327 the original ID if the seqID is diff in stcwdb
 					"ASMid 		smallint, " +       	// sTCW index into assembly data
 					"numAlign 	smallint default 0, " +	// num_clones if assembled
-					"ntLen  		int default 0, " +	// nucleotide sequence length
+					"ntLen  	int default 0, " +	// nucleotide sequence length
 					"aaLen		int default 0, " +	// protein sequence length
 					"orf_frame	tinyint default 0," +
 					"orf_start	int default 0," +
-					"orf_end		int default 0," +
+					"orf_end	int default 0," +
 					"cdsLen		int default 0," +
-					"utr5Len		int default 0," +	
-					"utr3Len		int default 0," +	
-					"CpG			float default 0," +
+					"utr5Len	int default 0," +	
+					"utr3Len	int default 0," +	
+					"CpG		float default 0," +
 					"GC			float default 0," +
 					"utr5Ratio	float default 0," + // CpG ratio for UTR5
 					"cdsRatio	float default 0," + // CpG ratio for CDS
 					"utr3Ratio	float default 0," + // CpG ratio for UTR3
 					"HITid 		int default 0, " + // this is best anno hit
-					"HITstr 		VARCHAR(30), " +
+					"HITstr 	VARCHAR(30), " +
 					"e_value 	double, "     +		// blast evalue to hit
-					"totExp 		int, " +
+					"totExp 	int, " +
 					"totExpN 	int, " +
 					"expList 	text, " +			// list of libraires
 					"expListN 	text, " +			// list of normalized libraires
@@ -169,7 +171,7 @@ public class Schema {
 			// The top N hits for each annoDB for each sequence. The term unitrans is outdated
 			sqlU =  "CREATE TABLE unitrans_hits ( " +
 					"HITid 		int, "	 +		// Primary in unique_hits
-					"HITstr 		VARCHAR(30), " +
+					"HITstr 	VARCHAR(30), " +
 					"UTid 		int, " +        // Primary for unitrans
 					"UTstr 		varchar(30), " + 
 					"percent_id smallint, " +
@@ -195,19 +197,19 @@ public class Schema {
 			// DB hits from all sequences 
 		 	sqlU =	"CREATE TABLE unique_hits ( " +
 		   			"HITid 		INT NOT NULL PRIMARY KEY AUTO_INCREMENT, " +
-		   			"HITstr 		VARCHAR(30), " +		// HitID in viewMulti
-		   			"dbtype 		VARCHAR(10), " +
+		   			"HITstr 	VARCHAR(30), " +		// HitID in viewMulti
+		   			"dbtype 	VARCHAR(10), " +
 		   			"taxonomy 	VARCHAR(20), " +
 		   			"isProtein 	tinyint, " +
 		   			"description VARCHAR(250), " +
 		   			"species 	VARCHAR(100), " +
-		   			"length 		int, " +
+		   			"length 	int, " +
 		   			"sequence 	mediumtext, " +
 		   			"goList 	mediumtext, " +
-		   			"nGO			int default 0, " + 	 // CAS310 db62
-		   			"nSeq			int default 0, " +   // CAS310 db62
-		   			"nBest			int default 0, " +   // CAS310 db62
-		   			"e_value		double default 0, "	+// CAS310 db62
+		   			"nGO		int default 0, " + 	 // CAS310 db62
+		   			"nSeq		int default 0, " +   // CAS310 db62
+		   			"nBest		int default 0, " +   // CAS310 db62
+		   			"e_value	double default 0, "	+// CAS310 db62
 		   			"unique (HITstr), " +	
 		   			"index idx1 (HITstr) " +
 		   			") ENGINE=MyISAM;";
@@ -218,7 +220,7 @@ public class Schema {
 					"PMid 			smallint NOT NULL PRIMARY KEY AUTO_INCREMENT, " + // should only be a few methods in db
 					"PMstr 			VARCHAR(30), " +
 					"PMtype			VARCHAR(30), " +
-					"adddate date, " +
+					"adddate 		date, " +
 					"prefix			VARCHAR(10), " + // (allow 5 from interface)
 					"description 	text, " +
 					"parameters		text " + 		// not used yet, but should save
@@ -233,10 +235,10 @@ public class Schema {
 					"count 		smallint, " +			// number of unitrans in cluster
 					"perAnno 	tinyint default 0, " +	// percent with best hit
 					"HITid 		int default 0, " +		// index into unique_hit, best hit across all members
-					"HITstr 		VARCHAR(30), " +
+					"HITstr 	VARCHAR(30), " +
 					"e_value 	double, "     +	 		// best evalue
 					"taxa		tinytext, " +
-					"perPCC 		tinyint default -1, " + 
+					"perPCC 	tinyint default -1, " + 
 					"minPCC		float default 0,"  +	
 					
 					"conSeq		mediumTEXT, " +    // consensus sequence
@@ -280,33 +282,33 @@ public class Schema {
 			
 			// XXXAll pairwise statistics, initiated with the search hits
 			sqlU = "create table pairwise (" +
-					"PAIRid 		int NOT NULL PRIMARY KEY AUTO_INCREMENT, " +
-					"ASMid1 		smallint not null, " +     // primary in assembly
-					"ASMid2 		smallint not null, " +	   // primary in assembly
+					"PAIRid 	int NOT NULL PRIMARY KEY AUTO_INCREMENT, " +
+					"ASMid1 	smallint not null, " +     // primary in assembly
+					"ASMid2 	smallint not null, " +	   // primary in assembly
 					"UTid1 		int not null, " +		   // primary in unitrans
 					"UTid2 		int not null, " +          // primary in unitrans
-					"UTstr1 		VARCHAR(30) not null, " +	// name of first sequence
-					"UTstr2 		VARCHAR(30) not null, " +	// name of second sequence
-					"CDSlen1		int default 0," +
-					"CDSlen2		int default 0," +
-					"PCC			float default  " + Globalx.dNoVal + "," + // PCC of RPKM, between -1 and 1
+					"UTstr1 	VARCHAR(30) not null, " +	// name of first sequence
+					"UTstr2 	VARCHAR(30) not null, " +	// name of second sequence
+					"CDSlen1	int default 0," +
+					"CDSlen2	int default 0," +
+					"PCC		float default  " + Globalx.dNoVal + "," + // PCC of RPKM, between -1 and 1
 					"HITid 		int default 0, " +		//  primary in unique_hit
 					"HITstr		VARCHAR(30), " +
 					
 					// blast - nt and aa
 					"ntEval		double default -2.0,  " + 	// blast e-value of pair
 					"ntSim		float default -2.0, "		+ 
-					"ntAlign		int default -2, "		+
+					"ntAlign	int default -2, "		+
 					"ntGap		smallint default -2, " +
-					"ntOlap1		float default -2.0, " +		
-					"ntOlap2		float default -2.0, " +		
+					"ntOlap1	float default -2.0, " +		
+					"ntOlap2	float default -2.0, " +		
 					"ntBit		int default -2, " +
 					"aaEval		double default -2.0,  " + 	// blast e-value of pair
 					"aaSim		float default -2.0, " +		
-					"aaAlign		int default -2, "		+
+					"aaAlign	int default -2, "		+
 					"aaGap		smallint default -2, " +
-					"aaOlap1		float default -2.0, " +		
-					"aaOlap2		float default -2.0, " +		
+					"aaOlap1	float default -2.0, " +		
+					"aaOlap2	float default -2.0, " +		
 					"aaBit		int default -2, " +
 					"aaBest		tinyint default -2, " +				
 	
@@ -319,13 +321,13 @@ public class Schema {
 					"nOpen		smallint default -2, " +		// gap open
 					
 					"cAlign		int default -2, "	  +		// number of aligned codons minus codons with gaps
-					"pCmatch		float default -2.0, " +		// exact match
+					"pCmatch	float default -2.0, " +		// exact match
 					"pCsyn		float default -2.0, " +		// synonymous
 					"pC4d		float default -2.0, " +		// codon pair in 4-fold  
 					"pC2d		float default -2.0, " +		// codon pair in 2-fold
 					"pCnonsyn	float default -2.0, " +		// non-synonymous
 					
-					"pAmatch		float default -2.0, " +		// exact match
+					"pAmatch	float default -2.0, " +		// exact match
 					"pAsub		float default -2.0, " +		// %Apos - likely substitution
 					"pAmis		float default -2.0, " +		// %Aneg - unlikely substitution
 					
@@ -361,8 +363,8 @@ public class Schema {
 			// contains NT alignment used for statistics. 
 			// currently not used for viewMulti
 			sqlU = "create table pairMap (" +
-					"PAIRid 		int, " +
-					"cds			text," +   // n-m:n-M###n-m   '###' delinates cds1 from cds2
+					"PAIRid 	int, " +
+					"cds		text," +   // n-m:n-M###n-m   '###' delinates cds1 from cds2
 					"utr5		text," +
 					"utr3		text," +
 					"index idx1(PAIRid) " +
@@ -372,15 +374,15 @@ public class Schema {
 			// XXX GO 
 			// all assigned and inherited GO-seq pairs
 			sqlU = "create table go_seq (" +
-					" UTid 	int, " +		// Primary in unitrans
-					" gonum	int, " +
-					// the following 5 go togehter
+					" UTid 		int, " +		// Primary in unitrans
+					" gonum		int, " +
+					// the following 5 go together
 					" bestHITstr varchar(30), "	+	// index into unique_hits.HITid
-					" bestEval double, " +        
-					" bestEV boolean default 0, " + 
-					" bestAN boolean default 0, " +
-					" EC varchar(5) default ''," + // if in parenthesis, inherited
-					" direct boolean default 0, " + // any hit_GO could be direct whereas EC is inherited
+					" bestEval 	double, " +        
+					" bestEV 	boolean default 0, " + 
+					" bestAN 	boolean default 0, " +
+					" EC 		varchar(5) default ''," + // if in parenthesis, inherited
+					" direct 	boolean default 0, " + // any hit_GO could be direct whereas EC is inherited
 					" unique(UTid,gonum), " +
 					" index idx1(UTid), " +
 					" index idx2(gonum) " +
@@ -388,21 +390,21 @@ public class Schema {
 			mDB.executeUpdate(sqlU);
 			
 			sqlU = "create table go_info (" +
-					" gonum int, " +
-					" descr text, " +
+					" gonum 	int, " +
+					" descr 	text, " +
 					" term_type enum('biological_process','cellular_component','molecular_function'), " +
-					" level smallint default 0, " + 
-					" bestEval double, " + 
-					" nSeqs int default 0, " + 
+					" level 	smallint default 0, " + 
+					" bestEval 	double, " + 
+					" nSeqs 	int default 0, " + 
 					" unique(gonum), " +
 					" index(gonum) ) ENGINE=MyISAM;";
 			if (!mDB.tableExist("go_info")) mDB.executeUpdate(sqlU);
 			
 			mDB.executeUpdate("create table go_graph_path (" +
-					" relationship_type_id tinyint unsigned, " + // e.g. 1 is_a, 27 part_of; can have duplicates because relation can be both
-					" distance smallint unsigned, " + 			//e.g. if A part_of B is_a C part_of D, then distance=3 for A part_of D 
-	    			" child int unsigned, " +
-	    			" ancestor int unsigned, " +
+					" relationship_type_id 	tinyint unsigned, " + // e.g. 1 is_a, 27 part_of; can have duplicates because relation can be both
+					" distance 				smallint unsigned, " + //e.g. if A part_of B is_a C part_of D, then distance=3 for A part_of D 
+	    			" child 				int unsigned, " +
+	    			" ancestor 				int unsigned, " +
 	    			" index(child), " +
 	    			" index(ancestor)) ENGINE=MyISAM;");
 		} 
@@ -422,76 +424,74 @@ public class Schema {
 		boolean hasDE=true, hasTPM=true;
 		
 		ResultSet rs;
-		try
-		{
-	    		for(int x=0; x<cmpPanel.getSpeciesCount(); x++) 
-	    		{
-	    			String asm = cmpPanel.getSpeciesSTCWid(x);
+		try {
+    		for(int x=0; x<cmpPanel.getSpeciesCount(); x++) 
+    		{
+    			String asm = cmpPanel.getSpeciesSTCWid(x);
+			
+			asmLibs.put(asm, new HashSet<String>());
+			asmDEs.put(asm, new HashSet<String>());
+			
+			DBConn sDBC = runMTCWMain.getDBCstcw(cmpPanel, x);	
 				
-				asmLibs.put(asm, new HashSet<String>());
-				asmDEs.put(asm, new HashSet<String>());
-				
-				DBConn sDBC = runMTCWMain.getDBCstcw(cmpPanel, x);	
-					
-				int cntR=0, cntP=0;
-				String r="", p="";
-				// ctglib=1 means there are expression libraries.
-				int cnt = sDBC.executeCount("select count(*) from library where ctglib=1");
-				if (cnt>0) {
-					rs = sDBC.executeQuery("select libid from library where ctglib=0");
-					while (rs.next())
-					{
-						String libName = rs.getString(1);
-						asmLibs.get(asm).add(libName);
-						addCheckCase(allLibs,libName);
-						cntR++;  r += " " + libName;	
-					}
-				
-					rs = sDBC.executeQuery("show columns from contig");
-					while (rs.next()) {
-						String colName = rs.getString(1);
-						if (colName.startsWith(Globals.PRE_S_DE)) {
-							String col = colName.substring(Globals.PRE_S_DE.length());
-							asmDEs.get(asm).add(col);
-							addCheckCase(allDEs,col);
-							cntP++; p += " " + col;
-						}
-					}
-					if (cntR>0) {
-						String msg = asm + " " + cntR + " TPM (" + r + ") ";
-						if (cntP>0) msg += + cntP + " DE (" + p + ")";
-						Out.PrtSpMsg(2, msg);
+			int cntR=0, cntP=0;
+			String r="", p="";
+			// ctglib=1 means there are expression libraries.
+			int cnt = sDBC.executeCount("select count(*) from library where ctglib=1");
+			if (cnt>0) {
+				rs = sDBC.executeQuery("select libid from library where ctglib=0");
+				while (rs.next())
+				{
+					String libName = rs.getString(1);
+					asmLibs.get(asm).add(libName);
+					addCheckCase(allLibs,libName);
+					cntR++;  r += " " + libName;	
+				}
+			
+				rs = sDBC.executeQuery("show columns from contig");
+				while (rs.next()) {
+					String colName = rs.getString(1);
+					if (colName.startsWith(Globals.PRE_S_DE)) {
+						String col = colName.substring(Globals.PRE_S_DE.length());
+						asmDEs.get(asm).add(col);
+						addCheckCase(allDEs,col);
+						cntP++; p += " " + col;
 					}
 				}
-				sDBC.close();
-	    		}
-	    		if (allLibs.size() > 0) {
-	    			Out.PrtSpCntMsg(2,allLibs.size(), "Total unique conditions ");    			
-	    		}
-	    		else hasTPM = false;
-	    		
-	    		if (allDEs.size() > 0) {
-	    			Out.PrtSpCntMsg(2, allDEs.size(), "Total unique DE names");
-	    		}
-	    		else hasDE = false;
-	    		
-	    		if (!hasDE && !hasTPM) {
-	    			Out.PrtSpMsg(2, "No TPM or DE columns in any of the databases");
-	    			return true;
-	    		}
-	    		
-	    		// Add TPM (RPKM for pre-305)
-	    		for (String lib : allLibs)
-	    		{
-	    			mDB.executeUpdate("alter table unitrans add " + Globals.PRE_LIB + lib + " double default " + Globalx.dStrNoVal);
-	    		}
-	    		// Add DE 
-	    		for (String de : allDEs)
-	    		{	// DEs can be between -1 and 1; generally -2 is not displayed (see sortTable.java)
-	    			mDB.executeUpdate("alter table unitrans add " + Globals.PRE_DE + de + " double default " + Globalx.dStrNoDE);
-	    		}
-
-	    		return true;
+				if (cntR>0) {
+					String msg = asm + " " + cntR + " TPM (" + r + ") ";
+					if (cntP>0) msg += + cntP + " DE (" + p + ")";
+					Out.PrtSpMsg(2, msg);
+				}
+			}
+			sDBC.close();
+    		}
+    		if (allLibs.size() > 0) {
+    			Out.PrtSpCntMsg(2,allLibs.size(), "Total unique conditions ");    			
+    		}
+    		else hasTPM = false;
+    		
+    		if (allDEs.size() > 0) {
+    			Out.PrtSpCntMsg(2, allDEs.size(), "Total unique DE names");
+    		}
+    		else hasDE = false;
+    		
+    		if (!hasDE && !hasTPM) {
+    			Out.PrtSpMsg(2, "No TPM or DE columns in any of the databases");
+    			return true;
+    		}
+    		
+    		// Add TPM (RPKM for pre-305)
+    		for (String lib : allLibs)
+    		{
+    			mDB.executeUpdate("alter table unitrans add " + Globals.PRE_LIB + lib + " double default " + Globalx.dStrNoVal);
+    		}
+    		// Add DE 
+    		for (String de : allDEs)
+    		{	// DEs can be between -1 and 1; generally -2 is not displayed (see sortTable.java)
+    			mDB.executeUpdate("alter table unitrans add " + Globals.PRE_DE + de + " double default " + Globalx.dStrNoDE);
+    		}
+    		return true;
 		}
 		catch(Exception e) {
 			ErrorReport.prtReport(e, "Error adding count columns");
@@ -505,12 +505,12 @@ public class Schema {
 	static public boolean addDynamicSTCW(DBConn mDB, String prefix) {
 		String field = Globals.PRE_ASM + prefix;
 	    try {
-	    		mDB.executeUpdate("ALTER TABLE pog_groups ADD " + field + " integer default 0");
-	    		return true;
+	    	mDB.executeUpdate("ALTER TABLE pog_groups ADD " + field + " integer default 0");
+	    	return true;
 	    }
 	    catch (Exception e) {
-	    		Out.PrtError("Your selected sTCW databases have duplicate singleTCW IDs: "  + prefix);
-	    		Out.PrtSpMsg(2, "The only way to change an ID is to rebuild one of the databases");
+	    	Out.PrtError("Your selected sTCW databases have duplicate singleTCW IDs: "  + prefix);
+	    	Out.PrtSpMsg(2, "The only way to change an ID is to rebuild one of the databases");
 	    }
 	    return false;
 	}
@@ -526,10 +526,8 @@ public class Schema {
 	static private void addCheckCase(Vector <String> set, String name)
 	{
 		boolean found = false;
-		for (String s : set)
-		{
-			if (s.equalsIgnoreCase(name)) 
-			{
+		for (String s : set) {
+			if (s.equalsIgnoreCase(name)) {
 				found = true;
 				break;
 			}

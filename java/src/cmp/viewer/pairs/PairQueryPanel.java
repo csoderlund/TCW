@@ -296,8 +296,20 @@ public class PairQueryPanel extends JPanel {
 		row = Static.createRowPanel();
 		rgKaKs = new Range("KaKs", "0.0", "", "kaks", "Selective strength");
 		row.add(rgKaKs);row.add(Box.createHorizontalStrut(5));
-		rgPval = new Range("p-value", "0.0", "0.05",  "pVal", "Fisher exact test of KaKs value");
-		row.add(rgPval);
+		
+		
+		naLabel = toolTipLabel("KaKs=NA", "If 'Yes', KaKs is equal NA; if 'No', KaKs is NOT equal NA", true);
+		Static.addHorzBox(row, naLabel, width);
+		row.add(naLabel); row.add(Box.createHorizontalStrut(3));
+	
+		naIncButton = Static.createRadioButton("Yes",false);
+		row.add(naIncButton); row.add(Box.createHorizontalStrut(3));
+		naExcButton = Static.createRadioButton("No",false);
+		row.add(naExcButton); row.add(Box.createHorizontalStrut(3));
+		naIgnButton = Static.createRadioButton("Either",true);
+		row.add(naIgnButton); row.add(Box.createHorizontalStrut(3));
+		ButtonGroup grp = new ButtonGroup();
+		grp.add(naIncButton); grp.add(naExcButton); grp.add(naIgnButton);
 		
 		if ((theViewerFrame.getInfo().hasKaKs())) {
 			page.add(new JLabel("  KaKs"));
@@ -500,8 +512,8 @@ public class PairQueryPanel extends JPanel {
 		
 		if (hasStats) {
 			statIgnButton.setSelected(true);
-			rgKaKs.clear(); rgPval.clear();
-			
+			rgKaKs.clear(); 
+			naIgnButton.setSelected(true);
 			rgStatAlign.clear();
 			rgStatGap.clear(); rgStatAneg.clear(); rgStatTsTv.clear(); rgStatCdiff.clear();  rgStat5diff.clear(); rgStat3diff.clear(); rgStatOlap1.clear(); rgStatOlap2.clear();
 			rgStatCexact.clear(); rgStatCsyn.clear(); rgStatC4d.clear(); rgStatCnonsyn.clear(); rgStatAexact.clear(); rgStatApos.clear();
@@ -552,8 +564,16 @@ public class PairQueryPanel extends JPanel {
 			query = Static.combineBool(query, rgStatTsTv.getSQL());
 			query = Static.combineBool(query, rgStatOlap1.getSQL());
 			query = Static.combineBool(query, rgStatOlap2.getSQL());
-			query = Static.combineBool(query, rgKaKs.getSQL());
-			query = Static.combineBool(query, rgPval.getSQL());
+			
+			String sub=""; // CAS327
+			String kk = rgKaKs.getSQL();
+			String na = "";
+			if (naIncButton.isSelected())      na = "pairwise.kaks=" + Globalx.dNullVal;
+			else if (naExcButton.isSelected()) na = "pairwise.kaks!="+ Globalx.dNullVal;
+			if (kk!="" && na !="") 	sub = "( " + Static.combineBool(kk, na, false) + ")";
+			else if (kk!="") 		sub = kk;
+			else if (na!="") 		sub = na;
+			query = Static.combineBool(query, sub);
 		}
 		// datasets
 		if (radDiffDS.isSelected()) query = Static.combineBool(query, "pairwise.ASMid1!=pairwise.ASMid2", true);
@@ -650,7 +670,8 @@ public class PairQueryPanel extends JPanel {
 			summary = Static.combineSummary(summary, rgStatOlap2.getSum());
 		
 			summary = Static.combineSummary(summary, rgKaKs.getSum());
-			summary = Static.combineSummary(summary, rgPval.getSum());
+			if (naIncButton.isSelected()) summary = Static.combineSummary(summary, "KaKs=NA");
+			else if (naExcButton.isSelected()) summary = Static.combineSummary(summary, "KaKs!=NA");
 		}
 		// datasets
 		if (radDiffDS.isSelected()) summary = Static.combineSummary(summary, "Different sets");
@@ -1018,7 +1039,9 @@ public class PairQueryPanel extends JPanel {
 	private Range rgStatGap, rgStatTsTv, rgStatAlign, rgStatCdiff, rgStat5diff, rgStat3diff, rgStatOlap1, rgStatOlap2;
 	private Range rgStatCexact, rgStatCsyn, rgStatC4d, rgStatCnonsyn, rgStatAexact, rgStatApos, rgStatAneg;
 	
-	private Range rgKaKs, rgPval; // CAS310 had unused KaKs 
+	private Range rgKaKs; // CAS310 had unused KaKs 
+	private JLabel naLabel;
+	private JRadioButton naIncButton= null, naExcButton= null, naIgnButton= null;
 	
 	// dataset
 	private JRadioButton radDiffDS, radSameDS, radIgnoreDS;

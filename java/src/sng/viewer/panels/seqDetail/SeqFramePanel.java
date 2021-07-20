@@ -243,8 +243,8 @@ public class SeqFramePanel extends JPanel {
 			return;
 		}
 		String text;
-		if (topAction==0) {
-			text="Length: " + sequence.length() + "   " + remark + "\n";
+		if (topAction==0) { // CAS327 add orfFrame
+			text="Best ORF: " + orfFrame + "  Length: " + sequence.length() + "   " + remark + "\n";
 			for (OrfData o : ORFs) {
 				String space = (o.frame==dFrame) ? "> " : "  ";
 				text += space + o.line + "\n";

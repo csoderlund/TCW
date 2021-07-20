@@ -178,31 +178,31 @@ public class PairSumStats {
 			double [] qrt = Stats.setQuartiles(kkVec, Globalx.dNoVal);
 			
 			// table for overview
-			String [] fields = {"Average", "","   Ka/Ks", "", "   Quartiles", "", "   P-value", ""};
+			String [] fields = {"Ka/Ks", "" ,"   Quartiles", "", "   Average", "", "   P-value", ""};
+			
 			int [] justify =   {1, 0, 1,   0,  1,  0,  1,  0};
 			int nRow = 4;
 		    int nCol=  fields.length;
 		    String [][] rows = new String[nRow][nCol];
 		    int r=0, c=0;
 		  
-		    rows[r][c] = "Ka";      rows[r++][c+1] = Out.formatDouble(sumKa/nKa); 
-		    rows[r][c] = "Ks";      rows[r++][c+1] = Out.formatDouble(sumKs/nKs);
-		    // 
-		    //rows[r][c] = "Ka/Ks";   rows[r++][c+1] = Out.formatDouble(sumKaKs/nKaKs); 
-		    rows[r][c] = "P-value"; rows[r++][c+1] = Out.formatDouble(sumPval/nPval);
-		    rows[r][c] = "";        rows[r++][c+1] = "";
+		    // CAS327 changed order of columns
+		    rows[r][c] = "NA ";   rows[r++][c+1] = String.format("%,d",kcnt[0]); // CAS327 was Zero
+		    rows[r][c] = "KaKs~1";   rows[r++][c+1] = String.format("%,d",kcnt[1]);
+		    rows[r][c] = "KaKs<1";   rows[r++][c+1] = String.format("%,d",kcnt[2]); 
+		    rows[r][c] = "KaKs>1";   rows[r++][c+1] = String.format("%,d",kcnt[3]);
 		    
 		    r=0; c=2;
-		    rows[r][c] = "   Zero ";   rows[r++][c+1] = String.format("%,d",kcnt[0]);
-		    rows[r][c] = "   Ka=Ks";   rows[r++][c+1] = String.format("%,d",kcnt[1]);
-		    rows[r][c] = "   Ka<Ks";   rows[r++][c+1] = String.format("%,d",kcnt[2]); 
-		    rows[r][c] = "   Ka>Ks";   rows[r++][c+1] = String.format("%,d",kcnt[3]);
+		    rows[r][c] = "   Q1(Lower)"; rows[r++][c+1] =  Out.formatDouble(qrt[0]);
+		    rows[r][c] = "   Q2(Median)"; rows[r++][c+1] = Out.formatDouble(qrt[1]);
+		    rows[r][c] = "   Q3(Upper)"; rows[r++][c+1] =  Out.formatDouble(qrt[2]);
+		    rows[r][c] = ""; rows[r++][c+1] = "";
 		    
 		    r=0; c=4;
-		    rows[r][c] = "   Q1(Lower)"; rows[r++][c+1] =  String.format("%6.5f", qrt[0]);
-		    rows[r][c] = "   Q2(Median)"; rows[r++][c+1] = String.format("%6.5f", qrt[1]);
-		    rows[r][c] = "   Q3(Upper)"; rows[r++][c+1] =  String.format("%6.5f", qrt[2]);
-		    rows[r][c] = ""; rows[r++][c+1] = "";
+		    rows[r][c] = "   Ka";      rows[r++][c+1] = Out.formatDouble(sumKa/nKa); 
+		    rows[r][c] = "   Ks";      rows[r++][c+1] = Out.formatDouble(sumKs/nKs); 
+		    rows[r][c] = "   P-value"; rows[r++][c+1] = Out.formatDouble(sumPval/nPval);
+		    rows[r][c] = "";        rows[r++][c+1] = "";
 		    
 		    r=0; c=6;
 		    rows[r][c] = "   <1E-100"; rows[r++][c+1] = String.format("%,d",pcnt[0]);
@@ -213,9 +213,9 @@ public class PairSumStats {
 		    int npair = kcnt[0]+kcnt[1]+kcnt[2]+kcnt[3];
 		    String sz = String.format("%,d",npair);
 		    if (method!="")
-		    	   infoStr =  pad +  "KaKs method: " + method + "    Pairs: " + sz + "\n\n"; 
+		    	   infoStr =  pad +  "KaKs method: " + method + "    Pairs: " + sz + "\n"; 
 		    else 
-		    	   infoStr =  "\n" + pad +  "KaKs pairs: " +  sz + "\n"; 
+		    	   infoStr =  pad +  "KaKs pairs: " +  sz + "\n"; 
 		    infoStr += Out.makeTable(nCol, nRow, fields, justify, rows);
 		    pairInfoStr += infoStr;
 		}
@@ -258,17 +258,20 @@ public class PairSumStats {
 				double ka =   rs.getDouble(1), ks =   rs.getDouble(2);
 				double kaks = rs.getDouble(3), pval = rs.getDouble(4);
 				
+				// CAS327 ka,ks,kaks are displayed with 3 SF, hence, it clearer for the counts to
+				// be on these values, i.e. it rounds some to 1.
 				if (ka  >Globalx.dNullVal) {sumKa += ka;     nKa++;}
 				if (ks  >Globalx.dNullVal) {sumKs += ks;     nKs++;}
-				if (kaks>Globalx.dNullVal) {kkVec.add(kaks);}
+				if (kaks>Globalx.dNullVal) {kkVec.add(kaks); }
 				if (pval>Globalx.dNullVal) {sumPval += pval; nPval++;}
 				
 				// if change here, change in PairQueryPanel 
-				if (ka==Globalx.dNullVal || ks==Globalx.dNullVal) kcnt[0]++; 
-				else if (kaks==1.0)   			kcnt[1]++; // rare
-				else if (kaks>0 && kaks<1.0)    	kcnt[2]++;
-				else if (kaks>1.0)    			kcnt[3]++;
-				
+				if (kaks==Globalx.dNullVal)     kcnt[0]++; // CAS327 was checking ka & ks separately
+				else {
+					if (kaks>=0.995 && kaks<1.006)  kcnt[1]++;
+					else if (kaks>=0 && kaks<1.0)   kcnt[2]++; // CAS327 was >0
+					else if (kaks>1.0)    			kcnt[3]++; 
+				}
 				if (pval<0)           pcnt[3]++;
 				else if (pval<1e-100) pcnt[0]++;
 				else if (pval<1e-10)  pcnt[1]++;
@@ -285,7 +288,7 @@ public class PairSumStats {
 		
 		String infoStr = "";
 	} // End KaKs class
-	
+
 	/*******************************************************************
 	 * 1. Create and save the gap map for an alignment
 	 * 2. Load and compute the alignment from the gapmap

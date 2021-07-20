@@ -303,7 +303,7 @@ public class ScoreCDS
 		    long nNoHang = sumAllPairs[IDX_nCDSlenNoHang];
 			
 			String sum = String.format(
-				"%sAligned: %s   CDS: %sb   5UTR: %sb   3UTR: %sb",  Summary.padTitle, 
+				"%sAligned: %s   CDS: %sb   5UTR: %sb   3UTR: %sb\n",  Summary.padTitle, 
 				Out.mText(cntCDS), Out.kMText(sumAllPairs[IDX_nCDSlenNoHang]),  
 				Out.kMText(sumAllPairs[IDX_n5UTRlenNoHang]),
 				Out.kMText(sumAllPairs[IDX_n3UTRlenNoHang]));
@@ -397,7 +397,9 @@ public class ScoreCDS
 		    rows[2][9] = String.format("%5.2f", xJI(sumAllPairs[IDX_CpGc_B], sumAllPairs[IDX_CpGc_E]));
 		    Out.makeTable(sumLines, nCol, nRow, fields2, just2, rows);	
 		    
-			for (String l : sumLines) sum += l + "\n";
+			for (int i=1; i<sumLines.size(); i++) {//CAS327 1st is blank line - skip
+				sum += sumLines.get(i) + "\n";
+			}
 			return sum;
 		} catch (Exception e) {ErrorReport.prtReport(e, "Writing summary for aa"); return "error";}
 	}
@@ -679,7 +681,7 @@ public class ScoreCDS
 	private String xDivPrt(long x, long y) {
 		return String.format("%4.2f", Out.div(x, y));
 	}
-	private String xAvgPctPrt(long x, long y) {
+	private String xAvgPctPrt(long x, long y) { // y is never zero
 		double pct = 0.0;
 		if (x>0 && y>0) pct = ((double)x/(double)y) * 100.0;
 		return String.format("%4.1f%s", pct, "%");
@@ -687,7 +689,7 @@ public class ScoreCDS
 	
 	// for columns only
 	private double xPctCol(int x, int y) {
-		if (x<=0) return Globalx.dNoVal; // -2
+		if (x<=0) return 0.0; // CAS327 was return -2 but (0/y)*100 is zero
 		if (y<=0) return Globalx.dNoVal; // -2
 		double p = ((double)x/(double)y)*100.0;
 		return p;

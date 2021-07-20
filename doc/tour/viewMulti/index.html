@@ -7,44 +7,82 @@
 <!--#include virtual="../ssi/start2t.html" -->
 <!--#include virtual="./ssi/view_mtcw.html" -->
 
-<div style="text-align: center"><big><ttc>Overview</ttc></big></div>
+<div style="text-align: center"><big><ttc>Start</ttc></big></div>
 <table  class="tablex" style="margin-left: auto;margin-right: auto;">
 <tr><td class="white" style="text-align:left; background-color:#666666; padding-bottom:4px;">
-<a href="#overview" class="white">Overview Panel</a>  <mark class="white">|</mark>
-<a href="#col" class="white">Table columns</a>  <mark class="white">|</mark>
-<a href="#exp" class="white">Table...</a> 
+<a href="#decimal" class="white">Decimal Display</a>  <mark class="white">|</mark>
+<a href="#hits" class="white">Find Hits</a>  <mark class="white">|</mark>
+<a href="#list" class="white">List Results</a>  <mark class="white">|</mark>
+<a href="#table" class="white">Table Features</a> 
 </td></tr>
 </table>
 
 <p><ttp>viewMultiTCW</ttp> displays information from a multiTCW (mTCW) database, which was created
 by one or more singleTCW (sTCW) databases with <a href="../runMulti" class="ext" target="_blank">runMultiTCW</a>.
 
-<a id=overview></a>
-<h3>Overview Panel</h3> 
+<h3>Left Panel</h3> 
 
 <table class="tablex">
 <tr><td class="top">
-<ttc>General</ttc>
-<br>&#10148;<ttc>Overview</ttc>: <a href="ex.html">Overview</a>
-is a link to the file of the full overview, where the first part is shown on the right.
-This mTCW database has 3 input sTCWdbs and 4 different types of clusters.
-<p><a href="explain.html">Explain</a> describes how the statistics were computed.
-<br>
+<big><ttc>General</ttc></big>
+<p>&#10148;<ttc>Overview</ttc>: The top part of the Overview is shown on the right and can be scrolled
+to view the entire page.
+<p><a href="explain.html" class="ext" target="_blank">Explain</a> describes how the statistics were computed
+and <a href="../../ov/mDemo.html" class="ext" target="_blank">Overview</a> shows the HTML of the overview on the right.
+
+<p>&#10148;<ttc>Decimal Display</ttc> allows the formatting of decimal numbers to be changed (<a href="#decimal">View</a>).
+
 <p>&#10148;<ttc>Find Hits</ttc> allows a sequence to be searched against the 
-database sequences, or a selected database.
+mTCWdb sequences or a selected database (<a href="#hits">View</a>).
 
-<p><ttc>Filters</ttc>: Provides filters for the four types of tables: clusters, pairs, sequences and hits.
+<p>&#10148;<ttc>List Results</ttc> provides a table of all results along with the query 
+(<a href="#list">View</a>).
 
-<p><ttc>Samples</ttc>: The tables can be very big, so the bottom four tabs provide <ttx>Sample</ttx> tables
+
+<td><a  href="img/viewMulti.png"><img src="img/viewMulti.png" alt="" style="border: 1px solid black; width: 650px"></a>
+</table>
+<p><big><ttc>Filters</ttc></big><br>Provides filters for the four types of tables: clusters, pairs, sequences and hits.
+The <a href="#table">Table Features</a> shows some general features.
+
+<p><big><ttc>Samples</ttc></big><br> The tables can be very big, so the bottom four tabs provide <ttx>Sample</ttx> tables
 of just a few 1000 entries.
 
-<td><img src="img/viewMulti.png" alt="" style="border: 1px solid black; width: 650px">
+<a id=decimal></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Decimal Display</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+<a  href="img/decimal.png"><img src="img/decimal.png" alt="" style="border: 1px solid black; width: 650px"></a>
+
+<a id=hits></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Find Hits</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+<a  href="img/find.png"><img src="img/find.png" alt="" style="border: 1px solid black; width: 650px"></a>
+
+<a id=list></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>List Results</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+<a  href="img/list.png"><img src="img/list.png" alt="" style="border: 1px solid black; width: 650px"></a>
+
+<a id=table></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Table Features</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+All four tables (Clusters, Pairs, Sequences, Hits) have the following options at the top of their panel:
+<table>
+<tr>
+	<td>The <ttc>Table...</ttc> drop-down allows exporting the table, the sequence of the table, etc.
+	<p>The <ttc>Show Column Stats</ttc> option to display summary
+	statistics for the rows and numeric columns of the displayed table, as illustrated on the right for the Pairs table.
+
+	<td><a  href="img/showColumns.png"><img src="img/showColumns.png" alt="" style="border: 1px solid black; width: 450px"></a>
+</tr>
 </table>
 
-<a id=col></a>
-<h3>Table Columns</h3>
 All four tables have the following at the bottom of their table:
-<br><img src="img/colSelect.png" alt="" style="border: 1px solid black; width: 250px">
+<br><a  href="img/colSelect.png"><img src="img/colSelect.png" alt="" style="border: 1px solid black; width: 250px"></a>
 <ol>
 	<li>The <ttc>Select Column</ttc> panel displays all possible columns. 
 	<li>Mousing over a column name describes it in the lower left corner.
@@ -52,17 +90,7 @@ All four tables have the following at the bottom of their table:
 	<li>The  columns can be sorted and moved around.
 </ol>
 
-<a id=exp></a>
-<h3>Table...</h3>
-<table>
-<tr>
-	<td>All tables have <ttc>Table...</ttc> drop-down, which allows exporting the table, the sequence of the table, etc.
-	<p>All tables have a <ttc>Show Column Stats</ttc> option to display summary
-	statistics for the rows and numeric columns of the displayed table, as illustrated below for the Pairs table.
 
-	<td><img src="img/showColumns.png" alt="" style="border: 1px solid black; width: 450px">
-</tr>
-</table>
 
 <table style="width: 100%"><tr><td style="text-align: left">
 <td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>

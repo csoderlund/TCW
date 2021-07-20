@@ -72,12 +72,13 @@ public class runMTCWMain {
 			//This is not fully supported, so only for testing
 			//System.out.println("  Sum-of-Pairs:"); // CAS313 add
 			//System.out.println("  	-nSoP Do not normalize SoP scores (default Score1).");
-			System.out.println("  The MSA score1 of built-in Sum-of-Pairs can be replaced with:"); // CAS312 add
-			System.out.println("  	-M1 <string>, where <string> is a valid MstatX method.");
-			System.out.println("  The MSA score2 of built-in Wentropy can be replaced with:"); // CAS312 add
-			System.out.println("  	-M2 <string>, where <string> is a valid MstatX method.");
-			System.out.println("  MstatX methods: trident, wentropy, mvector, jensen, kabat, gap");
-			System.out.println("    See agcol.arizona.edu/software/TCW/doc/mtcw/UserGuide.html for more info");
+			System.out.println("  MSA options:");
+			System.out.println("    The MSA score1 of built-in Sum-of-Pairs can be replaced with:"); // CAS312 add
+			System.out.println("  	  -M1 <string>, where <string> is a valid MstatX method.");
+			System.out.println("    The MSA score2 of built-in Wentropy can be replaced with:"); // CAS312 add
+			System.out.println("  	  -M2 <string>, where <string> is a valid MstatX method.");
+			System.out.println("    MstatX methods: trident, wentropy, mvector, jensen, kabat, gap");
+			System.out.println("      See agcol.arizona.edu/software/TCW/doc/mtcw/UserGuide.html for more info");
 			System.out.println("  Developer only:"); 
 			System.out.println("    -x  when Run Stats with 'Compute MSA and Score' - remove existing MSAs first");
 			System.exit(0);
@@ -104,6 +105,7 @@ public class runMTCWMain {
 			bWithPivot=true;
 			System.out.println("Bron_Kerbosch with pivot");
 		}
+
 /* CAS312 score1 */			
 		if (hasArg(args,"-M1")) {
 			msaScore1=MS;

@@ -37,40 +37,27 @@ To view all numbers in E-notation, enter 1 in both boxes.
 <li><b>Java defaults</b>: Java determines when to switch to E-notation.
 </ol>
 
-Highlight good p-values: (only available if p-values exist in sTCWdb)
-<ul>
-<li><b>Highlight good p-values</b>: Turn this option on/off.  
-<br>&nbsp;
-<li><b>Color Schemes [1-4]</b>: Select any of the 4 color schemes, where the color (A-D) corresponds
-to the cutoffs. For example, if color scheme 1 is selected and  cutoff A is 0.05, 
-a p-value will be highlighted light blue if its &lt;0.05.
-<br>&nbsp;
-<li><b>Cutoffs</b>: Change the cutoffs with the restriction that A&gt;B&gt;C&gt;D, then select <b>Apply Cutoffs</b>. 
-<br>Any of 
-them can be set to zero in order to be ignored, e.g. if you only want A and D to be applied,
-set the other two to zero. The cutoffs correspond to the ABCD in the color schemes.
-</ul>
+
 <h3>Round-off</h3>
-This is easiest to explain with an example: say you filter on p-value&lt;0.05.
-Given default values for <b>Decimal Display</b>, all cells of the resulting table should be colored
-and have values &lt;0.05. However, you will see values of 0.05 due to round off error:
+This is easiest to explain with an example: 
+<p>Example 1: Say you filter on KaKs&lt;0.05.
+<br>Given the default value of 2 for <b>Significant digits</b>, all cells of the resulting table should have
+values &lt;0.05. However, you will see values of 0.050 due to round-off:
 <ol>
-<li>If you look in the MySQL database, you will see that an 0.05 p-value will actually has a value like 0.0499590. 
+<li>If you look in the MySQL database, you will see that an 0.05 may actually have a value like 0.0499590. 
+<li>The filter is on the full value, which correctly determines that 0.0499590 &lt; 0.05.
 <li>When it is rounded for display, it becomes 0.050. Even at 3 significant digits, it is 0.0500 due to rounding; it
 requires 4 significant digits to view 0.04996.
-<li>The filter is on the full value, which correctly determines that 0.0499590 &lt; 0.05.
-<li>But when it is tested for highlighting, it is different between the Main and Basic tables, as discussed below.
 </ol>
-Main sequence table:
+
+<p>Example 2: Say you filter on KaKs&gt;1.0.
+<br>Given the default values of 2 for <b>Decimal places</b>, all cells of the resulting table should have
+values &gt;1.0. However, you will see values of 1.00 due to round-off:
 <ol>
-<li>The result is rounded BEFORE testing for highlight, so the rounded 0.05 cell will be white.  
-<li>Changing the significant digits on the <b>Decimal Display</b> does NOT change the value or highlighting unless 
-you refresh columns.
+<li>If you look in the MySQL database, you may see that the 1.0 may actually have a value like 1.003.
+<li>The filter is on the full value, which correctly determines that 1.003 &gt; 1.00.
+<li>When it is rounded for display, showing 2 decimal places becomes 1.00. At  3 decimal places, you will see 1.003.
 </ol>
-Basic Hit and GO tables:
-<ol>
-<li>The result is rounded AFTER testing for highlight, so the rounded 0.05 cell while be highlighted. 
-<li>Changing the significant digits to 4 on the <b>Decimal Display</b> will show it correctly as 0.04996.
-</ol>
+
 </body>
 </html>

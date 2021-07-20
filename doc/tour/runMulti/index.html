@@ -11,15 +11,15 @@
 <table  class="tablex" style="margin-left: auto;margin-right: auto;">
 <tr><td class="white" style="text-align:left; background-color:#666666; padding-bottom:4px;">
 <a href="#main" class="white">Main Panel</a> <mark class="white">|</mark> 
-<a href="#add" class="white">Additional Panel</a> <mark class="white">|</mark> 
-<a href="#stat" class="white">Example summary statistics</a> <mark class="white">|</mark> 
+<a href="#add" class="white">Additional Panel</a> <mark class="white">|</mark>  
 <a href="#refs"  class="white" >References</a>
 </td></tr>
 </table>
 
 <p><ttp>runMultiTCW</ttp> takes as input two or more singleTCW (sTCW) databases 
 and builds a multiTCW (mTCW) database of clustered sequences. 
-See <a href="../../mtcw/UserGuide.html" class="ext" target="_blank">mTCW UserGuide</a> for details. 
+See <a href="../../mtcw/UserGuide.html" class="ext" target="_blank">mTCW UserGuide</a> for details
+and <a href="../../ov/mDemo.html" class="ext" target="_blank">Overview</a> for example mTCWdb summary.
 
 <a id=main></a>
 <h3>Main panel</h3>	
@@ -104,90 +104,27 @@ fails on a cluster, in which case MUSCLE<sup>5</sup>  is used.
 <table class="tablex">
 <tr><td class=top>		
 1. Add single TCW database
-<br><a  href="img/addSingle.png"><img src="img/addSingle.png" alt="" style="border: 1px solid black; width: 400px"></a>
+<br><a  href="img/addSingle.png"><img src="img/addSingle.png" alt="" style="border: 1px solid black; width: 370px"></a>
 </td>
 
 <td class=top>
 2. Run Search
-<a  href="img/hitSettings.png">
-<br><img src="img/hitSettings.png" alt="" style="border: 1px solid black; width: 400px"></a>
+<br><a  href="img/hitSettings.png"><img src="img/hitSettings.png" alt="" style="border: 1px solid black; width: 450px"></a>
 </td>
 
 <tr>
 <td class=top>
 3. Add a cluster method
-<br><a  href="img/method.png"><img src="img/method.png" alt="" style="border: 1px solid black; width: 400px"></a>
+<br><a  href="img/method.png"><img src="img/method.png" alt="" style="border: 1px solid black; width: 370px"></a>
 </td>
 
 <td class=top>
 4. Add statistics. The counts on the bottom are updated after <ttc>Run Stats</ttc> is executed.
-<br><a  href="img/stats.png"><img src="img/stats.png" alt="" style="border: 1px solid black; width: 300px"></a>
+<br><a  href="img/stats.png"><img src="img/stats.png" alt="" style="border: 1px solid black; width: 320px"></a>
 </td>
 </table>
 
-<a id=stat></a>
-<table style="width: 100%"><tr><td style="text-align: left">
-<h3>Example summary statistics</h3>
-<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
-<pre>
-Project: ex  Cluster: 868  Pairs: 997  Seqs: 707  Hits: 2.1k   PCC Stats KaKs Multi
 
-Created: 24-Oct-20 v3.1.0     Last Update: 26-Oct-20 v3.1.0
-
-DATASETS: 3
-           Type  #Seq  #annotated  #annoDB  Created    Remark  
-      bar  NT     250         244        2  05-Oct-20  exBar   
-      foo  NT     250         245        2  05-Oct-20  exFoo   
-      fly  NT     207         205        2  18-Oct-20  exFly   
-                           
-CLUSTER SETS: 4
-      Prefix  Method        Parameters                         
-      BB      BBH           Sim 60; Cov 40(Both); bar,fly,foo  
-      HT      BestHit       Description; Sim 20; Cov 50        
-      CL      Closure       Sim 60; Cov 40(Both)               
-      OM      User Defined  ./projcmp/ex/orthoMCL.OM-40  
-            
-   Sizes
-      Prefix  =2   =3  4-5  6-10  11-15  16-20  21-25  &gt;25  Total  #Seqs  
-      BB       0  155    0     0      0      0      0    0    155  65.8%  
-      HT      74  147    4     0      0      0      0    0    225  86.0%  
-      CL      90  153    1     1      0      0      0    0    245  91.9%  
-      OM      51  186    3     3      0      0      0    0    243  98.3%  
-
-   Statistics
-      Prefix  conLen  sdLen     Score  SD    Trident  SD    
-      BB      535.55  56.94     11.04  3.44     0.75  0.17  
-      HT      599.68  80.10      8.08  5.24     0.71  0.22  
-      CL      569.77  57.45      8.48  5.36     0.74  0.18  
-      OM      596.01  84.14      8.80  6.69     0.68  0.22  
-
-PAIRS: 997
-   Hits
-      AA   Diff 860     Same 110      Similarity 69.5%   Coverage 82.8%
-      NT   Diff 661     Same 2        Similarity 86.9%   Coverage 64.0%
-
-   Aligned: 706   CDS: 1.0Mb   5UTR: 80.3kb   3UTR: 111.0kb        
-      Codons         306.6k     Amino Acids                Nucleotides         
-      Exact           58.6%     Exact            87.8%     CDS  Diff    25.4%  
-      Synonymous      29.2%     Substitution &gt;0   5.8%          Gaps     9.3%  
-        Fourfold      15.2%     Substitution&lt;=0   6.4%          SNPs    16.1%  
-        Twofold       11.4%                                5UTR Diff    34.4%  
-      Nonsynonymous   12.2%                                3UTR Diff    36.7%  
-
-                     Pos1   Pos2   Pos3  Total                   GC  CpG-Nt  CpG-Cd  
-      Transition     9.1%   4.6%  36.9%  50.5%       Both     37.7%    3.9%    2.2%  
-      Transversion  11.3%   7.2%  30.9%  49.5%       Either   54.3%   11.3%    5.8%  
-      ts/tv          0.80   0.64   1.19   1.02       Jaccard   0.69    0.35    0.38  
-
-   KaKs method: YN    Pairs: 706
-
-      Average            Ka/Ks          Quartiles               P-value       
-      Ka       0.085     Zero    51     Q1(Lower)   0.01670     &lt;1E-100  428  
-      Ks       2.527     Ka=Ks    0     Q2(Median)  0.03763     &lt;1E-10    88  
-      P-value  0.023     Ka&lt;Ks  650     Q3(Upper)   0.09073     &lt;0.001    57  
-                         Ka&gt;Ks    5                             Other    133  
-
-</pre>
 <a id=refs></a>
 <table style="width: 100%"><tr><td style="text-align: left">
 <h3>References</h3>

@@ -54,11 +54,14 @@ outside of the TCW environment and import them with this option.
 <a id=R></a>
 <h4>R-scripts</h4>
 A script of R commands can be provided, which uses the variables created by 
-<ttp>runDE</ttp> to compute DE. <ttp>RunDE</ttp> 
+<ttp>runDE</ttp> to compute DE and GO enrichment. <ttp>RunDE</ttp> 
 writes the data into the R environment (e.g. the count data is written to a matrix called 
 <ttx>countData</ttx>), executes the R script using the <ttx>source</ttx> command, and 
-reads the results from the variable called <ttx>results</ttx>.  The <tt>edgeRglm.R</tt> and
-<tt>goSeqBH.R</tt> scripts are supplied as example.
+reads the results from the variable called <ttx>results</ttx>.  
+
+<p>The <tt>edgeRglm.R</tt> and
+<tt>goSeqBH.R</tt> scripts are supplied as example. For GO enrichment, the <tt>goSeqBH.R</tt> script
+is provided; for the demo only, the <tt>goSeqNoFDR.R</tt> if provided.
 <p>
 
 <a id=refs></a>

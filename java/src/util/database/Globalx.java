@@ -8,8 +8,8 @@ import java.awt.Font;
 public class Globalx {
 	public static boolean debug = false; // changed in STCWMain or MTCWMain from command line 
 	
-	public static final String strRelDate = "(6-July-21)"; 
-	public static final String strTCWver = "3.2.6"; 
+	public static final String strRelDate = "(20-July-21)"; 
+	public static final String strTCWver = "3.2.7";  // 3.2.7  // must be 3 digits
 	public static final String URL = "http://www.agcol.arizona.edu ";
 	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate;
 	public static final String sTCWver = "sTCW v" + strTCWver;
@@ -91,7 +91,7 @@ public class Globalx {
 	// Its messy about what the values of 'no value' where
 	// See Stats.average - 
 	public static final String sNoVal =    "-";
-	public static final String sNullVal =  "--";
+	public static final String sNullVal =  "NA"; // CAS327 used for KaKs; NoVal is used for not computed
 	public static final double dNullVal =   -1.5; 
 	
 	public static final String iStrNoVal =  "-2";
