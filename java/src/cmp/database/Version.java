@@ -14,8 +14,8 @@ import cmp.compile.LoadSingleTCW; // db62 only
  * If columns are being added for a version, add them here and to schema
  */
 public class Version {
-	public static final String DBver = "6.4"; 
-	private final double nVer=6.4;
+	public static final String DBver = "6.5"; 
+	private final double nVer=6.5;
 	
 	/************************************************
 	 * CAS310 added this with return value as nothing works if not updated
@@ -28,18 +28,22 @@ public class Version {
 			String ver = mDB.executeString("select schemver from info");
 			if (ver.equals(DBver)) return true;
 			
-			Out.prt("mTCW database version db" + ver);
+			Out.prt("mTCW database version mdb" + ver);
 			tooOldDie(mDB);
 			
 			double d = Double.parseDouble(ver);
 			if (d>nVer) {
-				Out.PrtError("The mTCW database was created with a newer version of TCW.");
+				Out.PrtWarn("The mTCW database was created with a newer version of TCW.");
 				Out.prt("   This version of the software uses database mdb" + DBver);
 				return true; // CAS327 let it continue
 			}
-			if (!UserPrompt.showContinue("Database update", "The database needs a few small changes.")) 
-				return false;
-			
+			String [] options = {"Update", "Ignore"};
+			if (!UserPrompt.showOptions(options, "Database update", "The database needs a few small changes.")) {
+				Out.PrtError("The mTCW database was created with a older version of TCW.");
+				Out.prt("   This version of the software uses database mdb" + DBver);
+				Out.prt("   Some feature will probably fail.");
+				return false; // CAS330 all calling programs ignore this and continue 
+			}
 			if (d < 5.5) addv55(mDB);
 			if (d < 5.6) addv56(mDB);
 			if (d < 5.7) addv57(mDB);
@@ -50,6 +54,7 @@ public class Version {
 			if (d < 6.2) addv62(mDB);
 			if (d < 6.3) addv63(mDB);
 			if (d < 6.4) addv64(mDB);
+			if (d < 6.5) addv65(mDB);
 			
 			Out.prt("Complete update for mdb" + DBver);
 			return true;
@@ -57,15 +62,23 @@ public class Version {
 		catch (Exception e) {ErrorReport.die(e, "Error checking schema"); return false;}
 	}
 	//--------------------------------------------------------//
+	private void addv65(DBConn mDB) { // CAS330 (328) August 2021
+		try {
+			Out.PrtSpMsg(1, "Updating for mdb6.5 (v3.2.8) - add NTbest");
+			mDB.tableCheckAddColumn("pairwise", "ntBest", "tinyint default -2", "");
+			mDB.executeUpdate("update info set schemver='6.5'");
+		}
+		catch (Exception e) {ErrorReport.die(e, "Updating for mdb6.5");}
+	}
 	
 	private void addv64(DBConn mDB) { // CAS327 July 2021
 		try {
-			Out.PrtSpMsg(1, "Updating for mdb6.4");
+			Out.PrtSpMsg(1, "Updating for mdb6.4 (v3.2.7) -- add origStr");
 			mDB.tableCheckAddColumn("unitrans", "origStr", "VARCHAR(30)", "");
 			mDB.tableCheckAddColumn("info", "hasOrig", "tinyint default 0", ""); 
 			mDB.executeUpdate("update info set schemver='6.4'");
 		}
-		catch (Exception e) {ErrorReport.die(e, "Updating for mdb6.1");}
+		catch (Exception e) {ErrorReport.die(e, "Updating for mdb6.4");}
 	}
 	
 	private void addv63(DBConn mDB) { //v3.1.2 Nov/2020

@@ -145,9 +145,9 @@ public class Pairwise {
 					try {
 						if (!tok[2].equals("NA")) ka = 	Double.parseDouble(tok[2]);
 						if (!tok[3].equals("NA")) ks = 	Double.parseDouble(tok[3]);
-						if (!tok[4].equals("NA")) kaks = 	Double.parseDouble(tok[4]);
+						if (!tok[4].equals("NA")) kaks = Double.parseDouble(tok[4]);
 						else cntNull++;
-						if (!tok[5].equals("NA")) pVal = 	Double.parseDouble(tok[5]);		
+						if (!tok[5].equals("NA")) pVal = Double.parseDouble(tok[5]);		
 					}
 					catch (Exception e) {
 						cntNull++;
@@ -197,10 +197,11 @@ public class Pairwise {
 			return;
 		}
 	}
-
+	
 	/*****************************************************************
 	 * The following two methods create and update the pairwise table.
 	 * There is also a method in ScoreCDS which adds CDS score.
+	 * See comment above method computeBBHsets for explanation of aaBest and ntBest computation here.
 	 */
 	public boolean savePairsFromHitFile(String hitFile, boolean isAA) {
 		try {
@@ -244,29 +245,28 @@ public class Pairwise {
 			}
 			Out.PrtSpCntMsgZero(3, pairMap.size(), "existing pairs in database");
 			
-			
-			
 	// Create sql 
 			String pre = (isAA) ? "aa" : "nt";
-			String  evalCol =  pre+ "Eval";
-			String 	simCol =   pre+ "Sim"; 
-			String 	alignCol = pre+ "Align";
-			String 	gapCol =   pre+ "Gap";
-			String 	olap1Col = pre+ "Olap1";
-			String 	olap2Col = pre+ "Olap2";
-			String 	bitCol =   pre+ "Bit";
+			String  evalCol =  pre + "Eval";
+			String 	simCol =   pre + "Sim"; 
+			String 	alignCol = pre + "Align";
+			String 	gapCol =   pre + "Gap";
+			String 	olap1Col = pre + "Olap1";
+			String 	olap2Col = pre + "Olap2";
+			String 	bitCol =   pre + "Bit";
+			String  bestCol =  pre + "Best";  // CAS330 add ntBest
 		
 			MethodLoad load = new MethodLoad(mDB);
+			
 			PreparedStatement psI = mDB.prepareStatement("insert into pairwise set " +
 					"ASMid1=?, ASMid2=?, UTid1=?, UTid2=?, UTstr1=?, UTstr2=?, " 
 					+ evalCol + "=?," + simCol + "=?," + alignCol + "=?," + gapCol + "=?," 
-					+ olap1Col+ "=?," + olap2Col + "=?," + bitCol +"=?, HITid=?, HITstr=?," +
-					"CDSlen1=?, CDSlen2=? " + 
-					", aaBest=?, PCC = -2"); 
+					+ olap1Col+ "=?," + olap2Col + "=?," + bitCol +"=?," + bestCol + "=?," 
+					+ " HITid=?, HITstr=?,CDSlen1=?, CDSlen2=?, PCC = -2"); 
 					
 			PreparedStatement psU = mDB.prepareStatement("update pairwise set " 
-					+ evalCol + "=?," + simCol + "=?," + alignCol + "=?," 
-					+ gapCol + "=?," + olap1Col + "=?," + olap2Col + "=?," + bitCol + "=? "
+					+ evalCol + "=?," + simCol + "=?," + alignCol + "=?," + gapCol + "=?," 
+					+ olap1Col + "=?," + olap2Col + "=?," + bitCol + "=?, " + bestCol + "=?" 
 					+ " where UTid1=? and UTid2=?");
 		
 			int [] ids = new int [2];
@@ -274,7 +274,7 @@ public class Pairwise {
 		/** Main Loop -- read file and save **/
 			BufferedReader br = new BufferedReader(new InputStreamReader(new DataInputStream(new FileInputStream(hitFile))));
 			String curLine = "";
-			int cntRead=0, cntAddPair=0, cntUpdate=0,  cntMiss=0, cntAAbest2=0;
+			int cntRead=0, cntAddPair=0, cntUpdate=0,  cntMiss=0, cntBest2=0;
 			int cntBatchI=0, cntBatchU=0,  cntNoShare=0, cntUnique=0, cntPrt=0;
 			
 			double avgSim=0.0, avgOlap=0.0, sumID=0, sumAlign=0, sumLen=0;
@@ -326,7 +326,7 @@ public class Pairwise {
 					continue; 	
 				}
 				
-				int aaBest=0;
+				int best=0;
 				if (seqX1.asmID!=seqX2.asmID) {
 					if (!pairMap.containsKey(key)) {
 						seqX1.nPairs++;
@@ -334,8 +334,8 @@ public class Pairwise {
 					}
 					if (!seqX1.hasMate(seqX2.asmID)) {
 						 seqX1.setMate(seqX2);
-						 aaBest=2; // enter as bi-directional so only correct the ones that aren't
-						 cntAAbest2++;
+						 best=2; // enter as bi-directional so only correct the ones that aren't
+						 cntBest2++;
 					}
 				} 
 				
@@ -356,7 +356,7 @@ public class Pairwise {
 				if (!pairMap.containsKey(key)) {
 					ids[0] = seq1.seqID;
 					ids[1] = seq2.seqID;
-					String [] rt = load.descriptComputeBest(cntAddPair, ids);
+					String [] rt = load.descriptComputeBestPair(cntAddPair, ids);
 					cntAddPair++; 
 					
 					String hitID = rt[0];
@@ -364,8 +364,6 @@ public class Pairwise {
 		
 					if (hitStr.equals(Globals.uniqueID)) cntUnique++;
 					if (hitStr.equals(Globals.noneID)) cntNoShare++;
-					
-					if (!isAA) aaBest=0;
 					
 					psI.setInt(1, seq1.asmID);
 					psI.setInt(2, seq2.asmID);
@@ -380,11 +378,12 @@ public class Pairwise {
 					psI.setDouble(11, olap1);
 					psI.setDouble(12, olap2);
 					psI.setInt(13, bit);
-					psI.setString(14, hitID);
-					psI.setString(15, hitStr);
-					psI.setInt(16, seq1.cdsLen);
-					psI.setInt(17, seq2.cdsLen);
-					psI.setInt(18, aaBest);
+					psI.setInt(14, best);
+					psI.setString(15, hitID);
+					psI.setString(16, hitStr);
+					psI.setInt(17, seq1.cdsLen);
+					psI.setInt(18, seq2.cdsLen);
+					
 					psI.addBatch(); 
 					cntBatchI++;
 					if (cntBatchI==1000) {
@@ -401,8 +400,9 @@ public class Pairwise {
 					psU.setDouble(5, olap1);
 					psU.setDouble(6, olap2);
 					psU.setInt(7, 	bit);
-					psU.setInt(8, 	seq1.seqID);
-					psU.setInt(9, 	seq2.seqID);
+					psU.setInt(8, 	best);
+					psU.setInt(9, 	seq1.seqID);
+					psU.setInt(10, 	seq2.seqID);
 					psU.addBatch();
 				 
 				   cntUpdate++;  cntBatchU++;
@@ -491,8 +491,8 @@ public class Pairwise {
 				if (cntBatchU>0) psU.executeBatch();
 				psU.close();
 				mDB.closeTransaction();
-				x = Out.perFtxtP(cntAAbest2, cntTotal);
-				Out.PrtSpCntMsg(3, cntAAbest2, "candidate bi-directional AA best hit " + x);
+				x = Out.perFtxtP(cntBest2, cntTotal);
+				Out.PrtSpCntMsg(3, cntBest2, "candidate bi-directional AA best hit " + x);
 				x = Out.perFtxtP(cntUpdate, cntTotal);
 				Out.PrtSpCntMsgTimeMem(3, cntUpdate, "one-sided-directional AA best hit " + x, time);
 			}

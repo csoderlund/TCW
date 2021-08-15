@@ -36,7 +36,7 @@ public class LoadSingleTCW {
 	}
 	public boolean run() {
 		long startTime = Out.getTime();
-		Out.PrtDateMsg("\nLoading SingleTCWs with top " + MAX_RANK + " hits");
+		Out.PrtDateMsg("\nLoading SingleTCWs with top " + MAX_RANK + " hits per annoDB");
 		
     	if (!step1_datasetTable()) return false;
     	if (!Schema.addDynamicCountColumns(mDB, cmpPanel)) return false;

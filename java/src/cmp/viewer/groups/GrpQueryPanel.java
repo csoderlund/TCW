@@ -161,14 +161,14 @@ public class GrpQueryPanel extends JPanel {
 		JPanel page = Static.createPagePanel();
 		
 		JPanel row = Static.createRowPanel();	
-		txtGrpID = new Substring("Cluster ID", GRP_TABLE + ".PGstr", 
-				"All clusters with the substring in their Cluster ID (see corresponding column)", false);
+		txtGrpID = new Substring("ClusterID", GRP_TABLE + ".PGstr", 
+				"All clusters with the substring in their ClusterID (see corresponding column)", false);
 		row.add(txtGrpID);
 		page.add(row);	
 		page.add(Box.createVerticalStrut(10));
 		
 		row = Static.createRowPanel();
-		txtHitID = new Substring("Majority Hit ID", GRP_TABLE + ".HITstr", 
+		txtHitID = new Substring("Majority HitID", GRP_TABLE + ".HITstr", 
 				"All clusters with the substring in the identifier of majority hit", true);
 		row.add(txtHitID);
 		page.add(row);	
@@ -558,32 +558,38 @@ public class GrpQueryPanel extends JPanel {
 		public String getSQL() {
 			checkValues();
 			if (!checkOn.isSelected()) return "";
-			String min = txtMin.getText().trim(); // check if proper value
-			String max = txtMax.getText().trim();
 			
-			if (min.equals("")) { // CAS301
-				if (max.contentEquals("")) {
-					checkOn.setSelected(false);
-					return "";
-				}
-				return sqlField + "<"  + max;
+			String min = txtMin.getText(); // check if proper value
+			String max = txtMax.getText();
+			
+			if (min.contentEquals("") && max.contentEquals("")) {
+				checkOn.setSelected(false);
+				return "";
 			}
-			if (max.equals("")) {
-				if (min.contentEquals("")) {
-					min="0";
-					txtMin.setText(min);
-				}
+			if (!min.contentEquals("") && max.contentEquals(""))  // CAS330 rewrite
 				return sqlField + ">=" + min;
-			}
+			
+			if (min.contentEquals("")  && !max.contentEquals("")) 
+				return sqlField + "<" + max;
+			
+			if (min.contentEquals("0")  && max.contentEquals("0"))  // CAS330 add
+				return sqlField + "=0";
+			if (min.contentEquals("0.0")  && max.contentEquals("0.0"))  // CAS330 add
+				return sqlField + "=0.0";
+			
 			return "(" + sqlField + ">=" + min + " and " + sqlField + "<" + max + ")";
 		}
 		public String getSum() {
 			if (!checkOn.isSelected()) return "";
-			String min = txtMin.getText().trim(); // check if proper value
-			String max = txtMax.getText().trim();
+			
+			String min = txtMin.getText(); 
+			String max = txtMax.getText();
 			
 			if (min.equals("")) return label + "<"  + max;
 			if (max.equals("")) return label + ">=" + min;
+			
+			if (min.contentEquals("0")  && max.contentEquals("0"))  return  label + "=0";
+			if (min.contentEquals("0.0")&& max.contentEquals("0.0"))return  label + "=0.0";
 			
 			return "(" + label + ">=" + min + " and " + label + "<" + max + ")";
 		}
@@ -595,6 +601,14 @@ public class GrpQueryPanel extends JPanel {
 			if (min.equals("") && max.equals("") ) {
 				checkOn.setSelected(false);
 				return;
+			}
+			if (isInt) {
+				if (min.contentEquals("0.0")) txtMin.setText("0");
+				if (max.contentEquals("0.0")) txtMax.setText("0");
+			}
+			else {
+				if (min.contentEquals("0")) txtMin.setText("0.0");
+				if (max.contentEquals("0")) txtMax.setText("0.0");
 			}
 			if (!min.equals("") && !Static.isDouble(min) && !Static.isInteger(min)) {
 				UserPrompt.showWarn("Incorrect minimum  '" + min + "' for " + label );

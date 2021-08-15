@@ -7,6 +7,12 @@ import java.io.InputStreamReader;
 import util.file.FileC;
 import util.file.FileHelpers;
 /**********************************************
+ * This is used by sng.annotator.DoBlast and cmp.compile.DoBlast
+ * Takes the name of the dbFile and inFile (which exists), formats if necessary, and writes to tabFile
+ * The program and args are passed in.
+ * 
+ * The Find Hits search for both single and multi are written separately in their respective BlastTab.
+ * 
  * blastp - aa to aa
  * blastn - nt to nt
  * blastx - nt to aa
@@ -139,20 +145,20 @@ public class BlastRun {
 		
 		if (pgm.equals("diamond")) {
 			if (BlastArgs.isDiamond()) {
-				Out.Print("+++ TCW was tested with diamond 0.9.22 (Sept 2018)");
+				Out.Print("+++ TCW was tested with the DIAMOND in the /Ext directory");
 				Out.PrtSpMsg(2,"If this is out-of-date, please email tcw@agcol.arizona.edu and TCW will be updated");
 			}
 			else {
-		         Out.Print("+++ Diamond was not found on your machine. See Touble.html");
+		         Out.Print("+++ Diamond was not found on your machine. See Trouble.html");
 		    }
 		}
 		else if (pgm.equals("blast")) {
 			if (BlastArgs.isBlast()) {
-				Out.Print("+++ TCW was tested on blast+ 2.7.1, NCBI (10/3/17)");
+				Out.Print("+++ TCW was tested with the BLAST in the /Ext directory");
 				Out.PrtSpMsg(2,"If this is out-of-date, please email tcw@agcol.arizona.edu and TCW will be updated");
 		    }
 			else {
-		         Out.Print("+++ Blast+ was not on your machine. See Touble.html");
+		         Out.Print("+++ Blast+ was not on your machine. See Trouble.html");
 		    }
 		}
 	}

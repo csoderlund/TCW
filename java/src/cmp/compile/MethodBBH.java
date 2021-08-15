@@ -77,10 +77,8 @@ public class MethodBBH {
 	}
 	/**********************************************************************
 	 * Only pairs that pass the similarity and overlap test are loaded.
-	 * But that means the supposed BBH may not be loaded, but the second best may be
-	 * and will appear to be the best.
-	 * 1. do aaBest and ntBest and use them?
-	 * 2. no longer allow NT BBH?
+	 * But a given BBH pair may fail test, which could allow a different pair to pass.
+	 * This is why aaBest is computed when hits are loaded so only aaBest=2 pairs are considered
 	 */
 	private void computeBBHsets(int db1, int db2) {
 	try {
@@ -273,14 +271,14 @@ public class MethodBBH {
 	 */
 	private void loadPairs() {
 	try {
-		Out.PrtSpMsg(2, "Load " + strType[type] + " blast pairs from database");
+		Out.PrtSpMsg(2, "Load " + strType[type] + " hit pairs from database");
 		int cntLoad=0, cntMinSim=0, cntMinOlap=0;
 		
 		String msq="";
 		if (type==0) msq = "select UTid1, UTid2, aaEval, aaSim, aaOlap1, aaOlap2 " +
-							" from pairwise where aaSim>0 and asmID1!=asmID2 and AAbest=2";
+							" from pairwise where aaSim>0 and asmID1!=asmID2 and aaBest=2"; // CAS330 was AAbest
 		else         msq = "select UTid1, UTid2, ntEval, ntSim, ntOlap1, ntOlap2, PAIRid " +
-							" from pairwise where ntSim>0 and asmID1!=asmID2";
+							" from pairwise where ntSim>0 and asmID1!=asmID2 and ntBest=2"; // CAS330 added ntBest
 		ResultSet rs = mDB.executeQuery(msq);
 		
 		while (rs.next()) {

@@ -261,7 +261,7 @@ public class Stats
 			 if (v>=0 || v==Globalx.dNoVal || v==Globalx.dNullVal) t2++;
 		 }
 		 if (colName.contains(Globalx.frameField)) type=0;
-		 else if (t2==n)    type=2; 
+		 else if (t2==n)    type=2; // precedence over 1
 		 else if (t1==n)    type=1; 
 		 else if (isScore)  type=3;
 		 else {

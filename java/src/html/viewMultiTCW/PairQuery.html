@@ -22,15 +22,19 @@ Click the check box and enter the search value.
 <table border=1 cellpadding=3>
 <tr><td><tt>Pair #</tt><td> Search for the number shown in the <tt>Pair #</tt> column. This results in only
 one pair being displayed.
-<tr><td><tt>Seq ID</tt><td>If the SeqID of either sequence in the pair contains the given substring, the
+<tr><td><tt>SeqID</tt><td>If the <tt>Seq ID</tt> of either sequence in the pair contains the given substring, the
 resulting pair will be displayed. 
-<tr><td><tt>Shared Hit ID</tt><td>If the assigned Best Hit ID of  pair contains the given substring, the
+<tr><td><tt>Shared HitID</tt><td>If the assigned <tt>HitID</tt> of a pair contains the given substring, the
 resulting pair will be displayed. 
-<tr><td><tt>Shared Descript</tt><td>Displays all pairs that have the substring in the  description column.
+<br>The <tt>HitID</tt> "*NoShare" indicates the pair does not share any description.
+<br>The <tt>HitID</tt> "*Novel" indicates that neither sequence of the pair has any annotation.
+<br>See the <a href=http://www.agcol.arizona.edu/software/tcw/doc/mtcw/UserGuide.html#step2>online documentation</a>
+for a detailed description of how the <tt>Shared Hit</tt> is computed.
+<tr><td><tt>Shared Descript</tt><td>Displays all pairs that have the substring in the  description column. 
 <tr><td><tt>PCC</tt><td> This is only relevant if there are TPM values in the database. The Pearson
 Correlation Coefficient (PCC) is computed for all pairs to determine their correlation. 
 </table>
-<p>Substring queries (<tt>Seq ID</tt>, <tt>Shared Hit ID</tt>, <tt>Shared Descript</tt>):
+<p>Substring queries (<tt>SeqID</tt>, <tt>Shared HitID</tt>, <tt>Shared Descript</tt>):
 <ul>
 <li>The search is not case-sensitive and will find the substring anywhere in the ID or description.
 <li>The second two options have a <tt>Has</tt> and <tt>Not</tt> choice beside
@@ -49,13 +53,11 @@ them; if <tt>Not</tt> is selected, show all pairs that do NOT have the substring
 either an AA or NT hit to be pair.
 
 <h3>+Statistics - only available if at least two NT datasets are in the mTCWdb</h3>
-Selecting <tt>Has Stats</tt> or
-<tt>Has KaKs</tt> displays the pairs with the corresponding statistics. It depends on
-how the database was built as to whether a pair has Stats or has KaKs. 
+Selecting <tt>Has Stats</tt> displays the pairs with the corresponding statistics, which are the 
+pairs that are in at least one cluster. 
 
-<br><br>For all queries that have a "&gt;=" and "&lt;", a blank entry will be ignored, but one 
-of the two entry boxes must have a number if the corresponding check box
-is selected. 
+<br><br><tt>=0 or blank</tt>: For all queries that have a "&gt;=" and "&lt;", a blank entry will be ignored. 
+If both boxes contain an "0" (or "0.0"), then it computes "=0".
 
 <br><br><tt>Has Stats</tt>: All queries correspond to columns of the same name, e.g. "%Cexact" corresponds
 to the column "%Cexact", where putting the mouse over the column name (in the column panel)
@@ -63,7 +65,7 @@ defines it in the lower left hand corner as "Percent of codons that have an exac
 
 <br><br><tt>KaKs</tt>: This is the synonymous substitution rate (Ka) divided by the nonsynonymous
 substitution rate (Ks). KaKs&lt;1 is considered purifying selection and KaKs&gt;1
-is considered positive selection. If Kaks='-' then the overlap was too short to compute KaKs.
+is considered positive selection. If Kaks='-' then the overlap was too short to compute KaKs. 
 If <tt>KaKs=NA</tt> is selected and <tt>KaKs</tt> value(s) are entered, the query is on either condition.
 
 <h3>+Datasets</h3>

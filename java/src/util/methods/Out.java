@@ -790,15 +790,7 @@ public class Out {
 		return x;
 	}
 	
-	static public String formatDouble(double val) {
-	    	if (val == 0) return "0.0";
-	    	
-	    	double a = Math.abs(val);
-	    	if (a>=100.0)   return String.format("%.1f", val); 
-	    	if (a>=1.0)     return String.format("%.3f", val); 
-	    	if (a >= .0001) return String.format("%.3f", val); 
-	    	return  String.format("%.1E", val);
-	}
+	
 	
 	// if projcmp is prefix and /usr/tcw/projcmp/ex is path, return /projcmp/ex
 	static public String mkPathRelative(String prefix, String filePath) {

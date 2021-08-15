@@ -38,6 +38,7 @@ import util.methods.Out;
  */
 public class QRProcess {
 	private final int NUM_PRT_FILTER=25;
+	private final int METHOD_SIZE=40; // CAS330 " method varchar(40), " +
 	/********* R variables *********************
 	 * These variable are set in R for the DE R-scripts methods
 	 */
@@ -136,7 +137,7 @@ public class QRProcess {
 			dePrint(scores);
 			String col = Globals.PVALUE + pColName;
 			deSaveCols(scores, col, g1, g2);
-			deSaveMethod(col, g1, g2, "", pvalFile, 0);
+			deSaveMethod(col, g1, g2, "", pvalFile, "");
 			Out.Print("\nFinished adding p-values from file " + pvalFile + " for " + dbName);
 			return true;
 		}
@@ -171,11 +172,16 @@ public class QRProcess {
 				Out.PrtError("No R-script");
 				return false;
 			}
+			// CAS330 add filter
+			String filter="No Filter";
+			if (filCnt>0) filter = "Count>"+filCnt;
+			else if (filCPM>0) filter="CPM>"+filCPM+">="+filCPMn;
+			if (disp>0) filter+="; Disp " + disp;
 			
 			dePrint(scores);
 			if (scores.size() > 0 && pColName.length() > 0 && addCol) {
 				deSaveCols(scores, pColName, grp1, grp2);
-				deSaveMethod(pColName, grp1, grp2, rScriptFile, "", disp);
+				deSaveMethod(pColName, grp1, grp2, rScriptFile, "", filter);
 				Out.r("                                             ");
 			}  
 			Out.PrtMsgTimeMem("\nFinished DE execution for " + prtName(pColName), startTime);
@@ -596,7 +602,7 @@ public class QRProcess {
 			}
 			if (cntSave>0) ps.executeBatch();
 			mDB.closeTransaction(); 
-			if (cntNA>0) Out.PrtSpMsg(1, cntNA + " NA scores");
+			Out.PrtSpCntMsgZero(1, cntNA, "NA scores");
 			
 		/* Set negative if col1<col2 */
 			// IF there is one library in each group set, and IF the corresponding LN__ columns exist, 
@@ -622,7 +628,7 @@ public class QRProcess {
 	 *  Metadata goes in libraryDE 
 	 */
 	private void deSaveMethod(String pColName, TreeSet <String> grp1, TreeSet <String> grp2,
-			String rScriptFile, String pvalFile, double disp) {
+			String rScriptFile, String pvalFile, String filter) {
 		try {
 			String title = "";
 			for (String lib : grp1) title += lib + " ";
@@ -633,8 +639,10 @@ public class QRProcess {
 			String sMethod = "";
 			if (!rScriptFile.equals("")) {
 				String file = rScriptFile.substring(rScriptFile.lastIndexOf("/")+1);
-				if (file.length()>20) file = file.substring(0,20);
-				sMethod = file;
+				if (file.length()>25) file = file.substring(0,25);
+				
+				sMethod = file + " " + filter;
+				if (sMethod.length()>=METHOD_SIZE) sMethod = sMethod.substring(0,METHOD_SIZE-1);
 			}
 			else if (!pvalFile.equals("")) {
 				String file = pvalFile.substring(pvalFile.lastIndexOf("/")+1);
@@ -912,7 +920,8 @@ public class QRProcess {
     
         	mDB.executeUpdate("update assem_msg set pja_msg=NULL");
         	int n = scores.size(); 
-        	int cntSave=0, cnt=0;
+        	int cntSave=0, cnt=0, cntNA=0;
+        	double nan=Globalx.dNaDE; // Never seen this happen. If it does, need to change to '-' in Basic GO
         	
         	mDB.openTransaction(); 
 			PreparedStatement ps = mDB.prepareStatement("update go_info set " + pColName + "=? where gonum=?");
@@ -920,7 +929,9 @@ public class QRProcess {
 			for (String goStr : scores.keySet()) {
 				int gonum = Integer.parseInt(goStr);
 				double pval = scores.get(goStr);
-				ps.setDouble(1, pval);
+				if (scores.get(goStr).isNaN()) {ps.setDouble(1,nan); cntNA++;}
+				else ps.setDouble(1,pval); 
+			
 				ps.setInt(2,gonum);
 				ps.addBatch();
 				
@@ -936,13 +947,14 @@ public class QRProcess {
 			ps.close();
 			mDB.closeTransaction(); 
 			
+			Out.PrtSpCntMsgZero(1, cntNA, "NA scores");
 			Out.PrtSpCntMsg(0, cnt05, "GO p-values < 0.05 ");
 			goEnrichSummary += String.format("%s%,8d",space, cnt05);
 			
 			String sMethod = "unknown";
         	if (!rScriptFile.equals("")) {
 				String file = rScriptFile.substring(rScriptFile.lastIndexOf("/")+1);
-				if (file.length()>20) file = file.substring(0,20);
+				if (file.length()>=METHOD_SIZE) file = file.substring(0,METHOD_SIZE-1);
 				sMethod = file;
 			}
         	mDB.executeUpdate("update libraryDE set goCutoff=" + cutoff + ",goMethod='" + sMethod + 

@@ -195,21 +195,31 @@ public class MainTableSort extends JTable implements TableModel
 		
 		// null column is n-fold, sort it like DE
 		final boolean negSort = (dbName == null || dbName.startsWith(Globals.PVALUE)) ? true : false;
+		final boolean isPval =  (dbName != null && dbName.startsWith(Globals.PVALUE)) ? true : false;
 
 		Comparator<Object []> sortRows = new Comparator<Object []> () {
 			public int compare ( Object [] row1, Object [] row2 ) 
 	    	{
-				Object o1 = convertNull ( row1[1] );
-	            Object o2 = convertNull ( row2[1] );
+				Object o1 = convertNull ( row1[1], isPval );
+	            Object o2 = convertNull ( row2[1], isPval );
 	            
-	            if (negSort) {
-	            	Double d1 = Math.abs(((DisplayFloat)o1).getValue());
-	            	Double d2 = Math.abs(((DisplayFloat)o2).getValue());
+	            if (negSort) { // CAS330 make NoVal sort to bottom
+	            	if (!(o1 instanceof DisplayFloat) || !(o2 instanceof DisplayFloat)) {
+	            		if ( o1 == o2 ) 		return 0;
+		 	            else if ( o1 == null || o1.toString()==Globalx.sNoVal || o1.toString()==Globalx.sNullVal)	return 1;
+		 	            else if ( o2 == null || o2.toString()==Globalx.sNoVal || o2.toString()==Globalx.sNullVal)	return -1;	
+	            	}
+	            	
+	            	double	v1 = ((DisplayFloat)o1).getValue();
+	            	double	v2 = ((DisplayFloat)o2).getValue();
+	            
+	            	Double d1 = Math.abs(v1);
+	            	Double d2 = Math.abs(v2);
 	            	int nRes = 0;
 	            	if (d1 < d2) nRes = -1;
 	            	else if (d1 > d2) nRes = 1;
-	            	else if (((DisplayFloat)o2).getValue() < 0 && ((DisplayFloat)o1).getValue() > 0) nRes = 1;
-	            	else if (((DisplayFloat)o1).getValue() < 0 && ((DisplayFloat)o2).getValue() > 0) nRes = -1;
+	            	else if (v1>0 && v2<0) nRes=-1; // if equal absolute, positives go first
+	            	else if (v1<0 && v2>0) nRes=1;
 	            	return  (bInAscending ? nRes : -nRes);
 	            }
 	    	
@@ -366,18 +376,12 @@ public class MainTableSort extends JTable implements TableModel
 						Object obj = getValueAt(row, column);
 						
 						if (obj!=null) {
-							double theVal=0.0;
-				        	if (obj instanceof DisplayFloat) {
-								theVal = ((DisplayFloat) obj).getValue();
+				        	if (obj instanceof DisplayFloat) { // Could be '-' or 'NA'
+								double theVal = ((DisplayFloat) obj).getValue();
+								Color high = DisplayDecimalTab.getPvalColor(theVal);
+					        	if (high!=null) label.setBackground(high);
 							}
-							else {
-								Out.prt(dbName + " Cannot read table obj '" + obj.toString() + "'   Column:"
-										+ column + " Abs:" + getMappedColumn(column));
-							}
-				        	Color high = DisplayDecimalTab.getPvalColor(theVal);
-				        	if (high!=null) label.setBackground(high);
 						}
-						//else Out.prt(dbName + " " + row + " " + column + " null object"); happens when no output
 					}
 				}
 			}
@@ -415,20 +419,27 @@ public class MainTableSort extends JTable implements TableModel
 	public int getRowCount() { return tableRows.size();};
 	
 	public Object getValueAt( int rowIndex, int columnIndex ){	
-		int mapcol = getMappedColumn(columnIndex); 
+		
 		if (  rowIndex > nTotalRows || nTotalRows == 0) return null;
-		else {	
-			Object obj = null;
-			try {
-				String line = tableRows.get(rowIndex);
-				if (mapcol-- == 0)  return rowIndex+1;
-				
-		        obj = fieldObj.extractFieldByID ( line, getFieldIdxFromColumnIdx ( mapcol ) );
-		        obj = convertNull ( obj );
-			}
-			catch (Exception e) {return null;}
-			return obj;
+		
+		try {
+			int mapcol = getMappedColumn(columnIndex); 
+			if (mapcol-- == 0)  return rowIndex+1; // Row#
+			
+			String line = tableRows.get(rowIndex);
+			int fieldIdx = getFieldIdxFromColumnIdx ( mapcol );
+	        Object obj = fieldObj.extractFieldByID ( line,  fieldIdx);
+	        
+	        String dbName = fieldObj.getDBNameByID(fieldIdx); 
+	     
+	        boolean isPval = (dbName != null && dbName.startsWith(Globals.PVALUE)) ? true : false;
+	        
+	        obj = convertNull ( obj, isPval );
+      
+	        return obj;
 		}
+		catch (Exception e) {return null;}
+			
 	}
 	private int getFieldIdxFromColumnIdx ( int columnIndex ){
         if ( columnIndex < 0 )
@@ -439,10 +450,17 @@ public class MainTableSort extends JTable implements TableModel
         else
             return columnIndex;
     }
-	private Object convertNull ( Object obj ){
+	private Object convertNull ( Object obj, boolean isPval ){ // CAS330 add isPval
         if ( obj instanceof Integer ) {
             Integer val = (Integer)obj;
             if ( val.intValue() == Integer.MIN_VALUE ) obj = null;
+        }
+        else if ( obj instanceof DisplayFloat ) { // CAS330 add DisplayFloat check
+        	if (isPval) {
+        		Double val = Math.abs(((DisplayFloat) obj).getValue());
+        		if      (val==Globalx.dNoDE) obj = Globalx.sNoVal;
+        		else if (val==Globalx.dNaDE) obj = Globalx.sNullVal;
+        	}
         }
         else if ( obj instanceof Float ) {
             Float val = (Float)obj;

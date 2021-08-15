@@ -159,6 +159,7 @@ public class PairAlignData implements Comparable<PairAlignData> {
 			alignFullSeq1 = alignObj.getHorzResult(gapCh);
 			alignFullSeq2 = alignObj.getVertResult(gapCh);
 			nOLPscore     = alignObj.getOLPmatch();
+			alignObj.clear(); // CAS330 greatly reduces memory
 			
 			if (alignType!=AlignCDS_AA) removeHangingGap();
 		}

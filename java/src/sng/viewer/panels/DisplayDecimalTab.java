@@ -24,6 +24,7 @@ import javax.swing.event.DocumentListener;
 import sng.database.Globals;
 import sng.util.Tab;
 import sng.viewer.STCWFrame;
+import util.database.Globalx;
 import util.methods.ErrorReport;
 import util.methods.Static;
 import util.ui.DisplayFloat;
@@ -53,6 +54,14 @@ public class DisplayDecimalTab  extends Tab {
 	static private String colScheme="1";
 	static private Color [] selC=colSch1;
 	static private double [] pCuts = {0.05, 0.01, 0.001, 0.0001};
+	
+	/********************************************
+	 * Called from SeqDetail for hit table and other values
+	 */
+	static DisplayFloat disfl = new DisplayFloat();
+	static public String formatDouble(double val) {
+    	return disfl.getString(val);
+	}
 	
 	/******** Preferences ************************/
 	static public String getPrefIDPvalCut() {return "pvalCutoff";}
@@ -99,11 +108,12 @@ public class DisplayDecimalTab  extends Tab {
     public static Color getPvalColor(double pval) {
     	if (!bHighPval) return null;
     	double theVal = Math.abs(pval);
-    	if (theVal<pCuts[3]) 		return selC[3];
-    	else if (theVal<pCuts[2]) 	return selC[2];
-		else if (theVal<pCuts[1]) 	return selC[1];
-		else if (theVal<pCuts[0])	return selC[0];
-		else return null;
+    	if (theVal==Globalx.dNoDE) return null; // CAS330
+    	if (theVal<pCuts[3]) 	return selC[3];
+    	if (theVal<pCuts[2]) 	return selC[2];
+		if (theVal<pCuts[1]) 	return selC[1];
+		if (theVal<pCuts[0])	return selC[0];
+		return null;
     }
     /****************************************************************/
 	/**********************************************************

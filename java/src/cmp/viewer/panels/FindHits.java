@@ -45,10 +45,10 @@ import util.database.Globalx;
 import util.file.FileC;
 import util.file.FileRead;
 
-public class BlastTab extends JPanel
+public class FindHits extends JPanel
 {
 	private static final long serialVersionUID = 653192706293635582L;
-	private static final String helpHTML = Globals.helpDir + "BlastTab.html";
+	private static final String helpHTML = Globals.helpDir + "FindHits.html"; // CAS330 rename file and help
 	
 	private final String RESULTS0 = ".results" + FileC.TEXT_SUFFIX;
 	private final String RESULTS6 = ".results" + FileC.TSV_SUFFIX;;
@@ -57,7 +57,7 @@ public class BlastTab extends JPanel
 	private final int nWIDTH=520;
 	private final int nLEN=350;
 	
-	public BlastTab(MTCWFrame parentFrame) 
+	public FindHits(MTCWFrame parentFrame) 
 	{
 		setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -69,7 +69,7 @@ public class BlastTab extends JPanel
 		// blastn default is megablast, so do can use same defaults 
 		int cpu=1;
 		blastDefaults = BlastArgs.getBlastArgsDB()  + " -num_threads " + cpu;
-		dmndDefaults =  BlastArgs.getDiamondArgsDB() + " --threads " + cpu;
+		dmndDefaults =  BlastArgs.getDiamondArgsHit() + " --threads " + cpu; // CAS330 special for Find Hits
 		
 		// added after Blast is performed; not used right now
 		btnViewContig = Static.createButton("Copy Selected Subject", false, Globals.FUNCTIONCOLOR);
@@ -328,7 +328,7 @@ public class BlastTab extends JPanel
 	 * AA query
 	 * 		AAseqs, AAdb		diamond or blast
 	 */
-	private void runSearch() throws Exception{		
+	private void runSearch() {		
 		if (dmndCheck.isSelected() && !BlastArgs.isDiamond()) { // CAS316
 			showErr("Diamond executable not available");
 			return;
@@ -348,11 +348,7 @@ public class BlastTab extends JPanel
 		
 	// Create database
 		String ID = theParentFrame.getDBName();
-		createSubjectDB(ID);
-		if (dbFileName==null || dbFileName.equals("")) {
-			showErr("Cannot create search database file");
-			return;
-		}
+		if (!createFastaDB(ID)) return;
 		
 	// Determine if the input sequence is nucleotide or protein
 		
@@ -378,15 +374,18 @@ public class BlastTab extends JPanel
 			showStatus("Sequence type is ambiguous -- try protein search - starting " + pgm + "...");
 		}
 		
-	// Write query to file	
-		File queryFile = new File(baseDir, ID+".input.fa");
-		if (queryFile.exists()) queryFile.delete();
-		queryFile.createNewFile();
-		BufferedWriter w = new BufferedWriter(new FileWriter(queryFile));
-		w.write(wholeSeq); w.newLine();
-		w.close();
-
-	// Setting for blast
+	// Write query to file
+		File queryFH=null;
+		try {
+			queryFH = new File(baseDir, ID+".input.fa");
+			if (queryFH.exists()) queryFH.delete();
+			// queryFile.createNewFile();
+			BufferedWriter w = new BufferedWriter(new FileWriter(queryFH));
+			w.write(wholeSeq); w.newLine();
+			w.close();
+		} catch (Exception e) {ErrorReport.prtReport(e, "Writng input.fa"); showErr("Failed writing input"); return;}
+	
+	// Setting for search
 		boolean bIsTabOutput = tabCheck.isSelected();
 		String suffix = (bIsTabOutput) ? RESULTS6 : RESULTS0;
 		String resultFile = baseDir + "/" + ID + "." + pgm.substring(0,2) + suffix;
@@ -394,7 +393,7 @@ public class BlastTab extends JPanel
 		if (outFile.exists()) outFile.delete(); // CAS313
 		
 		String seqPath = 	new File(dbFileName).getAbsolutePath();
-		String queryPath = 	queryFile.getAbsolutePath();
+		String queryPath = 	queryFH.getAbsolutePath();
 		String outPath = 	outFile.getAbsolutePath();
 		
 		seqPath = 	FileC.removeRootPath(seqPath); // CAS316
@@ -405,7 +404,7 @@ public class BlastTab extends JPanel
 	
 		String params = txtParams.getText();
 		
-	// Run blast
+	// Run search
 		String action;
 		if (isSubjAA) 	action = (isQueryAA) ? "blastp" : "blastx";
 		else			action = (isQueryAA) ? "tblastn" : "blastn";
@@ -420,35 +419,34 @@ public class BlastTab extends JPanel
 		if (blastCmd==null || blastCmd.equals("")) return;
 		
 	// Execution
-		
-		long startTime = Out.getTime();
-		if (traceCheck.isSelected()) Out.prt("Executing: " + blastCmd);
-		
-		Process p = Runtime.getRuntime().exec(blastCmd);
-		p.waitFor();
-		
-		if (!outFile.isFile()) {
-			showErr("No resulting output file (see Help)");
-			return;
-		}
-		if (traceCheck.isSelected())  Out.PrtMsgTime("Complete search", startTime);
-		
-		int nrows = 0;
-		BufferedReader br = new BufferedReader(new FileReader(outFile));
-		while (br.ready())
-		{
-			if (!br.readLine().trim().equals("")) {
-				nrows++;
-				break;
+		try {
+			long startTime = Out.getTime();
+			if (traceCheck.isSelected()) Out.prt("Executing: " + blastCmd);
+			
+			Process p = Runtime.getRuntime().exec(blastCmd);
+			p.waitFor();
+			
+			if (!outFile.isFile()) {
+				showErr("No resulting output file (see Help)");
+				return;
 			}
-		}
-		br.close();
-		if (nrows == 0)
-		{
-			showErr("No results found (see Help).");
-			return;
-		}	
-
+			if (traceCheck.isSelected())  Out.PrtMsgTime("Complete search", startTime);
+			
+			int nrows = 0;
+			BufferedReader br = new BufferedReader(new FileReader(outFile));
+			while (br.ready()){
+				if (!br.readLine().trim().equals("")) {
+					nrows++;
+					break;
+				}
+			}
+			br.close();
+			if (nrows == 0){
+				showErr("No results found (see Help).");
+				return;
+			}	
+		} catch (Exception e) {ErrorReport.prtReport(e, "Execution"); showErr("Failed execution"); return;}
+		
 	// Create table of output
 		runResultRow(bIsTabOutput);
 		if (bIsTabOutput) runReadTab(pgm, resultFile);
@@ -459,7 +457,7 @@ public class BlastTab extends JPanel
 	/*********************************************************
 	 * createDB
 	 */
-	private boolean createSubjectDB(String ID) {
+	private boolean createFastaDB(String ID) {
 	try {
 		boolean bHaveDB=false;
 		int cnt=0;
@@ -468,18 +466,18 @@ public class BlastTab extends JPanel
 			isSubjAA=false; 
 			dbFileName = baseDir + "/" + ID + ".ntSeq.fa";
 			
-			File seqFile = new File(dbFileName);
-			bHaveDB = (seqFile.isFile()) ? true : false;
+			File seqFH = new File(dbFileName);
+			bHaveDB = (seqFH.isFile() && seqFH.length()>0) ? true : false;
 			if (bHaveDB) return true;
 			
 			// Write file of sequences
 			Out.prt("Create " + dbFileName);
 			DBConn mDB = theParentFrame.getDBConnection();
 			int nclones = mDB.executeCount("select count(*) from unitrans");		
-			showStatus("Writing " + nclones + "  sequences to file ....");
+			showStatus("Writing " + nclones + " sequences to file ....");
 			
-			seqFile.createNewFile();
-			BufferedWriter w = new BufferedWriter(new FileWriter(seqFile));
+			seqFH.createNewFile();
+			BufferedWriter w = new BufferedWriter(new FileWriter(seqFH));
 			
 			ResultSet rs1 = mDB.executeQuery("select UTstr, ntSeq from unitrans");
 			while (rs1.next())
@@ -493,13 +491,17 @@ public class BlastTab extends JPanel
 			w.close(); rs1.close(); mDB.close();
 			
 			if (traceCheck.isSelected()) Out.prt("Wrote " + cnt + " to file ");
+			if (cnt==0) { // CAS330
+				showErr("No sequences written to database file");
+				return false;
+			}
 			return true;
 		}
 		if (aaSeqCheck.isSelected()) {
 			isSubjAA=true;
 			dbFileName = baseDir + "/" + ID + ".aaSeq.fa";
-			File seqFile = new File(dbFileName);
-			bHaveDB = (seqFile.isFile()) ? true : false;
+			File seqFH = new File(dbFileName);
+			bHaveDB = (seqFH.isFile() && seqFH.length()>0) ? true : false;
 			if (bHaveDB) return true;
 			
 			// Write file of ORF sequences
@@ -508,8 +510,8 @@ public class BlastTab extends JPanel
 			int nclones = mDB.executeCount("select count(*) from unitrans");		
 			showStatus("Writing " + nclones + "  AA sequences to file ....");
 			
-			seqFile.createNewFile();
-			BufferedWriter w = new BufferedWriter(new FileWriter(seqFile));
+			// seqFH.createNewFile();
+			BufferedWriter w = new BufferedWriter(new FileWriter(seqFH));
 			
 			ResultSet rs2 = mDB.executeQuery("SELECT UTstr, aaSeq from unitrans");
 
@@ -523,6 +525,10 @@ public class BlastTab extends JPanel
 			w.close(); rs2.close(); mDB.close();
 			
 			if (traceCheck.isSelected()) Out.prt("Wrote " + cnt + " to file ");
+			if (cnt==0) { // CAS330
+				showErr("No sequences written to database file");
+				return false;
+			}
 			return true;
 		}
 		if (aaDbCheck.isSelected()) {
@@ -674,27 +680,27 @@ public class BlastTab extends JPanel
 	blastx - Align translated DNA query sequences against a protein reference database.
 	********************************************************/
 	private String runSetupDmnd(String action,
-			String seqPath, String queryPath, String outPath, String params, boolean isTab) {
+			String dbPath, String queryPath, String outPath, String params, boolean isTab) {
 		try {
 			if (!action.equals("blastp") && !action.equals("blastx")) {
 				showErr("To use diamond, the target must be a protein (AA-ORF or AA-DB).");
 				return null;
 			}
 			
-			if (seqPath.endsWith(".dmnd")) seqPath = seqPath.substring(0, seqPath.indexOf(".dmnd"));
+			// CAS330 if (dbPath.endsWith(".dmnd")) dbPath = dbPath.substring(0, dbPath.indexOf(".dmnd"));
 			
-			String formatFile = seqPath + ".dmnd"; 
+			String formatFile = dbPath + ".dmnd"; 
 			if (new File(formatFile).exists()) {
 				if (traceCheck.isSelected()) Out.prt("Use formated file: " + formatFile);
 			}
 			else {
-				String cmd = BlastArgs.getDiamondFormat(seqPath, seqPath);
+				String cmd = BlastArgs.getDiamondFormat(dbPath, dbPath);
 				if (traceCheck.isSelected()) Out.prt("Executing: " + cmd);
 				Process pFormatDB = Runtime.getRuntime().exec(cmd);
 				pFormatDB.waitFor();
 			}
 			String diamondPath = BlastArgs.getDiamondPath() + " " + action + " ";
-    		String args = " -q " + queryPath + " -d " + seqPath + " -o " + outPath;
+    		String args = " -q " + queryPath + " -d " + dbPath + ".dmnd -o " + outPath; // CAS330 add .dmnd
     		String fmt =  (isTab) ? " --outfmt 6 " : " --outfmt 0 ";
     				
     		return diamondPath + args + fmt + params;
@@ -704,45 +710,45 @@ public class BlastTab extends JPanel
 	/*****************************************************************
 	 * Blast is very slow if ONLY the query is formatted, so its done opposite of diamond
 	 */
-	private String runSetupBlast(String action, String seqPath, String queryPath, String outPath, 
+	private String runSetupBlast(String action, String dbPath, String queryPath, String outPath, 
 			String params, boolean isTab) {
 		try {
 			boolean doFormat=true;
-			if (seqPath.endsWith(".gz")) { 
-				String file = seqPath.substring(seqPath.lastIndexOf("/"));
+			if (dbPath.endsWith(".gz")) { 
+				String file = dbPath.substring(dbPath.lastIndexOf("/"));
 				showErr("For blast, the file may not be gzipped (" + file + ")");
 				return null;
 			}
 			if (queryPath.endsWith(".gz")) {
-				String file = seqPath.substring(seqPath.lastIndexOf("/"));
+				String file = dbPath.substring(dbPath.lastIndexOf("/"));
 				showErr("For blast, the file may not be gzipped (" + file + ")");
 				return null;
 			}
 			if (isSubjAA)
 			{
-				File phr = (new File(seqPath + ".phr"));
-				File pin = (new File(seqPath + ".pin"));
-				File psq = (new File(seqPath + ".psq"));
+				File phr = (new File(dbPath + ".phr"));
+				File pin = (new File(dbPath + ".pin"));
+				File psq = (new File(dbPath + ".psq"));
 								
 				if(phr.exists() && pin.exists() && psq.exists()) doFormat=false;
 			}
 			else
 			{
-				File nhr = (new File(seqPath + ".nhr"));
-				File nin = (new File(seqPath + ".nin"));
-				File nsq = (new File(seqPath + ".nsq"));
+				File nhr = (new File(dbPath + ".nhr"));
+				File nin = (new File(dbPath + ".nin"));
+				File nsq = (new File(dbPath + ".nsq"));
 								
 				if(nhr.exists() && nin.exists() && nsq.exists()) doFormat=false;		
 			}
 			if (doFormat) {
-				String cmd = (isSubjAA ? BlastArgs.getFormatp(seqPath) : BlastArgs.getFormatn(seqPath));
+				String cmd = (isSubjAA ? BlastArgs.getFormatp(dbPath) : BlastArgs.getFormatn(dbPath));
 				if (traceCheck.isSelected()) Out.prt("Executing: " + cmd);
 				Process pFormatDB = Runtime.getRuntime().exec(cmd);
 				pFormatDB.waitFor();
 			}
 			String blastPath = BlastArgs.getBlastPath() + action; // CAS303
 			
-			String args =  " -query " + queryPath + " -db " + seqPath + " -out " + outPath +  " ";
+			String args =  " -query " + queryPath + " -db " + dbPath + " -out " + outPath +  " ";
 			  
 		    String fmt = (isTab) ? " -outfmt 6 " : " -outfmt 0 ";
 		   
@@ -782,7 +788,7 @@ public class BlastTab extends JPanel
 		aaSeqCheck.setSelected(true); setEnableDB(false, true, false);
 		
 		blastDefaults = BlastArgs.getBlastArgsDB()  + " -num_threads 1";
-		dmndDefaults =  BlastArgs.getDiamondArgsDB() + " --threads 1";
+		dmndDefaults =  BlastArgs.getDiamondArgsHit() + " --threads 1";
 		
 		txtParams.setText(dmndDefaults); 
 	}

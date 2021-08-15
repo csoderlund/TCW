@@ -748,6 +748,9 @@ public class AnnoOptionsPanel extends JPanel {
 		chkSelfX.setSelected(false);  						chkSelfX.setEnabled(bNTdb);
 		txtSelfXargs.setText(BlastArgs.getTblastxArgs());	txtSelfXargs.setEnabled(bNTdb);
 		
+		chkSelfP.setSelected(false);  						chkSelfP.setEnabled(true); //CAS330
+		txtSelfPargs.setText(BlastArgs.getDiamondArgsORF());txtSelfPargs.setEnabled(true);
+		
 		chkSelfP.setSelected(false);  						chkSelfP.setEnabled(true);
 		cmbSearchPgms.setSelectedIndex(0); 					// before set save
 		saveDiaArgs = BlastArgs.getDiamondArgsORF();

@@ -38,7 +38,7 @@ import cmp.viewer.pairs.PairTablePanel;
 import cmp.viewer.panels.DatabaseSelectPanel;
 import cmp.viewer.panels.MenuPanel;
 import cmp.viewer.panels.ResultPanel;
-import cmp.viewer.panels.BlastTab;
+import cmp.viewer.panels.FindHits;
 import cmp.viewer.panels.DisplayDecimalTab;
 import cmp.viewer.panels.TextPanel;
 import cmp.viewer.seq.SeqsQueryPanel;
@@ -177,11 +177,7 @@ public class MTCWFrame extends JFrame {
 				System.err.println("Fatal error: Could not open database");
 				return;
 			}
-			boolean b = new Version().run(getDBConnection());
-			if (!b) {
-				System.out.println("Problem with the version, cannot continue. ");
-				System.exit(-1);
-			}
+			new Version().run(getDBConnection());
 			
 			if (args.length>1 && args[1].equals("-o")) {
 				new Summary(db).removeSummary();
@@ -219,12 +215,7 @@ public class MTCWFrame extends JFrame {
 		strDBUser = dbUser;
 		strDBPass = dbPass;
 		
-		boolean b = new Version().run(getDBConnection());
-		if (!b) {
-			System.out.println("Problem with the version, cannot continue. ");
-			System.out.println(host + " " + dbName + " " + dbUser);
-			System.exit(-1);
-		}
+		new Version().run(getDBConnection());
 		
 		//Loads the profile, if none selected creates a default profile
 		theSettings = new ViewerSettings(this);
@@ -320,7 +311,7 @@ public class MTCWFrame extends JFrame {
 		hitQueryPanel = new HitQueryPanel(this);
 		
 		resultPanel = new ResultPanel(this);
-		blastPanel = new BlastTab(this);
+		blastPanel = new FindHits(this);
 		decimalPanel = new DisplayDecimalTab(this);
 
 		int i=0, s=0;
@@ -607,7 +598,7 @@ public class MTCWFrame extends JFrame {
 	private StyleTextPanel instructionsPanel = null;
 	private TextPanel overviewPanel = null;
 	private ResultPanel resultPanel = null;
-	private BlastTab blastPanel = null;
+	private FindHits blastPanel = null;
 	private DisplayDecimalTab decimalPanel = null;
 	
 	private GrpTablePanel grpTablePanel = null;

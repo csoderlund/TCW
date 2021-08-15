@@ -91,15 +91,18 @@ public class BasicTablePanel extends JPanel {
 		        	for (String cn : pvalColNames) {
 			    		if (cn.contentEquals(displayCol)) {
 			    			Object obj = theTable.getValueAt(row,column);
+			    			if (obj.toString()==Globalx.sNoVal) break; // CAS330 changed 3 to '-'
+			    			
 					    	double theVal=0.0;
 				        	if (obj instanceof DisplayFloat) {
 								theVal = ((DisplayFloat) obj).getValue();
+								
+								Color high = DisplayDecimalTab.getPvalColor(theVal);
+					        	if (high!=null) c.setBackground(high);
 							}
-							else {
+							else 
 								Out.prt("Cannot read table obj " + obj.toString());
-							}
-				        	Color high = DisplayDecimalTab.getPvalColor(theVal);
-				        	if (high!=null) c.setBackground(high);
+					
 				        	break;
 			    		}
 			    	}
@@ -247,6 +250,9 @@ public class BasicTablePanel extends JPanel {
 					else if (dtype == Double.class) {
 						dArr[c++] = (Double) theTable.getValueAt(x, y);
 					}
+					else if ((String) theTable.getValueAt(x, y)==Globalx.sNoVal) {
+						dArr[c++]=Globalx.dNoDE; // CAS330 DE can be '-'
+					}
 					else { 
 						Out.prtToErr("BasicTablePanel: class? " + (String) theTable.getValueAt(x, y) + " " + dtype);
 					}
@@ -258,7 +264,7 @@ public class BasicTablePanel extends JPanel {
 						if (results[i]<0) rows[nRow][c] = "N/A"; // overflow
 						else rows[nRow][c] = String.format("%,d", (long) results[i]);
 					}
-					else rows[nRow][c] = Out.formatDouble(results[i]);
+					else rows[nRow][c] = DisplayDecimalTab.formatDouble(results[i]);
 				}
 				nRow++;
 			}

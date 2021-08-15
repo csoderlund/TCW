@@ -3,6 +3,7 @@ package cmp.viewer.table;
 /****************************************************
  * Renders the table.
  * Provides formatting of columns
+ * See TableData ColumnComparator for actual sort
  */
 import java.awt.Color;
 import java.awt.Component;
@@ -11,7 +12,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Vector;
@@ -109,13 +109,13 @@ public class SortTable extends JTable implements ListSelectionListener {
             compLbl.setForeground(txtColor);
         }
         	
-    	//Both fields use numeric representation for their values for speed
+    	// Set blank, NoVal, NoDE, Null values
     	if(colName.equals(ROWNUM)) {
     		compLbl.setText("" + (Index_row + 1));
     		compLbl.setHorizontalAlignment(SwingConstants.LEFT);
     	}
     	else if (getValueAt(Index_row, Index_col) == null) {
-    		compLbl.setText(Globalx.sNoVal);
+    		compLbl.setText(Globalx.sBlank); // CAS330  - was sNoVal
     	 	compLbl.setHorizontalAlignment(SwingConstants.RIGHT); 
     	}
     	else if((cl == Integer.class || cl == Long.class)) {
@@ -133,15 +133,14 @@ public class SortTable extends JTable implements ListSelectionListener {
     			if (SeqDEs.contains(colName)) {
     				if (Math.abs(val)>=Globalx.dNoDE) showVal=false;  // 3,-3 no display of DE
     			}
-    			// distinguish value not computed versus null value
     			else if (val <= Globalx.dNullVal) {//-2 no value, 1.5 = null value
     				showVal = false; 
     				if (val == Globalx.dNullVal)  noVal=Globalx.sNullVal;  
     			}
     			else if(compLbl.getText().length() == 0) showVal=false;
     			
-        		if (showVal)	compLbl.setText(DisplayDecimalTab.formatDouble(val, false));
-        		else compLbl.setText(noVal);
+        		if (showVal) compLbl.setText(DisplayDecimalTab.formatDouble(val)); // CAS330 was local formatDouble
+        		else 		 compLbl.setText(noVal);
         	 	compLbl.setHorizontalAlignment(SwingConstants.RIGHT); 
     		}
     		catch(Exception e) {compLbl.setText("");}
@@ -152,22 +151,20 @@ public class SortTable extends JTable implements ListSelectionListener {
     		try {
     			float val = ((Float)getValueAt(Index_row, Index_col));
     			 
-    			boolean isPerc = colName.startsWith("%");  
-    			
-    			if (val <= Globalx.dNullVal) {
-    				showVal = false; // -2 no display for everything else
+    			if (val <= Globalx.dNullVal) {//-2 no value, 1.5 = null value
+    				showVal = false; 
     				if (val == Globalx.dNullVal)  noVal=Globalx.sNullVal;  
     			}
     			else if(compLbl.getText().length() == 0) showVal=false;
     			
-        		if (showVal)	compLbl.setText(DisplayDecimalTab.formatDouble(val, isPerc));
-        		else compLbl.setText(noVal);
+        		if (showVal) compLbl.setText(DisplayDecimalTab.formatDouble(val));// CAS330 was local formatDouble
+        		else 		 compLbl.setText(noVal);
         	 	compLbl.setHorizontalAlignment(SwingConstants.RIGHT); 
     		}
     		catch(Exception e) {compLbl.setText("");}
     	}
     	else {
-    	   	if(compLbl.getText().length() == 0) compLbl.setText(Globalx.sNoVal);
+    	   	if(compLbl.getText().length() == 0) compLbl.setText(Globalx.sBlank); // CAS330
     	 	compLbl.setHorizontalAlignment(SwingConstants.LEFT); 
     	}
         return compLbl;    		
@@ -188,10 +185,6 @@ public class SortTable extends JTable implements ListSelectionListener {
 		for (int i=0; i<seq.length; i++) SeqDEs.add(seq[i]);
 	}
   
-    static DecimalFormat df1 = new DecimalFormat("#0.0###;#0.0###");
-    static DecimalFormat df2 = new DecimalFormat("0.#E0;0.##E0");
-    
-   
 	private static final int MAX_AUTOFIT_COLUMN_WIDTH = 120; // in pixels
     public void autofitColumns() {
         TableColumn column;
@@ -208,7 +201,6 @@ public class SortTable extends JTable implements ListSelectionListener {
             else if (theModel.getColumnClass(i) == Double.class) buf=4; 
             else if (theModel.getColumnClass(i) == Float.class)  buf=4; 
            
-            
             comp = headerRenderer.getTableCellRendererComponent(
                    this, column.getHeaderValue(), false, false, 0, i);
             

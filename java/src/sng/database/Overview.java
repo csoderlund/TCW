@@ -1405,14 +1405,14 @@ public class Overview {
 	        
 	        // DE
 	        if (!hasSeqDE) return false;
-    		lines.add("   DE (Differential Expression) computation: ");
-    		String msg = String.format("      %-12s %-20s %s", "Column",  "Method", "Conditions");
+    		lines.add("   Differential Expression computation: ");
+    		String msg = String.format("      %-12s %-30s %s", "Column",  "Method", "Conditions");
     		lines.add(msg);
     		
     		ResultSet rs = mDB.executeQuery("Select pCol, title, method from libraryDE");
     		while (rs.next()) {
     			String de = rs.getString(1).substring(2); // remove P_
-    			msg = String.format("      %-12s %-20s %s", de, rs.getString(3), rs.getString(2));
+    			msg = String.format("      %-12s %-30s %s", de, rs.getString(3), rs.getString(2));
         		lines.add(msg);
     		}
     		rs.close();
@@ -1421,14 +1421,14 @@ public class Overview {
     		// GO DE
 	        if (!hasGO) return true;
     		lines.add("   GO enrichment computation: ");
-    		msg = String.format("      %-12s %-20s %-5s", "Column", "Method", "Cutoff");
+    		msg = String.format("      %-12s %-30s %-5s", "Column", "Method", "Cutoff");
     		
     		int cnt=0;
     		rs = mDB.executeQuery("Select pCol, goCutoff, goMethod from libraryDE where goCutoff>0.0");
     		while (rs.next()) {
     			if (cnt==0) lines.add(msg);
     			String de = rs.getString(1).substring(2); // remove P_
-				msg = String.format("      %-12s %-20s %5.4f", de, rs.getString(3).trim(), rs.getDouble(2));
+				msg = String.format("      %-12s %-30s %.1e", de, rs.getString(3).trim(), rs.getDouble(2));
 				lines.add(msg);
 				cnt++;
     		}

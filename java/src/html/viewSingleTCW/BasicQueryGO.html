@@ -89,13 +89,20 @@ Columns can be rearranged by dragging and sorted
 by clicking on a column heading. 
 
 <p><b><i>Columns</i></b> 
-<ul>
-<li>These are all obvious except the column <b>GO</b>, which is the GO Ontology (BP, CC, MF).
-<li>P-values: See <b>Decimal Display</b> on upper left panel.
-<li>Evidence categories: The <b>Long</b> format shows the evidence codes found for the category,
-where the inherited codes are in parenthesis. The <b>Short</b> format just states 'Yes' if it 
-has one or move evidence codes in the category.
- </ul>
+<p>These are all obvious except for the following: 
+<table cellpadding=5>
+<tr><td>Ont<td>The GO Ontology (BP, CC, MF).
+<tr><td>#Seq<td>See the <b>#Seq</b> section at end.
+<tr><td>#Assign<td>The number of sequences with a hit that has the GO directly assigned.
+This column is only relevant for understanding the data.
+<tr><td>Best E-val<td>The Best E-value from all seq-hit pairs that have this GO.
+<tr><td>Evidence Categories<td>
+The "Long" format lists all evidence codes found for that category, where the inherited ones
+are in parenthesis. The "Short" format only states "Yes" if it has one or more evidence codes
+in the category, else its left blank.
+<tr><td>P-values<td>See <b>Decimal Display</b> on upper left panel for their display.
+</table>
+
 <p><b><i>Modify Table</i></b>
 <ul>
 <li><b>Delete Selected</b> and <b>Deleted Unselected</b>: 

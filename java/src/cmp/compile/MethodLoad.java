@@ -73,7 +73,7 @@ public class MethodLoad {
 		prefix = methodPanel.getMethodPrefixAt(idx);
 			
 		if (!processGroupFile(idx)) return -1;
-		return GRPid;
+		return methodID;
 	}
 	 /***************************************************
 	  * loadGroupFile
@@ -98,10 +98,10 @@ public class MethodLoad {
 		}
 
 		// LOAD METHOD, GROUPS and MEMBERS
-		step1_loadMethod(methodName, methodType, prefix, comment, settings);
-		if (bSuccess) step2_initDSfromDB();
-		if (bSuccess) step3_readFileofClusters();
-		if (bSuccess) new Pairwise(cmpPanel).saveMethodPairwise(mDB, GRPid, prefix);
+		step1_loadMethod(methodName, methodType, prefix, comment, settings); if (!bSuccess) return false;
+		step2_initDSfromDB();												if (!bSuccess) return false;
+		step3_readFileofClusters();											if (!bSuccess) return false;
+		new Pairwise(cmpPanel).saveMethodPairwise(mDB, methodID, prefix);
 		
 		return bSuccess;
 	 }
@@ -126,7 +126,7 @@ public class MethodLoad {
 		ps.execute();
 		
 		ResultSet rs = mDB.executeQuery( "select last_insert_id() as PMid");
-		if (rs.next()) GRPid = rs.getInt("PMid");
+		if (rs.next()) methodID = rs.getInt("PMid");
 		else ErrorReport.die("error getting last GRPid");
 		rs.close();
 
@@ -260,7 +260,7 @@ public class MethodLoad {
 			if (cntMem<2) continue; // CAS327 check for bad ID here instead of below
 			
 	    	/** add group to database -- need PGid for adding members **/
-			int PGid = step3b_loadGroup(POGsql, PGstr, GRPid, cntMem, sTCWcnt);
+			int PGid = step3b_loadGroup(POGsql, PGstr, methodID, cntMem, sTCWcnt);
 			sTCWcnt = null;
                
     	/** find members and add to database **/  
@@ -291,7 +291,7 @@ public class MethodLoad {
 			}
 			
     	/** add entry to pog_hits and compute best hit **/
-			Desc bestDesc = descriptComputeBest(PGid, memIdVec);
+			Desc bestDesc = descriptComputeBestGrp(PGid, memIdVec);
 			if (bestDesc!=null) {
 				int score = Out.perI(bestDesc.totalCnt, memIdVec.size());
 				if (score > 100) score = 100; 
@@ -377,18 +377,18 @@ public class MethodLoad {
 	 *	List of brief descriptions with count and bestAnno count
 	 *		List of HitIDs with that description, with nGO
 	 */
-	private Desc descriptComputeBest(int grpID, Vector <Integer> seqIDvec) {
-		String seqList=null;
-		for (int UTid : seqIDvec) {
-			if (seqList==null) seqList = " (UTid = " + UTid;
-			else seqList += " or UTid = " + UTid;		
+	private Desc descriptComputeBestGrp(int grpID, Vector <Integer> seqIDvec) {
+		String seqList= "UTid IN ("; // CAS330 changed from using UTid=x or....
+		for (int i=0; i<seqIDvec.size(); i++) {
+			if (i==0) seqList += seqIDvec.get(i);
+			else seqList += ", " + seqIDvec.get(i);		
 		}
 		seqList += ")";
 		
 		return new BestHit().compute(grpID, seqIDvec.size(), seqList); /* COMPUTE */
 	}
 	// called from pairwise for pairs
-	public String [] descriptComputeBest(int grpID, int [] seqIDarr) {
+	public String [] descriptComputeBestPair(int grpID, int [] seqIDarr) {
 		String seqList=null;
 		for (int UTid : seqIDarr) {
 			if (seqList==null) seqList = " (UTid = " + UTid;
@@ -416,8 +416,8 @@ public class MethodLoad {
 				boolean rc;
 				
 				rc = loadBestAnnoFromDB(seqList); 	if (!rc) return retVal(errorID);
-				if (descHitMap.size()==0) 			
-					return retVal(uniqueID); 
+				
+				if (descHitMap.size()==0) 			return retVal(uniqueID); 
 				
 				rc = loadCntAllAnnoFromDB(seqList); if (!rc) return retVal(errorID);
 				
@@ -427,31 +427,66 @@ public class MethodLoad {
 			}
 			catch (Exception e) {ErrorReport.die(e, "compute Best Hit"); return null;}  
 		}
+		/**************************************************************
+		 * No description, return dummy
+		 */
 		private Desc retVal(String id) {
 			bestDescObj = new Desc();
 			bestDescObj.update(0, id, 0.0, 0, false,  false,  "");
 			bestDescObj.totalCnt=grpSize;
 			return bestDescObj;
 		}
-		private boolean findBest() {
+		/*******************************************************************
+		 * Make list of best Anno descriptions with best bit_score hitID
+		 */
+		private boolean loadBestAnnoFromDB(String grpSeqList) {
 			try {
-				Vector <Desc> listDesc = new Vector <Desc> ();
-				for (Desc d : descHitMap.values() ) {
-					d.finish();
-					listDesc.add(d);
+				if (grpSeqList==null || grpSeqList.contentEquals("")) {
+					Out.PrtErr("Fatal error");
+					return false;
+				};
+				ResultSet rs = mDB.executeQuery(
+						"SELECT tr.HITid, tr.HITstr, tr.e_value, uq.description, uq.dbtype, uq.nGO " +
+						"FROM unitrans_hits as tr " +
+						"JOIN unique_hits as uq " +
+						"WHERE " + grpSeqList + " AND tr.HITid = uq.HITid AND tr.bestAnno=1 " +
+						//" (tr.bestAnno=1 OR tr.bestEval=1 OR tr.bestGO=1) " +  // CAS330 clearer to just allow bestAnno
+						"order by tr.e_value, tr.bit_score ASC");		// CAS305 added order by, CAS330 added bitscore
+				while (rs.next()) {	
+					int hitID = rs.getInt(1);
+					String hitStr = rs.getString(2);
+					double eval = rs.getDouble(3);
+					
+					String desc = rs.getString(4).trim();
+					if (desc.contains("{ECO ")) desc = desc.substring(0,desc.indexOf("{ECO")); 
+					
+					String dbType = rs.getString(5);
+					boolean bIsSP = (dbType.equals(Globalx.SP)) ? true : false;
+					
+					int nGO = rs.getInt(6);
+					
+					String  dBrief =    BestAnno.descBrief(desc);    // CAS305 moved to BestAnno
+					boolean bGoodAnno = BestAnno.descIsGood(dBrief); // CAS305 moved to BestAnno
+					
+					if (!descHitMap.containsKey(dBrief)) {
+						Desc x = new Desc();
+						x.update(hitID, hitStr, eval, nGO, bIsSP, bGoodAnno,  dBrief);
+						descHitMap.put(dBrief, x);
+					}
+					else {
+						Desc x = descHitMap.get(dBrief);
+						x.update(hitID, hitStr, eval, nGO, bIsSP, bGoodAnno,  dBrief);
+					}
 				}
-				Collections.sort(listDesc);
-				if (debug>0) for (Desc d : listDesc) d.prt();
-				bestDescObj=listDesc.get(0);
-						
 				return true;
 			}
-			catch (Exception e) {ErrorReport.die(e, "find best"); return false;}  
+			catch (Exception e) {ErrorReport.die(e, "Load best Hits: " + grpSeqList); return false;}  
 		}
-		
+		/*********************************************************
+		 * Count how many have the each best anno description
+		 */
 		private boolean loadCntAllAnnoFromDB(String seqList) {
 			try {
-				// count the ones that have this descript
 				ResultSet rs = mDB.executeQuery(
 					"SELECT tr.UTid, tr.HITid, uq.description " +
 					"FROM unitrans_hits as tr JOIN unique_hits as uq " +
@@ -471,10 +506,10 @@ public class MethodLoad {
 					String dBrief =   BestAnno.descBrief(descript);
 					
 					if (descHitMap.containsKey(dBrief)) {
-						Desc x = descHitMap.get(dBrief);
-						if (!curHitSet.contains(x)) {
-							x.cnt(hitID);
-							curHitSet.add(x);
+						Desc dObj = descHitMap.get(dBrief);
+						if (!curHitSet.contains(dObj)) {
+							dObj.cnt(hitID);
+							curHitSet.add(dObj);
 						}
 					}
 				}
@@ -484,78 +519,40 @@ public class MethodLoad {
 			}
 			catch (Exception e) {ErrorReport.die(e, "read best hits"); return false;}  
 		}
-		/*******************************************************************/
-		private boolean loadBestAnnoFromDB(String grpSeqList) {
+		/***************************************************************
+		 * Sorts the list to get the best
+		 */
+		private boolean findBest() {
 			try {
-				if (grpSeqList==null || grpSeqList.contentEquals("")) {
-					Out.PrtErr("Fatal error");
-					return false;
-				};
-				ResultSet rs = mDB.executeQuery(
-						"SELECT tr.HITid, tr.HITstr, tr.e_value, uq.description, uq.dbtype, uq.nGO " +
-						"FROM unitrans_hits as tr " +
-						"JOIN unique_hits as uq " +
-						"WHERE " + grpSeqList + " AND tr.HITid = uq.HITid AND " +
-						" (tr.bestAnno=1 OR tr.bestEval=1 OR tr.bestGO=1) " +
-						"order by tr.e_value");				// CAS305 added order by
-				while (rs.next()) {	
-					int hitID = rs.getInt(1);
-					String hitStr = rs.getString(2);
-					double eval = rs.getDouble(3);
-					
-					String desc = rs.getString(4).trim();
-					if (desc.contains("{ECO ")) desc = desc.substring(0,desc.indexOf("{ECO")); 
-					
-					String dbType = rs.getString(5);
-					boolean bIsSP = (dbType.equals(Globalx.SP)) ? true : false;
-					
-					int nGO = rs.getInt(6);
-					
-					String  dBrief =    BestAnno.descBrief(desc);    // CAS305 moved to BestAnno
-					boolean bGoodAnno = BestAnno.descIsGood(dBrief); // CAS305 moved to BestAnno
-					//if (debug>0) Out.prt(String.format("%5b %-20s  %-30s", bGoodAnno, dBrief, desc));
-					
-					if (!descHitMap.containsKey(dBrief)) {
-						Desc x = new Desc();
-						x.update(hitID, hitStr, eval, nGO, bIsSP, bGoodAnno,  dBrief);
-						descHitMap.put(dBrief, x);
-					}
-					else {
-						Desc x = descHitMap.get(dBrief);
-						x.update(hitID, hitStr, eval, nGO, bIsSP, bGoodAnno,  dBrief);
-					}
+				Vector <Desc> listDesc = new Vector <Desc> ();
+				for (Desc d : descHitMap.values() ) {
+					d.finish();
+					listDesc.add(d);
 				}
+				Collections.sort(listDesc);
+				if (debug>0) for (Desc d : listDesc) d.prt();
+				bestDescObj=listDesc.get(0);
+						
 				return true;
 			}
-			catch (Exception e) {ErrorReport.die(e, "Load best Hits: " + grpSeqList); return false;}  
+			catch (Exception e) {ErrorReport.die(e, "find best"); return false;}  
 		}
 	}
 	// Object for each description. Keep counts for all hitIDs that have this description.
 	private class Desc implements Comparable <Desc> {
-		static final double useSP = 0.90;
-		static final double DLOW = 1E-308; 
 		
 		// Find best hitID for the description and add to count of sequences with this anno
 		public void update(int hitID, String name, double eval, int nGO, boolean bsp, boolean bGood, String desc) {
 			boolean bAssign=false;
 			if (annoCnt==0) { // firstTime
 				bIsGood = bGood; 
-				bestDesc=desc;
-				bAssign=true;
+				bestDesc = desc;
+				bAssign = true;
 			}
 			annoCnt++;
 			
 			if (!bAssign) { // if eval is close, but new hit is SP or more GOs, replace
-				boolean bCheck=true;
-				if (bestEval!=eval) {
-	    			double ev = (eval==0.0) ? DLOW : eval;
-	    			if (ev>cmpEval)         bCheck=false; 
-				}
-				
-				if (bCheck) { 
-					if (nGO > cntGO)        bAssign=true;
-					else if (bsp && !bIsSP) bAssign=true;
-				}
+				if (eval<bestEval) bAssign=true;
 			}
 			if (bAssign) {
 				bestEval	= eval;
@@ -563,9 +560,6 @@ public class MethodLoad {
 				bestName 	= name;
 				bIsSP 		= bsp;
 				cntGO 		= nGO;
-				
-				double thisEv = (bestEval==0.0) ? DLOW : bestEval;
-				cmpEval = Math.exp(Math.log(thisEv) * useSP); 
 			}
 		}
 		public void cnt(int hitID) {
@@ -588,16 +582,16 @@ public class MethodLoad {
 			return 0;
 		}
 		public void prt() {
-			String msg = String.format("Good=%-5b Sp=%-5b best=%-3d total=%-3d GO=%-3d %.0e (%.0e) %-20s %-30s", 
-					bIsGood, bIsSP, annoCnt, totalCnt, cntGO, bestEval, cmpEval, bestName, bestDesc);
+			String msg = String.format("Good=%-5b Sp=%-5b best=%-3d total=%-3d GO=%-3d %.0e (%.1f) %-20s %-30s", 
+					bIsGood, bIsSP, annoCnt, totalCnt, cntGO, bestEval, bitScore, bestName, bestDesc);
 			Out.prt(msg);
 		}
 		private int annoCnt=0; 		// #seqs where this is best anno
 		private int totalCnt=0; 	// #seqs that have a hit with this anno
 		private int cntTA=0;		// annoCnt+totalCnt (totalCnt includes annoCnt -- this give emphasize)
 		
-		private double bestEval=100.0, cmpEval=100.0;
-		private int bestID=0, cntGO;
+		private double bestEval=100.0, bitScore=0.0;
+		private int bestID=0, cntGO=0;
 		private String bestName="", bestDesc=""; // bestDesc used for debugging
 		private boolean bIsSP=false, bIsGood=true; 
 	} // End BestHit class
@@ -605,7 +599,7 @@ public class MethodLoad {
 	 /***********************************************************/
 	 private int cntSeqs=0, nSTCW=0;
 	
-	 private int GRPid=-1;
+	 private int methodID=-1;
 	 private DBConn mDB;
 	 private CompilePanel cmpPanel;
 	 private MethodPanel methodPanel;

@@ -75,26 +75,27 @@ public class DoORF {
 	private String  pCdsFileName = "-1";
 	
 	// ORF additional rules
-	private final int     ORF_MIN_LEN =  9; 	// for very short sequences
-	private final int	  ORF_SHORT_LEN = 30; // nt; for all other sequences
+	private final int     ORF_MIN_LEN =  9; 	 // for very short sequences
+	private final int	  ORF_SHORT_LEN = 30;    // nt; for all other sequences
 	private final int 	  ORF_WRITE_LEN_MK = 90; // nt; Write to AllORFs if good Markov and len>=ORF_WRITE_LEN_MK
 	private final int     ORF_WRITE_LEN = 900;   // nt; Write to AllORFs.fa if len>ORF_WRITE_LEN
 	private final String  NUM_N_CODONS = "nnnnnnnnn";   // remarks if > than this many
 	
 	// whether to limit how much a hit can be extended.
-	private final int extendHitOlap = 95;
-	private final int extendHitSim =  60;
-	private final int extendHitOut =  40;  // limit amount to extend in codons - 2 rows visually
-	private final int extendHitIn =   10;    // codons
+	private final int EX_hitOlap = 95;
+	private final int EX_hitSim =  60;
+	private final int EX_hitOut =  40;  // limit amount to extend in codons - 2 rows visually
+	private final int EX_hitIn =   10;    // codons
 	
 	// whether to use a multiframe hit, it must fail all these tests to fail using the frame
-	private final int multiHitOlap=40, multiSeqOlap=40, multiSim=40; 
+	private final int MULTI_hitOlap=40, MULTI_seqOlap=40, MULTI_sim=40; 
 	private final double MK_CUT=0.5;  // check Markov if difference greater than this
 	
 	// flags
 	private final int    NO_RF = 0;
 	private final double CODON_STOP = -20.0;
 	private final int 	 BADORFS = 10;         // has stop codon in frame
+	
 	private boolean      bUseTrain=true;       // have training data
 	private boolean      bTrainFromFile=false; // false - compute; true - use  cds file.
 	
@@ -288,7 +289,7 @@ public class DoORF {
 					}
 							
     	    	 	// XXX Internal Heuristic for extending ORF
-    	    	 	boolean isGreatHit =  (hitCov >= extendHitOlap && sim >= extendHitSim) ? true : false;
+    	    	 	boolean isGreatHit =  (hitCov >= EX_hitOlap && sim >= EX_hitSim) ? true : false;
     	    	 		  	    	 		
 					seqData[idx].addHit(eval, sim, hitCov, seqCov, start, end, frame, isGoodHit, isGreatHit, hasStop);
     				if (i==1) {
@@ -302,9 +303,9 @@ public class DoORF {
 	   			if (seqData[idx].isGreatHit) cntGreatHit++;
 	   			if (seqData[idx].hasStops)   cntStop++; // this can still be good hit so give frame precedence, just don't use coords
 	   			if (seqData[idx].remark.contains(Globals.RMK_MultiFrame) // it has to be a really bad hit
-	   					&& seqData[idx].hitCov<multiHitOlap 
-	   					&& seqData[idx].seqCov<multiSeqOlap
-	   					&& seqData[idx].sim < multiSim) {
+	   					&& seqData[idx].hitCov<MULTI_hitOlap 
+	   					&& seqData[idx].seqCov<MULTI_seqOlap
+	   					&& seqData[idx].sim < MULTI_sim) {
 	   				seqData[idx].isGoodHit=false;
 					cntBadMulti++;
 				}
@@ -576,7 +577,7 @@ public class DoORF {
 				if (curSeqObj.isGreatHit) {
 					atg=hStart; 
 					stop=hEnd; 
-					extend=extendHitOut;
+					extend=EX_hitOut;
 				}
 				else {
 					atg=Math.abs(frame); 
@@ -611,10 +612,10 @@ public class DoORF {
 				}
 				
 				if (!hasATG) { 
-					if (curSeqObj.isGreatHit && !foundStop && hStart<extendHitOut) 
+					if (curSeqObj.isGreatHit && !foundStop && hStart<EX_hitOut) 
 						atg = Math.abs(frame); // possibly not complete transcript 
 					else if (foundStop) {
-						for (int i=hStart-1, j=0; i>=0 && j<extendHitIn; i+=3, j++) {
+						for (int i=hStart-1, j=0; i>=0 && j<EX_hitIn; i+=3, j++) {
 							codon = orientedSeq.substring(i, i+3);
 							if (isCodonStart(codon)) {
 								atg = i+1;
@@ -644,7 +645,7 @@ public class DoORF {
 					else nnn=0;
 				}
 				if (!hasStop && curSeqObj.isGreatHit) { 
-					if ((seqLen-hEnd)<extendHitOut)  
+					if ((seqLen-hEnd)<EX_hitOut)  
 						stop = seqLen;  // possibly not complete transcript
 				}
 				if (atg>0 && stop>0 & atg<curSeqObj.seqLen) {
@@ -956,10 +957,8 @@ public class DoORF {
 	        String msg = Out.makeTable(nCol, r+1, null, justify, rows);
 	        String [] lines = msg.split("\n");
 			for (int i=0; i<lines.length; i++) {
-				if (debug) Out.PrtSpMsg(2, lines[i]);				//xxx
 				overview += lines[i] + "\n";
 			}
-	        if (debug) Out.PrtSpMsg(3, "");							//xxx
 	        	
 	        // Not part of overview, just print to stdout and anno.log
         	int h=nCtg;
@@ -1012,15 +1011,15 @@ public class DoORF {
 			}
 			Out.PrtSpMsg(2,"   Frame:" + x);			//prt
 			Out.logOnly(2, "");
-			Out.logOnly(2, "Hit w/good coverage: hitCov >= " + extendHitOlap + " && sim >= " + extendHitSim);
+			Out.logOnly(2, "Hit w/good coverage: hitCov >= " + EX_hitOlap + " && sim >= " + EX_hitSim);
 		    Out.logOnly(2, "Markov Best Score:   best score over all 6-frame ORFs");
 		    Out.logOnly(2, "Markov Good Frame:   score>0 and best over all RFs of selected ORF");
 		    Out.logOnly(2, "");
 		    
 			// Save to database
 			try {
-				String gcOverview = gcObj.prtFinal();
-				String ov = overview + "\n" + gcOverview;
+				String gcOverview = gcObj.prtFinalGC();
+				String ov = overview + gcOverview; // CAS330 removed extra line 
 	 			mDB.executeUpdate("update assem_msg" +
 	 					" set orf_msg='" + prtObj.orfOverviewLegend + "'" + ", gc_msg='" + ov + "'");
 	 		}
@@ -1235,8 +1234,7 @@ public class DoORF {
 			}
 			else msg[idx++] +="        Train using best hits";
 		
-			msg[idx++] += "Good coverage: Hit overlap >= " + extendHitOlap + "% with Sim " + extendHitSim + "% (internal params)";
-			
+			msg[idx++] += "Good coverage: Hit overlap >= " + EX_hitOlap + "% with Sim " + EX_hitSim + "% (internal params)";	
 			
 			for (int i=0; i<msg.length && msg[i]!=""; i++) {
 				fileHeader += "### " + msg[i] + "\n";
@@ -1405,12 +1403,12 @@ public class DoORF {
 			if (remark.equals("")) remark=rmk;
 			else remark += Globals.tcwDelim + " " + rmk;
 		}
-		// XXX heuristic - this is not a symmetric sort
+		// XXX heuristic 
 		public int compareTo(OrfData x)
 		{
 			if (oLen<ORF_MIN_LEN && x.oLen<ORF_MIN_LEN) return 0; 
-			if (oLen<ORF_MIN_LEN)   return 1;
-			if (x.oLen<ORF_MIN_LEN) return -1;
+			if (oLen  < ORF_MIN_LEN) return 1;
+			if (x.oLen< ORF_MIN_LEN) return -1;
 			
 			int diffLen = (x.oLen-oLen);
 			
@@ -1424,17 +1422,17 @@ public class DoORF {
 			}
 			
 			// Rule 0: For gene datasets that do not have UTRs
-			if (hasATG   && isFullLen   && oFrame==1 && hasAnno) return -1;
+			if (  hasATG &&   isFullLen &&   oFrame==1 &&   hasAnno) return -1;
 			if (x.hasATG && x.isFullLen && x.oFrame==1 && x.hasAnno) return 1;
 			if (!hasAnno && !x.hasAnno) {
-				if (hasATG   && isFullLen   && oFrame==1) return -1;
+				if (  hasATG &&   isFullLen &&   oFrame==1) return -1;
 				if (x.hasATG && x.isFullLen && x.oFrame==1) return 1;
 			}
 		
 			// Rule 1: 
-			if (curSeqObj.isGoodHit) {
-				if (hasAnno   && !x.hasAnno) return -1;
-				if (x.hasAnno && !hasAnno)   return 1;
+			if (curSeqObj.isGoodHit) { // only no good if multi-frame and no good frame
+				if (  hasAnno && !x.hasAnno) return -1;
+				if (x.hasAnno &&   !hasAnno) return 1;
 			}
 			
 			// Rule 2: Longest ORF if one is significantly longer
@@ -1442,15 +1440,16 @@ public class DoORF {
 				double lnDiff = Math.abs(x.lnlen-lnlen);// lnlen is log of orf length
 				if (lnDiff>pdDiffLen) return diffLen;
 			}
+			
 			// Rule 3: best score
 			if (Math.abs(dMKscore-x.dMKscore)>MK_CUT) {// rare to be this close
 				if (dMKscore>x.dMKscore) return -1; 
 				if (dMKscore<x.dMKscore) return  1;
 			}
+			if (  hasAnno && !x.hasAnno) return -1; // even if not good, precedence
+			if (x.hasAnno &&   !hasAnno) return 1;
 			
-			if (hasAnno   && !x.hasAnno) return -1; // even if not good, precedence
-			if (x.hasAnno && !hasAnno)   return 1;
-			return diffLen;
+			return diffLen; // default to using longest
 		}
 	} // end OrfData
 	/***********************************************************/
@@ -1515,9 +1514,7 @@ public class DoORF {
 			}
 		}
 	
-		public String prtFinal() {
-			if (debug) Out.PrtSpMsg(3, "                                                     "); //###
-			
+		public String prtFinalGC() {
 			// table for overview; 3 column, text followed by number
 			int [] justify =   {0,  0,  0, 0,  0, 0, 0, 0, 0, 0};
 			int nRow = 5;
@@ -1571,11 +1568,13 @@ public class DoORF {
 			String overview = String.format("GC Content: %.2f%s", total, "%");
 			Out.PrtSpMsg(2, overview);
 			overview = "   " + overview + "\n";
+			
 			String msg = Out.makeTable(nCol, r+1, null, justify, rows);
-	        String [] lines = msg.split("\n");
+	        
+			String [] lines = msg.split("\n");
 			for (int i=0; i<lines.length; i++) {
-				if (debug) Out.PrtSpMsg(2, lines[i]);	//xxx
-				overview += lines[i] + "\n";
+				if (lines[i].trim()!="") 
+					overview += lines[i] + "\n";
 			}
 			
 			return overview;

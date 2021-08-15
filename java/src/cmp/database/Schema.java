@@ -311,7 +311,8 @@ public class Schema {
 					"aaOlap2	float default -2.0, " +		
 					"aaBit		int default -2, " +
 					"aaBest		tinyint default -2, " +				
-	
+					"ntBest		tinyint default -2, " +		// CAS330
+					
 					// dp align 
 					"nAlign		int default -2, "	  +		// number of aligned nt include gaps except in overhang
 					"pOlap1		float default -2.0, " +		// Cov1

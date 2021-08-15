@@ -84,13 +84,13 @@ public class BasicGOTablePanel {
 	private final String EVALUE = "Best E-val";
 	
 	private  final Class<?> [] COL_TYPES = 
-	 {Integer.class,  String.class, Integer.class, String.class, Double.class, Integer.class, Integer.class }; 
+	 {Integer.class,  String.class, String.class, Integer.class, Integer.class, Integer.class,  Double.class }; 
 	private  final String [] COL_MYSQL = 
-	 {"go_info.gonum","go_info.term_type", "go_info.level","go_info.descr","go_info.bestEval", 
-			 "go_info.nUnitranHit", "go_info.nDirectHit" };
+	 {"go_info.gonum","go_info.term_type", "go_info.descr", "go_info.level", 
+			 "go_info.nUnitranHit", "go_info.nDirectHit","go_info.bestEval" }; // CAS330 change column order
 	
 	private final String [] COL_NAMES = 
-		 {Globalx.goID, Globalx.goOnt, "Level",  Globalx.goTerm, EVALUE , "#Seqs", "#Assign"};
+		 {Globalx.goID, Globalx.goOnt, Globalx.goTerm , "Level",   "#Seqs", "#Assign", EVALUE};
 	private String []      evColNames = null;
 	private String []	 pvalColNames = null; // No P_	// CAS324 changed from Vector
 	private int endEvC=0, endStatic=0;
@@ -653,15 +653,17 @@ public class BasicGOTablePanel {
 				    	for (String cn : pvalColNames) {
 				    		if (cn.contentEquals(displayCol)) {
 				    			Object obj = theTable.getValueAt(row,column);
+				    			
 						    	double theVal=0.0;
 					        	if (obj instanceof DisplayFloat) {
 									theVal = ((DisplayFloat) obj).getValue();
+									
+									Color high = DisplayDecimalTab.getPvalColor(theVal);
+						        	if (high!=null) c.setBackground(high);
 								}
-								else {
+								else 
 									Out.prt("Cannot read table obj " + obj.toString());
-								}
-					        	Color high = DisplayDecimalTab.getPvalColor(theVal);
-					        	if (high!=null) c.setBackground(high);
+					        	
 					        	break;
 				    		}
 				    	}
@@ -1599,7 +1601,7 @@ public class BasicGOTablePanel {
 						if (results[i]<0) rows[nRow][c] = "N/A"; // overflow
 						else rows[nRow][c] = String.format("%,d", (long) results[i]);
 					}
-					else rows[nRow][c] = Out.formatDouble(results[i]);
+					else rows[nRow][c] = DisplayDecimalTab.formatDouble(results[i]);
 				}
 				nRow++;
 			}

@@ -16,6 +16,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 
 import util.methods.ErrorReport;
+import util.methods.Out;
 import cmp.viewer.groups.GrpTablePanel;
 import cmp.viewer.hits.HitTablePanel;
 import cmp.viewer.seq.SeqsTablePanel;
@@ -321,50 +322,35 @@ public class TableData implements Serializable {
 		public int compare(Object [] o1, Object [] o2) {
 			int retval = 0;
 			boolean bInAscending = arrHeaders[nColumn].isAscending();
-			boolean isBlank = false;
 			
+			// CAS330 took out logic to sort blank to end of table always - plus had dead logic in here
 			if (o1[nColumn] == null || o2[nColumn] == null) {
-				if (o1[nColumn] == null && o2[nColumn] == null) return 0;
-				if (o1[nColumn] == null) return 1;
-				if (o2[nColumn] == null) return -1;
+				if (o1[nColumn] == null && o2[nColumn] == null) retval = 0;
+				if (o1[nColumn] == null) retval = 1;
+				if (o2[nColumn] == null) retval = -1;
 			}
-			if(o2[nColumn] == null || o2[nColumn].equals("")) {
-				isBlank = true;
-				retval = -1;
-			}
-			else if(o2[nColumn].equals("") || o2[nColumn] == null) { 
-				isBlank = true;
-				retval = 1;
-			}
-			else if(o1[nColumn].equals(o2[nColumn])) {
-				retval = 0;
-			}
-			else {
-				if(arrHeaders[nColumn].getColumnClass() == Integer.class)
-					retval = ((Integer)o1[nColumn]).compareTo((Integer)o2[nColumn]);
-				else if(arrHeaders[nColumn].getColumnClass() == Long.class) {
-					if(o1[nColumn] instanceof String)
-						retval = ((Long)o1[nColumn]).compareTo((Long)o2[nColumn]);
-					else
-						retval = ((Long)o1[nColumn]).compareTo((Long)o2[nColumn]);
-				}
-				else if(arrHeaders[nColumn].getColumnClass() == Float.class)
-					retval = ((Float)o1[nColumn]).compareTo((Float)o2[nColumn]);
-				
-				else if(arrHeaders[nColumn].getColumnClass() == Double.class) 
-					retval = ((Double)o1[nColumn]).compareTo((Double)o2[nColumn]);
-				
-				else if(arrHeaders[nColumn].getColumnClass() == String.class) 
-					retval = ((String)o1[nColumn]).compareToIgnoreCase((String)o2[nColumn]);
-				
-				else if(arrHeaders[nColumn].getColumnClass() == BigDecimal.class)
-					retval = ((BigDecimal)o1[nColumn]).compareTo((BigDecimal)o2[nColumn]);
-				
-				else if(arrHeaders[nColumn].getColumnClass() == Boolean.class)
-					retval = ((Boolean)o1[nColumn]).compareTo((Boolean)o2[nColumn]);
-			}
-
-			if(isBlank || bInAscending)
+			else if(arrHeaders[nColumn].getColumnClass() == Integer.class)
+				retval = ((Integer)o1[nColumn]).compareTo((Integer)o2[nColumn]);
+			
+			else if(arrHeaders[nColumn].getColumnClass() == Long.class) 
+				retval = ((Long)o1[nColumn]).compareTo((Long)o2[nColumn]);
+			
+			else if(arrHeaders[nColumn].getColumnClass() == Float.class)
+				retval = ((Float)o1[nColumn]).compareTo((Float)o2[nColumn]);
+			
+			else if(arrHeaders[nColumn].getColumnClass() == Double.class) 
+				retval = ((Double)o1[nColumn]).compareTo((Double)o2[nColumn]);
+			
+			else if(arrHeaders[nColumn].getColumnClass() == String.class) 
+				retval = ((String)o1[nColumn]).compareToIgnoreCase((String)o2[nColumn]);
+			
+			else if(arrHeaders[nColumn].getColumnClass() == BigDecimal.class)
+				retval = ((BigDecimal)o1[nColumn]).compareTo((BigDecimal)o2[nColumn]);
+			
+			else if(arrHeaders[nColumn].getColumnClass() == Boolean.class)
+				retval = ((Boolean)o1[nColumn]).compareTo((Boolean)o2[nColumn]);
+			
+			if(bInAscending)
 				return retval;
 			else
 				return retval * -1;

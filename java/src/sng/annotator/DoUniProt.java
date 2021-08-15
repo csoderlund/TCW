@@ -118,7 +118,9 @@ public class DoUniProt
 			Out.PrtSpMsg(1, "Annotate sequences with sequence hits from " + nFiles + " DB file(s)");
 			hitsInDB = s1_loadUniqueHitSet();
 	    	
-	    	for (int i=0; i< nFiles; i++) {  
+	    	for (int i=0; i< nFiles; i++) { 
+	    		long totalTime = Out.getTime();
+	    		
 	    		// Run search if necessary or get existing hit file
 	    		String hitFile = hitObj.getRunDbBlastFile(i); 
 	    		if (hitFile==null) { // don't continue if something goes wrong
@@ -148,15 +150,17 @@ public class DoUniProt
 						nTotalHits, date, hitObj.getDBparams(i));
 				
 		/** 3.  Add to pja_unique_hits the sequence and header info from DB fasta file **/
-				if (db.equals("-")) Step1c_addUniqueNoFastaFile(i);
-				else Step1c_addUniqueFromFastaFile(i);
-				Step1d_updateHitCov();
+				if (db.equals("-")) 
+						Step1c_addUniqueNoFastaFile(i);
+				else 	
+						Step1c_addUniqueFromFastaFile(i);
 				
 		    	hitsAddToDB.clear();
 		    	
-		    	Out.Print("");
 		    	total += nAnnoSeq;
 		    	nAnnoSeq = 0;
+		    	Out.PrtSpMsgTime(2, "Complete adding DB#" + dbNum, totalTime);
+		    	Out.Print("");
 	    	}
 	    	return total;
 		}
@@ -198,8 +202,8 @@ public class DoUniProt
 		    	nHitNum++; cntPrt++;
 		        if (cntPrt == COMMIT) {     
 		        	cntPrt=0;
-		          	Out.r("      Annotated sequences " + nAnnoSeq + ", total hits   " + 
-		          		nTotalHits + ", HSPs   " + nHitNum);
+		          	Out.r("      Annotated sequences " + nAnnoSeq + ", total hits " + 
+		          		nTotalHits + ", HSPs " + nHitNum);
 		        }	   
     			String[] tokens = line.split("\t");
     			if (tokens == null || tokens.length < 11) continue;
@@ -280,14 +284,13 @@ public class DoUniProt
 			if (cntUniqueExists > 1) 
 				Out.PrtWarn(cntUniqueExists + " DB ids already existed in sTCW -- ignored ");
 	
+			if (nTotalHits > 0) 
+				Out.PrtSpMsg(3, nTotalHits + " total seq-" + dbLabelType + " pairs ");
+			
 			if (nHitNum==0) 
 				Out.PrtSpMsgTime(3, "NO HIT RESULTS", time);
-			else {
-				Out.PrtSpMsgTimeMem(3,nAnnoSeq + " annotated sequences                 ", time); 
-			
-				if (nTotalHits > 0) 
-					Out.PrtSpMsg(3, nTotalHits + " " + dbLabelType +  "-sequence additional pairs ");
-			}
+			else 
+				Out.PrtSpMsgTimeMem(3,nAnnoSeq + " annotated sequences                 ", time); 	
 	    }
         catch ( Throwable err ) {
         	pRC=false;
@@ -428,6 +431,7 @@ public class DoUniProt
 	    		hitsAddToDB.remove(hitID); 
 	    	}
 	    	System.err.print("                                                                      \r");
+	    	Step1d_updateHitCov();
 	    	Out.PrtSpMsgTimeMem(3,cnt_add + 	" unique hits added",time);
     	}
         catch ( Exception err ) {
@@ -478,6 +482,12 @@ public class DoUniProt
 					s1_saveDBhitUnique(DBID, isAAannoDB, dbType, dbTaxo, hitID, 
 						lp.getOtherID(), desc, lp.getSpecies(), hitSeq, 0);
 					cnt_add++;
+					
+					cntPrt++; // CAS330 moved from end of loop
+					if (cntPrt == COMMIT) {	                
+				         Out.rp("Read " + read + ", added ", cnt_add, total); 
+				         cntPrt=0;
+					}
 				}
 					
 				// start the next
@@ -499,11 +509,7 @@ public class DoUniProt
 					hitsAddToDB.remove(hitID); 
 				}
 				else addHit = false;
-				read++; cntPrt++;
-				if (cntPrt == COMMIT) {	                
-			         Out.rp("Unique " + dbLabelType + " added ", cnt_add, total); 
-			         cntPrt=0;
-				}
+				read++; 
 			}
 			// add last
 			if (addHit) { 
@@ -515,7 +521,9 @@ public class DoUniProt
 			if ( reader != null ) reader.close();
 
 			System.err.print("                                                                      \r");
-			Out.PrtSpMsgTimeMem(3,cnt_add + 	" unique hits descriptions added from " + read + "    ",time);
+			
+			Step1d_updateHitCov();
+			
 			if (cnt_add==0) {
 				Out.PrtError("The annoDB fasta file does not correspond to the hit tab file -- or the headers lines are weird");
 			}
@@ -529,6 +537,8 @@ public class DoUniProt
 					if (i>10) break;
 				}
 			}
+			
+			Out.PrtSpMsgTimeMem(3,cnt_add + 	" unique hits descriptions added from " + read + "    ",time);
 	    }
         catch ( Exception err ) {
         	pRC=false;

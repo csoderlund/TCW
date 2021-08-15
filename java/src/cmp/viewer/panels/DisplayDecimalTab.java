@@ -38,7 +38,7 @@ public class DisplayDecimalTab  extends JPanel {
 	 * The parameters changed in this class are static.
 	 */
 	static DisplayFloat disfl = new DisplayFloat();
-	static public String formatDouble(double val, boolean isP) {
+	static public String formatDouble(double val) {
     	return disfl.getString(val);
 	}
 	

@@ -26,6 +26,9 @@ projects are created by merging existing sTCW projects.
 			<li><a href="#two">Top three rows</a>
 			<li><a href="#step1">Step 1. sTCWdbs (single TCW databases)</a>
 			<li><a href="#step2">Step 2. Compare sequences</a>
+			<ul>
+				<li><a href="#pairs">Add Pairs from Hits</a>
+			</ul>
 			<li><a href="#step3">Step 3. Cluster Sets</a>
 				<ul>
 					<li><a href="#mt">Methods</a>
@@ -33,22 +36,22 @@ projects are created by merging existing sTCW projects.
 							<li><a href="#bbh">BBH</a>
 							<li><a href="#close">Closure</a>
 							<li><a href="#ht">BestHit</a>
-							<li><a href="#omcl">OrthoMCL</a>			      
+							<li><a href="#omcl">OrthoMCL</a>
 							<li><a href="#selfclust">User-defined clusters</a>
 						</ul>
-					<li><a href="#best">Representative hit per cluster</a>
+					<li><a href="#best">Majority hit per cluster</a>
 				</ul>
 			<li><a href="#step4">Step 4. Statistics</a>
 			<ul>
-				<li><a href="#kaks">Details on running <ttp>KaKs_calculator</ttp></a>	
-				<li><a href="#msa">Details on MSA score and <ttp>MstatX</ttp></a>	
+				<li><a href="#kaks">Details on running <ttp>KaKs_calculator</ttp></a>
+				<li><a href="#msa">Details on MSA score and <ttp>MstatX</ttp></a>
 			</ul>
 		</ul>
 	
 	<li><a href="#details">Additional Details</a>
 		<ul>
 			<li><a href="#time">Timings</a>
-			<li><a href="#trouble">Trouble shooting</a>		
+			<li><a href="#trouble">Trouble shooting</a>
 			<li><a href="#view">View/Query with <ttp>viewMultiTCW</ttp></a>
 		</ul>
 	<li><a href="#refs">References</a>
@@ -84,8 +87,8 @@ Common abbreviations:
 		<ul>
 			<li>The sTCW databases are annotated the same. 
 			<li>The conditions names are exactly the same (when applicable). For example, if two species both
-				have counts for the tissue type 'leaf', the condition name provided in runSingleTCW must be the same for both (e.g. leaf), 
-				though the name is case-insensitive.
+				have counts for the tissue type 'leaf', the condition name provided in runSingleTCW must be the same 
+				for both (e.g. leaf), though the name is case-insensitive.
 			<li>The DE column names are exactly the same (when applicable), as in the previous point.
 		</ul>
 
@@ -117,7 +120,8 @@ The multiTCW executables were installed when you installed TCW
 <a id=demo></a>
 <h2>Running the Demo</h2>
 This section is essential for learning how to use <ttp>runMultiTCW</ttp>, 
-and describes how to make a multiTCW project using the singleTCW demos. You can use <ttx>demoTra</ttx>, <ttx>demoAsm</ttx>, <ttx>demoPro</ttx>
+and describes how to make a multiTCW project using the singleTCW demos. 
+You can use <ttx>demoTra</ttx>, <ttx>demoAsm</ttx>, <ttx>demoPro</ttx>
 for a three way comparison that includes an AA-sTCW. 
 However, the three 'ex' demos, which are included in the package, have more homology so make a better example.
 <table class="tablex">
@@ -225,6 +229,8 @@ The following continues to use the three "ex" datasets as examples of sTCW datab
 <tr>
 	<td><ttc>Remove...</ttc>: Select one or more options. When you select 'Ok', you will be prompt to verify each removal.
 	<ul>
+	<li><ttl>Clusters from database</ttl>: Only remove the clusters from the database. The pairs and any
+	associated annotations will remain.
 		<li><ttl>Pairs and clusters from database</ttl>: 
 		Removes the pairs and clusters so you can start over without running <ttc>Build Database</ttc> again, 
 		e.g. if you want to use a different hit file, create all new clusters, etc. 
@@ -234,7 +240,8 @@ The following continues to use the three "ex" datasets as examples of sTCW datab
 		<br>&nbsp;
 		<li><ttl>Pairs and method files from disk</ttl>: If you remove the pairs and clusters from 
 		database, it is a good idea to remove all associated files from disk using this option. 
-		<li><ttl>Hit files from disk</ttl>: If you recreate the database and there have been changes to the sequences, you definitely want to remove the hit files so that
+		<li><ttl>Hit files from disk</ttl>: If you recreate the database and there have been changes to the sequences, 
+		you definitely want to remove the hit files so that
 		it allows you to re-search. Or, if you want to re-run a search program, you need to first remove the hit files using
 		this option.
 		<li><ttl>All files from disk</ttl>: If you no longer are using the project, you can delete
@@ -278,21 +285,32 @@ A multiTCW database can be created with a mix of NT-sTCWdbs and AA-sTCWdbs.
 <table class="tablex">	
 <tr>
 	<td class=top>	
-	The image on the right is the <ttc>Settings</ttc>. 
+	<a  href="img/cmp1.tiff"><img src="img/cmp1.tiff" alt="" style="border: 1px solid black; width: 300px"></a>
+	<p>The image on the right is the <ttc>Settings</ttc>. 
 	The <ttc>Run Search</ttc> puts the results in <ttx>hitsAA.tab</ttx> and <ttx>hitsNT.tab</ttx>;
 	these names cannot be changed.
 	<p>On the <ttc>Settings</ttc> page, you can change the AA search program from the default <ttp>Diamond</ttp>
 	to <ttp>Blast</ttp>. The NT search program is <ttp>Blastn</ttp>.
 	<p>Once the search is run, you can no longer change the parameters; if you want to change the
 	parameter and re-run the search, remove the hit files using the main panel <ttc>Remove...</ttc>.
-	<p><ttc>Add Pairs from Hits</ttc> on the main window loads the pairs from the hits result file.
-
+	
 	<td>
-	<a  href="img/hitSettings.png"><img src="img/hitSettings.png" alt="" style="border: 1px solid black; width: 350px"></a>
+	<a  href="img/hitSettings.png"><img src="img/hitSettings.png" alt="" style="border: 1px solid black; width: 400px"></a>
 	</td>
 </tr>
 </table>
 
+<a id=pairs></a>
+<h4>Add Pairs from Hits</h4> 
+<table class="tablex">	
+<tr>
+	<td class=top>	
+<a  href="img/cmp2.tiff"><img src="img/cmp2.tiff" alt="" style="border: 1px solid black; width: 300px"></a>
+<td>On the main window, loads the pairs from the hits result file.
+This step also assigns the shared description, which is the same algorithm as used for
+the <a href=#best>Majority Hit</a> for clusters. The only difference is that if there is no
+shared hit, the hitID will be "*NoShare" whereas clusters always are assigned an annotation.
+</table>
 <a id=step3></a>
 <h3>3. Cluster Sets</h3>
 
@@ -325,7 +343,8 @@ prefix can only be 5 characters, so make it a meaningful 5 characters.
 		The rules are as follows:
 		<ol type='a'>
 			<li>Select two sTCWdbs for the standard BBH of one pair per cluster.
-			<li>Select N (N&gt;2) sTCWdbs, and clusters of exactly size N will be created, where each pair in the cluster is a BBH pair.
+			<li>Select N (N&gt;2) sTCWdbs, and clusters of exactly size N will be created, 
+			where each pair in the cluster is a BBH pair.
 		</ol>
 	</ol>
 	
@@ -379,7 +398,8 @@ prefix can only be 5 characters, so make it a meaningful 5 characters.
 			<li>Otherwise, the description is used minus the "{ECO:...}" portion of the UniProt descriptions.
 		</ul>
 		<li>Each sequence must have &gt;=<ttl>%Similarity</ttl> and &gt;=<ttl>%Coverage</ttl> to the hit. 
-		<li>Each sequence must have &gt;=<ttl>%Similarity</ttl> and &gt;=<ttl>%Coverage</ttl> to at least one other sequence in the cluster.
+		<li>Each sequence must have &gt;=<ttl>%Similarity</ttl> and &gt;=<ttl>%Coverage</ttl> to at 
+		least one other sequence in the cluster.
 		<li>If the <ttl>All Hit</ttl> filter is "Yes", then all sequences in a cluster must have a hit with all others, otherwise,
 		each sequence only needs to have one hit (rule #3).
 		If the parameters are too lax, this can create some bad clusters. Rule of thumb:
@@ -433,23 +453,38 @@ prefix can only be 5 characters, so make it a meaningful 5 characters.
 </table>		
 	
 <a id="best"></a>
-<h4>Representative hit per cluster</h4>
-For all the cluster methods, a best hit is assigned to the cluster. 
-The algorithm inspects all hits for all sequences in the cluster, and selects the best based on
-(listed in order of precedence):
+<h4>Majority hit per cluster</h4>
+For all the cluster methods, a <tt>majority hit</tt> is assigned to the cluster using the same
+rules are for the <a href=#pairs>Pairs Annotation</a>. The only difference is that
+the cluster will always be assigned an annotation even if there is only one sequence
+with the given annotation. The rules in the context of clusters: 
+
+<ol>
+<li>For a cluster, a list of 'Best Anno' is created where they are 
+modified as follows:
+<ul>
+<li>The words "probable", "punitive", or "predicted:" are removed. 
+<li>The first two words are extracted.
+<li>The annotation is saved in lower case.
+</ul>
+<li>The number of times an abbreviated annotation is found for a sequence in the
+cluster is counted (counted only once per sequence no matter how many times it is found in the sequence list).
+<li>The annotation that has the highest count is assigned to the cluster.
+If there is a tie, then is further sorts on E-value, whether is it SwissProt and number of GOs.
+The cluster is also assigned an associated hitID that has the best E-value.
+<li>A sequence can have a 'Best Anno' of "uncharacterized" if it has no good annotation hits.
+This will not be used unless all sequences in the cluster only have "uncharacterized".
+<li>If none of the sequences annotation, the hitID will be "*Novel".
+</ol>
+
 <table class="tablex">
 		<tr><td>
-<ol>
-	<li>Hits are excluded if they contain phrases such as "uncharacterized protein", etc, 
-	unless all hits are un-informative.
-	<li>The hit with the most sequences that have a hit with the same first two words, or first 20 characters, 
-		of the description. For example, the image on the right show hits that all contain the same first two words.
-	<li>The hit with the most sequences having the hit.
-	<li>Good e-value.
-	<li>Is a SwissProt hit.
-	<li>Has GOs.
-</ol>
-<td valign=top><a  href="img/bestDesc.png"><img src="img/bestDesc.png" alt="" style="border: 1px solid black; width: 400px"></a>
+For example, in the cluster on the right, all three sequences have the annotation
+"chromatin-remodeling complex" in their annotation list. However, 
+the second sequence does not have the annotation 
+"ATP-dependent chromotin" in its annotation list.
+
+<td valign=top><a  href="img/bestDesc.png"><img src="img/bestDesc.png" alt="" style="border: 1px solid black; width: 440px"></a>
 </table>
 <p>The <u>%Hit</u> is computed, which is the percentage of sequences with the hit. This hit is not necessary
 the "Best" hit for any of the sequences.
@@ -484,7 +519,8 @@ the "Best" hit for any of the sequences.
 
 	<li>Ka/Ks:
 		<ul>
-		<li>After the Ka/Ks files are written, from the terminal window, change directories to <ttx>projcmp/&lt;project&gt;/KaKs</ttx>
+		<li>After the Ka/Ks files are written, from the terminal window, 
+			change directories to <ttx>projcmp/&lt;project&gt;/KaKs</ttx>
 			and execute "<ttx>sh runKaKs</ttx>". See further details below.
 		<li>Execute <ttc>Run Stats</ttc> again with <ttl>Read</ttl> selected.
 		</ul>
@@ -544,7 +580,8 @@ select <ttl>Read KaKs files</ttl> and <ttc>Keep</ttc>. Now <ttc>Run Stats</ttc>.
 
 <a id=msa></a>
 <h4>Details on MSA score and using <ttp>MstatX</ttp></h4>
-The default <u>Score1</u> and <u>Score2</u> are built-in methods. Score1 is Sum-of-Pairs, which are normalized between 0-1, where 1 is the best score. 
+The default <u>Score1</u> and <u>Score2</u> are built-in methods. Score1 is Sum-of-Pairs, 
+which are normalized between 0-1, where 1 is the best score. 
 Score2 is "Wentropy", which is copied
 directly from the <ttp>MstatX</ttp><sup>4</sup> with the exception that the scores are (1-score) so that
 1 is the best score. 
@@ -583,7 +620,8 @@ The following times are from the log files for building an mTCW database with th
 <tr><td>Add New Clusters<td>1h:23m:05s<td>46,831 clusters
 <tr><td>Run Stats<td>1h:33m:15s<td>116,109 alignments
 </table>
-<p>The longest task is to <ttc>Add GOs</ttc> (timing not shown); this task can be done at anytime, so it is recommended to wait until everything else is finalized before adding the GOs.
+<p>The longest task is to <ttc>Add GOs</ttc> (timing not shown); this task can be done at anytime, 
+so it is recommended to wait until everything else is finalized before adding the GOs.
 <p>The search program (e.g. blast) is run on <ttl>#CPU</ttl>, but all mTCW tasks only use one CPU.
  	
 <a id=trouble></a>
@@ -629,10 +667,13 @@ shows snapshots of some of the <ttp>viewMultiTCW</ttp> windows.
 <ol>
 <li>Li, L., Stoeckert, C.J., Jr. and Roos, D.S. (2003) 
 	OrthoMCL: identification of ortholog groups for eukaryotic genomes. Genome Res, 13, 2178-2189.
-<li>Zhang Z, Li J, Xiao-Qian Z, Wang J, Wong, G, Yu J (2006) KaKs_Calculator: Calculating Ka and Ks through model selection and model averaging. Geno. Prot. Bioinfo. Vol 4 No 4. 259-263.
-<li>Katoh K, Standley DM (2013) MAFFT Multiple Sequence Alignment Software Version 7: Improvements in Performance and Usability. Molecular Biology and Evolution Vol 30, Issue 4  772:780
+<li>Zhang Z, Li J, Xiao-Qian Z, Wang J, Wong, G, Yu J (2006) KaKs_Calculator: Calculating Ka and Ks 
+through model selection and model averaging. Geno. Prot. Bioinfo. Vol 4 No 4. 259-263.
+<li>Katoh K, Standley DM (2013) MAFFT Multiple Sequence Alignment Software Version 7: 
+Improvements in Performance and Usability. Molecular Biology and Evolution Vol 30, Issue 4  772:780
 <li>Guillaume Collet (2012) https://github.com/gcollet/MstatX.
-<li> Edgar RC (2004) MUSCLE: multiple sequence alignment with high accuracy and high throughput. Nucleic Acids Res 32: 1792-1797.
+<li> Edgar RC (2004) MUSCLE: multiple sequence alignment with high accuracy and high throughput. 
+Nucleic Acids Res 32: 1792-1797.
 </ol>
 
 <!--#include virtual="../ssi/end.html" -->

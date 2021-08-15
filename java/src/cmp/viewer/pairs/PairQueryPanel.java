@@ -91,14 +91,14 @@ public class PairQueryPanel extends JPanel {
 		page.add(Box.createVerticalStrut(5));
 		
 		row = Static.createRowPanel();	
-		txtSeqID = new Substring("Seq ID", PAIR_TABLE + ".UTstr1", PAIR_TABLE + ".UTstr2", 
+		txtSeqID = new Substring("SeqID", PAIR_TABLE + ".UTstr1", PAIR_TABLE + ".UTstr2", 
 				"All pairs with the substring in either seqID1 or seqID2", false);
 		row.add(txtSeqID);
 		page.add(row);
 		page.add(Box.createVerticalStrut(5));
 		
 		row = Static.createRowPanel();
-		txtHitID = new Substring("Shared Hit ID", PAIR_TABLE + ".HITstr", null,
+		txtHitID = new Substring("Shared HitID", PAIR_TABLE + ".HITstr", null,
 				"All pairs with the substring in the identifier of shared hit", true);
 		row.add(txtHitID);
 		page.add(row);	
@@ -295,22 +295,20 @@ public class PairQueryPanel extends JPanel {
 		
 		row = Static.createRowPanel();
 		rgKaKs = new Range("KaKs", "0.0", "", "kaks", "Selective strength");
-		row.add(rgKaKs);row.add(Box.createHorizontalStrut(5));
+		row.add(rgKaKs); row.add(Box.createHorizontalStrut(20));
 		
-		
-		naLabel = toolTipLabel("KaKs=NA", "If 'Yes', KaKs is equal NA; if 'No', KaKs is NOT equal NA", true);
-		Static.addHorzBox(row, naLabel, width);
-		row.add(naLabel); row.add(Box.createHorizontalStrut(3));
+		naCheck = Static.createCheckBox("KaKs=NA",false);
+		final String desc = "Include pairs with KaKs=NA";
+		naCheck.addMouseListener(new MouseAdapter() {
+			public void mouseEntered(MouseEvent e) {
+			    theViewerFrame.setStatus(desc);
+			}
+			public void mouseExited(MouseEvent e) {
+			    theViewerFrame.setStatus("");
+			}
+		});
+		row.add(naCheck); 
 	
-		naIncButton = Static.createRadioButton("Yes",false);
-		row.add(naIncButton); row.add(Box.createHorizontalStrut(3));
-		naExcButton = Static.createRadioButton("No",false);
-		row.add(naExcButton); row.add(Box.createHorizontalStrut(3));
-		naIgnButton = Static.createRadioButton("Either",true);
-		row.add(naIgnButton); row.add(Box.createHorizontalStrut(3));
-		ButtonGroup grp = new ButtonGroup();
-		grp.add(naIncButton); grp.add(naExcButton); grp.add(naIgnButton);
-		
 		if ((theViewerFrame.getInfo().hasKaKs())) {
 			page.add(new JLabel("  KaKs"));
 			page.add(Box.createVerticalStrut(rsep));
@@ -513,7 +511,7 @@ public class PairQueryPanel extends JPanel {
 		if (hasStats) {
 			statIgnButton.setSelected(true);
 			rgKaKs.clear(); 
-			naIgnButton.setSelected(true);
+			naCheck.setSelected(false);
 			rgStatAlign.clear();
 			rgStatGap.clear(); rgStatAneg.clear(); rgStatTsTv.clear(); rgStatCdiff.clear();  rgStat5diff.clear(); rgStat3diff.clear(); rgStatOlap1.clear(); rgStatOlap2.clear();
 			rgStatCexact.clear(); rgStatCsyn.clear(); rgStatC4d.clear(); rgStatCnonsyn.clear(); rgStatAexact.clear(); rgStatApos.clear();
@@ -568,9 +566,8 @@ public class PairQueryPanel extends JPanel {
 			String sub=""; // CAS327
 			String kk = rgKaKs.getSQL();
 			String na = "";
-			if (naIncButton.isSelected())      na = "pairwise.kaks=" + Globalx.dNullVal;
-			else if (naExcButton.isSelected()) na = "pairwise.kaks!="+ Globalx.dNullVal;
-			if (kk!="" && na !="") 	sub = "( " + Static.combineBool(kk, na, false) + ")";
+			if (naCheck.isSelected())      na = "pairwise.kaks=" + Globalx.dNullVal;
+			if (kk!="" && na !="") 	sub = "( " + Static.combineBool(kk, na, false) + ")"; // >=0.0 or =-1.5
 			else if (kk!="") 		sub = kk;
 			else if (na!="") 		sub = na;
 			query = Static.combineBool(query, sub);
@@ -670,8 +667,7 @@ public class PairQueryPanel extends JPanel {
 			summary = Static.combineSummary(summary, rgStatOlap2.getSum());
 		
 			summary = Static.combineSummary(summary, rgKaKs.getSum());
-			if (naIncButton.isSelected()) summary = Static.combineSummary(summary, "KaKs=NA");
-			else if (naExcButton.isSelected()) summary = Static.combineSummary(summary, "KaKs!=NA");
+			if (naCheck.isSelected()) summary = Static.combineSummary(summary, "KaKs=NA");
 		}
 		// datasets
 		if (radDiffDS.isSelected()) summary = Static.combineSummary(summary, "Different sets");
@@ -764,32 +760,36 @@ public class PairQueryPanel extends JPanel {
 			String min = txtMin.getText(); // check if proper value
 			String max = txtMax.getText();
 			
-			if (min.equals("")) { // CAS301
-				if (max.contentEquals("")) {
-					checkOn.setSelected(false);
-					return "";
-				}
-				return sqlField + "<"  + max;
+			if (min.contentEquals("") && max.contentEquals("")) {
+				checkOn.setSelected(false);
+				return "";
 			}
-			if (max.equals("")) {
-				if (min.contentEquals("")) {
-					min="0";
-					txtMin.setText(min);
-				}
+			if (!min.contentEquals("") && max.contentEquals(""))  // CAS330 rewrite
 				return sqlField + ">=" + min;
-			}
 			
-			if (max.equals("")) return sqlField + ">=" + min;
+			if (min.contentEquals("")  && !max.contentEquals("")) 
+				return "(" + sqlField + ">=0 and " + sqlField + "<" + max + ")"; // CAS330 can be < for NA
+			
+			if (min.contentEquals("0")  && max.contentEquals("0"))  // CAS330 add
+					return sqlField + "=0";
+			if (min.contentEquals("0.0")  && max.contentEquals("0.0"))  // CAS330 add
+					return sqlField + "=0.0";
+			
 			return "(" + sqlField + ">=" + min + " and " + sqlField + "<" + max + ")";
 		}
 		// CAS310 had weird test that would not display >=0.0, even though query would work
 		public String getSum() {
 			if (!checkOn.isSelected()) return "";
-			String min = txtMin.getText(); // check if proper value
+			
+			String min = txtMin.getText(); 
 			String max = txtMax.getText();
 			
 			if (min.equals("")) return label + "<"  + max;
 			if (max.equals("")) return label + ">=" + min;
+			
+			if (min.contentEquals("0")  && max.contentEquals("0"))  return  label + "=0";
+			if (min.contentEquals("0.0")&& max.contentEquals("0.0"))return  label + "=0.0";
+			
 			return "(" + label + ">=" + min + " and " + label + "<" + max + ")";
 		}
 		private void checkValues() {
@@ -800,6 +800,14 @@ public class PairQueryPanel extends JPanel {
 			if (min.equals("") && max.equals("") ) {
 				checkOn.setSelected(false);
 				return;
+			}
+			if (isInt) {
+				if (min.contentEquals("0.0")) txtMin.setText("0");
+				if (max.contentEquals("0.0")) txtMax.setText("0");
+			}
+			else {
+				if (min.contentEquals("0")) txtMin.setText("0.0");
+				if (max.contentEquals("0")) txtMax.setText("0.0");
 			}
 			if (!min.equals("") && !Static.isDouble(min) && !Static.isInteger(min)) {
 				UserPrompt.showWarn("Incorrect minimum  '" + min + "' for " + label );
@@ -1040,8 +1048,7 @@ public class PairQueryPanel extends JPanel {
 	private Range rgStatCexact, rgStatCsyn, rgStatC4d, rgStatCnonsyn, rgStatAexact, rgStatApos, rgStatAneg;
 	
 	private Range rgKaKs; // CAS310 had unused KaKs 
-	private JLabel naLabel;
-	private JRadioButton naIncButton= null, naExcButton= null, naIgnButton= null;
+	private JCheckBox naCheck = null; // CAS330 change from Yes/No/Either to checkbox
 	
 	// dataset
 	private JRadioButton radDiffDS, radSameDS, radIgnoreDS;

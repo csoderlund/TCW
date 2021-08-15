@@ -133,14 +133,14 @@ public class SeqsQueryPanel extends JPanel {
 		JPanel page = Static.createPagePanel();
 	
 		JPanel row = Static.createRowPanel();
-		txtSeqID = new Substring("Seq ID", "Seq ID", 	"unitrans.UTstr", 
+		txtSeqID = new Substring("SeqID", "SeqID", 	"unitrans.UTstr", 
 				"Show all sequences with the substring in their seqIDs");
 		row.add(txtSeqID);
 		page.add(row);
 		page.add(Box.createVerticalStrut(5));
 		
 		row = Static.createRowPanel();
-		txtHitID = new Substring("Best Hit ID", "Hit ID", 	"unitrans.HITstr", 
+		txtHitID = new Substring("Best HitID", "HitID", 	"unitrans.HITstr", 
 				"Show all sequences with the substring in their best HitID");
 		row.add(txtHitID);
 		page.add(row);
@@ -324,7 +324,7 @@ public class SeqsQueryPanel extends JPanel {
 		rgPKM = new Range [libs.length];
 		for (int i=0; i<libs.length; i++) {
 			row = Static.createRowPanel();
-			rgPKM[i] = new Range(libs[i], "0", "", Globals.PRE_LIB + libs[i],
+			rgPKM[i] = new Range(libs[i], "0.0", "", Globals.PRE_LIB + libs[i],
 					"Upper and/or lower limit of the RPKM of " + libs[i]);
 			row.add(rgPKM[i]);
 			page.add(row);
@@ -607,32 +607,39 @@ public class SeqsQueryPanel extends JPanel {
 		public String getSQL() {
 			checkValues();
 			if (!checkOn.isSelected()) return "";
-			String min = txtMin.getText().trim(); // check if proper value
-			String max = txtMax.getText().trim();
 			
-			if (min.equals("")) { // CAS301
-				if (max.contentEquals("")) {
-					checkOn.setSelected(false);
-					return "";
-				}
-				return sqlField + "<"  + max;
+			String min = txtMin.getText(); // check if proper value
+			String max = txtMax.getText();
+			
+			if (min.contentEquals("") && max.contentEquals("")) {
+				checkOn.setSelected(false);
+				return "";
 			}
-			if (max.equals("")) {
-				if (min.contentEquals("")) {
-					min="0";
-					txtMin.setText(min);
-				}
+			if (!min.contentEquals("") && max.contentEquals(""))  // CAS330 rewrite
 				return sqlField + ">=" + min;
-			}
+			
+			if (min.contentEquals("")  && !max.contentEquals("")) 
+				return sqlField + "<" + max;
+			
+			if (min.contentEquals("0")  && max.contentEquals("0"))  // CAS330 add
+				return sqlField + "=0";
+			if (min.contentEquals("0.0")  && max.contentEquals("0.0"))  // CAS330 add
+				return sqlField + "=0.0";
+			
 			return "(" + sqlField + ">=" + min + " and " + sqlField + "<" + max + ")";
 		}
 		public String getSum() { // CAS310 called after getSQL
 			if (!checkOn.isSelected()) return "";
-			String min = txtMin.getText().trim(); // check if proper value
-			String max = txtMax.getText().trim();
+			
+			String min = txtMin.getText(); 
+			String max = txtMax.getText();
 			
 			if (min.equals("")) return label + "<"  + max;
 			if (max.equals("")) return label + ">=" + min;
+			
+			if (min.contentEquals("0")  && max.contentEquals("0"))  return  label + "=0";
+			if (min.contentEquals("0.0")&& max.contentEquals("0.0"))return  label + "=0.0";
+			
 			return "(" + label + ">=" + min + " and " + label + "<" + max + ")";
 		}
 		private void checkValues() {
@@ -643,6 +650,14 @@ public class SeqsQueryPanel extends JPanel {
 			if (min.equals("") && max.equals("") ) {
 				checkOn.setSelected(false);
 				return;
+			}
+			if (isInt) {
+				if (min.contentEquals("0.0")) txtMin.setText("0");
+				if (max.contentEquals("0.0")) txtMax.setText("0");
+			}
+			else {
+				if (min.contentEquals("0")) txtMin.setText("0.0");
+				if (max.contentEquals("0")) txtMax.setText("0.0");
 			}
 			if (!min.equals("") && !Static.isDouble(min) && !Static.isInteger(min)) {
 				UserPrompt.showWarn("Incorrect minimum  '" + min + "' for " + label );

@@ -23,10 +23,10 @@ import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 
 import util.database.DBConn;
 import util.database.HostsCfg;
@@ -34,6 +34,7 @@ import util.methods.BlastArgs;
 import util.methods.ErrorReport;
 import util.methods.TCWprops;
 import util.methods.Out;
+import util.methods.Static;
 import util.ui.UserPrompt;
 import cmp.compile.runMTCWMain;
 import cmp.compile.Summary;
@@ -51,10 +52,7 @@ public class CompilePanel extends JPanel {
 		theViewerFrame = parentFrame;
 		theCompileMain = parentFrame.getParentMain();
 		
-		pnlMain = new JPanel();
-		pnlMain.setLayout(new BoxLayout(pnlMain, BoxLayout.PAGE_AXIS));
-		pnlMain.setBackground(Globals.BGCOLOR);
-		pnlMain.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+		pnlMain = Static.createPagePanel();
 		
 		// three replacement panels
 		pnlEditSpecies = new EditSpeciesPanel(this);
@@ -89,6 +87,10 @@ public class CompilePanel extends JPanel {
 		pnlStats = new StatsPanel(this, pnlEditStats);
 		pnlMain.add(pnlStats);
 		
+		JPanel panel = Static.createPagePanel();
+		//panel.add(new JSeparator()); panel.add(Box.createVerticalStrut(5));
+		JPanel row = Static.createRowPanel();
+		
 		btnRunViewer = new JButton("Launch viewMultiTCW");
 		btnRunViewer.setBackground(Globals.LAUNCHCOLOR);
 		btnRunViewer.addActionListener(new ActionListener() {
@@ -96,8 +98,20 @@ public class CompilePanel extends JPanel {
 				new RunCmd().viewMultiTCW(dbName);
 			}
 		});
-		pnlMain.add(btnRunViewer);
+		row.add(btnRunViewer); row.add(Box.createHorizontalStrut(50));
 		btnRunViewer.setEnabled(false);
+		
+		btnDoAll = new JButton("Do All"); 
+		btnDoAll.setBackground(Globals.LAUNCHCOLOR);
+		btnDoAll.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				//doAll();
+			}
+		});
+		//row.add(btnDoAll); // TODO finish
+		panel.add(row);
+		
+		pnlMain.add(panel);
 		pnlMain.add(Box.createVerticalStrut(5));
 		
 		pnlMain.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -145,14 +159,9 @@ public class CompilePanel extends JPanel {
 		try {
 			DBConn conn = new DBConn(hosts.host(), dbName, hosts.user(), hosts.pass());
 			if (conn!=null) {
-				boolean b = new Version().run(conn); // CAS310 moved this from mTCWcfgRead to here
-				if (b) theInfo = new DBinfo(conn); 
+				new Version().run(conn); // CAS310 moved this from mTCWcfgRead to here
+				theInfo = new DBinfo(conn); // CAS318 removed acting like it didn't exist if incorrect version
 				conn.close();
-				if (!b) { // CAS310 added this; pretends it does not exist if not updated
-					dbExists=false;
-					theInfo = null;
-					return false;
-				}
 			}
 		} 
 		catch (Exception err) {ErrorReport.die(err, "Error accessing database on " + dbName); }
@@ -556,7 +565,20 @@ public class CompilePanel extends JPanel {
 		catch (Exception e) {ErrorReport.prtReport(e, "Getting reserved words");}
 		return false;
 	}
-	
+	/************************************************************
+	 * finish...
+	private void doAll() {
+		try {
+			execBuildDatabase();
+			pnlBlast.runBlast();
+			pnlBlast.createPairsFromBlast();
+			execAddMethods();
+			pnlStats.runStats();
+			execBuildGO();
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "Running everything");}
+	}
+	*/
 	/*******************************************************/
 	private JScrollPane mainPane = null;
 	private JPanel pnlMain = null;	
@@ -567,6 +589,7 @@ public class CompilePanel extends JPanel {
 	public  BlastPanel pnlBlast = null;
 	public  StatsPanel pnlStats = null;
 	private JButton btnRunViewer = null;
+	private JButton btnDoAll = null;
 	
 	private EditSpeciesPanel pnlEditSpecies = null;
 	private EditMethodPanel pnlEditMethod = null;

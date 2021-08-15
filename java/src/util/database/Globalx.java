@@ -8,8 +8,8 @@ import java.awt.Font;
 public class Globalx {
 	public static boolean debug = false; // changed in STCWMain or MTCWMain from command line 
 	
-	public static final String strRelDate = "(20-July-21)"; 
-	public static final String strTCWver = "3.2.7";  // 3.2.7  // must be 3 digits
+	public static final String strRelDate = "(15-Aug-21)"; 
+	public static final String strTCWver = "3.3.0";  // 3.2.8  // must be 3 digits
 	public static final String URL = "http://www.agcol.arizona.edu ";
 	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate;
 	public static final String sTCWver = "sTCW v" + strTCWver;
@@ -90,8 +90,9 @@ public class Globalx {
 	
 	// Its messy about what the values of 'no value' where
 	// See Stats.average - 
+	public static final String sBlank =    "";
 	public static final String sNoVal =    "-";
-	public static final String sNullVal =  "NA"; // CAS327 used for KaKs; NoVal is used for not computed
+	public static final String sNullVal =  "NA"; // CAS327 used for KaKs=NA; NoVal is used for not computed
 	public static final double dNullVal =   -1.5; 
 	
 	public static final String iStrNoVal =  "-2";
@@ -100,9 +101,9 @@ public class Globalx {
 	public static final String dStrNoVal = 	"-2.0"; 
 	public static final double dNoVal = 	-2.0; 
 	
-	public static final String dStrNoDE = 	"3.0"; // set in QRprocess
-	public static final double dNoDE =  	3.0;   // may also be a -
-	public static final double dNaDE =		2.0;   // DE computation returns NA - CAS321 changed from 3
+	public static final String dStrNoDE = 	"3.0"; // set in QRprocess 
+	public static final double dNoDE =  	3.0;   // +/- 
+	public static final double dNaDE =		2.0;   // +/- DE computation returns NA - CAS321 changed from 3
 	
 	public static final String frameField = "Frame";
 	public static final float  dNoScore = -100000; // Float.MAX_VALUE does not work

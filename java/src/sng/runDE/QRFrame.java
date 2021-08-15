@@ -84,7 +84,7 @@ public class QRFrame extends JDialog implements WindowListener {
 	private final int    pValPrefixSize = Globals.PVALUE.length();
 	
 	private final String defPercent = "10";
-	private final String defPVal = ".05";
+	private final String defPVal = "0.05";
 	
 	private final String BADCOLNAME = "Invalid column name, use up to 15 letters/numbers/underscores";
 	private boolean bPopUp=false, bStderr=true;
@@ -1337,7 +1337,7 @@ public class QRFrame extends JDialog implements WindowListener {
 		btnPercent.setBackground(Color.WHITE);
 		row.add(btnPercent);		row.add(Box.createHorizontalStrut(3));
 		
-		txtPercent = new JTextField(3);
+		txtPercent = new JTextField(4);
 		txtPercent.setMaximumSize(txtPercent.getPreferredSize());
 		txtPercent.setMinimumSize(txtPercent.getPreferredSize());
 		txtPercent.setText(defPercent);

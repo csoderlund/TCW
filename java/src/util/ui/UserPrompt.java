@@ -230,7 +230,7 @@ public class UserPrompt extends JDialog {
 		if (ret == JOptionPane.NO_OPTION) return false;
 		return true;
 	}
-	static public boolean showYesNo (String [] options, String title, String msg) {
+	static public boolean showOptions (String [] options, String title, String msg) { // CAS330 changed name
 		int ret = JOptionPane.showOptionDialog(null, msg,
 				title, JOptionPane.YES_NO_OPTION, 
 				JOptionPane.QUESTION_MESSAGE, null, options, options[0]);

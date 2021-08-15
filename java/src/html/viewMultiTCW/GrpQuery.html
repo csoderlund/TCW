@@ -12,7 +12,7 @@ set and may take wait time to display.
 </ul>
 <h3>+Basic</h3>
 <ul>
-<li>Filter on <tt>Cluster ID</tt>, <tt>Majority Hit ID</tt> or <tt>Majority Description</tt>.  
+<li>Filter on <tt>ClusterID</tt>, <tt>Majority HitID</tt> or <tt>Majority Description</tt>.  
 <ul>
 <li>The substring will only be searched if the box is checked.
 <li>The search is not case-sensitive and will find the substring anywhere in the ID or description.
@@ -21,8 +21,14 @@ them; if <tt>Not</tt> is selected, show all clusters that do NOT have the substr
 if the substring "uncharacterized" is entered for <tt>Description</tt> along with the <tt>Not</tt>,
 only clusters without the substring "uncharacterized" in the description will be shown.
 </ul>
-<li>The <tt>%Hit</tt> is the percent with the majority hit, and filters on the <tt>%Hit</tt> column.
+<li>See the <a href=http://www.agcol.arizona.edu/software/tcw/doc/mtcw/UserGuide.html#best>online documentation</a>
+for details on how the <tt>Majority Hit</tt> is computed.
+<br>A <tt>Majority HitID</tt> of "*Novel" indicates none of the sequences in the cluster has
+annotation.
+<br><br>
+<li>The <tt>%Hit</tt> is the percent with the majority description substring, and filters on the <tt>%Hit</tt> column.
 </ul>
+
 
 <h3>+Dataset</h3>
 The multiTCW database was created from one or more singleTCW databases, where each

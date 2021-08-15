@@ -34,10 +34,10 @@ import javax.swing.table.TableColumnModel;
 
 import cmp.viewer.MTCWFrame;
 import cmp.viewer.table.FieldData;
+import cmp.viewer.panels.DisplayDecimalTab;
 import util.database.DBConn;
 import util.database.Globalx;
 import util.methods.ErrorReport;
-import util.methods.Out;
 import util.methods.Static;
 import util.ui.UIHelpers;
 
@@ -580,8 +580,7 @@ public class SeqDetailsPanel extends JPanel {
 			case 4: return nGO;
 			case 5: return best;
 			case 6: 
-				if (dEVal==0.0) return "0.0"; 
-				else return String.format("%.0E", dEVal); // CAS305 Out.formatDouble(dEVal); 
+				return DisplayDecimalTab.formatDouble(dEVal); // CAS305 Out.formatDouble(dEVal); 
 			case 7: return nPercent;
 			case 8: return nAlignLen;
 			case 9: return nStart;
@@ -655,14 +654,14 @@ public class SeqDetailsPanel extends JPanel {
 			case 0: return pairID;
 			case 1: return seqID;
 			case 2:
-				if (ntEval < -1.0) return new String("-");
-				return Out.formatDouble(ntEval); 
+				if (ntEval < -1.0) return Globalx.sNoVal;
+				return DisplayDecimalTab.formatDouble(ntEval); 
 			case 3: 
-				if (aaEval < -1.0) return new String("-");
-				return Out.formatDouble(aaEval); 
+				if (aaEval < -1.0) return Globalx.sNoVal;;
+				return DisplayDecimalTab.formatDouble(aaEval); 
 			case 4: 
-				if (pcc==Globalx.dNoVal) return "-";
-				return String.format("%5.2f", pcc);					
+				if (pcc==Globalx.dNoVal) return Globalx.sNoVal;
+				return DisplayDecimalTab.formatDouble(pcc);					
 			case 5:
 				return desc;
 			case 6:

@@ -7,10 +7,65 @@
 <!--#include virtual="./ssi/start1.html" -->
 
 
-<h3>TCW Version 3.2</h3>
-Release v3.1.8 converted from using the GO file <tt>go_&lt;date&gt;-termdb-tables.tar.gz</tt> to the GO file <tt>go-basic.obo</tt>, 
-which is used to build the <tt>GOdb</tt>. This ended up to be a pretty big changed,
-hence, this release version is <u>v3.2</u> to indicate the new GO source.
+<h4>v3.3.0  15-August-2021</h4>
+<i>Update existing multiTCW databases for this release</i>: 
+There is a small mTCWdb schema change, which will be updated the first time you access the database. However,
+the pairs table <ttl>NTbest</ttl> column will not have values unless you reload the AA/NT hit files. 
+
+<ul>
+<li>Both DIAMOND and BLAST have been updated to their latest release (v2.0.11.149  and 2.12.0+, respectively). 
+A slight change to the TCW was necessary for the latest DIAMOND and there is better error checking for the <ttl>Find Hits</ttl> feature.
+<li>The TCW DIAMOND defaults have changed to the following:
+<ul>
+<li>Sequences against annoDB: <tt>--max-hsps 1 --masking 0 --top 20</tt>
+<li>Self-search: <tt>--max-hsps 1 --masking 0 --sensitive  --query-cover 25 --subject-cover 25</tt>
+</ul>
+
+<li>All display of numbers use the Display Decimal settings except for the Overviews.
+</ul>
+
+<ttp>viewSingleTCW</ttp>
+<ul>
+<li>The DE value of 3.0 meant it was not computed; now this will display as an "-" instead of 3.0.
+<li>The Basic GO columns are in a more logical order.
+</ul>
+
+<ttp>runMultiTCW</ttp>
+<ul>
+<li>Database change:
+<ul>
+<li><b>mdb6.5</b>: Add <ttl>NTbest</ttl> pairs columns. There has been a <ttl>AAbest</ttl> column, where a '2' indicates the 
+pairs are the bi-directional best hits; only these are considered for the BBH-AA computation; having this column means that
+if the pair fails the BBH parameters, a second best pair cannot be used. This was not being
+done for the BBH-NT computation, and now is. The <ttl>AAbest</ttl> was also used in the AA Cluster algorithm,
+and now the <ttl>NTbest</ttl> is used for the NT Cluster algorithm.
+<li>If the user chooses to not update the database, it now will continue even though it
+will probably fail if any action performed on it except checking the overview.
+</ul>
+<li>Computing pair alignments has a memory reduction, and hence, speedup.
+<li>Assign Majority Hit to Cluster: The algorithm has a slight change where it will now
+only assign a 'Best Anno' from the sequences in the cluster (it was including Best Bit
+and Best GO). The documentation on this has been improved.
+
+</ul>
+
+<ttp>viewMultiTCW</ttp>
+<ul>
+<li>For all filters on &lt;=N and &gt;M, if both N and M are 0, then the search is "=0".
+<li>The recently added KaKs=NA is now a checkbox to include or not include NA (it was yes/no/either).
+<li>When sorting a text column, blanks values would always sorted to the bottom; now they
+are sorted like any other value. 
+<li>Added  pair table 'NTbest' column.
+</ul>
+
+<ttx>Minor</ttx>
+<ul>
+<li><ttp>runMultiTCW</ttp> (1) Always record whether the BBH or Closure clustering is AA or NT.
+(2) Tiny bug fix: When removing clusters only, it was not resetting the flag that told <ttp>viewMultiTCW</ttp>
+that the pre-computed MSAs did not exist (anymore).
+<li><ttp>viewSingleTCW</ttp> Overview includes the <ttp>runDE</ttp> filtering options under 
+PROCESSING INFORMATION.
+</ul>
 
 <h4>v3.2.7  20-July-2021</h4>
 This release has improved <ttc>Decimal Display</ttc> and multiple tiny improvements.
@@ -21,6 +76,7 @@ This release has improved <ttc>Decimal Display</ttc> and multiple tiny improveme
 latter does not have the color coding.
 <li>A third parameter has been added for the leading digits for E-notation, i.e. 1.2E-02 versus 1E-02.
 </ul>
+
 
 <p><ttp>runSingleTCW</ttp> - all minor
 <ul>

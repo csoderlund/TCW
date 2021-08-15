@@ -148,7 +148,7 @@ public class MethodClosurePanel extends JPanel {
 		String com = "Sim " + sim + "; Cov " + cov; 
 		com += "(" + covTypes[forx] +")";
 		
-		if (ntButton.isSelected()) com += ";" + abbrev[1];
+		com += "; " + getSearchType(); // CAS330 always put AA or NT
 		
 		return com;
 	}

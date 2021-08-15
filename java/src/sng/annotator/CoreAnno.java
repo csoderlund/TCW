@@ -113,6 +113,15 @@ public class CoreAnno {
 		 *********************************************************************/
 		int cntn=0, cntx=0, cntp=0;
 		
+		// blastn: Load pairs from self-blast nucleotide hit file
+		String fileSelfBlast = doBlastObj.getSelfBlastnFile();		
+		if (fileSelfBlast != null && !fileSelfBlast.equals("-")) { // CAS330 moved first to be consistent in order
+			cntn  = doBlastObj.addAllPairsFromBlastFile(delim, pairsHash, fileSelfBlast, Globalx.typeNT);
+			
+			if (cntp==0 && cntx==0) Out.PrtSpCntMsg(1, cntn,"Pairs from blastn                ");
+			else                    Out.PrtSpCntMsg(1, cntn,"Additional pairs from blastn ");
+		}
+				
 		// tblastx: Load pairs from translated self-blast file
 		String fileTransSelfBlast = doBlastObj.getSelfTblastxFile();
 		if (fileTransSelfBlast != null && !fileTransSelfBlast.equals("-")) {
@@ -128,15 +137,6 @@ public class CoreAnno {
 			
 			if (cntx==0) Out.PrtSpCntMsg(1, cntp, "Pairs from blastp             ");
 			else         Out.PrtSpCntMsg(1, cntp, "Additional pairs from blastp ");
-		}
-		
-		// blastn: Load pairs from self-blast nucleotide hit file
-		String fileSelfBlast = doBlastObj.getSelfBlastnFile();		
-		if (fileSelfBlast != null && !fileSelfBlast.equals("-")) {
-			cntn  = doBlastObj.addAllPairsFromBlastFile(delim, pairsHash, fileSelfBlast, Globalx.typeNT);
-			
-			if (cntp==0 && cntx==0) Out.PrtSpCntMsg(1, cntn,"Pairs from blastn                ");
-			else                    Out.PrtSpCntMsg(1, cntn,"Additional pairs from blastn ");
 		}
 	    
 		if (cntn==0 && cntx==0 && cntp==0) {
@@ -171,6 +171,7 @@ public class CoreAnno {
 		int failToAlign=0, tooShort=0, successToAlign=0, nCompareCount = 0;
 		
 		BlastHitData pairHitObj = null;
+		long alignTime = Out.getTime(); // CAS330
 		
 		if (maxDPpairs < nPairs) 
 			Out.PrtSpMsg(1, "Aligning best " + maxDPpairs + " out of " + nPairs + " pairs, due to Pairs limit in Options");
@@ -260,7 +261,8 @@ public class CoreAnno {
 		Out.PrtSpCntMsgNz(1, failToAlign, "Failed alignments");
 		Out.PrtSpCntMsgNz(1,tooShort, "Rejected alignments (<" + MIN_ALIGN_LEN + "bp)");
 		Out.PrtSpCntMsgNz(1, AlignCompute.getCnt6(), "Checked 6 frames");
-		Out.PrtMsgTime("Finished " + successToAlign + " sequence comparisons", time);
+		Out.PrtSpMsgTime(1, "Finished " + successToAlign + " alignments", alignTime);
+		Out.PrtMsgTime("Finished pairwise comparison", time);
 		return true;
 	}
 	/*********************************************************************

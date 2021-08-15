@@ -241,7 +241,7 @@ public class FieldData {
 	private static int [] PAIR_SECTION_IDX, PAIR_SECTION_BREAK;
 	
 	public static void buildPairs() {
-		int nCol=19, nNT=7, nStat=21, nKa=4; 
+		int nCol=19, nNT=8, nStat=21, nKa=4; 
 		if (hasPCC) nCol++;
 		if (hasGO)  nCol++;
 		if (hasNTblast) nCol += nNT;
@@ -310,7 +310,8 @@ public class FieldData {
 		addPair(c++, "%AAcov2", Float.class, PAIR_TABLE,"aaOlap2",  "Hit protein percent coverage for SeqID2 (aaAlign/(CDSlen2/3))", false);
 		addPair(c++, "AAgap", Integer.class, PAIR_TABLE, "aaGap",   "Hit #Gap Open for protein alignment", false);
 		addPair(c++, "AAbit", Integer.class, PAIR_TABLE, "aaBit",   "Hit bit score for protein alignment",  false);
-		addPair(c++, "AAbest",  Integer.class, PAIR_TABLE,"aaBest", "Pair is best AA hit for one (1) or both (2) sequences",false);
+		addPair(c++, "AAbest",  Integer.class, PAIR_TABLE,"aaBest", 
+				"Pair is best AA hit for one (1) or both (2) sequences, where a 2 is BBH)",false);
 		
 		if (theInfo.hasNTblast()) {
 			mkBreak.add(c);
@@ -321,6 +322,8 @@ public class FieldData {
 			addPair(c++, "%NTcov2", Float.class, PAIR_TABLE, "ntOlap2",  "Hit DNA percent coverage for SeqID2 (ntAlign/CDSlen2)",  false);
 			addPair(c++, "NTgap", Integer.class, PAIR_TABLE, "ntGap",    "Hit #Gap Open for DNA alignment",  false);
 			addPair(c++, "NTbit",  Integer.class, PAIR_TABLE, "ntBit",   "Hit bit score for DNA alignment",  false);
+			addPair(c++, "NTbest",  Integer.class, PAIR_TABLE,"ntBest", 
+					"Pair is best NT hit for one (1) or both (2) sequences, where a 2 is BBH)",false);
 		}
 		mkSection.add(c);
 		

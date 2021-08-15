@@ -88,9 +88,11 @@ except the following:
 
 <table border=0 cellspacing=3>
 <tr><td><b>General</b><td>&nbsp;
-<tr><td valign="top">&nbsp;&nbsp;HitID<td>The best shared hit from the pair. If neither sequence of the pair
-has a hit, the HitID will be "*Unique". If there is no shared description between the
-two sequences of the pair, the HitID will be "*NoShare". 
+<tr><td valign="top">&nbsp;&nbsp;HitID<td>The best shared hit from the pair
+(see the <a href=http://www.agcol.arizona.edu/software/tcw/doc/mtcw/UserGuide.html#step2>online documentation</a>
+for a description of how this is computed). 
+<br>The <tt>HitID</tt> "*NoShare" indicates the pair does not share any description.
+<br>The <tt>HitID</tt> "*Novel" indicates that neither sequence of the pair has any annotation.
 
 <tr><td valign="top">&nbsp;&nbsp;PCC<td>Pearson Correlation Coefficient of the TPM values.
 This only has values>0 if the datasets have matching condition names.

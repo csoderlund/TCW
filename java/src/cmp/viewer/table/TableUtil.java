@@ -28,6 +28,7 @@ import javax.swing.JTextField;
 
 import cmp.database.Globals;
 import cmp.viewer.MTCWFrame;
+import cmp.viewer.panels.DisplayDecimalTab;
 import util.database.DBConn;
 import util.database.Globalx;
 import util.file.FileC;
@@ -125,7 +126,7 @@ public class TableUtil {
 					if (results[i]<0) rows[r][c] = "N/A"; // overflow
 					else              rows[r][c] = String.format("%,d", (long) results[i]);
 				}
-				else                  rows[r][c] = Out.formatDouble(results[i]);
+				else                  rows[r][c] = DisplayDecimalTab.formatDouble(results[i]);
 			}
 			r++;
 		}
@@ -734,7 +735,7 @@ public class TableUtil {
 	    }
 	 	public String getGOLevel() { 
 	    	String x = txtGOlevel.getText().trim();
-	    	if (x.equals("-") || x.equals("") || x.equals("0")) return "0";
+	    	if (x.equals("-") || x.equals("") || x.equals("0") || x.contentEquals(Globalx.sNoVal)) return "0";
 	    		
 			try {Integer.parseInt(x);}
 			catch (Exception e) {
@@ -747,7 +748,7 @@ public class TableUtil {
 	    }
 	    public String getGOEval() { 
 	    	String x = txtGOEval.getText().trim();
-			if (x.equals("") || x.equals("-")) return "";
+			if (x.equals("") || x.equals("-") || x.contentEquals(Globalx.sNoVal)) return "";
 			
 			try {Double.parseDouble(x);}
 			catch (Exception e) {
@@ -841,7 +842,7 @@ public class TableUtil {
 				}
 				else { 
 					Object obj = theTable.getValueAt(x, y);
-	                String val = (obj == null) ? "-" : obj.toString(); // CAS305 changes all 3 to '-' convert(obj.toString()); 
+	                String val = (obj == null) ? Globalx.sNoVal : obj.toString(); // CAS305 changes all 3 to '-'; CAS330 sNoVal; 
 					retVal.append(val);
 				}
 				if (y != nCol-1) retVal.append(delim);

@@ -18,7 +18,7 @@ package util.methods;
  * 
  * CAS303 any support for old blast is gone. Only blast+ works
  * Three ways of accessing blast and diamond:
- * 1. /external
+ * 1. /Ext
  * 2. their path
  * 3. HOSTS.cfg diamond_path and blast_path
  */
@@ -46,17 +46,19 @@ public class BlastArgs {
     
     // default diamond is --evalue 1e-03; which is ~equivalent with blast 1e-10
     // don't compress as the other search programs don't
-    private static final String diamondOpt = "--max-hsps 1";
-    // CAS314 private static final String diamondOpt =     "--masking 0 --max-hsps 1 --top 20";
+    // CAS314 removed diamond parameters, CAS330 put this back in for both the following:
+    private static final String diamondOpt =   "--max-hsps 1 --masking 0 --top 20"; 
     // used for MTCW comparing ORFs and STCW self comparing ORFS
-    private static final String diamondOptORF = "--max-hsps 1 --sensitive";
-   
+    private static final String diamondOptORF = "--max-hsps 1 --masking 0 --sensitive --query-cover 25 --subject-cover 25";
+    // CAS330 add for Find Hits
+    private static final String diamondOptHit =   "--max-hsps 1 --masking 0"; 
+    
     // kludge because mTCW calls HOSTCfg 4x on startup; stops it printing over and over
     private static boolean hasChecked=false, bBlastExt=true; 
    
     public static void evalBlastPath(String bp, String dp, boolean prt) {
     	if (hasChecked) return; // Called multiple times from mTCW; everything is static for section
-    	
+ 	
      	boolean bBlast = blastSetup(bp);
      	boolean bDmnd =  diamondSetup(dp);
      	
@@ -127,15 +129,17 @@ public class BlastArgs {
     public static String getDiamondPath() { return diamondPath;}
     public static String getDiamondArgsDB() { return diamondOpt;}
     public static String getDiamondArgsORF() { return diamondOptORF;}
+    public static String getDiamondArgsHit() { return diamondOptHit;}
     public static String getDiamondFormat(String database, String outfile) {
 		return diamondPath + " makedb --in " + database + " -d " + outfile;
     }
-    public static String getDiamondCmd(String query, String database, String outfile, 
+    public static String getDiamondCmd(String queryFile, String dbFile, String outfile, 
     			String action, String blastOp, int nCPU) 
     {
     	String pgmPath = diamondPath + " " + action;
-		
-		return pgmPath  + " -q " + query + " -d " + database + " -o " + outfile + 
+    	if (!dbFile.endsWith(".dmnd")) dbFile += ".dmnd"; // CAS330 for 2.0.11
+    	
+		return pgmPath  + " -q " + queryFile + " -d " + dbFile + " -o " + outfile + 
 			" " + blastOp + " -p " + nCPU;
     }
     /*****************************************************************
@@ -179,14 +183,12 @@ public class BlastArgs {
         blastpEx =  p + "blastp"; 
         blastnEx =  p + "blastn"; 
         tblastxEx = p + "tblastx";
-        blastPath = p;
-        
+        blastPath = p;      
         return true;
     }
     // Called from DoBlast for blastp, blastn, blastx; CAS303 use blastPath
     public static String getBlastCmd(String query, String database, String outfile, String action, String blastOp, int nCPU) {
-	 	String pgm = blastPath + action;
-	 	
+	 	String pgm = blastPath + action;	 	
     	return pgm + " -query " + query + " -db " + database + " -out " + outfile + 
 	            " -outfmt 6 " + blastOp + " -num_threads " + nCPU + " ";
     }

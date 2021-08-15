@@ -479,7 +479,7 @@ public class DoBlast {
 		boolean isORF=false;
 		// true just means Blast did not fail. It doesn't mean the option was selected.
 		if (action.equals("blastn")  && !bExecBlastn) {
-			if (doSelfBlastn) Out.PrtSpMsg(2, "Use existing blastn: "  + selfBlastnFile);
+			if (doSelfBlastn)  Out.PrtSpMsg(2, "Use existing blastn:  "  + selfBlastnFile);
 			return true;
 		}
 		if (action.equals("tblastx") && !bExecTblastx) {
@@ -487,7 +487,7 @@ public class DoBlast {
 			return true; 
 		}
 		if (action.equals("blastp")  && !bExecBlastp) {
-			if (doSelfBlastp) Out.PrtSpMsg(2, "Use existing blastp: " + selfBlastpFile);
+			if (doSelfBlastp)  Out.PrtSpMsg(2, "Use existing blastp:  " + selfBlastpFile);
 			return true;
 		}
 		/********************** Run Blast *****************************/

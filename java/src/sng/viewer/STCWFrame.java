@@ -189,7 +189,7 @@ public class STCWFrame extends JFrame {
 			decimalTab = new DisplayDecimalTab(this);
 			tabbedPane.addTab(DecimalNumbers, decimalTab);
 			
-			blastTab = new BlastTab(this,metaData);
+			blastTab = new FindHits(this,metaData);
 			tabbedPane.addTab(Blast, blastTab);
 			MenuTreeNode blastNode = new MenuTreeNode(Blast,blastTab); // CAS305 move here
 			
@@ -996,7 +996,7 @@ public class STCWFrame extends JFrame {
 	
 	private ResultsSummaryTab resultsContigTab = null;
 	private ResultsSummaryTab resultsPairTab = null;
-	private BlastTab blastTab  = null;
+	private FindHits blastTab  = null;
 	
 	// Linux: user/.java/.userPrefs/viewSingleTCW - can view with 'more'
 	// Mac: ~/Library/Preferences/com.apple.java.util.prefs.plist - open with Finder 

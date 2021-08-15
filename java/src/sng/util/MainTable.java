@@ -15,6 +15,7 @@ import java.util.Vector;
 
 import sng.dataholders.SequenceData;
 import sng.viewer.STCWFrame;
+import sng.viewer.panels.DisplayDecimalTab;
 import util.database.DBConn;
 import util.database.Globalx;
 import util.file.FileC;
@@ -104,6 +105,9 @@ public class MainTable extends MainTableSort {
 					else if (obj instanceof Double) {
 						dArr[c++] = ((Double)obj).doubleValue();
 					}
+					else if ((String) getValueAt(x, y)==Globalx.sNoVal) {
+						dArr[c++]=Globalx.dNoDE; // CAS330 DE can be '-'
+					}
 					else { 
 						Out.prt("MainTable: class? " + (String) getValueAt(x, y) + " " + dtype);
 					}
@@ -120,7 +124,7 @@ public class MainTable extends MainTableSort {
 						if (results[i] < Globalx.dNoScore) rows[nRow][c] = "N/A"; // overflow
 						else rows[nRow][c] = String.format("%,d", (long) results[i]);
 					}
-					else rows[nRow][c] = Out.formatDouble(results[i]);
+					else rows[nRow][c] = DisplayDecimalTab.formatDouble(results[i]);
 				}
 				nRow++;
 			}

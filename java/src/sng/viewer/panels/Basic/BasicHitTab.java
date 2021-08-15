@@ -34,7 +34,9 @@ import sng.database.Globals;
 import sng.database.MetaData;
 import sng.util.Tab;
 import sng.viewer.STCWFrame;
+import util.database.Globalx;
 import util.methods.ErrorReport;
+import util.methods.Out;
 import util.methods.Static;
 import util.ui.DisplayFloat;
 import util.ui.UserPrompt;
@@ -550,8 +552,12 @@ public class BasicHitTab extends Tab {
 			
 			if (column < (nCol+numLibs))
 				return new DisplayFloat(libCounts[column-nCol]);
+			
 			nCol+=numLibs;
-			return new DisplayFloat(pvalCounts[column-nCol]);
+			
+			double pval = pvalCounts[column-nCol];
+			if (Math.abs(pval)==Globalx.dNoDE) return Globalx.sNoVal; // CAS330
+			return new DisplayFloat(pval);
 		}
 
 		public int compareTo(HitSeqData obj, boolean ascOrder, int column) {
@@ -741,7 +747,10 @@ public class BasicHitTab extends Tab {
 				return new DisplayFloat(nLibCounts[column-nCol]);
 			}
 			nCol+= numLibs;
-			return new DisplayFloat(nPvalCounts[column-nCol]);
+			
+			double pval = nPvalCounts[column-nCol];
+			if (Math.abs(pval)==Globalx.dNoDE) return Globalx.sNoVal; // CAS330
+			return new DisplayFloat(pval);
 		}
 		
 		public int compareTo(HitGroupData obj, boolean ascOrder, int column) {

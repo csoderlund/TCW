@@ -259,11 +259,11 @@ public class MethodBBHPanel extends JPanel {
 		int sim = Static.getInteger(txtSimCutoff.getText());
 		int cov = Static.getInteger(txtCovCutoff.getText());
 		if (sim!=0 || cov!=0) com += "(" + covTypes[forx] + ")"; 
-		
-		if (ntButton.isSelected()) com += ";" + abbrev[1];
+		com += "; " + getSearchType(); // CAS330 always put AA or NT
 		
 		if (selectSTCW.size()>0 && !listSTCW.equals("")) com += "; " + listSTCW;
 		else if (nSets>2) com += "; All pairs of sTCWs";
+		
 		return com;
 	}
 	

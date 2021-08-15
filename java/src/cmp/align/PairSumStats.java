@@ -132,7 +132,7 @@ public class PairSumStats {
 				seqid1.add(rs.getInt(2));
 				seqid2.add(rs.getInt(3));
 			}
-			Out.PrtSpCntMsg(1, pairid.size(), " Loaded sequences");
+			Out.PrtSpCntMsg(1, pairid.size(), "Loaded sequences");
 		}
 		catch(Exception e) {ErrorReport.die(e, "computing stats");}
 		}
@@ -193,15 +193,15 @@ public class PairSumStats {
 		    rows[r][c] = "KaKs>1";   rows[r++][c+1] = String.format("%,d",kcnt[3]);
 		    
 		    r=0; c=2;
-		    rows[r][c] = "   Q1(Lower)"; rows[r++][c+1] =  Out.formatDouble(qrt[0]);
-		    rows[r][c] = "   Q2(Median)"; rows[r++][c+1] = Out.formatDouble(qrt[1]);
-		    rows[r][c] = "   Q3(Upper)"; rows[r++][c+1] =  Out.formatDouble(qrt[2]);
+		    rows[r][c] = "   Q1(Lower)"; rows[r++][c+1] =  formatDouble(qrt[0]);
+		    rows[r][c] = "   Q2(Median)"; rows[r++][c+1] = formatDouble(qrt[1]);
+		    rows[r][c] = "   Q3(Upper)"; rows[r++][c+1] =  formatDouble(qrt[2]);
 		    rows[r][c] = ""; rows[r++][c+1] = "";
 		    
 		    r=0; c=4;
-		    rows[r][c] = "   Ka";      rows[r++][c+1] = Out.formatDouble(sumKa/nKa); 
-		    rows[r][c] = "   Ks";      rows[r++][c+1] = Out.formatDouble(sumKs/nKs); 
-		    rows[r][c] = "   P-value"; rows[r++][c+1] = Out.formatDouble(sumPval/nPval);
+		    rows[r][c] = "   Ka";      rows[r++][c+1] = formatDouble(sumKa/nKa); 
+		    rows[r][c] = "   Ks";      rows[r++][c+1] = formatDouble(sumKs/nKs); 
+		    rows[r][c] = "   P-value"; rows[r++][c+1] = formatDouble(sumPval/nPval);
 		    rows[r][c] = "";        rows[r++][c+1] = "";
 		    
 		    r=0; c=6;
@@ -218,6 +218,15 @@ public class PairSumStats {
 		    	   infoStr =  pad +  "KaKs pairs: " +  sz + "\n"; 
 		    infoStr += Out.makeTable(nCol, nRow, fields, justify, rows);
 		    pairInfoStr += infoStr;
+		}
+		private String formatDouble(double val) { // CAS330 moved from Out, as all others use DisplayDecimal
+	    	if (val == 0) return "0.0";
+	    	
+	    	double a = Math.abs(val);
+	    	if (a>=100.0)   return String.format("%.1f", val); 
+	    	if (a>=1.0)     return String.format("%.3f", val); 
+	    	if (a>=0.0001) return String.format("%.3f", val); 
+	    	return  String.format("%.1E", val);
 		}
 		private void init() {
 			for (int i=0; i<4; i++) kcnt[i]=0;

@@ -38,6 +38,7 @@ import sng.dataholders.ContigData;
 import sng.dataholders.MultiCtgData;
 import sng.dataholders.SequenceData;
 import sng.viewer.STCWFrame;
+import sng.viewer.panels.DisplayDecimalTab;
 import util.file.FileC;
 import util.file.FileWrite;
 import util.methods.ErrorReport;
@@ -471,7 +472,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 						else rows[r][c] = libNames[x] + ": " + libCounts[x]; 
 					}
 					else {
-						rows[r][c] = libNames[x] + ": " + Out.formatDouble(libRPKM[x]); 
+						rows[r][c] = libNames[x] + ": " + DisplayDecimalTab.formatDouble(libRPKM[x]); 
 					}
 					c++;
 				}
@@ -491,7 +492,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 						rows[r][c++] = "";
 					}
 					
-					rows[r][c++] = deNames[x] + ": " + Out.formatDouble(libDE[x]); 
+					rows[r][c++] = deNames[x] + ": " + DisplayDecimalTab.formatDouble(libDE[x]); 
 				}
 				if (r!=0) c=NUM_COLS;
 				textArea += textTable(c, r+1);
@@ -707,8 +708,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 				
 				int f = nFrame+3;
 				if (frameHitInfo[f]==null) {
-					String e = "0.0";
-					if (eval!=0) e =  String.format("%.0E", eval); 
+					String e = DisplayDecimalTab.formatDouble(eval);
 					frameHitInfo[nFrame+3] =  String.format("%s %s,%d%s", strBest, e, nPercent, "%");
 					frameHitStart[nFrame+3] = nStart;
 					frameHitEnd[nFrame+3] =   nEnd;
@@ -739,12 +739,11 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 			case 4: return nGO;
 			case 5: return strBest;	
 			case 6: 
-				if (nFrame==0) return "-";
+				if (nFrame==0) return Globalx.sNoVal;
 				return nFrame;
-			case 7: return dBit;
+			case 7: return DisplayDecimalTab.formatDouble(dBit);
 			case 8:
-				if(eval == 0) return new String("0.0");
-				return (new DecimalFormat("0.0E0")).format((Double)eval); 
+				return DisplayDecimalTab.formatDouble(eval); // CAS330
 			case 9: return nPercent;
 			case 10: return pSeqAlign;
 			case 11: return pHitAlign;

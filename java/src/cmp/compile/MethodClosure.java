@@ -110,7 +110,7 @@ public class MethodClosure {
 		int cntPass=0, cntMinSim=0, cntMinOlap=0, cntPair=0;
 		Out.PrtSpMsg(2, "Load " + strType[type] + " blast pairs from database");
 		if (type==0) msq = "select UTstr1, UTstr2, aaEval, aaSim, aaOlap1, aaOlap2, aaBit, aaBest from pairwise where aaSim>0";
-		else         msq = "select UTstr1, UTstr2, ntEval, ntSim, ntOlap1, ntOlap2, ntBit, aaBest from pairwise where ntSim>0";
+		else         msq = "select UTstr1, UTstr2, ntEval, ntSim, ntOlap1, ntOlap2, ntBit, ntBest from pairwise where ntSim>0";
 		rs = cmpDBC.executeQuery(msq);
 		while (rs.next()) {
 			cntPair++;
@@ -121,7 +121,7 @@ public class MethodClosure {
 			int olap1 = (int) (rs.getDouble(5)+0.5); // CAS305 was not rounding
 			int olap2 = (int) (rs.getDouble(6)+0.5); // CAS305 was not rounding
 			int bit   = rs.getInt(7);
-			int aaBest = (type==0) ? rs.getInt(8) : 0;
+			int bbh = rs.getInt(8);
 			
 			if (sim < simCutoff) {
 				cntMinSim++;
@@ -145,7 +145,7 @@ public class MethodClosure {
 			seqMap.get(seq1).add(seq2);
 			seqMap.get(seq2).add(seq1);
 			
-			Pair pair = new Pair(seq1, seq2, eval, sim, olap1, olap2, bit, aaBest);
+			Pair pair = new Pair(seq1, seq2, eval, sim, olap1, olap2, bit, bbh);
 			pairList.add(pair);
 		}
 		rs.close();		
@@ -294,16 +294,16 @@ public class MethodClosure {
 		HashSet <String> seqPairs = new HashSet <String> ();
 	}
 	private class Pair implements Comparable <Pair>{
-		public Pair (String seq1, String seq2, double eval, int sim, int olap1, int olap2, int bit, int aaBest) {
+		public Pair (String seq1, String seq2, double eval, int sim, int olap1, int olap2, int bit, int bbh) {
 			this.seq1=seq1;
 			this.seq2=seq2;
 			this.eval=eval;
 			this.bit = bit;
-			this.aaBest=aaBest;
+			this.bbh=bbh;
 		}
 		public int compareTo(Pair p) {
-			if (aaBest>p.aaBest) return -1;
-			if (aaBest<p.aaBest) return  1;
+			if (bbh>p.bbh) return -1;
+			if (bbh<p.bbh) return  1;
 			if (eval<p.eval)     return -1;
 			if (eval>p.eval)     return  1;
 			if (bit>p.bit)       return -1;
@@ -313,7 +313,7 @@ public class MethodClosure {
 		String seq1, seq2;
 		double eval;
 		double bit;
-		int aaBest;
+		int bbh;		// CAS330 changed from aaBest to bbh (includes ntBest)
 	}
 	 private DBConn cmpDBC;			// database connection
 	 private CompilePanel cmpPanel;	// get all parameters from this

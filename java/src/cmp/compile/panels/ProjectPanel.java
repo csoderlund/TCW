@@ -450,7 +450,8 @@ public class ProjectPanel extends JPanel {
     			
     			removeClust(mDB, info.getMethodPrefix());
     			
-    			mDB.executeUpdate("update pairwise set hasGrp=0, hasBBH=0");
+    			mDB.executeUpdate("update pairwise set hasGrp=0, hasBBH=0"); 
+    			mDB.executeUpdate("update info set hasMA=0");// CAS330 add hasMA
     			
     			Out.PrtSpMsg(0, "Finish cluster removal");
     			theCompilePanel.updateAll(); 

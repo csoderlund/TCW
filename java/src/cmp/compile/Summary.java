@@ -382,19 +382,23 @@ public class Summary {
   		
  		// pairInfo created in PairStats during compile
   		String text = mDB.executeString("select pairInfo from info");
-  		if (text!=null && text!="") {
-  			lines.add("");
+  		if (text!=null && text.trim()!="") {
   			String [] pline = text.split("\n");
-  			for (String l:pline) lines.add(l);
+  			if (pline.length>1) { // CAS330 prevent extra blank lines
+  				lines.add("");
+  				for (String l:pline) lines.add(l);
+  			}
   		}
   		
   		// kaksInfo created in Pairwise.java during compile
   		text = mDB.executeString("select kaksInfo from info");
-	 	if (text!=null && text!="") {
-	 		lines.add("");
+	 	if (text!=null && text.trim()!="") {
 	 		text = mDB.executeString("select kaksInfo from info");
 	 		String [] kline = text.split("\n");
-		 	for (String l:kline) lines.add(l);
+	 		if (kline.length>1) {
+  				lines.add("");
+  				for (String l:kline) lines.add(l);
+	 		}
 	 	}
     }
     catch (Exception e) {ErrorReport.prtReport(e, "reading database for Pairs");}	

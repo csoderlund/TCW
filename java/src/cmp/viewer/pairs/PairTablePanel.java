@@ -696,7 +696,7 @@ public class PairTablePanel extends JPanel {
 		int IDidx = theTableData.getColumnHeaderIndex(PAIRID);
 		int IDidx1 = theTableData.getColumnHeaderIndex(ID1_SQL); // index
 		int IDidx2 = theTableData.getColumnHeaderIndex(ID2_SQL);
-		int id1 = (Integer)theTableData.getValueAt(row, IDidx1);
+		int id1 = (Integer)theTableData.getValueAt(row, IDidx1); // CAS328 got a ArrayIndexOutOfBoundsException: 12 - why?
 		int id2 = (Integer)theTableData.getValueAt(row, IDidx2);
 		int pairid = ((Integer)theTableData.getValueAt(row, IDidx));			
 		
