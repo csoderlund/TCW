@@ -468,12 +468,12 @@ public class FieldSeqData implements Serializable
         		"E-value of the best bitscore." );
         mapper.setFieldSubQuery(FIRST_BEST_EVALUE_FIELD, "firstbesteval", TABLE_FIRST_BEST + ".e_value");
         
-        mapper.addIntField( FIRST_BEST_BIT_SCORE_FIELD, "BS Bitscore", TABLE_FIRST_BEST, 
+        mapper.addFloatField( FIRST_BEST_BIT_SCORE_FIELD, "BS Bitscore", TABLE_FIRST_BEST, //CAS331 change from Int
         		"bit_score", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
         		"Bit score of the best bitscore." );
         mapper.setFieldSubQuery(FIRST_BEST_BIT_SCORE_FIELD, "firstbestbitscore", TABLE_FIRST_BEST + ".bit_score");
         
-        mapper.addIntField( FIRST_BEST_PERCENT_IDENT, "BS %Sim", TABLE_FIRST_BEST,
+        mapper.addFloatField( FIRST_BEST_PERCENT_IDENT, "BS %Sim", TABLE_FIRST_BEST, //CAS331 change from Int
         		"percent_id", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST,
         		"Percent similarity of the best bitscore");
         mapper.setFieldSubQuery(FIRST_BEST_PERCENT_IDENT, "firstbestpercentid", TABLE_FIRST_BEST + ".percent_id");
@@ -571,12 +571,12 @@ public class FieldSeqData implements Serializable
         		"E-value of the overall BestAnno." );
         mapper.setFieldSubQuery(OVER_BEST_EVALUE_FIELD, "overeval", TABLE_OVER_BEST + ".e_value");
         
-        mapper.addIntField( OVER_BEST_BIT_SCORE_FIELD, "AN Bitscore", TABLE_OVER_BEST, 
+        mapper.addFloatField( OVER_BEST_BIT_SCORE_FIELD, "AN Bitscore", TABLE_OVER_BEST, // CAS331 change from int
         		"bit_score", GROUP_NAME_OVER_BEST, GROUP_DESC_OVER_BEST, 
         		"Bit score of the overall BestAnno." );
         mapper.setFieldSubQuery(OVER_BEST_BIT_SCORE_FIELD, "overbitscore", TABLE_OVER_BEST + ".bit_score");
         
-        mapper.addIntField( OVER_BEST_PERCENT_IDENT, "AN %Sim", TABLE_OVER_BEST,
+        mapper.addFloatField( OVER_BEST_PERCENT_IDENT, "AN %Sim", TABLE_OVER_BEST, // CAS331 change from int
         		"percent_id", GROUP_NAME_OVER_BEST, GROUP_DESC_OVER_BEST,
         		"Percent similarity of the overall BestAnno");
         mapper.setFieldSubQuery(OVER_BEST_PERCENT_IDENT, "overperid", TABLE_OVER_BEST + ".percent_id");
@@ -678,12 +678,12 @@ public class FieldSeqData implements Serializable
         		"E-value of the BestHitWithGO." );
         mapper.setFieldSubQuery(GO_BEST_EVALUE_FIELD, "goevalue", TABLE_GO_BEST + ".e_value");
         
-        mapper.addIntField( GO_BEST_BIT_SCORE_FIELD, "WG Bitscore", TABLE_GO_BEST, 
+        mapper.addFloatField( GO_BEST_BIT_SCORE_FIELD, "WG Bitscore", TABLE_GO_BEST, //CAS331 change from hit
         		"bit_score", GROUP_NAME_GO_BEST, GROUP_DESC_GO_BEST, 
         		"Bit score of the BestHitWithGO." );
         mapper.setFieldSubQuery(GO_BEST_BIT_SCORE_FIELD, "gobitscore", TABLE_GO_BEST + ".bit_score");
         
-        mapper.addIntField( GO_BEST_PERCENT_IDENT, "WG %Sim", TABLE_GO_BEST,
+        mapper.addFloatField( GO_BEST_PERCENT_IDENT, "WG %Sim", TABLE_GO_BEST, //CAS331 change from hit
         		"percent_id", GROUP_NAME_GO_BEST, GROUP_DESC_GO_BEST,
         		"Percent similarity of the BestHitWithGO");
         mapper.setFieldSubQuery(GO_BEST_PERCENT_IDENT, "goperid", TABLE_GO_BEST + ".percent_id");

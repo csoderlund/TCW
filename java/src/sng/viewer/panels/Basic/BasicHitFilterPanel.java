@@ -87,11 +87,11 @@ public class BasicHitFilterPanel extends JPanel {
 	// Keep SEQ and GRP columns the same, just different interpretations.
 	private static final String [] SEQ_STATIC_COLUMNS = { 
 		"Row", "Seq ID",  "Length", "Hit ID", "Best", "Rank", 
-		"E-value+",  "%Sim+", "%SeqCov+", "%HitCov+", "Align+",  
+		"Bitscore+", "E-value+",  "%Sim+", "%SeqCov+", "%HitCov+", "Align+",  
 		"Description", "Species", "DBtype", "Taxonomy"};
 	private static final String [] GRP_STATIC_COLUMNS = { 
 		"Row", "Hit ID", "Length", "#Seqs", "#Best", "#Rank1", 
-		"E-value*", "%Sim*", "%SeqCov*", "%HitCov*", "Align*", 
+		"Bitscore*", "E-value*", "%Sim*", "%SeqCov*", "%HitCov*", "Align*", 
 		"Description", "Species", "DBtype", "Taxonomy"}; 
 	private static final String [] GO_STATIC_COLUMNS = 
 		{"nGO", "Assigned GOs", "InterPro", "KEGG", "Pfam", "EC (enzyme)"}; // CAS322 GO => Assigned GOs
@@ -2286,25 +2286,24 @@ public class BasicHitFilterPanel extends JPanel {
 			headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.LINE_AXIS));
 			headerPanel.setBackground(Color.white);
 			String head="";
-			if (isGrp) 
-				head = "<HTML><H2>Hit columns</H2></HTML>";
-			else 
-				head = "<HTML><H2>Sequence columns</H2></HTML>";
+			if (isGrp) 	head = "<HTML><H2>Hit columns</H2></HTML>";
+			else 		head = "<HTML><H2>Sequence columns</H2></HTML>";
 			JLabel theHeader = new JLabel(head);
 			theHeader.setBackground(Color.white);
 			theHeader.setAlignmentX(CENTER_ALIGNMENT);
 			headerPanel.add(theHeader);
-			headerPanel.add(Box.createVerticalStrut(10));
+			headerPanel.add(Box.createVerticalStrut(5));
 			headerPanel.setMaximumSize(headerPanel.getPreferredSize());
 			headerPanel.setAlignmentX(CENTER_ALIGNMENT);
-			add(Box.createVerticalStrut(30));
+			
+			add(Box.createVerticalStrut(5)); // CAS331 changed VerticalStrut to take less room
 			add(headerPanel);
 			add(Box.createVerticalStrut(10));
 			
 			createColSelectPanel(staticNames, isGrp);
 			add(selectPanel);
 			
-			add(Box.createVerticalStrut(30));
+			add(Box.createVerticalStrut(10));
 			btnAccept = new JButton("Accept");
 			btnAccept.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -2388,8 +2387,9 @@ public class BasicHitFilterPanel extends JPanel {
 			chkGeneral.setAlignmentX(LEFT_ALIGNMENT);
 			chkGeneral.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
+					boolean b = chkGeneral.isSelected();
 					for(int x=0; x<chkStaticColNames.length; x++)
-						chkStaticColNames[x].setSelected(chkGeneral.isSelected());
+						chkStaticColNames[x].setSelected(b);
 					setOKEnabled();
 				}
 			});
@@ -2398,12 +2398,11 @@ public class BasicHitFilterPanel extends JPanel {
 			genChkRow.setMinimumSize(genChkRow.getPreferredSize());
 			genChkRow.setMaximumSize(genChkRow.getPreferredSize());
 			staticPanel.add(genChkRow);
+			
 			staticPanel.add(Box.createVerticalStrut(2));
-			if (isGrp) staticPanel.add(new JLabel("*Hit values of best"));
-			else  {
-				staticPanel.add(new JLabel("+Hit values or"));
-				staticPanel.add(new JLabel(" computed from them"));
-			}
+			if (isGrp) staticPanel.add(new JLabel("*Seq-Hit values of best"));
+			else  staticPanel.add(new JLabel("+Seq-Hit values"));
+				
 			staticPanel.setMinimumSize(staticPanel.getPreferredSize());
 			staticPanel.setMaximumSize(staticPanel.getPreferredSize());
 			staticPanel.setAlignmentX(CENTER_ALIGNMENT);
@@ -2773,7 +2772,7 @@ public class BasicHitFilterPanel extends JPanel {
 	 * XXX Database calls
 	 */
 	/* the following two are called by BasicHitQueryTab */
-	 public ArrayList<Object []> loadFromDatabase () throws Exception
+	 public ArrayList<Object []> loadFromDatabase () 
 	 {
         ArrayList<Object []> resultList = null;
         try {
@@ -2788,9 +2787,9 @@ public class BasicHitFilterPanel extends JPanel {
             int numSetFields = (libColNames == null) ? 0 : libColNames.length;
             numSetFields    += (pvalColNames==null)  ? 0 : pvalColNames.length;
             
-            int numStaticFields = 17; // read from DB; not same as number of displayed columns
+            int numStaticFields = 18; // read from DB; not same as number of displayed columns
             String fields = 	
-            	"tn.contigid, tn.uniprot_id, tn.e_value, tn.percent_id, " +
+            	"tn.contigid, tn.uniprot_id, tn.bit_score, tn.e_value, tn.percent_id, " + // CAS331 add bitscore
             	"tn.ctg_start,  tn.ctg_end, tn.prot_start, tn.prot_end, tn.alignment_len," +
             	"tn.filtered, tn.blast_rank, " + 
             	"uq.description, uq.species, uq.dbtype, uq.taxonomy, uq.length, ct.consensus_bases ";
@@ -2826,37 +2825,37 @@ public class BasicHitFilterPanel extends JPanel {
             ResultSet rset = dbc.executeQuery( strQuery ); 
             resultList = new ArrayList<Object []> ();
            
-	    		int cnt=0;
+	    	int cnt=0;
             while( rset.next() )
-	    		{	
-            		int cutoff = queryPanel.getAlign();
-            		if (cutoff>0) {
-            			int hlen = rset.getInt(16);
-            			int halign = Math.abs(rset.getInt(8)-rset.getInt(7)+1);
-            			double align = ((double)halign/(double)hlen)*100.0;   			
-            			if (align < (double) cutoff) continue;
-            		}
-	    	        Object [] readBuffer = new Object[numStaticFields + numSetFields];
-	    	        
-	    	        for (int i=0; i<numStaticFields; i++) {
-	    	        		readBuffer[i] = rset.getString( i+1 );
-	    	        }	
-	    			for(int x=0; x<numSetFields; x++) {
-	    				readBuffer[numStaticFields + x] = rset.getDouble(numStaticFields+x+1);
-	    			}
-	    			resultList.add(readBuffer);
-	    			cnt++;
-	    			if (cnt==1000) {
-	    				theParentTab.setStatus("Loaded " + resultList.size() + " from database...");
-	    				cnt=0;
-	    			}
-	    		}
+    		{	
+        		int cutoff = queryPanel.getAlign();
+        		if (cutoff>0) {
+        			int hlen = rset.getInt(16);
+        			int halign = Math.abs(rset.getInt(8)-rset.getInt(7)+1);
+        			double align = ((double)halign/(double)hlen)*100.0;   			
+        			if (align < (double) cutoff) continue;
+        		}
+    	        Object [] readBuffer = new Object[numStaticFields + numSetFields];
+    	        
+    	        for (int i=0; i<numStaticFields; i++) {
+    	        		readBuffer[i] = rset.getString( i+1 );
+    	        }	
+    			for(int x=0; x<numSetFields; x++) {
+    				readBuffer[numStaticFields + x] = rset.getDouble(numStaticFields+x+1);
+    			}
+    			resultList.add(readBuffer);
+    			cnt++;
+    			if (cnt==1000) {
+    				theParentTab.setStatus("Loaded " + resultList.size() + " from database...");
+    				cnt=0;
+    			}
+    		}
             rset.close(); dbc.close();
-	    		return resultList;
+	    	return resultList;
         }
         catch(Exception e) {
         		ErrorReport.reportError(e,"Error: reading database for Basic Hit Query");
-        		throw e;
+        		return null;
         }
 	}
 	public String loadFromDatabaseHitSeq(String hitID){

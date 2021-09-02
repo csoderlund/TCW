@@ -15,7 +15,6 @@ import java.util.TreeMap;
 import java.util.ArrayList;
 
 import sng.database.Schema;
-import sng.database.Version;
 import sng.dataholders.BlastHitData;
 import sng.dataholders.ContigData;
 import sng.dataholders.SequenceData;
@@ -202,7 +201,13 @@ public class CoreDB {
        	   mDB.tableDrop("pja_uniprot_go");
        	   mDB.tableDrop("go_term2term");
        	   mDB.tableDrop("go_graph_path");
-          
+       	   
+       	   // CAS331 Created during prune from command-line
+       	   mDB.tableDrop(DoUniPrune.tmp_hit);
+    	   mDB.tableDrop(DoUniPrune.tmp_seq);
+    	   if (mDB.tableColumnExists("assem_msg", "prune"))
+    		   mDB.executeUpdate("update assem_msg set prune = -1");
+    	   
            if (prt) Out.PrtSpMsg(0, "Complete deleting annotation");
            return true;
        }
@@ -567,14 +572,6 @@ public class CoreDB {
      * Static methods
      */
 	
-	// called from DoORF and DoUniProt.processAllDBblastFiles
-	static public void updateAnnoVer(DBConn mDB) {
-		try {
-			mDB.executeUpdate("update schemver set annoVer='" +  Version.strTCWver + "'");
-			mDB.executeUpdate("update schemver set annoDate='" + Version.strRelDate + "'");
-		}
-		catch (Exception e) {ErrorReport.reportError(e, "Updating annotation verion");}
-	}
 	// called by DoUniProt (why does it need sequence?) and doHomology 
 	static public ContigData loadContigData (DBConn mDB, String ctgName ) 
    {
@@ -655,12 +652,13 @@ public class CoreDB {
 	
 	public int getAID() { return 1; }
 	public boolean isAAtcw() { return isAAtcw;}
-	public void setIsAAtcw() {
+	public boolean setIsAAtcw() {
 	    try {
 	        if (mDB.tableColumnExists("assem_msg", "peptide")) isAAtcw=true;
 	        else isAAtcw=false;
+	        return isAAtcw;
 	    }
-	    catch (Exception e) {ErrorReport.reportError(e, "Checking to see if proteing database");}
+	    catch (Exception e) {ErrorReport.reportError(e, "Checking to see if proteing database"); return false;}
 	}
 	public DBConn getConn () {return mDB;}
 	/****************** instance variables *****************************/

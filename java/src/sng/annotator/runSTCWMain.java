@@ -15,6 +15,7 @@ import util.database.HostsCfg;
 import util.file.FileHelpers;
 import util.methods.ErrorReport;
 import util.methods.Out;
+import util.methods.TimeHelpers;
 
 /**
  * Main routine - called from execAnno or from runSingleTCW on annotate 
@@ -33,17 +34,23 @@ public class runSTCWMain
 	public static boolean bDelAnno = false; // set to delete annotation
 	
 	private static boolean bdoAnno=true; // don't print parameters 
-	private static boolean doGO = false;
+	private static boolean doGO = false, doPrune=false;
 	private static boolean doDeleteAnnoOnly=false, doAnnoDBParams=false, doDeletePairwise=false;
 	
 	public static final String optGO =  "-g -n";		// used by the manager for GO only
 	public static final String optORF = "-r -n";		// used by the manager for ORF only
+	public static final String optRM  = "-s -n";		// used by the manager for Hit Rm only
 	
 	// if -r, then the following 5 can be set
 	private static int ORF_Type_Param=0, ORF_Transcoder_Param=0, ORF_FIND_DUPS=0; 
 	private static int ORF_Seq_Cov= -1, ORF_Hit_Cov= -1;
 	
-	private static int cover1=0, cover2=0; // if -o overview, then -o1 and -o2 can be set.
+	// if -o overview, then -o1 and -o2 can be set.
+	private static int cover1=0, cover2=0; 
+	
+	// if -p, then the following can be set
+	private static int pruneType=-1, nPrtPrune=0;
+	private static boolean bRestore=false;
 	
 	public static void main(String[] args)
 	{   
@@ -57,7 +64,7 @@ public class runSTCWMain
 				|| hasOption(args, "-help") 
 				|| hasOption(args, "help")
 				|| args.length == 0) {
-			Usage_exit();
+			usage_exit();
 		}
 		projName = args[0]; 
 		projPath = getCurProjPath();
@@ -69,7 +76,7 @@ public class runSTCWMain
 		long startTime = Out.getTime();
 		
 		if (args.length>1) {
-			checkArgs(args);
+			usage_setArgs(args);
 			if (contMsg!=null) 
 				if (!yesNo(contMsg)) Out.die("Terminate");
 		}
@@ -83,15 +90,15 @@ public class runSTCWMain
 		blastObj = new DoBlast(); 
 		if (noPrompt) blastObj.setNoPrompt();
 
-	// 2. read LIB.cfg and sTCW.cfg
-		cfgObj = new CfgAnno();
-		if (! cfgObj.load(bdoAnno, doRecalcORF, doGO, blastObj, annoObj, uniObj, orfObj)) { 
+	// 2. read LIB.cfg and sTCW.cfg and set params in respective object
+		cfgObj = new CfgAnno(); 
+		if (! cfgObj.load(bdoAnno, doRecalcORF, doGO, doPrune, blastObj, annoObj, uniObj, orfObj)) { 
 			Out.close();		  // don't die, just return
 			return;
 		}
 		
 		// 3. create log file
-		if (bdoAnno || doGO || doRecalcORF) {
+		if (bdoAnno || doGO || doRecalcORF || doPrune) {
 			Out.createLogFile(getCurProjPath(), Globals.annoFile);
 			Out.PrtDateMsg("\n--------------- Annotate Sequences ---------------");
 		}
@@ -106,7 +113,7 @@ public class runSTCWMain
 			s.update(); // CAS314 was checking ifCurrent(), but then cannot 'force' update for testing
 						
 			sqlObj = new CoreDB(mDB, bdoAnno, stcwDB, stcwID);
-			sqlObj.setIsAAtcw();
+			isAAstcwDB = sqlObj.setIsAAtcw();
 			sqlObj.setLongestSeq();
 		}
 		catch (Exception e) {ErrorReport.die(e, "Error creating database connection for " + stcwDB);}
@@ -132,7 +139,12 @@ public class runSTCWMain
 			}
 			
 			if (doGO) {
-				checkGODB(true);
+				checkGODB(true, true);
+			}
+			else if (doPrune) {
+				if (!checkGODB(false, false))
+					if (!yesNo("GO database not defined -- cannot use to determine best -- continue?"))
+						System.exit(0);
 			}
 			else if (bdoAnno) // not just doing GO or summary
 			{
@@ -142,9 +154,9 @@ public class runSTCWMain
 					Out.die(" failed testing files");
 				}
 				boolean firstAnno = sqlObj.isFirstAnno();
-				boolean doAnnoDB = (blastObj.numDB() > 0) ? true : false;
+				boolean doAnnoDB = 	(blastObj.numDB() > 0) ? true : false;
 				boolean doSelf =    blastObj.doPairs();
-				boolean hasGO = sqlObj.existsGO();
+				boolean hasGO = 	sqlObj.existsGO();
 				
 				if (!firstAnno && !doAnnoDB && !doSelf) { 
 					Out.Print("No annoDB or pairs annotation to be done\n");
@@ -159,8 +171,10 @@ public class runSTCWMain
 				
 				doGO = false;
 				if (doAnnoDB || !hasGO) { 
-					Out.Print("Check GO database ");
-					if (checkGODB(false)) doGO=true;
+					if (!goNoAdd) { // CAS331
+						Out.Print("Check GO database ");
+						if (checkGODB(false, true)) doGO=true;
+					}
 				}
 		
 				Boolean ans = yesNo("Please confirm above parameters. Continue with annotation? ");
@@ -181,7 +195,7 @@ public class runSTCWMain
 			}
 		
 		if (doAnnoDBParams) {
-			if (!cfgObj.cfgDBParams()) {
+			if (!cfgObj.cfgDBParams(true)) {
 				finish();
 				return; // weren't read earlier because bdoAnno=false
 			}
@@ -189,7 +203,7 @@ public class runSTCWMain
 		}
 		
 		boolean successAnno=true; 
-		if (bdoAnno || doRecalcORF || doGO) updateState(false); // set null in case interrupt
+		if (bdoAnno || doRecalcORF || doGO || doPrune) updateState(false); // set null in case interrupt
 		
 		if (bdoAnno || doRecalcORF) {
 			BlastHitData.startHitWarnings("Warnings for " + projName);
@@ -200,15 +214,20 @@ public class runSTCWMain
 		}
 		if (successAnno) {
 			String msg=null;
-			if (doGO) {
-				new DoGOs(sqlObj,godb, goSlimSubset, goSlimOBOFile); // dies if anything fails
+			if (doPrune) {
+				int pt = (pruneType!=-1) ? pruneType : uniObj.getPrune();
+				new DoUniPrune(mDB, godbName, isAAstcwDB, uniObj.getUseSP(), 
+						uniObj.getFlank(), pt, bRestore, nPrtPrune); // CAS331
+			}
+			else if (doGO) {
+				new DoGOs(sqlObj,godbName, goSlimSubset, goSlimOBOFile); // dies if anything fails
 			}
 			else if (bdoAnno && sqlObj.existsGO()) 
 				msg ="GO annotations exist. Update with 'Exec GO only' if new UniProt annoDBs were added.";	
 			
 			// 8. Create Overview -- file is written in overview.java 
 			try {
-				if (bdoAnno || doRecalcORF || doGO) updateState(true); // CAS319 add here
+				if (bdoAnno || doRecalcORF || doGO || doPrune) updateState(true); // CAS319 add here
 				
 				Overview viewObj;
 				if (cover1>0 || cover2>0) viewObj = new Overview(mDB, cover1, cover2);
@@ -237,7 +256,7 @@ public class runSTCWMain
 		return true;
 	}
 	/*********************************************
-	 * These were all over the place.
+	 * CAS319 These were all over the place. Used in Overview only
 	 */
 	static private void updateState(boolean bSuccess) {
 		try {
@@ -255,13 +274,14 @@ public class runSTCWMain
 	/******************************************************
 	 * set options/actions
 	 */
-	private static void checkArgs(String [] args) {		
+	private static void usage_setArgs(String [] args) {		
 		HashSet <String> flags = new HashSet <String> (); 
-		flags.add("-n"); flags.add("-d");  flags.add("-b");
-		flags.add("-x"); flags.add("-q"); flags.add("-p"); flags.add("-g");
+		flags.add("-n"); flags.add("-d");  
+		flags.add("-p"); flags.add("-pt"); flags.add("-pr"); flags.add("-pp");
+		flags.add("-g");
 		flags.add("-o"); flags.add("-o1"); flags.add("-o2");
-		flags.add("-r"); flags.add("-t"); flags.add("-f"); 
-		flags.add("-hc");flags.add("-sc");
+		flags.add("-r"); flags.add("-t");  flags.add("-f"); flags.add("-hc");flags.add("-sc"); 
+		flags.add("-s"); flags.add("-x");  flags.add("-b");
 		
 		for (int i=0; i<args.length; i++) {
 			if (args[i].startsWith("-")) {
@@ -286,12 +306,12 @@ public class runSTCWMain
 			if (hasOption(args, "-o1")) {
 				cover1 = getOptionNum(args, "-o1");
 				if (cover1<0) Out.die("-o1 requires an integer following this flag");
-				else          Out.prt("Cover1: " + cover1);
+				else          Out.prt("   Cover1: " + cover1);
 			}
 			if (hasOption(args, "-o2")) {
 				cover2 = getOptionNum(args, "-o2");
 				if (cover2<0) Out.die("-o2 requires an integer following this flag");
-				else          Out.prt("Cover2: " + cover1);
+				else          Out.prt("   Cover2: " + cover1);
 			}
 			bdoAnno=false; 
 		}
@@ -305,29 +325,46 @@ public class runSTCWMain
 			bdoAnno=false;
 		    doDeleteAnnoOnly = true;
 		}	
-		else if(hasOption(args, "-q")) {
-			contMsg = "Delete annotation and reload existing hit files - continue?";
-			noPrompt = true;	
-		}
-		else if (hasOption(args, "-p")) {
+		else if (hasOption(args, "-s")) {
 			contMsg = "Delete pairwise - continue?";
 			bdoAnno=false;
 			doDeletePairwise = true;
 		}
-		else if(hasOption(args, "-g")) { // GO only -- used from runSingleTCW
+		else if(hasOption(args, "-g")) { // used from runSingleTCW also
 		    contMsg = "Compute GOs only - continue?";
 			bdoAnno=false;
 			doGO = true;
 		}
-		else if (hasOption(args, "-r")) {
+		else if(hasOption(args, "-p")) { // used from runSingleTCW also
+		    contMsg = "Prune redundant hits - continue?";
+		    if (hasOption(args, "-pt")) {
+				pruneType = getOptionNum(args, "-pt");
+				
+				if (pruneType==1)      Out.prt("   Prune hits based on same alignment values and description");
+				else if (pruneType==2) Out.prt("   Prune hits based on same description");
+				else if (pruneType==0) Out.prt("   No pruning - only restore if -pr is set"); // only restore
+				else Out.die("-pt requires an integer between 0 and 2");
+			}
+			if (hasOption(args, "-pr")) {
+				Out.prt("   Save/restore hit tables");
+				bRestore=true;
+			}
+			if (hasOption(args, "-pp")) {
+				nPrtPrune = getOptionNum(args, "-pp");
+				Out.prt("   Print first " + nPrtPrune + " pruned hits per annoDB");
+			}
+			bdoAnno=false;
+			doPrune = true;
+		}
+		else if (hasOption(args, "-r")) { // used from runSingleTCW also
 			contMsg = "Recalculate ORFs - continue?";
 			bdoAnno=false;
 			doRecalcORF = true; 
 			
 			ORF_Type_Param = getOptionNum(args,"-r");
 			if (ORF_Type_Param>0) {
-				if (ORF_Type_Param==1)      Out.prt("Use longest ORF ");
-				else if (ORF_Type_Param==2) Out.prt("Use Best Markov Score ");
+				if (ORF_Type_Param==1)      Out.prt("   Use longest ORF ");
+				else if (ORF_Type_Param==2) Out.prt("   Use Best Markov Score ");
 				else {
 					Out.prt("Invalid ORF type " + ORF_Type_Param);
 					ORF_Type_Param=0;
@@ -335,47 +372,52 @@ public class runSTCWMain
 			}
 			if (hasOption(args, "-t")) {
 				ORF_Transcoder_Param=1;
-				Out.prt("Use TransDecoder Base Frequency calculation");
+				Out.prt("   Use TransDecoder Base Frequency calculation");
 			}
 			if (hasOption(args, "-f")) {
 				ORF_FIND_DUPS=1;
-				Out.prt("Filter highly similar sequences");
+				Out.prt("   Filter highly similar sequences");
 			}
 			if (hasOption(args, "-sc")) {
 				ORF_Seq_Cov = getOptionNum(args,"-sc");
 				if (ORF_Seq_Cov<0) Out.die("-sc requires an integer following this flag");
-				else               Out.prt("Sequence coverage: " + ORF_Seq_Cov);
+				else               Out.prt("   Sequence coverage: " + ORF_Seq_Cov);
 			}
 			if (hasOption(args, "-hc")) {
 				ORF_Hit_Cov = getOptionNum(args,"-hc");
 				if (ORF_Hit_Cov<0) Out.die("-hc requires an integer following this flag");
-				else               Out.prt("Hit coverage: " + ORF_Hit_Cov);
+				else               Out.prt("   Hit coverage: " + ORF_Hit_Cov);
 			}
 		}	
 	}
 	/**************************************************************/
-	private static void Usage_exit () {
+	private static void usage_exit () {
 		System.err.println(
 				"\nUsage:  execAnno <project_directory>  [optional flag]\n"
 				+ "  A project directory must be supplied and exist under /projects.\n" 
 				+ "  The project directory must contain the sTCW.cfg.\n"
+				+ "  -n no prompt (this can be used with any of the below, or with no other parameter)\n" +
+				"		It re-uses any existing files, does not delete anything\n" +
+				"		This is good for batch processing\n"
 				+ "Only one of the following may be selected:\n"
-				+ "  -o Regenerate Overview\n" 
-				+ "     -o1 <integer> set the 1st cover cutoff (default 50)\n"
-				+ "     -o2 <integer> set the 2nd cover cutoff (default 90)\n"
-				+ "  -q Delete annotation and reload all existing hit files (for runSingleTCW selected annoDBs).\n"
-				+ "  -b Enter search program params into database based on defaults (for hit reloads)\n" 
-				+ "  -g Add GO data only (annotation must already done)\n"
+				+ "  -g Add GO data only      (annotation must already be done)\n"
+				+ "  -p Prune redundant hits  (annotation must already be done)\n"
+				+ "        -pt <integer> 1 Alignment  2 Descriptions  (this overrides what is set in Options)\n"
+				+ "        -pp <integer> Print first n pruned seq-hits per annoDB\n"	
+				+ "        -pr Save/restore hit tables before processing    \n"
 				+ "  -r Recalculate ORFs\n"
 				+ "     followed by 1=Use Longest ORF, 2=Use Best Markov Score\n" 
 				// + "     -t Use TransDecoder Base Frequency calculation\n"
+				// + "     -f Filter similiar sequences\n"
 				+ "        -sc <integer> minimum hit coverage\n"
 				+ "        -hc <integer> minimum hit coverage\n"
+				+ "  -o Regenerate Overview\n" 
+				+ "     -o1 <integer> set the 1st cover cutoff (default 50)\n"
+				+ "     -o2 <integer> set the 2nd cover cutoff (default 90)\n"
 				+ "  -x Delete annotation\n"
-				+ "  -p Delete similar pairs\n"
-				+ "  -n no prompt (this can be used with any of the above, or with no other parameter)\n" +
-				"		re-uses any existing files, does not delete anything\n" +
-				"		this is good for batch processing\n"
+				+ "  -b Enter search program parameters into database based on defaults (for Hit Reload)\n"
+				+ "  -s Delete similar pairs\n"
+				
 				);
 			System.exit(-1);
 	}
@@ -404,16 +446,16 @@ public class runSTCWMain
 		return noInt;
 	}
 	
-	private static boolean checkGODB(boolean dieflag) // true die, false live
+	private static boolean checkGODB(boolean dieflag, boolean isGOflag) // true die, false live
 	{
 		boolean rc = true;
-		String godbName = godb;
+		
 		if (godbName == null || godbName.equals("")) {
 			rc = false;
 			Out.PrtSpMsg(1, "No GO database");
 			if (dieflag)  Out.die("Set GO database in runSingleTCW before working with GOs (see runSingleTCW annoDB Options)");
 		}
-		else{
+		else {
 			try{
 				Out.PrtSpMsg(1, "GO database = " + godbName);
 				
@@ -429,8 +471,6 @@ public class runSTCWMain
 					else 			Out.die("GO database " + godbName + " is not current");
 					return false;
 				}
-				// --- pre-v318 -------------------------//
-				fixOldGOdb(goDB); 
 				
 				// Verify GOdb
 				String upTab = Globalx.goUpTable;
@@ -441,38 +481,26 @@ public class runSTCWMain
 				}
 				if (!b) {
 					rc = false;
-					if (!dieflag) Out.PrtWarn("GO database " + godbName + " is not current; ignoring GO step\n");
-					else Out.die("GO database " + godbName + " is not current");
+					if (!dieflag) 	Out.PrtWarn("GO database " + godbName + " is not current; ignoring GO step\n");
+					else 			Out.die("GO database " + godbName + " is not current");
+					godbName = null;
 				} 
-				else Out.PrtSpMsg(2,"Add GOs");
+				else Out.PrtSpMsg(2,"Valid goDB exists '" + godbName + "'");
 				goDB.close();
 				
-				// GO Slims
-				if (goSlimSubset!=null && !goSlimSubset.equals(""))
-					Out.PrtSpMsg(2,"Add GO_slim_subset " + goSlimSubset);
-				else if (goSlimOBOFile!=null && !goSlimOBOFile.equals(""))
-					Out.PrtSpMsg(2,"Add GO_slim_OBO_file " + goSlimOBOFile);
-				Out.PrtSpMsg(1,"");
+				if (isGOflag) {// GO Slims		
+					if (goSlimSubset!=null && !goSlimSubset.equals(""))
+						Out.PrtSpMsg(2,"Add GO_slim_subset " + goSlimSubset);
+					else if (goSlimOBOFile!=null && !goSlimOBOFile.equals(""))
+						Out.PrtSpMsg(2,"Add GO_slim_OBO_file " + goSlimOBOFile);
+					Out.PrtSpMsg(1,"");
+				}
 			}
 			catch(Exception e){ErrorReport.die(e, "Fatal error reading GO database " + godbName);}		
 		}
 		return rc;
 	}
-	// CAS318 - old GOdb from mysql 
-	private static void fixOldGOdb(DBConn goDB) {
-		try {
-			if (goDB.tableExist("PAVE_Uniprot")) {
-				Out.prt("+++ Renaming TCW added tables to GOdb");
-				goDB.tableRename("PAVE_Uniprot",  Globalx.goUpTable);
-				goDB.tableRename("PAVE_metadata", Globalx.goMetaTable);
-				goDB.tableRename("PAVE_gotree",   Globalx.goTreeTable);
-			}
-			boolean isOBO = (goDB.tableColumnExists(Globalx.goMetaTable, "isOBO"));
-			if (!isOBO) 
-				Out.PrtWarn("GO Slims are not available with pre-v318 GOdbs");
-		}
-		catch(Exception e){ErrorReport.die(e, "Converting old GOdb to >=v318");}		
-	}
+	
 	/***************************************************************************
 	 * Returns paths to various directories and files used by the annotator
 	 ***************************************************************************/
@@ -514,10 +542,11 @@ public class runSTCWMain
 		blastObj.setSeqBlastPrefix(prefix);
 	}
 	 
-	static public void setGOparameters(String xgodb, String xgoSlimSubset, String xgoSlimOBOFile) {
-		godb = xgodb;
+	static public void setGOparameters(String xgodb, String xgoSlimSubset, String xgoSlimOBOFile, String xnoGO) {
+		godbName = xgodb;
 		goSlimSubset = xgoSlimSubset;
 		goSlimOBOFile  = xgoSlimOBOFile;
+		goNoAdd = (xnoGO.contentEquals("0")) ? false : true;
 	}
 	 /************************************************************************/
 	public static boolean yesNo(String question)
@@ -578,13 +607,14 @@ public class runSTCWMain
 	static public String getAssemblyID() {return stcwID;}
 	static public String getBlastDir() { return blastPath;}
 	static public int getCPUs() {return nCPUs;}
+	
 	// Annotation settings
-
 	static private HostsCfg hostsObj = null;
 	static private DBConn mDB = null;
 	static private String stcwDB = null;
 	static private String stcwID = null;
-	static String godb, goSlimSubset, goSlimOBOFile;
+	static private String godbName, goSlimSubset, goSlimOBOFile;
+	static private boolean isAAstcwDB=true, goNoAdd;
 	
 	static private DoBlast blastObj = null;
 	static private DoUniProt uniObj = null;

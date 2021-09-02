@@ -72,7 +72,7 @@ public class Share {
 			}
 			if (cntGap>0) gapMap+= "-" + cntGap; // gap at end
 			
-			if (gapMap!="") gapMap = gapMap.substring(1);        // remove first ':'
+			if (!gapMap.contentEquals("")) gapMap = gapMap.substring(1);   // remove first ':' CAS331 !=""
 			else gapMap="0";
 			
 			return gapMap;

@@ -47,7 +47,8 @@ enum DBVer
 	Ver56,  // Pairwise changes
 	Ver57,	// Changed libraryDE
 	Ver58,	// changed go evidence code
-	Ver59	// v326 add anno_msg and index on libraryDE
+	Ver59,	// v326 add anno_msg and index on libraryDE
+	Ver60	// v311 changed percent_sim from integer to double; add assem_msg.
 }
 
 /********************************************
@@ -64,13 +65,13 @@ enum DBVer
 public class Schema 
 {
 	DBConn mDB;
-	DBVer  dbVer =  DBVer.Ver59; // default to this, as in other cases we get it from the schemver table
+	DBVer  dbVer =  DBVer.Ver60; // default to this, as in other cases we get it from the schemver table
 	String dbVerStr = null;      // read from database
 	
-	DBVer  curVer = DBVer.Ver59; 
-	String curVerStr = "5.9";
-	public static String currentVerString() {return "5.9";}
-	public static DBVer  currentVer() 		{return DBVer.Ver59;}
+	DBVer  curVer = DBVer.Ver60; 
+	String curVerStr = "6.0";
+	public static String currentVerString() {return "6.0";}
+	public static DBVer  currentVer() 		{return DBVer.Ver60;}
 	
 	public Schema(DBConn db)
 	{
@@ -96,6 +97,7 @@ public class Schema
 			else if (dbVerStr.equals("5.7"))	dbVer = DBVer.Ver57;
 			else if (dbVerStr.equals("5.8"))	dbVer = DBVer.Ver58;
 			else if (dbVerStr.equals("5.9"))	dbVer = DBVer.Ver59;
+			else if (dbVerStr.equals("6.0"))	dbVer = DBVer.Ver60;
 			else System.err.println("Unknown version string " + dbVerStr + " in schemver table");
 		}
 		catch (Exception e){}
@@ -107,10 +109,8 @@ public class Schema
 	{
 		try {
 		ResultSet rs = mDB.executeQuery("show tables");
-		if (rs.first())
-		{
-			ErrorReport.die("Cannot create database: tables already exist!");	
-		}
+		if (rs.first()){ErrorReport.die("Cannot create database: tables already exist!");}
+		
 		String sql = 
 			"create table schemver ( " +
 			"	schemver tinytext, " +
@@ -133,6 +133,7 @@ public class Schema
 			"   norm tinytext default null," +		// CAS304 RPKM or TPM
 			"	anno_msg text default null," +		// CAS326 added in Overview - null in DoUniProt; no version update
 			"	spAnno boolean default false,"  +  	// if SP takes precedence for Best Anno - added in DoUniProt
+			"	prune tinyint default -1,"	+		// CAS331 add db6.0
 			"	orf_msg text default null,"  +  	// added in DoORF
 			"	gc_msg text default null,"  +  		// added in DoORF
 			"   go_msg text default null, "	+  		// name of goterm file, which contains date
@@ -394,7 +395,7 @@ public class Schema
 		"	 dbtype			varchar(10), " + 
 		"	 taxonomy 		varchar(20)," +			 
 		// search (e.g. blast) fields
-		" 	 percent_id		SMALLINT  unsigned, " +
+		" 	 percent_id		Float default 0, " +	// CAS331 change from tinyint (db6.0)
 		"	 alignment_len	INTEGER  unsigned, " +		
 		"	 mismatches		SMALLINT  unsigned, " +
 		"	 gap_open		SMALLINT  unsigned, " +
@@ -434,7 +435,7 @@ public class Schema
 		"DBID 			integer not null, " +  	// database this came from
 		"hitID 			varchar (30) UNIQUE, " + // UniProtID or ntID 
 		"repID			varchar (30), " +        // second id in Uniprot 			
-		"dbtype 			varchar (10), " +
+		"dbtype 		varchar (10), " +
 		"taxonomy 		varchar(20), " + 		
 		"isProtein 		boolean default 0, " +
 		"nUnitranHit    smallint unsigned default 0, " +  // nSeqHit		
@@ -443,12 +444,12 @@ public class Schema
 		"species 		varchar (100), " +
 		"length			integer default 0, " +  
 		"sequence 		MEDIUMTEXT, " +
-		"goBrief			text, " + // #GOs followed by the first 4
+		"goBrief		text, " + // #GOs followed by the first 4
 		"goList			text, " + // this can be quite long
 		"interpro		text, " +
 		"kegg	 		text, " +
 		"pfam 			text, " +
-		"ec 				text, " +
+		"ec 			text, " +
 		"INDEX(hitID), " +
 		// loading - the following caused virtually no slow down on Linux, and tried a small set on Mac with no slow
 		// generally speeds up Basic Hit search, but not always
@@ -464,7 +465,7 @@ public class Schema
 		"AID 			bigint not null, " +
 		"species 		varchar (100), " +     		
 		"count    		int unsigned default 0, " +  // total count
-		"nBestHits     int unsigned default 0, " +   // best eval  
+		"nBestHits      int unsigned default 0, " +   // best eval  
 		"nOVBestHits     int unsigned default 0, " + // best anno
 		"index(species) ) ENGINE=MyISAM;";
 		mDB.executeUpdate(sql);
@@ -689,23 +690,7 @@ public class Schema
 	 */
 	public static void createGOtables (DBConn db) {
 		try {
-			if (db.tableExists("go_info")) {
-				Out.PrtSpMsg(1, "Clearing database GO tables");
-				ResultSet rset = db.executeQuery("SHOW COLUMNS FROM go_info"); // CAS319 check before print warn
-		        while(rset.next()) {
-		        	String col = rset.getString(1);
-		        	if(col.startsWith(Globals.PVALUE)) {
-		        		Out.PrtWarn("Any GOseq values will be removed. You will need to re-execute GOseq");
-		            	break;
-		            }
-		        }
-				db.tableDrop("go_info");
-				db.tableDrop("go_term2term");
-				db.tableDrop("go_graph_path");
-				db.tableDrop("pja_uniprot_go");
-				db.tableDrop("pja_unitrans_go");
-				db.tableDrop("pja_gotree");
-			}
+			if (db.tableExists("go_info")) dropGOtables(db);
 			else Out.PrtSpMsg(1, "Create database GO tables");
 			
 			// are in schema above, but for backwards compatible
@@ -802,6 +787,36 @@ public class Schema
 		}
 		catch(Exception e){ErrorReport.die(e, "Error adding GO tables to schema");}
 	}
+	// CAS331 put all GO remove here
+	public static void dropGOtables(DBConn tcwDB) {
+		try {
+			Out.PrtSpMsg(1, "Clearing database GO tables");
+			ResultSet rset = tcwDB.executeQuery("SHOW COLUMNS FROM go_info"); // CAS319 check before print warn
+	        while(rset.next()) {
+	        	String col = rset.getString(1);
+	        	if(col.startsWith(Globals.PVALUE)) {
+	        		Out.PrtWarn("Any GOseq values will be removed. You will need to re-execute GOseq");
+	            	break;
+	            }
+	        }
+	        tcwDB.tableDrop("go_info");
+	        tcwDB.tableDrop("go_term2term");
+	        tcwDB.tableDrop("go_graph_path");
+	        tcwDB.tableDrop("pja_uniprot_go");
+	        tcwDB.tableDrop("pja_unitrans_go");
+	        tcwDB.tableDrop("pja_gotree");
+			
+	        // erase other GO data
+			tcwDB.executeUpdate("update pja_db_unique_hits " +
+					" set ec='', pfam='', kegg='', goList='', goBrief='', interpro=''");
+			tcwDB.executeUpdate("update contig set PIDgo=0");
+			tcwDB.executeUpdate("update pja_db_unitrans_hits set filter_gobest=0");
+			tcwDB.executeUpdate("update assem_msg set go_msg='', go_slim=''");
+			if (tcwDB.tableColumnExists("libraryDE", "goMethod"))
+				tcwDB.executeUpdate("update libraryDE set goMethod='', goCutoff=-1.0");
+		}
+		catch(Exception e){ErrorReport.die(e, "Cannot drop GO tables");}
+	}
 	/***************************************************************
 	 * XXX Version methods
 	 */
@@ -841,8 +856,23 @@ public class Schema
 		if (dbVer==DBVer.Ver56) updateTo57();
 		if (dbVer==DBVer.Ver57) updateTo58();
 		if (dbVer==DBVer.Ver58) updateTo59();
+		if (dbVer==DBVer.Ver59) updateTo60();
 	
 		return dbVerStr;
+	}
+	private void updateTo60() {  // CAS331
+		try {
+			Out.Print("Update to sTCW schema db6.0 for " + Version.sTCWhead);
+		
+			mDB.tableCheckAddColumn("assem_msg", "prune", "tinyint default -1", ""); 
+			mDB.tableCheckModifyColumn("pja_db_unitrans_hits", "percent_id", "float default 0.0");
+			
+			mDB.executeUpdate("update schemver set schemver='6.0'");
+			dbVer = DBVer.Ver60;
+			dbVerStr = curVerStr;
+			Out.Print("Finish update for sTCW Schema db6.0");
+		}
+		catch (Exception e) {ErrorReport.reportError(e, "Error on check schema v3.2.3");}	
 	}
 	private void updateTo59() {  // CAS326
 		try {
@@ -855,7 +885,7 @@ public class Schema
 				mDB.tableCheckAddColumn("go_info", "nDirect", "integer", "");
 			
 			mDB.executeUpdate("update schemver set schemver='5.9'");
-			dbVer = DBVer.Ver58;
+			dbVer = DBVer.Ver59;
 			dbVerStr = curVerStr;
 			Out.Print("Finish update for sTCW Schema db5.9");
 		}

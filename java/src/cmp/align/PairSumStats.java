@@ -212,7 +212,7 @@ public class PairSumStats {
 		  
 		    int npair = kcnt[0]+kcnt[1]+kcnt[2]+kcnt[3];
 		    String sz = String.format("%,d",npair);
-		    if (method!="")
+		    if (!method.contentEquals("")) // CAS331 was !=""
 		    	   infoStr =  pad +  "KaKs method: " + method + "    Pairs: " + sz + "\n"; 
 		    else 
 		    	   infoStr =  pad +  "KaKs pairs: " +  sz + "\n"; 

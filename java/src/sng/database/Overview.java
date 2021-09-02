@@ -257,6 +257,7 @@ public class Overview {
             String annoVer = mDB.executeString( "SELECT annoVer from schemver");
     		if (annoVer != null) { 							// CAS318 put this second
     			msg += "with sTCW v" + annoVer;
+    			// CAS331 this no longer happens - I think
     			if (!annoVer.equals(Version.strTCWver)) msg += "    Updated with v" + Version.strTCWver;
     		}
             lines.add(msg);
@@ -1372,6 +1373,15 @@ public class Overview {
 		        rset.close();
 		        
 		        makeTable(nCol, r, dfields, djust, lines); // finish database  
+		        
+		        // PRUNE
+		        if (mDB.tableColumnExists("assem_msg", "prune")) {
+	    			int prune = mDB.executeInteger( "Select prune from assem_msg");
+	    			if (prune<=0) lines.add("   Prune: none"); 
+	    			else if (prune==1) lines.add("   Prune: same alignment");
+	    			else if (prune==2) lines.add("   Prune: same description");
+		        }
+		        lines.add("");
 	    	} 
         		// GO 
     		if (mDB.tableColumnExists("assem_msg", "go_msg")) {

@@ -45,6 +45,9 @@ sequences.
 		<li><a href="#anno">Annotate Sequences</a>
 		<ul>
 			<li><a href="#dbs">AnnoDBs and UniProt</a>
+				<ul>
+				<li><a href="#opt">Options</a>
+				</ul>
 			<li><a href="#go">GO annotation (also InterPro, EC, Pfam, KEGG) </a>
 			<li><a href="#orf">ORF finder options</a>
 			<li><a href="#sim">Similar pairs</a>
@@ -118,7 +121,7 @@ Make sure your <ttx>HOSTS.cfg</ttx> is correct.
 
 		<a id="Fig1"></a>
 		<a  href="img/runSingleTCW.png">
-		<img src="img/runSingleTCW.png" alt="" style="border: 1px solid black; width: 500px"></a>
+		<img src="img/runSingleTCW.png" alt="" style="border: 1px solid black; width: 550px"></a>
 	</td></tr>
 </table>
 
@@ -169,8 +172,11 @@ the p-values for the GO.
 <ol>	
 	<li>Back on the main window, select <ttc>Check All</ttc> then <ttc>UnCheck All</ttc>, which unchecks all current annoDB entries.
 	<li>Select <ttc>Import AnnoDBs</ttc>, then select file <ttx>AnnoDBs_other.cfg</ttx>. The AnnoDB table will look like the figure below.
-	<li>Go to AnnoDB <ttc>Options</ttc> and select <ttc>Reset to Default</ttc> at the bottom, then <ttc>Keep</ttc>.
-	NOTE: If you add more UniProt databases, you will want to redo GO. But since none of these have GOs, the GO computation does not need to be redone.
+	<li>GOs: If you add more UniProt databases, you will want to redo GO. 
+	But since none of these annoDBs have GOs, the GO computation does not need to be redone; 
+	on the <ttc>Options</ttc> panel, select <ttl>Ignore on Annotate</ttl> (the "(Ign)" indicates
+	this has been set).
+	<li>Pairs: if you had previously computed pairs, go to <ttl>Options</ttl> and unselect this option.
 	<li>Select <ttc>Annotate</ttc>:
 </ol>
 <td>
@@ -493,9 +499,10 @@ are loaded, and the sum of the replicates for each condition are used to compute
 
 Three types of computation are performed:
 <ol>
-    <li>Basic annotation: GC content and ORFs
+    
     <li>Functional annotation: Compares one or more protein and/or nucleotide databases ("annoDBs") to each sequence in the database. If the annoDBs are
 from UniProt, add the associated GO annotations.
+	<li>Basic annotation: GC content and ORFs, where the ORF computation uses the functional annotation.
     <li>Similar pairs: Compute pairs of similar sequences within the input set.
 </ol>
 	
@@ -549,17 +556,45 @@ You must still provide the annoDB fasta file as
 it extracts the description and species from it.
 
 <!--  ======== Option =================== -->
+<a id=opt></a>
+<table style="width: 100%"><tr><td style="text-align: left">	
 <h3>Options</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
 <p>The <ttc>Options</ttc> button below the AnnoDBs table provides additional options for:
  <ul>
  <li>ANNOTATION  
-  <li>ORF FINDER
+ <li>ORF FINDER
  <li>SIMILAR PAIRS
  </ul>
  The second option and part of the third are not available for TCW database created from protein sequences. 
 
+<h4>ANNOTATIONS</h4>
+
+<ttl>Best Anno -- SwissProt preference</ttl>: A SwissProt hit will be assigned Best Anno over a non-SwissProt hit
+if its bit-score &gt; 0.7 * highest bit-score.
+
+<p><ttl>Remove {ECO...} from UniProt descripts</ttl>: Most UniProt descriptions have {ECO...} text, e.g.
+<pre><small>   &gt;sp|A0A096SRM5|708A6_MAIZE UDP-glycosyltransferase 708A6 {ECO:0000303|PubMed:24045947}
+</small></pre>
+Selecting this option will remove the {ECO..} portion, e.g. remove {ECO:0000303|PubMed:24045947}.
+
+<p><ttl>Prune hits</ttl>: See the Annotation Guide <a href="AnnoGuide.html#prune" class="ext" target="_blank">Prune Hits</a> section
+for a details discussion. The options are:
+
 <table class="tablex">
 <tr><td class="top">
+
+<table class=tablex>
+<tr><td class="top"><ttc>None</ttc><td>Keep all hits found using the search parameters provided on the <ttc>Add or Edit AnnoDB</ttc> panel.
+<tr><td class="top"><ttc>Alignment</ttc><td>If all alignment columns (e.g. bit-score, E-value, %similarity, etc) 
+are the same between two hits for a sequence, only keep the best.
+<tr><td class="top"><ttc>Description</ttc><td>For each annoDB, if two descriptions are exactly the same (case-insensitive) 
+the best hit will be retained. 
+</table>
+The <ttc>Alignment</ttc> and <ttc>Description</ttc> optionally use the number of GOs per hit to aid in determining the
+best hit to keep. Hence, you will want to enter the <ttl>GO database</ttl> name before running <ttc>Annotate</ttc>.
+
 <a id="go"></a>
 <h4>GO Database (GO, KEGG, EC, InterPro, Pfam annotations)</h4>	
 
@@ -567,33 +602,36 @@ See <a href=AnnoDBs.html class="ext" target="_blank">Annotation Setup</a> for cr
 Once the GO database is created, it can be selected, as shown on the right. Once selected, it will display
 the available GO Slim categories in the drop-down below it; alternatively, a OBO formatted file may be entered.  
   		
+<p><ttl>Ignore on Annotate</ttl>: 
+If you do not want <ttc>Annotate</ttc> to perform the GO annotation, select <ttl>Ignore on Annotate</ttl>. 
+The GO annotation can be added with the <ttc>GO Only</ttc> button.
+
 <a id="orf"></a>
-<h4>ORF finder options</h4>
+<h4>ORF FINDER</h4>
 GC content and ORF finding is always performed when <ttc>Annotate</ttc> is performed.
 The ORF finder uses the annoDB hits to aid in determining the best open reading frame. 
 See the <a href=ORF.html class="ext" target="_blank">ORF</a> document on the ORF finding options and
 details on how it works. If after annotation is complete, you just want to run the ORF finder, use
 the  <ttc>ORF only</ttc> option.
-  		
+  <td><a href="img/annoDBoptions.png"><img src="img/annoDBoptions.png" alt="" style="border: 1px solid black; width: 450px"></a>
+</tr>
+</table>		
+
 <a id="sim"></a>		
-<h4>Similar Pairs</h4>
+<h4>SIMILAR PAIRS</h4>
 The annotator can compare all sequences and determine the top N pairs, 
 where their alignments can be viewed in <ttp>viewSingleTCW</ttp>. Only the <ttp>blastp</ttp>
 option works for AA-STCWdbs.  
 
 <p>More information on all the above is provided on the <ttc>Annotation Options</ttc> panel Help page
-and <a href="AnnoGuide.html#update" class="ext" target="_blank">Update and Redo annotation</a>.
-
-<td><a href="img/annoDBoptions.png"><img src="img/annoDBoptions.png" alt="" style="border: 1px solid black; width: 400px"></a>
-</tr>
-</table>
+and <a href="AnnoGuide.html#update" class="ext" target="_blank">Annotate Details</a>.
 
 
 <a id=add></a>		
 <h3>Adding to annotation</h3>
 Additional annotation can be added at a later time; 
 see <a href="AnnoGuide.html#update" class="ext" target="_blank">Update and Redo annotation</a> 
-in the Annotation Guide.
+in the Annotate Details Guide.
 	
 <a id="loc"></a>
 <table style="width: 100%"><tr><td style="text-align: left">
@@ -656,8 +694,8 @@ are not removed.
 
 <table style="width: 500px">
 <tr><td class="top">The image on the right shows what can be removed. The checked 
-items are useful for redoing parts of the annotation, as discussed in
-<a href="AnnoGuide.html#update" class="ext" target="_blank">Update and Redo annotation</a>.
+items are useful for redoing parts of the annotation, as discussed in Annotate Guide
+<a href="AnnoGuide.html#update" class="ext" target="_blank">Update and Redo annotation</a> section.
 <td><a href="img/remove.png"><img src="img/remove.png" alt="" style="border: 1px solid black; width: 200px"></a>
 </table>
 

@@ -319,8 +319,8 @@ public class DoORF {
  
     	   	Out.PrtSpCntMsgZero(5, cntScov, "Failed seq coverage " + piSeqOlap);
 	   		Out.PrtSpCntMsgZero(5, cntHcov, "Failed hit coverage " + piHitOlap);
-	   		Out.PrtSpCntMsgZero(3, cntStop, "Hits with stops, find longest non-Stop region in hit");
-	   		Out.PrtSpCntMsgZero(3, cntBadMulti, "Ignore poor hit with multiframes ");
+	   		Out.PrtSpCntMsgZero(3, cntStop, "Hits with stops (find longest non-stop hit region)");
+	   		Out.PrtSpCntMsgZero(3, cntBadMulti, "Poor hit with multiframes (ignore) ");
 	   	 	Out.PrtSpMsg(2, "Complete load");
        }
        catch (Exception e) {
@@ -447,7 +447,7 @@ public class DoORF {
 			mDB.executeUpdate("update contig set gc_ratio=0.0," +
 				"o_frame=0, o_coding_start=0, o_coding_end=0, o_len=0,  " +
 				"o_coding_has_begin=0, o_coding_has_end=0, o_markov=0, " +
-				"p_eq_o_frame=0"); // p_frame (hit frame) entered in DoUniProt
+				"p_eq_o_frame=0"); // p_frame (hit frame); notes is cleared when read except for Multi-frame
 			
 			return true;
 		}
@@ -1279,8 +1279,7 @@ public class DoORF {
 				hasAnno=true;
 			}
 		
-			if (notes!=null && notes.trim()!="") 
-			{	
+			if (notes!=null && notes.trim()!="")  {	
 				if (notes.contains(Globals.RMK_MultiFrame)) // Multi is assigned in DoUniProt, all other remarks are assigned in DoORF.
 					remark = Globals.RMK_MultiFrame;
 			}
@@ -1348,18 +1347,18 @@ public class DoORF {
 			seqID = curSeqObj.seqID;
 			oFrame=f;
 			oStart=start;
-	        	oEnd=end;
-	        	hasATG=hs;
-	    		hasStop=he;
+	        oEnd=end;
+	        hasATG=hs;
+	    	hasStop=he;
     		
-	    		if (end==0) return; // dummy ORF
+	    	if (end==0) return; // dummy ORF
 	    		
 	    	// fix last coord if end
-    			if (end > 0 && (end-start+1)%3!=0) {
-	    			if (he) Out.PrtError("ORF coords !div/3: " + curSeqObj.name + " frame: " + f + " oStart: " 
-	    						+ start + " oEnd: " + end + " hasEnd: " + he + 
-	    						" orfLen: " + (end-start+1)  + " seqLen: " + curSeqObj.seqLen);
-	    			for (int i=0; i<4 && ((oEnd-oStart+1)%3!=0); i--, oEnd--); // or could be at the end
+    		if (end > 0 && (end-start+1)%3!=0) {
+    			if (he) Out.PrtError("ORF coords !div/3: " + curSeqObj.name + " frame: " + f + " oStart: " 
+    						+ start + " oEnd: " + end + " hasEnd: " + he + 
+    						" orfLen: " + (end-start+1)  + " seqLen: " + curSeqObj.seqLen);
+    			for (int i=0; i<4 && ((oEnd-oStart+1)%3!=0); i--, oEnd--); // or could be at the end
 			}
     			
 			oLen=oEnd-oStart+1;

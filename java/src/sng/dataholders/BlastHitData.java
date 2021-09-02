@@ -20,6 +20,7 @@ import java.io.*;
 import sng.annotator.LineParser;
 import util.database.Globalx;
 import util.methods.ErrorReport;
+import util.methods.Out;
 
 public class BlastHitData implements Serializable, Comparable <BlastHitData> 
 {

@@ -432,11 +432,8 @@ public class ManagerFrame extends JFrame {
 		tempRow.add(btnEditAnnoOptions);
 		tempRow.add(Box.createHorizontalStrut(5));
 		
-		lblGODB = new JLabel("");
-		lblSim = new JLabel("");
-		tempRow.add(lblGODB);
-		tempRow.add(Box.createHorizontalStrut(5));
-		tempRow.add(lblSim);
+		lblAnno = new JLabel("");
+		tempRow.add(lblAnno); // CAS331 merged lblGO and lblSim
 		mainPanel.add(tempRow);
 		
 		mainPanel.add(new JSeparator());
@@ -1394,7 +1391,7 @@ public class ManagerFrame extends JFrame {
 		try {
 			boolean isProjectSelected = (curManData != null);
 			if(!isProjectSelected) {
-				lblGODB.setText("");
+				lblAnno.setText("");
 				txtdbID.setText("");
 				txtdbName.setText("");
 				updateEnable(false);
@@ -1422,23 +1419,35 @@ public class ManagerFrame extends JFrame {
 		chkSkipAssembly.setSelected(curManData.getSkipAssembly());
 		chkUseTransName.setSelected(curManData.getUseTransNames());
 		
+		String lblMsg="";
 		boolean hasGO = (curManData.getGODB().length()>0);
 		if (hasGO) {
-			String msg = "GO: " + curManData.getGODB();
-			String slim = curManData.getSlimSubset();
-			if (!slim.equals(""))  msg += " (" + slim + ")";
-			else {
-				String file = curManData.getSlimFile();
-				if (!file.equals("")) msg += " (Slim File)";
-			}
-			lblGODB.setText(msg);
-		}
-		else lblGODB.setText("GO: none");
+			lblMsg = "GO: " + curManData.getGODB();
 			
-		int npairs = curManData.getAnnoObj().getDoPairs();
-		if (npairs>0) lblSim.setText("Pairs: " + npairs);
-		else lblSim.setText("");
+			String noGO = curManData.getNoGO();
+			if (noGO.contentEquals("1")) {
+				lblMsg += " (Ign)";
+			}
+			else {
+				String slim = curManData.getSlimSubset();
+				if (!slim.equals(""))  lblMsg += " (" + slim + ")";
+				else {
+					String file = curManData.getSlimFile();
+					if (!file.equals("")) lblMsg += " (Slim File)";
+				}
+			}
+		}
+		else lblMsg = "GO: none";
+			
+		String prune = curManData.getAnnoObj().getPruneType();
+		if (prune.contentEquals("0"))		lblMsg += "  Prune: none";
+		else if (prune.contentEquals("1")) 	lblMsg += "  Prune: align";
+		else if (prune.contentEquals("2")) 	lblMsg += "  Prune: desc";
 		
+		int npairs = curManData.getAnnoObj().getDoPairs();
+		if (npairs>0) 						lblMsg += "  Pairs: " + npairs;
+		
+		lblAnno.setText(lblMsg);
 		if (bEnable) updateEnable(true);
 	}
 	public void updateTrans(boolean bEnable) {
@@ -1883,7 +1892,7 @@ public class ManagerFrame extends JFrame {
 	private JButton btnUpdateGO = null;
 	private JButton btnUpdateORF = null;
 
-	private JLabel lblGODB = null;
+	private JLabel lblAnno = null;
 	private JLabel lblSim = null;
 	
 	//AnnoDB controls

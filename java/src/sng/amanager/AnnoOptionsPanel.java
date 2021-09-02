@@ -128,22 +128,14 @@ public class AnnoOptionsPanel extends JPanel {
 		btnHelp.setBackground(Globalx.HELPCOLOR);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				UserPrompt.displayHTMLResourceHelp(theManFrame, 
-						"Annotation Options Help", helpHTML);
+				UserPrompt.displayHTMLResourceHelp(theManFrame, "Annotation Options Help", helpHTML);
 			}
 		});
 		
-		JPanel buttonRow = new JPanel();
-		buttonRow.setLayout(new BoxLayout(buttonRow, BoxLayout.LINE_AXIS));
-		buttonRow.setAlignmentX(Component.CENTER_ALIGNMENT);
-		buttonRow.setBackground(Globalx.BGCOLOR);
-				
-		buttonRow.add(btnKeep);
-		buttonRow.add(Box.createHorizontalStrut(15));
-		buttonRow.add(btnDiscard);
-		buttonRow.add(Box.createHorizontalStrut(15));
-		buttonRow.add(btnResetDefaults);
-		buttonRow.add(Box.createHorizontalStrut(15));
+		JPanel buttonRow = Static.createRowCenterPanel();		
+		buttonRow.add(btnKeep);				buttonRow.add(Box.createHorizontalStrut(15));
+		buttonRow.add(btnDiscard);			buttonRow.add(Box.createHorizontalStrut(15));
+		buttonRow.add(btnResetDefaults);	buttonRow.add(Box.createHorizontalStrut(15));
 		buttonRow.add(btnHelp);
 		
 		buttonRow.setMaximumSize(buttonRow.getPreferredSize());
@@ -159,7 +151,7 @@ public class AnnoOptionsPanel extends JPanel {
 	}
 	// ORF
 	private void createOrfPanel(JPanel innerPanel) {
-		innerPanel.add(new JLabel("ORF FINDER: (See Help)"));
+		innerPanel.add(new JLabel("ORF FINDER:"));
 		innerPanel.add(Box.createVerticalStrut(10));
 		
 		JPanel row = Static.createRowPanel();
@@ -207,16 +199,15 @@ public class AnnoOptionsPanel extends JPanel {
 		row = Static.createRowPanel();
 		row.add(Box.createHorizontalStrut(INDENT_RADIO));
 		
-		chkTrainHit = new JRadioButton("Train with Best Hits (Rule 1)");
-		chkTrainHit.setBackground(Globalx.BGCOLOR);
-		chkTrainHit.addActionListener(new ActionListener() {
+		radTrainHit = new JRadioButton("Train with Best Hits (Rule 1)");
+		radTrainHit.setBackground(Globalx.BGCOLOR);
+		radTrainHit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				setTrain(true, false);
 			}	
 		});
-		row.add(chkTrainHit);
+		row.add(radTrainHit);
 		row.add(Box.createHorizontalStrut(1));
-		
 		
 		row.add(Box.createHorizontalStrut(5));
 		ntJLabel[4] = new JLabel("Minimum Set");
@@ -231,14 +222,14 @@ public class AnnoOptionsPanel extends JPanel {
 		// 1.2 Train from CDS
 		row = Static.createRowPanel();
 		row.add(Box.createHorizontalStrut(INDENT_RADIO));
-		chkTrainCDSfile = new JRadioButton("Train with CDS file");
-		chkTrainCDSfile.setBackground(Globalx.BGCOLOR);
-		chkTrainCDSfile.addActionListener(new ActionListener() {
+		radTrainCDSfile = new JRadioButton("Train with CDS file");
+		radTrainCDSfile.setBackground(Globalx.BGCOLOR);
+		radTrainCDSfile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				setTrain(false, true);
 			}	
 		});
-		row.add(chkTrainCDSfile);						row.add(Box.createHorizontalStrut(5));
+		row.add(radTrainCDSfile);						row.add(Box.createHorizontalStrut(5));
 
 		txtTrainCDSfile = Static.createTextField("", 25);
 		row.add(txtTrainCDSfile);						row.add(Box.createHorizontalStrut(5));
@@ -262,9 +253,9 @@ public class AnnoOptionsPanel extends JPanel {
 		row.add(btnTrainCDSfile);
 		
 		ButtonGroup group = new ButtonGroup(); // CAS327
-		group.add(chkTrainHit);
-		group.add(chkTrainCDSfile);
-		chkTrainHit.setSelected(true);
+		group.add(radTrainHit);
+		group.add(radTrainCDSfile);
+		radTrainHit.setSelected(true);
 		
 		innerPanel.add(row);
 		innerPanel.add(Box.createVerticalStrut(5));
@@ -274,7 +265,7 @@ public class AnnoOptionsPanel extends JPanel {
 	}
 	// Similarity
 	private void createSelfPanel(JPanel innerPanel) {
-		innerPanel.add(new JLabel("SIMILAR PAIRS: (see Help to supply blast tab files)"));
+		innerPanel.add(new JLabel("SIMILAR PAIRS: (see Help on how to supply tab files)"));
 		innerPanel.add(Box.createVerticalStrut(10));
 
 		// BlastN
@@ -370,9 +361,22 @@ public class AnnoOptionsPanel extends JPanel {
 		innerPanel.add(row);
 		innerPanel.add(Box.createVerticalStrut(10));
 		
+		row = Static.createRowPanel();	// CAS331 add prune; if change - change in Overview
+		row.add(Static.createLabel("Prune hits")); 	row.add(Box.createHorizontalStrut(5));
+		radPrNone = Static.createRadioButton("None", false);
+		row.add(radPrNone);
+		radPrAlign = Static.createRadioButton("Alignment", false);
+		row.add(radPrAlign);					row.add(Box.createHorizontalStrut(5));
+		radPrDesc = Static.createRadioButton("Description", false);
+		row.add(radPrDesc);						row.add(Box.createHorizontalStrut(5));
+		
+		ButtonGroup group = new ButtonGroup(); // CAS327
+		group.add(radPrDesc); group.add(radPrAlign); group.add(radPrNone);
+		innerPanel.add(row);
+		innerPanel.add(Box.createVerticalStrut(20));
+		
 		row = Static.createRowPanel();
-		row.add(new JLabel("GO Database"));
-		row.add(Box.createHorizontalStrut(11));
+		row.add(new JLabel("GO Database"));		row.add(Box.createHorizontalStrut(11));
 		
 		cmbGODB = new ButtonComboBox();
 		cmbGODB.addItem("         None         ");
@@ -380,31 +384,36 @@ public class AnnoOptionsPanel extends JPanel {
 		cmbGODB.setMaximumSize(cmbGODB.getPreferredSize());
 		cmbGODB.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				boolean b=false;
 				if (cmbGODB.getSelectedIndex()!=0) {
+					b=true;
 					setGOSlim(true, false);
 					findSetSlims("");
 				}
 				else setGOSlim(false, false);
+				chkNoGO.setEnabled(b);
 			}
 		});
-		row.add(cmbGODB);
+		row.add(cmbGODB);	row.add(Box.createHorizontalStrut(35)); 
+		
+		chkNoGO = Static.createCheckBox("Ignore on Annotate", false);// CAS331 add 
+		row.add(chkNoGO);
+		
 		innerPanel.add(row);
 		innerPanel.add(Box.createVerticalStrut(5));
 		
 		row = Static.createRowPanel();
 		
 		// Slims from GO
-		chkSlimSubset = new JRadioButton("Slims from GO database");
-		chkSlimSubset.setBackground(Globalx.BGCOLOR);
-		chkSlimSubset.addActionListener(new ActionListener() {
+		radSlimSubset = new JRadioButton("Slims from GO database");
+		radSlimSubset.setBackground(Globalx.BGCOLOR);
+		radSlimSubset.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				setGOSlim(true, false);
 				findSetSlims("");
 			}	
 		});
-		
-		row.add(chkSlimSubset);
-		row.add(Box.createHorizontalStrut(10));
+		row.add(radSlimSubset);	row.add(Box.createHorizontalStrut(10));
 		
 		cmbSlimSubset = new ButtonComboBox();
 		cmbSlimSubset.addItem("         None         ");
@@ -417,14 +426,14 @@ public class AnnoOptionsPanel extends JPanel {
 		
 		// Slims from file
 		row = Static.createRowPanel();
-		chkSlimOBOFile = new JRadioButton("Slims from OBO File");
-		chkSlimOBOFile.setBackground(Globalx.BGCOLOR);
-		chkSlimOBOFile.addActionListener(new ActionListener() {
+		radSlimOBOFile = new JRadioButton("Slims from OBO File");
+		radSlimOBOFile.setBackground(Globalx.BGCOLOR);
+		radSlimOBOFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				setGOSlim(false, true);
 			}	
 		});
-		row.add(chkSlimOBOFile);
+		row.add(radSlimOBOFile);
 		
 		txtSlimOBOFile = Static.createTextField("", 25);
 		row.add(txtSlimOBOFile);						row.add(Box.createHorizontalStrut(5));
@@ -501,32 +510,32 @@ public class AnnoOptionsPanel extends JPanel {
 	}
 	
 	private void setTrain(boolean bHits, boolean bCDS) {
-		chkTrainHit.setSelected(bHits);
+		radTrainHit.setSelected(bHits);
 		
-		chkTrainCDSfile.setSelected(bCDS);
+		radTrainCDSfile.setSelected(bCDS);
 		txtTrainCDSfile.setEnabled(bCDS);
 		btnTrainCDSfile.setEnabled(bCDS);
 	}
 	private void setGOSlim(boolean x, boolean y) {
 		if (x==true || y==true) {
-			chkSlimSubset.setEnabled(true);
+			radSlimSubset.setEnabled(true);
 			cmbSlimSubset.setEnabled(x);
-			chkSlimSubset.setSelected(x);
+			radSlimSubset.setSelected(x);
 			
-			chkSlimOBOFile.setEnabled(true);
+			radSlimOBOFile.setEnabled(true);
 			txtSlimOBOFile.setEnabled(y);
 			btnSlimOBOFile.setEnabled(y);
-			chkSlimOBOFile.setSelected(y);	
+			radSlimOBOFile.setSelected(y);	
 		}
 		else {
-			chkSlimSubset.setEnabled(false);
+			radSlimSubset.setEnabled(false);
 			cmbSlimSubset.setEnabled(false);
-			chkSlimSubset.setSelected(false);
+			radSlimSubset.setSelected(false);
 			
-			chkSlimOBOFile.setEnabled(false);
+			radSlimOBOFile.setEnabled(false);
 			txtSlimOBOFile.setEnabled(false);
 			btnSlimOBOFile.setEnabled(false);
-			chkSlimOBOFile.setSelected(false);
+			radSlimOBOFile.setSelected(false);
 			
 		}
 	}
@@ -580,16 +589,24 @@ public class AnnoOptionsPanel extends JPanel {
 				curManData.setGODB("");
 			}
 		}
+		if (curManData.getNoGO().contentEquals("0")) chkNoGO.setSelected(false); //CAS331
+		else 										 chkNoGO.setSelected(true);
+		
 		
 		String file="";
 		ManagerData.AnnoData annoObj = curManData.getAnnoObj();
 		
 		// Best Anno
-		if (annoObj.getSPpref().equals("1")) chkSPpref.setSelected(true);
-		else chkSPpref.setSelected(false);
+		if (annoObj.getSPpref().equals("1")) 	chkSPpref.setSelected(true);
+		else 									chkSPpref.setSelected(false);
 		
-		if (annoObj.getRmECO().equals("1")) chkRmECO.setSelected(true);
-		else chkRmECO.setSelected(false);
+		if (annoObj.getRmECO().equals("1")) 	chkRmECO.setSelected(true);
+		else 									chkRmECO.setSelected(false);
+		
+		String pruneType = annoObj.getPruneType();
+		if (pruneType.contentEquals("1")) 		radPrAlign.setSelected(true); // CAS331
+		else if (pruneType.contentEquals("2")) 	radPrDesc.setSelected(true);
+		else 									radPrNone.setSelected(true);
 		
 		// Similarity; 
 		chkSelfN.setSelected(annoObj.getSelfBlastn());
@@ -641,11 +658,18 @@ public class AnnoOptionsPanel extends JPanel {
 		if(cmbGODB.getSelectedIndex() != 0) {
 			curManData.setGODB(cmbGODB.getSelectedItem().trim());
 			
-			if (chkSlimSubset.isSelected() && cmbSlimSubset.getSelectedIndex()!=0) 
+			if (radSlimSubset.isSelected() && cmbSlimSubset.getSelectedIndex()!=0) 
 				curManData.setSlimSubset(cmbSlimSubset.getSelectedItem());
 			else 
-				if (chkSlimOBOFile.isSelected() && txtSlimOBOFile.getText().trim()!="") 
+				if (radSlimOBOFile.isSelected() && txtSlimOBOFile.getText().trim()!="") 
 					curManData.setSlimFile(txtSlimOBOFile.getText());
+			
+			if (chkNoGO.isSelected()) 	curManData.setNoGO("1"); //CAS331
+			else 						curManData.setNoGO("0");
+		}
+		else if (!radPrNone.isSelected()) { // CAS331
+			String msg = "If you have created the GO database, please define it; it can help with pruning";
+			JOptionPane.showMessageDialog(this, msg, "No GOdb", JOptionPane.PLAIN_MESSAGE);
 		}
 		
 		String x;
@@ -657,12 +681,17 @@ public class AnnoOptionsPanel extends JPanel {
 		if (chkRmECO.isSelected()) annoObj.setRmECO("1"); 
 		else annoObj.setRmECO("0");
 		
+		
+		if (radPrAlign.isSelected()) 		annoObj.setPruneType("1");// CAS331
+		else if (radPrDesc.isSelected()) 	annoObj.setPruneType("2"); 
+		else 								annoObj.setPruneType("0");
+		
 		if (chkAltStart.isSelected()) annoObj.setORFaltStart("1");
 		else annoObj.setORFaltStart("0");
 		
 		x = txtHitEval.getText();
 		if (Static.isDouble("Hit E-value", x)) annoObj.setORFhitEval(x);
-		else rcMsg("Hit E-value", "Must be double '" + x + "'");
+		else return rcMsg("Hit E-value", "Must be double '" + x + "'");
 		
 		x = txtHitSim.getText();
 		if (Static.isInteger("Hit %Similarity", x)) annoObj.setORFhitSim(x);
@@ -676,7 +705,7 @@ public class AnnoOptionsPanel extends JPanel {
 		if (Static.isInteger("Minimum number of sequences used for training", x)) annoObj.setORFtrainMinSet(x);
 		else return rcMsg("Minimum Set", "Must be integer '" + x + "'");
 		
-		if (!chkTrainCDSfile.isSelected()) annoObj.setORFtrainCDSfile("");
+		if (!radTrainCDSfile.isSelected()) annoObj.setORFtrainCDSfile("");
 		else {
 			x = txtTrainCDSfile.getText();
 			if (x.contentEquals("") || x.contentEquals("-")) 
@@ -701,16 +730,16 @@ public class AnnoOptionsPanel extends JPanel {
 		annoObj.setSelfBlastpParams(txtSelfPargs.getText());
 		annoObj.setSelfBlastpPgm(cmbSearchPgms.getSelectedItem());
 		
-		if (chkSelfN.isSelected() || chkSelfX.isSelected() || chkSelfP.isSelected()) {
-			x = txtPairsLimit.getText();
-			int limit=0;
-			if(x.length() > 0) {
-				try {
-					limit = Integer.parseInt(x);
-					annoObj.setPairsLimit(limit);
-				}
-				catch (Exception e) {return rcMsg("Pair Limit", "Must be integer '" + x + "'");}
+		x = txtPairsLimit.getText();
+		int limit=0; //CAS331 set even if no selected
+		if(x.length() > 0) {
+			try {
+				limit = Integer.parseInt(x);
+				annoObj.setPairsLimit(limit);
 			}
+			catch (Exception e) {return rcMsg("Pair Limit", "Must be integer '" + x + "'");}
+		}
+		if (chkSelfN.isSelected() || chkSelfX.isSelected() || chkSelfP.isSelected()) {
 			if (limit==0) return rcMsg("Pair Limit",
 				"Cannot have 'Pairs limit' = 0 when a self blast option is selected.\n" +
 				"Either set a Pairs limit or uncheck all circles under SIMILAR PAIRS.");
@@ -723,10 +752,15 @@ public class AnnoOptionsPanel extends JPanel {
 	}
 	private void setDefaults() {
 		chkSPpref.setSelected(false);
-		cmbGODB.setSelectedIndex(0);
+		chkRmECO.setSelected(true);
+		
+		radPrNone.setSelected(true); //CAS331
+		
+		cmbGODB.setSelectedIndex(0); 
+		chkNoGO.setSelected(false); chkNoGO.setEnabled(false);//CAS331
 		cmbSlimSubset.setSelectedIndex(0);
 		
-		boolean bNTdb = !isAAdb; // everthing is disabled
+		boolean bNTdb = !isAAdb; // everything is disabled
 		if (mProps==null) mProps = new TCWprops(TCWprops.PropType.Annotate);
 		
 		// ORF
@@ -736,8 +770,8 @@ public class AnnoOptionsPanel extends JPanel {
 		
 		txtLenDiff.setEnabled(bNTdb);
 		
-		chkTrainHit.setEnabled(bNTdb); 
-		chkTrainCDSfile.setEnabled(bNTdb);
+		radTrainHit.setEnabled(bNTdb); 
+		radTrainCDSfile.setEnabled(bNTdb);
 		
 		txtTrainCDSfile.setEnabled(bNTdb);
 		
@@ -768,7 +802,7 @@ public class AnnoOptionsPanel extends JPanel {
 		boolean check = (bAlt.equals("1")) ? true : false;
 		chkAltStart.setSelected(check);
 		
-		chkTrainHit.setSelected(true);  // CAS327 was enabled
+		radTrainHit.setSelected(true);  // CAS327 was enabled
 		txtHitEval.setText(mProps.getProperty("Anno_ORF_hit_evalue")); 
 		txtHitSim.setText(mProps.getProperty("Anno_ORF_hit_sim")); 
 		
@@ -790,14 +824,16 @@ public class AnnoOptionsPanel extends JPanel {
 	// Best Anno
 	private JCheckBox chkSPpref = null;
 	private JCheckBox chkRmECO = null; // CAS305
+	private JRadioButton radPrDesc = null, radPrAlign = null, radPrNone = null;
 	
 	// GO
 	private ButtonComboBox cmbGODB = null;
+	private JCheckBox chkNoGO = null;
 	
-	private JRadioButton chkSlimSubset=null;
+	private JRadioButton radSlimSubset=null;
 	private ButtonComboBox cmbSlimSubset = null;
 	
-	private JRadioButton chkSlimOBOFile=null;
+	private JRadioButton radSlimOBOFile=null;
 	private JTextField txtSlimOBOFile = null;
 	private JButton   btnSlimOBOFile = null;
 	
@@ -806,7 +842,7 @@ public class AnnoOptionsPanel extends JPanel {
 	
 	private JTextField txtHitEval=null, txtHitSim=null, txtLenDiff=null;
 	
-	private JRadioButton  chkTrainHit=null, chkTrainCDSfile=null;
+	private JRadioButton  radTrainHit=null, radTrainCDSfile=null;
 	private JTextField 	  txtTrainMinSet=null;
 	
 	private JTextField txtTrainCDSfile = null;

@@ -465,6 +465,8 @@ public class ManagerData {
 	
 	public void setGODB(String dbName) { strGODB = dbName;  }
 	public String getGODB() { return strGODB; }
+	public void setNoGO(String b) {strNoGO=b;} // CAS331 add
+	public String getNoGO() {return strNoGO;}  // CAS331 add
 	public void setSlimSubset(String x) { strSlimSubset = x.trim();  }
 	public String getSlimSubset() { return strSlimSubset; }
 	public void setSlimFile(String x) { strSlimFile = x.trim(); }
@@ -716,6 +718,9 @@ public class ManagerData {
 		
 		public void setRmECO(String b) {strRmECO=b;} // CAS305
 		public String getRmECO() {return strRmECO;}
+		
+		public void setPruneType(String b) {strPruneType=b;} // CAS331
+		public String getPruneType() {return strPruneType;}
 
 	// similarity - the filename is fixed in CfgAnno
 		public void   setSelfBlastn(boolean b) 				{ bBlastn=b;}
@@ -781,6 +786,7 @@ public class ManagerData {
 		
 		private String strSPpref=Globals.pSP_PREF; // 0/1
 		private String strRmECO=Globals.pRM_ECO; // 0/1
+		private String strPruneType = Globals.pPRUNE; // 1,2,3 pruneType
 	}
 	public class AsmData {
 		public void setClique(String clique) { strClique = clique; }
@@ -1138,16 +1144,23 @@ public class ManagerData {
 				out.write("\n# Gene Ontology\n");
 				if(strGODB.length() > 0) {
 					out.write("Anno_GO_DB = " + strGODB + "\n");
+					
 					if (strSlimSubset.length()>0)
 						out.write("Anno_SLIM_SUBSET = " + strSlimSubset + "\n");
 					else if (strSlimFile.length()>0)
 						out.write("Anno_SLIM_OBOFile = " + strSlimFile + "\n");
+					
+					if (strNoGO.contentEquals("1")) out.write("Anno_No_GO = 1\n"); // CAS331
 				}
 				
 		// Anno DBs		
 				out.write("\n# AnnoDBs\n");
-				if (annoObj.strSPpref.equals("1")) out.write("Anno_SwissProt_pref = 1\n"); 
-				if (annoObj.strRmECO.equals("0"))  out.write("Anno_Remove_ECO = 0\n"); 
+				boolean sp=false;
+				if (annoObj.strSPpref.equals("1")) {out.write("Anno_SwissProt_pref = 1\n"); sp=true;}
+				if (annoObj.strRmECO.equals("0"))  {out.write("Anno_Remove_ECO = 0\n");  sp=true;}
+				if (!annoObj.strPruneType.equals(Globals.pPRUNE))  
+						{out.write("Anno_Prune_type = " + annoObj.strPruneType + "\n");  sp=true;}// CAS331
+				if (sp) out.write("\n");
 				
 				for(int x=0; x<getNumAnnoDBs(); x++) {
 					if(getAnnoDBAt(x) == null) continue;
@@ -1242,7 +1255,7 @@ public class ManagerData {
 		// Assembly/Instantiation
 			else if(key.equalsIgnoreCase("SKIP_ASSEMBLY")) {
 				if(value.equals("1"))	bSkipAssembly = true;
-				else	 bSkipAssembly = false;
+				else	 				bSkipAssembly = false;
 			}
 			else if(key.equalsIgnoreCase("USE_TRANS_NAME")) 	bUseTransNames = value.equals("1");
 			else if(key.equalsIgnoreCase("CLIQUE"))				asmObj.strClique = value;
@@ -1271,6 +1284,13 @@ public class ManagerData {
 				if (value.equals("1") || value.equals("0")) annoObj.strRmECO = value;
 				else {
 					Out.PrtWarn("Anno_Remove_ECO must be 0 or 1 - ignore line");
+					cntErrors++;
+				}
+			}
+			else if(key.equalsIgnoreCase("Anno_Prune_type")) { // CAS331
+				if (value.equals("1") || value.equals("0") || value.equals("2")) annoObj.strPruneType = value;
+				else {
+					Out.PrtWarn("Anno_Prune_type must be 0, 1 or 2 - ignore line");
 					cntErrors++;
 				}
 			}
@@ -1320,6 +1340,7 @@ public class ManagerData {
 			
 		// GO
 			else if(key.equalsIgnoreCase("Anno_GO_DB")) 		strGODB = value;
+			else if(key.equalsIgnoreCase("Anno_No_GO")) 		strNoGO = value; // CAS331 add
 			else if(key.equalsIgnoreCase("Anno_SLIM_SUBSET")) 	strSlimSubset = value;
 			else if(key.equalsIgnoreCase("Anno_SLIM_OBOFile")) 	strSlimFile = value;
 			else isAnnoDB=true;
@@ -1480,6 +1501,7 @@ public class ManagerData {
 	private boolean bSkipAssembly = true;
 	private boolean bUseTransNames = false;
 	private String strGODB = "";
+	private String strNoGO="0"; //CAS331
 	private String strSlimSubset="";
 	private String strSlimFile="";
 	

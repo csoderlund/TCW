@@ -114,9 +114,9 @@ public class CompileFrame extends JFrame {
 	private void checkExternal(String filePath) {
 		try {
 			if (!FileHelpers.fileExists(filePath))
-				Out.PrtError("file does not exists: " + filePath);
+				Out.PrtErr("file does not exists: " + filePath); //CAS331 no extra nl
 			else if (!FileHelpers.fileExec(filePath))
-				Out.PrtError("file is not executable: " + filePath);
+				Out.PrtErr("file is not executable: " + filePath);
 		}
 		catch(Exception e) {System.err.println("Check External"); }
 	}

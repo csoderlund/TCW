@@ -46,12 +46,13 @@ public class BlastArgs {
     
     // default diamond is --evalue 1e-03; which is ~equivalent with blast 1e-10
     // don't compress as the other search programs don't
-    // CAS314 removed diamond parameters, CAS330 put this back in for both the following:
-    private static final String diamondOpt =   "--max-hsps 1 --masking 0 --top 20"; 
+    // CAS314 removed diamond parameters, CAS330 put back in, 
+    // CAS331 remove --max-hsps 1 (it is default) --top 20 missed good ones with descriptions
+    private static final String diamondOpt =   "--masking 0"; 
     // used for MTCW comparing ORFs and STCW self comparing ORFS
-    private static final String diamondOptORF = "--max-hsps 1 --masking 0 --sensitive --query-cover 25 --subject-cover 25";
+    private static final String diamondOptORF = "--masking 0 --sensitive --query-cover 25 --subject-cover 25";
     // CAS330 add for Find Hits
-    private static final String diamondOptHit =   "--max-hsps 1 --masking 0"; 
+    private static final String diamondOptHit =   "--masking 0"; 
     
     // kludge because mTCW calls HOSTCfg 4x on startup; stops it printing over and over
     private static boolean hasChecked=false, bBlastExt=true; 

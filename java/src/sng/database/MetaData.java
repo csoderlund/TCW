@@ -80,18 +80,24 @@ public class MetaData {
 			// annotation
 			cnt = mDB.executeCount("SELECT count(*) FROM pja_databases");
 			if (cnt>0) {
-				bHasHits = true;
 				totalSeqHitPairs = mDB.executeCount("select count(*) from pja_db_unitrans_hits");
-				annoDBs = new String [cnt*2];
 				
-				TreeSet <String> type = new TreeSet <String> ();
-				TreeSet <String> taxo = new TreeSet <String> ();
-				rs = mDB.executeQuery("select dbtype, taxonomy from pja_databases");
+				bHasHits = true;
+				annoDBs = new String [cnt*2]; // type followed by taxo
+				
+				TreeSet <String> type = new TreeSet <String> (); // can be multiple of same type
+				TreeSet <String> taxo = new TreeSet <String> (); // can be multiple of same taxo
+				rs = mDB.executeQuery("select DBID, dbtype, taxonomy, isProtein from pja_databases");
 		 		int i=0;
 		 		while(rs.next()) {
-		 			String tp = rs.getString(1), tx = rs.getString(2);
+		 			int dbid = rs.getInt(1);
+		 			String tp = rs.getString(2); 
+		 			String tx = rs.getString(3);
+		 			boolean isAA = rs.getBoolean(4);
+		 			
 		 			annoDBs[i++] = tp; type.add(tp); 
 		 			annoDBs[i++] = tx; taxo.add(tx);
+		 			isAAannoDB.put(dbid, isAA); // CAS331
 		 		}
 		 		i=0;
 		 		typeDBs = new String [type.size()];
@@ -431,6 +437,8 @@ public class MetaData {
 	 public String [] getAnnoDBs() { return annoDBs;}
 	 public String [] getTypeDBs() { return typeDBs;}
 	 public String [] getTaxoDBs() { return taxoDBs;}
+	 public boolean isAAannoDB(int dbid) {return isAAannoDB.get(dbid);} // CAS331 
+	 
 	 public boolean hasHits() { return bHasHits; }
 	 public int totalSeqHitPairs() {return totalSeqHitPairs;}
 	 public boolean hasKEGG() { return bHasKEGG; }
@@ -469,6 +477,7 @@ public class MetaData {
 	 private String [] goPvalCols = null;
 	
 	 private String [] annoDBs = null, typeDBs = null, taxoDBs=null;
+	 private HashMap <Integer, Boolean> isAAannoDB = new HashMap<Integer, Boolean> (); // CAS331
 	 private Vector <String> species = null;
 	 private int totalSeqHitPairs=0;
 	 private boolean bHasHits = false;

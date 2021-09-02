@@ -19,14 +19,13 @@ import sng.dataholders.MultiCtgData;
 import sng.viewer.panels.seqDetail.SeqDetailPanel;
 import util.align.AlignPairOrig;
 import util.database.Globalx;
-import util.methods.BlastArgs;
 import util.methods.ErrorReport;
 import util.methods.Out;
 
 public class AlignCompute 
 {
 	public static final short frameResult=1; 
-	public static final short bestResult=2; // not currently used
+	public static final short bestResult=2; 
 	public static final short allResult=3;
 	public static final short orientResult=4;
 	public static final short pairResult=5;
@@ -75,18 +74,13 @@ public class AlignCompute
        isAAsTCW = isP;
        
        for (String hitName : selected) {
-	   		String seq =    seqPanel.getHitSeq(hitName);
-	   		String dbtype = seqPanel.getHitType(hitName);
+	   		String seq =    	seqPanel.getHitSeq(hitName);
+	   		String dbtype = 	seqPanel.getHitType(hitName);
+	   		boolean isProtein = seqPanel.isHitAA(hitName); // CAS331 was calculating based on dbtype
 	   		
 	   		SequenceData seqData = new SequenceData(dbtype);
 	   		seqData.setSequence(seq);
 	   		seqData.setName(hitName);
-	   		
-	   		boolean isProtein;
-	   		dbtype = dbtype.toLowerCase();
-	   		if (dbtype.equals(Globalx.SP) || dbtype.equals(Globalx.TR) || dbtype.equals(Globalx.PR)) isProtein = true;
-	   		else if (dbtype.equals(Globalx.NT)) isProtein  = false;
-	   		else isProtein = BlastArgs.isProtein(seq);
 	   		
 	   		BlastHitData blastData = new BlastHitData(hitName, isProtein, 
 	   				seqPanel.getHitStart(hitName), seqPanel.getHitEnd(hitName), seqPanel.getHitMsg(hitName));
@@ -104,7 +98,7 @@ public class AlignCompute
 	{		
 		ctgDataI = ctgData;
 		ctgDataII = null;
-		
+	
 		SequenceData   seq1 = ctgData.getSeqData(); // for proteins
 		if (!isAAsTCW) seq1 = seq1.newSeqDataNoGap();
 		
@@ -113,8 +107,12 @@ public class AlignCompute
 		
 		if (!hitData.isAAhit()) {	// database is nt and hit is nt
 			seq2.setIsNT(); 
+			
+			int tr = typeResult; // CAS311 changing type can mess a following AA align
 			if (typeResult==frameResult) typeResult=bestResult;
+			
 			hitAlignNT(seq1, seq2, 1, 0, hitData);
+			typeResult = tr;
 		}
 		else if (isAAsTCW)       // database and hit are aa
 			hitAlignAA(seq1, seq2, 0, 0, hitData);

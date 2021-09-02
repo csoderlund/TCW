@@ -20,7 +20,6 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.*;
 import java.sql.ResultSet;
-import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -210,7 +209,72 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 				}				
 			}
 		);	
-		/////////////////////////////
+		createShow();
+		createCopy();
+		createExport();
+		
+		JButton btnHelp = Static.createButton("Help2", true, Globalx.HELPCOLOR);
+		btnHelp.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				UserPrompt.displayHTMLResourceHelp(getInstance(),"Sequence Details", helpHTML);
+			}
+		});
+			
+		// Top panel with buttons and drop-down		
+		toolPanel = Static.createRowPanel();
+		toolPanel.add( Box.createHorizontalStrut(5) );
+		toolPanel.add(new JLabel(" Display:")); 	toolPanel.add( Box.createHorizontalStrut(3) );
+		toolPanel.add( menuLib); 				toolPanel.add( Box.createHorizontalStrut(3) );
+		if (nHits>0) toolPanel.add( menuHit );
+		
+		toolPanel.add( Box.createHorizontalStrut(30) );
+		toolPanel.add( btnShow );				toolPanel.add( Box.createHorizontalStrut(5) );
+		toolPanel.add( btnCopy );				toolPanel.add( Box.createHorizontalStrut(5) );
+		toolPanel.add( btnExport );				toolPanel.add( Box.createHorizontalStrut(20) );
+		
+		toolPanel.add( Box.createHorizontalGlue() );
+		toolPanel.add( btnHelp );				toolPanel.add( Box.createHorizontalStrut(5) );
+		
+		toolPanel.setMaximumSize( new Dimension ( Integer.MAX_VALUE, 
+				(int)toolPanel.getPreferredSize ().getHeight() ) );	
+		return toolPanel;
+	}
+	/********************************************************
+	 * Create show
+	 */
+	private void createShow() {
+		try {
+			final JPopupMenu showpopup = new JPopupMenu();
+			
+			showpopup.add(new JMenuItem(new AbstractAction("Selected Hit Info") {
+				private static final long serialVersionUID = 4692812516440639008L;
+				public void actionPerformed(ActionEvent e) {
+					if (theHitTable==null) return;
+					int [] selections = theHitTable.getSelectedRows();
+					if (selections.length==0)
+						JOptionPane.showMessageDialog(theMainFrame, 
+								"Select a hit in the DB hits table.", 
+								"Selected hit", JOptionPane.PLAIN_MESSAGE);
+					else { 
+						showSelectedHit(selections[0]);
+					}
+				}
+			}));
+			
+			btnShow = Static.createButton("Show...", true);
+			btnShow.addMouseListener(new MouseAdapter() {
+				public void mousePressed(MouseEvent e) {
+				    showpopup.show(e.getComponent(), e.getX(), e.getY());
+				}
+			});
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "Cannot create show button");}
+	}
+	/********************************************************
+	 * Create Copy
+	 */
+	private void createCopy() {
+	try {
 		final JPopupMenu copypopup = new JPopupMenu();
 		
 		copypopup.add(new JMenuItem(new AbstractAction("Seq ID") {
@@ -236,14 +300,14 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		}));
 		
 		if (!isAAtcw) {
- 			copypopup.add(new JMenuItem(new AbstractAction("Reverse complement") {
+			copypopup.add(new JMenuItem(new AbstractAction("Reverse complement") {
 				private static final long serialVersionUID = 4692812516440639008L;
 				public void actionPerformed(ActionEvent e) {
 					saveTextToClipboard(getRevCompString());
 				}
 			}));
-	
- 			if (metaData.hasORFs()) { // CAS304
+		
+			if (metaData.hasORFs()) { // CAS304
 				copypopup.add(new JMenuItem(new AbstractAction("Translated ORF (best frame)") {
 					private static final long serialVersionUID = 4692812516440639008L;
 					public void actionPerformed(ActionEvent e) {
@@ -256,38 +320,38 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 						}
 					}
 				}));
- 			}
-		}
+			}
+		} // isAAstcw
 		if (nHits>0) { 
 			copypopup.addSeparator();
 			copypopup.add(new JMenuItem(new AbstractAction("Selected hit - Hit ID") {
-				private static final long serialVersionUID = 4692812516440639008L;
-				public void actionPerformed(ActionEvent e) {
-					if (theHitTable==null) return;
-					int [] selections = theHitTable.getSelectedRows();
-					if (selections.length==0)
-						JOptionPane.showMessageDialog(theMainFrame, 
-								"Select a hit in the DB hits table.", 
-								"Selected hit", JOptionPane.PLAIN_MESSAGE);
-					else { 
-						saveTextToClipboard(theHitData.get(selections[0]).hitName);
-					}
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				if (theHitTable==null) return;
+				int [] selections = theHitTable.getSelectedRows();
+				if (selections.length==0)
+					JOptionPane.showMessageDialog(theMainFrame, 
+							"Select a hit in the DB hits table.", 
+							"Selected hit", JOptionPane.PLAIN_MESSAGE);
+				else { 
+					saveTextToClipboard(theHitData.get(selections[0]).hitName);
 				}
+			}
 			}));
-			
+		
 			copypopup.add(new JMenuItem(new AbstractAction("Selected hit - Description") {// CAS317
-				private static final long serialVersionUID = 4692812516440639008L;
-				public void actionPerformed(ActionEvent e) {
-					if (theHitTable==null) return;
-					int [] selections = theHitTable.getSelectedRows();
-					if (selections.length==0)
-						JOptionPane.showMessageDialog(theMainFrame, 
-								"Select a hit in the DB hits table.", 
-								"Selected hit", JOptionPane.PLAIN_MESSAGE);
-					else { 
-						saveTextToClipboard(theHitData.get(selections[0]).strDesc);
-					}
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				if (theHitTable==null) return;
+				int [] selections = theHitTable.getSelectedRows();
+				if (selections.length==0)
+					JOptionPane.showMessageDialog(theMainFrame, 
+							"Select a hit in the DB hits table.", 
+							"Selected hit", JOptionPane.PLAIN_MESSAGE);
+				else { 
+					saveTextToClipboard(theHitData.get(selections[0]).strDesc);
 				}
+			}
 			}));
 			copypopup.add(new JMenuItem(new AbstractAction("Selected hit - sequence") {
 				private static final long serialVersionUID = 4692812516440639008L;
@@ -302,70 +366,54 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 					}
 				}
 			}));
-		}	
-		JButton jbCopy = Static.createButton("Copy...", true);
-		jbCopy.addMouseListener(new MouseAdapter() {
-	            public void mousePressed(MouseEvent e) {
-	                copypopup.show(e.getComponent(), e.getX(), e.getY());
-	            }
-	        });
-		
-		// Export CAS314 moved saveTextToFile to ExportFile
-		final JPopupMenu exportpopup = new JPopupMenu();
-		exportpopup.add(new JMenuItem(new AbstractAction("Sequence (fasta)") {
-			private static final long serialVersionUID = -4657464918724936018L;
-			public void actionPerformed(ActionEvent e) {
-				fwObj.writeText(btnExport, "Seqs", "Seq", FileC.fFASTA, FileC.wAPPEND, getSequence());
-			}			
-		}));
-		
-		if (metaData.hasAssembly()) {
-			exportpopup.add(new JMenuItem(new AbstractAction("Aligned reads (fasta)") {
-				private static final long serialVersionUID = -8613746472039641395L;
+		} // end nHits
+		btnCopy = Static.createButton("Copy...", true);
+		btnCopy.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+			    copypopup.show(e.getComponent(), e.getX(), e.getY());
+			}
+		});
+
+	}catch (Exception e) {ErrorReport.prtReport(e, "Cannot create copy button");}
+	}
+	/********************************************************
+	 * Create export
+	 */
+	private void createExport() {
+		try {
+			// Export CAS314 moved saveTextToFile to ExportFile
+			final JPopupMenu exportpopup = new JPopupMenu();
+			exportpopup.add(new JMenuItem(new AbstractAction("Sequence (fasta)") {
+				private static final long serialVersionUID = -4657464918724936018L;
 				public void actionPerformed(ActionEvent e) {
-					fwObj.writeText(btnExport, "Reads", "Reads", FileC.fFASTA, FileC.wAPPEND, getAlignedReads());
-				}
+					fwObj.writeText(btnExport, "Seqs", "Seq", FileC.fFASTA, FileC.wAPPEND, getSequence());
+				}			
 			}));
-		}
-		if (nHits>0) {
-			exportpopup.add(new JMenuItem(new AbstractAction("DB hits (fasta)") {
-				private static final long serialVersionUID = 424842778593736605L;
-				public void actionPerformed(ActionEvent arg0) {
-					fwObj.writeText(btnExport, "DB hits", "DBhits", FileC.fFASTA, FileC.wAPPEND, getAllDBHitsString());
-				}
-			}));
-		}
-		btnExport = Static.createButton("Export...", true);
-		btnExport.addMouseListener(new MouseAdapter() {
+			
+			if (metaData.hasAssembly()) {
+				exportpopup.add(new JMenuItem(new AbstractAction("Aligned reads (fasta)") {
+					private static final long serialVersionUID = -8613746472039641395L;
+					public void actionPerformed(ActionEvent e) {
+						fwObj.writeText(btnExport, "Reads", "Reads", FileC.fFASTA, FileC.wAPPEND, getAlignedReads());
+					}
+				}));
+			}
+			if (nHits>0) {
+				exportpopup.add(new JMenuItem(new AbstractAction("DB hits (fasta)") {
+					private static final long serialVersionUID = 424842778593736605L;
+					public void actionPerformed(ActionEvent arg0) {
+						fwObj.writeText(btnExport, "DB hits", "DBhits", FileC.fFASTA, FileC.wAPPEND, getAllDBHitsString());
+					}
+				}));
+			}
+			btnExport = Static.createButton("Export...", true);
+			btnExport.addMouseListener(new MouseAdapter() {
 	            public void mousePressed(MouseEvent e) {
 	                exportpopup.show(e.getComponent(), e.getX(), e.getY());
 	            }
-	        });
-		
-		JButton btnHelp = Static.createButton("Help2", true, Globalx.HELPCOLOR);
-		btnHelp.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(getInstance(),"Sequence Details", helpHTML);
-			}
-		});
-			
-		// Top panel with buttons and drop-down		
-		toolPanel = Static.createRowPanel();
-		toolPanel.add( Box.createHorizontalStrut(5) );
-		toolPanel.add(new JLabel(" Display:")); 	toolPanel.add( Box.createHorizontalStrut(3) );
-		toolPanel.add( menuLib); 				toolPanel.add( Box.createHorizontalStrut(3) );
-		if (nHits>0) toolPanel.add( menuHit );
-		
-		toolPanel.add( Box.createHorizontalStrut(40) );
-		toolPanel.add( jbCopy );					toolPanel.add( Box.createHorizontalStrut(5) );
-		toolPanel.add( btnExport );				toolPanel.add( Box.createHorizontalStrut(20) );
-		
-		toolPanel.add( Box.createHorizontalGlue() );
-		toolPanel.add( btnHelp );				toolPanel.add( Box.createHorizontalStrut(5) );
-		
-		toolPanel.setMaximumSize( new Dimension ( Integer.MAX_VALUE, 
-				(int)toolPanel.getPreferredSize ().getHeight() ) );	
-		return toolPanel;
+		    });
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "Cannot create export button");}
 	}
 	private SeqDetailPanel getInstance() {return this;}
 	/***********************************************
@@ -577,23 +625,23 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 	}
     private static String pad(String s, int width, int o)
     {
-            if (s.length() > width) {
-                String t = s.substring(0, width-1);
-                System.err.println("'" + s + "' truncated to '" + t + "'");
-                s = t;
-                s += " ";
-            }
-            else if (o == 0) { // left
-                String t="";
-                width -= s.length();
-                while (width-- > 0) t += " ";
-                s = t + s;
-            }
-            else {
-                width -= s.length();
-                while (width-- > 0) s += " ";
-            }
-            return s;
+        if (s.length() > width) {
+            String t = s.substring(0, width-1);
+            System.err.println("'" + s + "' truncated to '" + t + "'");
+            s = t;
+            s += " ";
+        }
+        else if (o == 0) { // left
+            String t="";
+            width -= s.length();
+            while (width-- > 0) t += " ";
+            s = t + s;
+        }
+        else {
+            width -= s.length();
+            while (width-- > 0) s += " ";
+        }
+        return s;
     }
 
 	/********************************************************
@@ -621,7 +669,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 			
 			// general case: if filterType & fbit != 0, then fbit is correct filter.
 			if (filterType!=0 && filterType!=2 && filterType!=16 
-					&& (filterType & hd.filter) == 0) continue; // if filterType 1, 4 or 8 
+					&& (filterType & hd.nFilter) == 0) continue; // if filterType 1, 4 or 8 
 			
 			if (filterType==2 && hd.nRank != 1) continue; // top annoDBs
 			
@@ -659,23 +707,24 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		public static final int SORT_BY_SeqSTART = 13;
 		public static final int SORT_BY_SeqEND = 14; 
 		
-		public HitListData( int id, String name, double eVal, String type, String description, String species, String go,
-				int per, int alen, int start, int end,  String seq, int rank, int r, int fil,
-				String inter, String kg, String pf, String ec, int gobest, 
-				int pHitCov, int pSeqCov, double bits) {
-			hitID = id;
-			nRank = rank;
-			hitName = name;
-			eval = eVal;
+		public HitListData( int hitID, String hitName, double eval, String type, String description, String species, 
+				double sim, int alignLen, int start, int end,  String seq, int blast_rank, int best_rank, int filter, int gobest,
+				String goBrief, String inter, String kg, String pf, String ec, 
+				int pHitCov, int pSeqCov, double bits, boolean isAA, int hitSeqLen, String gList) {
+			this.hitID = hitID;
+			this.hitName = hitName;
+			this.eval = eval;
 			strType = type;
-			strDesc = description;
+			strDesc = description.trim();
 			strSpecies = species;
-			nPercent = per;
-			nAlignLen = alen;
+			pSim = sim;
+			nAlignLen = alignLen;
 			
 			nStart = start; 
 			nEnd = end;
-			if (!isAAtcw) {
+			isAAhit = isAA;
+			
+			if (isAA) { // CAS331 add isAAhit so NT will not be given a frame
 				if (start < end) {
 					nFrame = (start%3);
 					if (nFrame==0) nFrame=3;
@@ -687,15 +736,18 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 					nFrame = -nFrame;
 				}
 			}
-			else nFrame = 0;
+			else {
+				nFrame = 0;
+			}
 			
 			pHitAlign = pHitCov; 
 			pSeqAlign = pSeqCov; 
 			
-			filter=fil;
+			nRank = blast_rank;
+			nFilter=filter;
 			
 			strSeq = seq;
-			best = r;  
+			best = best_rank;  
 			if (best>0) {
 				if ((filter&16)==16 && (filter&32)==32) strBest = "BS,AN";
 				else if ((filter&16)==16) strBest = "BS";
@@ -709,25 +761,23 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 				int f = nFrame+3;
 				if (frameHitInfo[f]==null) {
 					String e = DisplayDecimalTab.formatDouble(eval);
-					frameHitInfo[nFrame+3] =  String.format("%s %s,%d%s", strBest, e, nPercent, "%");
+					frameHitInfo[nFrame+3] =  String.format("%s %s,%.1f%s", strBest, e, pSim, "%");
 					frameHitStart[nFrame+3] = nStart;
 					frameHitEnd[nFrame+3] =   nEnd;
 				}
 			}
-			if (Globalx.debug)
-				strBest = (strBest=="") ? (nRank+"") : (nRank + "," + strBest); // CAS317 
-			
 			nGO = noGO;
-	   		if (go!=null && !go.equals("")) {
-				String [] tok = go.split(";"); 
-				int n = Integer.parseInt(tok[0].substring(1));
+	   		if (goBrief!=null && !goBrief.equals("")) { 
+				int n = Integer.parseInt(goBrief.substring(1));
 				nGO = n+"";
 	   		}
-	   		strKEGG=kg;
-	   		strEC=ec;
-	   		strPfam=pf; 
-	   		strInterpro=inter;
+	   		strGOlist = 	(Static.isEmpty(gList)) ? "" : gList.trim();
+	   		strKEGG= 		(Static.isEmpty(kg)) 	? "" : kg.trim();
+	   		strEC=   		(Static.isEmpty(ec)) 	? "" : ec.trim();
+	   		strPfam= 		(Static.isEmpty(pf)) 	? "" : pf.trim(); 
+	   		strInterpro= 	(Static.isEmpty(inter)) ? "" : inter.trim();
 	   		dBit = bits;
+	   		nHitSeqLen = hitSeqLen;
 		}
 		
 		public Object getValueAt(int pos) {
@@ -742,9 +792,8 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 				if (nFrame==0) return Globalx.sNoVal;
 				return nFrame;
 			case 7: return DisplayDecimalTab.formatDouble(dBit);
-			case 8:
-				return DisplayDecimalTab.formatDouble(eval); // CAS330
-			case 9: return nPercent;
+			case 8: return DisplayDecimalTab.formatDouble(eval); // CAS330 - changed to use DisplayDecimal
+			case 9: return  DisplayDecimalTab.formatDouble(pSim);
 			case 10: return pSeqAlign;
 			case 11: return pHitAlign;
 			case 12: return nAlignLen;
@@ -764,7 +813,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 			case SORT_BY_pSEQ: return order * ((Integer) (pSeqAlign)).compareTo((Integer)(obj.pSeqAlign));
 			case SORT_BY_pHIT: return order * ((Integer)(pHitAlign)).compareTo((Integer)(obj.pHitAlign));
 			case SORT_BY_FRAME: return order * ((Integer)(nFrame)).compareTo((Integer)(obj.nFrame));
-			case SORT_BY_PERCENT: return order * ((Integer)(nPercent)).compareTo((Integer)(obj.nPercent));
+			case SORT_BY_PERCENT: return order * ((Double)(pSim)).compareTo((Double)(obj.pSim));
 			case SORT_BY_BEST: return order * strBest.compareTo(obj.strBest);
 			case SORT_BY_TYPE: return order * strType.compareTo(obj.strType);
 			case SORT_BY_DESCRIP: return order * strDesc.compareTo(obj.strDesc);
@@ -784,13 +833,13 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		private int nEnd = -1;
 		private int pSeqAlign = -1;
 		private int pHitAlign = -1;
-		private int nPercent = -1;
+		private double pSim = -1.0; // CAS331
 		private int nAlignLen = -1;
 		private String strType = "";
 		private String strDesc = "";
 		private String strSpecies = "";
 		private int nFrame = -1;
-		private int filter=0;	// Used for distinct regions, etc
+		private int nFilter=0;	// Used for distinct regions, etc
 		private int nRank = -1; // Used to view best per annodb
 		private String nGO=noGO;
 		private String strSeq=null;
@@ -798,6 +847,9 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		private String strBest="";
 		private String strKEGG="", strEC="", strPfam="", strInterpro="";
 		private double dBit=0; 
+		private boolean isAAhit=true; // CAS331 - so NT will not get a frame
+		private int nHitSeqLen=0;			// CAS331 for show
+		private String strGOlist="";		// CAS331 for show
 	} // end HitData class
 	
 	/*
@@ -1031,8 +1083,12 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		if (hitMap.containsKey(id)) return hitMap.get(id).strType.substring(0,2);
 		else return null;
 	}
-	public int getHitSim(String id) {
-		if (hitMap.containsKey(id)) return hitMap.get(id).nPercent;
+	public boolean isHitAA(String id) {
+		if (hitMap.containsKey(id)) return hitMap.get(id).isAAhit;
+		else return false;
+	}
+	public double getHitSim(String id) {
+		if (hitMap.containsKey(id)) return hitMap.get(id).pSim;
 		else return 0;
 	}
 	public int getHitStart(String id) {
@@ -1050,7 +1106,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		String e = "0.0";
 		if (hd.eval!=0) e =  String.format("%.0E", hd.eval); 
 		
-		String msg = String.format("Hit: %d%s, %s, %.1f, Align %d", hd.nPercent, "%", e, hd.dBit, hd.nAlignLen);
+		String msg = String.format("Hit: %.1f%s, %s, %.1f, Align %d", hd.pSim, "%", e, hd.dBit, hd.nAlignLen);
 		msg +=  "    " + hd.strType  + " " + hd.strDesc;
 		
 		return msg;
@@ -1086,12 +1142,12 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		if (hitMap.containsKey(id)) return hitMap.get(id).nAlignLen;
 		else return 0;
 	}
-	public int getHitPercent(String id) {
-		if (hitMap.containsKey(id)) return hitMap.get(id).nPercent;
+	public double getHitPercent(String id) {
+		if (hitMap.containsKey(id)) return hitMap.get(id).pSim;
 		else return 0;
 	}
 	public int getHitFiltered(String id) {
-		if (hitMap.containsKey(id)) return hitMap.get(id).filter;
+		if (hitMap.containsKey(id)) return hitMap.get(id).nFilter;
 		else return 0;
 	}
 	public String getHitDesc(String id) {
@@ -1144,6 +1200,76 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 	
 	public void lostOwnership(Clipboard arg0, Transferable arg1) {
 	}
+	/*********************************************************
+	 * Show selected hit info
+	 */
+	private void showSelectedHit(int index) {
+		Vector <String> lines = new Vector <String> ();
+		HitListData hd = theHitData.get(index);
+		int gap=0, mm=0, hStart=0, hEnd=0;
+		try {
+			
+			DBConn dbc = theMainFrame.getNewDBC();
+			ResultSet rs = dbc.executeQuery("select gap_open, mismatches, prot_start, prot_end "
+					+ " from pja_db_unitrans_hits "
+					+ " where CTGID = " + ctgData.getCTGID() + " and DUHID=" + hd.hitID);
+			if (rs.next()) {
+				gap = rs.getInt(1);
+				mm = rs.getInt(2);
+				hStart = rs.getInt(3);
+				hEnd = rs.getInt(4);
+			}
+			dbc.close(); rs.close();
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "Cannot read database for seqDetail");}
+		
+		String pre = "# ";
+		String fs = "%-15s  %s";
+		String fd = "%-15s  %15s";
+		lines.add(String.format(fs, "Hit ID", hd.hitName));
+		lines.add(String.format(fs, "annoDB", hd.strType));
+		lines.add(String.format(fs, "Description", hd.strDesc));
+		lines.add(String.format(fs, "Species", hd.strSpecies));
+		lines.add(String.format(fd, "Hit Length", String.format("%d", hd.nHitSeqLen)));
+		
+		lines.add("");
+		lines.add(pre + "Search file columns");
+		lines.add(String.format(fd, "%Identity (Sim)", String.format("%.2f", hd.pSim)));
+		lines.add(String.format(fd, "Align Length", String.format("%d", hd.nAlignLen)));
+		lines.add(String.format(fd, "Mismatches", String.format("%d", mm)));
+		lines.add(String.format(fd, "Gap Openings", String.format("%d", gap)));
+		lines.add(String.format(fd, "Seq Start:End", String.format("%d:%d", hd.nStart, hd.nEnd)));
+		lines.add(String.format(fd, "Hit Start:End", String.format("%d:%d", hStart, hEnd)));
+		lines.add(String.format(fd, "E-value", String.format("%.2E", hd.eval)));
+		lines.add(String.format(fd, "Bit Score", String.format("%.2f", hd.dBit)));
+		
+		lines.add("");
+		lines.add(pre + "Computed columns");
+		lines.add(String.format(fd, "Hit Coverage", String.format("%d", hd.pHitAlign)));
+		lines.add(String.format(fd, "Seq Coverage", String.format("%d", hd.pSeqAlign)));
+		lines.add(String.format(fd, "#Assigned GO", hd.nGO));
+		
+		lines.add("");
+		if (metaData.hasGOs()) {
+			boolean g = Static.isNotEmpty(hd.strGOlist);
+			boolean p = Static.isNotEmpty(hd.strInterpro);
+			boolean k = Static.isNotEmpty(hd.strKEGG);
+			boolean f = Static.isNotEmpty(hd.strPfam);
+			boolean e = Static.isNotEmpty(hd.strEC);
+			if (g || p || k || f || e) {
+				lines.add(pre + "UniProt .dat file");
+				lines.add(String.format(fs, "Assigned GO", hd.strGOlist));
+				lines.add(String.format(fs, "InterPro", hd.strInterpro));
+				lines.add(String.format(fs, "KEGG", hd.strKEGG));
+				lines.add(String.format(fs, "Pfam", hd.strPfam));
+				lines.add(String.format(fs, "EC", hd.strEC));
+			}
+		}
+		String [] alines = new String [lines.size()];
+		lines.toArray(alines);
+		UserPrompt.displayInfoMonoSpace(getInstance(), "Hit Info", alines);
+	}
+	
 	/**********************************************************
 	 * XXX database calls
 	 */
@@ -1161,17 +1287,25 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		catch ( Exception err ) {ErrorReport.reportError(err, "Error: reading database for hit sequence");}
 		return seq;
 	}
-	// ctgData already loaded into memory. Get hit data here
+	/***************************************
+	 *  ctgData already loaded into memory. Get hit data here
+	 *  SORT CAS317 added rank, bit to sort; CAS327 removed rank; 
+	 *  CAS331 I think I removed because the first is suppose to be the best or it messes up Frame.
+	 */
 	private void loadHitData() {
 	try {
 		hitMap = new HashMap <String, HitListData> ();
 	
 		if (ctgData.getCntTotal()==0) return;
 		DBConn dbc = theMainFrame.getNewDBC();
-		
+		// CAS327 had removed blast_rank sort - something to do with it not allowing Best first.
+		// CAS331 added percent_id because diamond does not, e.g.
+		//tra_052	tr|A0A1S3ZIC2|A0A1S3ZIC2_TOBAC	98.1	213	4	0	140	778	1	213	8.78e-159	439
+		//tra_052	tr|A0A6P5GC01|A0A6P5GC01_ANACO	98.6	213	3	0	140	778	1	213	8.78e-159	439
+		//tra_052	tr|A0A067FEN9|A0A067FEN9_CITSI	98.1	213	4	0	140	778	1	213	8.78e-159	439
 		String strQ = 	"SELECT  " +
-          		"q.DUHID, q.description, q.sequence, q.species, q.dbtype, q.taxonomy, " +
-          		"q.goBrief, q.interpro, q.kegg, q.pfam, q.ec, " +  // goBrief, not goList because just want #n from front
+          		"q.DUHID, q.DBID, q.description, q.sequence, q.species, q.dbtype, q.taxonomy, " +
+          		"q.length, q.goBrief, q.goList, q.interpro, q.kegg, q.pfam, q.ec, " +  
           		
           		"t.uniprot_id, t.percent_id, t.alignment_len," +
           		"t.ctg_start, t.ctg_end, " +
@@ -1182,36 +1316,39 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
           		"JOIN pja_db_unitrans_hits as t " +
           		"WHERE t.DUHID = q.DUHID " + 
           		"AND   t.CTGID = " + ctgData.getCTGID() + 
-          		" order by t.bit_score DESC, t.e_value ASC"; // CAS317 added rank, bit to sort; CAS327 removed rank
+          		" order by t.bit_score DESC, t.e_value ASC, t.percent_id DESC"; 
        
 		  HashSet <String> annodbs = new HashSet <String> (); 
-		  Vector <String> order = new Vector <String> (); // to keep ordered by e-value
+		  Vector <String> order = new Vector <String> (); // to keep ordered as input
           ResultSet rs = dbc.executeQuery( strQ );
     	  while( rs.next() )
     	  {	
     		  int i=1;
     		  int hitID = rs.getInt(i++);
+    		  int dbID = rs.getInt(i++);
     		  String desc = rs.getString(i++);
-    		  String seq = rs.getString(i++);
+    		  String fulSeq = rs.getString(i++);
     		  String species = rs.getString(i++);
     		  String type = rs.getString(i++);
     		  String tax = rs.getString(i++);
+    		  int hitSeqlen = rs.getInt(i++);
     		  String goBrief = rs.getString(i++);	
+    		  String goList = rs.getString(i++);
     		  String interpro = rs.getString(i++);
     		  String kegg = rs.getString(i++);
     		  String pfam = rs.getString(i++);
     		  String ec = rs.getString(i++);
     		  
     		  String hitName = rs.getString(i++);
-    		  int percent = rs.getInt(i++); 
-    		  int len = rs.getInt(i++);
+    		  double sim = rs.getDouble(i++); 
+    		  int alignlen = rs.getInt(i++);
     		  int start = rs.getInt(i++);
     		  int end = rs.getInt(i++);
     		  double eval = rs.getDouble(i++);
-    		  int blast = rs.getInt(i++);
+    		  int blast_rank = rs.getInt(i++);
     		  int filter = rs.getInt(i++);
-    		  int rank = rs.getInt(i++);
-    		  int nGo = rs.getInt(i++);
+    		  int best_rank = rs.getInt(i++);
+    		  int best_go = rs.getInt(i++);
     		  
     		  String typeTax="";
     		  String capType = type.toUpperCase();
@@ -1222,10 +1359,12 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
     		  double dbit = rs.getDouble(i++);
     		  
     		  if (!annodbs.contains(typeTax)) annodbs.add(typeTax);
+    		  boolean isAAhit = metaData.isAAannoDB(dbID);
     		  
-    		  HitListData hd = new HitListData( hitID, hitName, eval, typeTax, desc, species, goBrief,
-    				  percent, len, start, end,  seq, blast, rank, filter,
-    				  interpro, kegg, pfam, ec, nGo, pHitCov, pSeqCov, dbit);
+    		  HitListData hd = new HitListData( hitID, hitName, eval, typeTax, desc, species, 
+    				  sim, alignlen, start, end,  fulSeq, blast_rank, best_rank, filter, best_go,
+    				  goBrief, interpro, kegg, pfam, ec, pHitCov, pSeqCov, dbit, isAAhit, hitSeqlen, goList); // CAS331 add last 3
+    		 
     		  if (!hitMap.containsKey(hitName)) { // CAS321 duplicate names were happening
     			  	hitMap.put(hitName, hd);
     		  		order.add(hitName);
@@ -1345,7 +1484,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 	private JComboBox <MenuMapper> menuLib = null;
 	private JComboBox <MenuMapper> menuHit = null;
 	
-	private JButton btnExport = null;
+	private JButton btnExport = null, btnShow = null, btnCopy = null;
 	
 	private STCWFrame theMainFrame = null; 
 	private MetaData metaData = null;

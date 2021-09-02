@@ -471,9 +471,12 @@ public class Static {
     
     static public boolean isEmpty ( String str )
     {
-        return str == null || str.length() == 0;
+        return str == null || str.trim().length() == 0;
     }
-    
+    static public boolean isNotEmpty ( String str )
+    {
+        return str != null && str.trim().length() > 0;
+    }
     static String stripQuotes ( String str )
     {
         if ( str.length() >= 2 &&

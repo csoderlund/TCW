@@ -305,7 +305,7 @@ public class HitTablePanel  extends JPanel {
 		};
 
         theTableData = new TableData(this);
-        theTableData.setColumnHeaders(theFields.getDisplayFields(), theFields.getDisplayTypes());
+        theTableData.setColumnHeaders(theFields.getDisplayNames(), theFields.getDisplayTypes());
         theTableData.addRowsWithProgress(rs, theFields, loadStatus);
         theTableData.showTable();
 

@@ -10,7 +10,8 @@
 <table  class="tablex" style="margin-left: auto;margin-right: auto;">
 <tr><td class="white" style="text-align:left; background-color:#666666; padding-bottom:4px;">
 <a href="#main" 	class="white">Main Window</a> 		<mark class="white">|</mark> 
-<a href="#add" 		class="white">Additional Windows</a> <mark class="white">|</mark> 
+<a href="#build" 		class="white">Build Panels</a> <mark class="white">|</mark> 
+<a href="#anno" 		class="white">Annotate Panels</a> <mark class="white">|</mark> 
 <a href="#refs" 	class="white" >References</a>
 </td></tr>
 </table>
@@ -62,8 +63,10 @@ See <a href="../../stcw/UserGuide.html" class="ext" target="_blank">sTCW UserGui
 </table>
 
 <!--     Add          -->
-<a id=add></a>
-<h3>Additional windows</h3>
+<a id=build></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Build Panels</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
 <table class="tablex">
 <tr>
@@ -93,9 +96,15 @@ See <a href="../../stcw/UserGuide.html" class="ext" target="_blank">sTCW UserGui
 	</td>
 	<td>
 		<a href="img/runSingleRep.png"><img src="img/runSingleRep.png" alt="" style="border: 1px solid black; width: 450px"></a>
+</table>
 
-<tr><td>&nbsp;
 
+<a id=anno></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Annotate Panels</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<table class="tablex">
 <tr>
 	<td class="top">
 	<ttl>AnnoDBs</ttl>
@@ -112,7 +121,22 @@ See <a href="../../stcw/UserGuide.html" class="ext" target="_blank">sTCW UserGui
 	</td>
 	<td>
 	<a  href="img/runSingleAnno.png"><img src="img/runSingleAnno.png" alt="" style="border: 1px solid black; width: 450px"></a>
-<td>
+
+<tr>
+	<td class="top">
+	<ttl>AnnoDB Options</ttl>
+	<p><ttc>ANNOTATIONS</ttc>: An option of special interest is the <ttl>Prune</ttl> option. The results of the 
+	search against annoDBs can result in many hits, where some have the exact same alignment values and many have
+	the exact same description. The <ttl>Alignment</ttl> option removes all but the best hit with the same
+	alignment and description values, and the <ttl>Description</ttl> option removes all but the best hit with 
+	same description values.
+	<p><ttc>ORF FINDER</ttc>:The ORF Finder uses the seq-hit frame to determine the best open reading frame. If
+	a sequence has no hits or hits to multiple frame, it decides the best frame using the ORF length and the
+	Markov score. The Markov scores are trained using the best hits over all sequences.
+	<p><ttc>SIMILAR PAIRS</ttc>: This is useful to determine how similar the input sequences are.
+	</td>
+	<td>
+	<a  href="img/runSingleOptions.png"><img src="img/runSingleOptions.png" alt="" style="border: 1px solid black; width: 450px"></a>
 </table>
 
 <!-- REFS -->

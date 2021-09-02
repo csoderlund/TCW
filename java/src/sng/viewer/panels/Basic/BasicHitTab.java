@@ -463,8 +463,9 @@ public class BasicHitTab extends Tab {
 			int nCol=0;
 			strSeqID = 		(String) values[nCol++];
 			strHitID = 		(String) values[nCol++];
+			bitscore = 		Double.parseDouble((String) values[nCol++]); // CAS331
 			evalue = 		Double.parseDouble((String) values[nCol++]);
-			sim = 			Integer.parseInt((String) values[nCol++]);
+			sim = 			Double.parseDouble((String) values[nCol++]);
 			int sstart = 	Integer.parseInt((String) values[nCol++]);
 			int send   = 	Integer.parseInt((String) values[nCol++]);
 			int hstart = 	Integer.parseInt((String) values[nCol++]);
@@ -526,27 +527,28 @@ public class BasicHitTab extends Tab {
 				case 4: return strBest;
 				case 5: return nRank;
 				
-				case 6: return new DisplayFloat(evalue); 
-				case 7: return sim;
-				case 8: return seqAlign;
-				case 9: return hitAlign;
-				case 10: return align;
+				case 6: return new DisplayFloat(bitscore);
+				case 7: return new DisplayFloat(evalue); 
+				case 8: return new DisplayFloat(sim);
+				case 9: return seqAlign;
+				case 10: return hitAlign;
+				case 11: return align;
 				
-				case 11: return strDesc;
-				case 12: return strSpecies;
-				case 13: return strType;
-				case 14: return strTaxo;	
+				case 12: return strDesc;
+				case 13: return strSpecies;
+				case 14: return strType;
+				case 15: return strTaxo;	
 				}
 			}
 			if (hasGO) nCol+=6; // CAS322 was missing this
 			if (hasGO && column<nCol) {
 				switch(column) {
-				case 15: return nGO;
-				case 16: return strGO;
-				case 17: return strIP;
-				case 18: return strKEGG;
-				case 19: return strPFAM;
-				case 20: return strEC;
+				case 16: return nGO;
+				case 17: return strGO;
+				case 18: return strIP;
+				case 19: return strKEGG;
+				case 20: return strPFAM;
+				case 21: return strEC;
 				}
 			}
 			
@@ -575,27 +577,28 @@ public class BasicHitTab extends Tab {
 				case 4: return order * compareStrings(strBest, obj.strBest);
 				case 5: return order * ((Integer) nRank).compareTo((Integer) obj.nRank);
 				
-				case 6: return order * ((Double) evalue).compareTo((Double) obj.evalue);
-				case 7: return order * ((Integer) sim).compareTo((Integer) obj.sim);
-				case 8: return order * ((Integer) seqAlign).compareTo((Integer) obj.seqAlign);
-				case 9: return order * ((Integer) hitAlign).compareTo((Integer) obj.hitAlign);
-				case 10: return order * ((Integer) align).compareTo((Integer) obj.align);
+				case 6: return order * ((Double) bitscore).compareTo((Double) obj.bitscore);
+				case 7: return order * ((Double) evalue).compareTo((Double) obj.evalue);
+				case 8: return order * ((Double) sim).compareTo((Double) obj.sim);
+				case 9: return order * ((Integer) seqAlign).compareTo((Integer) obj.seqAlign);
+				case 10: return order * ((Integer) hitAlign).compareTo((Integer) obj.hitAlign);
+				case 11: return order * ((Integer) align).compareTo((Integer) obj.align);
 				
-				case 11: return order * compareStrings(strDesc, obj.strDesc);
-				case 12: return order * compareStrings(strSpecies, obj.strSpecies);
-				case 13: return order * compareStrings(strType, obj.strType);
-				case 14: return order * compareStrings(strTaxo, obj.strTaxo);		
+				case 12: return order * compareStrings(strDesc, obj.strDesc);
+				case 13: return order * compareStrings(strSpecies, obj.strSpecies);
+				case 14: return order * compareStrings(strType, obj.strType);
+				case 15: return order * compareStrings(strTaxo, obj.strTaxo);		
 				}
 			}
 			nCol+=6;
 			if (hasGO && column<nCol) {
 				switch(column) {
-				case 15: return order * ((Integer) nGO).compareTo((Integer) obj.nGO);
-				case 16: return order * compareStrings(strGO, obj.strGO);
-				case 17: return order * compareStrings(strIP, obj.strIP);
-				case 18: return order * compareStrings(strKEGG, obj.strKEGG);
-				case 19: return order * compareStrings(strPFAM, obj.strPFAM);
-				case 20: return order * compareStrings(strEC, obj.strEC);
+				case 16: return order * ((Integer) nGO).compareTo((Integer) obj.nGO);
+				case 17: return order * compareStrings(strGO, obj.strGO);
+				case 18: return order * compareStrings(strIP, obj.strIP);
+				case 19: return order * compareStrings(strKEGG, obj.strKEGG);
+				case 20: return order * compareStrings(strPFAM, obj.strPFAM);
+				case 21: return order * compareStrings(strEC, obj.strEC);
 				}
 			}
 			if (column < (nCol+numLibs)) {
@@ -604,7 +607,12 @@ public class BasicHitTab extends Tab {
 			}
 			nCol+=numLibs;
 			int index = column-nCol;
-			return order * ((Double) Math.abs(pvalCounts[index])).compareTo((Double) Math.abs(obj.pvalCounts[index]));
+			Double val1 = (Double) Math.abs(pvalCounts[index]);
+			Double val2 = (Double) Math.abs(obj.pvalCounts[index]);
+			if (val1==Globalx.dNoDE && val2==Globalx.dNoDE) return 0; // CAS331 check for noDe
+			else if (val1==Globalx.dNoDE) return 1;
+			else if (val2==Globalx.dNoDE) return -1;
+			return order * val1.compareTo(val2);
 		}
 		
 		public HitGroupData getGroupItem() {
@@ -614,8 +622,9 @@ public class BasicHitTab extends Tab {
 		private int nRowNum = -1;
 		private String strSeqID;
 		private String strHitID;
+		private double bitscore;	// CAS331 added
 		private double evalue;
-		private int sim;
+		private double sim;			// CAS331 change from int
 		private int align, seqAlign, hitAlign; // hitStart transferred to HitGroupData
 		private int seqLen, hitLen;            // hitLen transferred to HitGroupData
 		private String strDesc;
@@ -657,14 +666,15 @@ public class BasicHitTab extends Tab {
 			strType = 		seq.strType;
 			strTaxo = 		seq.strTaxo;
 			nGO =			seq.nGO;
-			strGO = 			seq.strGO;
-			strIP = 			seq.strIP;
+			strGO = 		seq.strGO;
+			strIP = 		seq.strIP;
 			strKEGG = 		seq.strKEGG;
 			strPFAM = 		seq.strPFAM;
-			strEC = 			seq.strEC;
+			strEC = 		seq.strEC;
 			if (!seq.strBest.equals("")) nBest=1;
 			if (seq.nRank==1) nRank1=1;
 			
+			bitscore = seq.bitscore;
 			evalue=seq.evalue;
 			sim = seq.sim;
 			seqAlign = seq.seqAlign;
@@ -677,8 +687,8 @@ public class BasicHitTab extends Tab {
 			nPvalCounts = new Double[numPvals];
 			for(int x=0; x<nPvalCounts.length; x++) nPvalCounts[x] = seq.pvalCounts[x];
 		}
-		public void incrementSeqCount(Double [] lcounts, Double [] pcounts, String strBest, 
-				Double seqEVal, int seqSim, int sstart, int hstart, int seqAlign, int nRank) { 
+		public void incrementSeqCount(Double [] lcounts, Double [] pcounts, String strBest, Double seqBit,
+				Double seqEVal, double seqSim, int sstart, int hstart, int seqAlign, int nRank) { 
 			nSeqs++; 
 			for(int x=0; x<lcounts.length; x++) 
 				if (nLibCounts[x] < lcounts[x]) nLibCounts[x] = lcounts[x];
@@ -689,7 +699,8 @@ public class BasicHitTab extends Tab {
 			if (!strBest.equals("")) nBest++;
 			if (nRank==1) nRank1++;
 			
-			if (seqEVal < evalue || (seqEVal==evalue && seqSim>sim)) {
+			if (seqBit>bitscore || (seqBit==bitscore && seqEVal < evalue) || (seqEVal==evalue && seqSim>sim)) {
+				bitscore = seqBit;
 				evalue=seqEVal;
 				sim = seqSim;
 				seqAlign = sstart;
@@ -720,27 +731,28 @@ public class BasicHitTab extends Tab {
 				case 4: return nBest;
 				case 5: return nRank1;
 				
-				case 6: return new DisplayFloat(evalue); 
-				case 7: return sim;
-				case 8: return seqAlign;
-				case 9: return hitAlign;
-				case 10: return align;
+				case 6: return new DisplayFloat(bitscore);
+				case 7: return new DisplayFloat(evalue); 
+				case 8: return new DisplayFloat(sim); 
+				case 9: return seqAlign;
+				case 10: return hitAlign;
+				case 11: return align;
 				
-				case 11: return strDesc;
-				case 12: return strSpecies;
-				case 13: return strType;
-				case 14: return strTaxo;
+				case 12: return strDesc;
+				case 13: return strSpecies;
+				case 14: return strType;
+				case 15: return strTaxo;
 				}
 			}
 			if (hasGO) nCol+=6;
 			if (hasGO && column<nCol) {
 				switch(column) {
-				case 15: return nGO;
-				case 16: return strGO;
-				case 17: return strIP;
-				case 18: return strKEGG;
-				case 19: return strPFAM;
-				case 20: return strEC;
+				case 16: return nGO;
+				case 17: return strGO;
+				case 18: return strIP;
+				case 19: return strKEGG;
+				case 20: return strPFAM;
+				case 21: return strEC;
 				}
 			}		
 			if (column < nCol+numLibs) {
@@ -767,28 +779,28 @@ public class BasicHitTab extends Tab {
 				case 4: return order * ((Integer) nBest).compareTo((Integer) obj.nBest);
 				case 5: return order * ((Integer) nRank1).compareTo((Integer) obj.nRank1);
 				
+				case 6: return order * ((Double) bitscore).compareTo((Double) obj.bitscore);
+				case 7: return order * ((Double) evalue).compareTo((Double) obj.evalue);
+				case 8: return order * ((Double) sim).compareTo((Double) obj.sim);
+				case 9: return order * ((Integer) seqAlign).compareTo((Integer) obj.seqAlign);
+				case 10: return order * ((Integer) hitAlign).compareTo((Integer) obj.hitAlign);
+				case 11: return order * ((Integer) align).compareTo((Integer) obj.align);
 				
-				case 6: return order * ((Double) evalue).compareTo((Double) obj.evalue);
-				case 7: return order * ((Integer) sim).compareTo((Integer) obj.sim);
-				case 8: return order * ((Integer) seqAlign).compareTo((Integer) obj.seqAlign);
-				case 9: return order * ((Integer) hitAlign).compareTo((Integer) obj.hitAlign);
-				case 10: return order * ((Integer) align).compareTo((Integer) obj.align);
-				
-				case 11: return order * compareStrings(strDesc, obj.strDesc);
-				case 12: return order * compareStrings(strSpecies, obj.strSpecies);
-				case 13: return order * compareStrings(strType, obj.strType);
-				case 14: return order * compareStrings(strTaxo, obj.strTaxo);		
+				case 12: return order * compareStrings(strDesc, obj.strDesc);
+				case 13: return order * compareStrings(strSpecies, obj.strSpecies);
+				case 14: return order * compareStrings(strType, obj.strType);
+				case 15: return order * compareStrings(strTaxo, obj.strTaxo);		
 				}
 			}
 			if (hasGO) nCol += 6;
 			if (hasGO && column<nCol) {
 				switch(column) {
-				case 15: return order * ((Integer) nGO).compareTo((Integer) obj.nGO);
-				case 16: return order * compareStrings(strGO, obj.strGO);
-				case 17: return order * compareStrings(strIP, obj.strIP);
-				case 18: return order * compareStrings(strKEGG, obj.strKEGG);
-				case 19: return order * compareStrings(strPFAM, obj.strPFAM);
-				case 20: return order * compareStrings(strEC, obj.strEC);
+				case 16: return order * ((Integer) nGO).compareTo((Integer) obj.nGO);
+				case 17: return order * compareStrings(strGO, obj.strGO);
+				case 18: return order * compareStrings(strIP, obj.strIP);
+				case 19: return order * compareStrings(strKEGG, obj.strKEGG);
+				case 20: return order * compareStrings(strPFAM, obj.strPFAM);
+				case 21: return order * compareStrings(strEC, obj.strEC);
 				}
 			}
 			if (column< nCol+numLibs) {
@@ -797,7 +809,12 @@ public class BasicHitTab extends Tab {
 			}
 			nCol+=numLibs;
 			int index = column-nCol;
-			return order * ((Double) Math.abs(nPvalCounts[index])).compareTo((Double) Math.abs(obj.nPvalCounts[index]));
+			Double val1 = (Double) Math.abs(nPvalCounts[index]);
+			Double val2 = (Double) Math.abs(obj.nPvalCounts[index]);
+			if (val1==Globalx.dNoDE && val2==Globalx.dNoDE) return 0; // CAS331 check for noDe
+			else if (val1==Globalx.dNoDE) return 1;
+			else if (val2==Globalx.dNoDE) return -1;
+			return order * val1.compareTo(val2);
 		}
 		public String strHitID;
 		public int nSeqs;
@@ -814,8 +831,9 @@ public class BasicHitTab extends Tab {
 		private String strEC = null;
 		private int nBest=0;
 		private int nRank1=0;
+		private double bitscore=0.0;
 		private double evalue=2.0;
-		private int sim;
+		private double sim=0.0;
 		private int align, seqAlign, hitAlign, hitLen;
 		private Double [] nLibCounts = null;
 		private Double [] nPvalCounts = null;
@@ -852,10 +870,10 @@ public class BasicHitTab extends Tab {
 			 seqCntMap.clear(); 
 			 String x = " (of " + results.size() + ") ...";
 			 int row=1, cnt=0;
-			 for (Object [] o : results) {
-				 String seqid = (String) o[0];
+			 for (Object [] rObj : results) {
+				 String seqid = (String) rObj[0];
 				 seqListAdd(seqid);
-				 seqObjList.add(new HitSeqData(row, o));
+				 seqObjList.add(new HitSeqData(row, rObj));
 				 row++; cnt++;
 				 if (cnt==10000) {
 	    				setStatus("Added " + seqObjList.size() + x + " to sequence table...        ");
@@ -936,7 +954,7 @@ public class BasicHitTab extends Tab {
 			for (HitSeqData seq : seqObjList) {
 				if (hitMap.containsKey(seq.strHitID)) {
 					HitGroupData grp = hitMap.get(seq.strHitID);
-					grp.incrementSeqCount(seq.libCounts, seq.pvalCounts, seq.strBest, 
+					grp.incrementSeqCount(seq.libCounts, seq.pvalCounts, seq.strBest, seq.bitscore,
 							seq.evalue, seq.sim, seq.seqAlign, seq.hitAlign, seq.align, seq.nRank);
 				}
 				else {

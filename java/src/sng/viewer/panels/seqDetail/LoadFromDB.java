@@ -161,18 +161,19 @@ public class LoadFromDB {
 			ResultSet rs = mDB.executeQuery( strQ );
 			if (!rs.next()) return null;
 			
-			int start = rs.getInt(1);
-			int end = rs.getInt(2);
-			boolean isP = rs.getBoolean(3);
-			double eval = rs.getDouble(4);
-			int pid = rs.getInt(5);
-			int nAlign = rs.getInt(6); 
-			double bit = rs.getDouble(7); // CAS400
+			int i=1;
+			int start = rs.getInt(i++);
+			int end = rs.getInt(i++);
+			boolean isP = rs.getBoolean(i++);
+			double eval = rs.getDouble(i++);
+			double pid = rs.getDouble(i++); // CAS331
+			int nAlign = rs.getInt(i++); 
+			double bit = rs.getDouble(i++); // CAS331
 			
 			// Msg is shown in the header line of AnnoDB Hits (should be same as SeqDetailPanel.getHitMsg
 			String e = "0.0";
 			if (eval!=0) e =  String.format("%.0E", eval); 
-			String msg = String.format("Hit: %d%s, %s, %.1f, Align %d", pid, "%", e, bit, nAlign);
+			String msg = String.format("Hit: %.1f%s, %s, %.1f, Align %d", pid, "%", e, bit, nAlign);
 			
 			BlastHitData blastData = new BlastHitData(hitID, isP, start, end, msg);
 			
@@ -182,11 +183,9 @@ public class LoadFromDB {
 		return null;
 	}
 	private ContigData loadDetailForContig ( String strContigID ) 
-    		throws Exception
     {	
         ContigData curContig = new ContigData ();
-        try
-        {       
+        try {       
             String strQuery = "SELECT CTGID, contigid, consensus, quality, " +
             			"notes, has_ns, consensus_bases, " + 
             			"numclones, frpairs, est_5_prime, est_3_prime, est_loners, " +
@@ -264,8 +263,7 @@ public class LoadFromDB {
             }
         }
         catch(Exception e) {
-        		ErrorReport.reportError(e, "Error: reading database newLoadConsensusAndData");
-        		throw e;
+        	ErrorReport.reportError(e, "Reading database for sequence details");
         }
         return curContig;
     }

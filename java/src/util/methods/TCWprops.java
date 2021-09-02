@@ -149,17 +149,20 @@ public class TCWprops
 			*  getAnnoProperty() 	returns user supplied or default
 			*  getNotDefault() 		only return value if user supplied.
 			*****************************************************/
-			mProps.setProperty("STCW_db", ""); // new
-			mProps.setProperty("SingleID", ""); 	 //new
+			mProps.setProperty("STCW_db", ""); 
+			mProps.setProperty("SingleID", ""); 	
 			mProps.setProperty("CPUs", "1");							
 			
 			mProps.setProperty("Anno_flanking_region", "30"); // not documented; used for setFilterOverlap
+			mProps.setProperty("Anno_min_bitscore", "-1");    // not documented
+			
 			mProps.setProperty("Anno_SwissProt_pref", Globals.pSP_PREF); 
 			mProps.setProperty("Anno_Remove_ECO", Globals.pRM_ECO); // CAS305
 			
-			    
-			mProps.setProperty("Anno_DBdate", "-");     
-			mProps.setProperty("Anno_min_bitscore", "-1"); 
+			mProps.setProperty("Anno_Prune_type", Globals.pPRUNE); // CAS331
+			mProps.setProperty("Anno_No_GO", Globals.pNO_GO); // CAS331
+			
+			mProps.setProperty("Anno_DBdate", "-");  // Global DBdate if individual DBdata not set   
 			
 			for (int i=1; i<Globals.numDB; i++) {
 				mProps.setProperty("Anno_DBtab_" +   Integer.toString(i), "-"); // CAS314 was "Anno_unitrans_DBblast_"

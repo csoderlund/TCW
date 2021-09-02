@@ -429,7 +429,7 @@ public class GrpTablePanel extends JPanel {
 			}
 		};
         theTableData = new TableData(this);
-        theTableData.setColumnHeaders(theFields.getDisplayFields(), theFields.getDisplayTypes());
+        theTableData.setColumnHeaders(theFields.getDisplayNames(), theFields.getDisplayTypes());
         theTableData.addRowsWithProgress(rset, theFields, loadProgress);
         theTableData.showTable();
 

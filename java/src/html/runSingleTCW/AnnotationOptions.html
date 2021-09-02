@@ -29,8 +29,18 @@ are used for these three tasks.
 	<td>Many UniProt descriptions (especially in TrEMBL) end with strings that start
 		with "{ECO". This option removes this string from the description.
 		
-	<tr><td valign="top" nowrap><b>GO Database*</b></td>
+	<tr><td valign="top"><b>Prune hits</b>*</td> 
+	<td><i>None</i>: do not remove any.
+	<br><i>Alignment</i>: remove hits with the same alignment from the same annoDB with the exception of the best one.
+	The same alignment uses all the search tab file columns along with the hit sequence length and description
+	<br><i>Description</i>: remove hits with the same description from the same database with the exception
+	of the best one. The descriptions are compared after removing any trailing "{...}" text and using case-insensitive.
+	
+	<tr><td valign="top" nowrap><b>GO Database**</b></td>
 		<td>By selecting a GO database, Gene Ontology information will be added.
+	<tr><td valign="top" nowrap><b>Ignore on Annotate</b></td>
+		<td>You may define your GO database but not have added GOs with <b>Annotate</b>, and instead
+		add them explicitly with <b>GO Only</b>.
 		
 	<tr><td valign="top" nowrap><b>Slims from GO database</b></td>
 		<td>The GO database has GO Slims identified for various groups, e.g. goslim_plants.
@@ -41,8 +51,13 @@ are used for these three tasks.
 		<td>Slims can be read from a file, and the OBO file is the GO file format for slims
 		(google for "OBO file format").
 		</table>
-	*If you are not able to select one, then one needs to be downloaded and installed;
-		see online "Annotation Setup" (http://www.agcol.arizona.edu/software/tcw/doc/stcw/AnnoDBs.html).
+	*The number of GOs assigned to a hit-GO pair factors into deciding what is the best hit; hence,
+	you need to define your GO Database if you created one with <tt>runAS</tt>. 
+	See the online <a href="http://www.agcol.arizona.edu/software/tcw/doc/stcw/AnnoGuide.html">
+	                        Annotation Guide</a>  for more information.
+	<p>**If you are not able to select one, then one needs to be downloaded and installed;
+		see the online 
+		<a href="http://www.agcol.arizona.edu/software/tcw/doc/stcw/AnnoDBs.html">Annotation Setup</a>.
 		
 <h3>ORF finder:</h3>
 	See http://www.agcol.arizona.edu/software/tcw/doc/stcw/ORF.html for a full explanation

@@ -781,7 +781,7 @@ public class FieldData {
 	//****************************************************************************
 	//* Methods  called by tables
 	//****************************************************************************
-	public String [] getDisplayFields() {
+	public String [] getDisplayNames() {
 		if(theViewFields.size() == 0) return null;
 
 		Vector<String> retVal = new Vector<String> ();
@@ -809,6 +809,7 @@ public class FieldData {
 		}
 		return retVal.toArray(new Class<?>[retVal.size()]);
 	}
+	
 	public String getDBFieldQueryList() {
 		Iterator<FieldItem> iter = theViewFields.iterator();
 		FieldItem item = null;
@@ -836,9 +837,9 @@ public class FieldData {
 		return retVal;
 	}
 	/***********************************************
-	 * Methods called by TableData - addRowsWithProgress
+	 * Methods called by TableData - addRowsWithProgress 
 	 */
-	public String [] getDisplayFieldSymbols() {
+	public String [] getDisplaySymbols() {
 		if(theViewFields.size() == 0) return null;
 
 		Vector<String> retVal = new Vector<String> ();

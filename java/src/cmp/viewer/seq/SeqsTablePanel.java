@@ -157,7 +157,7 @@ public class SeqsTablePanel extends JPanel {
         theTableData = new TableData(this);
         FieldData theFields = FieldData.getSeqFields(theViewerFrame.getSeqLibList(), 
         		theViewerFrame.getSeqDEList(), theViewerFrame.getMethodPrefixes());
-        theTableData.setColumnHeaders(theFields.getDisplayFields(), theFields.getDisplayTypes());
+        theTableData.setColumnHeaders(theFields.getDisplayNames(), theFields.getDisplayTypes(), theFields.getDisplaySymbols());
         
         theTableData.addRowsWithProgress(rset, theFields, loadStatus);
         theTableData.showTable();

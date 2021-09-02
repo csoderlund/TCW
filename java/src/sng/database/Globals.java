@@ -77,6 +77,8 @@ public class Globals {
 	static public final String pTRAIN_MIN = "50";
 	static public final String pSP_PREF = "0";
 	static public final String pRM_ECO = "1";
+	static public final String pPRUNE = "0"; // Also change in AnnoOption Defaults
+	static public final String pNO_GO = "0";
 	
 	public static boolean hasVal(String val) {
 		if (val==null || val.trim().equals("")|| val.trim().equals("-")  ) return false;

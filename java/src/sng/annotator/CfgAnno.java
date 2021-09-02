@@ -21,15 +21,15 @@ public class CfgAnno {
 	
 	public CfgAnno() {}
 	
-	public boolean load(boolean bdoAnno, boolean bdoORF, boolean bdoGO, 
+	public boolean load(boolean bdoAnno, boolean bdoORF, boolean bdoGO, boolean bdoPrune,
 			DoBlast blastObj, CoreAnno annoObj, DoUniProt uniObj, DoORF orfObj) {
 		
-		this.blastObj = blastObj;
-		this.annoObj = annoObj;
-		this.uniObj = uniObj;
-		this.orfObj = orfObj;
+		this.blastObj = blastObj; // sets annoDBs
+		this.annoObj = annoObj;   // sets npairs
+		this.uniObj = uniObj;	  // sets bUseSP, flank, min_score
+		this.orfObj = orfObj;	  // sets ORf params
 		
-		return cfgTCWload(bdoAnno, bdoORF, bdoGO);
+		return cfgTCWload(bdoAnno, bdoORF, bdoGO, bdoPrune);
 	}
 	/**********************************************************************/
 	/***
@@ -42,7 +42,7 @@ public class CfgAnno {
 	 *     Manager saves any changes before calling runSTCWMain to then load sTCW.cfg again
 	 *  4. This file
 	 */
-	private boolean cfgTCWload(boolean bdoAnno, boolean bdoORF, boolean bdoGO) 
+	private boolean cfgTCWload(boolean bdoAnno, boolean bdoORF, boolean bdoGO, boolean bdoPrune) 
 	{			
 		Out.Print("\nReading " + sTCWcfg);
 		String cfgFile = runSTCWMain.getCurProjPath() + "/" + sTCWcfg;
@@ -59,13 +59,13 @@ public class CfgAnno {
 			cfgNonFileParams();
 			if (bdoAnno) cfgSelfblastParams();
 			if (bdoAnno||bdoORF) cfgORFParams();
-			if (bdoAnno) {
-				if (!cfgDBParams()) return false;
+			if (bdoAnno || bdoPrune) {
+				if (!cfgDBParams(bdoAnno)) return false;
 				if (!cfgGO()) return false;
 			}
-			else if (bdoGO)
+			else if (bdoGO) {
 				if (!cfgGO()) return false;
-			
+			}
 		} catch (Exception err) {
 			ErrorReport.reportError(err, "reading configuration file " + cfgFile);
 			return false;
@@ -74,14 +74,20 @@ public class CfgAnno {
 	}
 	private boolean cfgGO() {
 		try {
-			String godb = mProps.getAnnoProperty("Anno_GO_DB").trim(); 
-			String goSlimSubset = mProps.getAnnoProperty("Anno_SLIM_SUBSET").trim(); 
-			String goSlimOBOFile = mProps.getAnnoProperty("Anno_SLIM_OBOFile").trim(); 
-			runSTCWMain.setGOparameters(godb, goSlimSubset, goSlimOBOFile);
+			String godb = 			mProps.getAnnoProperty("Anno_GO_DB").trim(); 
+			String noGO = 			mProps.getAnnoProperty("Anno_No_GO").trim(); // CAS331 add
+			String goSlimSubset = 	mProps.getAnnoProperty("Anno_SLIM_SUBSET").trim(); 
+			String goSlimOBOFile = 	mProps.getAnnoProperty("Anno_SLIM_OBOFile").trim(); 
+			runSTCWMain.setGOparameters(godb, goSlimSubset, goSlimOBOFile, noGO);
 			
-			if (Globals.hasVal(godb)) Out.PrtSpMsg(1,"GO_DB = " + godb); // CAS316 added prints
-			if (Globals.hasVal(goSlimSubset)) Out.PrtSpMsg(1,"GO SLIM = " + goSlimSubset);
-			if (Globals.hasVal(goSlimOBOFile)) Out.PrtSpMsg(1,"GO Slim OBO file = " + goSlimOBOFile);
+			if (Globals.hasVal(godb)) 			{
+				Out.PrtSpMsg(1,"GO_DB = " + godb); // CAS316 added prints
+				
+				if (Globals.hasVal(noGO) && noGO!=Globals.pNO_GO) //CAS331
+					Out.PrtSpMsg(1,"Do not add GOs on 'Annotate'");
+			}
+			if (Globals.hasVal(goSlimSubset)) 	Out.PrtSpMsg(1,"GO SLIM = " + goSlimSubset);
+			if (Globals.hasVal(goSlimOBOFile)) 	Out.PrtSpMsg(1,"GO Slim OBO file = " + goSlimOBOFile);
 			return true;
 		} catch (Exception err) {
 			ErrorReport.reportError(err, "reading GO parameters ");
@@ -187,22 +193,17 @@ public class CfgAnno {
 		}
 		catch (Exception e) {ErrorReport.reportError(e, "getting annoDB parameters");}
 	}
-	public boolean cfgDBParams() {
+	public boolean cfgDBParams(boolean bAnno) {
 		try {	
-			int flank = argInt("Anno_flanking_region", "Flanking region");			
-			uniObj.setFlankingRegion(flank);
-			
+			int flank =  argInt("Anno_flanking_region", "Flanking region");	
 			int spPref = argInt("Anno_SwissProt_pref", "SwissProt preference");
-			uniObj.setSwissProtPref(spPref);
-			
 			int rmPref = argInt("Anno_Remove_ECO", "Remove {ECO...} string"); // CAS305
-			uniObj.setRemoveECO(rmPref);
-			
-			int bit = Integer.parseInt(mProps.getAnnoProperty("Anno_min_bitscore"));
-			if (bit != -1) {
-				uniObj.setMinBitScore(bit);
-				Out.PrtSpMsg(1,"min_bitscore = " + bit);
-			}
+			int bit =    argInt("Anno_min_bitscore", "Minimum bitscore");
+			int prune =  argInt("Anno_Prune_type", "Prune type");
+	
+			String godbName = mProps.getAnnoProperty("Anno_GO_DB").trim(); // So DoUniProt can pass to DoUniPrune
+			uniObj.setCfgAnnoParams(rmPref==1, spPref==1, flank, bit, prune, godbName); // CAS331 change from 4 to 1 method call
+			if (!bAnno) return true; // is bPrune
 			
 			for (int i=1; i < Globals.numDB; i++) {
 				String n = Integer.toString(i);
@@ -313,8 +314,6 @@ public class CfgAnno {
 			return false;
 		}
 	}
-	
-	
 	private boolean goodDate (String dt) { // yyyy-mm-dd
 		int f = dt.indexOf("-");
 		int l = dt.lastIndexOf("-");

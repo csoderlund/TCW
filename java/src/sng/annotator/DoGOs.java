@@ -85,15 +85,7 @@ public class DoGOs
 			}
 			
 			/** Create Tables **/
-			Schema.createGOtables(tcwDB); // drops current 
-			
-			tcwDB.executeUpdate("update pja_db_unique_hits " +
-				" set ec='', pfam='', kegg='', goList='', goBrief='', interpro=''");
-			tcwDB.executeUpdate("update contig set PIDgo=0");
-			tcwDB.executeUpdate("update pja_db_unitrans_hits set filter_gobest=0");
-			tcwDB.executeUpdate("update assem_msg set go_msg='', go_slim=''");
-			if (tcwDB.tableColumnExists("libraryDE", "goMethod"))
-				tcwDB.executeUpdate("update libraryDE set goMethod='', goCutoff=-1.0");
+			Schema.createGOtables(tcwDB); // drops current CAS331 moved erasing data to dropGOtables
 			
 			if (!do1_assem_msg()) return false;
 			if (!do2_pja_db_unique_hits()) return false;

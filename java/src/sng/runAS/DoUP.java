@@ -52,7 +52,9 @@ public class DoUP {
 			if (!mkDirTaxo(spFiles, trFiles)) return;
 			
 			long startTime = Out.getTime();
+			
 			if (spFiles.size()>0) {
+				long downTime = Out.getTime(); //CAS331 add sub-times
 				Out.PrtSpDateMsg(1, "Download SwissProt files");
 				for (int i=0; i<spFiles.size(); i++) {
 					if (!spDats.get(i)) {
@@ -60,8 +62,12 @@ public class DoUP {
 						if (!runDownload(SP, spPre, f, f)) return;	
 					}
 				}
+				Out.PrtSpMsgTime(1,"Complete SwissProt download", downTime);
 			}
+			
+			
 			if (trFiles.size()>0) {
+				long downTime = Out.getTime();
 				Out.PrtSpMsg(1,"");
 				Out.PrtSpDateMsg(1, "Download TrEMBL files");
 				for (int i=0; i<trFiles.size(); i++) {
@@ -70,7 +76,9 @@ public class DoUP {
 						if (!runDownload(TR, trPre, f, f)) return;	
 					}
 				}
+				Out.PrtSpMsgTime(1, "Complete TrEMBL download", downTime);
 			}
+			long createTime=Out.getTime();
 			Out.PrtSpMsg(1,"");
 			Out.PrtSpDateMsg(1, "Create FASTA files");
 			DoUPdat datObj = new DoUPdat(frameObj);
@@ -82,6 +90,8 @@ public class DoUP {
 				if (!datObj.dat2fasta(TR, mkNameDir(TR,f), mkNameDat(trPre,f), 
 						mkNameFasta(trPre,f))) return;
 			}
+			Out.PrtSpMsgTime(1, "Complete create files", createTime);
+			
 			Out.PrtMsgTime("Complete Taxonomic UniProt", startTime);
 		}
 		catch (Exception e) {ErrorReport.reportError(e, "Problems getting file");}

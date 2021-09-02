@@ -6,7 +6,61 @@
 <a id=top>
 <!--#include virtual="./ssi/start1.html" -->
 
+<h4>v3.3.1  1-Sept-2021</h4>
 
+The singleTCW database has a small schema update that will be applied the first time an existing
+database is viewed.
+
+<p><ttp>runSingleTCW</ttp> -- Annotate
+<ul>
+<li>sTCWdb version sdb6.0: The percent similarity (identity) is stored as a real number instead of an integer.
+
+<li><font color=green>NEW</font> Prune Hits - there are many hits with the exact same coordinates and/or descriptions.
+A new function removes all but the best based on same alignment values or same description.
+This function can be set to run in the AnnoDBs <ttl>Options</ttl> or from the command line.
+<li>Tiny changes;
+<ul>
+
+
+<li>DIAMOND - removed '--max-hsps 1' as TCW defaults because it is a DIAMOND default.
+Removed '--top 20' as this misses some good descriptions.
+<li>TCW was only loading 25 hits per annoDB. This restriction has been removed since the user
+can set the limit in the search programs parameters.
+<li>This really isn't a problem, but I fixed it any way as it could be confusing: If there were multiple hits with the
+same bit_score and E-value, it was using the one with the highest rank for the "Best Bit" assignment, 
+which was changed to lowest. 
+<li>Tiny bug fix in Multi-Frame: If a sequence had an NT hit, it was typically incorrectly marked as 'Multi-frame'. 
+</ul>
+</ul>
+<ttp>viewSingleTCW</ttp> - tiny adjustments
+<ul>
+<li>Sequence Detail: 
+<ul>
+<li>A new <ttl>Show</ttl> button shows all columns for a selected hit (the Hit Table
+only provides a subset of all columns).
+<li>The Hit Table now sorts on bit-score, e-value, %sim in that order (the addition of %sim is new).
+</ul>
+<li>Basic Hit: 
+<ul>
+<li>The Bit-score has been added to the columns. 
+<li>DE values of "-" will sort to the bottom of the table.
+</ul>
+
+<li>A reading frame was being assigned to an NT hit -- it now has a value of "-".
+<li>Tiny bug fix in alignments: In rare instance, aligning an NT-NT following by a NT-AA could create a bogus NT-AA alignment.
+</ul>
+
+<ttp>viewMultiTCW</ttp>
+<ul>
+<li>Sequence Table: DE values of "-" will sort to the bottom of the table and the sort will ignore 
+the minus sign before an DE value (as <ttp>viewSingleTCW</ttp> does).
+</ul>
+
+<ttl>Software details</ttl>
+<ul>
+<li>The Best Bits, etc assignment was moved from DoUniProt.java to DoUniAssign.java
+</ul>
+<!-------------------------------------------------------------------->
 <h4>v3.3.0  15-August-2021</h4>
 <i>Update existing multiTCW databases for this release</i>: 
 There is a small mTCWdb schema change, which will be updated the first time you access the database. However,
@@ -154,7 +208,7 @@ ask the user if they want to over-write an existing column.
 on a selected DE p-value, it will overwrite an existing column.
 <li>The DE and GO p-value columns will be displayed in <ttp>viewSingleTCW</ttp> in the order that
 the DE p-value columns are created (only guaranteed if created with v3.2.6 or later).
-<li>The online <a href=stcw/DiffExp.html>DE User Manual</a> was significantly updated.
+<li>The online <a href="stcw/DiffExp.html">DE User Manual</a> was significantly updated.
 </ul>
 
 <ttp>runSingleTCW</ttp> - <b>Overview</b>
