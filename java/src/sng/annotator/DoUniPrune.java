@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
  */
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.TreeMap;
 
@@ -76,7 +77,7 @@ public class DoUniPrune {
 	 * 			copy unique to tmp_seq tables
 	 */
 	private int nTotalUniquePrune=0;
-	private int cntKeepAnnoSeqHit=0, cntPruneAnnoSeqHit=0;
+	private int cntKeepAnnoSeqHit=0, cntPruneAnnoSeqHit=0, cntNoRank1=0;
 	private HashSet <Integer> 	 keepAnnoDBSet = new HashSet <Integer> (); // Hits to keep
 	
 	private void findDupsPerAnno() {
@@ -102,11 +103,14 @@ public class DoUniPrune {
 						cntPrt=0;
 					}
 				}
-				Out.PrtSpCntMsg2(4, cntKeepAnnoSeqHit, "Seq hits", cntPruneAnnoSeqHit, "Removed");
+			
+				Out.PrtSpCntMsg3(4, cntKeepAnnoSeqHit, "Seq hits", 
+									cntPruneAnnoSeqHit, "Removed", 
+									cntNoRank1, "Updated Rank=1");
 				
 				deleteUniqueHits(dbIdx); 	if (!bRC) return;
 				
-				cntKeepAnnoSeqHit=cntPruneAnnoSeqHit=0;
+				cntKeepAnnoSeqHit=cntPruneAnnoSeqHit=cntNoRank1=0;
 				keepAnnoDBSet.clear();
 			}
 			Out.PrtSpMsg(3, "Final");
@@ -118,13 +122,15 @@ public class DoUniPrune {
 	/*********************************************************
 	 * Prune based on description - HitList order description, bitscore, eval, GOs
 	 * Prune based on alignment   - HitList order bitscore, eval, sim, align, GOs
+	 * Hence, not by rank.
+	 * 	After delete all, sort ArrayList by Rank. If no #1, make first #1 and update.
 	 */
 	private void findSeqDup(int dbIdx, int seqID) {
 		try {
 			ArrayList <HitData> hitList = loadHitDataForSeq(dbIdx, seqID);
 			if (hitList==null || hitList.size()==0) return;
 			
-			HashSet <Integer> delSet =  new HashSet <Integer> (); // seqHitIdx (pja_db_unitrans_hits.PID)
+			HashSet <Integer> delSeqHitSet =  new HashSet <Integer> (); // seqHitIdx (pja_db_unitrans_hits.PID)
 			HitData lastHD=null;
 			
 			for (HitData hd : hitList) { 
@@ -137,27 +143,40 @@ public class DoUniPrune {
 				cntPruneAnnoSeqHit++;
 				
 				if (lastHD.isBestGO(hd)) {
-					delSet.add(hd.pid);
+					delSeqHitSet.add(hd.seqHitIdx);
+					hd.bDelete=true;
 				}
 				else {
-					delSet.add(lastHD.pid); 
+					delSeqHitSet.add(lastHD.seqHitIdx); 
+					lastHD.bDelete=true;
 					lastHD = hd;
 				}
 			}
 			// find hits that must be kept
 			for (HitData hd: hitList) {
-				if (!delSet.contains(hd.pid)) {
-					if (!keepAnnoDBSet.contains(hd.duhid))
-						 keepAnnoDBSet.add(hd.duhid);
+				if (!delSeqHitSet.contains(hd.seqHitIdx)) {
+					if (!keepAnnoDBSet.contains(hd.hitIdx))
+						 keepAnnoDBSet.add(hd.hitIdx);
+				}
+			}
+			
+			// CAS332 may be removing rank=1
+			Collections.sort(hitList);
+			for (HitData hd : hitList) {
+				if (hd.rank==1 && !hd.bDelete) break;
+				if (hd.rank!=1 && !hd.bDelete) {
+					cntNoRank1++;
+					tcwDB.executeUpdate("update pja_db_unitrans_hits set blast_rank=1 where PID=" + hd.seqHitIdx);
+					break;
 				}
 			}
 			hitList.clear();
 			
-			// delete redundant hits for this seq
-			for (int pid : delSet) 
-				tcwDB.executeUpdate("delete from pja_db_unitrans_hits where PID=" + pid);
-	
-			delSet.clear();
+			// delete redundant hits for this seq; what if is a rank=1
+			for (int seqHitIdx : delSeqHitSet) {
+				tcwDB.executeUpdate("delete from pja_db_unitrans_hits where PID=" + seqHitIdx);
+			}
+			delSeqHitSet.clear();
 		}
 		catch(Exception e) {ErrorReport.prtReport(e, "Find duplicate hits"); bRC=false;}
 	}
@@ -165,7 +184,6 @@ public class DoUniPrune {
 		if (pruneType==1) return lastHD.isSame(hd);
 		else return lastHD.desc.contentEquals(hd.desc);
 	}
-	
 	
 	/************************************************
 	 * Delete redundant hits for this DB
@@ -225,13 +243,13 @@ public class DoUniPrune {
 				return;
 			}
 			/************************************************
-			 * Get goList from goDB, create goBrief and enter into tcwDB
+			 * Get goList from goDB
+			 * The GO records have not been loaded yet, so need to create goBrief for #GOs
 			 */
-			
 			Out.PrtSpMsg(3, "Find GO counts from " + godbName + " for UniProt hits");
 			tcwDB.executeUpdate("UPDATE pja_db_unique_hits SET goBrief = ''");
 			
-			ArrayList <GoData>  hitList = new ArrayList <GoData> ();   //These 3 have same index 
+			ArrayList <GoData>  hitList = new ArrayList <GoData> ();   
 			
 			int cntHit=0;
 			rs = tcwDB.executeQuery("select DUHID, hitID from pja_db_unique_hits" ); 
@@ -296,7 +314,7 @@ public class DoUniPrune {
             		"uh.DUHID, uh.hitID, uh.description, uh.length, uh.goBrief, " +
             		"sh.PID, sh.e_value, sh.bit_score, sh.percent_id, sh.alignment_len, " +
             		"sh.gap_open, sh.mismatches, " +
-            		"sh.ctg_start, sh.ctg_end, sh.prot_start, sh.prot_end " +
+            		"sh.ctg_start, sh.ctg_end, sh.prot_start, sh.prot_end, sh.blast_rank " +
 		    		"FROM pja_db_unique_hits   as uh " +
 		    		"JOIN pja_db_unitrans_hits as sh " +
 		    		"ON sh.DUHID = uh.DUHID " +
@@ -311,7 +329,7 @@ public class DoUniPrune {
             while( rset.next() ) {	
             	int i=1;
             	HitData hit = new HitData ();
-                hit.duhid = 	rset.getInt(i++);
+                hit.hitIdx = 	rset.getInt(i++);
                 hit.hitID = 	rset.getString(i++);
                 hit.desc = 		rset.getString(i++).trim().toLowerCase();
                 if (hit.desc.contains("{") && hit.desc.endsWith("}")) // e.g. ZF-HD family protein {ORGLA09G0180300.1} 
@@ -327,7 +345,7 @@ public class DoUniPrune {
                 	else hit.nGO = 	Integer.parseInt(goBrief.substring(1));
                 } catch (Exception e) {Out.die("cannot parse '" + goBrief + "'" + " for " + hit.hitID);}
                 
-                hit.pid 		= rset.getInt(i++);
+                hit.seqHitIdx 	= rset.getInt(i++);
                 hit.eVal 		= rset.getDouble(i++); 
                 hit.bitScore 	= rset.getDouble(i++);
                 hit.sim 		= rset.getDouble(i++);
@@ -338,6 +356,7 @@ public class DoUniPrune {
 		        hit.seqEnd 		= rset.getInt(i++); 
 		        hit.hitStart 	= rset.getInt(i++);
 		        hit.hitEnd 		= rset.getInt(i++); 
+		        hit.rank		= rset.getInt(i++);
 		        
 		        hit.isGood = BestAnno.descIsGood(hit.desc); 
 		        
@@ -424,14 +443,19 @@ public class DoUniPrune {
 		String hitName;
 		String nGO;
 	}
-	private class HitData {
-  		int pid, duhid;
+	private class HitData implements Comparable <HitData>{
+  		int seqHitIdx, hitIdx; // pja_db_unitrans_hits.pid, pja_db_unique_hits.duhid
   		String hitID, desc;
   		double eVal, bitScore, sim;
   		int align, mm, gap, seqStart, seqEnd, hitStart, hitEnd, length;
-  		int nGO;
-  		boolean isGood;
+  		int nGO, rank;
+  		boolean isGood, bDelete=false;
   		
+  		public int compareTo(HitData x) {
+  			if (rank<x.rank) return -1;
+  			if (rank>x.rank) return  1;
+  			return 0;
+		}
   		boolean isSame(HitData hd) { // GOs, Desc, Species can be different when everything else is the same
   			if (hd.bitScore!=bitScore) 	return false;
   			if (hd.eVal!=eVal) 			return false;

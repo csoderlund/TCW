@@ -1248,6 +1248,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		lines.add(String.format(fd, "Hit Coverage", String.format("%d", hd.pHitAlign)));
 		lines.add(String.format(fd, "Seq Coverage", String.format("%d", hd.pSeqAlign)));
 		lines.add(String.format(fd, "#Assigned GO", hd.nGO));
+		lines.add(String.format(fd, "Rank", hd.nRank));
 		
 		lines.add("");
 		if (metaData.hasGOs()) {

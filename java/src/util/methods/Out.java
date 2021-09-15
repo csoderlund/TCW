@@ -110,6 +110,14 @@ public class Out {
 	static public void PrtSpCntMsg2(int sp, int cnt, String msg, int cnt2, String msg2) {
 		PrtSpMsg(sp, String.format("%7s %-12s  %7s %s", df.format(cnt), msg, df.format(cnt2), msg2));
 	}
+	static public void PrtSpCntMsg3(int sp, int cnt, String msg, int cnt2, String msg2, int cnt3, String msg3) {
+		if (cnt3>0)
+			PrtSpMsg(sp, String.format("%7s %-12s  %7s %-12s  %7s %s", 
+				df.format(cnt), msg, df.format(cnt2), msg2 , df.format(cnt3), msg3));
+		else 
+			PrtSpMsg(sp, String.format("%7s %-12s  %7s %s", 
+				df.format(cnt), msg, df.format(cnt2), msg2));
+	}
 	static public void PrtSpCntkMsg2(int sp, long cnt, String msg, long cnt2, String msg2) {
 		PrtSpMsg(sp, String.format("%7s %-12s  %7s %s", kMText(cnt), msg, kMText(cnt2), msg2));
 	}

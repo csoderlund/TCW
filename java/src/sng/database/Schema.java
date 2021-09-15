@@ -790,6 +790,8 @@ public class Schema
 	// CAS331 put all GO remove here
 	public static void dropGOtables(DBConn tcwDB) {
 		try {
+			if (!tcwDB.tableExist("go_info")) return;
+			
 			Out.PrtSpMsg(1, "Clearing database GO tables");
 			ResultSet rset = tcwDB.executeQuery("SHOW COLUMNS FROM go_info"); // CAS319 check before print warn
 	        while(rset.next()) {

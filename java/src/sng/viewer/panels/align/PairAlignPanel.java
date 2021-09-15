@@ -24,36 +24,30 @@ import util.ui.MultilineTextPanel;
 /**
  * Displays alignment of a pair in two nucleotide or two amino acid
  * CAS314 removed all references to SequenceData class; use renamed PairBasePanel with Trim
+ * CAS332 made multiple alignments line up the same. Moved all final variables to here.
  */
 public class PairAlignPanel extends PairBasePanel {
 	private final Color background1 = new Color(0xEEFFEE);
 	private final Color background2 = new Color(0xEEFFFF);
 	private final char gapCh = Globalx.gapCh;
 	
-	public PairAlignPanel ( int num, AlignData alignObj, boolean alt, boolean isHit,
-			int nInTopGap, int nInBottomGap, int nInLeftGap, int nInRightGap )
+	public PairAlignPanel ( int num, AlignData alignObj, boolean alt, boolean bHit, String maxStr )
 	{		
 		super ( Globals.textFont );
-		Color c;
+		dRulerHeight =  super.getTextWidth( "999999" );
+		
 		numAlign = num;
-		this.isHit = isHit;
-		
+		isHit = bHit;
 		alignData = alignObj;
-		nTopGap = 		nInTopGap;
-		nLowGap = 		nInBottomGap;
-		nRightGap = 	nInRightGap;
-		nLeftGap = 		nInLeftGap;
-		dFrameLeftX = 	(double) nInLeftGap;
-		dFrameTopY = 	(double) nInTopGap;
-		dRulerHeight = super.getTextWidth( "999999" );
 		
+		Color c;
 		if (alt) c = background1; 
 		else c = background2;
 		
 		super.setBackground( c );
 		super.setLayout( null );
 		
-		init();
+		init(maxStr);
 	}
 	
 	public void refreshPanels ( )  { 
@@ -106,11 +100,11 @@ public class PairAlignPanel extends PairBasePanel {
 		super.drawRuler(g2, 0, dRulerTop, dRulerLow); 	
 	
 		boolean isFirst=true;
-		super.drawText(g2, alignData.getDisplayStr1(), dFrameLeftX + nInsetGap, dSeq1Top );
+		super.drawText(g2, alignData.getDisplayStr1(), dFrameLeftX + fInsetGap, dSeq1Top );
 		super.drawSequence (g2, alignSeq1, dSeq1Top, dSeq1Low, nTrimStart1, nTrimStop1, isFp1, isFirst, isDNA );
 		
 		isFirst=false;
-		super.drawText(g2, alignData.getDisplayStr2(), dFrameLeftX + nInsetGap, dSeq2Top );
+		super.drawText(g2, alignData.getDisplayStr2(), dFrameLeftX + fInsetGap, dSeq2Top );
 		super.drawSequence (g2, alignSeq2, dSeq2Top, dSeq2Low, nTrimStart2, nTrimStop2, isFp2, isFirst, isDNA );
 	}
 	
@@ -119,8 +113,8 @@ public class PairAlignPanel extends PairBasePanel {
 	}
 	
 	public Dimension getPreferredSize() {
-		int nWidth = nLeftGap + (int)getFrameWidth ( ) + nRightGap;
-		int nHeight = nTopGap + (int)dFrameHeight + nLowGap;
+		int nWidth = fLeftGap + (int)getFrameWidth ( ) + fRightGap;
+		int nHeight = fTopGap + (int)dFrameHeight + fLowGap;
 		return new Dimension( nWidth, nHeight ); 
 	}
 	
@@ -134,18 +128,11 @@ public class PairAlignPanel extends PairBasePanel {
 		if(!bFirst && (nPos < nTrimStart1 || nPos > nTrimStop1)) return true;
 		return false;
 	}
-	
-	public double getGraphicalDeadWidth ( ) {
-		// The total width of what can't be used for drawing the bases in graphical mode
-		return dSeqStart + nInsetGap;
-	}
 	private double getFrameWidth ( ) {
-		double dWidth = dSeqStart + getSequenceWidth ( ) + nInsetGap;
-		return Math.max ( 700, dWidth );
+		double dWidth = dSeqStart + getSequenceWidth ( ) + fInsetGap;
+		return Math.max ( fMaxWidth, dWidth );
 	}
-	protected double getFrameLeft ( ){
-		return dFrameLeftX;
-	}	
+	//protected double getFrameLeft ( ){return dFrameLeftX;}	
 	protected double getFrameRight ( ){
 		return dFrameLeftX + getFrameWidth ( );
 	}
@@ -229,8 +216,8 @@ public class PairAlignPanel extends PairBasePanel {
 				start = (double)aaLen-start+1.0;
 				end =   (double)aaLen-end+1.0;
 			}
-			double top = dSeq1Top - nInsetGap / 2.0;
-			double low = dSeq1Low + nInsetGap / 2.0;
+			double top = dSeq1Top - fInsetGap / 2.0;
+			double low = dSeq1Low + fInsetGap / 2.0;
 			
 			// drawing coords
 			int nStart = (int) start;
@@ -251,8 +238,8 @@ public class PairAlignPanel extends PairBasePanel {
 	
 	private void highlightAAORF() {
 	try {
-		double top = dSeq1Top  - nInsetGap / 2.0;
-		double bottom = dSeq1Low + nInsetGap / 2.0;
+		double top = dSeq1Top  - fInsetGap / 2.0;
+		double bottom = dSeq1Low + fInsetGap / 2.0;
 		
 		CodingRegion orf = alignData.getORFCoding1 ();
 		String alignSeq  = alignData.getAlignSeq1();
@@ -303,11 +290,14 @@ public class PairAlignPanel extends PairBasePanel {
 	
 	public AlignData getAlignData() {return alignData;}
 	
-	private void init() {
+	private void init(String maxStr) {
 	try {
-		dSeqStart = Math.max( super.getTextWidth( alignData.getDisplayStr1() ), 
-				  super.getTextWidth( alignData.getDisplayStr2() ) );
-		dSeqStart += nInsetGap * 2.0d + nLeftGap;
+		dFrameLeftX = 	(double) fLeftGap;
+		dFrameTopY = 	(double) fTopGap;
+		
+		//dSeqStart = Math.max( super.getTextWidth( alignData.getDisplayStr1() ), super.getTextWidth( alignData.getDisplayStr2() ) );
+		dSeqStart  = super.getTextWidth( maxStr); // CAS332 all start at same place
+		dSeqStart += fInsetGap * 2.0d + fLeftGap; 
 		super.setMinPixelX ( dSeqStart );
 		
 		int x=0, aLen = alignData.getAlignSeq1().length();
@@ -341,29 +331,29 @@ public class PairAlignPanel extends PairBasePanel {
 		if ( headerPanel != null ) remove ( headerPanel );
 		
 		headerPanel = new MultilineTextPanel ( Globals.textFont, 
-				alignData.getDescription(numAlign), nInsetGap, (int)getFrameWidth ( ) - 2, 1); 
+				alignData.getDescription(numAlign), fInsetGap, (int)getFrameWidth ( ) - 2, 1); 
 		headerPanel.setBackground( Color.WHITE );  
 		add ( headerPanel );  
-        headerPanel.setLocation( nLeftGap + 1, nTopGap + 1 );	
+        headerPanel.setLocation( fLeftGap + 1, fTopGap + 1 );	
         
         dHeaderHeight = headerPanel.getHeight() + 1;
 		dFrameHeight = dHeaderHeight 						// Header
-					+ nInsetGap * 2.0d + nRowHeight * 2.0d + // Sequences
-					+ nInsetGap * 2.0d + dRulerHeight; 		// Ruler
+					+ fInsetGap * 2.0d + fRowHeight * 2.0d + // Sequences
+					+ fInsetGap * 2.0d + dRulerHeight; 		// Ruler
 		dDivider1Y = dFrameTopY + dHeaderHeight;
 		
 		dRulerTop = dDivider1Y;
 		dRulerLow = dRulerTop + dRulerHeight;
 		
-		dSeq1Top =    dRulerLow + (nInsetGap-2); 
-		dSeq1Low = dSeq1Top + nRowHeight;
+		dSeq1Top = dRulerLow + (fInsetGap-2); 
+		dSeq1Low = dSeq1Top + fRowHeight;
 			
-		dSeq2Top = 	  dSeq1Low + (nInsetGap+2);
-		dSeq2Low = dSeq2Top + nRowHeight;
+		dSeq2Top = dSeq1Low + (fInsetGap+2);
+		dSeq2Low = dSeq2Top + fRowHeight;
 		
-		dSelectRow1Top = dSeq1Top - nInsetGap / 2.0;
-		dSelectMid = dSeq1Low + nInsetGap / 2.0;
-		dSelectRow2Low = dSeq2Low + nInsetGap;
+		dSelectRow1Top = 	dSeq1Top - fInsetGap / 2.0;
+		dSelectMid = 		dSeq1Low + fInsetGap / 2.0;
+		dSelectRow2Low = 	dSeq2Low + fInsetGap;
 	}
 	catch(Exception e) {ErrorReport.prtReport(e, "init PairAlign");}
 	}
@@ -381,7 +371,6 @@ public class PairAlignPanel extends PairBasePanel {
 	private Rectangle2D selectionBox = new Rectangle2D.Double (0,0,0,0);
 	
 	// Attributes for where to draw
-	private int nTopGap = 0, nLowGap = 0, nRightGap = 0, nLeftGap = 0;
 	private double dFrameLeftX = 0, dFrameTopY = 0, dFrameHeight = 0;
 	private double dDivider1Y = 0, dRulerTop = 0, dRulerLow = 0;
 	
@@ -389,7 +378,10 @@ public class PairAlignPanel extends PairBasePanel {
 	private double dSelectRow1Top = 0, dSelectMid = 0, dSelectRow2Low = 0;
 	private double dHeaderHeight = 0, dRulerHeight = 0, dSeqStart = 0;
 	
-	static private final int nInsetGap = 5, nRowHeight = 15;
+	static final private int fMaxWidth = 700; // doesn't seem to change anything when I change
+	static final private int fInsetGap = 5;
+	static final private int fRowHeight = 15;
+	static final private int fTopGap = 10, fLowGap = 5, fRightGap = 10, fLeftGap = 10; // CAS332 moved from PairViewPanel as always the same
 	
     private static final long serialVersionUID = 1;
 }

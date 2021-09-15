@@ -39,6 +39,7 @@ import sng.database.Globals;
 import util.align.AlignPairAA;
 import util.database.Globalx;
 import util.methods.ErrorReport;
+import util.methods.Out;
 import util.methods.Static;
 import util.ui.MenuMapper;
 import util.ui.UIHelpers;
@@ -63,9 +64,20 @@ public class PairViewPanel extends JPanel implements ClipboardOwner
 		String lastHit="";
 		Vector<PairAlignPanel> subPanels = new Vector<PairAlignPanel> ();
 		
+		String maxStr = "", str=""; // CAS332 start alignments at same place
+		Iterator<AlignData> x = inAlignmentLists.iterator();
+		while ( x.hasNext() ) {
+			AlignData alignData = x.next ();
+			
+			str = alignData.getDisplayStr1();
+			if (maxStr.length()< str.length()) maxStr = str;
+			
+			str = alignData.getDisplayStr2();
+			if (maxStr.length()< str.length()) maxStr = str;
+		}
+		
 		Iterator<AlignData> i = inAlignmentLists.iterator();
-		while ( i.hasNext() )
-		{
+		while ( i.hasNext() ) {
 			AlignData alignData = i.next ();
 			isAAsTCW = !alignData.isNTsTCW();
 			String hitID = alignData.getSeqData2().getName(); // Only change if hitID is different
@@ -73,8 +85,7 @@ public class PairViewPanel extends JPanel implements ClipboardOwner
 				alt = !alt;
 				lastHit=hitID;
 			}
-			PairAlignPanel curPanel = new PairAlignPanel ( 
-					cnt, alignData, alt, isHit, nTopGap, nBottomGap, nSideGaps, nSideGaps );
+			PairAlignPanel curPanel = new PairAlignPanel ( cnt, alignData, alt, isHit, maxStr );
 			subPanels.add( curPanel );	
 			cnt++;
 		}
@@ -680,6 +691,5 @@ public class PairViewPanel extends JPanel implements ClipboardOwner
 	private JScrollPane scroller = null;
 	private Vector<PairBasePanel> baseAlignPanelsVec = null;
     
-	static final private int GAP_WIDTH = 10, nTopGap = GAP_WIDTH, nBottomGap = GAP_WIDTH / 2, nSideGaps = GAP_WIDTH; 
     private static final long serialVersionUID = 1;	
 }

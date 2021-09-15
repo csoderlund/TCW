@@ -194,13 +194,7 @@ public class CoreDB {
        	   mDB.tableDelete("tuple_orfs"); // CAS305
        	   mDB.tableDelete("tuple_usage");// CAS305
          
-       	   Out.PrtSpMsg(1, "Remove GO tables...");
-       	   mDB.tableDrop("go_info");
-       	   mDB.tableDrop("pja_gotree");
-       	   mDB.tableDrop("pja_unitrans_go");
-       	   mDB.tableDrop("pja_uniprot_go");
-       	   mDB.tableDrop("go_term2term");
-       	   mDB.tableDrop("go_graph_path");
+       	   Schema.dropGOtables(mDB); // CAS332 was dropping from here, and not complete
        	   
        	   // CAS331 Created during prune from command-line
        	   mDB.tableDrop(DoUniPrune.tmp_hit);

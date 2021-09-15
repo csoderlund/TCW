@@ -15,7 +15,6 @@ import util.database.HostsCfg;
 import util.file.FileHelpers;
 import util.methods.ErrorReport;
 import util.methods.Out;
-import util.methods.TimeHelpers;
 
 /**
  * Main routine - called from execAnno or from runSingleTCW on annotate 
@@ -311,7 +310,7 @@ public class runSTCWMain
 			if (hasOption(args, "-o2")) {
 				cover2 = getOptionNum(args, "-o2");
 				if (cover2<0) Out.die("-o2 requires an integer following this flag");
-				else          Out.prt("   Cover2: " + cover1);
+				else          Out.prt("   Cover2: " + cover2);
 			}
 			bdoAnno=false; 
 		}
@@ -353,6 +352,7 @@ public class runSTCWMain
 				nPrtPrune = getOptionNum(args, "-pp");
 				Out.prt("   Print first " + nPrtPrune + " pruned hits per annoDB");
 			}
+			Out.prt("   This is just for experimentation. Remove annotation and Re-annotate when done experimenting.");
 			bdoAnno=false;
 			doPrune = true;
 		}

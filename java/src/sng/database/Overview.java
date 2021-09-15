@@ -486,70 +486,72 @@ public class Overview {
 	 // ANNO DBS
     private boolean annoDatabases(Vector <String> lines) {	  
     	try {    			
-	        int nDB = nAnnoDBs;   
+	        Out.prtSp(1, "Processing each annoDB.....");
 	        lines.add("   annoDBs (Annotation databases): " + nAnnoDBs + "   (see Legend below)");
 	        
-	        Out.prtSp(1, "Processing each annoDB.....");
-	   /* Loop through seq-hits for each annoDB creating stats */  
-	        nDB++; // do not used index 0
+	   /* Loop through seq-hits for each annoDB creating stats */
+	        int nDB = (nAnnoDBs+1);  // 1..nAnnoDB
 	        double [] totSimSum = new double [nDB]; // divide by totPairs
 	        double [] bestSimSum = new double [nDB]; // divide by hitSeq[i] 
 	        int [] hitSeq = new int [nDB]; // percent of numSeqs
-	        int [] cover1 = new int [nDB]; // percent of hitSeq[i]
-	        int [] cover2 = new int [nDB]; // percent of hitSeq[i]
+	        int [] cover1 = new int [nDB]; // percent of hitSeq[i] at COVER1
+	        int [] cover2 = new int [nDB]; // percent of hitSeq[i] at COVER2
 	        for (int i=0; i<nDB; i++) {
-	        		totSimSum[i]=bestSimSum[i]=0.0;
-	        		hitSeq[i]=cover1[i]=cover2[i]=0;
+	        	totSimSum[i]=bestSimSum[i]=0.0;
+	        	hitSeq[i]=cover1[i]=cover2[i]=0;
 	        }
-	     	int maxIdx = mDB.executeCount("SELECT max(CTGID) FROM contig")+1;
-	     	boolean [] noHit = new boolean [maxIdx];
+	        int maxIdx = mDB.executeCount("SELECT max(CTGID) FROM contig")+1;
+	     	int [] noHit = new int [maxIdx];
+	     	int badRank=0;
+	     	
+	        // CAS332 Instead of checking rank=1, I was checking for the first hit because
+	        // some sequences end up with rank=2 due to duplicates. Still fixing...
 	     
 	     	for (int dbid=1; dbid < nDB; dbid++) {
-	     		for (int i=0; i<maxIdx; i++) noHit[i]=true;
+	     		for (int i=0; i<maxIdx; i++) noHit[i]=0;
 	     		
-	     		// BasicHitQuery:443 and SeqDetail for hit table use prot_start and prot_end
-	     		ResultSet rs = mDB.executeQuery("select hit.length, " +
-		    	    	" seq.percent_id, seq.prot_start, seq.prot_end, seq.blast_rank, seq.CTGID, seq.contigid " +
+	     		ResultSet rs = mDB.executeQuery("select " +
+		    	    	" seq.percent_id, seq.prot_cov, seq.blast_rank, seq.CTGID, seq.contigid " +
 		    			" from pja_db_unitrans_hits as seq " +
 		    			" right join pja_db_unique_hits as hit on seq.DUHID = hit.DUHID " +
 		    			" WHERE hit.DBID=" + dbid +
 		    			" order by seq.CTGID, seq.blast_rank");			
 	     		
      			while (rs.next()) {
-	    			int hLen = rs.getInt(1);
-	    			int pSim = rs.getInt(2);
-	    			int align = Math.abs(rs.getInt(4)-rs.getInt(3)+1);
-	    			//int rank = rs.getInt(5);
-	    			int idx = rs.getInt(6);
-	    			/** CAS321 this happens cause duplicate hits can get in - need to fix in annotator
-	    			if (noHit[idx] && rank!=1) {
+     				int i=1;
+	    			int pSim = rs.getInt(i++);
+	    			int hitCov = rs.getInt(i++); // CAS332 was prot_end-prot_start
+	    			int rank = rs.getInt(i++);
+	    			int idx = rs.getInt(i++);
+	    			
+	    			if (Globalx.debug && noHit[idx]==0 && rank==2) {
+	    				noHit[idx]=2;
 	    				badRank++;
-	    				if (badRank<=3) Out.PrtWarn("First hit but rank is " + rank + " #DB" + dbid + 
-	    						" " + rs.getString(7));
-	    				if (badRank==3) {
-	    					Out.PrtSpMsg(1,"Further messages surpressed; listed in log file. The hit file and DB fasta file may be inconsistent.");
-	    				}
+	    				if (badRank<=3) Out.PrtWarn("First hit not rank=1 - #DB" + dbid + " " + rs.getString(i));
+	    				if (badRank==3) Out.PrtSpMsg(1,"Further messages surpressed. The hit file and DB fasta file may be inconsistent.");
 	    			}
-	    			**/
-	    			if (noHit[idx]) {
-	    				noHit[idx]=false;
-	    				if (pSim>=COVER1) {
-	    					double polap = ((double)align/(double)hLen)*100.0;
-	    					if (polap>=COVER1) cover1[dbid]++;
+	    			
+	    			if (rank==1) { 
+	    				noHit[idx]=1;
+	    				hitSeq[dbid]++;
+	    				if (pSim>=COVER1 && hitCov>=COVER1) {
+	    					cover1[dbid]++;
 	    					
-	    					if (pSim>=COVER2 && polap>=COVER2) cover2[dbid]++;
+	    					if (pSim>=COVER2 && hitCov>=COVER2) cover2[dbid]++;
 	    				}
 	    				bestSimSum[dbid] += (double) pSim;
 	    			}
 	    			totSimSum[dbid] += (double) pSim;
 	    		}
 	    		rs.close();
-	    		
-	    		// even if the indices are not sequential (from assembly), 
-	    		// this is only counting the ones with a value
-	    		for (int i=0; i<maxIdx; i++) if (!noHit[i]) hitSeq[dbid]++;
-	    	   	Out.prtSpCnt(1, hitSeq[dbid], "Seqs with hits for DB#" + dbid + "             ");
+	    		if (Globalx.debug) {
+	    			int cntNoHit=0;
+	    			for (int x : noHit) if (x==2) cntNoHit++;
+	    			Out.PrtSpCntMsg2(1, hitSeq[dbid], "Seqs with hits for DB#" + dbid, cntNoHit, "No Rank=1");
+	    		}
+	    		else Out.PrtSpCntMsg(1, hitSeq[dbid], "Seqs with hits for DB#" + dbid + "             ");
 	     	}
+	     	
 	   /* Loop through annoDBs creating table */ // CAS327 change BEST HIT to Rank=1
 	        String [] dfields =  {"ANNODB",  "ONLY", "BITS", "ANNO", "UNIQUE", "TOTAL", "AVG", "Rank", "HAS (%Seqs)", "AVG", "COVER", "COVER"};
 	        String [] dfields2 = {"",          "",     "",    "",    "",        "",     "%SIM"," =1 ", "HIT        ", "%SIM", ">="+COVER1, ">="+COVER2};
@@ -584,7 +586,6 @@ public class Overview {
     	       	
     	        rows[r][c++] = " | "; // rank=1
     	        
-   	       	
     	       	int hseq = hitSeq[dbid];
     	      	rows[r][c++] =  Out.kbFText(hseq) + " " + Out.perFtxtP(hseq, numSeqs); 
      	  

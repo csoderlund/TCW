@@ -103,6 +103,10 @@ public class DoUniProt
 		try {
 			if (mDB.tableColumnExists("assem_msg", "anno_msg"))
 		 		mDB.executeUpdate("update assem_msg set anno_msg=''");
+			
+			if (!mDB.tableColumnExists("assem_msg", "prune")) // CAS332 - also run in DoUniPrune
+				mDB.tableCheckAddColumn("assem_msg", "prune", "tinyint default -1", null);
+			mDB.executeUpdate("update assem_msg set prune = " + pruneType);
 		}
 		catch (Exception e) {
 			pRC = false;

@@ -4,11 +4,10 @@
 <title>singleTCW Overview</title>
 
 <style>
-.nw {vertical-align: top; white-space: nowrap;}	
-.top {vertical-align: top; }	
-table.y, .y td, th { border: 1px solid black; border-collapse: collapse; border-spacing: 5px;}
-th, td {padding: 5px;}
+.tabley    		{border: 1px  solid black; border-spacing: 0px;  border-collapse: collapse;}
+.tabley td 		{border: 1px  solid black; padding: 3px; }
 </style>
+
 </head>
 
 <body style="font-family: Arial, sans-serif;  font-size: 14px;">
@@ -17,7 +16,8 @@ th, td {padding: 5px;}
 <tr><td>&nbsp;
 
 <tr><td>
-<h2>Reproduce singleTCW overview</h2>
+<h2>Reproduce sTCW overview</h2>
+
 This describes how to obtain the table of results corresponding to statistics
 in the overview. The following short-hand is used:
 <ul>
@@ -25,37 +25,38 @@ in the overview. The following short-hand is used:
 <li>#Seqs is the number of sequences, which is listed at the top of the overview.
 <li>"Stats" is the "Show Column Stats" on the "Table..." drop-down.
 </ul>
-
+<big><i>Always clear filters before setting new ones!</i></big>
 <h3>INPUT</h3>
 Most of the input section is data supplied by the user with runSingleTCW. The following
-two are computed:
-<table class=y>
-<tr><td>Counts: SIZE<td>Show all<td>Column:Counts for all conditions: Stats, column:Sum
+are computed:
+<table class=tabley>
+<tr><td colspan=3>Counts:
+<tr><td>SIZE<td>Show All<td>Column:Counts for all conditions: Stats, column:Sum
+<tr><td colspan=3>Sequences:
 <tr><td>AVG-len<td>Show All<td>Column:Length; Stats, column:Average
 <tr><td>MED-len<td>Show All<td>Column:Length; Stats, column:Median
-<br>The median in the two cases will be slightly different 
+<br>The median in the two cases may be slightly different 
 because they are computed differently.
 </table>
  
 <h3>ANNOTATION</h3>
 <h3>Hit Statistics:</h3>
 
-<table class=y>
+<table class=tabley>
 <tr><th>Column<th>Search<th>Obtain number
 <tr><td>Sequences with hits<td>Filters: Annotated<td>Number of rows
-<tr><td>Unique hits<td>AnnoDB Hits: Seq:None(slow)<sup>*</sup><td>Hits # above table
-<tr><td>Total sequence hits<td>AnnoDB Hits: Seq:None(slow)<sup>*</sup><td>Pairs # above table
+<tr><td>Unique hits<td>AnnoDB Hits: Seq:None(slow)<td>Hits # above table
+<tr><td>Total sequence hits<td>AnnoDB Hits: Seq:None(slow)<td>Pairs # above table
 <tr><td>Bases covered by hit<td>AnnoDB Hits: Seq:Best Bits<td>Unselect "Group by Hit ID""; column:Align; 
 	<br>Stats, column:Sum; for NT, multiply by 3
 <tr><td>Total bases 
 	<br>(residues for AA seqs)
 	<td>Show All<td>Column:Length; Stats, column:Sum
 </table>
-<sup>*</sup> Use Clear All
 
 <h3>AnnoDBs:</h3>
 
-<table class=y>
+<table class=tabley>
 <tr><th>Column<th>Search<th>Obtain number
 <tr><td>ONLY
 	<td>Filters: Annotated, Best Bits, 
@@ -71,31 +72,33 @@ because they are computed differently.
 <tr><td>UNIQUE<td>Seq:None(slow)<td>Hits # above table
 <tr><td>TOTAL<td>Seq:None(slow) <td>Pairs # above table
 
-<tr><td>AVG-SIM<td>Seq:None(slow)<td>Unselect "Group by Hit ID""; column:%Sim; Stats, column:Average
+<tr><td>AVG %SIM<td>Seq:None(slow)<td>Unselect "Group by Hit ID"; column:%Sim; Stats, column:Average
 
 <tr><td colspan=3>Rank=1 is the best hit for a sequence for a given annoDB.
-<tr><td>HAS SEQ<td>Seq:Rank=1<td>Seqs # above table; percentage of total #Seqs
-<tr><td>AVG-SIM<td>Seq:Rank=1 <td>Uncheck "Group by Hit""; Column:%Sim; Stats, column:Average
-<tr><td>Cover &gt;=N<td>Seq:Rank=1,%Sim&gt;=N,%HitCov&gt;=N
-	<td>Seqs # above table; percentage of HIT-SEQ
+<tr><td>HAS HIT<td>Seq:Rank=1<td>Seqs # above table; percentage of total #Seqs
+<tr><td>AVG %SIM<td>Seq:Rank=1 <td>Uncheck "Group by Hit"; Column:%Sim; Stats, column:Average
+<tr><td>Cover &gt;=N<td>Seq:Rank=1,%Sim&gt;=N,%HitCov<sup>*</sup>&gt;=N
+	<td>Seqs # above table; percentage of HAS HIT
 </table>
-HitCov is the difference between the hit stop and start coordinates divided by the length of the protein.
+<sup>*</sup>HitCov is the difference between the hit stop and start coordinates divided by the length of the protein.
 
 <h3>Top 15 species from total: N</h3>
 The N is the number of unique species based on the first two words of the
-species name: 
+species name. From "AnnoDB Hits":
 <ul>
-<li>AnnoDB Hits, select Species, select Two words 
-<li>The number listed beside "Species" is the same as N, and
-the species are listed in the table.
+<li>Select "Species"", select "Two words"", enter first two words of species name next to "Find", select "Find", select the entry on the
+left and add to the right.
+<li>Select "Best Bits", "Best Anno" or "None" for the three numbers shown.
+<li>BUILD TABLE 
+<li>Use the number listed beside "Pairs".
 </ul>
 
 <h3>Gene Ontology Statistics:</h3>
 
-<table class=y>
+<table class=tabley>
 <tr><th>Column<th>Search<th>Obtain number
 <tr><td>Unique GOs
-	<td>GO Annotation: no filters<sup>*</sup>
+	<td>GO Annotation: no filters
 	<td>Results number
 <tr><td>Unique hits with GOs
 	<td>AnnoDB Hits: Seqs:None; GO,etc:Has GO
@@ -117,19 +120,18 @@ the species are listed in the table.
 <tr><td>cellular_component
 	<td>GO Annotation: Level: cellular_component
 	<td>Number GOs at top of table	
-<tr><td>is_a, part_of, replaced_by
-	<td>GO Annotation:  no filters<sup>*</sup>
-	<td>Table..., Each GO's parents with relations, Export to file, grep	<sup>**</sup>
+<tr><td>is_a, part_of
+	<td>GO Annotation:  no filters
+	<td>Export..., Each GO's parents with relations, grep (see footnote<sup>*</sup>)
 </table>
-<sup>*</sup> Use Clear All
-<br><sup>**</sup> From terminal, <tt>grep Is_a AllGoParents.tsv | wc</tt>. Then replace
-<tt>is_a</tt> with <tt>part_of</tt>, then with <tt>replaced_by</tt>.
+<sup>*</sup> From terminal, '<tt>grep is_a GOeachParents.tsv | wc</tt>'. Repeat with 
+<tt>is_a</tt> replaced with <tt>part_of</tt>.
 
 
 <h2>EXPRESSION</h2>
 The following sections may not exist if the input had no count files or the DE methods
 were not executed.
-<table class=y>
+<table class=tabley>
 <tr><td>TPM*
 	<td>Filter: select Condition under Exclude; set "At Most" to 1.99. 
 	<td>This will continue using 4.99, 9.99, etc, where the previous results are
@@ -163,8 +165,8 @@ that are found in un-assembled sequences.
 	to the row number that start having #n&gt;10.
 </table>
 
-<h3>ORFs stats:</h3>
-<table class=y>
+<h3>ORF Stats:</h3>
+<table class=tabley>
 <tr><th>Column<th>Search<th>Obtain number
 <tr><td colspan=3><i>The following use the Basic Sequence. Select "TCW" and enter
 the Substring indicated.</i>
@@ -194,7 +196,7 @@ find where the rows start with 'No','No'.
 <h3>GC Content:</h3>
 The only number reproducible is the GC Content, which is the %GC over the entire sequence..
 
-<table class=y>
+<table class=tabley>
 <tr><td>GC Content<td>Show All<td>Column:%GC; Stats, column:Average
 <br>Note, there will be some slight difference in the number due to round-off error.
 </table>
@@ -205,5 +207,6 @@ The only number reproducible is the GC Content, which is the %GC over the entire
 <li>The CpG-O/E is ratio observed/expected [(#CpG/(#G*#C))*length].
 <li>The UTRs can be viewed in the Sequence Detail alignments, but there is no column for it.
 </ul>
+
 </body>
 </html>

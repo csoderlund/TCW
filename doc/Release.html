@@ -6,6 +6,22 @@
 <a id=top>
 <!--#include virtual="./ssi/start1.html" -->
 
+<h4>v3.3.2  15-Sept-2021</h4>
+Fixes for bugs recently introduced bugs and one display improvement. 
+
+<p><ttp>runSingleTCW</ttp> 
+<ul>
+<li>Various features use "Rank=1", which was not being updated when pruning was applied. 
+<li>"Remove Annotation" was not clearing the GOseq values totally.
+</ul>
+
+<ttp>viewSingleTCW</ttp> 
+<ul>
+<li>AnnoDB Hits bug fix from v3.3.0: Filtering on "%HitCov" stopped working.
+<li>Pair Alignment: if multiple pairs are shown, the alignment will start in the same place across all alignments.
+<li>Verified all "Reproduce" information from "Overview" and improved the description.
+</ul>
+
 <h4>v3.3.1  1-Sept-2021</h4>
 
 The singleTCW database has a small schema update that will be applied the first time an existing
@@ -15,7 +31,7 @@ database is viewed.
 <ul>
 <li>sTCWdb version sdb6.0: The percent similarity (identity) is stored as a real number instead of an integer.
 
-<li><font color=green>NEW</font> Prune Hits - there are many hits with the exact same coordinates and/or descriptions.
+<li><font color=blue>NEW</font> Prune Hits - there are many hits with the exact same coordinates and/or descriptions.
 A new function removes all but the best based on same alignment values or same description.
 This function can be set to run in the AnnoDBs <ttl>Options</ttl> or from the command line.
 <li>Tiny changes;

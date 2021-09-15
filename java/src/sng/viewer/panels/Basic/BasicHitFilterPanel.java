@@ -358,13 +358,13 @@ public class BasicHitFilterPanel extends JPanel {
 			rowFilter1.add(Box.createHorizontalStrut(2));
 			
 			isActive = false;
-			chkUseAlign = Static.createCheckBox("%HitCov>=", isActive);
-			chkUseAlign.addActionListener(new ActionListener() {
+			chkUseHitCov = Static.createCheckBox("%HitCov>=", isActive);
+			chkUseHitCov.addActionListener(new ActionListener() {
     			public void actionPerformed(ActionEvent e) {
     				enableEvalSim();
     			}
     		});   
-    		rowFilter1.add(chkUseAlign);
+    		rowFilter1.add(chkUseHitCov);
 			txtAlign = Static.createTextField( DEFAULT_SIM, INT_SIZE,isActive);
 			rowFilter1.add(txtAlign);
 			rowFilter1.add(Box.createHorizontalStrut(4));
@@ -609,7 +609,7 @@ public class BasicHitFilterPanel extends JPanel {
 			return (loadList!=null);
 		}
 		public int getAlign() {
-			if (!chkUseAlign.isSelected()) return 0;
+			if (!chkUseHitCov.isSelected()) return 0;
 				
 			try {
 				return Integer.parseInt(txtAlign.getText());
@@ -678,8 +678,8 @@ public class BasicHitFilterPanel extends JPanel {
 			String sim = (chkUseSim.isSelected()) ? txtSim.getText() : "";
 			if (!sim.equals("")) sum = strMerge(sum, "Sim " + sim + "%");
 			
-			String aln = (chkUseAlign.isSelected()) ? txtAlign.getText() : "";
-			if (!aln.equals("")) sum = strMerge(sum, "Align " + aln + "%");
+			String aln = (chkUseHitCov.isSelected()) ? txtAlign.getText() : "";
+			if (!aln.equals("")) sum = strMerge(sum, "HitCov " + aln + "%"); // CAS332 was "Align"
 			
 			int x = boxBest.getSelectedIndex();
 			if (x!=0) {
@@ -701,7 +701,7 @@ public class BasicHitFilterPanel extends JPanel {
 			*/
 			txtField.setText("");
 			
-			chkUseAlign.setSelected(false);
+			chkUseHitCov.setSelected(false);
 			txtAlign.setText(DEFAULT_SIM); txtAlign.setEnabled(false);
 			
 			chkUseEval.setSelected(false); 
@@ -720,7 +720,7 @@ public class BasicHitFilterPanel extends JPanel {
 		private void enableEvalSim() {
 			txtEval.setEnabled(chkUseEval.isSelected());
 			txtSim.setEnabled(chkUseSim.isSelected());
-			txtAlign.setEnabled(chkUseAlign.isSelected());
+			txtAlign.setEnabled(chkUseHitCov.isSelected());
 		}
 		private void enableSections() {
 			boolean sec1 = chkUseSearch.isSelected();
@@ -740,7 +740,7 @@ public class BasicHitFilterPanel extends JPanel {
 			chkCount.setEnabled(sec2);btnCount.setEnabled(sec2);
 			
 			txtEval.setEnabled(sec2);    txtSim.setEnabled(sec2);     txtAlign.setEnabled(sec2);
-			chkUseEval.setEnabled(sec2); chkUseSim.setEnabled(sec2);  chkUseAlign.setEnabled(sec2);
+			chkUseEval.setEnabled(sec2); chkUseSim.setEnabled(sec2);  chkUseHitCov.setEnabled(sec2);
 	
 			chkAnnoDBs.setEnabled(sec2); chkSpecies.setEnabled(sec2); chkGOetc.setEnabled(sec2);
 			btnAnnoDBs.setEnabled(sec2); btnSpecies.setEnabled(sec2); btnGOetc.setEnabled(sec2);
@@ -754,7 +754,7 @@ public class BasicHitFilterPanel extends JPanel {
 				
 				if (chkUseEval.isSelected()) 	txtEval.setEnabled(sec2);
 				if (chkUseSim.isSelected())  	txtSim.setEnabled(sec2);
-				if (chkUseAlign.isSelected())  	txtAlign.setEnabled(sec2);
+				if (chkUseHitCov.isSelected())  	txtAlign.setEnabled(sec2);
 			}
 		}
 		
@@ -771,7 +771,7 @@ public class BasicHitFilterPanel extends JPanel {
 		public Vector <String> loadList = null;
 		
 		// Seq: first filter line
-		private JCheckBox  chkUseEval = null, chkUseSim = null, chkUseAlign=null;
+		private JCheckBox  chkUseEval = null, chkUseSim = null, chkUseHitCov=null;
 		private JTextField txtEval = null,    txtSim = null,    txtAlign=null;
 		
 		private String [] bestOpt = {"None(slow)", "Rank=1", "Best Bits", "Best Anno", 
@@ -2829,9 +2829,9 @@ public class BasicHitFilterPanel extends JPanel {
             while( rset.next() )
     		{	
         		int cutoff = queryPanel.getAlign();
-        		if (cutoff>0) {
-        			int hlen = rset.getInt(16);
-        			int halign = Math.abs(rset.getInt(8)-rset.getInt(7)+1);
+        		if (cutoff>0) { 
+        			int hlen = rset.getInt(17); // CAS332 didnt fix when added bitscore; fails when Hcov is selected
+        			int halign = Math.abs(rset.getInt(9)-rset.getInt(8)+1);
         			double align = ((double)halign/(double)hlen)*100.0;   			
         			if (align < (double) cutoff) continue;
         		}

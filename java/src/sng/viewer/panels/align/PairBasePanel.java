@@ -13,6 +13,7 @@ import javax.swing.*;
 
 import util.align.AAStatistics;
 import util.database.Globalx;
+import util.methods.Out;
 /*
  * Drawing routines for pair wise alignment
  * PairAlignPanel extends this class
@@ -51,7 +52,6 @@ public class PairBasePanel extends JPanel {
 	public void selectNone () { }
 	
 	public void handleClick( MouseEvent e, Point localPoint ) { }
-	public double getGraphicalDeadWidth ( ) { return 0; }
 	public AlignData getAlignData() {return null;}
 	
 	//------- Setup -------------//
