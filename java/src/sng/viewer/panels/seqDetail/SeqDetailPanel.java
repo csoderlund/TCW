@@ -251,10 +251,10 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 				public void actionPerformed(ActionEvent e) {
 					if (theHitTable==null) return;
 					int [] selections = theHitTable.getSelectedRows();
-					if (selections.length==0)
-						JOptionPane.showMessageDialog(theMainFrame, 
-								"Select a hit in the DB hits table.", 
-								"Selected hit", JOptionPane.PLAIN_MESSAGE);
+					if (selections.length==0) {
+						showSelectedHit(0); // CAS333 default first hit
+						//JOptionPane.showMessageDialog(theMainFrame, "Select a hit in the DB hits table.", "Selected hit", JOptionPane.PLAIN_MESSAGE);
+					}
 					else { 
 						showSelectedHit(selections[0]);
 					}
@@ -353,7 +353,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 				}
 			}
 			}));
-			copypopup.add(new JMenuItem(new AbstractAction("Selected hit - sequence") {
+			copypopup.add(new JMenuItem(new AbstractAction("Selected hit - Sequence") {
 				private static final long serialVersionUID = 4692812516440639008L;
 				public void actionPerformed(ActionEvent e) {
 					int [] selections = theHitTable.getSelectedRows();
@@ -720,8 +720,8 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 			pSim = sim;
 			nAlignLen = alignLen;
 			
-			nStart = start; 
-			nEnd = end;
+			nStart = start; // sequence hit start in NT
+			nEnd = end;		// sequence hit end in NT
 			isAAhit = isAA;
 			
 			if (isAA) { // CAS331 add isAAhit so NT will not be given a frame
@@ -1245,8 +1245,9 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		
 		lines.add("");
 		lines.add(pre + "Computed columns");
-		lines.add(String.format(fd, "Hit Coverage", String.format("%d", hd.pHitAlign)));
+		lines.add(String.format(fd, "Frame", hd.nFrame));
 		lines.add(String.format(fd, "Seq Coverage", String.format("%d", hd.pSeqAlign)));
+		lines.add(String.format(fd, "Hit Coverage", String.format("%d", hd.pHitAlign)));
 		lines.add(String.format(fd, "#Assigned GO", hd.nGO));
 		lines.add(String.format(fd, "Rank", hd.nRank));
 		
@@ -1268,7 +1269,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		}
 		String [] alines = new String [lines.size()];
 		lines.toArray(alines);
-		UserPrompt.displayInfoMonoSpace(getInstance(), "Hit Info", alines);
+		UserPrompt.displayInfoMonoSpace(getInstance(), "Hit Info for " + ctgData.getContigID(), alines,  380, 380); // CAS333 add name and w, h
 	}
 	
 	/**********************************************************
@@ -1452,9 +1453,9 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 	public int [] getHitEnd() { return frameHitEnd;}
 	
 	private boolean hasHit=false;
-	private String [] frameHitInfo = new String [7]; // for SeqFramePanel
-	private int [] frameHitStart = new int [7];
-	private int [] frameHitEnd = new int [7];
+	private String [] frameHitInfo  = new String [7]; // for SeqFramePanel
+	private int []    frameHitStart = new int [7];
+	private int []    frameHitEnd   = new int [7];
 	
 	private ContigData ctgData;
 	private HitListData [] 	hitData;					 // all data

@@ -15,6 +15,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import util.methods.ErrorReport;
+import util.methods.Out;
 
 public class UserPrompt extends JDialog {
 	private static final long serialVersionUID = 1L;
@@ -45,23 +46,23 @@ public class UserPrompt extends JDialog {
 		helpDiag.setVisible(true);		
 	}
 	/*******************************************************/
-	// send line-delimited string or array of strings
+	// line-delimited string, does not use parentFrame, modal=false
 	public static void displayInfoMonoSpace(Component parentFrame, String title, String theMessage) {
 		if (parentFrame==null) 
 			 displayInfoMonoSpace(null, title, theMessage, false, false);
 		else displayInfoMonoSpace(parentFrame, title, theMessage, false, false);
 	}
-	
+	// string array, does not use parentFrame, modal=false
 	public static void displayInfoMonoSpace(Component parentFrame, String title, String [] message) {
 		String theMessage = "";
 		for(int x=0; x<message.length; x++)
 			theMessage += message[x] + "\n";
 		
-		if (parentFrame==null) 
-			 displayInfoMonoSpace(null, title, theMessage, false, false);
+		if (parentFrame==null) displayInfoMonoSpace(null, title, theMessage, false, false);
 		else displayInfoMonoSpace(parentFrame, title, theMessage, false, false);
 	}
 	
+	// string array, user sets sizeToParent and isModal
 	public static void displayInfoMonoSpace(Component parentFrame, String title, 
 			String [] message, boolean isModal, boolean sizeToParent) {
 		
@@ -72,8 +73,14 @@ public class UserPrompt extends JDialog {
 			 displayInfoMonoSpace(null, title, theMessage, false, false);
 		else displayInfoMonoSpace(parentFrame, title, theMessage, isModal, sizeToParent);
 	}
-	// the three above call this
-	//isModal=true means that everything is frozen until the window is closed
+	/***********************************************************************
+	// the 3 above call this
+	 * @param parentFrame - may be null, in which case sizeToParent and halfWidth are ignoreed
+	 * @param title
+	 * @param theMessage
+	 * @param isModal - true means that everything is frozen until the window is closed
+	 * @param sizeToParent if
+	 */
 	private static void displayInfoMonoSpace(Component parentFrame, String title, 
 			String theMessage, boolean isModal, boolean sizeToParent) {
 		JOptionPane pane = new JOptionPane();
@@ -93,8 +100,47 @@ public class UserPrompt extends JDialog {
 		helpDiag.setModal(isModal);
 		helpDiag.setResizable(true);
 		
-		if(sizeToParent && parentFrame != null && (helpDiag.getWidth() >= parentFrame.getWidth() || helpDiag.getHeight() >= parentFrame.getHeight()))
-				helpDiag.setSize(parentFrame.getSize());
+		if (parentFrame != null && sizeToParent) {
+			int w = parentFrame.getWidth();  
+			int h = parentFrame.getHeight();  
+			if (helpDiag.getWidth() >= w || helpDiag.getHeight() >= h) {	
+				Dimension d = new Dimension (w, h);
+				helpDiag.setSize(d);
+			}
+		}
+		helpDiag.setVisible(true);		
+	}
+	/********************************************************************
+	 * CAS333 add
+	 * @param parentFrame - if supplied, parentframe will not go in front of popup
+	 * @param title
+	 * @param [] message
+	 * @param w	width
+	 * @param h	height
+	 */
+	public static void displayInfoMonoSpace(Component parentFrame, String title, String [] message,  int w, int h) {
+		String theMessage = "";
+		for(int x=0; x<message.length; x++) theMessage += message[x] + "\n";
+		
+		JOptionPane pane = new JOptionPane();
+		JTextArea messageArea = new JTextArea(theMessage);
+
+		JScrollPane sPane = new JScrollPane(messageArea); 
+		messageArea.setFont(new Font("monospaced", Font.BOLD, 12));
+		messageArea.setEditable(false);
+		messageArea.setSelectionColor(Color.gray); // CAS313 makes text selectable and copy
+		messageArea.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+		
+		pane.setMessage(sPane);
+		pane.setMessageType(JOptionPane.PLAIN_MESSAGE);
+
+		JDialog helpDiag = pane.createDialog(parentFrame, title);
+		helpDiag.setModal(false);	// do not freeze other windows
+		helpDiag.setResizable(true);
+		
+		Dimension d = new Dimension (w, h);
+		helpDiag.setSize(d);
+		
 		helpDiag.setVisible(true);		
 	}
 	/*******************************************************/

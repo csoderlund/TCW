@@ -62,8 +62,8 @@ public class STCWMain
 			System.err.println("Time query executions turned on.");
 			doTIME = true;
 		}
-		if (hasOption(args, "-test")) { // CAS313
-			System.err.println("Test turned on.");
+		if (hasOption(args, "-d")) { // CAS313
+			System.err.println("Debug turned on.");
 			Globalx.debug = true;
 		}
 		String dbstr = (args.length>0) ? args[0] : "";  

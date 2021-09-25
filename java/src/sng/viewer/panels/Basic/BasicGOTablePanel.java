@@ -77,7 +77,7 @@ public class BasicGOTablePanel {
 	
 	public static final int GOindex=0;
 	public static final int GOdomain=1;
-	private static final int GOdesc=3;
+	private static final int GOdesc=2; // CAS333 was 3
 	private static final int GOnSeq=5;
 	
 	private static final String goPref= "_goPrefs";

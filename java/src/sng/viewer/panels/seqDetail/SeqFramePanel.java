@@ -126,8 +126,8 @@ public class SeqFramePanel extends JPanel {
 				{
 					int type = frameDropDown.getSelectedIndex();
 					if (type == 0) 		{dFrame=1;}
-					else if (type == 1)  {dFrame=2;}
-					else if (type == 2)  {dFrame=3;}
+					else if (type == 1) {dFrame=2;}
+					else if (type == 2) {dFrame=3;}
 					else if	(type == 3)	{dFrame=-1;}
 					else if	(type == 4)	{dFrame=-2;}
 					else if	(type == 5)	{dFrame=-3;}
@@ -234,7 +234,12 @@ public class SeqFramePanel extends JPanel {
 				(int)toolPanel.getPreferredSize ().getHeight() ) );	
 	}
 	private SeqFramePanel getInstance() {return this;}
-	/*************************************************/
+	/*************************************************
+	 * The Coding Sequence (CDS) is the actual region of DNA that is translated to form proteins. 
+	 * While the ORF may contain introns as well, the CDS refers to those nucleotides(concatenated exons) 
+	 * that can be divided into codons which are actually translated into amino acids by the ribosomal 
+	 * translation machinery.
+	 *************************************************/
 	private void createStatsPanel() {
 		statsPanel = Static.createRowPanel();
 		if (isProtein) {
@@ -244,7 +249,7 @@ public class SeqFramePanel extends JPanel {
 		}
 		String text;
 		if (topAction==0) { // CAS327 add orfFrame
-			text="Best ORF: " + orfFrame + "  Length: " + sequence.length() + "   " + remark + "\n";
+			text="Assigned ORF: RF" + orfFrame + "  Length: " + sequence.length() + "   " + remark + "\n";
 			for (OrfData o : ORFs) {
 				String space = (o.frame==dFrame) ? "> " : "  ";
 				text += space + o.line + "\n";
@@ -338,7 +343,7 @@ public class SeqFramePanel extends JPanel {
 		String ruler;
 		for (int j=inc, i=0; i<cnt; i++, j+=3) {
 			int num = (topAction==0) ? j : (j/3);
-			ruler = String.format(" %3d", num);
+			ruler = String.format(" %3d", (num-1)); // CAS333 Y-axis +/- X-axis to get last pos of codon see Help)
 			g2.drawString(ruler, dX, dY);
 			dX += fm.stringWidth(String.valueOf(ruler));
 		}
@@ -353,7 +358,7 @@ public class SeqFramePanel extends JPanel {
 			if (cnt==newRow) {
 				dY += rowHeight;
 				int num = (topAction==0) ? coord : ((coord-frame)/3)+1; 
-				sNum = String.format("%5d", num); // seqNumLength=5
+				sNum = String.format("%5d", num); 
 				g2.setColor(Color.black);
 				g2.drawString(sNum, xLeft, dY);
 				dX = xLeft + fm.stringWidth(String.valueOf(sNum)) + seqNumLength;

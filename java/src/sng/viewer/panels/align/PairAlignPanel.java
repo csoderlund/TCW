@@ -59,7 +59,7 @@ public class PairAlignPanel extends PairBasePanel {
 		if (super.isShowORF()) 
 			if (alignData.isNTsTCW()) {
 				if (alignData.getFrame1()==alignData.getORFCoding1().getFrame())
-						highlightAAORF ();
+						highlightUTR ();
 			}
 	};
 	
@@ -75,8 +75,7 @@ public class PairAlignPanel extends PairBasePanel {
 		Rectangle2D highlightBox = new Rectangle2D.Double ( dFrameLeftX - 2, dFrameTopY - 2, 
 				getFrameWidth () + 4, dFrameHeight + 4 );
 		
-		if ( hasSelection() )// Outline whole thing
-		{	
+		if ( hasSelection() ) {// Outline whole thing
 			Stroke oldStroke = g2.getStroke();
 			g2.setColor( Globalx.selectColor );
 			g2.setStroke( new BasicStroke (3) );
@@ -97,14 +96,15 @@ public class PairAlignPanel extends PairBasePanel {
 		g2.draw ( outsideBox );
 		g2.draw( new Line2D.Double( dFrameLeftX, dDivider1Y, getFrameRight ( ), dDivider1Y ) );
 		
-		super.drawRuler(g2, 0, dRulerTop, dRulerLow); 	
+		super.drawRuler(g2, dRulerTop, dRulerLow); 	
 	
+		// XXX Uses nTrimStart1,nTrimStop1 to avoid printing leading/trailing gaps
 		boolean isFirst=true;
-		super.drawText(g2, alignData.getDisplayStr1(), dFrameLeftX + fInsetGap, dSeq1Top );
+		super.drawName(g2, alignData.getDisplayStr1(), dFrameLeftX + fInsetGap, dSeq1Top );
 		super.drawSequence (g2, alignSeq1, dSeq1Top, dSeq1Low, nTrimStart1, nTrimStop1, isFp1, isFirst, isDNA );
 		
 		isFirst=false;
-		super.drawText(g2, alignData.getDisplayStr2(), dFrameLeftX + fInsetGap, dSeq2Top );
+		super.drawName(g2, alignData.getDisplayStr2(), dFrameLeftX + fInsetGap, dSeq2Top );
 		super.drawSequence (g2, alignSeq2, dSeq2Top, dSeq2Low, nTrimStart2, nTrimStop2, isFp2, isFirst, isDNA );
 	}
 	
@@ -187,100 +187,101 @@ public class PairAlignPanel extends PairBasePanel {
 	}
 	
 	//---------------------------------Private Methods-------------------------------------//
+	/************************************************************
+	* Search coordinates:
+	* 		starts at 1
+	* 		do not include gaps
+	* 		are in nt coords - 
+	* 			start - base before first codon
+	* 			end  -  base of last codon
+	*************************************************************/
 	
-	private void highlightHit ( ) {
+	private void highlightHit( ) {
 		if (alignData.getHitData()==null) return; 
 		
 		try {
 			String alignSeq = alignData.getAlignSeq1();
-			double start = (double) alignData.getHitData().getCtgStart();
+			double start = (double) alignData.getHitData().getCtgStart(); 
 			double end =   (double) alignData.getHitData().getCtgEnd();
-			
-			if (alignData.isNTsTCW() && !alignData.isNTalign()) {
+
+			if (alignData.isNTsTCW() && !alignData.isNTalign()) { // change to AA coords starting at 1
+				if (start>end) { // reverse start and end (ruler is still 10, 20, so do not RC sequence)
+					start = (double) alignData.getNtLen1() - start +1;
+					end =   (double) alignData.getNtLen1() - end +1;
+				}
 				int aFrame = Math.abs(alignData.getFrame1());
-				if (aFrame==3) aFrame=0;
-				
-				if (start>end) {
-					start = (start/3.0);
-					end  =  ((end-aFrame)/3.0);
-				}
-				else {
-					start = ((start-aFrame)/3.0);
-					end  =  (end/3.0);
-				}
+				start = (start-aFrame)/3.0;	  
+				end =   (end-aFrame-2)/3.0; // -2 is first base of codon 
 			}
-			if (start>end) {
-				int aaLen = 0;
-				for (int i = 0; i < alignSeq.length(); i++)
-					if (alignSeq.charAt(i) != Globals.gapCh) ++aaLen;
-				start = (double)aaLen-start+1.0;
-				end =   (double)aaLen-end+1.0;
+			else { // AA-AA and NT-NT (the 2nd may get reversed); this changes to 0-coordinate
+				start--;
+				end--;
 			}
-			double top = dSeq1Top - fInsetGap / 2.0;
-			double low = dSeq1Low + fInsetGap / 2.0;
-			
-			// drawing coords
-			int nStart = (int) start;
-			int nEnd   = (int)   end;
-			int gapStart = addGaps(alignSeq, nStart); // beginning of hit
-			while (alignSeq.charAt(gapStart)==Globals.gapCh && gapStart<alignSeq.length()) // skip any leading gaps
-				gapStart++;
-			
-			int gapStop =  addGaps(alignSeq, nEnd); 
+			// drawing coords - add gaps
+			int gapStart = addGaps(alignSeq, (int) start); // gaps before hit
+			int gapStop =  addGaps(alignSeq, (int) end);   // gaps within hit
 			
 			String tip = String.format("Seq Coords of Hit: %d-%d  Gap adjust: %d-%d", 
 							(int)start, (int)end, gapStart, gapStop);
+
+			double top = dSeq1Top - fInsetGap / 2.0;
+			double low = dSeq1Low + fInsetGap / 2.0;
 			
 			super.setupHitPanels(tip, gapStart, gapStop, top, low); 
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Showing hit region");}
 	}
 	
-	private void highlightAAORF() {
+	/********************************************
+	 * CAS333 rewrote - was extending UTR over hit overhang
+	 */
+	private void highlightUTR() {
 	try {
 		double top = dSeq1Top  - fInsetGap / 2.0;
 		double bottom = dSeq1Low + fInsetGap / 2.0;
 		
 		CodingRegion orf = alignData.getORFCoding1 ();
-		String alignSeq  = alignData.getAlignSeq1();
 			
 		int oFrame = 	Math.abs(orf.getFrame());
 		int oEnd5 = 	orf.getBegin()-oFrame;
 		int oStart3 =  	orf.getEnd()-oFrame;
 		
-		oEnd5 =   (oEnd5/3)+1; 
+		oEnd5 =   (oEnd5/3)+1; 		
 		oStart3 = (oStart3/3)+1;		
 		
-		int gapEnd5 =  	  addGaps(alignSeq, oEnd5); 
-		int gapStart3 =   addGaps(alignSeq, oStart3);
-		
-		int startAlign = (super.isTrim()) ? nTrimStart1 : 0; // already in AA coords if AA
-		int endAlign =   alignSeq1.length();
-		
-		String tip5 = String.format("5'UTRs Gapped Coords %d-%d", startAlign,gapEnd5);
-		String tip3 = String.format("3'UTRs Gapped Coords %d-%d", gapStart3, endAlign);
-	
-		super.setupUtrPanels(tip5, startAlign, gapEnd5, top, bottom); 
-		super.setupUtrPanels(tip3, gapStart3, endAlign, top, bottom); 
+		int gapEnd5 =  	  addGaps(alignSeq1, oEnd5)-1; 
+		int gapStart3 =   addGaps(alignSeq1, oStart3)-1;
+			
+		if (nTrimStart1 != gapEnd5) {
+			String tip5 = String.format("5'UTRs  Gapped Coords %d-%d", nTrimStart1, gapEnd5-1);
+			super.setupUtrPanels(tip5, nTrimStart1, gapEnd5, top, bottom); 
+		}
+		if (gapStart3 < nTrimStop1) {
+			String tip3 = String.format("3'UTRs  Gapped Coords %d-%d", gapStart3, nTrimStop1);
+			super.setupUtrPanels(tip3, gapStart3, nTrimStop1, top, bottom); 
+		}
 	}
 	catch (Exception e) {ErrorReport.prtReport(e, "Showing UTRs region");}
 	}
-	// aaaaaaa--aaaaaaaaa
-	// ---aaaabb
+	/******************************************************
+	 * ----1234-567----	
+	 * endCoord=4	gapCoord=8
+	 * 
+	 * return coordinate from beginning to endCoord with gaps added
+	 * endCoord does not account for gaps
+	 */
 	private int addGaps(String alignSeq, int endCoord) { 
 	try {
-		int gapCoord=endCoord;
+		int gapCoord = endCoord;
 		int aLen = alignSeq.length()-1;
-		int aLast=aLen;
 		
+		int aLast=aLen;
 		while (alignSeq.charAt(aLast) == Globals.gapCh && aLast>1) aLast--;// trailing gaps
-			
-		for (int sIdx=0, aIdx=0; sIdx<endCoord && aIdx<aLast; sIdx++, aIdx++) {
-			
-			while (alignSeq.charAt(aIdx) == Globals.gapCh && aIdx<aLast) {
+		
+		for (int s=0, a=0; s<=endCoord && a<aLast; a++) { // s=seq count w/o gaps, a=align count w gaps 
+			if (alignSeq.charAt(a) == Globals.gapCh) 
 				gapCoord++;
-				aIdx++;
-			}
+			else s++;
 		}
 		return gapCoord;
 	}
@@ -307,7 +308,7 @@ public class PairAlignPanel extends PairBasePanel {
 		nTrimStart1=x;
 		
 		for(x=aLen-1; x>=0 && alignSeq1.charAt(x)==gapCh; x--);
-		nTrimStop1=x;
+		nTrimStop1=x; 
 		
 		if (alignData.getFrame1()<0) isFp1=false;
 		
@@ -320,12 +321,11 @@ public class PairAlignPanel extends PairBasePanel {
 		
 		if (alignData.getFrame2()<0) isFp2=false;
 		
-		super.setIndexRange ( 0, Math.max(alignSeq1.length(), alignSeq2.length()) );
+		super.setIndexRange (Math.max(alignSeq1.length(), alignSeq2.length()) );// CAS333 is final 1
 		
 		super.setTrimRange(Math.max(nTrimStart1, nTrimStart2), Math.min(nTrimStop1, nTrimStop2)); // CAS313 add	
 		
-		if (alignData.getSeqData1().isNT()) isDNA=true;
-		else isDNA=false;
+		isDNA = alignData.getSeqData1().isNT();
 		
 		// was in setZoom
 		if ( headerPanel != null ) remove ( headerPanel );

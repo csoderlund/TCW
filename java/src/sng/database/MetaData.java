@@ -425,7 +425,7 @@ public class MetaData {
 	 public int getNumSeqSets() { return seqLibNames.length; }
 	 public String [] getSeqNames() { return seqLibNames; }
 	 public String [] getSeqTitles() { return seqLibTitles; }
-	 public String [] getDENames() { return deNames; }
+	 public String [] getDENames() { return deNames; } // is null if no deNames
 	 public String [] getDETitles() { return deTitles; }
 	 public String [] getLibNames() { return expLibNames; }
 	 public String [] getLibTitles() { return expLibTitles; }

@@ -220,7 +220,7 @@ public class MainTable extends MainTableSort {
                 }
                 pw.println();
             }
-            Out.prt("Complete writing " + nRow + " records to " + fileName);
+            Out.prt("Complete writing " + nRow + " records to " + fwObj.getFileName()); // CAS333 was fileName
             pw.close();
             return true;
         }
@@ -265,7 +265,7 @@ public class MainTable extends MainTableSort {
             }
             if (rs!=null) rs.close();
             pw.close(); mdb.close();
-            Out.prt("Complete writing " + rowCnt + " sequences  to " + fileName);
+            Out.prt("Complete writing " + rowCnt + " sequences to " + fwObj.getFileName());
             return true;
         }
         catch (Exception err) {ErrorReport.reportError(err, "Internal error: exporting  table to " + fileName);}    
@@ -341,7 +341,7 @@ public class MainTable extends MainTableSort {
             if (rs!=null) rs.close();
             pw.close(); mdb.close();
             Out.PrtSpMsgCntZero(1, "Non UniProt hits", nonUP);
-            Out.prt("Complete writing hit sequences to " + fileName);
+            Out.prt("Complete writing hit sequences to " + fwObj.getFileName());
             return true;
         }
         catch (Exception err) {ErrorReport.reportError(err, "Internal error: exporting  table to " + fileName);}    
@@ -398,7 +398,7 @@ public class MainTable extends MainTableSort {
             }
             pw.close(); mdb.close();
             Out.PrtSpCntMsgZero(1, ignore, "Ignore records with frame=0");
-            Out.prt("Complete writing " + prt + " records to " + fileName);
+            Out.prt("Complete writing " + prt + " records to " + fwObj.getFileName());
             return true;
         }
         catch (Exception err) {ErrorReport.reportError(err, "Internal error: exporting  table\nQuery: " + query);}     
@@ -489,7 +489,7 @@ public class MainTable extends MainTableSort {
     		}
     		expPW.close();
     		rs.close(); mdb.close();
-    		Out.prtSp(0, "Complete writing " + cnt + " line to " + fileName);
+    		Out.prtSp(0, "Complete writing " + cnt + " line to " + fwObj.getFileName());
     		return true;
     	}
     	catch (Exception err) {ErrorReport.reportError(err,"TCW error: exporting count table" );}   	
@@ -565,7 +565,7 @@ public class MainTable extends MainTableSort {
              }
              pw.close(); mdb.close();
              Out.PrtSpCntMsg(1, cntNoGO, "Sequences with no GOs");
-             Out.prt("Complete writing " + cnt + " sequences and " + cntGO + " GOs to " + fileName);
+             Out.prt("Complete writing " + cnt + " sequences and " + cntGO + " GOs to " + fwObj.getFileName());
              return true;
          }
          catch (Exception err) {ErrorReport.reportError(err, "Internal error: exporting GO for table\nQuery: " + query);}     
@@ -656,7 +656,7 @@ public class MainTable extends MainTableSort {
 	        String [] de = frame.getMetaData().getDENames(); // CAS322 was reading database
 		    Vector<String> pcols = new Vector<String>();
 		    String deCols="";
-		    if (de.length>0) {
+		    if (de!=null && de.length>0) { // CAS333 was not checking for null
 		    	for (String d : de) {
 		    		pcols.add(d);
 		    		deCols += "," + Globalx.PVALUE + d; 
@@ -698,7 +698,7 @@ public class MainTable extends MainTableSort {
 	        }
 	        pw.close();
 	        rs.close(); mdb.close();
-	        Out.PrtSpMsg(0, "Complete writing " + nrows + " rows  to " + fileName);
+	        Out.PrtSpMsg(0, "Complete writing " + nrows + " rows  to " + fwObj.getFileName());
 	        return true;
 	    }
 	    catch(Exception e){ ErrorReport.prtReport(e, "Writing GO file");}

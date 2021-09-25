@@ -29,6 +29,10 @@ public class PairBasePanel extends JPanel {
 	
 	private final int gapCh = Globalx.gapCh;
 	private final int stopCh = Globalx.stopCh;
+	
+	private final int nMinLen=0; // CAS333 - always the same; corresponds with alignSeq starting at 0
+	private final int nDefaultScale=3;
+	private final int nOff=1;
 	    
 	public PairBasePanel ( Font baseFont ) {
 		theFont = baseFont;
@@ -55,16 +59,15 @@ public class PairBasePanel extends JPanel {
 	public AlignData getAlignData() {return null;}
 	
 	//------- Setup -------------//
+	public void setMinPixelX (double dX) {dMinPixelX = dX;}// pixel starting after name
 	
-	public void setMinPixelX (double dX) {dMinPixelX = dX;}// lowest pixel on the x-axis for drawing
-	
-	public void setIndexRange (int nMin, int nMax) { 
-		nMinIndex = nMinLen = nMin;  // 0 the lowest index for bases in the alignment
+	public void setIndexRange (int nMax) { 
+		nMinIndex = nMinLen;  		 
 		nMaxIndex = nMaxLen = nMax;	 // len of longest - the highest index for bases in the alignment
 	}
 	public void setTrimRange(int nMin, int nMax) {
 		nMinTrim = nMin;
-		nMaxTrim = nMax+1;
+		nMaxTrim = nMax; // CAS333 was +1 so showing extra AA at end
 	}
 	
 	//------- Change View methods ---------------//
@@ -96,12 +99,12 @@ public class PairBasePanel extends JPanel {
 		reDrawPanels ( ); 
 	}	
 	
-	public void setShowORF ( boolean b ) { bShowORF = b; reDrawPanels ( ); };
-	public void setShowHit ( boolean b ) { bShowHit = b; reDrawPanels ( ); };
+	public void setShowORF ( boolean b ) {bShowORF = b; reDrawPanels ( );};
+	public void setShowHit ( boolean b ) {bShowHit = b; reDrawPanels ( );};
 	
-	public boolean isShowORF() { return bShowORF;}
-	public boolean isShowHit() { return bShowHit;}
-	public boolean isTrim() {return isTrim;}
+	public boolean isShowORF() 	{return bShowORF;}
+	public boolean isShowHit() 	{return bShowHit;}
+	public boolean isTrim() 	{return isTrim;}
 		
 	//---- Draw ---//
 	public void paintComponent(Graphics g) {
@@ -125,13 +128,24 @@ public class PairBasePanel extends JPanel {
 		revalidate();
 		repaint();
 	}
-
-	protected void drawSequence( Graphics2D g2, String seq, double dYTop, double dYLow, 
+	/******************************************************************
+	 * 
+	 * @param g2
+	 * @param alignSeq	aligned sequence with gaps
+	 * @param dYTop		static value for where to draw 
+	 * @param dYLow		ditto
+	 * @param start		start where leading gaps end
+	 * @param end		end where trailing gaps start (is last char, hence, use <=end)
+	 * @param isFp		is forward strand
+	 * @param isFirst	is top of pair
+	 * @param isDNA		for color scheme
+	 */
+	protected void drawSequence( Graphics2D g2, String alignSeq, double dYTop, double dYLow, 
 			int start, int end, boolean isFp, boolean isFirst , boolean isDNA ) {
 		if( nDrawMode == GRAPHICMODE ) 
-			drawSequenceLine( g2, seq, dYTop, dYLow , start, end, isFp, isFirst, isDNA);
+			drawSequenceLine( g2, alignSeq, dYTop, dYLow , start, end, isFirst, isDNA, isFp);
 		else
-			writeSequenceLetters( g2, seq, dYTop, dYLow, start, end,  isFirst, isDNA );
+			writeSequenceLetters( g2, alignSeq, dYTop, dYLow, start, end,  isFirst, isDNA );
 	}
 	/*********************************************************************************
 	 * XXX Draw the columns of bases that are currently visible 
@@ -139,14 +153,13 @@ public class PairBasePanel extends JPanel {
 	private void writeSequenceLetters (Graphics2D g2, String alignSeq, double dYTop, double dYLow, 
 			int start, int end, boolean isFirst, boolean isDNA) {
 	
-		double dWriteBaseline = (dYLow - dYTop) / 2 - dFontMinHeight / 2 + dYTop + dFontAscent; 
+		double dWriteBaseline = (dYLow - dYTop)/2 - dFontMinHeight/2 + dYTop + dFontAscent; 
 		g2.setColor(Color.black);
 		
 		int nStart = (isTrim) ? Math.max(start, nMinTrim) : start;
 		int nEnd =   (isTrim) ? Math.min(end,   nMaxTrim) : end;
 		
-		for( int i = nStart; i <= nEnd; i++ )
-		{		
+		for( int i = nStart; i <= nEnd; i++ ) {		
 			double dX = calculateWriteX ( i );
 			
 			Color baseColor = Color.black;
@@ -170,7 +183,7 @@ public class PairBasePanel extends JPanel {
 		float fCharWidth = (float)bounds.getWidth();
 		
 		// Adjust x draw position to center the character in its rectangle
-		float fX = (float)dCellLeft + (float)(dFontCellWidth - 1.0f) / 2.0f - fCharWidth / 2.0f; 
+		float fX = (float)dCellLeft + (float)(dFontCellWidth - 1.0f)/2.0f - fCharWidth/2.0f; 
 		   
 		layout.draw( g2, fX, (float)dBaseline );
 
@@ -180,13 +193,13 @@ public class PairBasePanel extends JPanel {
 	 * Line
 	 ***********************************************************************/
 	private void drawSequenceLine( Graphics2D g2, String alignSeq, double dYTop, double dYLow,
-			int start, int end, boolean isFp, boolean isFirst, boolean isDNA){
+			int start, int end, boolean isFirst, boolean isDNA, boolean isFp){
 		
 		int nStart = (isTrim) ? Math.max(start, nMinTrim) : start;
 		int nEnd =   (isTrim) ? Math.min(end,   nMaxTrim) : end;
 		
 		double dHeight = 	dYLow - dYTop;   // always 15.0
-		double dY 	= 		dHeight / 2.0 + dYTop; // center, so +/- hash
+		double dY 	= 		dHeight/2.0 + dYTop; // center, so +/- hash
 
 		int hashHeight =   (int)(dHeight/2) - 2;
 		int hash_LG = 		hashHeight;
@@ -197,7 +210,7 @@ public class PairBasePanel extends JPanel {
 		if (bScaleUp && nScale>2) dW = nScale*0.5;
 
 		// For each letter in the sequence
-		for( int pos = nStart; pos < nEnd; pos++) {
+		for( int pos = nStart; pos <= nEnd; pos++) { // CAS333 < -> <= no difference?
 			double dX = calculateDrawX ( pos);
 		
 			Color baseColor = Color.BLACK;
@@ -222,13 +235,13 @@ public class PairBasePanel extends JPanel {
 		}
 		// Draw the line for the sequence and arrow head
 		double dXStart = calculateDrawX ( nStart );
-		double dXEnd = 	calculateDrawX ( nEnd );
+		double dXEnd = 	 calculateDrawX ( nEnd );
 
 		g2.setColor( Color.black );
 		g2.draw( new Line2D.Double( dXStart, dY, dXEnd, dY ) );
 
-		double dArrowHeight = dHeight / 2.0 - 2;
-		if (isFp) drawArrowHead ( g2, dXEnd, dY, dArrowHeight, isFp );
+		double dArrowHeight = dHeight/2.0 - 2;
+		if (isFp) drawArrowHead ( g2, dXEnd,   dY, dArrowHeight, isFp );
 		else      drawArrowHead ( g2, dXStart, dY, dArrowHeight, isFp ); // CAS314 put arrow on correct end
 		
 		g2.setColor(Color.black);
@@ -293,7 +306,7 @@ public class PairBasePanel extends JPanel {
 		g2.draw( new Line2D.Double( dXStart, dYStartBottom, dX, dY ) );
 		g2.draw( new Line2D.Double( dXStart - 1, dYStartBottom, dX - 1, dY ) );
 	}
-	protected void drawRuler ( Graphics2D g2, double dXMin, double dYTop, double dYLow)  {
+	protected void drawRuler ( Graphics2D g2, double dYTop, double dYLow)  {
 		String tLen = (nMaxIndex>9999) ? "99999" : "9999"; // CAS314
 		TextLayout layout = new TextLayout( tLen, theFont, g2.getFontRenderContext() );		
 		double dY = (dYLow + dYTop) / 2 + layout.getBounds().getWidth() / 2;
@@ -316,7 +329,7 @@ public class PairBasePanel extends JPanel {
 			else 
 				dX = (( calculateWriteX (i) + calculateWriteX (i+1) ) / 2);
 
-			if ( dX > dXMin) // dXMin is 0
+			if ( dX > 0) 
 				drawVerticalText ( g2, String.valueOf(i), dX, dY );
 		}
 	}
@@ -332,7 +345,7 @@ public class PairBasePanel extends JPanel {
 		layout.draw( g2, (float)-dY, (float)dX + fHalf );	
 		g2.rotate ( Math.PI / 2.0 );
 	}	
-	private void drawText ( Graphics2D g2, String str, double dXLeft, double dYTop, Color theColor ) {
+	private void drawName ( Graphics2D g2, String str, double dXLeft, double dYTop, Color theColor ) {
 		if ( str == null || str.length() == 0 ) return;
 		
 		g2.setColor ( theColor );
@@ -343,28 +356,28 @@ public class PairBasePanel extends JPanel {
 	}		
 	private double calculateX ( int nBasePos ) {
   		if(nDrawMode == GRAPHICMODE) return calculateDrawX ( nBasePos );
-  		else return calculateWriteX ( nBasePos );	
+  		else 						 return calculateWriteX( nBasePos );	
 	}
-	protected double calculateWriteX ( int nBasePos ) {
-		return dMinPixelX + ( nBasePos - nMinIndex ) * dFontCellWidth;
+	protected double calculateWriteX ( int nBasePos ) { // char
+		return 					dMinPixelX + (nBasePos - nMinIndex + nOff) * dFontCellWidth; // CAS333 +1
 	}		
-	protected double calculateDrawX ( int nBasePos ) { 
-		if (bScaleUp) return dMinPixelX + ( nBasePos - nMinIndex + 1 ) * nScale;
-		return dMinPixelX + ( nBasePos - nMinIndex + 1 ) / nScale;
+	protected double calculateDrawX ( int nBasePos ) { // line
+		if (bScaleUp) 	return 	dMinPixelX + (nBasePos - nMinIndex + nOff) * nScale;
+		else 			return 	dMinPixelX + (nBasePos - nMinIndex + nOff) / nScale;
 	}
 	protected double getTextWidth ( String str ) {
 		if ( str == null ) return 0;
 		else return fontMetrics.stringWidth ( str );
 	}
-	protected void drawText ( Graphics2D g2, String str, double dX, double dY ) {
-		drawText ( g2, str, dX, dY, Color.BLACK );
+	protected void drawName ( Graphics2D g2, String str, double dX, double dY ) {
+		drawName ( g2, str, dX, dY, Color.BLACK );
 	}	
 	protected double getSequenceWidth ( ) {
 		if( nDrawMode == GRAPHICMODE ) {
-			if (bScaleUp) return ( nMaxIndex - nMinIndex + 1 ) * nScale;
-			else return ( nMaxIndex - nMinIndex + 1 ) / nScale;
+			if (bScaleUp) 	return ( nMaxIndex - nMinIndex + nOff ) * nScale;
+			else 		  	return ( nMaxIndex - nMinIndex + nOff ) / nScale;
 		}
-		else return dFontCellWidth * ( nMaxIndex - nMinIndex + 1 );
+		else 				return ( nMaxIndex - nMinIndex + nOff ) * dFontCellWidth;
 	}	
 	/************************************************************
 	 * Highlighting for NtAA or NtNt
@@ -375,14 +388,14 @@ public class PairBasePanel extends JPanel {
 		int s = (start < nMinIndex) ? nMinIndex : start;
 		int e = (end > nMaxIndex)   ? nMaxIndex : end;
 		
-		double dLeft = calculateX(s); // CAS314 was +1 XXX
+		double dLeft =  calculateX(s); // CAS314 was +1 XXX
 		double dRight = calculateX(e+1);
 		createHighlightPanel (tip, colorHIT, dLeft, dRight, dYTop, dYBottom);
 	}
 	protected void setupUtrPanels(String tip, int aStart, int aStop,  double dYTop, double dYBottom) {		
 		if (!bShowORF) return;
 		
-		double dLeft = calculateX(aStart);
+		double dLeft =  calculateX(aStart);
 		double dRight = calculateX(aStop);
 		
 		createHighlightPanel (tip, colorORF, dLeft, dRight, dYTop, dYBottom );
@@ -412,7 +425,7 @@ public class PairBasePanel extends JPanel {
 	/********************************************************************************/
 	
 	// Set at startup
-	private int nMinLen=0, nMaxLen=0;   // CAS314 Zero and length of longest sequence, respectively
+	private int nMaxLen=0;   // CAS314 length of longest sequence
 	private int nMinTrim =0, nMaxTrim = 0; // CAS314 Where consensus starts/stops having gaps for trim
 	private double dMinPixelX = 0;		// The lowest pixel (associated base at min index) 
 	private double dFontMinHeight = 0;  // The minimum sized box a letter will fit in based on our font
@@ -422,8 +435,8 @@ public class PairBasePanel extends JPanel {
 	private Font theFont = null;
 		
 	// Can change	
-	private int nMinIndex = 1, nMaxIndex = 1; // CAS314 isTrim changes between to Len or Trim
-	private int nScale = 3;					  // always positive
+	private int nMinIndex = nMinLen, nMaxIndex = 0; // CAS314 isTrim changes between to Len or Trim
+	private int nScale = nDefaultScale;		  // always positive
 	private boolean bScaleUp=false;			  // changes direction of nScale
 	private int nDrawMode = GRAPHICMODE;
 	private boolean isTrim=false;

@@ -65,9 +65,9 @@ public class PairViewPanel extends JPanel implements ClipboardOwner
 		Vector<PairAlignPanel> subPanels = new Vector<PairAlignPanel> ();
 		
 		String maxStr = "", str=""; // CAS332 start alignments at same place
-		Iterator<AlignData> x = inAlignmentLists.iterator();
-		while ( x.hasNext() ) {
-			AlignData alignData = x.next ();
+		Iterator<AlignData> iter = inAlignmentLists.iterator();
+		while ( iter.hasNext() ) {
+			AlignData alignData = iter.next ();
 			
 			str = alignData.getDisplayStr1();
 			if (maxStr.length()< str.length()) maxStr = str;
@@ -76,9 +76,9 @@ public class PairViewPanel extends JPanel implements ClipboardOwner
 			if (maxStr.length()< str.length()) maxStr = str;
 		}
 		
-		Iterator<AlignData> i = inAlignmentLists.iterator();
-		while ( i.hasNext() ) {
-			AlignData alignData = i.next ();
+		iter = inAlignmentLists.iterator();
+		while ( iter.hasNext() ) {
+			AlignData alignData = iter.next ();
 			isAAsTCW = !alignData.isNTsTCW();
 			String hitID = alignData.getSeqData2().getName(); // Only change if hitID is different
 			if (!hitID.equals(lastHit)) {
@@ -97,8 +97,7 @@ public class PairViewPanel extends JPanel implements ClipboardOwner
 		panel.add ( Box.createVerticalStrut(5) );
 		panel.add ( panel.scroller );	
 		return panel;
-	}	
-	
+	}		
 	/*******************************************
 	 * XXX Class starts here
 	 */
@@ -125,8 +124,7 @@ public class PairViewPanel extends JPanel implements ClipboardOwner
         
 		setLayout( new BoxLayout ( this, BoxLayout.Y_AXIS ) );
 		super.setBackground(Color.WHITE);
-	}
-	
+	}	
 	private void createMainPanelFromSubPanels ( Vector <PairAlignPanel>  pairPanels ){
 		JPanel mainPanel = Static.createPagePanel();
 		mainPanel.setVisible( false );
@@ -147,8 +145,7 @@ public class PairViewPanel extends JPanel implements ClipboardOwner
 		mainPanel.add( Box.createVerticalGlue() ); 	
 		
 		scroller.setViewportView( mainPanel );
-	}
-		
+	}		
 	/*******************************************************
 	 * Pairwise - either NTAA, NTNT or AAAA
 	 */
@@ -289,8 +286,7 @@ public class PairViewPanel extends JPanel implements ClipboardOwner
 				if ( !e.isShiftDown() && !e.isControlDown() )
 					curPanel.selectNone();
 		}
-	}
-	
+	}	
 	private void actionChangeZoom ( int n ) throws Exception // Notify all sub-panels
 	{
 		Iterator<PairBasePanel> iter = baseAlignPanelsVec.iterator();
@@ -317,8 +313,7 @@ public class PairViewPanel extends JPanel implements ClipboardOwner
 			curPanel.setShowORF(setUTR); 
 		}		
 		scroller.getViewport().getView().setVisible( true );
-	}
-	
+	}	
 	private void actionChangeView ( )
 	{
 		if ( nViewType == PairBasePanel.GRAPHICMODE )
@@ -328,7 +323,6 @@ public class PairViewPanel extends JPanel implements ClipboardOwner
 		
 		setViewType();
 	}
-	
 	private void setViewType ()
 	{
 		// Notify all sub-panels
@@ -355,10 +349,7 @@ public class PairViewPanel extends JPanel implements ClipboardOwner
 			}
 		}		
 		scroller.setViewportView( scroller.getViewport().getView() );		
-	}
-	
-	
-	
+	}	
 	/****************************************************************
 	 * XXX Align Pair for Pairwise
 	 */

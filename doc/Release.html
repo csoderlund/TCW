@@ -6,6 +6,25 @@
 <a id=top>
 <!--#include virtual="./ssi/start1.html" -->
 
+<h4>v3.3.3  25-Sept-2021</h4>
+
+<ttp>viewSingleTCW</ttp> - tiny fixes
+<ul>
+<li>Exports now write the correct filename of output to the terminal.
+<li>Sequence Detail - Frame: The Y-axis coordinate has been changed so that it can
+be added to the X-axis coordinate to get the last base of the respective codon.
+<li>Sequence Detail - Align: 
+<ul>
+<li>The highlight UTR would incorrectly extend over a hit overhang.
+<li>The highlight HIT included one extra AA.
+<li>Trim showed an extra AA on the 3' end.
+<li>When the "Hit" was highlighted for a negative frame, the coordinates were often
+off by 1.
+</ul>
+<li>Main Table "Export GOs from Table" did not work if there were no GOseq values.
+<li>Basic GO: The "Show" was recently broken, and has been fixed.
+</ul>
+
 <h4>v3.3.2  15-Sept-2021</h4>
 Fixes for bugs recently introduced bugs and one display improvement. 
 

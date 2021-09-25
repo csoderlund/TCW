@@ -123,6 +123,8 @@ public class FileWrite {
 			
 			FileC.setLastDirFile(file, pathType);
 			
+			fileName = file;
+			
 			return new File(file);
 		}
 		catch(Exception e) {
@@ -204,7 +206,9 @@ public class FileWrite {
 	}
 	/********************************************************************************/
 	public boolean isAppend() {return bAppend;}
+	public String getFileName() {return fileName;} // CAS333 add so can write correct filename
 	private boolean bAppend=false;
 	
 	private boolean bVerify=false, bPrt=false;
+	private String fileName="";
 }

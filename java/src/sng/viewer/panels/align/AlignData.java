@@ -27,6 +27,7 @@ public class AlignData
 	{
 	    seqData1 = sd1;	// has gaps but not leading or trailing gapCh			
 	    seqData2 = sd2; 
+	    ntLength1 = ctg1.getSeqData().getLength(); // CAS333 for PairAlign to reverse coords
 		nLength1 = seqData1.getLength();  
 		nLength2 = seqData2.getLength();  
 		strName1 = seqData1.getName();
@@ -261,6 +262,7 @@ public class AlignData
 	// view
 	public boolean isNTalign()  {return isNTalign;} // could be NT hit or Seq Pair
 	public boolean isNTsTCW() 	{return isNTsTCW;}
+	public int getNtLen1() 		{return ntLength1;} // CAS333 for PairAlignPanel
 	
 	public void releaseSequences ( ) {
     	seqData1 = seqData2 = null;	
@@ -287,7 +289,8 @@ public class AlignData
 	
 	private SequenceData seqData1 = null;
 	private String strName1 = "";
-	private int nLength1 = 0; 
+	private int nLength1 = 0;
+	private int ntLength1 = 0;
 	
 	private SequenceData seqData2 = null;
 	private String strName2 = "";

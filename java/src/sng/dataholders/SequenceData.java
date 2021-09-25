@@ -334,7 +334,8 @@ public class SequenceData implements Serializable {
 		String transSeq = aaSeqData.ntSeqData.strSequence;
 
 		// Translation
-		for (int i = nFrame-1; i < transSeq.length() - 3; i+=3) {
+		int end = transSeq.length() - 2; //CAS333 was -3, which was not getting last codon for F1&F3
+		for (int i = nFrame-1; i < end; i+=3) {
 			char c = AAStatistics.getAminoAcidFor(
 					transSeq.charAt(i), transSeq.charAt(i+1),transSeq.charAt(i+2));
 			newSequence += c;
