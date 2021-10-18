@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Basic Queries for AnnoDB Hits</title>
+<title>Basic Filters for AnnoDB Hits</title>
 </head>
 
 <body style="padding:20px;width:650px;font-family:Times">
-<h1>Basic Queries for AnnoDB Hits</h1>
+<h1>Basic Filters for AnnoDB Hits</h1>
 
 <i>Overview</i>: 
 Check <b>Search</b> to search for the substring in the text box, and/or check <b>Filters</b> to apply
@@ -42,14 +42,19 @@ of memory.
 substring, e.g. 'mitochondrial%' to match everything that starts with 'mitochondrial'.
 To force it to match at the end of the string, enter a '%' at the beginning of the string.
 NOTE: since '%' is a special character, it cannot be in a search string as a literal.
-</ul>
-<b>Load File</b>: The file should contain one Hit ID per line (make sure <b>Hit ID</b> is selected)
-or one description per line (make sure <b>Description</b> is selected).
-<i>This performs a complete search, not a substring search.</i> Also, beware that it will
-use the filters if <b>Filters</b> is checked.
-
-<p><b>Filters</b>: If this is not checked, then the query is only on the entered substring.
+<li><b>Filters</b>: If this is not checked, then the query is only on the entered substring.
 If it is checked, then any filters from are also applied.
+</ul>
+<b>Load File</b>: 
+<ul>
+<li>The file should contain one Hit ID per line (make sure <b>Hit ID</b> is selected)
+or one description per line (make sure <b>Description</b> is selected).
+<i>This performs a complete search, not a substring search.</i> 
+<li>For <b>Hit ID</b>, there can be additional information on a line; only the
+first word will be taken as an ID.
+<li><b>Filters</b>: The filters will also be applied if the <b>Filters</b> is checked.
+</ul>
+
 <hr>
 <h2>Filters</h2>
 
@@ -140,9 +145,9 @@ the sort takes a while if the sequence-hit pair list is very large.
 
 <h2>Top Row of Options</h2>
 
-<b>View Seqs</b>&nbsp;&nbsp;Select a one or more hitIDs or seqIDs in the table, 
-then select <b>View Seqs</b>.
-The sequences will be shown in the main table, where you can select it to view the <b>Sequence Details</b>.
+<b>Seq Table</b>&nbsp;&nbsp;Select a one or more hitIDs or seqIDs in the table, 
+then select <b>Seq Table</b>.
+The sequences will be shown in the main table, where you can select it to view the <b>Seq Details</b>.
 <p>
 <b>Align</b>&nbsp;&nbsp;Select a one or more hitIDs or seqIDs in the table, 
 then select <b>Align</b>. Each hit-sequence pair will be aligned; the resulting panel

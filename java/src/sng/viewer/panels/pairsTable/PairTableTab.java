@@ -135,7 +135,7 @@ public class PairTableTab extends Tab
 		});
 		btnViewAlign.setEnabled(false);
 		
-		btnViewSeqs = new JButton("View Sequences");
+		btnViewSeqs = new JButton(Globals.seqTableLabel);
 		btnViewSeqs.setBackground(Globals.PROMPTCOLOR);
 		btnViewSeqs.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {

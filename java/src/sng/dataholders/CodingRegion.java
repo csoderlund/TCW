@@ -8,16 +8,8 @@ package sng.dataholders;
  */
 public class CodingRegion
 {
-	public static final int TYPE_UNKWOWN = 0;
-	public static final int TYPE_ORF = 1;
-	public static final int TYPE_LARGEST_ORF = 2;
-	public static final int TYPE_UNIPROT = 3;
+	public static final int TYPE_LARGEST_ORF = 1; // CAS334 only type there is
 	
-	/**
-	 * Creates a new CodingRegion object with one of the following types:
-	 * (TYPE_UNKNOWN | TYPE_ORF | TYPE_LARGEST_ORF | TYPE_UNIPROT)
-	 * @param nInType The type of the coding region 
-	 */
 	public CodingRegion ( int nInType ) { nType = nInType; }
 		
 	public int getBegin () { return nBegin; };
@@ -35,9 +27,6 @@ public class CodingRegion
 	public int getFrame () { return nFrame; };
 	public void setFrame ( int n ) { nFrame = n; }
 	
-	/**
-	 * @return copy of the coding region
-	 */
 	public CodingRegion cloneRegion ( )
 	{
 		CodingRegion copy = new CodingRegion ( nType );
@@ -49,16 +38,13 @@ public class CodingRegion
 		
 		return copy;
 	}
-	public void clear(){
-		// nothing to clear
-	}
+	public void clear(){}
 	
-	private int nType = TYPE_UNKWOWN;
+	private int nType = 0;
 	private boolean bHasBegin = false;
 	private boolean bHasEnd = false;
 
 	private int nFrame = 0;
 	private int nBegin = 0;
 	private int nEnd = -1;
-	private int nLen = 0;
 }

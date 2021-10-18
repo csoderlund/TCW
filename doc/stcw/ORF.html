@@ -8,44 +8,34 @@
 This document discusses the <ttp>TCW ORF finder</ttp>.
 <p><b>Contents:</b></p>
 <ol>
-	<li><a href="#overview">Overview</a>
-	<li><a href="#run"><ttp>runSingleTCW</ttp> - Running the ORF finder</a>
+	<li><a href="#overview">ORF Finder</a>
 	<ol type="a">
-		<li><a href="#algo">ORF finder algorithm</a>
-		<li><a href="#cmd">Running from the ORF finder only</a>
+		<li><a href="#algo">Algorithm</a>
+		<li><a href="#cmd">Executing the ORF finder</a>
 		<li><a href="#out">Output file</a>
+		<li><a href="#results">Summary of results</a>
 	</ol>
+	
 	<li><a href="#view"><ttp>viewSingleTCW</ttp> - Viewing the ORFs</a>
-	<li><a href="#orf"><ttp>TCW ORF finder</ttp> and <ttp>Trinity Transcoder</ttp></a>
-	<li><a href="ORFsummary.html" target="_blank">Explanation of summary output</a>
+	<li><a href="#orf"><ttp>TCW ORF finder</ttp> and <ttp>Trinity TransDecoder</ttp></a>
+	
 	<li><a href="#ref">References</a>
 </ol>
 
 <a id="overview"></a>
-<h2>Overview</h2>
+<h2>ORF Finder</h2>
 
-<ttp>TCW</ttp> has programs to build and view a single species (singleTCW), and to build and view 
-the orthologs of multiple species (multiTCW). For the comparison, it is necessary to have 
-the protein sequences, i.e. translated Open Reading Frame (ORF). 
-The <ttp>TCW</ttp> annotation step computes the best ORF for each sequence using the annotation hits, 
+The <ttp>runSingleTCW</ttp> annotation step computes the best ORF for each sequence using the annotation hits, 
 5th-order Markov model<sup>2,3</sup> and length of candidate ORF. It outputs a protein sequence for 
-every transcript. 
-
-<p>NOTE: there have been some small changes to the algorithm since this document was written, 
-but its the parameters have stayed the same.</p>
-
-<a id="run"></a>
-<h2>runSingleTCW - Running the ORF finder</h2>
+every transcript. This document has been updated for v3.3.4.
 
 <table class="tablex">
 <tr>
-	<td style="width: 25%">
-		<ttp>runSingleTCW</ttp> has an Option menu that allows the user to 
-		set the GO, ORF and similarity options for annotations. The section on the right
-		are the parameters for ORF finding. The algorithm and parameters are discussed in the next section.
+	<td style="width: 40%">
+		<ttp>runSingleTCW</ttp> has an <ttc>Option</ttc> menu that allows the user to 
+		set the ORF options, which is shown on the right. 
 
-		<p>This ORF finder algorithm was designed to find the 'best' ORF from <i>de novo</i> assembled 
-		transcripts for input into <ttp>runMultiTCW</ttp>. However, a file of all the 'good' ORFs is output
+		<p>This ORF finder algorithm was designed to find the 'best' ORF for input into <ttp>runMultiTCW</ttp>. However, a file of all the 'good' ORFs is output
 		(see <a href="#out">Output files</a>).</p>
 
 	<td style="width: 50%">
@@ -56,155 +46,179 @@ but its the parameters have stayed the same.</p>
 </table>
 
 <a id="algo"></a>
+
+<table style="width: 100%"><tr><td style="text-align: left">
 <h3>Algorithm</h3>
-The algorithm is:
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+The algorithm for computing the best ORF for a given sequence is:
 <pre>
-   1. For each of the 6 frames:
-         Find the best ORF as follows:
-            If the frame computes an ORF using Rule 1, no further ORFs are found.
-            Otherwise, find all possible ORFs and select the best using Rule 2 and Rule 3.
-   2. From the 6 ORFs found in Step 1, find the best ORF using Rules 1, 2 and 3.
+   1. For each of the 6 frames, find the best ORF as follows:
+		If there is a good hit (E-value &lt; N or %HitSim&gt;=M), use the hit frame.
+			If the hit terminates with a Start and Stop codon, use the corresponding coordinates.
+			Else compute all ORFs surrounding the hit and select the best based on the Rules.
+		If there is not a good hit, find all possible ORFs and select the best based on the Rules.
+   2. From the 6 ORFs found in Step 1, find the best ORF using all Rules.
 </pre>
-	
-<p><ttl>Rule 1: Use best hit frame if E-value &lt; [default 1E-03] or %HitSim&gt;=[default 95].</ttl></p>
-<br>If this rule succeeds, see <a href="#rule">Additional heuristics</a> for information on assigning coordinates.
-<br>If Diamond is used as the search program, 1E-03 is its default and generally gets the short 
-perfect matches; however, with more stringent E-value cutoffs, the perfect hits to a transcript with relatively 
-long UTRs can be missed, so the %HitSim (%hit-coverage &gt;=N and %similarity &gt;=N) detects these cases.
-	
-<p><ttl>Rule 2: Else use the longest ORF frame if the log length ratio &gt; [default 0.3]</ttl>.
-	
+<h4>Rules</h4>
+When comparing two ORFs, the following rules are applied in order.
+<p>&#9758; <ttl>Rule 1: Use best hit frame if E-value &lt; N or %HitSim&gt;=M.</ttl>
+
+
+<p>&#9758; <ttl>Rule 2: Else use the longest ORF frame if the log ratio &gt; Cutoff</ttl>.
 <table class="tablex">
 <tr>
-	<td class="top">
+	<td>
 		If the lengths of two candidate ORFs are very different, than it is best to 
-		use the longest ORF. To determine if their lengths are 'very' different,
-		the log length ratio is used. For example:
+		use the longest ORF. 
+		<br>To determine if their lengths are 'very' different,
+		the log length ratio is used. 
 	
-		<p>In Table 1 on the right, the 0.1, 0.2 and 0.3 are Log Length Ratio cutoffs.</p>
-		<br>A value of 'false' indicates that the longest ORF will be selected.
-		<br>A value of 'true' indicates that Rule 3 will be used.
+		<p>For example, in the Table 1 on the right, the 0.3, 0.4 and 0.5 are Log Ratio cutoffs.
+		<p>A value of 'T' indicates that the longest ORF will be selected.
 	<td>
 	<table class="tabley">
-		<caption>Table 1. Length differences </caption>
-		<tr><td><i>Length</i><td><i>Length</i><td><i>Log</i><td colspan="3">Cutoff
-		<tr><td><i>1</i><td><i>2</i><td><i>Ratio</i><td><i>0.1</i><td><i>0.2</i><td><i>0.3</i>
-		<tr><td>39<td>30<td>0.262    <td>false<td>false<td>true
-		<tr><td>390<td>300<td>0.262  <td>false<td>false<td>true
-		<tr><td>3900<td>3000<td>0.262<td>false<td>false<td>true
+		<tr><th colspan="3"><th colspan="3">&nbsp;&nbsp;Cutoff
+		<tr><th>Length 1<th>Length 2<th>Log Ratio<th>0.3<th>0.4<th>0.5
+		<tr><td>30<td>45<td>0.40547 <td>T<td>T<td>F
+		<tr><td>300<td>450<td>0.40547<td>T<td>T<td>F
+		<tr><td>3000<td>4500<td>0.40547<td>T<td>T<td>F
 	</table>
 </tr>
 </table>
 
 
-<p><ttl>Rule 3: Else use the best Markov score</ttl>.</p>
-<br>Markov is the 5th-order Markov model as computed by <ttp>TransDecoder</ttp><sup>3</sup> and 
-originally used in <ttp>GeneID</ttp><sup>2</sup>. It is trained using either of the following:
+<p>&#9758; <ttl>Rule 3: Else use the best Markov score if the log ratio &gt; Cutoff</ttl> 
+<br>It is trained using either of following:
 <ul>
-	<li><ttl>Train with Best Hits (i.e. pass Rule 1). Minimum Set [default 50] </ttl>
-		<br>There must be at least <ttl>Minimum Set</ttl> sequences that pass the E-value 
-		cutoff or no training set is created. 
-		The training set is created from the exact nucleotide regions of hit alignments.
+	<li><ttl>Train with Best Hits (Rule 1). Minimum Set [default 500] </ttl>
+		<br>There must be at least <ttl>Minimum Set</ttl> sequences that pass 
+		the <ttl>E-value</ttl> and <ttl>%Sim</ttl> 
+		cutoffs, otherwise Rule 3 is ignored. The training set is created from the exact nucleotide regions of hit alignments.
+	<br>&nbsp;	
 	<li><ttl>Train with CDS file [default none]</ttl>
 		<br>The file name of a fasta file of nucleotide coding sequences.
 </ul>
 
-<p>Note: Its rare to use Rule 3 since generally a sequence has a good hit or a sufficiently long
-ORF. However, the scores are interesting to view in <a href="#view">viewSingleTCW</a>, where the
-codon usage score is also shown (trained with the same set).</p>
+<p>&#9758; <ttl>Rule 4: Else use the ORF with start and stop codons</ttl>.
 
+<p>&#9758; <ttl>If all else fails:</ttl> Use a poor hit frame or the longest ORF.
+
+<h4>Markov training set</h4> 
+The default requires at least 500 sequences (<ttc>Minimum Set</ttc>). The algorithm
+finds the 2000 unique longest sequences to train with; if there is not 2000, all unique sequences
+will be used. The <ttc>Minimum Set</ttc> can be changed in the interface. The number of training sequences
+can be changed by running the <ttl>ORF finder</ttl> from the command line, e.g.
+<pre>
+	./execAnno &lt;project&gt; -r -t 5000
+</pre>
+The training set that TCW uses to create the Markov model can make a big difference in the Markov scores, hence, resulting ORFs.
+If your dataset is small and there is a file of CDS sequences available, use it!
 
 <a id="rule"></a>
-<p><i>Additional heuristics</i>: These rules were developed by studying the results.
-</p>
-<p>An ORF must be greater than 30bp unless the sequence length is less than 30bp, then it must
+<h4>Additional heuristics</h4> 
+<i>Length</i>: An ORF must be greater than 30bp unless the sequence length is less than 30bp, then it must
 be at least 9bps.
 </p>
-<p><u>Heuristics for Rule 1:</u>
+<p><i>Rule 1</i>:
 <ul>
-	<li>The 'Best Eval' hit is used for this rule,  except in the following two cases:
-	<ol>
-		<li>The hit is from a <i>nucleotide</i> annoDB (i.e. annotation database).
-		<li>The hit region contains Stop codons.
-	</ol>
-	In these cases, the 'Best Annotation' hit is used if it does not have these problems.
-	
-	<li>The hit frame will be ignored in the following two conditions:
-		<ol>
-			<li>If there are Stop codons within the hit region.
-			<li>If a sequence has hits to multiple frame and the best hit covers less than 50% of the protein.
-		</ol>
-
-	<li>If the hit frame is used, the coordinates are set as follows:
-	<ol>
-		<li>If the hit E-value&lt;1E-100 and the hit coverage is &gt;95%:
-		<ul><li>Search for the first Start and Stop codons within 
-			the first 40 upstream and downstream codons, respectively. 
-			<li>If no start is found, the search will look internally at the first 10 codons.
-			<li>If no Start is found, the hit start coordinate
-			will be used, and if no Stop is found, the hit end coordinate will be used.
-		</ul>
-		<li>Otherwise, search to the ends for the first Start and Stop codons. 
-		<li>In either case, the extension will not pass through a string of &gt;=9 consecutive N's.
-	</ol>
+	<li><u>Multi-frame</u>: The best hit frame will be used if it is a good hit, else, the hit is ignored.
+	<br>&nbsp;
+	<li><u>Stops in Hit</u>: All possible ORFs are computed, and the selected one will be from those that
+	cover a region of the hit.
+	<br>&nbsp;
+	<li><u>Nucleotide Best Bit-score</u>: The 'Best Anno' hit will be used instead (assuming its protein).
 </ul>
 
 <!--   ===========Running============ -->
 <a id="cmd"></a>
-<h3>Running the ORF finder only</h3>
-The ORF finder is run after the sequences are annotated (<ttc>Exec Annotate Sequences</ttc> in <ttp>runSingleTCW</ttp>).
-If you want to change the ORF finder options and run it again, there is a "Exec ORF only" function
+<h3>Executing the ORF finder</h3>
+The ORF finder is run after the sequences are annotated (<ttc>Step 3. Annotate</ttc> in <ttp>runSingleTCW</ttp>).
+If you want to change the ORF finder options and run it again, there is a "ORF only" function
 in <ttp>runSingleTCW</ttp>. Or you can run it from the command line:
 <pre>
 	./execAnno &lt;project&gt; -r
 </pre>
-This will uses the option set using <ttp>runSingleTCW</ttp>. 
+Running from the command line will use the options set using <ttp>runSingleTCW</ttp>. 
 
 <!--   ===========Output============ -->
 <a id="out"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
 <h3>Output files</h3>
-The following files are written into the project's subdirectory "orfFiles".
-The following examples are from the <ttx>demoTra</ttx> demo files. 
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
-<p>Table 2. Output files of the <ttp>TCW ORF finder</ttp> with <ttx>demoTra</ttx> replaced
-with the database name.</p>
+The following files are written into the <ttx>&lt;project&gt;orfFiles</ttx> directory.
+
+<p>Table 2. Output files of the <ttp>TCW ORF finder</ttp>.</p>
 <table class="tabley">
 	<tr><td><ttx>bestORFs.pep.fa</ttx><td>The translated CDS for the best ORF for each sequence. 
 	<tr><td><ttx>bestORFs.cds.fa</ttx><td>The CDS for the best ORF for each sequence. 
-	<tr><td><ttx>allGoodORFs.pep.fa</ttx><td>The translated CDSs for all good ORFs*.
-	<tr><td><ttx>allGoodORFs.scores.txt</ttx><td>A list of the coordinates and scores for all good ORFs*.
 	<tr><td><ttx>bestORF.scores.txt</ttx><td>For the best ORF for each sequence, the 6-frame scores for the ORF.
+	<tr><td><ttx>allGoodORFs.pep.fa*</ttx><td>The translated CDSs for all good ORFs.
+	<tr><td><ttx>allGoodORFs.scores.txt*</ttx><td>A list of the coordinates and scores for all good ORFs.
 	<tr><td><ttx>scoreCodon.txt</ttx><td>The computed codon usage frequencies.
 	<tr><td><ttx>scoreMarkov.txt</ttx><td>The computed 5th-order Markov model loglikelihood.
 </table>
-<small>* Selected hit, or &gt;= 900nt, or Markov score is &gt;0 and best frame.</small>
+<small>* Selected hit, or &gt;= 900nt, or good Markov score (&gt;0 and best of 6-frames for ORF).</small>
 
 <a id="ex"></a>
 <p>Example of <ttx>AllGoodORFs.txt</ttx>, where the first one listed is the selected ORF.
 <pre style="font-size: 12px">
-	### Name   ntLen aaLen       Type Frame Start..Stop  Markov Codon   Remark
-	tra_001_a    564  188  5p-partial   1     106..669    46.91  35.83  $ORF>Hit Hit:  2E-85 88% 79% (106..663)
-	tra_002_a   2160  720  5p-partial   3      3..2162   140.08  68.49  $ORF>Hit Hit: 3E-181 53% 82% (6..2150)
-	tra_002_b    198   66    Complete  -3   2272..2075     4.12   4.26
+    ### Name        ntLen aaLen        Type Frame  Start..Stop     Markov Codon
+	tra_002_a        2160   720  5p-partial     3      3..2162   139.08   67.16   Hit: 3E-215  52%  84% (6..2150)
+	tra_002_b         141    47  5p-partial     1   2269..2409     5.01    5.50
 </pre>
-<p>Example of <ttx>BestORFscores.txt</ttx> of the 6-frame scores for the best ORF:</p>
+<p>Example of <ttx>bestORFs.scores.txt</ttx> of the 6-frame scores for the best ORF:</p>
 <pre style="font-size: 12px">
-	>tra_002 type:5p-partial seqLen:3111 orfLen:2160 frame:3 coords:3..2162 Hit:3.3E-181,53%,82%
-	 Markov  140.44  -64.85  -27.51  -55.59  -25.99  -26.71    3
+	>tra_002         type:5p-partial seqLen:3111     orfLen:2160     ORF:3-2162(3)        Hit:2.94E-215,52%,84%
+ 	 Markov  139.08  -68.93  -26.47  -51.14  -25.33  -29.83
 </pre>
 The first Markov score is for the ORF starting at 0 (hence, the current frame), 
 the next two are offset by 1 and 2 respectively, the last
 three are for the reverse sequence with offsets 0,1,2.
 
+<a id="results"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Summary of Results</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+The <ttp>TCW ORF finder</ttp> prints out various summary statistics to the <ttx>&lt;projects&gt;/logs/anno.log</ttx> file,
+and the top part of the following is in the <ttl>Overview</ttl>. The results below are from a RNA-seq assembled
+dataset of sequences.
+
+<pre style="font-size: 12px">  
+ORF Stats:   Average length 583
+    Has Hit            36,574  (75.8%)    Both Ends   12,499  (25.9%)
+    Is Longest ORF     28,955  (60.0%)    ORF>=300    23,880  (49.5%)    MultiFrame     6,425  (13.3%)
+    Markov Best Score  34,283  (71.0%)    ORF=Hit     17,700  (36.7%)    Stops in Hit   4,440   (9.2%)
+    All of the above   20,834  (43.2%)     with Ends   3,573   (7.4%)    >=9 Ns in ORF    596   (1.2%)
+
+    Additional ORF info                      For seqs with hit  36,580  (75.8%)     Hit w/good coverage  5,560  (11.5%)
+    Markov Good Frame    36,075  (74.7%)     Longest & Markov   20,834  (57.0%)     Longest & Markov     4,220  (75.9%)
+    ORF=Hit              17,700  (36.7%)     Is Longest ORF     23,451  (64.1%)     Is Longest ORF       4,401  (79.2%)
+    ORF>Hit              12,506  (25.9%)     Markov Best Score  28,464  (77.8%)     Markov Best Score    5,105  (91.8%)
+    ORF~Hit               5,571  (11.5%)     Markov Good Frame  30,127  (82.4%)     Markov Good Frame    5,228  (94.0%)
+    ORF>Hit & HasEnds     2,543   (5.3%)     Has Start & Stop    9,376  (25.6%)     Has Start & Stop     4,250  (76.4%)
+    Has Start|Stop       38,822  (80.4%)     Not hit frame                    6     ORF=Hit & HasEnds    3,316  (59.6%)
+
+Frame: 3(17.8%)  2(16.8%)  1(17.6%)  -1(16.4%)  -2(15.1%)  -3(16.4%)
+
+Hit w/good coverage: hitCov >= 95 and sim >= 60
+Markov Best Score:   best score over all 6-frame ORFs
+Markov Good Frame:   score>0 and best over all RFs of selected ORF
+</pre>
 <!-- ============== View =================== -->
 <a id="view"></a>
 <table style="width: 100%"><tr><td style="text-align: left">
 <h2>viewSingleTCW - Viewing the ORFs</h2>
 <td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
-The <ttp>TCW ORF finder</ttp> assigns remarks to the sequence about the selected ORF;
-all <ttp>TCW</ttp> assigned remarks start with a "$". In the
-images below, an ORF assigned remark is searched on in A, viewed as a column in B, and shown in the sequence frame view of C.
+The <ttp>TCW ORF finder</ttp> assigns remarks to the sequence about the selected ORF 
+(see TCW <ttc>Basic Sequence Help</ttc>, which has a "TCW Remark Legend" section). 
+In the
+images below, (A) an ORF assigned remark is searched on, 
+(B) the set is viewed as a Sequence table,  (C) the sequence frame view and (D) the Markov scores for the best
+ORF from C. Further description is provided below the set of images. Click on an image for a clearer view.
 
 <table class="tablex">
 <tr>
@@ -213,7 +227,7 @@ images below, an ORF assigned remark is searched on in A, viewed as a column in 
 		<tr><td>
 			<fcap>A. Basic Sequence Query for Remark</fcap>
 			<br><a href="img/ORFbasic.png">
-			<img src="img/ORFbasic.png" alt="" style="width: 60%; border:1px solid black"></a>
+			<img src="img/ORFbasic.png" alt="" style="width: 90%; border:1px solid black"></a>
 		</tr>
 		<tr><td>
 			<fcap>B. Columns of the Sequence table</fcap>
@@ -239,36 +253,18 @@ images below, an ORF assigned remark is searched on in A, viewed as a column in 
 </table>
 <fcap>Figure 3: <ttp>viewSingleTCW</ttp> features for viewing the ORFs.</fcap>
 
-
-<p>A. Basic Sequence Query for Remark: The Basic Sequence Query allows searching on the remark, in
-this example, the remark "!LG" was searched on (substring of remark $ORF!LG), which shows the sequences 
-where the ORF is not the longest.
-All rows were selected and "View Sequences" shows them in the main Sequence table as shown in Figure 3B.
+<p>A. <ttl>Basic Sequence Filter</ttl> for <ttc>TCW Remark</ttc>: In
+this example, the remark "!Lg" was searched on, which shows the sequences with ORFs that are not the longest. 
+All rows were selected and <ttc>Seq Table</ttc> shows them in the main Sequence table as shown in Figure 3B.
 </p>
 <p>B. Columns of the Sequence table: This figure
 shows most of the ORF columns. A row can be selected followed by 
-"View Selected Sequence" to view the frame as shown in Figure 3C.
+<ttc>Seq Detail</ttc> to view the frame as shown in Figure 3C.
 </p>
-<p>C. Sequence Details Frame view: This example shows that the longest ORF was not the
-selected one. The selected one has a hit with an E-value of 3E-44 and good Markov and Codon
-scores.
+<p>C. <ttl>Sequence Details Frame</ttl> view: This example shows that the selected ORF is not the longest ORF,
+but has a hit with an E-value of 3.3E-98 and good Markov and Codon scores.
 </p>
-<p>D. By toggling the "ORFs" to "Scores", the upper region will show the 6-frame scores of the selected ORF.
-
-<a id="result"></a>
-<table style="width: 100%"><tr><td style="text-align: left">
-<h2>Results</h2>
-<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
-
-The <ttp>TCW ORF finder</ttp> prints out various summary counts. The results below are from a RNA-seq assembled
-dataset of 31,925 sequences.
-
-<pre style="font-size: 12px">  
-	Is Longest ORF     24,187 (76%)    ORF>=300         20,460 (64%)    MultiFrame           1,233  (4%)
-	Has Hit            22,793 (71%)    Has Start&amp;Stop   16,002 (50%)    >=9 Ns in ORF            0  (0%)
-	Markov Best Score  24,346 (76%)    Has Start|Stop   28,669 (90%)    Stops in Best Eval   1,175  (4%)
-	All of the above   16,859 (53%)    Average ORF len          755
-</pre>
+<p>D. By toggling the <ttc>ORFs/NT</ttc> to <ttc>Scores/AA</ttc>, the upper region will show the 6-frame scores of the selected ORF.
 
 <table>
 <tr>
@@ -288,21 +284,30 @@ dataset of 31,925 sequences.
 
 
 <a id="orf"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
 <h2>TCW ORF finder and Trinity TransDecoder</h2>
-
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+<br>Markov is the 5th-order Markov model as computed by <ttp>TransDecoder</ttp><sup>3</sup> and 
+originally used in <ttp>GeneID</ttp><sup>2</sup>.
 The <ttp>TransDecoder</ttp><sup>2</sup> Perl code for computing the reading frame specific
-5th-order Markov model was written in
-Java for the <ttp>TCW ORF finder</ttp>, that is, it computes the exact same scores. 
-<ul>
-<li>If the <ttp>TCW</ttp> file <ttx>HitRegion.txt</ttx>
-was entered into the <ttp>TransDecoder</ttp> <ttx>seq_n_baseprobs_to_loglikelihood_vals.pl</ttx> program,
-the <ttp>TCW</ttp> <ttx>ScoreMarkov.txt</ttx> file will be the same as the <ttp>TransDecoder</ttp> <ttx>hexamer.scores</ttx> file.
-<li>If the <ttx>bestORFs.cds.fa</ttx> file is used as input to the <ttx>score_CDS_likelihood_all_6_frames.pl</ttx>
-program, the <ttp>TCW</ttp> <ttx>bestORFs.scores.txt</ttx> file will have similar Markov score as the
-<ttx>longest_orfs.cds.scores</ttx> file; there is a slight variation because of a difference in precision between
-Perl and Java. 
-</ul>
- 
+5th-order Markov model was translated to Java for the <ttp>TCW ORF finder</ttp>. However, they use different
+training sets, so their scores tend to be different. They are the same +/-0.02 if either of the following
+is done: (1) Use the TransDecoder <ttx>longest_orfs.cds.top_500_longest</ttx> as the TCW <ttx>CDS file</ttx>
+and run <ttx>./execAnno &lt;project&gt; -f -r</ttx>.
+(2) Use the TCW <ttx>orfFiles/bestORFs.cds.fa</ttx> file is used as input to the TD <ttx>score_CDS_likelihood_all_6_frames.pl</ttx>
+program. In either case, compare the TransDecoder <ttx>longest_orfs.cds.scores</ttx> (.p1 only) with the 
+TCW <ttx>orfFiles/bestORF.scores.txt</ttx> file, for the ORFs where the start and ends are the same.
+For example:
+<pre>
+TransDecoder: longest_orfs.cds.scores
+#acc    Markov_order    seq_length      score_1 score_2 score_3 score_4 score_5 score_6
+Osj_00011.p1    5       1047    83.19   0.06    15.85   27.04   26.83   5.91
+
+TCW: bestORF.scores.txt
+>Osj_00011       type:complete   seqLen:1509     orfLen:1047     ORF:286-1332(1)      Hit:2.72E-79,45%,93%
+ Markov   82.69    0.06   15.86   27.04   26.84    5.92
+</pre>
+
 <a id="ref"></a>
 <table style="width: 100%"><tr><td style="text-align: left">
 <h2>References</h2>

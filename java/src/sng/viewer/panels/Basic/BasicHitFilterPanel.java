@@ -567,18 +567,31 @@ public class BasicHitFilterPanel extends JPanel {
 		private void loadFile(String fileName) {
 			try {
 				loadList= new Vector <String> ();
+				int cnt=0;
 				String line;
 				BufferedReader file = new BufferedReader(new FileReader(fileName));
 				while((line = file.readLine()) != null) {
-					line.replace("\n","").trim();
+					line = line.replace("\n","").trim();
 					if (line.equals("")) continue;
 					if (line.startsWith("#")) continue;
 					
-					loadList.add(line);
+					if (isDesc()) {
+						loadList.add(line);
+						cnt++;
+					}
+					else {
+						String [] tok = line.split("\\s+"); // CAS334 ignore rest of stuff on line
+						if (tok.length==0 || tok[0].trim()=="") 
+							Out.PrtWarn("Bad Line: " + line);
+						else {
+							loadList.add(tok[0]);
+							cnt++;
+						}
+					}
 				}
 				file.close(); 
 				if (loadList.size()==0) loadList=null;
-				else txtField.setText(loadList.get(0) + ",...");
+				else txtField.setText(loadList.get(0) + ",...(" + cnt + ")");
 			}
 			catch(Exception e) {ErrorReport.prtReport(e, "Error loading file");}
 		}
@@ -623,25 +636,18 @@ public class BasicHitFilterPanel extends JPanel {
 			
 			String searchStr = txtField.getText().trim();
 			if (searchStr.equals("")) return ""; 
-
-			if (searchStr.endsWith("...") && loadList==null)  searchStr = searchStr.replace("...", "");
-			else if (!searchStr.endsWith("...") && loadList!=null) loadList = null;
-			
-			if (loadList!=null) searchStr = Static.addQuoteDBList(loadList);
+		
+			if (searchStr.contains("...") && loadList!=null) {// CAS334 slight change in check
+				searchStr = " IN (" + Static.addQuoteDBList(loadList) + ")";
+			}
 			else {
 				searchStr = Static.addQuoteDB(searchStr);
-				if (!searchStr.contains("%")) searchStr = Static.addWildDB(searchStr);
-			}
-		      
-            String col = "";
-            if (radHitID.isSelected()) col = "tn.uniprot_id";
-			else col = "uq.description";
-             
-    		String strQuery = " AND " + col;
-    		if (loadList!=null)  strQuery+=	" IN ("  + searchStr + ")";
-    		else 				 strQuery+=	" LIKE " + searchStr; 
-   
-			return strQuery;
+				if (!searchStr.contains("%")) searchStr = " LIKE " + Static.addWildDB(searchStr);
+				loadList=null;	
+			}   
+            String col = (radHitID.isSelected()) ? "tn.uniprot_id" : "uq.description";
+           
+			return " AND " + col + searchStr;
 		}
 		public String getWhere() {
 			String strQuery="";
@@ -699,6 +705,7 @@ public class BasicHitFilterPanel extends JPanel {
 			lblID.setEnabled(false);
 			radDesc.setSelected(true); 
 			*/
+			loadList=null;
 			txtField.setText("");
 			
 			chkUseHitCov.setSelected(false);

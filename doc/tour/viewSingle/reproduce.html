@@ -25,7 +25,7 @@ in the overview. The following short-hand is used:
 <li>#Seqs is the number of sequences, which is listed at the top of the overview.
 <li>"Stats" is the "Show Column Stats" on the "Table..." drop-down.
 </ul>
-<big><i>Always clear filters before setting new ones!</i></big>
+<b><i>Always clear filters before setting new ones!</i></b>
 <h3>INPUT</h3>
 Most of the input section is data supplied by the user with runSingleTCW. The following
 are computed:
@@ -170,31 +170,23 @@ that are found in un-assembled sequences.
 <tr><th>Column<th>Search<th>Obtain number
 <tr><td colspan=3><i>The following use the Basic Sequence. Select "TCW" and enter
 the Substring indicated.</i>
-<tr><td>Is Longest ORF<td>!LG<td>#Seqs minus Result number
-<tr><td>Markov Best Score<td>!mk<td>#Seqs minus Result number
-<tr><td>ORF=Hit<td>ORF=Hit<td>#Seqs minus Result number
-<tr><td>MultiFrame<td>Multi-frame<td>Result number
-<tr><td>&gt;=9 Ns in ORF<td>9N<td>Result number. View in Sequence Frame to see n's in ORF (CDS). 
-Others may have n's, but not in the CDS.
-<tr><td>Stops in Hit<td>Stops<td>Result number
+<tr><td>Is Longest ORF<td>!Lg<td>#Seqs minus Result number
+<tr><td>Markov Best Score<td>!Mk<td>#Seqs minus Result number
+<tr><td>All of the above<td>$<td>Result number
+<tr><td>ORF=Hit<td>ORF=Hit<td>Result number
+<tr><td>ORF=Hit with Ends<td>ORF=Hit+<td>Result number
+<tr><td>Multi-frame<td>Multi-frame<td>Result number
+<tr><td>Stops in Hit<td>Stop<td>Result number
+<tr><td>&gt;=9 Ns in ORF<td>9N<td>Result number. 
 
-<tr><td colspan=3><i>The following use the Filters, SNPs and ORFs.</i>
+<tr><td colspan=3><i>The following use the Filters: SNPs and ORFs.</i>
+<tr><td>Both Ends<td>Has Ends (Start&Stop codons)<td>Number of rows
 <tr><td>Has Hit<td>Protein confirmation<td>Number of rows
-
-<tr><td>All of the above<td>Protein confirmation<td>
-Use the Basic Sequence (as above), search !LG, then add to that !mk using "Add to Table"; 
-select all sequences and show in Sequence table with the 'Is PR Frame'
-column; take the number that have use the protein frame and subtract
-from the total number from 'Protein confirmation'.
-
 <tr><td>ORF>=300<td>Has ORF >= 300<td>Number of rows
-<tr><td>Has Start&amp;Stop<td>Has Start and Stop<td>Number of rows
-<tr><td>Has Start|Stop<td>No filter<td> Columns:HasStart, HasStop;
-<br>Sort both columns so 'Yes' rise to the top,
-find where the rows start with 'No','No'.
+
 </table>
 <h3>GC Content:</h3>
-The only number reproducible is the GC Content, which is the %GC over the entire sequence..
+The only number reproducible is the GC Content, which is the %GC over the entire sequence. 
 
 <table class=tabley>
 <tr><td>GC Content<td>Show All<td>Column:%GC; Stats, column:Average

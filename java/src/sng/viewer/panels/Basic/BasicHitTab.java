@@ -76,7 +76,7 @@ public class BasicHitTab extends Tab {
 	 * Top button panel
 	 */
 	private void createTopRowPanel() {
-		btnViewSeqs = new JButton("View Seqs");
+		btnViewSeqs = new JButton(Globals.seqTableLabel);
 		btnViewSeqs.setBackground(Globals.FUNCTIONCOLOR);
 		btnViewSeqs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -248,7 +248,7 @@ public class BasicHitTab extends Tab {
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 					UserPrompt.displayHTMLResourceHelp(getParentFrame(), 
-					"Basic DB Hits Query", helpHTML);
+					"Filter DB Hits ", helpHTML);
 			}
 		});
 

@@ -37,6 +37,7 @@ import util.database.DBConn;
 import util.file.FileC;
 import util.file.FileRead;
 import util.methods.ErrorReport;
+import util.methods.Out;
 import util.methods.Static;
 
 public class BasicSeqFilterPanel extends JPanel {
@@ -45,8 +46,11 @@ public class BasicSeqFilterPanel extends JPanel {
 	
 	private static final String seqPref= "_seqPrefs"; // save to preferences; same columns for hit&seq
 	
+	private static final int BUILD=0, ADD=1, SELECT=2; // CAS334 add select
+	
 	// Any change here will work in this file, but needs to be changed in BasicSeqQueryTab.SeqData class!!!
 	// These are columns from database and do not include row#
+	// Do not move Seq ID, as it is expected to be first
 	private static final String rowCol = "Row";
 	private static int idxLong = 1;
 	private static String [] STATIC_COLUMNS   = { "Seq ID", "Longest", "TCW Remark", "User Remark", "Counts",  "Best HitID"};
@@ -55,10 +59,6 @@ public class BasicSeqFilterPanel extends JPanel {
 		"contig.contigid", "contig.longest_clone ", "contig.notes", "contig.user_notes", 
 		"contig.totalexp", "contig.bestmatchid"};
 	
-	private boolean isOnByDefault(int x) {
-		if (x!=4) return true;
-		return false;
-	}
 	/**********************************************
 	* The top queries, and 4 selection panels 
 	*/
@@ -192,7 +192,7 @@ public class BasicSeqFilterPanel extends JPanel {
 			btnBuildTable.setBackground(Globals.FUNCTIONCOLOR);
 			btnBuildTable.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					loadDataForTable(true /* build */);
+					loadDataForTable(BUILD);
 				}
 			});
 			row3.add(btnBuildTable);
@@ -202,12 +202,22 @@ public class BasicSeqFilterPanel extends JPanel {
 			btnAddTable.setBackground(Globals.FUNCTIONCOLOR);
 			btnAddTable.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					loadDataForTable(false /* add */);
+					loadDataForTable(ADD);
 				}
 			});
 			row3.add(btnAddTable);
 			row3.add(Box.createHorizontalStrut(10));
 			
+			btnSelectRows = new JButton("SELECT ROWS");
+			btnSelectRows.setBackground(Globals.MENUCOLOR);
+			btnSelectRows.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					loadDataForTable(SELECT);
+				}
+			});
+			row3.add(btnSelectRows);	
+			add(row3);
+			row3.add(Box.createHorizontalStrut(20));
 			
 			btnSetColumns = new JButton("Columns");
 			btnSetColumns.setBackground(Globals.MENUCOLOR);
@@ -236,21 +246,38 @@ public class BasicSeqFilterPanel extends JPanel {
 		private void loadFile(String fileName) {
 			try {
 				loadList= new Vector <String> ();
+				boolean isName = isName();
+				int cnt=0;
 				String line;
 				BufferedReader file = new BufferedReader(new FileReader(fileName));
 				while((line = file.readLine()) != null) {
-					line.replace("\n","").trim();
+					line = line.replace("\n","").trim();
 					if (line.equals("")) continue;
 					if (line.startsWith("#")) continue;
-					loadList.add(line);
+					
+					if (isName) {
+						String [] tok = line.split("\\s+"); // CAS334 ignore rest of stuff on line
+						if (tok.length==0 || tok[0].trim()=="") 
+							Out.PrtWarn("Bad Line: " + line);
+						else {
+							loadList.add(tok[0]);
+							cnt++;
+						}
+					}
+					else {
+						loadList.add(line);
+						cnt++;
+					}
 				}
 				file.close(); 
 				if (loadList.size()==0) loadList = null;
-				else txtField.setText(loadList.get(0) + ",...");
+				else txtField.setText(loadList.get(0) + ",... (" + cnt + ")");
 			}
 			catch(Exception e) {ErrorReport.prtReport(e, "Error loading file");}
 		}
-		
+		public boolean isName() {
+			return (radSeqID.isSelected() || radLong.isSelected());
+		}
 		public String getSearchCol() {
 			if (radSeqID.isSelected()) return "contig.contigid";
 			else if (radLong!=null && radLong.isSelected()) return "contig.longest_clone"; // CAS326
@@ -262,14 +289,17 @@ public class BasicSeqFilterPanel extends JPanel {
 			
 			if (x.equals("") || x.equals("...") || x.equals("...")) return ""; 
 			
-			if (x.contains("...") && loadList!=null) return Static.addQuoteDBList(loadList);
-			
-			loadList=null;
-			
-			x = Static.addQuoteDB(x);
-			if (!x.contains("%")) 	x = Static.addWildDB(x);
-			
-			return x;
+			if (x.contains("...") && loadList!=null) {
+				return Static.addQuoteDBList(loadList);
+			}
+			else {
+				loadList=null;
+				
+				x = Static.addQuoteDB(x);
+				if (!x.contains("%")) 	x = Static.addWildDB(x);
+				
+				return x;
+			}
 		}
 		public String getStatusCol() {
 			if (radSeqID.isSelected()) return "Seq ID";
@@ -284,7 +314,14 @@ public class BasicSeqFilterPanel extends JPanel {
 			return Static.addQuote(x); 
 		}
 		
-		public void enableAddToTable(boolean b) {btnBuildTable.setEnabled(b);}
+		// CAS334 disable everything while changing or selecting row
+		public void enableTableButton(boolean b) {
+			btnBuildTable.setEnabled(b);
+			btnAddTable.setEnabled(b);
+			btnSelectRows.setEnabled(b);
+			
+			theParentTab.enableBottomButtons(b);
+		}
 		// Search:
 		public JRadioButton radSeqID = null, radLong=null;
 		public JRadioButton radTCW = null, radUser = null;
@@ -294,6 +331,7 @@ public class BasicSeqFilterPanel extends JPanel {
 		// Results
 		private JButton btnBuildTable = null;
 		private JButton btnAddTable = null;
+		private JButton btnSelectRows = null;
 		private JButton btnSetColumns = null;
 	} // end QueryPanel
 	
@@ -483,7 +521,7 @@ public class BasicSeqFilterPanel extends JPanel {
 			}
 			if (cnt==0) {
 				for (int x=0; x<chkStaticColNames.length; x++) {
-					if (isOnByDefault(x)) chkStaticColNames[x].setSelected(true);
+					chkStaticColNames[x].setSelected(true);
 				}
 			}
 			bSaveStaticSelect = new boolean [totalColumns];
@@ -504,14 +542,13 @@ public class BasicSeqFilterPanel extends JPanel {
 	/****************************************************************
 	 * Database query
 	 ***************************************************************/
-	private void loadDataForTable(boolean isBuild)
-	{
-		final boolean bBuild = isBuild; 
+	private void loadDataForTable(int type){
+		final int iType = type; 
 		Thread thread = new Thread(new Runnable() {
 		public void run() {
 			try {	
 				theParentTab.setStatus("Loading Sequences. Please Wait..");
-				queryPanel.enableAddToTable(false);
+				queryPanel.enableTableButton(false);
 					
 				ArrayList<Object []> results = loadFromDatabase();
 				
@@ -523,11 +560,14 @@ public class BasicSeqFilterPanel extends JPanel {
 				}
 				statusSearch = "Search: " + statusSearch;
 				
-				queryPanel.enableAddToTable(true);
-				if (bBuild) theParentTab.tableBuild(results, statusSearch);
-				else  theParentTab.tableAdd(results, statusSearch);
+				if (iType==0) 		theParentTab.tableBuild(results, statusSearch);
+				else if (iType==1)  theParentTab.tableAdd(results, statusSearch);
+				else theParentTab.tableSelect(results, statusSearch);
+				
+				queryPanel.enableTableButton(true); // CAS334 moved after Build/Add/Select
+				
 			} catch (Exception err) {
-				queryPanel.enableAddToTable(true);
+				queryPanel.enableTableButton(true);
 				theParentTab.setStatus("Error during query");
 				JOptionPane.showMessageDialog(null, "Query failed due to unknown reasons ");
 				ErrorReport.reportError(err, "Internal error: building hit table");
@@ -537,7 +577,7 @@ public class BasicSeqFilterPanel extends JPanel {
 		thread.setPriority(Thread.MIN_PRIORITY);
 		thread.start();
 	}
-	 public ArrayList<Object []> loadFromDatabase () throws Exception {
+	private ArrayList<Object []> loadFromDatabase () { // called from above
         try {
 		    String strQuery = "SELECT " + mysqlCols + " FROM contig";
 		  	
@@ -569,7 +609,7 @@ public class BasicSeqFilterPanel extends JPanel {
 	        rset.close(); dbc.close(); 
 	    	return retVal;
 	    }
-	    catch(Exception e) {ErrorReport.reportError(e,"Error: reading database loadFromDatabase");}
+	    catch(Exception e) {ErrorReport.reportError(e,"Reading database loadFromDatabase");}
         return null;
 	}
 	

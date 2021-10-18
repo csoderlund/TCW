@@ -146,7 +146,7 @@ public class BasicGOFilterTab extends Tab {
 	private void createTopRowPanel() {
 		topRowPanel = Static.createRowPanel();
 		
-		btnViewSeqs = new JButton("View Seqs");
+		btnViewSeqs = new JButton(Globals.seqTableLabel);
 		btnViewSeqs.setBackground(Globals.FUNCTIONCOLOR);
 		btnViewSeqs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -164,7 +164,7 @@ public class BasicGOFilterTab extends Tab {
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(theParentFrame, 
-						"Basic GO Query", helpHTML);
+						"Filter GO annotations", helpHTML);
 			}
 		});
 		
@@ -897,7 +897,7 @@ public class BasicGOFilterTab extends Tab {
 		});  
     	row4.add(chkUseEnrich);		row4.add(Box.createHorizontalStrut(4));
     	
-		lblCutoff = Static.createLabel("Pval<", enable);
+		lblCutoff = Static.createLabel("p-value<", enable);
 		row4.add(lblCutoff); 		row4.add(Box.createHorizontalStrut(1));
 		txtCutoff = Static.createTextField(DEF_PVAL,4, enable);
 	    row4.add(txtCutoff);		row4.add(Box.createHorizontalStrut(2));
@@ -1609,29 +1609,37 @@ public class BasicGOFilterTab extends Tab {
 		try {
 			boolean isDesc = chkGODesc.isSelected();
 			loadList= new Vector <String> ();
-			int cntBad=0;
+			int cntBad=0, cnt=0;
 			String line, bad="", goTxt="";
 			BufferedReader file = new BufferedReader(new FileReader(fileName));
 			
 			while((line = file.readLine()) != null) {
-				line.replace("\n","").trim();
+				line = line.replace("\n","").trim();
 				if (line.equals("")) continue;
 				if (line.startsWith("#")) continue;
 				
 				if (isDesc) {
 					loadList.add(line);
-					if (goTxt=="") goTxt=line;
+					if (goTxt=="") goTxt = line; // for setText
+					cnt++;
 				}
 				else {
-					String gonum = line.replaceAll("[A-Za-z:]", "");
+					String [] tok = line.split("\\s+"); // CAS334 ignore rest of stuff on line
+					if (tok.length==0 || tok[0].trim()=="") {
+						Out.PrtWarn("Bad Line: " + line);
+						continue;
+					}
+					String go = tok[0];
+					String gonum = go.replaceAll("[A-Za-z:]", "");
 					try {
-						Integer.parseInt(gonum);
-						if (goTxt=="") goTxt=line;
+						Integer.parseInt(gonum); // exception
 						loadList.add(gonum);
+						if (goTxt=="") goTxt = go;  // for setText
+						cnt++;
 					}
 					catch (Exception e) {
-						if (bad=="") bad = line;
-						else bad += ", " + line;
+						if (bad=="") bad =        go + "::" + line;
+						else 		 bad += "\n" +go + "::" + line;
 						cntBad++;
 					}
 				}
@@ -1649,9 +1657,8 @@ public class BasicGOFilterTab extends Tab {
 			}
 			else {
 				loadStart=goTxt;
-				if (loadList.size()>1) goTxt+=",...";
-				if (isDesc) txtSubString.setText(goTxt);
-				else txtSubString.setText(goTxt);
+				if (loadList.size()>1) goTxt+=",...(" + cnt + ")"; // CAS324 add count
+				txtSubString.setText(goTxt);
 			}
 		}
 		catch(Exception e) {ErrorReport.prtReport(e, "Error loading file");}

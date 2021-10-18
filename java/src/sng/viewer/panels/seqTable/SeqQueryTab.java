@@ -1,5 +1,5 @@
 /**
- * Filter Contigs Query
+ * Filter Sequence Query
  * One object is made in STCWFrame at startup
  * Filters are only on the contig and pja_db_unitrans_hits 
  * Filters on pja_db_unique_hits are in Basic Hit
@@ -637,7 +637,7 @@ public class SeqQueryTab extends Tab
 		addRowToPanel ( chkHasProteinORF, thePanel );	
 		
 		// Both UTRs
-		chkHasBothUTRs = new JCheckBox ( "Has a start and stop codon" );
+		chkHasBothUTRs = new JCheckBox ( "Has Ends (Start&Stop codon)" );
 		chkHasBothUTRs.setSelected( false);
 		chkHasBothUTRs.setBackground(Color.WHITE);
 		addRowToPanel ( chkHasBothUTRs, thePanel );		
@@ -958,8 +958,7 @@ public class SeqQueryTab extends Tab
 	
 	private int getAndValidateInteger ( ToggleTextField theField, boolean isPos, String name ) throws DataValidationError
 	{
-		try
-		{
+		try{
 			int n = Integer.parseInt( theField.getText() );
 			if (isPos &&  n >= 0 ) return n;
 			if (!isPos) return n;
@@ -970,8 +969,7 @@ public class SeqQueryTab extends Tab
 	
 	private int getAndValidateInteger ( ToggleTextComboField theField, String name ) throws DataValidationError
 	{
-		try
-		{
+		try {
 			int n = Integer.parseInt( theField.getText() );
 			if ( n >= 0 ) return n;
 		}
@@ -1549,7 +1547,7 @@ public class SeqQueryTab extends Tab
 			joinSum("ORF>=" + nORFMinNT);
 		}
 		int nORFframe = chkFrameORF.isSelected() ? 
-				getAndValidateInteger( chkFrameORF , true, "ORF Frame") : -10;
+				getAndValidateInteger( chkFrameORF , false, "ORF Frame") : -10; //CAS334 true for >0 only
 		if (nORFframe!=-10) {
 			strORF = appendANDPredicate ( strORF,"contig.o_frame = " + nORFframe);
 			joinSum("Frame=" + nORFframe);
@@ -1560,7 +1558,7 @@ public class SeqQueryTab extends Tab
 		}
 		if ( chkHasBothUTRs.isSelected()) {
 			strORF = appendANDPredicate ( strORF, " o_coding_has_begin = TRUE AND o_coding_has_end = TRUE " );	
-			joinSum("ORF has Start/Stop codons"); 
+			joinSum("ORF has Start&Stop codons"); 
 		}
 		if (strORF!="") strSQL = appendANDPredicate ( strSQL, strORF);
 		

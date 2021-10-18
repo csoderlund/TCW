@@ -19,24 +19,25 @@ of these interfaces, so this Help provides any additional information.
 <p>The columns available depend on the attributes of the database, e.g. whether
 its TCW-assembled, differential expression was computed, annotation was performed.
 
-<p>Both <b>Show All</b> and <b>Filters</b> use these column setting for the
+<p>Both <b>All Seqs</b> and <b>Filters</b> use these column setting for the
  respective table. To change the columns in a given
  table, display it and then use "Refresh Columns" to update the columns.
  
-<h3>General</h3>
+<h2>General</h2>
 General sequence attributes: ID, length, total reads, etc. The columns available
 depend on the attributes of the database, e.g. if it is an assembled set, it
 will have the column <u>#buried</u>. 
 <br><br>In the <b>User Remark</b> column has user-supplied information added with
-runSingleTCW. The <b>TCW Remark</b> is information added by TCW during <tt>viewSingleTCW</tt> annotation.
+<tt>runSingleTCW</tt>. The <b>TCW Remark</b> is information added by the TCW <tt>ORF finder</tt> during annotation
+(See <b>Basic Sequence Help</b> for the TCW Remark Legend).
 
 
-<h3>Counts and TPM (or RPKM)</h3>
+<h2>Counts and TPM (or RPKM)</h2>
 The raw count and normalized TPM is available for each "Condition",
 i.e. the combined replicates of the experimental conditions (tissue, treatment, etc).
 NOTE: If RPKM was computed instead of TPM, then the Column page will say RPKM instead of TPM.
 
-<h3>N Fold and R Statistic</h3>
+<h2>N Fold and R Statistic</h2>
 N Fold - Select pairs of conditions to show their fold-change difference as a column. 
 The fold change is calculated using TPM values as follows: 
 the larger value is divided by the smaller value, where zero in the denominator 
@@ -48,7 +49,7 @@ R Statistic<sup>1</sup> - is a quick way to look for differential expression
 among all conditions at once.
 
 
-<h3>Differential Expression</h3>
+<h2>Differential Expression</h2>
 If your project has differential expression results added using 
 the <tt>runDE</tt> TCW program, then you can 
 select those columns here. In order to indicate up/down regulation,
@@ -57,7 +58,7 @@ The DE column in the sequence table sorts without regard to the sign.
 <p><b>Note</b>: a "-" indicates the sequence was filtered out before DE analysis and a "NA" indicates that 
 the DE computation returned an NA. The "-" and "NA" will always sort to the bottom of the table.
 
-<h3>Best Hits</h3>
+<h2>Best Hits</h2>
 The first set of values are from the <tt>AnnoDB fasta file</tt>. The second set is from the search
 file (i.e. produced by <tt>BLAST</tt> or <tt>DIAMOND</tt>). The last set (if present)
 are from the <tt>UniProt .dat file</tt>.
@@ -69,13 +70,14 @@ are from the <tt>UniProt .dat file</tt>.
 The best hit with at least one assigned GO ID.
 </table>
 
-<h3>SNPs and ORFs</h3>
+<h2>SNPs and ORFs</h2>
 
 Note that SNPs are only available if the  assembly was performed within TCW. 
 
 <P>ORFs is the best "Open Reading Frame"". The best ORF is determined using 
 the best hit, longest open reading frame, and 5th-order Markov score. 
-For details, see www.agcol.arizona.edu/software/tcw/doc/stcw/ORF.html. 
+For details, see the online <a href="http://www.agcol.arizona.edu/software/tcw/doc/stcw/ORF.html">ORF Finder</a>.
+The ORF finder add "TCW Remarks", which are described in the <b>Basic Sequence Help</b>.
 <p>
 <hr>
 <p>

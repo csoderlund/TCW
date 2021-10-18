@@ -131,11 +131,11 @@ public class ManagerData {
 	private void saveMetaData(SeqData trans, BufferedWriter out) {
 		try {
 			Attributes attrObj = trans.getAttr();
-			if(attrObj.getTitle().length() > 0)	out.write("title     = " + attrObj.getTitle() + "\n");
+			if(attrObj.getTitle().length() > 0)		out.write("title     = " + attrObj.getTitle() + "\n");
 			if(attrObj.getCultivar().length() > 0)	out.write("cultivar  = " + attrObj.getCultivar() + "\n");
 			if(attrObj.getTissue().length() > 0)	out.write("tissue    = " + attrObj.getTissue() + "\n");
-			if(attrObj.getStage().length() > 0)	out.write("stage     = " + attrObj.getStage() + "\n");
-			if(attrObj.getTreatment().length() > 0)out.write("treatment = " + attrObj.getTreatment() + "\n");
+			if(attrObj.getStage().length() > 0)		out.write("stage     = " + attrObj.getStage() + "\n");
+			if(attrObj.getTreatment().length() > 0)	out.write("treatment = " + attrObj.getTreatment() + "\n");
 			if(attrObj.getOrganism().length() > 0)	out.write("organism  = " + attrObj.getOrganism() + "\n");
 			if(attrObj.getStrain().length() > 0)	out.write("strain    = " + attrObj.getStrain() + "\n");
 			if(attrObj.getYear().length() > 0)		out.write("year      = " + attrObj.getYear() + "\n");
@@ -270,8 +270,7 @@ public class ManagerData {
 		catch(Exception e) {ErrorReport.prtReport(e, "Loading count data failed"); cntErrors++;}
 		return null;
 	}
-	
-	
+
 	/**********************************************************
 	 * XXX Called from EditTransLibPanel.updateTransLibUI on Add
 	 * always single count/rep as replicates have not been defined yet.
@@ -768,9 +767,12 @@ public class ManagerData {
 		public void setORFlenDiff(String r) { strORFlenDiff = r; }
 		public String getORFlenDiff() { return strORFlenDiff; }
 		
+		public void setORFmkDiff(String r) { strORFmkDiff = r; }
+		public String getORFmkDiff() { return strORFmkDiff; }
+		
 		public void setORFtrainMinSet(String r) { strORFtrainMinSet = r; }
 		public String getORFtrainMinSet() { return strORFtrainMinSet; }
-				
+		
 		public void setORFtrainCDSfile(String filename) { strORFtrainCDSfile = filename; }
 		public String getORFtrainCDSfile() { return strORFtrainCDSfile; }
 				
@@ -780,6 +782,7 @@ public class ManagerData {
 		private String strORFhitSim = Globals.pHIT_SIM;  		
 		
 		private String strORFlenDiff=Globals.pDIFF_LEN;
+		private String strORFmkDiff=Globals.pDIFF_MK;		// CAS334 Log difference of markov scores
 		
 		private String strORFtrainMinSet=Globals.pTRAIN_MIN;
 		private String strORFtrainCDSfile="";
@@ -1103,6 +1106,9 @@ public class ManagerData {
 					if (!annoObj.strORFlenDiff.equals(theProps.getProperty("Anno_ORF_len_diff")))
 						out.write("Anno_ORF_len_diff = " + annoObj.strORFlenDiff + "\n");
 					
+					if (!annoObj.strORFmkDiff.equals(theProps.getProperty("Anno_ORF_mk_diff")))
+						out.write("Anno_ORF_mk_diff = " + annoObj.strORFmkDiff + "\n");
+					
 					String file = annoObj.strORFtrainCDSfile;
 					if(file != null && !file.equals("") && !file.equals("-1")) 
 						out.write("Anno_ORF_train_CDS_file = " + file + "\n");
@@ -1311,6 +1317,9 @@ public class ManagerData {
 			else if(key.equalsIgnoreCase("Anno_ORF_len_diff")) {
 				if (isDouble("Anno_ORF_len_diff", value)) annoObj.strORFlenDiff = value;
 			}
+			else if(key.equalsIgnoreCase("Anno_ORF_mk_diff")) {
+				if (isDouble("Anno_ORF_mk_diff", value)) annoObj.strORFmkDiff = value;
+			}
 			else if(key.equalsIgnoreCase("Anno_ORF_train_min_set")) {
 				if (isInteger("Anno_ORF_train_min_set", value)) annoObj.strORFtrainMinSet = value;
 			}
@@ -1512,5 +1521,4 @@ public class ManagerData {
 	private boolean isAAstcw = false;
 	private HostsCfg hostObj=null;
 	private ManagerFrame theManFrame=null;
-	
 }

@@ -1,5 +1,10 @@
 package sng.viewer.panels;
 
+/************************************************************
+ * Results tab on left of main panel. Used by Results (Sequence) and Pair Results
+ * CAS334 	Sequence Detail nodes are added and removed from Summary.
+ * 			The data structure was changed to RowData class
+ */
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -21,78 +26,64 @@ import java.awt.event.MouseEvent;
 import java.awt.Color;
 import java.util.Vector;
 
-
 import sng.database.Globals;
-import sng.util.MenuTreeNode;
 import sng.util.Tab;
 import sng.viewer.STCWFrame;
 import util.ui.UserPrompt;
+import util.methods.Out;
+import util.methods.Static;
 
 public class ResultsSummaryTab extends Tab
 {
+	private final String helpHTML =  Globals.helpDir + "ResultsSummaryTab.html";
+	private final String [] colNames = new String [] {"Label", "Summary"}; 
+	
 	private static final long serialVersionUID = -8340849413126018332L;
-	public ResultsSummaryTab ( STCWFrame parentFrame, Tab parentTab, String [] fieldList )
+	public ResultsSummaryTab (String name, STCWFrame parentFrame)
 	{
-		super(parentFrame, parentTab);
+		super(parentFrame, null);
 		super.setBackground(Color.WHITE);
-		theParentFrame = parentFrame;
-		colNames = fieldList;
+		title = name; 
+		theMainFrame = parentFrame;
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBorder( BorderFactory.createEmptyBorder(10, 10, 10, 10) );
 		
-		btnClearSel = new JButton("Remove Selected Result");
-		btnClearSel.setEnabled(false);
+		btnClearSel = Static.createButton("Remove Selected Result", false);
 		btnClearSel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) { 
-				int selRow = table.getSelectedRow();
-				if (selRow != -1) {	
-					String name = rows.get(selRow).get(0);
-					theParentFrame.removeResult(name);
-					rows.remove(selRow);
-					tabs.remove(selRow);
-					table.revalidate();
-				}
+;				removeSelected();
 			}
 		});
-		
-		btnClearAll = new JButton("Remove All Results");
-		btnClearAll.setEnabled(false);
+		btnClearAll = Static.createButton("Remove All Results", false);
 		btnClearAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) { 
-				clearAll();
+				removeAllRows();
 			}
-		});
-		
-		btnHelp = new JButton("Help");
-		btnHelp.setBackground(Globals.HELPCOLOR);
+		});	
+		btnHelp = Static.createButton("Help", true, Globals.HELPCOLOR);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(getParentFrame(), "List Filtered Results", "html/viewSingleTCW/ResultsSummaryTab.html");
+				UserPrompt.displayHTMLResourceHelp(getParentFrame(), title + " Results", helpHTML);
 			}
 		});
 		
-		JPanel buttonPanel = new JPanel();
-		buttonPanel.setLayout(new BoxLayout ( buttonPanel, BoxLayout.X_AXIS ));
-		buttonPanel.setBackground(Color.WHITE);
-		buttonPanel.add(btnClearSel);
-		buttonPanel.add(Box.createHorizontalStrut(5));
-		buttonPanel.add(btnClearAll);
-		buttonPanel.add(Box.createHorizontalStrut(5));
+		JPanel buttonPanel = Static.createRowPanel();
+		buttonPanel.add(btnClearSel);	buttonPanel.add(Box.createHorizontalStrut(5));
+		buttonPanel.add(btnClearAll);	buttonPanel.add(Box.createHorizontalStrut(5));
 		
 		buttonPanel.add(Box.createHorizontalGlue());
 		buttonPanel.add(btnHelp); 
 		buttonPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		
-		lblTitle = new JLabel("List Filtered Results");
+		lblTitle = Static.createLabel(title + " Results");
 		Font f = lblTitle.getFont();
 		lblTitle.setFont(new Font(f.getName(), f.getStyle(), f.getSize()+4));
-		txtDesc = new JTextArea(
-				"Remove a result removes it from left panel and this table.");
+		txtDesc = new JTextArea("Remove a label removes it from left panel and this table.");
 
 		txtDesc.setFont(new Font(f.getName(), Font.PLAIN, f.getSize()));
 		txtDesc.setAlignmentX(Component.LEFT_ALIGNMENT);
 		txtDesc.setEditable(false);
-		lblError = new JLabel("The filtered result has been closed.");
+		lblError = Static.createLabel("The filtered result has been closed.");
 		lblError.setVisible(false);
 		lblError.setForeground(Color.RED);
 		
@@ -104,8 +95,7 @@ public class ResultsSummaryTab extends Tab
 		table.setShowVerticalLines( true );	
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); 
 		table.setIntercellSpacing ( new Dimension ( 1, 0 ) );		
-		rows = new Vector<Vector<String>>();
-		tabs = new Vector<Tab>();	
+		rowsVec = new Vector<RowData>();
 		table.setModel(new ResultsTableModel());
 		table.getTableHeader().setBackground(Color.WHITE);
 		table.addMouseListener(new MouseAdapter() {
@@ -114,9 +104,9 @@ public class ResultsSummaryTab extends Tab
 					btnClearSel.setEnabled(true);
 				else if (e.getClickCount() == 2) {
 					int row = table.getSelectedRow();
-					Tab tab = tabs.get(row);
+					Tab tab = rowsVec.get(row).tab;
 					if (tab != null) {
-						String name = rows.get(row).get(0);
+						String name = rowsVec.get(row).name;
 						getParentFrame().menuTree.setSelectedNode(name);
 						getParentFrame().tabbedPane.setSelectedTab(tab);
 						lblError.setVisible(false);
@@ -133,49 +123,77 @@ public class ResultsSummaryTab extends Tab
 		scroll.setAlignmentX(Component.LEFT_ALIGNMENT);
 		scroll.getViewport().setBackground(Color.WHITE);
 		
-		add(buttonPanel);
-		add(Box.createVerticalStrut(20));
+		add(buttonPanel);	add(Box.createVerticalStrut(20));
 		add(lblTitle);
-		add(txtDesc);
-		add(Box.createVerticalStrut(15));
+		add(txtDesc);		add(Box.createVerticalStrut(15));
 		add(lblError);
 		add(scroll);
-	}
-	
-	public int addResultSummary(String name, Tab tab, MenuTreeNode node, String summary) {
+	}	
+	public int addResultSummary(String name, String summary, Tab tab, Tab parentTab) {
 		btnClearAll.setEnabled(true);
 		lblError.setVisible(false);
 		
-		Vector<String> newRow = new Vector<String>();
-		newRow.add(name);
-		newRow.add(summary);
+		RowData newRow = new RowData(name, summary, tab, parentTab);
 		
-		rows.add(newRow);
-		tabs.add(tab);
+		boolean badd=false;
+		if (parentTab!=null) {
+			for (int i=0; i<rowsVec.size(); i++) {
+				if (rowsVec.get(i).tab==parentTab) {
+					rowsVec.insertElementAt(newRow, i+1);
+					badd=true;
+					break;
+				}
+			}
+		}
+		if (!badd) rowsVec.add(newRow);
 		table.revalidate();
 		
-		return rows.size()-1;
+		return rowsVec.size()-1;
 	}
-	
 	public void removeResultSummary(Tab tab) {	
-		int index = tabs.indexOf(tab);
-		if (index >= 0) {
-			tab.close();
-			rows.remove(index);
-			tabs.remove(index);
-			lblError.setVisible(false);
-			table.revalidate();
+		for (int idx=0; idx<rowsVec.size(); idx++) {
+			if (rowsVec.get(idx).tab == tab) {
+				removeChildren(tab);		
+				
+				rowsVec.remove(idx);	
+	
+				lblError.setVisible(false);
+				table.revalidate();
+				return;
+			}
 		}
 	}
-	private void clearAll() {
-		while(tabs.size()>0) {
-			Tab t = tabs.get(0);
-			t.close();
-			String name = rows.get(0).get(0);
-			theParentFrame.removeResult(name);
-			rows.remove(0);
-			tabs.remove(0);
+	private void removeSelected() {
+		int selRow = table.getSelectedRow();
+		if (selRow == -1) return;
+		
+		theMainFrame.removeTab(rowsVec.get(selRow).tab); // remove from left panel
+		
+		removeChildren(rowsVec.get(selRow).tab);		  // remove children from both
+		
+		rowsVec.remove(selRow);						  // remove from result table
+		
+		table.revalidate();
+	}
+	/************************************************
+	 * CAS334: The Summary contains the prefix of the parent node, e.g Filter1: 
+	 * so all children with that prefix are removed if the parent is removed.
+	 */
+	private void removeChildren(Tab ptab) {
+		Vector <RowData> remove = new Vector <RowData> ();
+		for (RowData rd : rowsVec) {
+			if (rd.ptab==ptab) remove.add(rd);
 		}
+		for (RowData rd : remove) {
+			theMainFrame.removeTab(rd.tab);
+			rowsVec.remove(rd);
+		}
+	}
+	private void removeAllRows() {
+		for (RowData rd : rowsVec) {
+			theMainFrame.removeTab(rd.tab);
+		}
+		rowsVec.clear();
 		table.revalidate();
 
 		btnClearAll.setEnabled(false);
@@ -184,16 +202,11 @@ public class ResultsSummaryTab extends Tab
 		
 		revalidate(); repaint();
 	}
-	/**
-	 * Tab is about to close, free the associated memory
-	 */
-	public void close()
-	{
+	/** Tab is about to close, free the associated memory */
+	public void close() {
 		table = null;
-		if(rows != null) rows.clear();
-		rows = null;
-		if(tabs != null) tabs.clear();
-		tabs = null;
+		if(rowsVec != null) rowsVec.clear();
+		rowsVec = null;
 	}
 	
 	private class ResultsTableModel extends AbstractTableModel {
@@ -202,32 +215,38 @@ public class ResultsSummaryTab extends Tab
 		public int getColumnCount() {
             return colNames.length;
         }
-
         public int getRowCount() {
-            return rows.size();
+            return rowsVec.size();
         }
-        
         public Object getValueAt(int row, int col) {
-            Vector<String> r = rows.elementAt(row);
-            return r.elementAt(col);
+            RowData r = rowsVec.elementAt(row);
+            if (col==0) return r.name;
+            if (col==1) return r.summary;
+            return r.tab;
         }
-        
         public String getColumnName(int col) {
             return colNames[col];
         }
 	}
-	
+	private class RowData { // CAS334 changed from two vectors to a class
+		public RowData(String name, String summary, Tab tab, Tab parentTab) {
+			this.name = name;
+			this.summary = summary;
+			this.tab = tab;
+			this.ptab = parentTab;
+		}
+		String name;
+		String summary;
+		Tab tab, ptab;
+	}
 	private JTable table = null;
-	private JLabel lblTitle = null;
-	private JLabel lblError = null;
+	private JLabel lblTitle = null, lblError = null;
 	private JTextArea txtDesc = null;
 	private JScrollPane scroll = null;
-	private JButton btnClearSel = null;
-	private JButton btnClearAll = null;
-	private JButton btnHelp = null;
-	private String[] colNames = null;
-	private Vector<Vector<String>> rows = null;
-	private Vector<Tab> tabs = null;  
-	private STCWFrame theParentFrame=null;
+	private JButton btnClearSel = null, btnClearAll = null, btnHelp = null;
+	
+	private String title;
+	private Vector<RowData> rowsVec = null;
+	private STCWFrame theMainFrame=null;
 }
 

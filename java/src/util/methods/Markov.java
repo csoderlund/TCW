@@ -41,8 +41,8 @@ public class Markov {
 	
 	public String scoreSeq(String tag, int type, String seq) {
 		scoreSeqAllFrames(type, seq);
-		return String.format(" %-6s %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %s\n",
-				tag, score[0], score[1], score[2],score[3], score[4], score[5], allFramesStr);
+		return String.format(" %-6s %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f\n",
+				tag, score[0], score[1], score[2],score[3], score[4], score[5]); // remove (Pos & best) Good score
 	}
 	
 	public boolean isGood() {return isGood;}
@@ -57,7 +57,7 @@ public class Markov {
 			if (type==fnMarkov) {
 				int markov_order=5;
 		    
-			    	score[0] = markovScoreThisFrame(seq, markov_order, true);				
+			    score[0] = markovScoreThisFrame(seq, markov_order, true);				
 				score[1] = markovScoreThisFrame(seq.substring(1), markov_order, true);
 				score[2] = markovScoreThisFrame(seq.substring(2), markov_order, true);
 		
@@ -104,7 +104,7 @@ public class Markov {
 				allFramesStr="???";
 			}
 		}
-		catch (Exception e) {e.printStackTrace(); return;}
+		catch (Exception e) {ErrorReport.prtReport(e, "Markov score"); return;}
 	}
 	/***************************************************************/
 	private double codonScoreThisFrame(String seq) {
@@ -125,8 +125,8 @@ public class Markov {
 	    
 	    double score = 0;
 	    
-	    for (int i = 0; i <= markov_order; i++) {
-	    		int frame = i % 3;
+	    for (int i = 0; i <= markov_order; i++) { // initial n bases, e.g. 5
+	    	int frame = i % 3;
 		       
 	        String kmer = seq.substring(0, i+1); 
 	        String key = kmer + "-" + frame;
@@ -143,7 +143,7 @@ public class Markov {
 	       
 	        if (stopAtStop) {
 		        if (i == seq_length - 2 - 1  && frame == 0) {
-		        		String codon = seq.substring(i, i+3);
+		        	String codon = seq.substring(i, i+3);
 					if (codon.equals("taa") || codon.equals("tag") || codon.equals("tga")) {
 						break;
 					}
@@ -177,7 +177,7 @@ public class Markov {
 	}
 	private boolean isGood=false;
 	private int nScore=3;
-	private String allFramesStr="";
+	private String allFramesStr=""; // CAS334 was printing on Detail Frame, but just confusing
 	private double allFramesScore=0;
 	private double [] score = new double [6];
 	private double expectedCodonLog = Math.log(1.0/64.0);

@@ -33,7 +33,7 @@ it can hit multiple different annoDBs (have alignments in more than one annoDB).
 <table class=tablex>
 <tr><td colspan=2><u>The following are characterizations assigned to DB hits</u></td>
 </tr>
-<tr><td><i>Best Bits (BS/BITS)</i></td>
+<tr><td valign=top nowrap><i>Best Bits (BS/BITS)</i></td>
 <td>The hit with the best bitscore. 
 If there is a tie, a SP (SwissProt) or TR (TrEMBL) takes precedence.
 If there is still a tie, the best e-value takes precedence.</td>
@@ -60,7 +60,7 @@ Note that the <tt>Blast</tt> and <tt>Diamond</tt> default order is the e-value s
 bitscore. </td>
 </tr>
 </table>
-NOTE: The bitscore takes precedence over the e-value since the e-value takes into account the size of the database, wherease
+NOTE: The bitscore takes precedence over the e-value since the e-value takes into account the size of the database, whereas
 the bitscore will be the same regardless of the size of the database.
 <p>Special Case - <i>Best Anno (AN/ANNO)</i>:  The database may having been built with the "SwissProt precedence" option set, in which
 case, this will be stated at the end of the <b>Overview</b> panel. When this is selected, a SwissProt hit will be selected
@@ -77,10 +77,16 @@ of what is available.
 <p><b>&gt;&gt;Find hits</b> - Search a sequence against the sequences in the database or a user
 selected protein database. This requires the <tt>Blast</tt> and optional <tt>Diamond</tt> paths to 
 be in the HOSTS.cfg file. 
+<p><b>&gt;&gt;Results</b> - List all sequence results corresponding to labels on the left.
+<ul>
+<li>All queries that have been performed will be listed in a table. 
+<li>Selecting a label will redisplay it on the right, or select it from this Results table.
+<li>To remove a label, select the 'x' beside it on the left panel, or remove it from the Results
+table.
+</ul>
+<h2>Seq Table</h2>
 
-<h2>Sequences</h2>
-
-<b>&gt;&gt;Show All</b> - A table of all sequences in the database. 
+<b>&gt;&gt;All Seqs</b> - A table of all sequences in the database. 
 <ul>
 <li>To view a sequence from the table, select the sequence and then "View Selected Sequence".
 <li>Change the columns in the table using "Columns" under "Sequence.
@@ -95,26 +101,21 @@ or redisplay the table (listed on the left panel) and select "Refresh columns".
 
 <b>&gt;&gt;Filters</b> - A menu with specific filters for sequences.
 <ul>
-<li>Select one or more filters, then select "View Filtered Sequences". The sequences that pass all filters will
+<li>Select one or more filters, then select "Filtered Seq Table". The sequences that pass all filters will
 be displayed in a table. 
 <li>If you are not seeing the columns you desire, go to the "Columns", change
 the columns, come back to the table (it will be listed on the left), and click "Refresh Columns".
 </ul>
 
-<b>&gt;&gt;Results</b> - List all Filter query results.
-<ul>
-<li>All queries that have been performed will be listed in a table. 
-<li>Selecting a label will redisplay it on the right, or select it from this Results table.
-<li>To remove a label, select the 'x' beside it on the left panel, or remove it from the Results
-table.
+
 </ul>
 
-<h2>Basic Queries</h2>
+<h2>Basic Filters</h2>
 <b>&gt;&gt;Sequences</b> - Search on Seq ID, TCW Remarks or User Remarks.  
 <ul>
 <li> 
 This builds a table from the results of the selected filters.
-<li>The resulting sequences can be shown as "View Selected Sequence". 
+<li>The resulting sequences can be shown as "Seq Table". 
 <li>Columns can be changed with "Select Columns". 
 
 </ul>
@@ -131,8 +132,8 @@ This builds a table from the results of the selected filters.
 
 
 <hr>
-<h2>Similar Sequence Pairs</h2>
-This section will only exist if the database was built with the <b>Similar Pairs</b> option.
+<h2>Pair Table</h2>
+This section will only exist if the database was built with the <b>Similar Pairs</b> option of <tt>runSingleTCW</tt>.
 All options are the same as above, except apply to sequence pairs. 
 
 </BODY>

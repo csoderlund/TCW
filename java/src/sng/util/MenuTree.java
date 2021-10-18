@@ -1,5 +1,8 @@
 package sng.util;
 
+/*********************************************************
+ * Controls selectable labels on left panel
+ */
 import java.awt.LayoutManager;
 import java.awt.Dimension;
 import java.awt.Container;
@@ -9,17 +12,15 @@ import java.awt.Color;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
-import sng.util.MenuTreeNode.MenuTreeNodeEvent;
-import sng.util.MenuTreeNode.MenuTreeNodeListener;
-
 import java.util.Vector;
 import java.util.Iterator;
 
+import sng.util.MenuTreeNode.MenuTreeNodeEvent;
+import sng.util.MenuTreeNode.MenuTreeNodeListener;
 
 public class MenuTree extends JPanel implements MenuTreeNodeListener {
 	private static final long serialVersionUID = 1L;
-
-	private static final boolean DEBUG = false;
+	private static boolean DEBUG = false; 
 	
 	private static int DEFAULT_LEVEL_INDENT = 20;
 	private static int DEFAULT_RIGHT_MARGIN = 5;
@@ -28,10 +29,8 @@ public class MenuTree extends JPanel implements MenuTreeNodeListener {
 	private MenuTreeNode rootNode = null;
 	private MenuTreeNodeListener nodeListener = null;
 	private MenuTreeNode lastSelectedNode = null;
-	private ImageIcon arrowIcon = null;
-	private ImageIcon dotIcon = null;
-	private ImageIcon closeIcon = null;
-	private ImageIcon plusminusIcon = null;
+	
+	private ImageIcon arrowIcon = null, dotIcon = null, closeIcon = null, plusminusIcon = null;
 	
 	// called by STCWFrame.openAssembly to set root node
 	public MenuTree(MenuTreeNode node) {
@@ -59,8 +58,7 @@ public class MenuTree extends JPanel implements MenuTreeNodeListener {
 		installNodes();
 	}
 	
-	private void installNodes()
-	{
+	private void installNodes() {
 		removeAll();
 		
 		Vector<MenuTreeNode> v = new Vector<MenuTreeNode>();
@@ -72,11 +70,9 @@ public class MenuTree extends JPanel implements MenuTreeNodeListener {
 		}
 	}
 	
-	public void addMenuTreeNodeListener(MenuTreeNodeListener l) 
-	{
+	public void addMenuTreeNodeListener(MenuTreeNodeListener l) {
 		nodeListener = l;
 	}
-	
 	public void addNode(Tab parentTab, MenuTreeNode childNode) {
 		MenuTreeNode parentNode = getNodeWithUserObject(parentTab);
 		addNode(parentNode, childNode);
@@ -179,7 +175,7 @@ public class MenuTree extends JPanel implements MenuTreeNodeListener {
 		}
 		return null;
 	}
-	
+
 	public MenuTreeNode getNodeWithUserObject(Object obj) {
 		Vector<MenuTreeNode> v = new Vector<MenuTreeNode>();
 		depthFirstList(v, rootNode);
@@ -191,16 +187,6 @@ public class MenuTree extends JPanel implements MenuTreeNodeListener {
 		prtMsg("no NodeWithUserObject ", obj.getClass().getName());
 		return null;
 	}
-	
-	public void printTree(String parentName) {
-		Vector<MenuTreeNode> v = new Vector<MenuTreeNode>();
-		depthFirstList(v, getNodeWithName(parentName));
-		Iterator<MenuTreeNode> iter = v.iterator();
-		while (iter.hasNext())
-			System.err.print(iter.next().toString() + " ");
-		System.err.println();
-	}
-	
 	private void depthFirstList(Vector<MenuTreeNode> v, MenuTreeNode n) {
 		v.add(n);
 		
@@ -211,6 +197,7 @@ public class MenuTree extends JPanel implements MenuTreeNodeListener {
 		if (DEBUG) 
 			System.err.format("MenuTree %-20s %s\n", method, msg);
 	}
+	
 	private void printTree() {
 		Vector<MenuTreeNode> v = new Vector<MenuTreeNode>();
 		depthFirstList(v, rootNode);
@@ -218,7 +205,7 @@ public class MenuTree extends JPanel implements MenuTreeNodeListener {
 		int i=1;
 		while (iter.hasNext()) {
 			MenuTreeNode n = iter.next();
-			System.err.println(i + " " + n.toString());
+			System.err.println(i + " " + n.toString() + " " + n.getText());
 			i++;
 		}
 	}
@@ -232,7 +219,6 @@ public class MenuTree extends JPanel implements MenuTreeNodeListener {
 		public MenuTreeLayout(MenuTree menuTree) {
 			this.menuTree = menuTree;
 		}
-		
 		public void addLayoutComponent(String name, Component comp) { }
 		
 		public void removeLayoutComponent(Component comp) { }
@@ -258,7 +244,6 @@ public class MenuTree extends JPanel implements MenuTreeNodeListener {
 					n.setStyle(MenuTreeNode.STYLE_LEVEL3);
 					break;
 				default:
-					//n.setType(MenuTreeNode.TYPE_DEFAULT);
 					n.setStyle(MenuTreeNode.STYLE_LEVEL4);
 				}
 					
@@ -269,23 +254,18 @@ public class MenuTree extends JPanel implements MenuTreeNodeListener {
 				y2 += height;
 				x2 += DEFAULT_LEVEL_INDENT;
 			}
-			
 			for (MenuTreeNode child : n.getChildNodes()) {
 				Dimension dim = doLayout(child, x2, y2);
 				y2 += dim.getHeight();
-			}
-			
+			}	
 			return new Dimension(x2-x, y2-y);
 		}
-		
 		public void layoutContainer(Container parent) {
 			doLayout(menuTree.rootNode, 0, 0);
 		}
-		
 		public Dimension minimumLayoutSize(Container parent) {
 			return preferredLayoutSize(parent);
 		}
-		
 		public Dimension preferredLayoutSize(Container parent) {
 			return doLayout(menuTree.rootNode, 0, 0);
 		}

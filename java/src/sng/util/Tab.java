@@ -9,7 +9,6 @@ import javax.swing.JPanel;
 
 import sng.viewer.STCWFrame;
 
-// mdb added 4/10/08
 public class Tab extends JPanel {
 	private static final long serialVersionUID = 1744893675782003263L;
 

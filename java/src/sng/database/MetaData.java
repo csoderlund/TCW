@@ -177,6 +177,11 @@ public class MetaData {
 				 			deNames[i] = rs.getString(1).substring(2); // remove P_
 				 			deTitles[i++] = rs.getString(2);
 				 		}
+				 		
+				 		/** sanity check CAS334 this happened but cannot reproduce **/
+					 	if (!mDB.tableColumnExists("contig", "P_" + deNames[0])) {
+					 		Out.PrtWarn("TCW error: " + deNames[0] + " does not exist");
+					 	}
 				 	}
 			 	}	
 		 	}

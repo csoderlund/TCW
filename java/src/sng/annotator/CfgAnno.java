@@ -182,14 +182,16 @@ public class CfgAnno {
 			int hitSim 	=		argInt("Anno_ORF_hit_sim", "ORF %Sim of Hit");
 			
 			double diffLen = 	argDouble("Anno_ORF_len_diff", "ORF Log Len Ratio");
+			
+			double diffMk = 	argDouble("Anno_ORF_mk_diff", "ORF Log Markov Ratio"); // CAS334
 		
 			int trSet	 =		argInt("Anno_ORF_train_min_set", "ORF minimal training set");
 			
-			String cdsFile = mProps.getAnnoProperty("Anno_ORF_train_CDS_file");
+			String cdsFile = mProps.getAnnoProperty("Anno_ORF_train_CDS_file"); 
 			if (Globals.hasVal(cdsFile)) {
 				Out.PrtSpMsg(1,"ORF Training CDS file = " + cdsFile);
 			}
-			orfObj.setParams(bAlt, hitEval, hitSim, diffLen, trSet, cdsFile);
+			orfObj.setParams(bAlt, hitEval, hitSim, diffLen, diffMk, trSet, cdsFile);
 		}
 		catch (Exception e) {ErrorReport.reportError(e, "getting annoDB parameters");}
 	}

@@ -75,13 +75,14 @@ public class BasicGOTablePanel {
 	private static final String GO_FORMAT = Globalx.GO_FORMAT;
 	private static final int MAX_COL = 300;
 	
+	private static final String goPref= "_goPrefs";
+	private final String EVALUE = "Best E-val";
+	
+	// IF CHANGE COLUMNS, FIX THESE TOO!!!
 	public static final int GOindex=0;
 	public static final int GOdomain=1;
 	private static final int GOdesc=2; // CAS333 was 3
-	private static final int GOnSeq=5;
-	
-	private static final String goPref= "_goPrefs";
-	private final String EVALUE = "Best E-val";
+	private static final int GOnSeq=4; // CAS334 was 5 (wasn't fixed after column change), which broke #Seqs DE
 	
 	private  final Class<?> [] COL_TYPES = 
 	 {Integer.class,  String.class, String.class, Integer.class, Integer.class, Integer.class,  Double.class }; 
@@ -138,7 +139,7 @@ public class BasicGOTablePanel {
 				});
 	    		generalColsPanel.add(chkStaticColumns[x]);
 	    	}
-	    	chkStaticColumns[GOindex].setEnabled(false);
+	    	// chkStaticColumns[GOindex].setEnabled(false); CAS334 may want to just write description
 		    generalColsPanel.add(Box.createVerticalStrut(10));
 		    
 	    	JPanel checkGenPanel = Static.createRowPanel();
@@ -979,10 +980,11 @@ public class BasicGOTablePanel {
 	public void tableExport(Component btnC, int type) {
 		new ExportGO().run(btnC, type);
 	}
-	// CAs324 change theTableModel to theTable
+	// CAS324 change theTableModel to theTable
 	public String tableCopyString(String delim) {
  		StringBuilder retVal = new StringBuilder();
  	
+ 		retVal.append("#"); // CAS334 column headings is a comment
 		for(int x=0; x<theTable.getColumnCount()-1; x++) {
 			retVal.append(theTable.getColumnName(x));
 			retVal.append(delim);
@@ -1073,11 +1075,11 @@ public class BasicGOTablePanel {
 	private class ExportColumn extends JDialog {
 		private static final long serialVersionUID = 1L;
 		public ExportColumn(String tcwid) {
-	    		setModal(true);
-	    		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-	    		setTitle("Column heading.... ");
-	        
-	    		JPanel page = Static.createPagePanel();
+    		setModal(true);
+    		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+    		setTitle("Column heading.... ");
+        
+    		JPanel page = Static.createPagePanel();
 	        page.add(Static.createLabel("Column heading for #Seqs"));
 	        page.add(Box.createVerticalStrut(10));
 	       
@@ -1199,6 +1201,8 @@ public class BasicGOTablePanel {
 				int rowCnt = getRowCount();
 				Out.prtSp(1, "Processing " + rowCnt + " rows and " + colCnt + " columns...");
 				
+				// Column headings
+				line.append("#"); // CAS334 column headings are a comment
 				boolean [] isDE = new boolean [theTable.getColumnCount()];
 				for(int x=0; x<theTable.getColumnCount(); x++) {
 					String colName = theTable.getColumnName(x).replaceAll("\\s", "-"); 
@@ -1219,6 +1223,7 @@ public class BasicGOTablePanel {
 				}	
 				pw.println(line.toString());
 			
+				// rest of table
 				int x, y, cnt=0, nCol=theTable.getColumnCount();
 				String val = "";
 				for(x=0; x<getRowCount(); x++) {

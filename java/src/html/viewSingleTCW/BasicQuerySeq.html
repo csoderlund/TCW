@@ -5,31 +5,29 @@
 .tablex    		{border: 0px; padding: 3px; border-spacing: 3px; }
 .tablex td 		{border: 0px; padding: 3px; border-spacing: 3px}
 </style>
-<title>Basic Queries for Sequence</title>
+<title>Basic Filters for Sequence</title>
 </head>
 
 <body style="padding:20px;width:650px;font-family:Times">
 
-<h1>Basic Queries for Sequence</h1>
+<h1>Basic Filters for Sequence</h1>
 
 This provides some basic sequence searches; for more involved searches, use
-the <b>Filter</b> bullet on the left panel.  This allows you to "build" a table
-of results from multiple queries, which can be copied to Clipboard, 
-exported, or view the individual sequences with <b>View Selected Sequence</b>. 
+the <b>Filter</b> bullet on the left panel.  
 
 <hr>
 <h2>Search</h2>
 
 <p>
 Choose one of four search modes and enter a string to search on.  
-<ul>
-<li><b>Seq ID</b>&nbsp;&nbsp;Sequence name. Only one name is allowed unless loaded from file. 
-<li><b>Orig ID or Longest or None</b>&nbsp;&nbsp; (1) Original name if Seq ID != Orig ID  (2) Longest read of contig
+<table class=tablex>
+<tr><td nowrap><b>Seq ID</b><td>Sequence name. Only one name is allowed unless loaded from file. 
+<tr><td nowrap><b>Orig ID</b><td>(1) Original name if Seq ID != Orig ID  (2) Longest read of contig
 if assembled, (3) no query if neither of the previous. 
-<li><b>TCW</b>&nbsp;&nbsp;TCW Remarks are entered when the database is built; they provide information
+<tr><td><b>TCW</b><td>TCW Remarks are entered when the database is built; they provide information
 on the ORFs, and if the sequence has hits in multiple frames.
-<li><b>User</b>&nbsp;&nbsp;User Remarks may be associated with each sequence (entered with <tt>runSingleTCW</tt>).
-</ul>
+<tr><td><b>User</b><td>User Remarks may be associated with each sequence (entered with <tt>runSingleTCW</tt>).
+</table>
 
 <b><i>Search rules</i></b> 
 <ul>
@@ -40,15 +38,26 @@ To force it to match at the end of the string, enter a '%' at the beginning of t
 NOTE: since '%' is a special character, it cannot be in a search string as a literal.
 </ul>
 
-<b>Load File</b>: The file should contain one Sequence ID per line (make sure <b>Seq IDs</b>
-is selected); likewise for Orig ID, TCW (remark) and User (remark). <i>This performs an exact search</i>.
+<b>Load File</b>: 
+<ul>
+<li>Select the search mode: <b>Seq ID</b>, <b>Orig ID</b>, <b>TCW</b> or <b>User</b>.
+<li>The file should contain one search item per line. <i>This performs an exact search</i>.
+<li>For <b>Seq ID</b> and <b>Orig ID</b>, there can be additional information on a line; only the
+first word will be taken as an ID.
+</ul>
 
 <hr>
 <h2>Results</h2>
-Select one or more filters, then click <b>BUILD TABLE</b> or <b>ADD to TABLE</b> to execute the 
-search, which builds a new table or adds to the existing table, respectively.
-<br>Columns can be added/removed (<b>Columns</b>), rearranged by dragging and sorted
-by clicking on a column heading.
+Select one or more filters, the select one of the following:
+<table class=tablex>
+<tr><td><b>BUILD TABLE</b><td>Builds a new table. 
+<tr><td><b>ADD to TABLE</b><td>Adds any new rows to the existing table.
+<tr><td><b>SELECT ROWS</b><td>Select all existing rows that result from the query.
+</table>
+<b>Columns</b>: This will bring up a panel of columns, which can be selected or deselected,
+and the results will immediately be changed in the table after <b>Accept</b>.
+<p>A column can be moved by selecting the heading and moving it. Click the column heading to
+sort it.
  
 <p><b><i>Modify Table</i></b>
 <ul>
@@ -61,21 +70,21 @@ be removed from the other (not-displayed) list.
 <hr>
 <h2>Columns</h2>
 <table class=tablex>
-<tr><td><u>TCW Remark</u><td>Assigned by TCW during <tt>runSingleTCW</tt> ORF computation
+<tr><td><u>TCW Remark</u><td>Assigned by TCW during <tt>runSingleTCW</tt> ORF computation. See last section.
 <tr><td><u>User Remark</u><td>Uploaded by the user with <tt>runSingleTCW</tt>.
 <tr><td><u>Count</u><td>Total count from all conditions/libraries. 
 <tr><td><u>Orig ID or Longest</u><td>See <b>Search</b> above.
 <tr><td><u>Best HitID</u><td>The HitID of the hit with the best e-value.
 </table>
 
-
 <hr>
 <h2>Top row of options</h2>
 
-<b>View Seqs</b>&nbsp;&nbsp;Select a one or more seqIDs in the table, 
-then select <b>View Sequences</b>.
-The sequences will be shown in the main table, where you can select it to view the
-<b>Sequence Details</b>.
+<b>Seq Table</b>&nbsp;&nbsp;Select one or more seqIDs in the table, 
+then select this button. The sequences will be shown in the main sequence table.
+
+<p><b>Seq Detail</b>&nbsp;&nbsp;Select one seqIDs in the table, 
+then select this button. The sequences will be shown in the <b>Sequence Details</b> display.
 
 <p><b>Copy...</b>&nbsp;&nbsp;Select one sequence to copy to clipboard the SeqID, Best HitID, or Orig ID.
 
@@ -85,7 +94,31 @@ The sequences will be shown in the main table, where you can select it to view t
 <li><u>Export</u> A window will pop-up with a file chooser, and the table will be
 written to the selected file.
 </ul>
+<hr>
+<h2>TCW Remark Legend</h2>
+<table class=tablex>
+<tr><td>ORF=Hit<td>The ORF has the same coordinates as the hit.
+<tr><td>ORF=Hit+<td>The ORF has the same coordinates as the hit and Start and Stop codons.
+<tr><td>ORF&gt;Hit<td>The Hit is contained in the ORF.
+<tr><td>ORF&lt;Hit<td>The ORF is contained in the Hit.
+<tr><td>ORF~Hit<td>The ORF coordinates overlap the Hit.
+<tr><td valign=top>$<td>The dollar sign may be appended to any of the ORF remarks above, which indicates that the ORF has a Hit, is the longest,
+and has the best Markov score (there will not be a ORF!Lg or ORF!Mk).
+<tr><td valign=top>ORF!Lg<td>The ORF is not the longest in comparison with the other 5 frames.
+<tr><td valign=top>ORF!Mk<td>The ORF does not have the best Markov score in comparison with the other 5 frames.
 
+<tr><td>!5!3<td>No Start or Stop codon.
+<tr><td>!5<td>No Start codon.
+<tr><td>!3<td>No Stop codon.
+
+<tr><td>ORF!Hit<td>The ORF frame is not the same as the Hit frame.
+<tr><td>ORF&gt;=9Ns<td>There are &gt;=9Ns in the ORF.
+<tr><td valign=top>ORF:AN<td>Typically, the BS (Best Bits) hit is used. But if the BS is a nucleotide hit, then
+the AN (Best Annotation) hit is used.
+<tr><td nowrap>Multi-frame<td>Hits to multiple different frames
+<tr><td>StopHit<i>n</i><td>Stops in best hit, where <i>n</i> is the number of Stops found.
+
+</table>
 </body>
 </html>
 

@@ -226,14 +226,10 @@ public class STCWFrame extends JFrame {
 				basicGOQueryNode = new MenuTreeNode(BasicGOQuery, basicGOQueryTab);
 			}
 
+			resultsSeqTab = new ResultsSummaryTab("Sequence", this); // CAS334 moved column heading to ResultSummary
+			tabbedPane.addTab(ContigsResults, resultsSeqTab);
 			
-			//Columns for displaying query criteria on the "Sequence Results" 
-			String [] colNames = new String [] {"Result", "Filter"}; 
-			resultsContigTab = new ResultsSummaryTab(this, null, colNames);
-			tabbedPane.addTab(ContigsResults, resultsContigTab);
-			
-			//Columns for displaying queries on the "Pair Results"
-			resultsPairTab = new ResultsSummaryTab(this, null, colNames);
+			resultsPairTab = new ResultsSummaryTab("Pair", this);
 			tabbedPane.addTab(PairResults, resultsPairTab);
 
 			/*
@@ -244,7 +240,7 @@ public class STCWFrame extends JFrame {
 			general.addChild(new MenuTreeNode(Overview, overviewTab));
 			general.addChild(new MenuTreeNode(DecimalNumbers, decimalTab));
 			general.addChild(blastNode);
-			general.addChild(new MenuTreeNode(ContigsResults, resultsContigTab)); // CAS327 move from contig
+			general.addChild(new MenuTreeNode(ContigsResults, resultsSeqTab)); // CAS327 move from contig
 			root.addChild(general);
 
 			MenuTreeNode contigHeader = new MenuTreeNode(SequenceSection);
@@ -359,48 +355,33 @@ public class STCWFrame extends JFrame {
 			swapToExceptionTab(null, err);
 		}
 	}
+	/************************ OVERVIEW *********************************/
+	private Tab addOverviewTab() {
+		Vector<String> tempMsg = new Vector<String>();
+		tempMsg.add("Generating statistics ...\n" +
+				"If the overview has to be computed, this can take a few minutes.\n" +
+				"You can go to another tab if you like.");
+		final TextTab newTab = new TextTab(this, null, tempMsg, overviewHelp);
 
-	/********************************************************
-	 * Selecting an item in the menu tree, or adding an item to the menu tree
-	 * evokes this listener. However, next and prev do not evoke this.
-	 */
-	private MenuTreeNodeListener menuTreeListener = new MenuTreeNodeListener() {
-		public void eventOccurred(MenuTreeNodeEvent e) {
-			MenuTreeNode node = e.getNode();
-			if (node == null)return;
+		Thread thread = new Thread(new Runnable() {
+			public void run() {
+				try {
+					Vector<String> lines = new Vector<String>();
+					DBConn mDB = getNewDBC();
+					new Overview(mDB).overview(lines); 
+					mDB.close();
+					newTab.setContent(lines);
+				} catch (Exception err) {
+					newTab.setContent("Failed generating stats.\n" + err.toString());
+					ErrorReport.reportError(err);
+				}
+			}
+		});
+		thread.setPriority(Thread.MIN_PRIORITY);
+		thread.start();
 
-			Tab tab = (Tab) node.getUserObject();
-			if (tab == null) return;
-
-			String nodeName = node.getText();
-			if(nodeName.equals(ContigsFilters) || nodeName.equals(ContigsColumns))
-			{
-				btnFiltered.getParent().setVisible(true);
-				btnFiltered.setText(ViewFilteredSequences);
-			}
-			else if(nodeName.equals(PairsFilters) || nodeName.equals(PairsColumns)) {
-				btnFiltered.getParent().setVisible(true);
-				btnFiltered.setText(ViewFilteredPairs);
-			}
-			else
-			{
-				btnFiltered.getParent().setVisible(false);
-			}
-			
-			// closing a tab 
-			if (e.getType() == MenuTreeNodeEvent.TYPE_CLOSED) {
-				MenuTreeNode parentNode = node.getParentNode();
-				removeNode(node); 
-				
-				resultsContigTab.removeResultSummary(tab);
-				resultsPairTab.removeResultSummary(tab);
-				menuTree.setSelected(parentNode);
-				tab = (Tab) parentNode.getUserObject();
-				tabbedPane.setSelectedTab(tab);
-			} else if (e.getType() == MenuTreeNodeEvent.TYPE_SELECTED)
-				tabbedPane.setSelectedTab(tab);
-		}
-	};
+		return newTab;
+	}
 	
 	public void setButtonsVisible(boolean show) {
 		if(btnFiltered != null) btnFiltered.getParent().setVisible(show);
@@ -409,11 +390,11 @@ public class STCWFrame extends JFrame {
 	/****************************************
 	 * Display methods
 	 */
-	//Load individual contigs for a table: from Basic
+	//Load individual sequences for a table: from Basic
 	public void loadContigs(String strTabID, String [] contigs, int basicType) {
 		filterContigTab.executeQuery(strTabID, contigs, basicType);
 	}
-	// filterContigTab.executeQuery -> queryContigTab.executeQuery -> calls this method 
+	// SeqQueryTab.executeQuery -> calls this method 
 	public void addQueryResultsTab(RunQuery theQuery, String [] contigIDs, int viewMode, String strTabID) {
 		loadQueryContigs(null, theQuery, contigIDs, viewMode, strTabID);
 	}
@@ -487,9 +468,9 @@ public class STCWFrame extends JFrame {
 							newNode.setUserObject(newTab);
 							
 							if(theQuery.getType() == RunQuery.QUERY_CONTIGS)
-								resultsContigTab.addResultSummary(nodeID,newTab, newNode, summary);
+								resultsSeqTab.addResultSummary(nodeID,summary, newTab, null);
 							else
-								resultsPairTab.addResultSummary(nodeID,newTab, newNode, summary);
+								resultsPairTab.addResultSummary(nodeID, summary, newTab, null);
 						} else {
 							// this thread was canceled but hasn't been killed yet
 							newNode.setUserObject(progress.getCancelPanel());
@@ -605,9 +586,9 @@ public class STCWFrame extends JFrame {
 							newNode.setUserObject(newTab);
 							// Add new entry to results summary table
 							if(theQuery.getType() == RunQuery.QUERY_CONTIGS)
-								resultsContigTab.addResultSummary(nodeID,newTab, newNode, summary);
+								resultsSeqTab.addResultSummary(nodeID, summary, newTab, null);
 							else
-								resultsPairTab.addResultSummary(nodeID,newTab, newNode, summary);
+								resultsPairTab.addResultSummary(nodeID, summary, newTab, null);
 						} else {
 							newNode.setUserObject(progress.getCancelPanel());
 						}
@@ -640,7 +621,7 @@ public class STCWFrame extends JFrame {
 	public void swapInCAP3Tab(Tab oldTab, MultiCtgData theCluster,
 		int nRecordNum, String strTabTitle) 
 	{
-		Tab tab = new SeqTopRowTab(this, theCluster, null, nRecordNum, null);
+		Tab tab = new SeqTopRowTab(this, theCluster, null, nRecordNum);
 		tabbedPane.addTab(strTabTitle, tab);
 		tabbedPane.setSelectedTab(tab);
 		
@@ -650,41 +631,43 @@ public class STCWFrame extends JFrame {
 		tabbedPane.swapInTab(oldTab, strTabTitle, tab);
 		tabbedPane.setSelectedTab(tab);		
 	}
-
-	// adds a tab on the left under Show Sequences
-	public Tab addContigPage(String strContigName, Tab parentTab, int nRecordNum) 
-	{
-		Tab tab = addNewContigTab(strContigName, parentTab, nRecordNum, null);
+	/*********** Create Detail page ***************/
+	// adds a tab on the left under Sequences, Basic Sequence or Find Hits
+	public Tab addSeqDetailPage(String strSeqName, Tab parentTab, int nRecordNum) {
+		Tab tab = addNewSeqDetailTab(strSeqName, parentTab, nRecordNum);
 		
-		MenuTreeNode newNode = new MenuTreeNode(strContigName);
+		MenuTreeNode newNode = new MenuTreeNode(strSeqName);
 		tab.setMenuNode(newNode);
 		newNode.setUserObject(tab);
 		menuTree.addNode(parentTab, newNode);
 		newNode.setType(MenuTreeNode.TYPE_CLOSEABLE);
 		menuTree.setSelected(newNode);
 		
+		resultsSeqTab.addResultSummary(strSeqName,  parentTab.getTitle(), tab, parentTab); // CAS334 add to results
+		
 		return tab;
 	}
-	// called from addContigPage and seqDetail.addNewTab for prev/next
-	public Tab addNewContigTab(String strContigName, 
-			Tab parentTab, int nRecordNum, int [] prevDisplayOptions) 
-	{
+	public Tab addNextSeqDetailTab(String strSeqName, MenuTreeNode newNode, Tab parentTab, int nRecordNum) {
+		Tab tab = addNewSeqDetailTab(strSeqName, parentTab, nRecordNum);
+		resultsSeqTab.addResultSummary(strSeqName, parentTab.getTitle(), tab, parentTab); // CAS334 add to results
+		return tab;
+	}
+	// Add detail page to left: called from addSeqDetailPage and seqDetail.addNewTab for prev/next
+	private Tab addNewSeqDetailTab(String strSeqName, Tab parentTab, int nRecordNum) {
 		ContigData theContig = new ContigData();
-		theContig.setContigID(strContigName);
+		theContig.setContigID(strSeqName);
 
 		MultiCtgData mData = new MultiCtgData();// Make a psuedo cluster with the one contig
 		mData.addContig(theContig);
 
-		Tab tab = new SeqTopRowTab(this, mData, parentTab, nRecordNum, prevDisplayOptions);
-		tabbedPane.addTab(strContigName, tab);
+		Tab tab = new SeqTopRowTab(this, mData, parentTab, nRecordNum);
+		tabbedPane.addTab(strSeqName, tab);
 		tabbedPane.setSelectedTab(tab);
 		return tab;
 	}
 	
 	// called from Pairs Table for selected row
-	public void addPairAlignTab(MultiCtgData pairObj, String strTitle,
-			Tab parentTab, int nRecordNum, int nPairNum) 
-	{
+	public void addPairAlignTab(MultiCtgData pairObj, String strTitle,Tab parentTab, int nRecordNum, int nPairNum) {
 		Tab newTab = new PairTopRowTab(this, pairObj, parentTab, nRecordNum, nPairNum, null);
 		tabbedPane.addTab(strTitle, newTab);
 		tabbedPane.setSelectedTab(newTab);
@@ -697,8 +680,7 @@ public class STCWFrame extends JFrame {
 		menuTree.setSelected(newNode);
 	}
 	// Called from PairTopRowTab: next/prev
-	public void addPairAlignNextPrev(MultiCtgData theCluster, 
-			Tab parentTab, int nRecordNum, int nPairNum,
+	public void addPairAlignNextPrev(MultiCtgData theCluster, Tab parentTab, int nRecordNum, int nPairNum,
 			String strTabTitle, int [] prevDisplayOptions, MenuTreeNode node) 
 	{
 		Tab newTab = new PairTopRowTab(this, theCluster, parentTab, nRecordNum, nPairNum, prevDisplayOptions);
@@ -706,15 +688,13 @@ public class STCWFrame extends JFrame {
 		tabbedPane.setSelectedTab(newTab);
 		
 		// Re-use existing menu tree node		
-		removeTabFromNode(node); 
+		removeTabPrevNext(node); 
 		newTab.setMenuNode(node);
 		node.setText(strTabTitle);
 		node.setUserObject(newTab);
 	}
 	
-	public MenuTreeNode addNewMenuTreeNode(String parentTitle,
-			String nodeTitle, Tab tab, String toolTipText) 
-	{
+	public MenuTreeNode addNewMenuTreeNode(String parentTitle, String nodeTitle, Tab tab, String toolTipText) {
 		MenuTreeNode node = menuTree.getNodeWithUserObject(tab);
 		if (node == null) {
 			node = new MenuTreeNode(nodeTitle);
@@ -727,37 +707,76 @@ public class STCWFrame extends JFrame {
 
 		return node;
 	}
-	
-	private Tab addOverviewTab() {
-		Vector<String> tempMsg = new Vector<String>();
-		tempMsg.add("Generating statistics ...\n" +
-				"If the overview has to be computed, this can take a few minutes.\n" +
-				"You can go to another tab if you like.");
-		final TextTab newTab = new TextTab(this, null, tempMsg, overviewHelp);
-
-		Thread thread = new Thread(new Runnable() {
-			public void run() {
-				try {
-					Vector<String> lines = new Vector<String>();
-					DBConn mDB = getNewDBC();
-					new Overview(mDB).overview(lines); 
-					mDB.close();
-					newTab.setContent(lines);
-				} catch (Exception err) {
-					newTab.setContent("Failed generating stats.\n" + err.toString());
-					ErrorReport.reportError(err);
-				}
-			}
-		});
-		thread.setPriority(Thread.MIN_PRIORITY);
-		thread.start();
-
-		return newTab;
+	/****************** Remove tabs *************************/
+	public void removeTabPrevNext(MenuTreeNode node) { // Prev/Next
+		Tab tab = (Tab) node.getUserObject();
+		tabbedPane.remove(tab);
+		resultsSeqTab.removeResultSummary(tab); // CAS334 remove from results 
 	}
+	public void removeTabWait(Tab t) { // SeqTopRowTab wait tab for loading details
+		tabbedPane.remove(t);
+	}
+	public void removeTab(Tab t) { // ResultSummary
+		MenuTreeNode node = menuTree.getNodeWithUserObject(t);
+		if (node!=null) removeTab(node); 
+	}
+	public void removeTabFromResult(String name) { // ResultSummary
+		MenuTreeNode node = menuTree.getNodeWithName(name);
+		if (node!=null) removeTab(node); 
+	}
+	public void removeTab(MenuTreeNode node) { // MenuTreeNodeListener, which also removes from Results
+		Vector <MenuTreeNode> children = node.getChildNodes();
+		
+		Iterator<MenuTreeNode> iter = children.iterator();
+		while (iter.hasNext()) {
+			MenuTreeNode child = iter.next();
+			Tab tab = (Tab) child.getUserObject();
+			tabbedPane.remove(tab);
+			menuTree.removeNodeFromPanel(child);
+		}
+		Tab tab = (Tab) node.getUserObject();
+		tabbedPane.remove(tab);
+		menuTree.removeNode(node);
+	}
+	/********************************************************
+	 * Selecting an item in the menu tree, or adding an item to the menu tree
+	 * evokes this listener. However, next and prev do not evoke this.
+	 */
+	private MenuTreeNodeListener menuTreeListener = new MenuTreeNodeListener() {
+		public void eventOccurred(MenuTreeNodeEvent e) {
+			MenuTreeNode node = e.getNode();
+			if (node == null)return;
 
+			Tab tab = (Tab) node.getUserObject();
+			if (tab == null) return;
+
+			String nodeName = node.getText();
+			if(nodeName.equals(ContigsFilters) || nodeName.equals(ContigsColumns)) {
+				btnFiltered.getParent().setVisible(true);
+				btnFiltered.setText(ViewFilteredSequences);
+			}
+			else if(nodeName.equals(PairsFilters) || nodeName.equals(PairsColumns)) {
+				btnFiltered.getParent().setVisible(true);
+				btnFiltered.setText(ViewFilteredPairs);
+			}
+			else {
+				btnFiltered.getParent().setVisible(false);
+			}
+			if (e.getType() == MenuTreeNodeEvent.TYPE_CLOSED) {
+				MenuTreeNode parentNode = node.getParentNode();
+				removeTab(node); 
+				
+				resultsSeqTab.removeResultSummary(tab);
+				resultsPairTab.removeResultSummary(tab);
+				menuTree.setSelected(parentNode);
+				tab = (Tab) parentNode.getUserObject();
+				tabbedPane.setSelectedTab(tab);
+			} else if (e.getType() == MenuTreeNodeEvent.TYPE_SELECTED)
+				tabbedPane.setSelectedTab(tab);
+		}
+	};
 	
-	// Modification of the Runnable interface so that it can throw to
-	// prevent redundant exception handling code.
+	// Modification of the Runnable interface so that it can throw to prevent redundant exception handling code.
 	public interface RunnableCanThrow {
 		public void run() throws Throwable;
 	}
@@ -813,32 +832,6 @@ public class STCWFrame extends JFrame {
 				n.setUserObject(newTab);
 		}
 	}
-	
-	public void removeTabFromNode(MenuTreeNode node) {
-		Tab tab = (Tab) node.getUserObject();
-		tabbedPane.remove(tab);
-	}
-	public void removeTab(Tab t) {
-		tabbedPane.remove(t);
-	}
-	public void removeResult(String name) {
-		MenuTreeNode node = menuTree.getNodeWithName(name);
-		if (node!=null) removeNode(node); 
-	}
-	public void removeNode(MenuTreeNode node) {
-		Vector <MenuTreeNode> children = node.getChildNodes();
-		
-		Iterator<MenuTreeNode> iter = children.iterator();
-		while (iter.hasNext()) {
-			MenuTreeNode child = iter.next();
-			Tab tab = (Tab) child.getUserObject();
-			tabbedPane.remove(tab);
-			menuTree.removeNodeFromPanel(child);
-		}
-		Tab tab = (Tab) node.getUserObject();
-		tabbedPane.remove(tab);
-		menuTree.removeNode(node);
-	}
 	public void swapToExceptionTab(Tab oldTab, Throwable err) {
 		if (debug)
 			System.err.println("STCWFrame.swapToExceptionTab: oldTab=" + oldTab);
@@ -876,8 +869,7 @@ public class STCWFrame extends JFrame {
 		return prefsRoot;
 	}
 
-	private void cleanupMemory()
-	{
+	private void cleanupMemory(){
 		//contentPane = null;
 		tabbedPane = null;
 		viewPane = null;
@@ -891,7 +883,7 @@ public class STCWFrame extends JFrame {
 		if(fieldContigTab != null) fieldContigTab.close();
 		if(basicSeqQueryTab != null) basicSeqQueryTab.close();
 		if(basicHitQueryTab != null) basicHitQueryTab.close();
-		if(resultsContigTab != null) resultsContigTab.close();	
+		if(resultsSeqTab != null) resultsSeqTab.close();	
 		if(resultsPairTab != null) resultsPairTab.close();
 		hostsObj = null;
 	}
@@ -953,25 +945,25 @@ public class STCWFrame extends JFrame {
 	private static final String DecimalNumbers = "Decimal Display";
 	private static final String Blast = "Find Hits"; 
 	
-	private static final String BasicSection =  "Basic Queries ";
+	private static final String BasicSection =  "Basic Filters ";
 	private static final String BasicSeqQuery = "Sequences";
 	private static final String BasicHitQuery = "AnnoDB Hits";
 	public static final String BasicGOQuery =   "GO Annotation"; 
 	
-	private static final String SequenceSection = "Sequence ";
-	public static final String ShowAllContigs = "Show All";
+	private static final String SequenceSection = Globals.seqTableLabel + " "; // space to make unique
+	public static final String ShowAllContigs = "All Seqs";
 	private static final String ContigsFilters = "Filters";
 	private static final String ContigsColumns = "Columns";
 	private static final String ContigsResults = "Results";
-	private static final String ViewFilteredSequences = "View Filtered Sequences";
+	private static final String ViewFilteredSequences = "Filtered " + Globals.seqTableLabel;
 	
-	private static final String PairsSection = "Similar Pairs ";
-	private static final String ShowAllPairs = "Show Pairs";
+	private static final String PairsSection = Globals.pairTableLabel + " ";
+	private static final String ShowAllPairs = "All Pairs";
 	private static final String PairsFilters = "Pairs Filters";
 	private static final String PairsResults = "Pairs Results";
 	private static final String PairsColumns = "Pairs Columns";
 	private static final String PairResults = "Pair Results";
-	private static final String ViewFilteredPairs = "View Filtered Pairs";
+	private static final String ViewFilteredPairs = "Filtered " + Globals.pairTableLabel;
 	
 	public JSplitPane splitPane;
 	public MenuTree menuTree;
@@ -994,7 +986,7 @@ public class STCWFrame extends JFrame {
 	private BasicHitTab basicHitQueryTab = null;
 	private BasicGOFilterTab basicGOQueryTab = null;
 	
-	private ResultsSummaryTab resultsContigTab = null;
+	private ResultsSummaryTab resultsSeqTab = null;
 	private ResultsSummaryTab resultsPairTab = null;
 	private FindHits blastTab  = null;
 	

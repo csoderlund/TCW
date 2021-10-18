@@ -87,7 +87,7 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 				displayPair();
 			}
 		});
-		JButton jbView = new JButton("View Sequences");
+		JButton jbView = new JButton(Globals.seqTableLabel);
 		jbView.setBackground(Globals.PROMPTCOLOR);
 		jbView.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {

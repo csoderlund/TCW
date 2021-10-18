@@ -189,6 +189,7 @@ public class TCWprops
 			mProps.setProperty("Anno_ORF_hit_sim", Globals.pHIT_SIM);     
 			
 			mProps.setProperty("Anno_ORF_len_diff", Globals.pDIFF_LEN);
+			mProps.setProperty("Anno_ORF_mk_diff", Globals.pDIFF_MK);	// CAS334
 			
 			mProps.setProperty("Anno_ORF_train_evalue", "1E-75"); // obsolete.
 			mProps.setProperty("Anno_ORF_train_min_set", Globals.pTRAIN_MIN); 
@@ -399,28 +400,24 @@ public class TCWprops
 	 * CfgAnno uses this to read sTCW.cfg 
 	 * ManagerData reads and writes sTCW.cfg directly
 	 */
-	public void loadAnnotate(File f) throws Exception
-	{	
+	public void loadAnnotate(File f) throws Exception {	
 		int error=0;
 		aUserKeys = new HashMap<String, String>  ();
 		
 		BufferedReader br = new BufferedReader(new FileReader(f));
-		while (br.ready())
-		{	
+		while (br.ready()) {	
 			String line = br.readLine();
 			line = line.replaceAll("#.*","");
 			if (line.trim().length() == 0) continue;
 			line += " ";
 			String[] fields = line.split("=");
-			if (fields.length == 2)
-			{
+			if (fields.length == 2) {
 				String key = fields[0].trim();
 				if (key.equals("")) continue;
 				
 				String val = fields[1].trim();
 									
-				if (mProps.containsKey(key))
-				{
+				if (mProps.containsKey(key)){
 					if (aUserKeys.containsKey(key)) {
 						ErrorReport.reportError("sTCW.cfg: duplicate parameter:  " + line);
 						error++;
@@ -429,8 +426,7 @@ public class TCWprops
 						aUserKeys.put(key, val);
 					}
 				}
-				else if (key.startsWith("Anno"))
-				{
+				else if (key.startsWith("Anno")) {
 					ErrorReport.reportError("sTCW.cfg: Ignoring unknown parameter: " + key);
 					error++;
 				}

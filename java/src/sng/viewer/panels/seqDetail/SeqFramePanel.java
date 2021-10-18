@@ -34,6 +34,7 @@ import sng.viewer.STCWFrame;
 import util.methods.ErrorReport;
 import util.methods.Static;
 import util.methods.Markov;
+import util.methods.Out;
 import util.ui.UIHelpers;
 import util.ui.UserPrompt;
 import util.align.AAStatistics;
@@ -102,55 +103,46 @@ public class SeqFramePanel extends JPanel {
 			hitCheckBox = Static.createCheckBox("dummy", false); 
 			return;
 		}
-		
 		String ctgName = ctgData.getContigID();
 		JLabel name = new JLabel("  " + ctgName);
-		toolPanel.add(name);
-		toolPanel.add( Box.createHorizontalStrut(5) );
+		toolPanel.add(name);	toolPanel.add( Box.createHorizontalStrut(5) );
 		
+		// CAS334 labels 1,2,3
 		String [] labels = {"Frame 1", "Frame 2", "Frame 3", "Frame -1", "Frame -2", "Frame -3"};
 		frameDropDown = Static.createCombo(labels);
 		
 		int def = orfFrame-1;
-		if (orfFrame==0) def=2; 
-		if (orfFrame==-1) def=3;
-		else if (orfFrame==-2) def=4;
-		else if (orfFrame==-3) def=5;
+		if (orfFrame==0) 		def=0;
+		else if (orfFrame==-1) 	def=3;
+		else if (orfFrame==-2) 	def=4;
+		else if (orfFrame==-3) 	def=5;
 		frameDropDown.setSelectedIndex(def);
 
 		frameDropDown.setBackground(Color.WHITE);
-		frameDropDown.addActionListener
-		( 	new ActionListener () 
-			{
-				public void	actionPerformed(ActionEvent e)
-				{
-					int type = frameDropDown.getSelectedIndex();
-					if (type == 0) 		{dFrame=1;}
-					else if (type == 1) {dFrame=2;}
-					else if (type == 2) {dFrame=3;}
-					else if	(type == 3)	{dFrame=-1;}
-					else if	(type == 4)	{dFrame=-2;}
-					else if	(type == 5)	{dFrame=-3;}
-					refreshPanel();
-				}
+		frameDropDown.addActionListener ( new ActionListener () {
+			public void	actionPerformed(ActionEvent e) {
+				int type = frameDropDown.getSelectedIndex();
+				if (type == 0) 		{dFrame=1;}
+				else if (type == 1) {dFrame=2;}
+				else if (type == 2) {dFrame=3;}
+				else if	(type == 3)	{dFrame=-1;}
+				else if	(type == 4)	{dFrame=-2;}
+				else if	(type == 5)	{dFrame=-3;}
+				refreshPanel();
 			}
-		);	
+		} );	
 		toolPanel.add( frameDropDown );
 		toolPanel.add( Box.createHorizontalStrut(10) );
 		
 		String [] labels2 = {"ORFs/NT", "Scores/AA"};
 		topDropDown = Static.createCombo(labels2);
 		
-		topDropDown.addActionListener
-		( 	new ActionListener () 
-			{
-				public void	actionPerformed(ActionEvent e)
-				{
-					topAction=topDropDown.getSelectedIndex();
-					refreshPanel();
-				}
+		topDropDown.addActionListener ( new ActionListener () {
+			public void	actionPerformed(ActionEvent e) {
+				topAction=topDropDown.getSelectedIndex();
+				refreshPanel();
 			}
-		);	
+		});	
 		if (tupleMap!=null) {
 			toolPanel.add(topDropDown );
 			toolPanel.add( Box.createHorizontalStrut(10) );
@@ -158,61 +150,45 @@ public class SeqFramePanel extends JPanel {
 		else topAction=0;
 	
 		startCheckBox = Static.createCheckBox("Start", false); // gray CDS
-		startCheckBox.addActionListener
-		( 	new ActionListener () 
-			{
-				public void	actionPerformed(ActionEvent e)
-				{
-					if (startCheckBox.isSelected()) showStart=true;
-					else showStart=false;
+		startCheckBox.addActionListener ( new ActionListener () {
+			public void	actionPerformed(ActionEvent e){
+				if (startCheckBox.isSelected()) showStart=true;
+				else showStart=false;
 
-					refreshPanel();
-				}
+				refreshPanel();
 			}
-		);	
+		});	
 		toolPanel.add( startCheckBox );
 		toolPanel.add( Box.createHorizontalStrut(10) );
 		
 		cdsCheckBox = Static.createCheckBox("CDS", false); // colors Start, gray CDS
-		cdsCheckBox.addActionListener
-		( 	new ActionListener () 
-			{
-				public void	actionPerformed(ActionEvent e)
-				{
-					if (cdsCheckBox.isSelected()) showCDS=true;
-					else showCDS=false;
-					refreshPanel();
-				}
+		cdsCheckBox.addActionListener ( new ActionListener () {
+			public void	actionPerformed(ActionEvent e){
+				if (cdsCheckBox.isSelected()) showCDS=true;
+				else showCDS=false;
+				refreshPanel();
 			}
-		);	
+		});	
 		toolPanel.add( cdsCheckBox );
 		toolPanel.add( Box.createHorizontalStrut(10) );
 		
 		hitCheckBox = Static.createCheckBox("Hit", false);
-		hitCheckBox.addActionListener
-		( 	new ActionListener () 
-			{
-				public void	actionPerformed(ActionEvent e)
-				{
-					if (hitCheckBox.isSelected()) showHit=true;
-					else showHit=false;
-					refreshPanel();
-				}
+		hitCheckBox.addActionListener (new ActionListener () {
+			public void	actionPerformed(ActionEvent e){
+				if (hitCheckBox.isSelected()) showHit=true;
+				else showHit=false;
+				refreshPanel();
 			}
-		);	
+		});	
 		
 		String [] labels3 = {"Italics", "Blue"};
 		hitDropDown = Static.createCombo(labels3);
-		hitDropDown.addActionListener
-		( 	new ActionListener () 
-			{
-				public void	actionPerformed(ActionEvent e)
-				{
-					hitAction=hitDropDown.getSelectedIndex();
-					refreshPanel();
-				}
+		hitDropDown.addActionListener ( new ActionListener () {
+			public void	actionPerformed(ActionEvent e) {
+				hitAction=hitDropDown.getSelectedIndex();
+				refreshPanel();
 			}
-		);	
+		});	
 		if (hasHit) {
 			toolPanel.add(hitCheckBox );
 			toolPanel.add(hitDropDown);
@@ -249,11 +225,13 @@ public class SeqFramePanel extends JPanel {
 		}
 		String text;
 		if (topAction==0) { // CAS327 add orfFrame
-			text="Assigned ORF: RF" + orfFrame + "  Length: " + sequence.length() + "   " + remark + "\n";
-			for (OrfData o : ORFs) {
-				String space = (o.frame==dFrame) ? "> " : "  ";
-				text += space + o.line + "\n";
-			}
+			text="Selected ORF: RF" + orfFrame +  " " + remark + "    Seq Length: " + sequence.length() +"\n";
+			int[] frames = {2,1,0,3,4,5}; // CAS334 sorted 3,2,1,-1..; print 1,2,3,-1.. 
+	        for (int idx : frames) {
+	        	 OrfData o = ORFs.get(idx);
+	        	 String space = (o.frame==dFrame) ? "> " : "  ";
+				 text += space + o.line + "\n";
+	        }
 		}
 		else {
 			text = createScoreText();
@@ -405,7 +383,7 @@ public class SeqFramePanel extends JPanel {
 				else colorCodon = Color.black;
 			}
 			
-		// CDS Regio
+		// CDS Region
 			isItalics = false;
 			if (coord==oStart) {
 				inCDS=true;
@@ -416,7 +394,7 @@ public class SeqFramePanel extends JPanel {
 				inCDS=false;
 				colorCodon = colorCDS; 
 			}
-			else if (isEnd) { // was adding "*" to delimit end of CDS, but didn't look right.
+			else if (isEnd) { 
 				colorTxt = Color.black; 
 				isEnd=false;
 			}
@@ -468,19 +446,16 @@ public class SeqFramePanel extends JPanel {
 	/****************************************************
 	 * image class
 	 */
-	private class imageClassPanel extends JPanel
-	{
+	private class imageClassPanel extends JPanel {
 		private static final long serialVersionUID = -5567198149411527973L;
 		SeqFramePanel csp;
-		public imageClassPanel(SeqFramePanel csp) 
-		{
+		public imageClassPanel(SeqFramePanel csp) {
 			super();
 			setBackground(Color.white);
 			setAlignmentX(Component.LEFT_ALIGNMENT);
 			this.csp = csp; 
 		}
-	    public void paintComponent(Graphics g) 
-	    {
+	    public void paintComponent(Graphics g) {
 	        super.paintComponent(g); 
 	        csp.drawImage(g);
 	    }  	    
@@ -518,7 +493,7 @@ public class SeqFramePanel extends JPanel {
 		remark = add2 + add;
 		
 		OrfData best = initReadDB();
-		if (best==null) drawOrf = ORFs.get(0);	
+		if (best==null) drawOrf = ORFs.get(2); // frame 1 (sorted 3,2,1)	
 		else drawOrf = best;
 		
 		for (OrfData o : ORFs) {
@@ -531,7 +506,7 @@ public class SeqFramePanel extends JPanel {
 		dFrame = drawOrf.frame;
 	}
 	/***************************************************************
-	 * Create 3 lines of information corrsponding to the 3 draw modes
+	 * Create 3 lines of information corresponding to the 3 draw modes
 	 */
 	private void initFrameLines(OrfData o) {
 		String seq = (o.frame>0) ? sequence : seqRev;
@@ -563,8 +538,8 @@ public class SeqFramePanel extends JPanel {
 		try {
 			OrfData best=null;
 			orfString = ctgData.getLongestORFCoords();
-			if (!orfString.equals("-")) orfFrame =    ctgData.getORFCoding().getFrame();
-			else orfFrame=0;
+			if (!orfString.startsWith("-")) orfFrame = ctgData.getORFCoding().getFrame();
+			
 			DBConn dbc = theMainFrame.getNewDBC();
 			
 			Vector <OrfData> oList = new Vector <OrfData> ();
@@ -614,7 +589,7 @@ public class SeqFramePanel extends JPanel {
 					}
 				}
 			}
-			else { // should always be in database now
+			else { // NT loaded but no ORFs defined
 				dbc.close();
 				
 				for (int i=3; i>=-3; i--) {
@@ -622,15 +597,8 @@ public class SeqFramePanel extends JPanel {
 					OrfData o = new OrfData();
 					oList.add(o);
 					o.frame = i;
-					if (orfFrame==i) {
-						best = o;
-						o.nStart = ctgData.getORFCoding().getBegin();
-						o.nEnd = ctgData.getORFCoding().getEnd();
-					}
-					else {
-						o.nStart = Math.abs(i);
-						o.nEnd = seqLen;
-					}
+					o.nStart = Math.abs(i);
+					o.nEnd = seqLen;
 				}
 			}
 			// CAS314 order correctly

@@ -205,7 +205,7 @@ public class PairAlignPanel extends PairBasePanel {
 			double end =   (double) alignData.getHitData().getCtgEnd();
 
 			if (alignData.isNTsTCW() && !alignData.isNTalign()) { // change to AA coords starting at 1
-				if (start>end) { // reverse start and end (ruler is still 10, 20, so do not RC sequence)
+				if (start>end) { // RCOORDS reverse start and end (ruler is still 10, 20, so do not RC sequence)
 					start = (double) alignData.getNtLen1() - start +1;
 					end =   (double) alignData.getNtLen1() - end +1;
 				}

@@ -2,6 +2,7 @@ package sng.viewer.panels.Basic;
 /**********************************************
  * Table for Basic Sequence and Hit. Includes status bar
  */
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -135,10 +136,8 @@ public class BasicTablePanel extends JPanel {
 		setAlignmentX(Component.LEFT_ALIGNMENT);
 		setBackground(Color.white);
 	
-		add(txtStatus);
-		add(Box.createVerticalStrut(5));
-		add(theTablePanel);
-		add(Box.createVerticalStrut(5));
+		add(txtStatus);		add(Box.createVerticalStrut(5));
+		add(theTablePanel);	add(Box.createVerticalStrut(5));
 		createTableButtonPanel();
 	}
 	private void createStatusBar() {
@@ -154,13 +153,13 @@ public class BasicTablePanel extends JPanel {
 	}
 	// Parent specific
 	private void updateTopButtons() {
-		if (hitTab!=null) hitTab.updateTopButtons(getSelectedRowCount());
-		else if (seqTab!=null) seqTab.updateTopButtons(getSelectedRowCount());
+		if (hitTab!=null) 		hitTab.updateTopButtons(getSelectedRowCount());
+		else if (seqTab!=null) 	seqTab.updateTopButtons(getSelectedRowCount());
 	}
 	private Object getValue(int row, int index) {
 		if (index == 0)  return row+1;
-		if (hitTab!=null) return hitTab.getValueAt(row, index);
-		else if (seqTab!=null) return seqTab.getValueAt(row, index);
+		if (hitTab!=null) 		return hitTab.getValueAt(row, index);
+		else if (seqTab!=null) 	return seqTab.getValueAt(row, index);
 		else return null;
 	}
 	private void tableSort(boolean sortAsc, int mode) {
@@ -168,10 +167,11 @@ public class BasicTablePanel extends JPanel {
 		else if (seqTab!=null) seqTab.tableSort(sortAsc, mode);
 	}
 	private int getNumRow() {
-		if (hitTab!=null) return hitTab.getNumRow();
-		else if (seqTab!=null) return seqTab.getNumRow();
+		if (hitTab!=null) 		return hitTab.getNumRow();
+		else if (seqTab!=null) 	return seqTab.getNumRow();
 		else return 0;
 	}
+	
 	// called from parent
 	public void setStatus(String status) {
 		txtStatus.setText(status);
@@ -199,6 +199,11 @@ public class BasicTablePanel extends JPanel {
 		}
 		catch (Exception e) {return 0;}
 	}
+	// CAS334 the following were added for the new Basic Sequence select option
+	public void selectRow(int row) {
+		theTable.addRowSelectionInterval(row, row);
+	}
+	
 	/****************************************************************
 	 * Shared table functions
 	 */
@@ -560,21 +565,14 @@ public class BasicTablePanel extends JPanel {
 			}
 		});
 		
-		JPanel bottomPanel = new JPanel();
-		bottomPanel.setLayout(new BoxLayout ( bottomPanel, BoxLayout.X_AXIS ));
-		bottomPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-		bottomPanel.setBackground(Globalx.BGCOLOR);
-		bottomPanel.setAlignmentY(LEFT_ALIGNMENT);
+		JPanel bottomPanel = Static.createRowPanel();
 		
-		bottomPanel.add(lblHeader);
-		bottomPanel.add(Box.createHorizontalStrut(5));
-		bottomPanel.add(btnDelete);
-		bottomPanel.add(Box.createHorizontalStrut(3));
+		bottomPanel.add(lblHeader); 	bottomPanel.add(Box.createHorizontalStrut(5));
+		bottomPanel.add(btnDelete);		bottomPanel.add(Box.createHorizontalStrut(3));
 		bottomPanel.add(btnKeep);
 		
 		bottomPanel.add(Box.createHorizontalStrut(15));
-		bottomPanel.add(btnSelectAll);
-		bottomPanel.add(Box.createHorizontalStrut(3));
+		bottomPanel.add(btnSelectAll);	bottomPanel.add(Box.createHorizontalStrut(3));
 		bottomPanel.add(btnUnselectAll);
 		
 		bottomPanel.add(Box.createHorizontalStrut(15));
@@ -584,8 +582,7 @@ public class BasicTablePanel extends JPanel {
 		bottomPanel.setMaximumSize(bottomPanel.getPreferredSize());
 		add(bottomPanel);
 	}
-	private void keepFromList()
-	{
+	private void keepFromList(){
 		int numElements = theTable.getRowCount();
 		int [] selValues = theTable.getSelectedRows();		
 
@@ -603,13 +600,11 @@ public class BasicTablePanel extends JPanel {
 		deleteFromList(opposite);
 	}
 		
-	private void deleteFromList()
-	{
+	private void deleteFromList(){
 		int [] selValues = theTable.getSelectedRows();
 		deleteFromList(selValues);
 	}
-	private void deleteFromList(int [] selValues)
-	{
+	private void deleteFromList(int [] selValues) {
 		theTable.clearSelection();
 		for(int x=selValues.length-1; x>=0; x--) {
 			if (hitTab!=null) hitTab.removeFromList(selValues[x]);
@@ -621,7 +616,14 @@ public class BasicTablePanel extends JPanel {
 		}
 		else setStatus("Results: " + seqTab.getNumRow());
 	}
-	
+	// CAS334 added for Basic Sequence SELECT ROWS
+	public void enableButtons(boolean b) {
+		btnDelete.setEnabled(b);
+		btnKeep.setEnabled(b);
+		btnUnselectAll.setEnabled(b);
+		btnSelectAll.setEnabled(b);
+		btnSort.setEnabled(b);
+	}
 	//Table button panel
 	private JButton btnDelete = null, btnKeep = null;
 	private JButton btnUnselectAll = null, btnSelectAll = null, btnSort=null;

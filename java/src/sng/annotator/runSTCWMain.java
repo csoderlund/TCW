@@ -41,7 +41,7 @@ public class runSTCWMain
 	public static final String optRM  = "-s -n";		// used by the manager for Hit Rm only
 	
 	// if -r, then the following 5 can be set
-	private static int ORF_Type_Param=0, ORF_Transcoder_Param=0, ORF_FIND_DUPS=0; 
+	private static int ORF_Type_Param=0, ORF_Transcoder_Param=0, ORF_Filter= -1;
 	private static int ORF_Seq_Cov= -1, ORF_Hit_Cov= -1;
 	
 	// if -o overview, then -o1 and -o2 can be set.
@@ -83,9 +83,9 @@ public class runSTCWMain
 		hostsObj = new HostsCfg(); // Read HOSTS.cfg
 		
 	// 1. create objects used for annotation
-		uniObj = new DoUniProt();
+		uniObj =  new DoUniProt();
 		annoObj = new CoreAnno();	
-		orfObj = new DoORF();
+		orfObj =  new DoORF();
 		blastObj = new DoBlast(); 
 		if (noPrompt) blastObj.setNoPrompt();
 
@@ -122,8 +122,7 @@ public class runSTCWMain
 		blastObj.setMainObj(uniObj, annoObj, sqlObj, stcwID);		
 		
 		/** 5. all checks **/
-		try
-		{
+		try {
 			if (doDeleteAnnoOnly) {
 				sqlObj.deleteAnnotation(true);
 				Out.PrtMsgTime("\nEnd annotation for " + projName, startTime);
@@ -145,9 +144,8 @@ public class runSTCWMain
 					if (!yesNo("GO database not defined -- cannot use to determine best -- continue?"))
 						System.exit(0);
 			}
-			else if (bdoAnno) // not just doing GO or summary
-			{
-				// 5. test files
+			else if (bdoAnno) { // not just doing GO or summary
+			
 				if (!blastObj.testFilesAndcreateOutFiles()) {
 					finish();
 					Out.die(" failed testing files");
@@ -159,12 +157,12 @@ public class runSTCWMain
 				
 				if (!firstAnno && !doAnnoDB && !doSelf) { 
 					Out.Print("No annoDB or pairs annotation to be done\n");
-					if (Out.yesNo("Perform GC and ORF computations?")) doRecalcORF=true;
-					else bdoAnno = false;
+					doRecalcORF = yesNo("Perform GC and ORF computations?"); // CAS334 changed from Out.yesNO 
 				}
 				if (!sqlObj.isAAtcw()) { 
 					if (blastObj.numDB()==0 && !doRecalcORF) {
-						if (!sqlObj.hasORFs()) doRecalcORF=true;
+						if (!sqlObj.hasORFs()) 
+							doRecalcORF = yesNo("Perform GC and ORF computations?"); // CAS334 added check
 					}
 				}
 				
@@ -207,7 +205,7 @@ public class runSTCWMain
 		if (bdoAnno || doRecalcORF) {
 			BlastHitData.startHitWarnings("Warnings for " + projName);
 			if (!bdoAnno && doRecalcORF) 
-				orfObj.setCmdParam(ORF_Type_Param, ORF_Transcoder_Param, ORF_FIND_DUPS, ORF_Seq_Cov, ORF_Hit_Cov);
+				orfObj.setCmdParam(ORF_Type_Param, ORF_Transcoder_Param, ORF_Filter, ORF_Seq_Cov, ORF_Hit_Cov);
 		
 			successAnno = annoObj.run(getCurProjPath(), orfObj);
 		}
@@ -279,7 +277,7 @@ public class runSTCWMain
 		flags.add("-p"); flags.add("-pt"); flags.add("-pr"); flags.add("-pp");
 		flags.add("-g");
 		flags.add("-o"); flags.add("-o1"); flags.add("-o2");
-		flags.add("-r"); flags.add("-t");  flags.add("-f"); flags.add("-hc");flags.add("-sc"); 
+		flags.add("-r"); flags.add("-t");  flags.add("-f");  flags.add("-ff"); flags.add("-hc");flags.add("-sc"); 
 		flags.add("-s"); flags.add("-x");  flags.add("-b");
 		
 		for (int i=0; i<args.length; i++) {
@@ -361,6 +359,12 @@ public class runSTCWMain
 			bdoAnno=false;
 			doRecalcORF = true; 
 			
+			if (hasOption(args, "-t")) { // CAS334 added
+				ORF_Filter = getOptionNum(args,"-t");
+				if (ORF_Filter == 0) Out.prt("   Use all sequences for training");
+				else Out.prt("   Use N longest ORFs to train Markov Model: N=" + ORF_Filter);
+			}
+			// the following are not printed on usage_exit
 			ORF_Type_Param = getOptionNum(args,"-r");
 			if (ORF_Type_Param>0) {
 				if (ORF_Type_Param==1)      Out.prt("   Use longest ORF ");
@@ -370,23 +374,19 @@ public class runSTCWMain
 					ORF_Type_Param=0;
 				}
 			}
-			if (hasOption(args, "-t")) {
+			if (hasOption(args, "-f")) {
 				ORF_Transcoder_Param=1;
 				Out.prt("   Use TransDecoder Base Frequency calculation");
-			}
-			if (hasOption(args, "-f")) {
-				ORF_FIND_DUPS=1;
-				Out.prt("   Filter highly similar sequences");
-			}
+			}	
 			if (hasOption(args, "-sc")) {
 				ORF_Seq_Cov = getOptionNum(args,"-sc");
 				if (ORF_Seq_Cov<0) Out.die("-sc requires an integer following this flag");
-				else               Out.prt("   Sequence coverage: " + ORF_Seq_Cov);
+				else               Out.prt("   Minimum sequence coverage: " + ORF_Seq_Cov);
 			}
 			if (hasOption(args, "-hc")) {
 				ORF_Hit_Cov = getOptionNum(args,"-hc");
 				if (ORF_Hit_Cov<0) Out.die("-hc requires an integer following this flag");
-				else               Out.prt("   Hit coverage: " + ORF_Hit_Cov);
+				else               Out.prt("   Minimum hit coverage: " + ORF_Hit_Cov);
 			}
 		}	
 	}
@@ -406,11 +406,13 @@ public class runSTCWMain
 				+ "        -pp <integer> Print first n pruned seq-hits per annoDB\n"	
 				+ "        -pr Save/restore hit tables before processing    \n"
 				+ "  -r Recalculate ORFs\n"
-				+ "     followed by 1=Use Longest ORF, 2=Use Best Markov Score\n" 
-				// + "     -t Use TransDecoder Base Frequency calculation\n"
-				// + "     -f Filter similiar sequences\n"
-				+ "        -sc <integer> minimum hit coverage\n"
-				+ "        -hc <integer> minimum hit coverage\n"
+				//+ "     optionally followed by 1=Use Longest ORF, 2=Use Best Markov Score\n" 
+				// + "     -f Use TransDecoder Base Frequency calculation\n"
+				+ "        -t <integer> Use N longest ORFs to train Markov Model \n"
+				+ "           If N = 0, all good hit sequences will be used for training\n"
+				+ "           with no duplicate removal (Only works with Best Hits)\n"
+				//+ "        -sc <integer> minimum seq coverage\n"
+				//+ "        -hc <integer> minimum hit coverage\n"
 				+ "  -o Regenerate Overview\n" 
 				+ "     -o1 <integer> set the 1st cover cutoff (default 50)\n"
 				+ "     -o2 <integer> set the 2nd cover cutoff (default 90)\n"
@@ -549,8 +551,7 @@ public class runSTCWMain
 		goNoAdd = (xnoGO.contentEquals("0")) ? false : true;
 	}
 	 /************************************************************************/
-	public static boolean yesNo(String question)
-	{
+	public static boolean yesNo(String question) {
 		if (noPrompt) return true;
 		BufferedReader inLine = new BufferedReader(new InputStreamReader(System.in));
 

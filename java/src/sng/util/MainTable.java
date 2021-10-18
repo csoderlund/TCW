@@ -220,11 +220,66 @@ public class MainTable extends MainTableSort {
                 }
                 pw.println();
             }
-            Out.prt("Complete writing " + nRow + " records to " + fwObj.getFileName()); // CAS333 was fileName
+            Out.prt("Complete writing " + nRow + " rows to " + fwObj.getFileName()); // CAS333 was fileName
             pw.close();
             return true;
         }
         catch (Exception e) {ErrorReport.reportError(e, "TCW error: writing file");}
+        return false;
+    }
+    /******************************************************
+     * Save table to file
+     * CAS322 was assuming Row# was in col0
+     */
+    public boolean saveSelToFileTabDelim(Component btnC, String fileName, STCWFrame frame) {
+        String delim = FileC.TSV_DELIM;
+        try {
+        	// String title, String defFile, int fileType, int wrType
+        	PrintWriter pw = fwObj.getWriter(btnC, "Selected rows", fileName, FileC.fTSV, FileC.wAPPEND);
+            if (pw==null) return false;
+           
+            int [] rows = getSelectedRows();
+            
+            int nCol=getColumnCount(), nRow=rows.length, rowCol=0;
+            Out.prt("Writing " + nRow + " rows and " + nCol + " columns " );
+            
+            pw.print("#"); // CAS314 if append, makes it easier to view/remove column headings
+            for(int x=0; x < nCol; x++) {
+                String head = (String)getColumnModel().getColumn(x).getHeaderValue();
+            	
+            	if (head.contentEquals(ROWn)) {
+            		rowCol=x;
+            		continue;
+            	}
+            	head = head.replaceAll("\\s", "-");//Remove spaces from column headers
+            	
+                pw.print(head);
+                if (x < nCol-1) pw.print(delim);
+            }
+            pw.print("\n");
+            
+            for (int i=0;  i < nRow;  i++) {
+                if (i % 100 == 0) Out.r("Wrote " + i);
+                
+                int row = rows[i];
+                for (int col = 0;  col < nCol;  col++) {
+                	if (col==rowCol) continue;
+                	
+                    Object obj = getValueAt(row, col);
+                    String s = (obj == null ? "" : obj.toString()); 
+                   
+                    if(s.indexOf(',') >= 0) s = "\"" + s + "\""; // surrounds ',' with quotes
+                    
+                    pw.print(s);
+                    if(col < nCol-1) pw.print(delim);
+                }
+                pw.println();
+            }
+            Out.prt("Complete writing " + nRow + " selected rows to " + fwObj.getFileName()); 
+            pw.close();
+            return true;
+        }
+        catch (Exception e) {ErrorReport.reportError(e, "TCW error: writing selected rows");}
         return false;
     }
     /***************************************************

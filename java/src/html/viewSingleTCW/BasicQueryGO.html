@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Basic Queries for GO Annotation</title>
+<title>Basic Filters for GO Annotation</title>
 </head>
 <body style="padding:20px;width:650px;font-family:Times">
 
-<h1>Basic Queries for GO Annotation</h1>
+<h1>Basic Filters for GO Annotation</h1>
 <i>Overview</i>: 
 Select <b>Search</b> to search for the string in the text box, or select <b>Filters</b> to apply the
 filters set. Select a check box or radio button to enable the associated search or filter.
@@ -25,9 +25,14 @@ www.geneontology.org (the GO version is listed in the <b>Overview</b> panel).
 (<i>Must use one of these formats!</i>). Only one GO ID is allowed unless loaded from file.
 <li><b>GO Name </b>&nbsp;&nbsp;All GO names are searched for the substring.
 </ul>
-<b>Load File</b>: The file should contain one GO ID or one GO Name per line,
+<b>Load File</b>: 
+<ul>
+<li>The file should contain one GO ID or one GO Name per line,
 depending on whether <b>GO ID</b> or <b>GO Name</b> is selected. <i>GO Name and GO ID must
 be the exact text when loaded from file</i>.
+<li>For <b>GO ID</b>, there can be additional information on a line; only the
+first word will be taken as an ID.
+</ul>
 <hr>
 
 <h2>Filters</h2>
@@ -115,7 +120,7 @@ be removed from the other (not-displayed) list.
 <h2>Top row of options</h2>
 <i><b>Selected:</b></i>
 <ul>
-<li><b>View Seqs</b> view the sequences in the main table for the selected GO.
+<li><b>Seq Table</b> view the sequences in the main table for the selected GO.
 
 <li><b>Copy...</b> to the clipboard, which can be pasted elsewhere
 <ol type='a'>
@@ -145,7 +150,7 @@ the GO. The associated hit information is a bit confusing, but is as follows:
 <ul>
 <li>If the sequence has multiple hits with the GO, only the one with the best E-value
 is shown. This is not necessarily a hit with the GO assigned.
-<li>If the <b>View Seqs</b> is used, 
+<li>If the <b>Seq Table</b> is used, 
 the resulting table only shows the GO hits if it is 'Best Bits' or 'Best Anno',
 which is not the same as this "Best". 
 <li>All sequences with the GO are shown, regardless of their DE values.
@@ -247,7 +252,7 @@ other than <b>All</b>, it is much slower!
 <li> <b>Column #Seqs</b>&nbsp;&nbsp; This is typically all sequences that have a hit
 associated with the GO, unless the <b>Enrich: #Seqs</b> is changed from <b>All</b>.
 <br>&nbsp;
-<li><b>View Seqs</b>&nbsp;&nbsp;This shows the sequences that correspond with the <u>#Seqs</u> column 
+<li><b>Seq Table</b>&nbsp;&nbsp;This shows the sequences that correspond with the <u>#Seqs</u> column 
 in the table.
 </ol> 
 <i>DE Sequence</i>: Each sequence has the following annotations:
@@ -271,7 +276,7 @@ is not based on the cutoff from the panel, but based on the cutoff used for inpu
 <p>If the <b>for</b> filter is on two or more conditions where "and" is used (e.g. StRo and StOl), 
 the #Seqs=DE is an "or" of the individual conditions; it is done that way to account for 
 the sequences that went into the GO P-values.
-For example, try selecting #Seq=upDE, then select a row followed by <b>View Seqs</b>; at least one of the two
+For example, try selecting #Seq=upDE, then select a row followed by <b>Seq Table</b>; at least one of the two
 conditions will be up-regulated; however, on the <b>Basic GO</b> panel, both the conditions will
 be &lt;Pval.
 </body>

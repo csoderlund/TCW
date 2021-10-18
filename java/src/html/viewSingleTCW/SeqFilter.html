@@ -25,11 +25,11 @@ TCW uses the terminology <b>every</b> and <b>any</b>, but alternative terminolog
 Example abbreviations used:
 (U) means Up, (E) is either, &amp; is every, | is any.
 </ol>
-<h3>General</h3>
+<h2>General</h2>
 Filter on sequence length, total read count, and whether the sequence has
 a user-added remark. Remarks can be added with the runSingleTCW interface.
 
-<h3>Counts and TPM (or RPKM)</h3>
+<h2>Counts and TPM (or RPKM)</h2>
 Filter based on counts or TPM of one or more conditions, where TPM is the default. 
 NOTE: If RPKM was computed instead of TPM, then the Filter page will say RPKM instead of TPM.
 
@@ -44,7 +44,7 @@ For example, say you choose <b>Include</b>=condA,condB and <b>Exclude</b>=condC,
 This filter would results in a list of sequence where both condA and condB are >= 1.0
 and both condC and condD are = 0.0.
 
-<h3>N-fold</h3>
+<h2>N-fold</h2>
 This applies to the TPM columns. 
 <ol>
 <li>Check to turn filter on.
@@ -61,7 +61,7 @@ or <b>Any</b> if you at least one to pass the filter.
 </ol>
 
 
-<h3>Differential Expression</h3>
+<h2>Differential Expression</h2>
 This filter will only be available if the person who built the database ran
 the function to add DE (Differential
 expression) p-values to your database.
@@ -78,7 +78,7 @@ case you will see options <b>Up/Down/Either</b> for each DE column.
 For example, if you select <b>Up</b>, then you will see only results for which that p-value
 has a <i>positive</i> value.
 
-<h3>Best Hit</h3>
+<h2>Best Hit</h2>
 Selecting <b>Annotated</b> shows a table of all annotated sequences, with any filters applied.
 <p>All Filters below the <b>Search</b> label are applied to the selected <b>Best</b>, e.g. 
  <b>Best Bits</b>, <b>Best Anno</b> or <b>Best With GO</b>. (See Instructions for their definitions).
@@ -93,13 +93,13 @@ must correspond to one listed on the <b>Overview</b> panel under "Annotation Dat
 </table>
 <i>Note: there are additional annotation queries under <b>annoDB Hits</b>.</i>
 
-<h3>GO</h3>
+<h2>GO</h2>
 
 Enter a GO ID, e.g. 3674 or GO:0003674, and all sequences that have this GO as assigned or inherited
 will be displayed.  Additional
 GO queries are available from the <b>Basic GO Annotation</b>. 
 
-<h3>SNPs and ORFs</h3>
+<h2>SNPs and ORFs</h2>
 
 Note, SNPs are only computed for assembled contigs, so SNP queries are not available for
 imported transcript sequences. ORFs are computed in either case. 

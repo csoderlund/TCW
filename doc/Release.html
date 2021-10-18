@@ -6,6 +6,73 @@
 <a id=top>
 <!--#include virtual="./ssi/start1.html" -->
 
+<h4>v3.3.4  18-Oct-2021</h4>
+This release is improvements for the <ttl>ORF finder</ttl>.
+<p><ttp>runSingleTCW</ttp>
+<ul>
+<li>Changes to ORF finder:
+<ul>
+<li>Algorithm: (the changes are fine-tuning results, no major changes)
+<ul>
+<li><u>For Markov training</u>: it was using all sequences for training. Now it uses the longest N sequences
+(default 2000), after removing similar sequences. N can be changed by executing <ttc>execAnno</ttc> with the
+-t option.
+<li><u>Sort</u>: (1) Instead of comparing the Markov scores, it tests against (Abs(log(score1)-log(score2)&gt;0.3), where negative
+markov scores are -(log(-score1)); (2) If the length and Markov scores are similar, a 4th rule checks for ends (Start & Stop codon).
+<li><u>With Hit</u>: If the hit ends at start/stop codons, always use those coordinates. Otherwise, it finds all possible ORFs (including Stop to Stop),
+and sorts for the best ORF.
+<li><u>Stop codons</u>: If there was stop codons in the hit, it was not always finding the best coordinates - now it does. 
+<li><u>No hit</u>: ORFs that are Stop to Stop may now be considered if the Stop is far enough from the last Start.
+<li><u>N's in sequence</u>: It use to try to avoid N's, now it does not. However, it does remove them from the length before taking
+the log for comparing lengths.
+<li><u>Minimal sequences for Markov training</u>: The default was 50, which is way too low. It is now 500.
+</ul>
+
+<li>The selected ORFs that do not have both Start and/or Stop will have a remark.
+<li>The output files are now sorted by SeqID.
+<li>Previously, allGoodORFs.pep.fa + bestORFs.pep.fa provided all candidate ORFs; now all 
+candidate ORFs are in allGoodORFs.pep.fa.
+
+</ul>
+
+</ul>
+
+<ttp>viewSingleTCW </ttp>
+<ul>
+<li><ttc>Load File</ttc> for all 3 Basic filters: 
+only the first word per line will be read as a SeqID, OrigID, HitID or GOID.
+This allows files to be used that have other information on each line. 
+<ul>
+<li><ttc>Basic GO annotations</ttc>: Add "#" before column headings so an exported file can later be read in 
+(The other Exports already do this).
+</ul>
+<li><font color=green>New</font> <ttc>Sequence Table</ttc> has new Export option to output the columns
+of the selected row.
+<li><ttc>Basic Sequence</ttc>: 
+<ul>
+<li><font color=green>New</font> Select one sequence from the table followed by <ttc>Seq Detail</ttc> to see the <ttc>Sequence Detail</ttc>
+panel. This is in contrast to the <ttc>Seq Table</ttc> ,which results the sequences being shown in the 
+<ttc>Sequence Table</ttc>.
+<li><font color=green>New</font> The result of a search will <ttc>SELECT ROWS</ttc> from the existing table.
+</ul>
+
+
+<li><ttc>Results</ttc>: This panel now shows all <ttc>Sequence Detail</ttc> labels from the left panel
+so that all results can easily be removed.
+<li>Changed a few labels, e.g. the "View Seqs" label to "Seq Table", and "View Selected Sequence" to "Seq Detail"
+</ul>
+
+Bug fixes:
+<ul>
+<li>ORF finder: Sequence of length 0 crashed the ORF Finder.
+<li><ttc>Basic GO annotations</ttc>: the <ttl>#Seqs</ttl> quit showing the number of DE seqs correctly (bug from v3.3.3).
+<li><ttc>Filter ORF Frame</ttc>: Only worked for positive frames.
+</ul>
+Other
+<ul>
+<li>demoTra: add N's to a few of the sequences.
+</ul>
+
 <h4>v3.3.3  25-Sept-2021</h4>
 
 <ttp>viewSingleTCW</ttp> - tiny fixes

@@ -13,6 +13,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Vector;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -30,6 +31,7 @@ import sng.database.Globals;
 import sng.util.Tab;
 import sng.viewer.STCWFrame;
 import util.methods.ErrorReport;
+import util.methods.Out;
 import util.methods.Static;
 import util.ui.UserPrompt;
 
@@ -62,7 +64,7 @@ public class BasicSeqTab extends Tab {
 	 * Top button panel
 	 */
 	private void createTopRowPanel() {
-		btnViewSeqs = new JButton("View Seqs");
+		btnViewSeqs = new JButton(Globals.seqTableLabel);
 		btnViewSeqs.setBackground(Globals.FUNCTIONCOLOR);
 		btnViewSeqs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -70,6 +72,15 @@ public class BasicSeqTab extends Tab {
 			}
 		});
 		btnViewSeqs.setEnabled(false);
+		
+		btnDetail = new JButton(Globals.seqDetailLabel);
+		btnDetail.setBackground(Globals.FUNCTIONCOLOR);
+		btnDetail.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				viewSelectedDetail();
+			}
+		});
+		btnDetail.setEnabled(false);
 		
 		// Copy
 		final JPopupMenu copypopup = new JPopupMenu();
@@ -164,7 +175,7 @@ public class BasicSeqTab extends Tab {
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 					UserPrompt.displayHTMLResourceHelp(theParentFrame, 
-					"Basic Sequence Query", helpHTML);
+					"Filter Sequences", helpHTML);
 			}
 		});
 
@@ -173,10 +184,12 @@ public class BasicSeqTab extends Tab {
 		topRowPanel.add(Box.createHorizontalStrut(1));
 		topRowPanel.add(btnViewSeqs);
 		topRowPanel.add(Box.createHorizontalStrut(1));
+		topRowPanel.add(btnDetail);
+		topRowPanel.add(Box.createHorizontalStrut(1));
 		topRowPanel.add(btnCopy);
 		topRowPanel.add(Box.createHorizontalStrut(60));
 		topRowPanel.add(btnTable);
-		topRowPanel.add(Box.createHorizontalStrut(280));
+		topRowPanel.add(Box.createHorizontalStrut(160)); // CAS334 help was off the page
 		topRowPanel.add(Box.createHorizontalGlue());
 		topRowPanel.add(btnHelp);
 		topRowPanel.setMaximumSize(topRowPanel.getPreferredSize());
@@ -202,6 +215,13 @@ public class BasicSeqTab extends Tab {
 	/*******************************************************
 	 * Private methods
 	 */
+	private void viewSelectedDetail() {
+		String [] seqNames = getSelectedSeqs();
+		int len = seqNames.length;
+		if (len==0) return;
+
+		theParentFrame.addSeqDetailPage(seqNames[0], this, -1);
+	}
 	private void viewSelectedSeqs() {
 		String [] seqNames = getSelectedSeqs();
 		int len = seqNames.length;
@@ -292,7 +312,7 @@ public class BasicSeqTab extends Tab {
 	/***********************************************
 	 * Table
 	 */
-	 // The database call was performed in BasicHitFilterPanel, and passes in the results for display
+	 // The database call was performed in BasicSeqFilterPanel, and passes in the results for display
 	 public void tableBuild(ArrayList<Object []> results, String summary) {
 		 try {
 			 enableTopButtons(false);
@@ -334,7 +354,34 @@ public class BasicSeqTab extends Tab {
 		 }
 		 catch (Exception e) {ErrorReport.prtReport(e, "Updating table");}
 	}
-	
+	 /*********************************************************
+	  * CAS334 Queries the database, but then selects any rows that match
+	  */
+	 public void tableSelect(ArrayList<Object []> results, String summary) {
+		 try {
+			 theTablePanel.setStatus("Selecting " + results.size() + " possible rows. Please Wait..");
+			 enableTopButtons(false);
+			
+			 int cnt=0;
+			 for (int i=0; i<seqObjList.size(); i++) { 
+				 for (Object [] o : results) {
+					 String seqid = (String) o[0];
+					 if (seqObjList.get(i).strSeqID.equals(seqid)) {
+						 theTablePanel.selectRow(i);
+						 cnt++;
+						 break;
+					 }
+				 }
+				 if (i>0 && i%5000==0) setStatus("Selected " + cnt + " from " + i + ". Still working...");
+			 }
+		
+			 theTablePanel.setStatus("");
+			 //theTablePanel.tableRefresh();	Loses highlight		
+			 String r = String.format("Results: %,d   Select %d  %s", seqObjList.size(), cnt, summary);
+			 theTablePanel.setStatus(r);
+		 }
+		 catch (Exception e) {ErrorReport.prtReport(e, "Updating table");}
+	}
 	public void tableSort (boolean sortAsc, int mode) {
 		try {// CAS314 Comparison method violates its general contract!
 			Collections.sort(seqObjList, new SeqDataComparator(sortAsc, mode));		
@@ -352,10 +399,15 @@ public class BasicSeqTab extends Tab {
 	public void updateTopButtons(int row) {
 		btnViewSeqs.setEnabled(row>0);
 		btnCopy.setEnabled(row==1);
+		btnDetail.setEnabled(row==1);
 	}
 	public void enableTopButtons(boolean b) {
 		btnViewSeqs.setEnabled(b);
 		btnCopy.setEnabled(b);
+		btnDetail.setEnabled(b);
+	}
+	public void enableBottomButtons(boolean b) { // CAS334 for new SELECT
+		theTablePanel.enableButtons(b);
 	}
 	public void tableRefresh() {
 		theTablePanel.setColumns(theFilterPanel.getColNames(), theFilterPanel.getColSelect());
@@ -366,10 +418,11 @@ public class BasicSeqTab extends Tab {
 	}
 	//Table panel
 	private BasicTablePanel theTablePanel = null;
-	private ArrayList<SeqData> seqObjList = new ArrayList<SeqData> ();
+	private Vector<SeqData> seqObjList = new Vector<SeqData> (); // CAS334 was ArrayList; possible synchronization problem
 	
 	//User interface
 	private JButton btnViewSeqs = null;
+	private JButton btnDetail = null;	// CAS334
 	private JButton btnTable = null;
 	private JButton btnCopy = null;
 	private JButton btnHelp = null;

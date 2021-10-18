@@ -65,11 +65,9 @@ public class SeqTopRowTab extends Tab {
 	public SeqTopRowTab ( STCWFrame theFrame,
            MultiCtgData listData, // One ContigData with name only; except if CAP3 was run
            Tab parentTab, 
-           int recordNum,
-           int [] prevSettings)
+           int recordNum)
 	{
 		super(theFrame, parentTab);
-		prevDisplaySettings = prevSettings;
 		theMainFrame = theFrame;
 		metaData = theFrame.getMetaData();
 		nRecordNum = recordNum; 								
@@ -328,7 +326,7 @@ public class SeqTopRowTab extends Tab {
 				if (ctgFullData==null) return;
 				
 				opDetails();
-				theFrame.removeTab(waitTab);
+				theFrame.removeTabWait(waitTab);
 			}
 		});
 	}
@@ -582,11 +580,10 @@ public class SeqTopRowTab extends Tab {
 		String strTitle = ((SeqTableTab)parentTab).getContigIDAtRow(nNewRecordNum);
 		if (strTitle==null) return;
 		
-		Tab newTab = getParentFrame().addNewContigTab( strTitle, parentTab, 
-					nNewRecordNum, prevDisplaySettings );
-		
 		MenuTreeNode node = getMenuNode();// Re-use existing menu tree node
-		getParentFrame().removeTabFromNode(node);
+		getParentFrame().removeTabPrevNext(node); // Remove from left pane
+		
+		Tab newTab = getParentFrame().addNextSeqDetailTab( strTitle, node, parentTab, nNewRecordNum);
 		
 		newTab.setMenuNode(node);
 		node.setText(strTitle);
@@ -622,7 +619,6 @@ public class SeqTopRowTab extends Tab {
 	}
 	
 	/*****************************************************/
-	
 	private SeqDetailPanel detailPanel = null;
 	private SeqFramePanel framePanel = null;
 	private SeqGOPanel goPanel = null;
@@ -654,6 +650,5 @@ public class SeqTopRowTab extends Tab {
 	private String goHit = null;
 	
 	/**********************************************************/
-	private int [] prevDisplaySettings = null; // not working right now
 	private int lastDisplay=0;
 }

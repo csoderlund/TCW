@@ -121,8 +121,8 @@ public class SequenceData implements Serializable {
 			if (c==Globalx.stopCh) cnt++;
 		}
 		if (c==Globalx.stopCh) cnt--; // stop codon
-		if (cnt>0) Out.PrtErr(name + " has stop " + cnt + " codons in translation. CDS " 
-								+ strSeq.length() + ";  AA " + aa.length());
+		if (cnt>0) Out.PrtErr(name + " has " + cnt + " stop codons in translation. CDS " 
+			+ strSeq.length() + ";  AA " + aa.length() + " Frame: " + frame + " Start: " + start + " End: " + end);
 		return aa;
 	}
 

@@ -20,8 +20,8 @@ are used for these three tasks.
 	<td valign="top"><b>Best Anno - SwissProt preference</b></td> 
 	<td>The <i>Best Anno</i> is the best hit without a phrase in its description such as
 		"uncharacterized protein". If this option is selected, and if the best-anno is
-		not a SwissProt hit, then the best-anno SwissProt hit is used if the bitscore is greater
-		than 70% of the <i>Best Anno</i> bitscore. The purpose of this option is
+		not a SwissProt hit, then the best-anno SwissProt hit is used if the bit-score is greater
+		than 70% of the <i>Best Anno</i> bit-score. The purpose of this option is
 		to give preference to SwissProt since the descriptions tend to be better and they
 		are the most reliable protein sequences.</td>
 		
@@ -60,7 +60,7 @@ are used for these three tasks.
 		<a href="http://www.agcol.arizona.edu/software/tcw/doc/stcw/AnnoDBs.html">Annotation Setup</a>.
 		
 <h3>ORF finder:</h3>
-	See http://www.agcol.arizona.edu/software/tcw/doc/stcw/ORF.html for a full explanation
+	See the online <a href="http://www.agcol.arizona.edu/software/tcw/doc/stcw/ORF.html">ORF Finder</a> for a full explanation
 	of TCW ORF finding and these parameters.
 	<p><b>Use Alternative Starts</b> - By default, TCW only uses ATG. If you select this option, it will also use
 	CTG and TTG.
@@ -71,34 +71,36 @@ are used for these three tasks.
 	
 	<ul>
 	<li><b>Rule 1:</b> <i>Best Hit.</i> 
-	<br>Parameter: <u>E-value</u> &lt;= [default: 1E-10] or <u>%Sim</u> &gt;= [default: 20].
-	<br><br>The sequence will be used if the best hit (EV or AN) if the hit E-value &lt;= than the cutoff
-	or the Hit similarity (also referred to as identity) is &gt;= than its cutoff. 
+	<br>Parameter: <u>E-value</u> &lt;= N or <u>%Sim</u> &gt;= M.
+	<br><br>The sequence will be used if the best bitscore hit (BS) has  E-value &lt;= N 
+	or Hit similarity &gt;= M. 
 	
-	<br><br>NOTE: If the best hits are mostly from a nucleotide database, this does not work.
+	<br><br>NOTE: If the Best bitscore hit is nucleotide, the Best Anno hit is used. If there are
+	no protein hits, then the Markov training will not be used.
 	<br><br>
 	
 	<li><b>Rule 2:</b> <i>Longest ORF.</i> 
-	<br>Parameter: <u>log length ratio</u> &gt; [default: 0.5].
-	<br><br>If the lengths of two candidate ORFs are very different, than the longest ORF is used.
+	<br>Parameter: <u>log ratio</u> &gt; N: 
+	If the lengths of two candidate ORFs are very different, than the longest ORF is used.
 	To determine if their lengths are <i>very</i> different,
-	the log length ratio is compared to a user-supplied cutoff, e.g. 0.3. For example, if the
+	the log length ratio is compared to N. For example, if the
 	cutoff is 0.3: the log ratio of 3000:4500 is 0.405, so the longest ORF would be used, 
 	but the log ratio of 3000:4000 is 0.288, so Rule 3 would be used.
 
 	<br><br>
 	<li><b>Rule 3:</b> <i>Best Markov score.</i> 
-	<br>Parameters: <u>Minimal Set</u> [default: 50] and the following.
-	<br><br>For 5th-order Markov model computation*, there are two options:
+	<br>Parameters: <u>log ratio</u> &gt; N. If the Markov Scores are very different, the ORF
+	with the highest Markov score is used. To determine if they are very different, the log ratio
+	is compared to N.
+	<br><br>For computing the 5th-order Markov model computation*, the options are:
 	<ol>
+	<li><u>Minimal Set</u>: There must be at least this many valid sequences to be used for training.
 	<li><u>Train with Best Hits</u>: For the best hits identified in Rule 1,
-	the exact hit region of each sequence will be part of the training set. There must be at least N sequences
-	that pass the E-value test, where N is the user supplied 'Minimum Set'
+	the exact hit region of each sequence will be part of the training set. 
 	<li><u>Train with CDS file</u>:  This option allows you to supply a file of nucleotide coding sequences in FASTA format to be used to train.
 As they are coding sequences, the sequences must be in frame.
-	
 	</ol>
-	*The Markov score was computed according to Hass et al. (2013) <i>Nature Protocols</i> 8:1494-1512 for Transcoder.
+	*The Markov score was computed according to Hass et al. (2013) <i>Nature Protocols</i> 8:1494-1512 for TransDecoder.
 </ul>
 
 		

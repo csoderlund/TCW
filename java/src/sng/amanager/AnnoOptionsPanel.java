@@ -1,6 +1,14 @@
 package sng.amanager;
 
-import java.awt.Component;
+/****************************************************
+ * Options button on Main Panel opens this window.
+ * 1. GO
+ * 2. ORFs
+ * 3. Similarity
+ * It gets all values from sTCW.cfg from ManagerData, which has already loaded it.
+ * It writes changes to ManagerData, which subsequently writes to sTCW.cfg
+ */
+
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,7 +21,6 @@ import java.util.Vector;
 import javax.swing.JOptionPane;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -37,15 +44,6 @@ import util.methods.TCWprops;
 import util.ui.ButtonComboBox;
 import util.ui.UserPrompt;
 
-/****************************************************
- * Options button on Main Panel opens this window.
- * 1. GO
- * 2. ORFs
- * 3. Similarity
- * It gets all values from sTCW.cfg from ManagerData, which has already loaded it.
- * It writes changes to ManagerData, which subsequently writes to sTCW.cfg
- */
-
 public class AnnoOptionsPanel extends JPanel {
 	private static final long serialVersionUID = -6606995633515724156L;
 	/*************************************************
@@ -55,23 +53,18 @@ public class AnnoOptionsPanel extends JPanel {
 	private static final int NUM_LG_FIELD_WIDTH = 4;
 	private static final int NUM_SM_FIELD_WIDTH = 2;
 	private static final int INDENT_RADIO = 25;
+	private static final int VERT1 = 5, VERT2=10;
 	private final String helpHTML = Globals.helpRunDir + "AnnotationOptions.html";
 	
 	public AnnoOptionsPanel(ManagerFrame parentFrame) {
 		theManFrame = parentFrame;
 		
 		try { // created before we know what type sTCW is
-		pnlAnnoDBOptions = new JPanel();
-		pnlAnnoDBOptions.setLayout(new BoxLayout(pnlAnnoDBOptions, BoxLayout.PAGE_AXIS));
-		pnlAnnoDBOptions.setBackground(Globalx.BGCOLOR);
-		pnlAnnoDBOptions.setAlignmentX(Component.LEFT_ALIGNMENT);
+		pnlAnnoDBOptions = Static.createPagePanel();
 		pnlAnnoDBOptions.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		
-		JPanel innerPanel = new JPanel();
-		innerPanel.setLayout(new BoxLayout(innerPanel, BoxLayout.PAGE_AXIS));
-		innerPanel.setBackground(Globalx.BGCOLOR);
-		innerPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
+		JPanel innerPanel = Static.createPageCenterPanel();
+		
 		JPanel row = Static.createRowPanel();
 		JLabel title = new JLabel("Annotation Options");
 		title.setFont(pnlAnnoDBOptions.getFont().deriveFont(Font.BOLD, 18));
@@ -80,7 +73,7 @@ public class AnnoOptionsPanel extends JPanel {
 		row.add(title);
 		row.add(Box.createHorizontalGlue());
 		innerPanel.add(row);
-		innerPanel.add(Box.createVerticalStrut(20));
+		innerPanel.add(Box.createVerticalStrut(VERT2));
 		
 		createAnnoPanel(innerPanel);
 		createOrfPanel(innerPanel);
@@ -159,7 +152,7 @@ public class AnnoOptionsPanel extends JPanel {
 		chkAltStart.setBackground(Globalx.BGCOLOR);
 		row.add(chkAltStart);
 		innerPanel.add(row);
-		innerPanel.add(Box.createVerticalStrut(5));
+		innerPanel.add(Box.createVerticalStrut(VERT1));
 		
 		// Rule 1
 		row = Static.createRowPanel();		
@@ -167,35 +160,36 @@ public class AnnoOptionsPanel extends JPanel {
 		row.add(ntJLabel[0]);
 		row.add(Box.createHorizontalStrut(1));
 		txtHitEval  = Static.createTextField("0", NUM_LG_FIELD_WIDTH);
-		row.add(txtHitEval);
-		row.add(Box.createHorizontalStrut(1));
+		row.add(txtHitEval);	row.add(Box.createHorizontalStrut(1));
 		
-		ntJLabel[1] = new JLabel(" or %Sim>="); // CAS318 %Identity from file, was HitSim
-		row.add(ntJLabel[1]);
-		row.add(Box.createHorizontalStrut(1));
+		ntJLabel[1] = new JLabel(" or %Sim>="); // CAS318 %Identity from file, was HitSim;
+		row.add(ntJLabel[1]);	row.add(Box.createHorizontalStrut(1));
 		txtHitSim  = Static.createTextField("0", NUM_LG_FIELD_WIDTH);
 		row.add(txtHitSim);
 		
 		innerPanel.add(row);
-		innerPanel.add(Box.createVerticalStrut(5));
+		innerPanel.add(Box.createVerticalStrut(VERT1));
 		
-		// Rule 2
+	// Rule 2
 		row = Static.createRowPanel();	
-		ntJLabel[2] = new JLabel("Rule 2: Else use longest ORF frame if the log length ratio >");
-		row.add(ntJLabel[2]);
-		row.add(Box.createHorizontalStrut(1));
+		ntJLabel[2] = new JLabel("Rule 2: Else use the longest ORF if the log ratio >");
+		row.add(ntJLabel[2]);	row.add(Box.createHorizontalStrut(1));
 		txtLenDiff = Static.createTextField("0", NUM_SM_FIELD_WIDTH);
 		row.add(txtLenDiff);
 		innerPanel.add(row);
-		innerPanel.add(Box.createVerticalStrut(5));
+		innerPanel.add(Box.createVerticalStrut(VERT1));
 		
-		// Training
+	// Rule 3 Training
 		row = Static.createRowPanel();
-		ntJLabel[3] = new JLabel("Rule 3: Else use the best Markov score");
-		row.add(ntJLabel[3]);
+		ntJLabel[3] = new JLabel("Rule 3: Else use the best Markov score if the log ratio >");
+		row.add(ntJLabel[3]);	
+		row.add(Box.createHorizontalStrut(1));
+		txtMkDiff = Static.createTextField("0", NUM_SM_FIELD_WIDTH);
+		row.add(txtMkDiff);
 		innerPanel.add(row);
-		innerPanel.add(Box.createVerticalStrut(5));
+		innerPanel.add(Box.createVerticalStrut(VERT1));
 		
+		// Train From best hit 
 		row = Static.createRowPanel();
 		row.add(Box.createHorizontalStrut(INDENT_RADIO));
 		
@@ -207,19 +201,16 @@ public class AnnoOptionsPanel extends JPanel {
 			}	
 		});
 		row.add(radTrainHit);
-		row.add(Box.createHorizontalStrut(1));
-		
 		row.add(Box.createHorizontalStrut(5));
 		ntJLabel[4] = new JLabel("Minimum Set");
-		row.add(ntJLabel[4]);
-		row.add(Box.createHorizontalStrut(1));
-		txtTrainMinSet  = Static.createTextField("0", NUM_SM_FIELD_WIDTH);
+		row.add(ntJLabel[4]);	row.add(Box.createHorizontalStrut(1));
+		txtTrainMinSet  = Static.createTextField("0", NUM_LG_FIELD_WIDTH);
 		row.add(txtTrainMinSet);
-		
+	
 		innerPanel.add(row);
-		innerPanel.add(Box.createVerticalStrut(5));
+		innerPanel.add(Box.createVerticalStrut(VERT1));
 		
-		// 1.2 Train from CDS
+		// Train from CDS
 		row = Static.createRowPanel();
 		row.add(Box.createHorizontalStrut(INDENT_RADIO));
 		radTrainCDSfile = new JRadioButton("Train with CDS file");
@@ -258,22 +249,22 @@ public class AnnoOptionsPanel extends JPanel {
 		radTrainHit.setSelected(true);
 		
 		innerPanel.add(row);
-		innerPanel.add(Box.createVerticalStrut(5));
+		innerPanel.add(Box.createVerticalStrut(VERT1));
 		
 		innerPanel.add(new JSeparator());
-		innerPanel.add(Box.createVerticalStrut(10));
+		innerPanel.add(Box.createVerticalStrut(VERT2));
 	}
 	// Similarity
 	private void createSelfPanel(JPanel innerPanel) {
 		innerPanel.add(new JLabel("SIMILAR PAIRS: (see Help on how to supply tab files)"));
-		innerPanel.add(Box.createVerticalStrut(10));
+		innerPanel.add(Box.createVerticalStrut(VERT2));
 
 		// BlastN
 		JPanel row = Static.createRowPanel();
 		chkSelfN = Static.createCheckBox("BlastN (NT-NT)", false);
 		row.add(chkSelfN);
 		innerPanel.add(row);
-		innerPanel.add(Box.createVerticalStrut(5));
+		innerPanel.add(Box.createVerticalStrut(VERT1));
 		
 		row = Static.createRowPanel();	
 		row.add(Box.createHorizontalStrut(INDENT_RADIO));
@@ -283,14 +274,14 @@ public class AnnoOptionsPanel extends JPanel {
 		row.add(txtSelfNargs);	
 		
 		innerPanel.add(row);
-		innerPanel.add(Box.createVerticalStrut(15));
+		innerPanel.add(Box.createVerticalStrut(VERT2));
 		
 		/// Tblast
 		row = Static.createRowPanel();
 		chkSelfX = Static.createCheckBox("Tblastx (6-frame)", false);
 		row.add(chkSelfX);
 		innerPanel.add(row);
-		innerPanel.add(Box.createVerticalStrut(5));
+		innerPanel.add(Box.createVerticalStrut(VERT1));
 		
 		row = Static.createRowPanel();	
 		row.add(Box.createHorizontalStrut(INDENT_RADIO));
@@ -298,14 +289,14 @@ public class AnnoOptionsPanel extends JPanel {
 		txtSelfXargs = new JTextField(BLASTARGS_TEXT_WIDTH);
 		row.add(txtSelfXargs);	
 		innerPanel.add(row);
-		innerPanel.add(Box.createVerticalStrut(15));
+		innerPanel.add(Box.createVerticalStrut(VERT2));
 		
 		// Blastp for AA-ORFs or AA-stcw CAS314 add
 		row = Static.createRowPanel();
 		chkSelfP = Static.createCheckBox("BlastP (AA-AA: AA-ORFs or AAsTCW)", false);
 		row.add(chkSelfP);
 		innerPanel.add(row);
-		innerPanel.add(Box.createVerticalStrut(5));
+		innerPanel.add(Box.createVerticalStrut(VERT1));
 		
 		row = Static.createRowPanel();	
 		row.add(Box.createHorizontalStrut(INDENT_RADIO));
@@ -324,7 +315,7 @@ public class AnnoOptionsPanel extends JPanel {
 		row.add(cmbSearchPgms);
 		
 		innerPanel.add(row);
-		innerPanel.add(Box.createVerticalStrut(5));
+		innerPanel.add(Box.createVerticalStrut(VERT1));
 		
 		row = Static.createRowPanel();	
 		row.add(Box.createHorizontalStrut(INDENT_RADIO));
@@ -333,7 +324,7 @@ public class AnnoOptionsPanel extends JPanel {
 		row.add(txtSelfPargs);	
 		
 		innerPanel.add(row);
-		innerPanel.add(Box.createVerticalStrut(15));
+		innerPanel.add(Box.createVerticalStrut(VERT2));
 		
 		row = Static.createRowPanel();
 		txtPairsLimit  = Static.createTextField("0", NUM_LG_FIELD_WIDTH);
@@ -344,13 +335,13 @@ public class AnnoOptionsPanel extends JPanel {
 		row.add(txtPairsLimit);
 		innerPanel.add(row);
 		innerPanel.add(new JSeparator());
-		innerPanel.add(Box.createVerticalStrut(10));
+		innerPanel.add(Box.createVerticalStrut(VERT2));
 	}
 		
 	// GO
 	private void createAnnoPanel(JPanel innerPanel) {
 		innerPanel.add(new JLabel("ANNOTATION:"));
-		innerPanel.add(Box.createVerticalStrut(10));
+		innerPanel.add(Box.createVerticalStrut(VERT2));
 		
 		JPanel row = Static.createRowPanel();	
 		chkSPpref = Static.createCheckBox("Best Anno - SwissProt preference", false);
@@ -359,7 +350,7 @@ public class AnnoOptionsPanel extends JPanel {
 		chkRmECO = Static.createCheckBox("Remove {ECO...} from UniProt descripts", true);
 		row.add(chkRmECO); 
 		innerPanel.add(row);
-		innerPanel.add(Box.createVerticalStrut(10));
+		innerPanel.add(Box.createVerticalStrut(VERT2));
 		
 		row = Static.createRowPanel();	// CAS331 add prune; if change - change in Overview
 		row.add(Static.createLabel("Prune hits")); 	row.add(Box.createHorizontalStrut(5));
@@ -373,7 +364,7 @@ public class AnnoOptionsPanel extends JPanel {
 		ButtonGroup group = new ButtonGroup(); // CAS327
 		group.add(radPrDesc); group.add(radPrAlign); group.add(radPrNone);
 		innerPanel.add(row);
-		innerPanel.add(Box.createVerticalStrut(20));
+		innerPanel.add(Box.createVerticalStrut(VERT2+5));
 		
 		row = Static.createRowPanel();
 		row.add(new JLabel("GO Database"));		row.add(Box.createHorizontalStrut(11));
@@ -400,7 +391,7 @@ public class AnnoOptionsPanel extends JPanel {
 		row.add(chkNoGO);
 		
 		innerPanel.add(row);
-		innerPanel.add(Box.createVerticalStrut(5));
+		innerPanel.add(Box.createVerticalStrut(VERT1));
 		
 		row = Static.createRowPanel();
 		
@@ -422,7 +413,7 @@ public class AnnoOptionsPanel extends JPanel {
 		cmbSlimSubset.setEnabled(false);
 		row.add(cmbSlimSubset);
 		innerPanel.add(row);
-		innerPanel.add(Box.createVerticalStrut(5));
+		innerPanel.add(Box.createVerticalStrut(VERT1));
 		
 		// Slims from file
 		row = Static.createRowPanel();
@@ -453,7 +444,7 @@ public class AnnoOptionsPanel extends JPanel {
 		
 		innerPanel.add(row);
 		innerPanel.add(new JSeparator());
-		innerPanel.add(Box.createVerticalStrut(10));
+		innerPanel.add(Box.createVerticalStrut(VERT2));
 	}
 	private Vector<String> findGODBs() {
 		Vector<String> retVal = new Vector<String> ();
@@ -463,8 +454,7 @@ public class AnnoOptionsPanel extends JPanel {
 			String dbstr = DBConn.createDBstr(hostsObj.host() + "/", null); // CAS303
 
 			Connection con = DriverManager.getConnection(dbstr, hostsObj.user(), hostsObj.pass());
-			Statement st = con.createStatement();
-				
+			Statement st = con.createStatement();	
 			
 			ResultSet rset = st.executeQuery("show databases LIKE '" + Globalx.goPreDB + "%'");
 			while(rset.next()) {
@@ -511,7 +501,6 @@ public class AnnoOptionsPanel extends JPanel {
 	
 	private void setTrain(boolean bHits, boolean bCDS) {
 		radTrainHit.setSelected(bHits);
-		
 		radTrainCDSfile.setSelected(bCDS);
 		txtTrainCDSfile.setEnabled(bCDS);
 		btnTrainCDSfile.setEnabled(bCDS);
@@ -535,8 +524,7 @@ public class AnnoOptionsPanel extends JPanel {
 			radSlimOBOFile.setEnabled(false);
 			txtSlimOBOFile.setEnabled(false);
 			btnSlimOBOFile.setEnabled(false);
-			radSlimOBOFile.setSelected(false);
-			
+			radSlimOBOFile.setSelected(false);	
 		}
 	}
 	private void setParamDefaults () {
@@ -592,7 +580,6 @@ public class AnnoOptionsPanel extends JPanel {
 		if (curManData.getNoGO().contentEquals("0")) chkNoGO.setSelected(false); //CAS331
 		else 										 chkNoGO.setSelected(true);
 		
-		
 		String file="";
 		ManagerData.AnnoData annoObj = curManData.getAnnoObj();
 		
@@ -640,6 +627,7 @@ public class AnnoOptionsPanel extends JPanel {
 		txtHitSim.setText(annoObj.getORFhitSim());
 		
 		txtLenDiff.setText(annoObj.getORFlenDiff());
+		txtMkDiff.setText(annoObj.getORFmkDiff());
 		
 		txtTrainMinSet.setText(annoObj.getORFtrainMinSet());
 		setTrain(true, false);
@@ -700,6 +688,10 @@ public class AnnoOptionsPanel extends JPanel {
 		x = txtLenDiff.getText();
 		if (Static.isDouble("Length Difference", x)) annoObj.setORFlenDiff(x);
 		else return rcMsg("Length Difference", "Must be double '" + x + "'");
+		
+		x = txtMkDiff.getText();
+		if (Static.isDouble("Markov Difference", x)) annoObj.setORFmkDiff(x);
+		else return rcMsg("Markov Difference", "Must be double '" + x + "'");
 			
 		x = txtTrainMinSet.getText();
 		if (Static.isInteger("Minimum number of sequences used for training", x)) annoObj.setORFtrainMinSet(x);
@@ -769,11 +761,11 @@ public class AnnoOptionsPanel extends JPanel {
 		txtHitSim.setEnabled(bNTdb);
 		
 		txtLenDiff.setEnabled(bNTdb);
+		txtMkDiff.setEnabled(bNTdb);
 		
+		txtTrainMinSet.setEnabled(bNTdb);
 		radTrainHit.setEnabled(bNTdb); 
 		radTrainCDSfile.setEnabled(bNTdb);
-		
-		txtTrainCDSfile.setEnabled(bNTdb);
 		
 		// Sim
 		chkSelfN.setSelected(false);  						chkSelfN.setEnabled(bNTdb);
@@ -802,12 +794,13 @@ public class AnnoOptionsPanel extends JPanel {
 		boolean check = (bAlt.equals("1")) ? true : false;
 		chkAltStart.setSelected(check);
 		
-		radTrainHit.setSelected(true);  // CAS327 was enabled
 		txtHitEval.setText(mProps.getProperty("Anno_ORF_hit_evalue")); 
 		txtHitSim.setText(mProps.getProperty("Anno_ORF_hit_sim")); 
 		
 		txtLenDiff.setText(mProps.getProperty("Anno_ORF_len_diff")); 
+		txtMkDiff.setText(mProps.getProperty("Anno_ORF_mk_diff")); 
 		
+		radTrainHit.setSelected(true);  // CAS327 was enabled
 		txtTrainMinSet.setText(mProps.getProperty("Anno_ORF_train_min_set")); 
 		txtTrainCDSfile.setText(""); 
 	}
@@ -840,7 +833,7 @@ public class AnnoOptionsPanel extends JPanel {
 	// ORF
 	private JCheckBox chkAltStart = null;
 	
-	private JTextField txtHitEval=null, txtHitSim=null, txtLenDiff=null;
+	private JTextField txtHitEval=null, txtHitSim=null, txtLenDiff=null, txtMkDiff= null;
 	
 	private JRadioButton  radTrainHit=null, radTrainCDSfile=null;
 	private JTextField 	  txtTrainMinSet=null;

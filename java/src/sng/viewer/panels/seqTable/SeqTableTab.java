@@ -125,7 +125,7 @@ public class SeqTableTab extends Tab
 	{
 		final JPanel toolbarPanel = Static.createRowPanel();
 		
-		btnViewContig = new JButton("View Selected Sequence");
+		btnViewContig = new JButton(Globals.seqDetailLabel); // CAS334 changed from View Selected Sequence
 		btnViewContig.setBackground(Globalx.FUNCTIONCOLOR);
 		btnViewContig.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
@@ -185,6 +185,13 @@ public class SeqTableTab extends Tab
 					StringSelection stuff = new StringSelection(contigTable.copyTableToString());
 					cb.setContents(stuff, null);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error copy table");}
+			}
+		}));
+		tablepopup.addSeparator();
+		tablepopup.add(new JMenuItem(new AbstractAction("Export selected rows of columns (" + Globalx.CSV_SUFFIX + ")") {
+			private static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent e) {
+				runExport(EXPORT_SELECT);
 			}
 		}));
 		tablepopup.addSeparator();
@@ -260,7 +267,7 @@ public class SeqTableTab extends Tab
 			System.out.println("TCW error in Refresh Columns");
 		}
 	}
-	// one contig selected
+	// one sequence selected
 	private void addContigTab ( )
 	{
 		int nRow = contigTable.getSelectedRow();
@@ -268,7 +275,7 @@ public class SeqTableTab extends Tab
 		
 		String strName = (String)theFields.extractFieldByID( contigTable.getRowAt(nRow), 
 				FieldSeqData.SEQ_ID_FIELD);
-		getParentFrame().addContigPage(strName, this, nRow);
+		getParentFrame().addSeqDetailPage(strName, this, nRow);
 	}
 	
 	public String getContigIDAtRow(int nRow) {
@@ -315,6 +322,7 @@ public class SeqTableTab extends Tab
 	private static final int EXPORT_SEQS = 4;
 	private static final int EXPORT_ORF = 5;
 	private static final int EXPORT_SeqGO = 6;
+	private static final int EXPORT_SELECT = 7;
 	private static final String filePrefix = "SeqTable";
 
 	private void runExport(int mode) {
@@ -325,6 +333,9 @@ public class SeqTableTab extends Tab
 					btnTable.setEnabled(false);
 					if(saveMode == EXPORT_TABLE) {
 						contigTable.saveToFileTabDelim(btnTable, filePrefix+"Columns", getParentFrame());
+					}
+					else if(saveMode == EXPORT_SELECT) { // CAS334
+						contigTable.saveSelToFileTabDelim(btnTable, filePrefix+"Select", getParentFrame());
 					}
 					else if(saveMode == EXPORT_SEQS) {
                         contigTable.saveToFasta(btnTable, filePrefix+"Seqs", getParentFrame());

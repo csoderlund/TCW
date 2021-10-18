@@ -6,14 +6,39 @@
 <body style="padding:20px;width:650px;font-family:Times">
 
 <h1>Results</h1>
-The table summarizes all existing filter tables, which are listed on the left under <b>Filters</b>. 
+
+<h2>Sequence Results</h2>
+All labels on the left panel will be shown in this table. 
+<ul>
+<li>These are either table or sequence detail labels.
+<li>A label representing a table
+will include a ":", e.g. "Filter1:". 
+<li>Removing a table label will remove any
+sequence detail labels listed for it; the <tt>Summary</tt> contains the table label up to the ":"
+and the sequence detail label listed under the table on the left panel. 
+<li>The <tt>All Seqs</tt>, <tt>Find Hits</tt> and
+<tt>Sequences</tt> labels do not have entries in the table, so any sequence detail label needs to be remove
+individually or with the <b>Remove All Results</b>. 
+</ul>
+<b>Remove All Results</b>: All labels will be removed and the table cleared.
 <p>
-This is most useful for <b>Remove All Results</b> which will do just that,
-i.e. all filtered tables will be removed.
+<b>Remove Selected Result</b>: Select a result followed by this option to remove it, 
+or the label can be removed by selecting the 'x' by its name on the left.
 <p>
-Select a result to remove it with <b>Remove Selected Result</b>, 
-or the result can be removed by selecting the
-'x' by its name on the left.
+Double-click a row will show its corresponding table or sequence detail. 
+
+<h2>Pair Results</h2>
+Only filtered tables are listed, which have a corresponding label on the left under <b>Pair Filters</b>. 
+<ul>
+<li>Removing a filtered table will remove all the alignments shown on the left beneath the filtered label.
+<li>If the <b>Seq Table</b> is selected for one or more pairs, the resulting sequence table will
+be listed under <b>Filters</b> and be listed on this <b>Results</b> page.
+</ul>
+<b>Remove All Results</b>: All  Pair labels will be removed and the table cleared.
+<p>
+<b>Remove Selected Result</b>: Select a label followed by this option to remove it, 
+or the label can be removed by selecting the 'x' by its name on the left.
+
 <p>
 Double-click a result to show its corresponding table. 
 </body>

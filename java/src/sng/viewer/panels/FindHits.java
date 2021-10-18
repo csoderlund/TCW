@@ -74,7 +74,7 @@ public class FindHits extends Tab
 		dmndDefaults =  BlastArgs.getDiamondArgsHit() + " --threads " + cpu; // CAS330 special for Find Hits
 		
 		// added after Blast is performed
-		btnViewContig = Static.createButton("View Selected Sequence", false, Globals.FUNCTIONCOLOR);
+		btnViewContig = Static.createButton(Globals.seqDetailLabel, false, Globals.FUNCTIONCOLOR);
 		btnViewContig.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				if (resultTable.getSelectedRowCount() == 1)
@@ -876,7 +876,7 @@ public class FindHits extends Tab
 			showStatus("Neither query or subject is a STCW seqID");
 			return;
 		}
-		theViewFrame.addContigPage(strName, this, nRow);
+		theViewFrame.addSeqDetailPage(strName, this, nRow);
 	}
 	private void showErr(String err)
 	{

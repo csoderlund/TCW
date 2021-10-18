@@ -499,4 +499,13 @@ public class Static {
     public static String goFormat(int gonum) {
     	return String.format(Globalx.GO_FORMAT, gonum);
     }
+    // CAS334 
+    public static boolean isOlap(int s1, int e1, int s2, int e2) {
+    	if (s1>=s2 && s1<e2) return true;
+    	if (s2>=s1 && s2<e1) return true;
+    	return false;
+    }
+    public static boolean isS1InS2(int s1, int e1, int s2, int e2) {
+    	return (s1>=s2 && e1 <= e2); 
+    }
 }

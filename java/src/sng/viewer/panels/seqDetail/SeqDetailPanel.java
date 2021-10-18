@@ -1384,10 +1384,8 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 	} catch (Exception e) {ErrorReport.prtReport(e, "Getting hit data for " + ctgData.getContigID());}
 	}
 	// load from database. Not in ctgData
-	private void loadCountData()
-	{	
+	private void loadCountData() {	
 	    ResultSet rs = null;
-	    
 		try {	
 			int ctgID = ctgData.getCTGID();
 			DBConn dbc = theMainFrame.getNewDBC();
@@ -1444,7 +1442,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
     		rs.close();    		
     		dbc.close();
 		}
-		catch ( Exception err ) {ErrorReport.reportError(err, "Error: reading database for getLibs");}
+		catch ( Exception err ) {ErrorReport.reportError(err, "Error: reading database for counts and DE");}
 	}
 	
 	public boolean hasHit() { return hasHit; }

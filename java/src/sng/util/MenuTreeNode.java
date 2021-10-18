@@ -1,5 +1,10 @@
 package sng.util;
 
+/**********************************************************
+ * Node is a Tab on the left panel. This object contains the text and action symbol
+ * The tab object is stored in STCWFrame.
+ * CAS334 move stuff around - no real change
+ */
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -18,42 +23,27 @@ import javax.swing.JPanel;
 
 public class MenuTreeNode extends JPanel implements ActionListener {
 	private static final long serialVersionUID = -8445121683849128470L;
-
 	private static final boolean DEBUG = false;
 	
-	public final static int TYPE_DEFAULT 	 = 0;
-	public final static int TYPE_COLLAPSIBLE = 1;
-	public final static int TYPE_CLOSEABLE 	 = 2;
+	public final static int TYPE_COLLAPSIBLE = 1; 
+	public final static int TYPE_CLOSEABLE 	 = 2; 
 	
-	public final static int STYLE_LEVEL1 = 1;
-	public final static int STYLE_LEVEL2 = 2;
-	public final static int STYLE_LEVEL3 = 3;
-	public final static int STYLE_LEVEL4 = 4;
+	public final static int STYLE_LEVEL1 = 1, STYLE_LEVEL2 = 2, STYLE_LEVEL3 = 3, STYLE_LEVEL4 = 4;
 	
-	public final static Color bgColorLeft = Color.white;
-	
+	private int type = TYPE_COLLAPSIBLE;
 	private MenuTreeNode parent;
 	private Vector<MenuTreeNode> children;
 	private Object userObject = null;
-	private JButton nodeButton = null;
-	private JButton actionButton = null;
-	private int type = TYPE_COLLAPSIBLE;
-	private MenuTreeNodeListener nodeListener = null;
-	private boolean visible = true;
-	private boolean collapsed = false;
-	private boolean selectable = true;
 	
-	private ImageIcon arrowIcon = null;
-	private ImageIcon dotIcon = null;
-	private ImageIcon closeIcon = null;
-	private ImageIcon plusminusIcon = null;
+	private JButton nodeButton = null;  // Text displayed on left
+	private JButton actionButton = null;
 	
 	// called by STCWFrame.openAssembly to create root node that is added to MenuTree
 	public MenuTreeNode() {
 		parent = null;
 		children = new Vector<MenuTreeNode>();
 		
-		setBackground(bgColorLeft);
+		setBackground(Color.white);
 		setLayout(new FlowLayout(FlowLayout.LEFT, 5, 0));
 		
 		nodeButton = new JButton(" ");
@@ -95,9 +85,7 @@ public class MenuTreeNode extends JPanel implements ActionListener {
 		prtMsg("Create ", name + " " + userObj.getClass().getName());
 	}
 	
-	public void setIcons(	ImageIcon arrowIcon, ImageIcon dotIcon, 
-							ImageIcon closeIcon, ImageIcon plusminusIcon)
-	{
+	public void setIcons(ImageIcon arrowIcon, ImageIcon dotIcon, ImageIcon closeIcon, ImageIcon plusminusIcon) {
 		this.arrowIcon = arrowIcon;
 		this.dotIcon = dotIcon;
 		this.closeIcon = closeIcon;
@@ -135,10 +123,13 @@ public class MenuTreeNode extends JPanel implements ActionListener {
 	public void addChild(MenuTreeNode newChild) { 
 		addChild(newChild, getChildCount()); 
 	}
-	public void addNodeListener(MenuTreeNodeListener l) { nodeListener = l; }
-	public void removeChild(MenuTreeNode theChild) { children.remove(theChild); }
-	
-	public void setUserObject(Object obj) { 
+	public void addNodeListener(MenuTreeNodeListener l) { 
+		nodeListener = l; 
+	}
+	public void removeChild(MenuTreeNode theChild) { 
+		children.remove(theChild); 
+	}
+	public void setUserObject(Object obj) { // obj = tab
 		prtMsg("setUserObject ", obj.getClass().getName());
 		userObject = obj; 
 	}
@@ -151,42 +142,35 @@ public class MenuTreeNode extends JPanel implements ActionListener {
 		setVisible(true);
 		showChildren();
 	}
-	
 	public void hideNode() {
 		setVisible(false);
 		hideChildren();
 	}
-	
 	public void hideChildren() {
 		Iterator<MenuTreeNode> iter = children.iterator();
 		while (iter.hasNext())
 			iter.next().hideNode();
 	}
-	
 	private void showChildren() {
 		Iterator<MenuTreeNode> iter = children.iterator();
 		while (iter.hasNext())
 			iter.next().showNode();
 	}
-	
 	private void collapseNode() {
 		collapsed = true;
 		setVisible(visible);
 		collapseChildren();
 	}
-	
 	private void expandNode(boolean expandChildren) {
 		collapsed = false;
 		setVisible(visible);
 		if(expandChildren) expandChildren();
 	}
-	
 	public void collapseChildren() {
 		Iterator<MenuTreeNode> iter = children.iterator();
 		while (iter.hasNext())
 			iter.next().collapseNode();
 	}
-	
 	public void expandChildren() {
 		Iterator<MenuTreeNode> iter = children.iterator();
 		while (iter.hasNext())
@@ -199,7 +183,6 @@ public class MenuTreeNode extends JPanel implements ActionListener {
 					temp.expandNode(true);					
 		}
 	}
-	
 	private boolean isChildCollapsed() {
 		boolean childCollapsed = false;
 		
@@ -209,7 +192,6 @@ public class MenuTreeNode extends JPanel implements ActionListener {
 		
 		return childCollapsed;
 	}
-	
 	public boolean isSelectable() { return selectable; }
 	private void setParent(MenuTreeNode newParent) { parent = newParent; }
 	
@@ -221,7 +203,6 @@ public class MenuTreeNode extends JPanel implements ActionListener {
 		else
 			setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
 	}
-	
 	public void setSelected() {
 		if (selectable) {
 			setVisible(true);
@@ -285,12 +266,10 @@ public class MenuTreeNode extends JPanel implements ActionListener {
 			nodeButton.setIcon(dotIcon);
 			nodeButton.setFont(new Font(font.getName(),Font.PLAIN,font.getSize()));
 			selectable = true;
-			//nodeButton.setFont(new Font(font.getName(),Font.PLAIN,10));
-			//selectable = false;
 			break;
 		}
 	}
-	
+
 	protected int getLevel() {
 		MenuTreeNode nextParent = parent;
 		int level = 0;
@@ -332,4 +311,8 @@ public class MenuTreeNode extends JPanel implements ActionListener {
 	public interface MenuTreeNodeListener extends EventListener {
 		void eventOccurred(MenuTreeNodeEvent e);
 	}
+	
+	private MenuTreeNodeListener nodeListener = null;
+	private boolean visible = true, collapsed = false, selectable = true;
+	private ImageIcon arrowIcon = null, dotIcon = null, closeIcon = null, plusminusIcon = null;
 }

@@ -489,11 +489,13 @@ public class LoadFromDB {
  				int nSeqLen = rset.getInt( 4 );
  			
  				if (nSeqLen != qualVect.size())
- 					Out.bug("Error: Failed to parse the correct number of quality values.");	
+ 					Out.bug("Error: Failed to parse the correct number of quality values. " 
+ 							+ cloneid + " " + nSeqLen + " " + qualVect.size());	
  			
      			if (nSeqLen != seqString.length ())
-     				Out.bug("Error: Failed to parse the correct number of bases." );	
- 		Out.bug(" clone " + nSeqLen + " " + seqString.length() + " " + qualVect);	
+     				Out.bug("Error: Failed to parse the correct number of bases. " 
+     						+ cloneid + " " + " " + nSeqLen + seqString.length());	
+     			
  				curClone.compAndSet ( seqString, qualVect, false );
  			                
  				out.add( curClone );		
