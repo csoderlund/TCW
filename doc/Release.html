@@ -6,6 +6,39 @@
 <a id=top>
 <!--#include virtual="./ssi/start1.html" -->
 
+<h4>v3.3.5  4-Nov-2021</h4>
+The main change from this release is a feature to allow log2FC analysis besides FC.
+<p><ttp>runSingleTCW</ttp>
+<ul>
+<li>Changes to ORF finder: A few small changes to the output to anno.log to make it clearer.
+</ul>
+
+<ttp>viewSingleTCW </ttp>
+<ul>
+<li>Basic Hits: <ttc>Seq Table</ttc>, <ttc>Delete Selected</ttc>, <ttc>Keep Selected</ttc> for "Group by Hit ID"":
+<ul>
+<li>If there were many seq-hit pairs,  these functions could take a very long time - its faster now, but can still
+take a long time (a popup will advice the user now). 
+<li>Tiny rare bugs: (1) The <ttc>Clear All</ttc> did not work if there were no counts for the sequences.
+(2) The hit 'best align' value on rare occasions was wrong.
+</ul>
+
+<li>Sequence Table: <ttc>Filter</ttc> and <ttc>Column</ttc>:
+<ul>
+<li>The N-fold column and filters are given the option of displaying and filtering on the log2FC or just the FC.
+<li>Bug fix: Differential Expression: The "Any" for "Up" would only show up-regulated for all selected DE columns
+that had at least one &lt;p-value; that restriction has been removed. Same for "Down". 
+</ul>
+
+<li>Seq Detail: - minor change
+<ul>
+<li>For <ttc>Align Best Hits</ttc>, it now aligns all best hits even if they
+are not displayed in the hits table (e.g. if there is a different Best Bits and Best Anno,
+and <ttc>Distinct Regions</ttc> is displayed, one of the bests may not be in the table, so it would not
+be aligned).
+</ul>
+</ul>
+
 <h4>v3.3.4  18-Oct-2021</h4>
 This release is improvements for the <ttl>ORF finder</ttl>.
 <p><ttp>runSingleTCW</ttp>

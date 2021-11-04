@@ -1059,7 +1059,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 	}
 	public String [] getBestHits() {
 		Vector<String> retVal = new Vector<String> ();
-		for (HitListData hd : theHitData) {
+		for (HitListData hd : hitData) { // CAS335 was theHitData, which is only visible
 			if (!hd.strBest.equals("")) retVal.add(hd.hitName);
 		}
 		return retVal.toArray(new String[0]);

@@ -582,6 +582,9 @@ public class BasicTablePanel extends JPanel {
 		bottomPanel.setMaximumSize(bottomPanel.getPreferredSize());
 		add(bottomPanel);
 	}
+	/******************************************************
+	 * Keep Selected and Remove Selected
+	 */
 	private void keepFromList(){
 		int numElements = theTable.getRowCount();
 		int [] selValues = theTable.getSelectedRows();		
@@ -604,18 +607,19 @@ public class BasicTablePanel extends JPanel {
 		int [] selValues = theTable.getSelectedRows();
 		deleteFromList(selValues);
 	}
+	// CAS335 change to send the list instead of row by row
 	private void deleteFromList(int [] selValues) {
-		theTable.clearSelection();
-		for(int x=selValues.length-1; x>=0; x--) {
-			if (hitTab!=null) hitTab.removeFromList(selValues[x]);
-			else seqTab.removeFromList(selValues[x]);
-		}
-		if (hitTab!=null) {
+		theTable.clearSelection(); 
+		if (hitTab!=null) { 
+			hitTab.deleteFromList(selValues);
 			setStatus(hitTab.getStatus());
-			hitTab.tableHitRecalc();
 		}
-		else setStatus("Results: " + seqTab.getNumRow());
+		else {
+			seqTab.deleteFromList(selValues);
+			setStatus("Results: " + seqTab.getNumRow());
+		}
 	}
+	/*************************************************************/
 	// CAS334 added for Basic Sequence SELECT ROWS
 	public void enableButtons(boolean b) {
 		btnDelete.setEnabled(b);

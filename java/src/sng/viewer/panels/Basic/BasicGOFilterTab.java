@@ -454,7 +454,7 @@ public class BasicGOFilterTab extends Tab {
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error export table", null);}
 			}
 		}));
-		tableExport.add(new JMenuItem(new AbstractAction("Table columns with -log10(Pval)") {
+		tableExport.add(new JMenuItem(new AbstractAction("Table columns with -log10(p-value)") {
 			private static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent e) {
 				try {

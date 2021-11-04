@@ -45,22 +45,27 @@ This filter would results in a list of sequence where both condA and condB are >
 and both condC and condD are = 0.0.
 
 <h2>N-fold</h2>
-This applies to the TPM columns. 
-<ol>
-<li>Check to turn filter on.
-<li>Select a TPM condition from the <b>Select 1</b> list and another condition from the <b>Select 2</b> list.
-Then click <b>Add</b>, which will add the pair separated by a "/" in the box on the right.
-<li>Select <b>Up</b>, <b>Down</b> or <b>Either</b>, where the last shows both up and down N-fold.
-<li>Set the number for N-fold, where the default is "2".
-<li>If there are more than one pair selected (i.e. shown in box on right),
-select <b>Every</b> if you want all pairs to pass the filter, 
-or <b>Any</b> if you at least one to pass the filter. 
-<li>To remove an N-fold pair from the box, select it followed by <b>Remove</b>.
-<li>To change the Up/Down/Either selection for an entry in the table, select the entry followed by <b>Change</b>.
-<li>To view the results, use the <b>Columns</b> tab on the left and select the same conditions.
-</ol>
+This applies to the TPM columns. Whether using Log2FC or FC, a "0.1" is added to both A and B to avoid ambiguities with 
+a zero value.
+<table>
+<tr><td>N-fold<td>&nbsp;<td>This must be checked and a value entered into the box beside it.
+<tr><td valign="top">Direction<sup>1</sup>&nbsp;<td><td>Up-Down, Up or Down can be selected.
 
-
+<tr><td valign="top" nowrap>Every/Any<td>&nbsp;<td>If more than one A-B pair is selected, the "Every" requires them all to
+pass the N-fold test whereas the "Any" only requires one of the pairs to pass the filter.
+<tr><td valign="top" nowrap>Select A<td>&nbsp;<td>Select the first condition.
+<tr><td valign="top" nowrap>Select B<td>&nbsp;<td>Select the second condition.
+<tr><td valign="top" nowrap>Add<sup>2</sup><td>&nbsp;<td>After A and B are selected, this will add them to the box.
+<td><tr><td valign="top" nowrap>Remove<td>&nbsp;<td>Select an entry in the box followed by "Remove" to remove it.
+<td><tr><td valign="top" nowrap>Log2<sup>3</sup><td>&nbsp;<td>If this is selected, then the box will contain "A:B", else it will contain
+"A/B".
+</table>
+<sup>1</sup>E/U/D will be displayed in the box beside the pair, depending on whether up-down, up, or down was selected.
+<br><sup>2</sup>If the box contains the currently selected A and B, and the direction is changed, select "Add" again
+to change the direction in the box. 
+<br><sup>3</sup>When checked or unchecked, the entries in the box will change from "A:B" to "A/B" or vice versa.
+<p>To view the associated values, use the <b>Columns</b> tab on the left and select the same conditions and Log2 setting.
+<p>
 <h2>Differential Expression</h2>
 This filter will only be available if the person who built the database ran
 the function to add DE (Differential

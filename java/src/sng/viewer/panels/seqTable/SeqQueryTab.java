@@ -37,6 +37,7 @@ import sng.database.MetaData;
 import sng.util.RunQuery;
 import sng.util.Tab;
 import sng.viewer.STCWFrame;
+import util.database.Globalx;
 import util.methods.Converters;
 import util.methods.Out;
 import util.methods.Static;
@@ -44,7 +45,6 @@ import util.ui.CollapsiblePanel;
 import util.ui.ToggleTextComboField;
 import util.ui.ToggleTextField;
 import util.ui.UserPrompt;
-
 
 public class SeqQueryTab extends Tab
 {
@@ -68,7 +68,7 @@ public class SeqQueryTab extends Tab
 		MIN_ROW_HEIGHT = (int)test.getPreferredSize().getHeight() + 5;
 		
 		theQuery = inQuery;
-		tempContigData = (FieldSeqData) Converters.deepCopy( theQuery.getContigData() );
+		tempSeqData = (FieldSeqData) Converters.deepCopy( theQuery.getContigData() );
 		
 		createFilterPanel();
 	}
@@ -188,7 +188,6 @@ public class SeqQueryTab extends Tab
 			row.add(chkLocEnd);
 			addRowToPanel(row, thePanel);
 		}
-		
 		return thePanel;
 	}
 	// Library
@@ -198,7 +197,7 @@ public class SeqQueryTab extends Tab
 		libTitles = metaData.getLibTitles();
 		
 		JComponent thePanel = new CollapsiblePanel(LIBRARY_HEADER, LIBRARY_DESCRIPTION);
-		String [] libLabels = {"EVERY", "ANY"};
+		String [] libLabels = {"Every", "Any"};
 		
 		chkCounts = new JRadioButton("use counts");
 		chkCounts.setBackground(Color.WHITE);
@@ -329,7 +328,7 @@ public class SeqQueryTab extends Tab
 	}
 	private JComponent createNfold() {
 		JComponent thePanel = new CollapsiblePanel(NFOLD_HEADER, NFOLD_DESCRIPTION);
-		nFoldObj = new UIfieldNFold(chkIncludeLibs, true);
+		nFoldObj = new UIfieldNFold(chkIncludeLibs, null);
 		thePanel.add(nFoldObj);
 		return thePanel;
 	}
@@ -348,8 +347,8 @@ public class SeqQueryTab extends Tab
 		
 		cmbBoolPVal = new JComboBox <String> ();
 		cmbBoolPVal.setBackground(Color.WHITE);
-		cmbBoolPVal.addItem("EVERY");
-		cmbBoolPVal.addItem("ANY");
+		cmbBoolPVal.addItem("Every");
+		cmbBoolPVal.addItem("Any");
 		cmbBoolPVal.setSelectedIndex(0);
 		cmbBoolPVal.setMaximumSize(cmbBoolPVal.getPreferredSize());
 		cmbBoolPVal.setMinimumSize(cmbBoolPVal.getPreferredSize());
@@ -365,13 +364,10 @@ public class SeqQueryTab extends Tab
 		row.setLayout(new BoxLayout(row, BoxLayout.LINE_AXIS));
 		row.setBackground(Color.WHITE);
 		
-		row.add(chkFilterPVal);
-		row.add(Box.createHorizontalStrut(5));
+		row.add(chkFilterPVal);		row.add(Box.createHorizontalStrut(5));
 		row.add(lblPVal);
-		row.add(txtPVal);
-		row.add(Box.createHorizontalStrut(3));
-		row.add(new JLabel("from"));
-		row.add(Box.createHorizontalStrut(3));
+		row.add(txtPVal);			row.add(Box.createHorizontalStrut(3));
+		row.add(new JLabel("from"));row.add(Box.createHorizontalStrut(3));
 		row.add(cmbBoolPVal);
 		row.add(new JLabel("selected DE column"));
 		
@@ -380,8 +376,7 @@ public class SeqQueryTab extends Tab
 		
 		row = new JPanel();
 		row.setBackground(Color.white);
-		row.setLayout(new BoxLayout(row, BoxLayout.LINE_AXIS));
-		row.add(Box.createHorizontalStrut(5));
+		row.setLayout(new BoxLayout(row, BoxLayout.LINE_AXIS));	row.add(Box.createHorizontalStrut(5));
 		row.add(new JLabel("Select one or more DE columns"));
 		addRowToPanel(row, thePanel);
 		
@@ -406,21 +401,18 @@ public class SeqQueryTab extends Tab
 			sr.setMinimumSize(new Dimension(160,sr.getPreferredSize().height));
 			row.add(sr);
 			
-			colUpDown[x] = new JRadioButton("Either"); colUpDown[x].setBackground(Color.white);
-			colUpOnly[x] = new JRadioButton("Up"); colUpOnly[x].setBackground(Color.white);
-			colDownOnly[x] = new JRadioButton("Down"); colDownOnly[x].setBackground(Color.white);
+			colUpDown[x] = Static.createRadioButton("Either", false);
+			colUpOnly[x] = Static.createRadioButton("Up", false); 		
+			colDownOnly[x] = Static.createRadioButton("Down", false);
 			ButtonGroup bg2 = new ButtonGroup();
 			bg2.add(colUpDown[x]);
 			bg2.add(colDownOnly[x]);
 			bg2.add(colUpOnly[x]);
 			colUpDown[x].setSelected(true);
 			
-			if (hasUpDown)
-			{
-				row.add(colUpOnly[x]);
-				row.add(Box.createHorizontalStrut(5));
-				row.add(colDownOnly[x]);
-				row.add(Box.createHorizontalStrut(5));
+			if (hasUpDown){
+				row.add(colUpOnly[x]);		row.add(Box.createHorizontalStrut(5));
+				row.add(colDownOnly[x]);	row.add(Box.createHorizontalStrut(5));
 				row.add(colUpDown[x]);
 			}
 			row.add(Box.createHorizontalStrut(30));
@@ -473,11 +465,10 @@ public class SeqQueryTab extends Tab
 		chkUpDownAll.setSelected(true);
 	    
 		if (hasUpDown && pLen>1) {
-			row.add(chkUpOnlyAll);
-			row.add(Box.createHorizontalStrut(5));
-			row.add(chkDownOnlyAll);
-			row.add(Box.createHorizontalStrut(5));
+			row.add(chkUpOnlyAll);		row.add(Box.createHorizontalStrut(5));
+			row.add(chkDownOnlyAll);	row.add(Box.createHorizontalStrut(5));
 			row.add(chkUpDownAll);
+			
 			thePanel.add(Box.createVerticalStrut(5));
 			addRowToPanel(row, thePanel);
 		}
@@ -790,8 +781,7 @@ public class SeqQueryTab extends Tab
 			}
 		}
 		boolean[] ret = new boolean[theColumns.size()];
-		for (int i = 0; i < ret.length; i++)
-		{
+		for (int i = 0; i < ret.length; i++) {
 			ret[i] = theColumns.get(i);
 		}
 		return ret;
@@ -989,11 +979,9 @@ public class SeqQueryTab extends Tab
 		panel.setLayout( new BoxLayout ( panel, BoxLayout.X_AXIS ) );
 		panel.setBackground(Color.WHITE);
 		
-		panel.add( comp1 );
-		panel.add( Box.createHorizontalStrut(5) );
+		panel.add( comp1 );		panel.add( Box.createHorizontalStrut(5) );
 		
-		panel.add( comp2 );
-		panel.add( Box.createHorizontalStrut(5) );
+		panel.add( comp2 );		panel.add( Box.createHorizontalStrut(5) );
 		
 		return panel;
 	}
@@ -1014,8 +1002,7 @@ public class SeqQueryTab extends Tab
 	public String [] getAllPValNames() {return pValColumns;}
 	public String [] getAllPValTitles() {return pValTitles;}
 	
-	public void executeQuery ( String tag, String [] contigIDs, int viewMode ) 
-	{	
+	public void executeQuery ( String tag, String [] contigIDs, int viewMode ) {	
 		theQuery.setType(RunQuery.QUERY_CONTIGS);
 		getParentFrame().addQueryResultsTab(theQuery, contigIDs, viewMode, tag);
 	}
@@ -1040,47 +1027,17 @@ public class SeqQueryTab extends Tab
 			UserPrompt.showWarn("See red warning on top of Filter page");
 			return;
 		}	
-		// pre-June16 was passing each piece of filter. Now just passes where clause.
-		tempContigData.setWhere(where);
-		tempContigData.setSummary(summary);
-		theQuery.setContigData(tempContigData);
+		
+		tempSeqData.setWhere(where);
+		tempSeqData.setSummary(summary);
+		theQuery.setContigData(tempSeqData);
 			
 		theQuery.setType(RunQuery.QUERY_CONTIGS);
 				
 		++nChildren;
 		getParentFrame().addQueryResultsTab ( theQuery, "Filter" + nChildren ); 
 	}
-	// this merges both the Query Include/Exclude and the Columns Nfold
-	public String [] getAllRequiredLibs(FieldSeqTab fTab) { 
-		Vector<String> retVal = new Vector<String> ();
-		if (!metaData.hasExpLevels()) return retVal.toArray(new String[0]);
-		
-		String [] selectedIncLibs = getSelectedIncludeLibs();
-		if(selectedIncLibs != null) {
-			for(int x=0; x<selectedIncLibs.length; x++)
-				if(!retVal.contains(selectedIncLibs[x]))
-					retVal.add(selectedIncLibs[x]);
-		}
-	
-		String [] selectedExLibs = getSelectedExcludeLibs();
-		if(selectedExLibs != null) {
-			for(int x=0; x<selectedExLibs.length; x++)
-				if(!retVal.contains(selectedExLibs[x]))
-					retVal.add(selectedExLibs[x]);
-		}
-	
-		String [] foldCols = fTab.getFoldColumns();
-		for(int x=0; x<foldCols.length; x++) {
-			String [] vals = foldCols[x].split("/");
-			if (vals!=null && vals.length==2) {
-				if(!retVal.contains(vals[0])) retVal.add(vals[0]);
-				if(!retVal.contains(vals[1])) retVal.add(vals[1]);
-			}
-		}
-	
-		return retVal.toArray(new String[0]);
-	}
-	public boolean usesCounts() { return chkCounts!=null && chkCounts.isSelected();}
+
 	public String getGOterm () {
 		if (chkGOID!=null && chkGOID.isSelected()) return chkGOID.getText();
 		else return null;
@@ -1090,8 +1047,7 @@ public class SeqQueryTab extends Tab
 		return chkHasBestDBHit.isSelected();
 	}
 	
-	public void close()
-	{
+	public void close(){
 		defaultLabelDims = null;
 		defaultNumDims = null;
 		uniprotPanel = null;
@@ -1115,7 +1071,7 @@ public class SeqQueryTab extends Tab
 	
 	public String getWHEREClause ( ) throws DataValidationError 
 	{	
-    		summary="";
+    	summary="";
 		String strSQL = "";	
 		int inc;
 	
@@ -1289,49 +1245,14 @@ public class SeqQueryTab extends Tab
 		
 		return strSQL;
 	}
-	private String getWhereNfold(String strSQL) throws DataValidationError {
-		if (!nFoldObj.isNfold()) return strSQL;
-		String [] colPairs = nFoldObj.getColumnNames();
-		if (colPairs.length==0) return strSQL;
+	private String getWhereNfold(String strSQL) {
+		if (!nFoldObj.isNfoldFilter()) return strSQL;
 		
-		int n = nFoldObj.getNfold();   // n-fold, get from NfoldObj
-		String op = nFoldObj.getAndOr();
+		String sql = nFoldObj.getFoldSQL();
+		String sum = nFoldObj.getFoldSum();
 		
-		if (n<0) 
-			throw new DataValidationError ( nFoldObj, "N-fold must be a positive number" );
-		
-		String sql="", sum= n +"-fold: ", dirStr="(";
-		
-		for (String p : colPairs) {
-			String [] tok = p.split(" ");
-			if (tok.length!=2) continue;
-			
-			String [] lib = tok[0].split("/");
-			if (lib.length!=2) continue;
-			
-			int dir = 0;
-			if (tok[1].equals("U")) dir = 1;
-			else if (tok[1].equals("D")) dir = -1;
-			dirStr += tok[1];
-			
-			if (sql!= "") { 
-				sql += op;
-				sum += op; 
-			} 
-			sum += lib[0] + "/" + lib[1];
-			
-			String lib1 = "contig.LN__" + lib[0];
-			String lib2 = "contig.LN__" + lib[1];
-			
-			// create ( (lib1/lib2>=n or lib2/lib1>=0) and (lib1>0 or lib2>0))
-			String clause = "";
-			if (dir>=0) clause += lib1 + "/ greatest(" + lib2 + ", 0.1) >= " + n;
-			if (dir==0) clause += " or "; 
-			if (dir<=0) clause += lib2 + "/ greatest(" + lib1 + ", 0.1) >= " + n;
-			sql += "((" + clause + ") and (" + lib1 + " > 0 or " + lib2 + " > 0))";
-		}
-		sum += " " + dirStr + ")";
 		joinSum(sum);
+		
 		return appendANDPredicate(strSQL, sql);
 	}
 	private String getWherePval(String strSQL)throws DataValidationError
@@ -1351,49 +1272,41 @@ public class SeqQueryTab extends Tab
 			throw new DataValidationError ( chkFilterPVal, "Invalid value for DE p-value limit" );
 		}
 		
-		String boolVal = "";
-		if (cmbBoolPVal.getSelectedIndex() == 0) boolVal = "&";
-		else boolVal = "|";
-		
-		String sum = "p-value <" + String.format("%.0E ", dPValLimit)  +  pValCols[0];
-		
-		// CAS322 - kludge for 0.05, 0.01,... need to figure out how in general
-		// Obj 0.00000323   d: 3.23E-6			Obj -0.00158   d: -0.00158  By default, the string conversion
-		
-		String pValQuery = "(abs(contig.P_" + pValCols[0] + ") < " + dPValLimit + ")";
-		
-		// Needs more investigation: if (dPValLimit>0.0999) pValQuery = "(ROUND(abs(contig.P_" + pValCols[0] + "),4) < " + dPValLimit + ")";
-		
-		for(int i=1; i<pValCols.length; i++) {
-			pValQuery += boolVal + "(abs(contig.P_" + pValCols[i] + ") < " + dPValLimit + ")";
-			sum += boolVal + pValCols[i];
-		}		
-		
-		strSQL = appendANDPredicate(strSQL, pValQuery);
-		
-		Vector<String> terms = new Vector<String>();
+		// CAS335 re-wrote this
+		String op = (cmbBoolPVal.getSelectedIndex() == 0) ? "&" : "|";
+	
 		boolean [] colsUp = getSelectedUpColumns();
 		boolean [] colsDown = getSelectedDownColumns();
-		sum += " (";
+		String sum = "", dir="", query="";
+		String limit = ") < " + dPValLimit;
+		
 		for (int i = 0; i < colsUp.length; i++)
 		{
+			if (sum!="") {
+				sum += op;
+				query += op;
+			}
+			
+			String term = "contig." + Globalx.PVALUE + pValCols[i];
+			sum +=  pValCols[i];
+			
 			if (colsUp[i]) {
-				terms.add("contig.P_" + pValCols[i] + ">0 ");
-				sum += "U";
+				query += "(" + term + ">0 and abs(" + term + limit + ")";
+				dir += "U";
 			}
 			else if (colsDown[i]) {
-				terms.add("contig.P_" + pValCols[i] + "<0 ");
-				sum += "D";
+				query += "(" + term + "<0 and abs(" + term + limit + ")";
+				dir += "D";
 			}
-			else sum += "E";
+			else {
+				query += "(abs(" + term + limit + ")";
+				dir += "E";
+			}
 		}
-		sum += ")";
-		if (terms.size() >0)
-		{
-			String sql = Static.strVectorJoin(terms, " and ");
-			strSQL = appendANDPredicate(strSQL, sql);				
-		}
+		sum = "p-value<" + dPValLimit + ": " + sum + " (" + dir + ")";
+	
 		joinSum(sum);
+		strSQL = appendANDPredicate(strSQL, query);
 		
 		return strSQL;
 	}
@@ -1533,7 +1446,6 @@ public class SeqQueryTab extends Tab
 			strSQL = appendANDPredicate(strSQL, "contig.PIDgo>0 and contig.PIDgo!=contig.PID and contig.PIDgo!=contig.PIDov");
 			joinSum("GO!=Bits&GO!=Anno");
 		}
-		
 		return strSQL;
 	}
 	private String getWhereORFs(String strSQL) throws DataValidationError
@@ -1581,9 +1493,9 @@ public class SeqQueryTab extends Tab
 	}
 	
     private void joinSum(String one) {
-    		if (one==null || one.length()==0) return;
-    		if (summary==null || summary.length()==0) summary=one;
-    		else summary += "; " + one;
+		if (one==null || one.length()==0) return;
+		if (summary==null || summary.length()==0) summary=one;
+		else summary += "; " + one;
     }
     private String appendPredicate ( String strPred1, int nType, String strPred2 )
 	{
@@ -1662,40 +1574,31 @@ public class SeqQueryTab extends Tab
 			
 			setBestHitEnabled(chkHasBestDBHit.isSelected());
 			
-			chkDBHitCov.setSelected(false);
-			chkDBHitCov.setText("1");
-			chkDBSeqCov.setSelected(false);
-			chkDBSeqCov.setText("1");
-			chkDBHitBits.setSelected(false);
-			chkDBHitBits.setText("100");
-			chkDBHitEVal.setSelected(false);
-			chkDBHitEVal.setText("1E-30");
-			chkDBHitIdent.setSelected(false);
-			chkDBHitIdent.setText("40");
+			chkDBHitCov.setSelected(false);		chkDBHitCov.setText("1");
+			chkDBSeqCov.setSelected(false);		chkDBSeqCov.setText("1");
+			chkDBHitBits.setSelected(false);	chkDBHitBits.setText("100");
+			chkDBHitEVal.setSelected(false);	chkDBHitEVal.setText("1E-30");
+			chkDBHitIdent.setSelected(false);	chkDBHitIdent.setText("40");
+			
 			chkDBtype.setSelected(false);
 			chkDBtaxo.setSelected(false);
 			chkNumAnno.setSelected(false);
 		}
 		
 		if (chkGOID!=null) {
-			chkGOID.setSelected(false);
-			chkGOID.setText("");
+			chkGOID.setSelected(false);			chkGOID.setText("");
 		}
 		
 		if (metaData.hasORFs()) {
-			chkHasORF.setText("300");
-			chkHasORF.setSelected(false);
-			chkFrameORF.setText("");
-			chkFrameORF.setSelected(false);
+			chkHasORF.setSelected(false);		chkHasORF.setText("300");
+			chkFrameORF.setSelected(false);		chkFrameORF.setText("");
 			
 			chkHasBothUTRs.setSelected(false);
 			chkHasProteinORF.setSelected(false);
 
 			if (metaData.hasAssembly()) { // Can have SNPs and no ORFs -- not worth separating....
-				chkLessEqualSNPs.setSelected(false);
-				chkLessEqualSNPs.setText("1");
-				chkGreaterEqualSNPs.setSelected(false);
-				chkGreaterEqualSNPs.setText("1");
+				chkLessEqualSNPs.setSelected(false);	chkLessEqualSNPs.setText("1");
+				chkGreaterEqualSNPs.setSelected(false);	chkGreaterEqualSNPs.setText("1");
 			}
 		}
 	}
@@ -1717,27 +1620,17 @@ public class SeqQueryTab extends Tab
 	private JScrollPane scroller = null;
 	
 	// general
-	private ToggleTextComboField chkCtgLength = null;
-	private ToggleTextComboField chkNumAnno = null;
-	private ToggleTextComboField chkNumAligns = null;
-	private ToggleTextComboField chkTotalExpLevel = null;
-	private UIqueryIncEx hasRemarkQuery = null;
-	private UIqueryIncEx hasLocQuery = null;
-	private UIqueryIncEx hasNQuery = null;
+	private ToggleTextComboField chkCtgLength = null, chkNumAnno = null, chkNumAligns = null, chkTotalExpLevel = null;
+	private UIqueryIncEx hasRemarkQuery = null, hasLocQuery = null, hasNQuery = null;
 	private ToggleTextField chkLocN = null, chkLocStart=null, chkLocEnd=null;
 	
 	// libs
-	private JCheckBox [] chkIncludeLibs = null;
-	private JLabel [] labelIncLibs = null;
-	private JCheckBox [] chkExcludeLibs = null;
-	private JLabel [] labelExLibs = null;
-	private JCheckBox libSelAll = null;
-	private JCheckBox libCheckUnChecked = null;
+	private JCheckBox [] chkIncludeLibs = null, chkExcludeLibs = null;
+	private JLabel [] labelIncLibs = null, labelExLibs = null;
+	private JCheckBox libSelAll = null, libCheckUnChecked = null;
 	
-	private JRadioButton chkCounts = null;
-	private JRadioButton chkRPKM = null;
-	private UIqueryIncExLib incLibQuery = null;
-	private UIqueryIncExLib exLibQuery = null;
+	private JRadioButton chkCounts = null, chkRPKM = null;
+	private UIqueryIncExLib incLibQuery = null, exLibQuery = null;
 	
 	// Nfold
 	private UIfieldNFold nFoldObj = null;
@@ -1747,24 +1640,17 @@ public class SeqQueryTab extends Tab
 	private JCheckBox chkFilterPVal = null;
 	private JComboBox <String> cmbBoolPVal = null;
 	private JCheckBox [] colSelectPVal = null;
-	private JRadioButton[] colUpOnly = null;
-	private JRadioButton[] colDownOnly = null;
-	private JRadioButton[] colUpDown = null;
+	private JRadioButton[] colUpOnly = null, colDownOnly = null, colUpDown = null;
 	private JLabel[] colpValTitle = null;
 
-	private JRadioButton chkUpOnlyAll; 
-	private JRadioButton chkDownOnlyAll; 
-	private JRadioButton chkUpDownAll; 
+	private JRadioButton chkUpOnlyAll, chkDownOnlyAll, chkUpDownAll; 
 	private JCheckBox chkAllPVal;
 	
 	// Good UTRs and SNPs widgets
-	private ToggleTextField chkLessEqualSNPs = null;		
-	private ToggleTextField chkGreaterEqualSNPs = null;	
+	private ToggleTextField chkLessEqualSNPs = null, chkGreaterEqualSNPs = null;	
 	
-	private ToggleTextField chkHasORF = null;
-	private ToggleTextField chkFrameORF = null;
-	private JCheckBox chkHasBothUTRs = null;
-	private JCheckBox chkHasProteinORF = null;
+	private ToggleTextField chkHasORF = null, chkFrameORF = null;
+	private JCheckBox chkHasBothUTRs = null, chkHasProteinORF = null;
 	
 	// Search 
 	private ToggleTextField chkGOID = null;
@@ -1790,8 +1676,8 @@ public class SeqQueryTab extends Tab
 	private static final String GENERAL_DESCRIPTION = "Find sequences with the specified attributes.";
 	private static String LIBRARY_HEADER = "Counts and RPKM";
 	private static String LIBRARY_DESCRIPTION = "Filter sequences based on counts or RPKM";
-	private static final String NFOLD_HEADER = "N-fold";
-	private static final String NFOLD_DESCRIPTION = "Filter on n-fold change between two conditions";
+	private static final String NFOLD_HEADER = "Fold-change";
+	private static final String NFOLD_DESCRIPTION = "Filter on log2FC or FC change between two conditions";
 	private static final String PVAL_HEADER = "Differential Expression";
 	private static final String PVAL_DESCRIPTION = "Filter on DE p-value columns";
 	private static final String BEST_DB_HIT_HEADER = "Best Hit";
@@ -1804,6 +1690,6 @@ public class SeqQueryTab extends Tab
     private MetaData metaData = null;
 	private int nChildren = 0;
 	private RunQuery theQuery = null;
-	private FieldSeqData tempContigData = null;
+	private FieldSeqData tempSeqData = null;
 	private String norm="RPKM";
 }

@@ -1995,7 +1995,7 @@ public class BasicHitFilterPanel extends JPanel {
 			libRow.add(txtRPKM);
 			
 			libRow.add(new JLabel("from"));
-			String [] libLabels = {"EVERY", "ANY"};
+			String [] libLabels = {"Every", "Any"};
 			libCombo = new JComboBox <String> (libLabels);
 			libRow.add(libCombo);
 			libRow.add(new JLabel("selected"));
@@ -2062,7 +2062,7 @@ public class BasicHitFilterPanel extends JPanel {
 			row.add(txtDE);
 			
 			row.add(new JLabel("from"));
-			String [] labels = {"EVERY", "ANY"};
+			String [] labels = {"Every", "Any"};
 			pvalCombo = new JComboBox <String> (labels);
 			row.add(pvalCombo);
 			row.add(new JLabel("selected"));
@@ -2210,8 +2210,10 @@ public class BasicHitFilterPanel extends JPanel {
 			return ret;
 		}
 		public void clear() {
-			for (int x=0; x<libColNames.length; x++)
-				chkLibColNames[x].setSelected(false);
+			if (libColNames!=null) { // CAS335 bug!
+				for (int x=0; x<libColNames.length; x++)
+					chkLibColNames[x].setSelected(false);
+			}
 			if (pvalColNames!=null) {
 				for (int x=0; x<pvalColNames.length; x++)
 					chkPvalColNames[x].setSelected(false);

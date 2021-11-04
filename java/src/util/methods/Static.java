@@ -243,18 +243,11 @@ public class Static {
 		
 		return menuZoom;
   }
-   static public JComboBox<String> createCombo(Vector <String> labels) {
-	   	JComboBox<String> cbox = new JComboBox<String>();
-	   	cbox.setBackground(Globalx.BGCOLOR);
-	  
-		for (int i=0; i<labels.size(); i++) 
-			cbox.addItem(labels.get(i)); 
-		cbox.setSelectedIndex(0);
-		
-		Dimension dim = new Dimension ( (int)(cbox.getPreferredSize().getWidth()), 
-				(int)cbox.getPreferredSize().getHeight() );
-		cbox.setPreferredSize( dim );
-		cbox.setMaximumSize ( dim );
+ 
+   static public JComboBox<String> createCombo(String [] labels, boolean enable) {
+	   	JComboBox<String> cbox = createCombo(labels);
+	   	cbox.setEnabled(enable);
+	   
 		return cbox;
   }
    static public JComboBox<String> createCombo(String [] labels) {

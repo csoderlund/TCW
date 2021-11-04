@@ -965,6 +965,7 @@ public class DoORF {
 		}
 		/*************************************************
 		 * Output stats
+		 * CAS335 tidied up some output
 		 */
 		private void statsORFprint() {
 			Out.prt("                                                             "); 
@@ -1000,18 +1001,18 @@ public class DoORF {
 			rows[r][c] = "  Both Ends"; 		rows[r++][c+1] = perCntText(cntHasBothEnds, nCtg);
 			rows[r][c] = "  ORF>=300"; 			rows[r++][c+1] = perCntText(cntHas300, nCtg);
 			rows[r][c] = "  ORF=Hit"; 			rows[r++][c+1] = perCntText(cntORFeq,nCtg);
-			rows[r][c] = "   with Ends";      	rows[r++][c+1] = perCntText(cntTestORFeqEnds,nCtg);
+			rows[r][c] = "    with Ends";      	rows[r++][c+1] = perCntText(cntTestORFeqEnds,nCtg);
 			
 			r=0; c=4;
+			rows[r][c] = "  Multi-frame"; 		rows[r++][c+1] = perCntText(cntMultiFrame, nCtg);
+			rows[r][c] = "  Stops in Hit"; 		rows[r++][c+1] = perCntText(cntStopInHit, nCtg);
+			rows[r][c] = "  >=" + nnn + " Ns in ORF";  rows[r++][c+1] = perCntText(cntHasNs, nCtg);
 			if (cntHasORF!=nCtg) {
 				rows[r][c] = "  No ORF"; 		rows[r++][c+1] = perCntText((nCtg-cntHasORF), nCtg);
 			}
 			else {
 				rows[r][c] = "  "; 				rows[r++][c+1] = "";
 			}
-			rows[r][c] = "  Multi-frame"; 		rows[r++][c+1] = perCntText(cntMultiFrame, nCtg);
-			rows[r][c] = "  Stops in Hit"; 		rows[r++][c+1] = perCntText(cntStopInHit, nCtg);
-			rows[r][c] = "  >=" + nnn + " Ns in ORF";  rows[r++][c+1] = perCntText(cntHasNs, nCtg);
 				
 	        overview = "   " + overview + "\n";
 	        String msg = Out.makeTable(nCol, r+1, null, justify, rows);
@@ -1028,40 +1029,40 @@ public class DoORF {
 	        	
 	        r=0; c=0;
 	        rows[r][c] = "Additional ORF info";  rows[r++][c+1] = "";
-	        rows[r][c] = "Markov Good Frame";    rows[r++][c+1] = perCntText(cntTestGoodMK,h);
-	        rows[r][c] = "ORF=Hit";  			 rows[r++][c+1] = perCntText(cntORFeq, h);
-	        rows[r][c] = "ORF>Hit";  			 rows[r++][c+1] = perCntText(cntTestORFgt,h);
-	        rows[r][c] = "ORF~Hit";  			 rows[r++][c+1] = perCntText(cntTestORFappr,h);       
-	        rows[r][c] = "ORF>Hit & HasEnds";    rows[r++][c+1] = perCntText(cntTestORFgtEnds,h);
-	        rows[r][c] = "Has Start|Stop"; 		 rows[r++][c+1] = perCntText(cntHasAtLeastOneEnd, nCtg);
-	       
+	        rows[r][c] = " One End";		 		 rows[r++][c+1] = perCntText(cntHasAtLeastOneEnd, nCtg);
+	        rows[r][c] = " Markov Good Frame";    rows[r++][c+1] = perCntText(cntTestGoodMK,h);
+	        rows[r][c] = " ORF=Hit";  			 rows[r++][c+1] = perCntText(cntORFeq, h);
+	        rows[r][c] = " ORF~Hit";  			 rows[r++][c+1] = perCntText(cntTestORFappr,h);  
+	        rows[r][c] = " ORF>Hit";  			 rows[r++][c+1] = perCntText(cntTestORFgt,h);
+	        rows[r][c] = "   with Ends";    		 rows[r++][c+1] = perCntText(cntTestORFgtEnds,h);
+	              
 	        r=0; c=2;
 	        h=cntTestHasHit;
 	        rows[r][c] = "   For seqs with hit";  	rows[r++][c+1] = perCntText(h,nCtg);
-	        rows[r][c] = "   Longest & Markov";		rows[r++][c+1] = perCntText(cntTestHitLongBestMK,h);
-	        rows[r][c] = "   Is Longest ORF";  		rows[r++][c+1] = perCntText(cntTestHitLongest,h);
-	        rows[r][c] = "   Markov Best Score";  	rows[r++][c+1] = perCntText(cntTestHitBestMK,h);
-	        rows[r][c] = "   Markov Good Frame";  	rows[r++][c+1] = perCntText(cntTestHitGoodMK,h);	
-	        rows[r][c] = "   Has Start & Stop";  	rows[r++][c+1] = perCntText(cntTestHitHasEnds,h);	
-	        rows[r][c] = "   Not hit frame";  	    rows[r++][c+1] = Out.df(cntTestHitneORF);
-	        
+	        rows[r][c] = "    Both Ends";  			rows[r++][c+1] = perCntText(cntTestHitHasEnds,h);
+	        rows[r][c] = "    Markov Good Frame";  	rows[r++][c+1] = perCntText(cntTestHitGoodMK,h);
+	        rows[r][c] = "    Markov Best Score";  	rows[r++][c+1] = perCntText(cntTestHitBestMK,h);
+	        rows[r][c] = "    Is Longest ORF";  		rows[r++][c+1] = perCntText(cntTestHitLongest,h);
+	        rows[r][c] = "    Longest & Markov";		rows[r++][c+1] = perCntText(cntTestHitLongBestMK,h);
+	        rows[r][c] = "    Not hit frame";  	    rows[r++][c+1] = Out.df(cntTestHitneORF);
+	       	        
 	        r=0; c=4;
 	        h=cntTestGTHit;
 	        rows[r][c] = "   Hit w/good coverage";  rows[r++][c+1] = perCntText(h,nCtg);
-	        rows[r][c] = "   Longest & Markov";		rows[r++][c+1] = perCntText(cntTestGTHitLongBestMK,h);
-	        rows[r][c] = "   Is Longest ORF";  		rows[r++][c+1] = perCntText(cntTestGTHitLongest,h);
-	        rows[r][c] = "   Markov Best Score";  	rows[r++][c+1] = perCntText(cntTestGTHitBestMK,h);
-        	rows[r][c] = "   Markov Good Frame";  	rows[r++][c+1] = perCntText(cntTestGTHitGoodMK,h);	       
-        	rows[r][c] = "   Has Start & Stop";  	rows[r++][c+1] = perCntText(cntTestGTHitHasEnds,h);  	
-        	rows[r][c] = "   ORF=Hit & HasEnds";  	rows[r++][c+1] = perCntText(cntTestGThasEnds,h);
-	        	 
+	        rows[r][c] = "    Both Ends";	  		rows[r++][c+1] = perCntText(cntTestGTHitHasEnds,h);
+	        rows[r][c] = "    Markov Good Frame";  	rows[r++][c+1] = perCntText(cntTestGTHitGoodMK,h);
+	        rows[r][c] = "    Markov Best Score";  	rows[r++][c+1] = perCntText(cntTestGTHitBestMK,h);
+	        rows[r][c] = "    Is Longest ORF";  		rows[r++][c+1] = perCntText(cntTestGTHitLongest,h);
+	        rows[r][c] = "    Longest & Markov";		rows[r++][c+1] = perCntText(cntTestGTHitLongBestMK,h);	       
+        	rows[r][c] = "    ORF=Hit with Ends";  	rows[r++][c+1] = perCntText(cntTestGThasEnds,h);
+        		        	 
         	//CAS326 removed, CAS327 put back in fixed
 	        msg = Out.makeTable(nCol, r+1, null, justify, rows);
 	        lines = msg.split("\n");
 	       
 			for (int i=0; i<lines.length; i++) {
-				if (debug) Out.PrtSpMsg(2, lines[i]); // term & log
-				else 	   Out.logOnly(2, lines[i]);  // log only - not in overview
+				if (debug) Out.PrtSpMsg(1, lines[i]); // term & log
+				else 	   Out.logOnly(1, lines[i]);  // log only - not in overview
 			}
 	       
 			String x="";
@@ -1074,9 +1075,10 @@ public class DoORF {
 			}
 			Out.PrtSpMsg(2,"   Frame:" + x);			//term
 			Out.logOnly(2, "");
-			Out.logOnly(2, "Hit w/good coverage: hitCov >= " + GT_hitOlap + " and sim >= " + GT_hitSim);
-		    Out.logOnly(2, "Markov Best Score:   best score over all 6-frame ORFs");
-		    Out.logOnly(2, "Markov Good Frame:   score>0 and best over all RFs of selected ORF");
+			Out.logOnly(2, "Both Ends:           Has Start and Stop codon");
+			Out.logOnly(2, "Hit w/good coverage: HitCov >= " + GT_hitOlap + " and sim >= " + GT_hitSim);
+		    Out.logOnly(2, "Markov Best Score:   Best score from best ORF for each of 6 frames");
+		    Out.logOnly(2, "Markov Good Frame:   Score>0 and best score from 6 RFs of selected ORF");
 		   
 		    Out.logOnly(2, "");
 		    
@@ -1089,10 +1091,12 @@ public class DoORF {
 	 		}
 	 		catch (Exception e) {ErrorReport.prtReport(e, "Adding ORF information to db");}
 			
-			if (debug) Out.PrtSpMsg(2, "----------------------------------------------------------------------"); //xxx
 			
-			if (debug) 	Out.PrtSpMsg(2, "Exceptions: " + cntExcept); 
-			else 		Out.logOnly(2, "Exceptions: " + cntExcept);
+			if (debug) 	{
+				Out.PrtSpMsg(1, "----------------------------------------------------------------------"); //xxx
+				Out.PrtSpMsg(1, "Exceptions: " + cntExcept); 
+			}
+			else Out.logOnly(1, "Exceptions: " + cntExcept);
 			
 			Out.PrtSpMsg(2, "Wrote " + writeGoodAA + " ORFs to " + orfAllAAfname + " and " + orfFrameFname);	//prt
 			

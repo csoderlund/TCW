@@ -919,7 +919,7 @@ public class STCWFrame extends JFrame {
 	public PairQueryTab getQueryPairsTab() { return filterPairsTab;}
 	public SeqQueryTab getQueryContigTab() { return filterContigTab;}
 	public FieldPairsTab getFieldPairsTab() { return fieldPairsTab;}
-	public FieldSeqTab getFieldContigTab() { return fieldContigTab;}
+	public FieldSeqTab getFieldSeqTab() { return fieldContigTab;}
 	
 	public MetaData getMetaData() { return metaData;}
 	public String getdbName() {return dbName;}

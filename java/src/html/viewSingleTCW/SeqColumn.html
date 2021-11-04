@@ -39,11 +39,19 @@ NOTE: If RPKM was computed instead of TPM, then the Column page will say RPKM in
 
 <h2>N Fold and R Statistic</h2>
 N Fold - Select pairs of conditions to show their fold-change difference as a column. 
-The fold change is calculated using TPM values as follows: 
-the larger value is divided by the smaller value, where zero in the denominator 
-is replaced by 0.1.
-If the condition selected for 'Select 1' is smaller than the condition selected for
-'Selected 2', the result is made negative. 
+The fold change is calculated with TPM values using either of the following:
+<table>
+<tr><td><i>Log2</i>&nbsp;<td><td><i>Compute<sup>1</sup></i>&nbsp;<td><td><i>Display</i>
+<tr><td>Check<td>&nbsp;<td>&nbsp;Log2(A/B)<td>&nbsp;<td>&nbsp;lib1/lib2
+<tr><td>Un-Check<td>&nbsp;<td>&nbsp;A/B if A&gt;=B; -(B/A) if A&lt;B<td>&nbsp;<td>&nbsp;lib1:lib2
+</table>
+<sup>1</sup>0.1 is added to both A and B before Log2FC or FC is computed in order to avoid problems with zero.
+
+<p>Check or un-checking <ttc>Log2</tt> will immediately change all selected pairs by replacing the "/" with ":" or vice versa.
+However, existing tables must be refreshed to change the column. 
+<p>The <ttc>Filter</ttc> has a <ttc>N-fold<ttc> filter,
+which is separate from the column, e.g. the column can be Log2FC but the filter can be using FC, so make sure
+both the filter and column contain either ":" for Log2FC or "/" for FC.
 <p>
 R Statistic<sup>1</sup> - is a quick way to look for differential expression 
 among all conditions at once.

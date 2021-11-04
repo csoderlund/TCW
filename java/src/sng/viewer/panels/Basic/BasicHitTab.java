@@ -15,6 +15,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Vector;
@@ -291,35 +292,42 @@ public class BasicHitTab extends Tab {
 		topRowPanel.setVisible(true);
 		theTablePanel.setVisible(true);
 	}
-	
-	
+
 	public void setStatus(String txt) {theTablePanel.setStatus(txt);}
 	
 	/*******************************************************
 	 * Private methods
 	 */
 	private void viewSelectedSeqs() {
-		String [] seqIDs = getSelectedSeqIDs();
-		String [] hitIDs = getSelectedHitIDs();
-		if (seqIDs==null || hitIDs==null) return;
+		if (theTablePanel.getSelectedRowCount()==0) return;
 		
-		String tag = (hitIDs.length>1) ? (hitIDs.length+" Hits") : hitIDs[0];
+		String [] seqIDs = getSelectedSeqIDs();
+		if (seqIDs==null) return;
+	
+		String tag = "HitSeqs"; // CAS335 was doing extra work to get tag
+		
+		if (isGrpView) {
+			int [] rows = theTablePanel.getSelectedRows();
+			if (rows.length==1) tag = hitGrpList.get(rows[0]).hd.strHitID;
+			else tag = rows.length + " Hits";
+		}
+		
 		theParentFrame.loadContigs(tag, seqIDs, STCWFrame.BASIC_QUERY_MODE_HIT );
 	}
 	private void viewAlignSeqs() {
 		int [] rows = theTablePanel.getSelectedRows();
-		// this is one to one pairing for alignment
+		// this is one-to-one pairing for alignment
 		// BasicHitFilterPanel will create the unique map of ContigData and SequenceData objects
 		Vector <String> seqList = new Vector <String> ();
 		Vector <String> hitList = new Vector <String> ();
 		
 		if (isGrpView) {
 			for (int r : rows) {
-				String hit = grpObjList.get(r).strHitID;
+				String hit = hitGrpList.get(r).hd.strHitID;
 			
-				for(int x=0; x<seqObjList.size(); x++) {
-					if(seqObjList.get(x).strHitID.equals(hit)) {
-						seqList.add(seqObjList.get(x).strSeqID);
+				for(int x=0; x<hitSeqList.size(); x++) {
+					if (hitSeqList.get(x).hd.strHitID.equals(hit)) {
+						seqList.add(hitSeqList.get(x).strSeqID);
 						hitList.add(hit);
 					}
 				}
@@ -327,68 +335,81 @@ public class BasicHitTab extends Tab {
 		}
 		else {
 			for (int r : rows) {
-				seqList.add(seqObjList.get(r).strSeqID);
-				hitList.add(seqObjList.get(r).strHitID);
+				seqList.add(hitSeqList.get(r).strSeqID);
+				hitList.add(hitSeqList.get(r).hd.strHitID);
 			}
 		}
 		 theFilterPanel.displayAlign(seqList, hitList);
 	}
 	private String [] getSelectedSeqIDs() {
 		int [] rows = theTablePanel.getSelectedRows();
-		Vector<String> ids = new Vector<String> ();
-		if (isGrpView) {
+	
+		HashSet <String> seqIDs = new HashSet <String> (); // CAS335 was vector
+	
+		if (!isGrpView) {
 			for (int r : rows) {
-				String hit = grpObjList.get(r).strHitID;
-			
-				for(int x=0; x<seqObjList.size(); x++) {
-					if(seqObjList.get(x).strHitID.equals(hit)) {
-						if(!ids.contains(seqObjList.get(x).strSeqID))
-							ids.add(seqObjList.get(x).strSeqID);
-					}
-				}
+				String seqid = hitSeqList.get(r).strSeqID;
+				if (!seqIDs.contains(seqid)) seqIDs.add(seqid); // CAS335 add 'contains' check
 			}
+			return seqIDs.toArray(new String[0]);
 		}
-		else {
-			for (int r : rows) {
-				ids.add(seqObjList.get(r).strSeqID);
-			}
-		}
-		return ids.toArray(new String[0]);	
-	}
-	private String [] getSelectedHitIDs() {
-		if (theTablePanel.getSelectedRowCount()==0) return null;
+	
+	/* GrpView  */
 		
-		int [] rows = theTablePanel.getSelectedRows();
-		String [] ids = new String [rows.length];
-		for (int r=0; r<rows.length; r++) {
-			if (isGrpView) ids[r]  = grpObjList.get(rows[r]).strHitID;
-			else  ids[r] = seqObjList.get(rows[r]).strHitID;
+		if (rows.length==hitGrpList.size()) { // all rows selected - CAS335 - much faster using seqHitList
+			for (HitSeqData sObj : hitSeqList) {
+				if (!seqIDs.contains(sObj.strSeqID))
+					seqIDs.add(sObj.strSeqID);
+			}
+			return seqIDs.toArray(new String[0]);
 		}
-		return ids;
+		if (rows.length>5000 && hitSeqList.size()>50000) {// CAS335 add popup
+			if (!UserPrompt.showContinue("Many Seq-Hit pairs", 
+					rows.length + " rows to be removed, which can take long.\n\n"
+					+ "The Seq-Hit table is much faster (Uncheck 'Group by Hit ID' and select).\n"))
+			return null;	
+		}
+		// CAS335 go through seqs, once it finds a hit, then don't look for rest
+		for (int r : rows) {
+			String hitid = hitGrpList.get(r).hd.strHitID;
+		
+			for(int x=0; x<hitSeqList.size(); x++) {
+				String seqid = hitSeqList.get(x).strSeqID;
+				
+				if(!seqIDs.contains(seqid))
+					if(hitSeqList.get(x).hd.strHitID.equals(hitid)) 
+						seqIDs.add(seqid);
+			}
+			if (r>999 && (r%1000)==0) 
+				Out.r("Processed hits #" + r + ": seq #" + seqIDs.size());
+		}
+		Out.r("                                                                ");
+		return seqIDs.toArray(new String[0]);	
 	}
+	
 	private String getSelectedHitID() {
 		if (theTablePanel.getSelectedRowCount()==0) return "";
 		
 		int row = theTablePanel.getSelectedRow();
 		
-		if (isGrpView) return grpObjList.get(row).strHitID;
-		else return seqObjList.get(row).strHitID;
+		if (isGrpView) return hitGrpList.get(row).hd.strHitID;
+		else return hitSeqList.get(row).hd.strHitID;
 	}
 	private String getSelectedDesc() {
 		if (theTablePanel.getSelectedRowCount()==0) return "";
 		
 		int row = theTablePanel.getSelectedRow();
 		
-		if (isGrpView) return grpObjList.get(row).strDesc;
-		else return seqObjList.get(row).strDesc;
+		if (isGrpView) return hitGrpList.get(row).hd.strDesc;
+		else return hitSeqList.get(row).hd.strDesc;
 	}
 	private String getSelectedHitSeq() {
 		if (theTablePanel.getSelectedRowCount()==0) return "";
 		
 		int row = theTablePanel.getSelectedRow();
 		String hitID;
-		if (isGrpView) hitID = grpObjList.get(row).strHitID;
-		else hitID = seqObjList.get(row).strHitID;
+		if (isGrpView) hitID = hitGrpList.get(row).hd.strHitID;
+		else hitID = hitSeqList.get(row).hd.strHitID;
 		
 		return theFilterPanel.loadFromDatabaseHitSeq(hitID);
 	}
@@ -424,9 +445,9 @@ public class BasicHitTab extends Tab {
 			String id="";
 			int row = theTablePanel.getSelectedRow();
 			if (isGrpView) {
-				id = grpObjList.get(row).strHitID;
+				id = hitGrpList.get(row).hd.strHitID;
 				for (int i=0; i<colNames.length; i++) {
-					Object o = grpObjList.get(row).getValueAt(i);
+					Object o = hitGrpList.get(row).getValueAt(i);
 					String val = "" + o;
 					String x = String.format("%-15s: %s", colNames[i], val);
 					lines.add(x);
@@ -435,9 +456,9 @@ public class BasicHitTab extends Tab {
 				lines.add("* Heuristic search values corresponding to best e-value");
 			}
 			else {
-				id = seqObjList.get(row).strSeqID;
+				id = hitSeqList.get(row).strSeqID;
 				for (int i=0; i<colNames.length; i++) {
-					Object o = seqObjList.get(row).getValueAt(i);
+					Object o = hitSeqList.get(row).getValueAt(i);
 					String val = "" + o;
 					String x = String.format("%-15s: %s", colNames[i], val);
 					lines.add(x);
@@ -454,6 +475,23 @@ public class BasicHitTab extends Tab {
 			ErrorReport.prtReport(e, "Creating Sequence GO popup");
 		}
 	}
+	/************************************************
+	 * HitData -- CAS335 added this structure to reduce copies
+	 */
+	private class HitData {
+		private String strHitID;
+		private int hitLen;
+		private String strDesc;
+		private String strSpecies;
+		private String strType;
+		private String strTaxo;
+		private int nGO = 0;
+		private String strGO = null;
+		private String strIP = null;
+		private String strKEGG = null;
+		private String strPFAM = null;
+		private String strEC = null;
+	}
 	/*************************************************************
 	 * HitSeqData
 	 */
@@ -462,7 +500,7 @@ public class BasicHitTab extends Tab {
 			nRowNum=r;
 			int nCol=0;
 			strSeqID = 		(String) values[nCol++];
-			strHitID = 		(String) values[nCol++];
+			hd.strHitID = 		(String) values[nCol++];
 			bitscore = 		Double.parseDouble((String) values[nCol++]); // CAS331
 			evalue = 		Double.parseDouble((String) values[nCol++]);
 			sim = 			Double.parseDouble((String) values[nCol++]);
@@ -481,28 +519,28 @@ public class BasicHitTab extends Tab {
 			
 			nRank = 		Integer.parseInt((String) values[nCol++]);
 			
-			strDesc = 		(String) values[nCol++];
-			strSpecies = 	(String) values[nCol++];
-			strType = 		(String) values[nCol++];
-			strTaxo = 		(String) values[nCol++];
+			hd.strDesc = 		(String) values[nCol++];
+			hd.strSpecies = 	(String) values[nCol++];
+			hd.strType = 		(String) values[nCol++];
+			hd.strTaxo = 		(String) values[nCol++];
 			
-			hitLen = 		Integer.parseInt((String) values[nCol++]);
+			hd.hitLen = 	Integer.parseInt((String) values[nCol++]);
 			seqLen = 		Integer.parseInt((String) values[nCol++]);
-			seqAlign = Static.percent(Math.abs(sstart-send)+1,seqLen);
-			hitAlign = Static.percent(Math.abs(hstart-hend)+1,hitLen);
+			seqAlign = 		Static.percent(Math.abs(sstart-send)+1,seqLen);
+			hitAlign = 		Static.percent(Math.abs(hstart-hend)+1,hd.hitLen);
 			
 			if (hasGO) {
 				String strGoBrief = (String) values[nCol++];
 				if (strGoBrief!=null && !strGoBrief.equals("")) {
 					String [] tok = strGoBrief.split(";"); // goBrief may have #N;GO...;GO...
-					nGO = Integer.parseInt(tok[0].substring(1));
+					hd.nGO = Integer.parseInt(tok[0].substring(1));
 		   		}
-				else nGO=0;
-				strGO = (String) values[nCol++];
-				strIP = (String) values[nCol++];
-				strKEGG = (String) values[nCol++];
-				strPFAM = (String) values[nCol++];
-				strEC   = (String) values[nCol++];
+				else hd.nGO=0;
+				hd.strGO = (String) values[nCol++];
+				hd.strIP = (String) values[nCol++];
+				hd.strKEGG = (String) values[nCol++];
+				hd.strPFAM = (String) values[nCol++];
+				hd.strEC   = (String) values[nCol++];
 			}
 			
 			libCounts = new Double[numLibs];
@@ -523,7 +561,7 @@ public class BasicHitTab extends Tab {
 				case 1: return strSeqID;
 				case 2: return seqLen;
 				
-				case 3: return strHitID;
+				case 3: return hd.strHitID;
 				case 4: return strBest;
 				case 5: return nRank;
 				
@@ -534,21 +572,21 @@ public class BasicHitTab extends Tab {
 				case 10: return hitAlign;
 				case 11: return align;
 				
-				case 12: return strDesc;
-				case 13: return strSpecies;
-				case 14: return strType;
-				case 15: return strTaxo;	
+				case 12: return hd.strDesc;
+				case 13: return hd.strSpecies;
+				case 14: return hd.strType;
+				case 15: return hd.strTaxo;	
 				}
 			}
 			if (hasGO) nCol+=6; // CAS322 was missing this
 			if (hasGO && column<nCol) {
 				switch(column) {
-				case 16: return nGO;
-				case 17: return strGO;
-				case 18: return strIP;
-				case 19: return strKEGG;
-				case 20: return strPFAM;
-				case 21: return strEC;
+				case 16: return hd.nGO;
+				case 17: return hd.strGO;
+				case 18: return hd.strIP;
+				case 19: return hd.strKEGG;
+				case 20: return hd.strPFAM;
+				case 21: return hd.strEC;
 				}
 			}
 			
@@ -573,7 +611,7 @@ public class BasicHitTab extends Tab {
 				case 1: return order * compareStrings(strSeqID, obj.strSeqID);
 				case 2: return order * ((Integer) seqLen).compareTo((Integer) obj.seqLen);
 				
-				case 3: return order * compareStrings(strHitID,obj.strHitID);
+				case 3: return order * compareStrings(hd.strHitID,obj.hd.strHitID);
 				case 4: return order * compareStrings(strBest, obj.strBest);
 				case 5: return order * ((Integer) nRank).compareTo((Integer) obj.nRank);
 				
@@ -584,21 +622,21 @@ public class BasicHitTab extends Tab {
 				case 10: return order * ((Integer) hitAlign).compareTo((Integer) obj.hitAlign);
 				case 11: return order * ((Integer) align).compareTo((Integer) obj.align);
 				
-				case 12: return order * compareStrings(strDesc, obj.strDesc);
-				case 13: return order * compareStrings(strSpecies, obj.strSpecies);
-				case 14: return order * compareStrings(strType, obj.strType);
-				case 15: return order * compareStrings(strTaxo, obj.strTaxo);		
+				case 12: return order * compareStrings(hd.strDesc, obj.hd.strDesc);
+				case 13: return order * compareStrings(hd.strSpecies, obj.hd.strSpecies);
+				case 14: return order * compareStrings(hd.strType, obj.hd.strType);
+				case 15: return order * compareStrings(hd.strTaxo, obj.hd.strTaxo);		
 				}
 			}
 			nCol+=6;
 			if (hasGO && column<nCol) {
 				switch(column) {
-				case 16: return order * ((Integer) nGO).compareTo((Integer) obj.nGO);
-				case 17: return order * compareStrings(strGO, obj.strGO);
-				case 18: return order * compareStrings(strIP, obj.strIP);
-				case 19: return order * compareStrings(strKEGG, obj.strKEGG);
-				case 20: return order * compareStrings(strPFAM, obj.strPFAM);
-				case 21: return order * compareStrings(strEC, obj.strEC);
+				case 16: return order * ((Integer) hd.nGO).compareTo((Integer) obj.hd.nGO);
+				case 17: return order * compareStrings(hd.strGO, obj.hd.strGO);
+				case 18: return order * compareStrings(hd.strIP, obj.hd.strIP);
+				case 19: return order * compareStrings(hd.strKEGG, obj.hd.strKEGG);
+				case 20: return order * compareStrings(hd.strPFAM, obj.hd.strPFAM);
+				case 21: return order * compareStrings(hd.strEC, obj.hd.strEC);
 				}
 			}
 			if (column < (nCol+numLibs)) {
@@ -621,26 +659,20 @@ public class BasicHitTab extends Tab {
 		
 		private int nRowNum = -1;
 		private String strSeqID;
-		private String strHitID;
+		private int seqLen; 
+		
 		private double bitscore;	// CAS331 added
 		private double evalue;
 		private double sim;			// CAS331 change from int
-		private int align, seqAlign, hitAlign; // hitStart transferred to HitGroupData
-		private int seqLen, hitLen;            // hitLen transferred to HitGroupData
-		private String strDesc;
-		private String strSpecies;
-		private String strType;
-		private String strTaxo;
+		private int align, seqAlign, hitAlign; 
+		           
 		private String strBest="";
 		private int nRank=0;
-		private int nGO = 0;
-		private String strGO = null;
-		private String strIP = null;
-		private String strKEGG = null;
-		private String strPFAM = null;
-		private String strEC = null;
+		
 		private Double [] libCounts = null;
 		private Double [] pvalCounts = null;
+		
+		private HitData hd = new HitData();
 	} // end hitSeqData
 	private class HitSeqDataComparator implements Comparator<HitSeqData> {
 		public HitSeqDataComparator(boolean sortAsc, int mode) {
@@ -658,28 +690,20 @@ public class BasicHitTab extends Tab {
 	 */
 	public class HitGroupData implements Comparable<HitGroupData> {
 		public HitGroupData(HitSeqData seq) {
-			strHitID = seq.strHitID;
-			hitLen = seq.hitLen;
+			
 			nSeqs = 1;
-			strDesc = 		seq.strDesc;
-			strSpecies = 	seq.strSpecies;
-			strType = 		seq.strType;
-			strTaxo = 		seq.strTaxo;
-			nGO =			seq.nGO;
-			strGO = 		seq.strGO;
-			strIP = 		seq.strIP;
-			strKEGG = 		seq.strKEGG;
-			strPFAM = 		seq.strPFAM;
-			strEC = 		seq.strEC;
+			
+			hd = seq.hd;
+			
 			if (!seq.strBest.equals("")) nBest=1;
 			if (seq.nRank==1) nRank1=1;
 			
-			bitscore = seq.bitscore;
-			evalue=seq.evalue;
-			sim = seq.sim;
-			seqAlign = seq.seqAlign;
-			hitAlign = seq.hitAlign;
-			align = seq.align;
+			bitscore = 	seq.bitscore;
+			evalue =	seq.evalue;
+			sim = 		seq.sim;
+			seqAlign = 	seq.seqAlign;
+			hitAlign = 	seq.hitAlign;
+			align = 	seq.align;
 			
 			nLibCounts = new Double[numLibs];
 			for(int x=0; x<nLibCounts.length; x++) nLibCounts[x] = seq.libCounts[x];
@@ -687,8 +711,9 @@ public class BasicHitTab extends Tab {
 			nPvalCounts = new Double[numPvals];
 			for(int x=0; x<nPvalCounts.length; x++) nPvalCounts[x] = seq.pvalCounts[x];
 		}
+		// The first seq-hit has been added, update with subsequent ones
 		public void incrementSeqCount(Double [] lcounts, Double [] pcounts, String strBest, Double seqBit,
-				Double seqEVal, double seqSim, int sstart, int hstart, int seqAlign, int nRank) { 
+				Double seqEVal, double seqSim, int seqAlign, int hitAlign, int align, int nRank) { 
 			nSeqs++; 
 			for(int x=0; x<lcounts.length; x++) 
 				if (nLibCounts[x] < lcounts[x]) nLibCounts[x] = lcounts[x];
@@ -703,20 +728,20 @@ public class BasicHitTab extends Tab {
 				bitscore = seqBit;
 				evalue=seqEVal;
 				sim = seqSim;
-				seqAlign = sstart;
-				hitAlign = hstart;
-				align = seqAlign;
+				this.seqAlign = seqAlign;
+				this.hitAlign = hitAlign;
+				this.align    = align;		// CAS335 was getting seqAlign value
 			}
 		}
 		
 		public void setRowNum(int row) { nRowNum = row; }
 		
 		public boolean equals(HitSeqData hit) {
-			return compareStrings(strHitID, hit.strHitID) == 0;
+			return compareStrings(hd.strHitID, hit.hd.strHitID) == 0;
 		}
 		
 		public int compareTo(HitGroupData obj) {
-			return compareStrings(strHitID, obj.strHitID);
+			return compareStrings(hd.strHitID, obj.hd.strHitID);
 		}
 		
 		public Object getValueAt(int column) {
@@ -724,8 +749,8 @@ public class BasicHitTab extends Tab {
 			if (column<nCol) {
 				switch(column) {
 				case 0: return nRowNum;
-				case 1: return strHitID;
-				case 2: return hitLen;
+				case 1: return hd.strHitID;
+				case 2: return hd.hitLen;
 				
 				case 3: return nSeqs;
 				case 4: return nBest;
@@ -738,21 +763,21 @@ public class BasicHitTab extends Tab {
 				case 10: return hitAlign;
 				case 11: return align;
 				
-				case 12: return strDesc;
-				case 13: return strSpecies;
-				case 14: return strType;
-				case 15: return strTaxo;
+				case 12: return hd.strDesc;
+				case 13: return hd.strSpecies;
+				case 14: return hd.strType;
+				case 15: return hd.strTaxo;
 				}
 			}
 			if (hasGO) nCol+=6;
 			if (hasGO && column<nCol) {
 				switch(column) {
-				case 16: return nGO;
-				case 17: return strGO;
-				case 18: return strIP;
-				case 19: return strKEGG;
-				case 20: return strPFAM;
-				case 21: return strEC;
+				case 16: return hd.nGO;
+				case 17: return hd.strGO;
+				case 18: return hd.strIP;
+				case 19: return hd.strKEGG;
+				case 20: return hd.strPFAM;
+				case 21: return hd.strEC;
 				}
 			}		
 			if (column < nCol+numLibs) {
@@ -772,8 +797,8 @@ public class BasicHitTab extends Tab {
 			if (column<nCol) {
 				switch(column) {
 				case 0: return 0; // CAS326 order * ((Integer) nRowNum).compareTo((Integer) obj.nRowNum);
-				case 1: return order * compareStrings(strHitID, obj.strHitID);
-				case 2: return order * ((Integer) hitLen).compareTo((Integer) obj.hitLen);
+				case 1: return order * compareStrings(hd.strHitID, obj.hd.strHitID);
+				case 2: return order * ((Integer) hd.hitLen).compareTo((Integer) obj.hd.hitLen);
 				
 				case 3: return order * ((Integer) nSeqs).compareTo((Integer) obj.nSeqs);
 				case 4: return order * ((Integer) nBest).compareTo((Integer) obj.nBest);
@@ -786,21 +811,21 @@ public class BasicHitTab extends Tab {
 				case 10: return order * ((Integer) hitAlign).compareTo((Integer) obj.hitAlign);
 				case 11: return order * ((Integer) align).compareTo((Integer) obj.align);
 				
-				case 12: return order * compareStrings(strDesc, obj.strDesc);
-				case 13: return order * compareStrings(strSpecies, obj.strSpecies);
-				case 14: return order * compareStrings(strType, obj.strType);
-				case 15: return order * compareStrings(strTaxo, obj.strTaxo);		
+				case 12: return order * compareStrings(hd.strDesc, obj.hd.strDesc);
+				case 13: return order * compareStrings(hd.strSpecies, obj.hd.strSpecies);
+				case 14: return order * compareStrings(hd.strType, obj.hd.strType);
+				case 15: return order * compareStrings(hd.strTaxo, obj.hd.strTaxo);		
 				}
 			}
 			if (hasGO) nCol += 6;
 			if (hasGO && column<nCol) {
 				switch(column) {
-				case 16: return order * ((Integer) nGO).compareTo((Integer) obj.nGO);
-				case 17: return order * compareStrings(strGO, obj.strGO);
-				case 18: return order * compareStrings(strIP, obj.strIP);
-				case 19: return order * compareStrings(strKEGG, obj.strKEGG);
-				case 20: return order * compareStrings(strPFAM, obj.strPFAM);
-				case 21: return order * compareStrings(strEC, obj.strEC);
+				case 16: return order * ((Integer) hd.nGO).compareTo((Integer) obj.hd.nGO);
+				case 17: return order * compareStrings(hd.strGO, obj.hd.strGO);
+				case 18: return order * compareStrings(hd.strIP, obj.hd.strIP);
+				case 19: return order * compareStrings(hd.strKEGG, obj.hd.strKEGG);
+				case 20: return order * compareStrings(hd.strPFAM, obj.hd.strPFAM);
+				case 21: return order * compareStrings(hd.strEC, obj.hd.strEC);
 				}
 			}
 			if (column< nCol+numLibs) {
@@ -816,25 +841,17 @@ public class BasicHitTab extends Tab {
 			else if (val2==Globalx.dNoDE) return -1;
 			return order * val1.compareTo(val2);
 		}
-		public String strHitID;
+		
 		public int nSeqs;
 		private int nRowNum = -1;
-		private String strDesc;
-		private String strSpecies;
-		private String strType;
-		private String strTaxo;
-		private String strIP = null;
-		private int nGO=0;
-		private String strGO = null;
-		private String strKEGG = null;
-		private String strPFAM = null;
-		private String strEC = null;
+		private HitData hd = null;
+		
 		private int nBest=0;
 		private int nRank1=0;
 		private double bitscore=0.0;
 		private double evalue=2.0;
 		private double sim=0.0;
-		private int align, seqAlign, hitAlign, hitLen;
+		private int align, seqAlign, hitAlign;
 		private Double [] nLibCounts = null;
 		private Double [] nPvalCounts = null;
 	} // end HitGroupData
@@ -860,25 +877,25 @@ public class BasicHitTab extends Tab {
 	/***********************************************
 	 * Table
 	 */
-	 // The database call was performed in BasicHitFilterPanel, and passes in the results for display
-	 // may may multiple HitSeqData for a seqID since there is one for each seq-hit pair
+	 /* The database call was performed in BasicHitFilterPanel, and passes in the results for display
+	    There may be multiple HitSeqData for a seqID since there is one for each seq-hit pair */
 	 public void tableBuild(ArrayList<Object []> results, String summary) {
 		 try {
 			 enableTopButtons(false);
 			
-			 seqObjList.clear();
+			 hitSeqList.clear();
 			 seqCntMap.clear(); 
 			 String x = " (of " + results.size() + ") ...";
 			 int row=1, cnt=0;
 			 for (Object [] rObj : results) {
 				 String seqid = (String) rObj[0];
-				 seqListAdd(seqid);
-				 seqObjList.add(new HitSeqData(row, rObj));
+				 addSeqCntMap(seqid);
+				 hitSeqList.add(new HitSeqData(row, rObj));
 				 row++; cnt++;
 				 if (cnt==10000) {
-	    				setStatus("Added " + seqObjList.size() + x + " to sequence table...        ");
-	    				cnt=0;
-	    			 }
+	    			setStatus("Added " + hitSeqList.size() + x + " to sequence table...        ");
+	    			cnt=0;
+	    		 }
 			 }
 			 setStatus("Create Hits....");
 			 isSorted=false;
@@ -894,27 +911,27 @@ public class BasicHitTab extends Tab {
 		 try {
 			 enableTopButtons(false);
 			 String x = " (of " + results.size() + ") ...";
-			 int row=seqObjList.size();
+			 int row=hitSeqList.size();
 			 int cnt=0, add=0;
 			 
 			 for (Object [] o : results) {
 				 boolean isAdd=true;
 				 String seqid = (String) o[0];
 				 String hitid = (String) o[1];
-				 for (HitSeqData sd : seqObjList) {
-					 if (sd.strSeqID.equals(seqid) && sd.strHitID.equals(hitid)) {
+				 for (HitSeqData sd : hitSeqList) {
+					 if (sd.strSeqID.equals(seqid) && sd.hd.strHitID.equals(hitid)) {
 						 isAdd = false;
 						 break;
 					 }
 				 }
 				 if (isAdd) {
-					seqObjList.add(new HitSeqData(row, o));	
+					hitSeqList.add(new HitSeqData(row, o));	
 					row++; cnt++; add++;
 					if (cnt==10000) {
 		    				setStatus("Add " + add + x + " to sequence table...        ");
 		    				cnt=0;
 		    			}
-					seqListAdd(seqid);
+					addSeqCntMap(seqid);
 				 }
 			 }
 			 setStatus("Create Hits....");
@@ -927,48 +944,41 @@ public class BasicHitTab extends Tab {
 		 }
 		 catch (Exception e) {ErrorReport.prtReport(e, "Updating table");}
 	}
-	private void seqListAdd(String seqid) {
+	private void addSeqCntMap(String seqid) {
 		if (seqCntMap.containsKey(seqid)) 
 			 seqCntMap.put(seqid, seqCntMap.get(seqid) +1);
 		else seqCntMap.put(seqid, 1);
 	}
-	private void seqListRemove(String seqid) {
-		if (seqCntMap.containsKey(seqid)) {
-			int cnt = seqCntMap.get(seqid);
-			if (cnt==1) seqCntMap.remove(seqid);
-			else 		seqCntMap.put(seqid, seqCntMap.get(seqid)-1);
-		}
-	}
+	
 	public String getStatus() { 
 		return String.format("Seqs: %,d   Hits: %,d  Pairs: %,d    ",
-				 seqCntMap.size(), grpObjList.size(),  seqObjList.size());
+				 seqCntMap.size(), hitGrpList.size(),  hitSeqList.size());
 	}
 	private void convertToGroupedHits(boolean first) {
 		try {
-			grpObjList = new ArrayList<HitGroupData> ();
+			hitGrpList = new ArrayList<HitGroupData> ();
 			int rowNum = 0;
 			HashMap <String, HitGroupData> hitMap = new HashMap <String, HitGroupData> ();
 		
-			String x = "(of " + seqObjList.size() + ") ...";
+			String x = "(of " + hitSeqList.size() + ") ...";
 			int cnt=0;
-			for (HitSeqData seq : seqObjList) {
-				if (hitMap.containsKey(seq.strHitID)) {
-					HitGroupData grp = hitMap.get(seq.strHitID);
+			for (HitSeqData seq : hitSeqList) {
+				if (hitMap.containsKey(seq.hd.strHitID)) {
+					HitGroupData grp = hitMap.get(seq.hd.strHitID);
 					grp.incrementSeqCount(seq.libCounts, seq.pvalCounts, seq.strBest, seq.bitscore,
 							seq.evalue, seq.sim, seq.seqAlign, seq.hitAlign, seq.align, seq.nRank);
 				}
 				else {
 					HitGroupData grp = seq.getGroupItem();
 					grp.setRowNum(++rowNum);
-					grpObjList.add(grp);
-					hitMap.put(seq.strHitID, grp);
+					hitGrpList.add(grp);
+					hitMap.put(seq.hd.strHitID, grp);
 				}
 				if (first) {
 					cnt++;
 					if (cnt%10000==0) {
-		    				setStatus("Added " + grpObjList.size() + " to grouped table, processed " + 
-		    						cnt + x);
-		    			}
+		    			setStatus("Added " + hitGrpList.size() + " to grouped table, processed " + cnt + x);
+		    		}
 				}
 			}
 			Runtime.getRuntime().gc();
@@ -983,7 +993,7 @@ public class BasicHitTab extends Tab {
 		isSorted=false; // do not reorder again until sorted again
 		
 		if (isGrpView) {
-			grpObjList.clear();
+			hitGrpList.clear();
 			convertToGroupedHits(false); 
 			return;
 		}
@@ -992,20 +1002,20 @@ public class BasicHitTab extends Tab {
 			HashMap <String, ArrayList <HitSeqData>> seqMap = 
 					new HashMap <String, ArrayList <HitSeqData>> ();
 			ArrayList <HitSeqData> tmp;
-			for (HitSeqData seq : seqObjList) {
-				if (seqMap.containsKey(seq.strHitID)) tmp = seqMap.get(seq.strHitID);
+			for (HitSeqData seq : hitSeqList) {
+				if (seqMap.containsKey(seq.hd.strHitID)) tmp = seqMap.get(seq.hd.strHitID);
 				else tmp = new ArrayList <HitSeqData> ();
 				tmp.add(seq);
-				seqMap.put(seq.strHitID, tmp);
+				seqMap.put(seq.hd.strHitID, tmp);
 			}
 			
-			seqObjList.clear();
-			seqObjList = new ArrayList<HitSeqData> ();
-			for (HitGroupData grp : grpObjList) {
-				if (seqMap.containsKey(grp.strHitID)) {
-					tmp = seqMap.get(grp.strHitID);
+			hitSeqList.clear();
+			hitSeqList = new ArrayList<HitSeqData> ();
+			for (HitGroupData grp : hitGrpList) {
+				if (seqMap.containsKey(grp.hd.strHitID)) {
+					tmp = seqMap.get(grp.hd.strHitID);
 					for (HitSeqData seq : tmp)
-						seqObjList.add(seq);
+						hitSeqList.add(seq);
 				}
 			}
 			Runtime.getRuntime().gc();
@@ -1017,49 +1027,82 @@ public class BasicHitTab extends Tab {
 	}
 	public void tableSort (boolean sortAsc, int mode) {
 		isSorted=true;
-		if(isGrpView) {
- 			Collections.sort(grpObjList, 
-					new HitGroupDataComparator(sortAsc, mode));
-		}
- 		else {
- 			Collections.sort(seqObjList, 
- 					new HitSeqDataComparator(sortAsc, mode));
- 		}
+		if(isGrpView) 
+ 			Collections.sort(hitGrpList, new HitGroupDataComparator(sortAsc, mode));
+ 		else 
+ 			Collections.sort(hitSeqList, new HitSeqDataComparator(sortAsc, mode));
 	}
 	public int getNumRow() {
-		if (isGrpView) return grpObjList.size();
-	    return seqObjList.size();
+		if (isGrpView) return hitGrpList.size();
+	    return hitSeqList.size();
 	}
 	public Object getValueAt(int row, int index) {
  		if (isGrpView) 
- 			 return grpObjList.get(row).getValueAt(index);
- 		else return seqObjList.get(row).getValueAt(index);
+ 			 return hitGrpList.get(row).getValueAt(index);
+ 		else return hitSeqList.get(row).getValueAt(index);
 	}
-	public void removeFromList(int row) {
-		if (isGrpView) {
-			String hitID = grpObjList.get(row).strHitID;
+	/******************************************************
+	 * Called from BasicTablePanel to Keep Selected or Remove Selected
+	 * CAS335 BasicTable was calling row by row
+	 */
+	public void deleteFromList(int [] rows) {
+		if (!isGrpView) {
+			for(int x=rows.length-1; x>=0; x--) {
+				String seqid = hitSeqList.get(rows[x]).strSeqID;
+				
+				int cnt =   seqCntMap.get(seqid);
+				
+				if (cnt==1) seqCntMap.remove(seqid);
+				else 		seqCntMap.put(seqid, seqCntMap.get(seqid)-1);
+	
+				hitSeqList.remove(rows[x]);
+			}
+			hitGrpList.clear();
+			convertToGroupedHits(false);
+			return;
+		}
+		
+	/* isGrpView - rebuilds */
+		if (rows.length>5000 && hitSeqList.size()>50000) {// CAS335 add popup
+			if (!UserPrompt.showContinue("Many Seq-Hit pairs", 
+					rows.length + " rows to be removed, which can take long.\n\n"
+					+ "The Seq-Hit table is much faster (Uncheck 'Group by Hit ID' and select).\n"))
+			return;	
+		}
 			
-			ArrayList <HitSeqData> tmpSeq = seqObjList;
-			seqObjList = new ArrayList<HitSeqData> ();
-			seqCntMap = new HashMap <String, Integer> (seqCntMap.size());
-			for (HitSeqData seq : tmpSeq) // hitSeq data is one-to-one
-				if (!seq.strHitID.equals(hitID)) {
-					seqObjList.add(seq);
-					seqListAdd(seq.strSeqID);
+		ArrayList <HitGroupData> rmHitObj = new ArrayList <HitGroupData> ();
+		
+		if (Globalx.debug) Out.prt("Before: " + getStatus());
+		for(int ih=rows.length-1; ih>=0; ih--) { 
+			HitGroupData hitObj = hitGrpList.get(rows[ih]); 
+			String hitID = hitObj.hd.strHitID;
+			
+			for (int is=hitSeqList.size()-1; is>=0; is--) { // Delete from end of HitSeqData
+				HitSeqData seqObj = hitSeqList.get(is);
+				
+				if (seqObj.hd.strHitID.equals(hitID)) { // found a hit-seq pair
+					String seqid = seqObj.strSeqID;
+					
+					int cnt =   seqCntMap.get(seqid);
+					if (cnt==1) seqCntMap.remove(seqid);
+					else 		seqCntMap.put(seqid, seqCntMap.get(seqid)-1);
+					
+					hitSeqList.remove(is);
 				}
-			
-			grpObjList.remove(row);
+			}	
+			rmHitObj.add(hitObj);
+			if (ih>999 && ih%1000==0) 
+				Out.r("Removed " + (rows.length-ih) + " of " + rows.length);
 		}
-		else { 
-			ArrayList <HitGroupData> tmpGrp = grpObjList;
-			grpObjList = new ArrayList<HitGroupData> ();
-			for (HitGroupData grp : tmpGrp) 
-				if (grp.nSeqs>0) grpObjList.add(grp);
-			
-			seqListRemove(seqObjList.get(row).strSeqID);
-			seqObjList.remove(row);
+		for (HitGroupData hitObj : rmHitObj) {
+			hitGrpList.remove(hitObj);
+			hitObj.hd=null;
+			hitObj=null;
 		}
+		Out.r("                                                 ");
+		if (Globalx.debug) Out.prt("After:  " + getStatus());
 	}
+	
 	public void updateTopButtons(int row) {
 		btnViewSeqs.setEnabled(row>0);
 		btnAlignSeqs.setEnabled(row>0);
@@ -1074,12 +1117,7 @@ public class BasicHitTab extends Tab {
 		btnExport.setEnabled(b);
 		btnCopy.setEnabled(b);
 	}
-	public void tableHitRecalc() { // called after delete objects from table
-		if (!isGrpView) {
-			grpObjList.clear();
-			convertToGroupedHits(false);
-		}
-	}
+	
 	public void tableRefresh(boolean b) {
 		isGrpView = b;
 		theTablePanel.setColumns(theFilterPanel.getColNames(), theFilterPanel.getColSelect());
@@ -1093,18 +1131,13 @@ public class BasicHitTab extends Tab {
 	//Table panel
 	private BasicTablePanel theTablePanel = null;
 	
-	private ArrayList<HitSeqData> seqObjList = new ArrayList<HitSeqData> ();
-	private ArrayList<HitGroupData> grpObjList = new ArrayList<HitGroupData> ();
-	private HashMap <String, Integer> seqCntMap = new HashMap <String, Integer> ();
+	private ArrayList<HitSeqData> 		hitSeqList = new ArrayList<HitSeqData> ();	  // seq-hit pairs with hit values & descriptions
+	private ArrayList<HitGroupData> 	hitGrpList = new ArrayList<HitGroupData> ();  // hits
+	private HashMap <String, Integer>   seqCntMap = new HashMap <String, Integer> (); // # hits per seq; shows #seqs and when to remove
 	
 	//User interface
-	private JButton btnViewSeqs = null;
-	private JButton btnAlignSeqs = null;
-	private JButton btnShow = null;
-	private JButton btnTable = null;
-	private JButton btnCopy = null;
-	private JButton btnExport = null;
-	private JButton btnHelp = null;
+	private JButton btnViewSeqs = null, btnAlignSeqs = null, btnShow = null;
+	private JButton btnTable = null, btnCopy = null, btnExport = null, btnHelp = null;
 	
 	private JPanel topRowPanel = null;
 	private BasicHitFilterPanel theFilterPanel = null;

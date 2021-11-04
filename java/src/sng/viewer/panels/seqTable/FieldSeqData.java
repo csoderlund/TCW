@@ -14,6 +14,7 @@ import sng.database.MetaData;
 import sng.util.FieldMapper;
 import sng.viewer.STCWFrame;
 import util.database.Globalx;
+import util.methods.Out;
 
 public class FieldSeqData implements Serializable
 {	
@@ -72,13 +73,13 @@ public class FieldSeqData implements Serializable
     public static final int CNT_NT					= 1037;
     
     //since # of libraries is dynamic, can only label the start of the range
-    public static final int LIBRARY_COUNT_ALL		= 1100;
-    public static final int N_LIBRARY_COUNT_ALL		= 1300;
+    public static final int LIBRARY_COUNT_ALL		= 1100; // Can have 400 libs
+    public static final int LIBRARY_TPM_ALL			= 1500; // Can have 400 tpm
     
     public static final int CONTIG_SET_COUNT 		= 1900;
     
     public static final int N_FOLD_LIB				= 2700;
-    public static final int N_FOLD_LIB_LIMIT		= 2899;
+    public static final int N_FOLD_LIB_LIMIT		= 2899; // allows 200 N-FOLD fields
     
     public static final int RSTAT_FIELD				= 2900;
     public static final int P_VALUES				= 2901;
@@ -166,12 +167,13 @@ public class FieldSeqData implements Serializable
     public static final String GROUP_NAME_SEQ_SET	= "Sequence Set";
     public static final String GROUP_DESC_SEQ_SET	= "Sequences with counts";
     
-    public static String GROUP_NAME_LIB		= "Counts and TPM";
+    public static String GROUP_NAME_LIB		= "Counts and TPM"; // TPM may be replaced with RPKM
     public static String GROUP_DESC_LIB		
     		= "Counts and/or TPM per condition (or assembled sequences).";
     
-    public static final String GROUP_NAME_RSTAT		= "N-Fold and Rstat";
-    public static final String GROUP_DESC_RSTAT 	= "Fold change between two conditions, and the R-statistic (Stekel et al. (2000)) over all conditions";
+    public static final String GROUP_NAME_RSTAT		= "Fold-change and Rstat";
+    public static final String GROUP_DESC_RSTAT 	
+    		= "Log2FC or FC between two conditions and R-statistic over all conditions";
 
     public static final String GROUP_NAME_PVAL		= "Differential Expression";
     public static final String GROUP_DESC_PVAL 		= "Columns of DE p-values";
@@ -204,10 +206,10 @@ public class FieldSeqData implements Serializable
      * Defines the columns in the Contig Table
      * the return Mapper has all the columns defined, so used hence-forth
      */
-    static public FieldMapper createContigFieldMapper (STCWFrame parentFrame)
+    static public FieldMapper createSeqFieldMapper (STCWFrame parentFrame)
     {
-    		SeqQueryTab qTab = parentFrame.getQueryContigTab();
-    		MetaData metaData = parentFrame.getMetaData();
+    	SeqQueryTab qTab = parentFrame.getQueryContigTab();
+    	MetaData metaData = parentFrame.getMetaData();
     	
     	String norm = metaData.getNorm();
     	if (norm.contentEquals("TPM")) { // CAS304
@@ -316,13 +318,11 @@ public class FieldSeqData implements Serializable
      	        		GROUP_NAME_CONTIG, GROUP_DESC_CONTIG, 
      	        		"Strand of the predicted gene." );
         }
-        
         if (metaData.hasPairWise()) {
             mapper.addStringField( PAIRWISE_FIELD, "Pairs Count", "contig", "cnt_pairwise", 
             		GROUP_NAME_CONTIG, GROUP_DESC_CONTIG, 
             		"Number of Similar Sequence Pairs its contain in." );
         }
-   
         if (metaData.hasHits()) {	// Counts for UniProt and Nucleotide hits   
             mapper.addIntField( CNT_TAXO, "#annoDBs", "contig", 
             		"cnt_annodb", GROUP_NAME_CONTIG, GROUP_DESC_CONTIG, 
@@ -363,21 +363,21 @@ public class FieldSeqData implements Serializable
         				L + allLibraryNames[x], GROUP_NAME_LIB, GROUP_DESC_LIB, 
         				"Library " + allLibraryNames[x]);
         	for(int x=0; x<allLibraryNames.length; x++)
-        		mapper.addFloatField(N_LIBRARY_COUNT_ALL + x, allLibraryNames[x], "contig", 
+        		mapper.addFloatField(LIBRARY_TPM_ALL + x, allLibraryNames[x], "contig", 
         				LN + allLibraryNames[x], GROUP_NAME_LIB, GROUP_DESC_LIB, 
         				allLibraryTitles[x]);    
 	        	
         	// Nfold and Rstat
 	        mapper.addFloatField( RSTAT_FIELD, "Rstat", "contig", "rstat", 
-	            GROUP_NAME_RSTAT, GROUP_DESC_RSTAT, 
-	            		"Over all conditions for the sequence." );
+	        		GROUP_NAME_RSTAT, GROUP_DESC_RSTAT, 
+	            	"(Stekel et al. 2000) Over all conditions for the sequence." );
 	        
 	        // DE/pvals
 	        if(pLabels != null) {
 	        	for(int x=0; x<pLabels.length; x++) {
 	        		mapper.addFloatField(P_VALUES + x, pLabels[x], "contig", 
 	        			PVAL + pLabels[x], GROUP_NAME_PVAL, GROUP_DESC_PVAL, 
-	        				pTitles[x]);
+	        			pTitles[x]);
 	        	}
 	        } 
         }  
@@ -757,31 +757,16 @@ public class FieldSeqData implements Serializable
     /*************************************
      * Builds the mySQL statement with a where clause of contig names
      */
-    public String getSeqListSQL (FieldMapper fields, FieldSeqTab fTab, String [] contigIDs)
+    public String getSeqListSQL (FieldMapper fields, FieldSeqTab fTab, String [] seqIDs)
     {
-	    	String strQuery = "", strNFold="";
-	    	summary= "Basic search";
-	    	
-	    	String [] foldCols = fTab.getFoldColumns();
-	    	if (foldCols!=null && foldCols.length>0) {
-		    	Vector <String> libs = new Vector <String> ();
-			for(int x=0; x<foldCols.length; x++) {
-					String [] vals = foldCols[x].split("/");
-					if(!libs.contains(vals[0])) libs.add(vals[0]);
-					if(!libs.contains(vals[1])) libs.add(vals[1]);
-			}   
-	    		for(int x=0; x<libs.size(); x++) {
-	    			strNFold += ", " + L + libs.get(x) + " AS LIB" + (x+1);
-	    			strNFold += ", " + LN + libs.get(x) + " AS LIBN" + (x+1);
-	    		}
-	    	}
+    	String strQuery = "", strNFold="";
+    	summary= "Basic search";
+    	
+   		strQuery = "SELECT " + fields.getDBFieldList(fTab.getNFoldObj()) + strNFold +
+   				   " FROM contig " + getJoinForColumns(fields);
 
-   		strQuery = "SELECT " + fields.getDBFieldList() + strNFold +
-   				   " FROM contig " + 
-   				   getJoinForColumns(fields);
-
-		String contigList = "('" + contigIDs[0] + "'";
-		for(int x=1; x<contigIDs.length; x++) contigList += ", '" + contigIDs[x] + "'";
+		String contigList = "('" + seqIDs[0] + "'";
+		for(int x=1; x<seqIDs.length; x++) contigList += ", '" + seqIDs[x] + "'";
 		contigList += ")";
 		
 		strQuery +=	" WHERE contig.contigid IN " + contigList  + " ORDER BY contig.contigid";
@@ -791,21 +776,9 @@ public class FieldSeqData implements Serializable
     /**
      * XXX Builds the mySQL statement with a where clause of the filters
      */
-    public String getSeqFilterSQL (SeqQueryTab queryObj, FieldMapper fields, FieldSeqTab fTab)
+    public String getSeqFilterSQL (SeqQueryTab queryObj, FieldMapper fMapObj, FieldSeqTab fTabObj)
     {
-	    String strQuery = "";
-	    String strRStat = "";
-	    	
-	    String [] libs = queryObj.getAllRequiredLibs(fTab);
-	    fields.setNFoldLibNames(libs);
-	    boolean usesCounts = queryObj.usesCounts();
-	    if(libs != null && libs.length > 0) {    		
-	    	for(int x=0; x<libs.length; x++) {
-	    		if (usesCounts) strRStat += "," + L + libs[x] + " AS LIB" + (x+1);
-	    		strRStat += ", " + LN + libs[x] + " AS LIBN" + (x+1);
-	    	}
-	    }
-   		strQuery = "SELECT " + fields.getDBFieldList() + strRStat + " FROM contig";
+	    String strQuery = "SELECT " + fMapObj.getDBFieldList(fTabObj.getNFoldObj()) + " FROM contig";
    
    		String queryJoin =  "";
    		String strGOID = queryObj.getGOterm();
@@ -824,10 +797,10 @@ public class FieldSeqData implements Serializable
    		} 
    		else whereClause="1";
    		
-   		String fieldJoin = getJoinForColumns(fields);
+   		String fieldJoin = getJoinForColumns(fMapObj);
    		
    		strQuery += queryJoin + fieldJoin + " where " + whereClause + " ORDER by contig.contigid";
-
+ 
 		return strQuery;
     }
     private String getJoinForColumns(FieldMapper fields) {

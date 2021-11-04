@@ -1,8 +1,8 @@
 package sng.util;
 
 /**************************************
- * Columns are declared here (FieldContigData, FieldPairsData), 
- * set as visible (selected) (FieldContigTab, FieldPairsTab), 
+ * Columns are declared here (FieldSeqData, FieldPairsData), 
+ * set as visible (selected) (FieldSeqTab, FieldPairsTab), 
  * and returned for query (QueryTab) and display of table (MainTableSort).
  * 
  * CAS322 no change, just tidied up formatting and comments
@@ -11,16 +11,19 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Vector;
 import java.util.Iterator;
+import java.util.HashSet;
 import java.sql.ResultSet;
 
 import sng.viewer.STCWFrame;
 import sng.viewer.panels.seqTable.FieldSeqData;
 import sng.viewer.panels.seqTable.FieldSeqTab;
+import sng.viewer.panels.seqTable.UIfieldNFold;
 import util.methods.Converters;
 import util.methods.ErrorReport;
 import util.methods.Out;
 import util.ui.DisplayFloat;
 import util.ui.DisplayInt;
+import util.database.Globalx;
 
 /**
  * The listFields is a vector of FieldData objects, which is a private class
@@ -63,33 +66,23 @@ public class FieldMapper
     }
     
     // FieldSeqTab and FieldPairsTab
-	public String [] getVisibleFieldNames ()
-	{
+	public String [] getVisibleFieldNames () {
 	    return getNamesFromIDs ( getVisibleFieldIDs ( ) );
 	}
-	public String [] getNfoldLibNames ()
-	{
-	    return nfoldLibNames;
-	}
-	// MainTableSort
-    public int getNumFields ( )
-    {
+	
+	/*******************************************
+	 * MainTableSort
+	 */
+    public int getNumFields ( ){
         return listFields.size();
     }
-    // MainTableSort
-    public String getFieldNameByID ( int nFieldID )
-    {
+    public String getFieldNameByID ( int nFieldID ){
         return getFieldByID ( nFieldID ).strName;
     }
-    // MainTableSort - sortByColumn
-    public String getDBNameByID ( int nFieldID )
-    {
+    public String getDBNameByID ( int nFieldID ){ // - sortByColumn
         return getFieldByID ( nFieldID ).strField;
     }  
-   
-    // for MainTableSort
-    public Object extractFieldByID ( String line, int nField )
-    {
+    public Object extractFieldByID ( String line, int nField ){
     	FieldData [] fields = getVisibleFields ( );
     	String [] row = line.split("\t");
     	for ( int i = 0; i < fields.length; ++i ) {
@@ -99,9 +92,8 @@ public class FieldMapper
         return null;
     }
        
-    // ContigListTab and PairListTab
-    public Object extractFieldByID ( Object obj, int nField)
-    {
+    // SeqTableTab and PairTableTab
+    public Object extractFieldByID ( Object obj, int nField) {
         Object[] row = (Object[])obj;
 	    	FieldData [] fields = getVisibleFields ( );
 	    	for ( int i = 0; i < fields.length; ++i ) {
@@ -111,39 +103,36 @@ public class FieldMapper
         return null;
     }
     // FieldPairsData
-    public void setFieldRequired ( int nID )
-    {
-    		getFieldByID ( nID ).bRequired = true;
+    public void setFieldRequired ( int nID ) {
+    	getFieldByID ( nID ).bRequired = true;
     }
     
-    // FieldContigTab and FieldMapper
-    public boolean isNFoldField( int id )
-    {
-    		return id >= FieldSeqData.N_FOLD_LIB && id <= FieldSeqData.N_FOLD_LIB_LIMIT;
+    // FieldSeqTab and FieldMapper
+    public boolean isNFoldField( int id ) {
+    	return id >= FieldSeqData.N_FOLD_LIB && id<= FieldSeqData.N_FOLD_LIB_LIMIT;
     }  
-    // FieldContigData, FieldPairsData
-    public void setDefaultFieldIDs ( int [] fieldIDs )
-    {        
+    
+    // FieldSeqData, FieldPairsData
+    public void setDefaultFieldIDs ( int [] fieldIDs ) {        
         defaultFieldIDs = fieldIDs;
     }    
     
     // called at startup by FieldTab.setUIFromFields
     public boolean getFieldRequiredByName ( String strName )
     {
-	    	FieldData f = getFieldByName ( strName );
-	    	if (f==null) return false; // not all databases have same columns
-	    	return f.bRequired;
+    	FieldData f = getFieldByName ( strName );
+    	if (f==null) return false; // not all databases have same columns
+    	return f.bRequired;
     }   
     // called by FieldTab.getFieldsFromUI
     public boolean hasFieldName(String name) {
-	    	String[] fieldNames = getFieldNames();
-	    	for (int i = 0;  i < fieldNames.length;  i++)
-	    		if (name.equals(fieldNames[i])) return true;
-	    	return false;
+    	String[] fieldNames = getFieldNames();
+    	for (int i = 0;  i < fieldNames.length;  i++)
+    		if (name.equals(fieldNames[i])) return true;
+    	return false;
     }
  // FieldTab, FieldMapper
-    public String [] getFieldNames ( )
-    {
+    public String [] getFieldNames ( ) {
         String [] names = new String [ listFields.size() ];
         int i = 0;
         Iterator<FieldData> iter = listFields.iterator();
@@ -160,65 +149,48 @@ public class FieldMapper
     	visibleFields = null; // To force it to recreate when getVisibleFields() is called
         visibleFieldIDs = getIDsFromNames ( fieldNames );
         Arrays.sort(visibleFieldIDs);
-   }
-   public void setVisibleNFold(String [] foldCols) {
-	   Vector<String> retVal = new Vector<String> ();
-	   if (foldCols!=null) {
-		   for(int x=0; x<foldCols.length; x++) {
-				String [] vals = foldCols[x].split("/");
-				if(!retVal.contains(vals[0])) retVal.add(vals[0]);
-				if(!retVal.contains(vals[1])) retVal.add(vals[1]);
-			}
-	   }
-	   nfoldLibNames = retVal.toArray(new String[0]);
-   }
-   public void setNFoldLibNames(String [] libs) {
-	   nfoldLibNames = new String [libs.length];
-	   for (int i=0; i<libs.length; i++) nfoldLibNames[i]=libs[i];
-   }
+    }
+  
     public void setVisibleFieldNames ( Object[] fieldNames )
     {
         visibleFieldIDs = getIDsFromNames ( fieldNames );
         Arrays.sort(visibleFieldIDs);
-   }
-    // FieldTab
+    }
+    // FieldSeqTab and FieldPairsTab
     public boolean isFieldVisible ( String strFieldName )
     {
 	    FieldData f = getFieldByName ( strFieldName );
 	    if (f == null) 	return false;
        	return isFieldVisible(f.nID);
     }
-    private FieldData getFieldByName ( String str )
-    {
+    private FieldData getFieldByName ( String str ) {
     	if (str==null) return null;
     		
         int n = getIndexForName ( str );
         if ( n >= 0)  return listFields.get( n );
         
-		if (theParentFrame!=null) {
-    		FieldSeqTab fieldObj = theParentFrame.getFieldContigTab();
-        	if(isSeq && fieldObj!=null) { // NFold
-        		n = fieldObj.getNFoldFieldID(str);
-        		if (n>=0) {
-        			addFloatField(n, str, null, null, null, null, null);
-        			return listFields.get( getIndexForID(n) );
-        		}
-        	}
+		if (theParentFrame!=null && isSeq) { // Nfold column may not be added yet
+    		FieldSeqTab fieldObj = theParentFrame.getFieldSeqTab();
+    		if (fieldObj!=null) {
+	    		UIfieldNFold nfoldObj = fieldObj.getNFoldObj();
+	    		if (nfoldObj!=null) {
+	        		n = nfoldObj.getIDForName(str);
+	        		if (n>=0) {
+	        			addFloatField(n, str, null, null, null, null, null);
+	        			return listFields.get( getIndexForID(n) );
+	        		}
+	        	}
+    		}
 		}
+	
 	   	return null;
-    }
-    
-    public void prtFieldByID(int nField, String msg) {
-    	FieldData f = getFieldByID(nField);
-    	System.err.println(msg + ": " + f.nID + " " + f.strName + "  " + f.strTable + "  " + f.strSubQuery);
-    }
+    }      
     private FieldData getFieldByID ( int nField )
     {
         int nIdx = getIndexForID ( nField );
         if ( nIdx < 0 ) nIdx = 0;
         return listFields.get( nIdx );
-    }
-    
+    }    
     private int getIndexForName ( String strName )
     {
     	int rc=-1;
@@ -232,18 +204,16 @@ public class FieldMapper
             }
         }
         return rc;
-    }
-    
-    private int getIndexForID ( int nField )
+    }   
+    private int getIndexForID ( int nID )
     {
         for ( int i = 0; i < listFields.size(); ++i ) {
             FieldData curField = listFields.get(i);
-            if ( curField.nID == nField )
+            if ( curField.nID == nID )
                 return i;
         }
         return -1;
-    }    
-    
+    }       
     private int [] getIDsFromNames ( Object [] fields )
     {
         Vector<Integer> ids = new Vector<Integer> ();
@@ -257,8 +227,7 @@ public class FieldMapper
         int [] retVal = new int[ids.size()];
         for(int x=0; x<retVal.length; x++) retVal[x] = ids.get(x);
         return retVal;
-    }    
-    
+    }      
     private String [] getNamesFromIDs ( int [] fields )
     {
         String [] names = new String [ fields.length ];
@@ -266,8 +235,7 @@ public class FieldMapper
             names[i] = getFieldByID ( fields[i] ).strName;
         }
         return names;
-    }    
-    
+    }       
     private FieldData [] getVisibleFields ( )
     {   
       	if ( visibleFields != null ) return visibleFields;
@@ -275,30 +243,23 @@ public class FieldMapper
       	CmpFieldData fieldCmp = new CmpFieldData();
  
       	Vector<FieldData> tempVisibleFields = new Vector<FieldData> ();
-        for (FieldData theField : listFields )
-        {
+        for (FieldData theField : listFields ) {
             if ( isFieldVisible ( theField.nID ))
-            {
             	tempVisibleFields.add(theField);
-            }
         }
         visibleFields = tempVisibleFields.toArray(new FieldData[0]);
         Arrays.sort(visibleFields, fieldCmp);
  
         return visibleFields;
-    }
-    
+    }   
     private boolean isFieldVisible ( int nID )
     {
     	int ids [] = getVisibleFieldIDs ();
     	
-    	for ( int i = 0; i <  ids.length; ++i )
-    	{ 	
+    	for ( int i = 0; i <  ids.length; ++i )	
     		if ( ids[i] == nID ) return true;
-    	}
     	return false;
-    }
-    
+    }    
     // ContigListTab and ContigPairListTab
     public int [] getVisibleFieldIDs ( )
     {
@@ -331,9 +292,8 @@ public class FieldMapper
     			results.add(tempID);
     	}
     	return results.toArray(new String [0]);
-    }  
-   
-    // STCWFrame, FieldContigTab
+    }     
+    // STCWFrame, FieldSeqTab
     public void setVisibleFieldIDsList ( String [] strVisFieldIDs )
     {
     	if ( strVisFieldIDs == null || strVisFieldIDs.length == 0 || 
@@ -354,8 +314,7 @@ public class FieldMapper
     		visibleFieldIDs = Converters.intCollectionToIntArray ( fieldsInts );
         	Arrays.sort(visibleFieldIDs);
 	   	}
-	}
-   
+	}  
     /**
      * Methods for Groups, where a group is Label for a set of columns on the Select Column page
      */
@@ -378,7 +337,6 @@ public class FieldMapper
     	}
     	return groupDescriptions.toArray(new String[0]);
     }
-
     // FieldTab while building UI
     public String [] getFieldNamesByGroup(String strGroupName) {
     	Vector<String> fieldNames = new Vector<String>();
@@ -429,7 +387,6 @@ public class FieldMapper
     	}    	
     	return fieldNames.toArray(new String[0]);
     }
- 
     /**
      * Methods for mapping the columns to the database
      * which include ones that build the SQL
@@ -493,101 +450,102 @@ public class FieldMapper
     }
     // XXX FieldSeqData
     // Returns the list of visible field names formatted to be part of a SQL statement
-    public String getDBFieldList ( )
+    // CAS335 add Nfold libs here without replicate
+    public String getDBFieldList (UIfieldNFold nFoldObj )
     {
-    	String strFields = null;
+    	HashSet <String> tpmVal = new HashSet <String> ();
+    	
+    	String LN = Globalx.LIBRPKM;
+    	
+    	if (nFoldObj!=null) {
+    		String [] libs = nFoldObj.getFoldLibs();
+    	
+	 	    if(libs != null && libs.length > 0) {    		
+	 	    	for(int x=0; x<libs.length; x++) 
+	 	    		tpmVal.add(LN + libs[x]);
+	 	    }
+    	}
+    	String colList = "";
     	FieldData [] fields = getVisibleFields ( );
+    	
         for ( int i = 0; i < fields.length; ++i )
         {
-            if ( strFields != null ) strFields += ", ";
-            else strFields = "";
+            if ( colList != "" ) colList += ", ";
  
-            if ( fields[i] == null || fields[i].strField == null || fields[i].strField.length()==0)
-            			strFields += "NULL"; // Place holder so we have the correct number of columns
-            else if (fields[i].nID==FieldSeqData.SEQ_ID_FIELD) // CAS304 KLUDGE - it has strSubquery if GOs
-            	strFields += fields[i].strTable + "." + fields[i].strField;
-            else if ( fields[i].strSubQuery != null )
-            		strFields += fields[i].strSubQuery;
-            else if ( fields[i].strTable != null )
-                strFields += fields[i].strTable + "." + fields[i].strField;
-            else
-                strFields += fields[i].strField;                   
+            if ( fields[i] == null || fields[i].strField == null || fields[i].strField.length()==0) {
+            	colList += "NULL"; // Place holder so we have the correct number of columns; n-fold
+            }
+            else if (fields[i].nID==FieldSeqData.SEQ_ID_FIELD) {
+            	colList += fields[i].strTable + "." + fields[i].strField;
+            }
+            else if (fields[i].nID>=FieldSeqData.LIBRARY_TPM_ALL && fields[i].nID<=FieldSeqData.LIBRARY_TPM_ALL) {
+            	colList += fields[i].strTable + "." + fields[i].strField;
+            	if (tpmVal.contains(fields[i].strField)) tpmVal.remove(fields[i].strField);
+            }
+            else if ( fields[i].strSubQuery != null ) { // CAS304  strSubquery for 3 types of Best Hits 
+            	colList += fields[i].strSubQuery;
+            }
+            else if ( fields[i].strTable != null ) {
+                colList += fields[i].strTable + "." + fields[i].strField;
+            }
+            else {
+                colList += fields[i].strField;  
+            }
         }
-       
-        return strFields;
-    }
-      
+        for (String col : tpmVal) {
+        	if ( colList != "" ) colList += ", ";
+        	colList += "contig." + col;
+        }
+        return colList;
+    }      
     /*
-     * QueryData
+     * sng.util.RunQuery.runDBQuery
      * The database has been queried. The fields array has all the database fields
-     * that are too be shown. Hence, the values can be extracted from the result set.
+     * that are to be shown. Hence, the values can be extracted from the result set.
      */
-    public String getObjFromSeqResultSet ( ResultSet rs, int nRow,  
-    		FieldSeqTab fieldObj) throws Exception
+    public String getObjFromSeqResultSet (ResultSet rs, int nRow, FieldSeqTab fieldObj) 
     {    	
-	    FieldData [] fields = getVisibleFields ( );
-		StringBuffer sb = new StringBuffer();
-		String nu = null;
-		
-		for ( int i = 0; i < fields.length; ++i )
-    	{
-			if( fields[i] == null)  {
-				sb.append(nu); 
-			}
-			else if ( fields[i].nType == FieldData.RECORD_ID ) {
-				sb.append(nRow );
-			}
-			/**
-			else if (fields[i].nID == FieldContigData.RSTAT_INC_FIELD) {
-				//Rstat was passed in for included libraries
-    			String [] includeLibs = theFilter.getIncludeLibs(); 
-    			if(incLib != null && includeLibs != null && includeLibs.length>0) {
-    				int [] contigCounts = new int[includeLibs.length];
-    				for(int x=0; x<contigCounts.length; x++) {    					
-    					contigCounts[x] = rs.getInt("LIB" + (getIndex(usedLibNames, includeLibs[x])+1));
-    				}
-        			sb.append(getRStat(contigCounts, incLib) );
-    			}
-    			else {
-    				sb.append(0);
-    			}
-    		}
-    		**/
-    		else if(fields[i].nID >= FieldSeqData.N_FOLD_LIB && fields[i].nID <= FieldSeqData.N_FOLD_LIB_LIMIT) {
-    			String [] libs = fields[i].strName.split("/");
-    			int index0=-1, index1=-1;
-    			for (int j=0; j<nfoldLibNames.length; j++) {
-    				if (nfoldLibNames[j].equals(libs[0]))  index0=(j+1);
-    				if (nfoldLibNames[j].equals(libs[1]))  index1=(j+1);
-    			}
-    			if (index0==-1 || index1==-1) {
-    				Out.PrtError("N fold in Field Mapper " + fields[i].strName);
-    				continue;
-    			}
-    			float A = rs.getFloat("LIBN" + index0);
-    			float B = rs.getFloat("LIBN" + index1);
-    			
-    			float result; 
-    			if(A>B) {
-        			if(B==0) B = .1f;
-    				result = A/B;
-    			}
-    			else {
-        			if(A==0) A = .1f;
-    				result = -1 * (B/A);
-    			}
-    			sb.append(result);
-    		}
-    		else 
-    		{
-    			Object data = rs.getObject( fields[i].strField );
-	    			sb.append(convertFromDBStr( fields[i], data )); 
-    		}
-			sb.append(MainTable.ROW_DELIMITER);
-    	}
-    	return sb.toString();
-    }
+    	FieldData [] fields = getVisibleFields ( );
+    	int i=0;
    
+    	try {
+    		StringBuffer sb = new StringBuffer();
+			String nu = null;
+			
+			for (i = 0; i < fields.length; ++i )
+	    	{
+				if( fields[i] == null)  {
+					sb.append(nu); 
+				}
+				else if ( fields[i].nType == FieldData.RECORD_ID ) {
+					sb.append(nRow );
+				}
+	    		else if (fields[i].nID >= FieldSeqData.N_FOLD_LIB && fields[i].nID <= FieldSeqData.N_FOLD_LIB_LIMIT) {
+	    			UIfieldNFold nFoldObj = fieldObj.getNFoldObj();
+	    			String delim = nFoldObj.getDelim();
+	    			
+	    			String [] libs = fields[i].strName.split(delim);
+	    				
+	    			double A = rs.getDouble(Globalx.LIBRPKM + libs[0]);
+	    			double B = rs.getDouble(Globalx.LIBRPKM + libs[1]);
+	    			
+	    			double result = nFoldObj.getFC(A, B);// CAS335 add log2(A/B)
+	    			
+	    			sb.append(result);
+	    		}
+	    		else { // everything else
+	    			Object data = rs.getObject( fields[i].strField );
+		    		sb.append(convertFromDBStr( fields[i], data )); 
+	    		}
+				sb.append(MainTable.ROW_DELIMITER);
+	    	}
+	    	return sb.toString();
+    	}
+    	catch (Exception e) {
+			ErrorReport.prtReport(e, "Parsing results: Column " + i + " '"+ fields[i].strField + "'");
+			return null;
+    	}
+    }  
     public String getObjFromPairResultSet ( ResultSet rs, int nRow) throws Exception
     {    	
     	FieldData [] fields = getVisibleFields ( );
@@ -674,48 +632,37 @@ public class FieldMapper
      * FieldContigData and FieldPairsData to add columns
      */
     
-    public void addBoolField ( int nID, String strName, String strTable, 
-    		String strField, String strGroupName, String strGroupDescription, 
-    		String strFieldDescription )
+    public void addBoolField ( int nID, String strName, String strTable, String strField, 
+    		String strGroupName, String strGroupDescription, String strFieldDescription )
     {
         addField ( nID, strName, strTable, strField, strGroupName, 
         		strGroupDescription, strFieldDescription, FieldData.BOOLEAN_TYPE ); 
     }
-    
-    public void addStringField ( int nID, String strName, String strTable, 
-    		String strField, String strGroupName, String strGroupDescription, 
-    		String strFieldDescription )
+    public void addStringField ( int nID, String strName, String strTable, String strField, 
+    		String strGroupName, String strGroupDescription, String strFieldDescription ) 
     {
         addField ( nID, strName, strTable, strField, strGroupName, 
         		strGroupDescription, strFieldDescription, FieldData.STRING_TYPE );
-    }
-    
-    public void addIntField ( int nID, String strName, String strTable, 
-    		String strField, String strGroupName, String strGroupDescription, 
-    		String strFieldDescription )
+    } 
+    public void addIntField ( int nID, String strName, String strTable, String strField, 
+    		String strGroupName, String strGroupDescription, String strFieldDescription ) 
     {
         addField ( nID, strName, strTable, strField, strGroupName, 
         		strGroupDescription, strFieldDescription, FieldData.INTEGER_TYPE );
     }
-    
-    public void addFloatField ( int nID, String strName, String strTable, 
-    		String strField, String strGroupName, String strGroupDescription,
-    		String strFieldDescription )
+    public void addFloatField ( int nID, String strName, String strTable, String strField, 
+    		String strGroupName, String strGroupDescription, String strFieldDescription )
     {
         addField ( nID, strName, strTable, strField, strGroupName, 
         		strGroupDescription, strFieldDescription, FieldData.FLOAT_TYPE );
     }
-    
-    public void addPercentField ( int nID, String strName, String strTable, 
-    		String strField, String strGroupName, String strGroupDescription, 
-    		String strFieldDescription )
+    public void addPercentField ( int nID, String strName, String strTable, String strField, 
+    		String strGroupName, String strGroupDescription, String strFieldDescription ) 
     {
         addField ( nID, strName, strTable, strField, strGroupName, 
         		strGroupDescription, strFieldDescription, FieldData.PERCENT_TYPE );
     }
-    
-    public void setFieldSubQuery ( int nID, String strField, String strQuery )
-    {
+    public void setFieldSubQuery ( int nID, String strField, String strQuery ) {
     	FieldData field = getFieldByID ( nID );
     	field.strField = strField;
     	field.strSubQuery = "(" + strQuery + ") as " + strField;
@@ -758,15 +705,17 @@ public class FieldMapper
 			else return 0;
 		}
     }
+    public void prtFieldByID(int nField, String msg) {
+    	FieldData f = getFieldByID(nField);
+    	Out.tmp(msg + ": " + f.nID + " " + f.strName + "  " + f.strTable + "  " + f.strSubQuery);
+    }
     public void prt() {
+    	Out.tmp("From FieldMapper:");
     	FieldData [] fields = getVisibleFields ( );
         for ( int i = 0; i < fields.length; ++i )
-        {
-        	Out.prt(i + " " + fields[i].strName);
-        }
+        	Out.tmp(i+ " " + fields[i].nID + " " + fields[i].strName );
     }
-    /* Instance variables */
-    
+    /* Instance variables */   
     private Vector<FieldData> listFields = new Vector<FieldData> ();
     private Vector <String> listGroups = new Vector<String>();
     
@@ -775,9 +724,8 @@ public class FieldMapper
     
     private int [] defaultFieldIDs = null;
     private Vector<String> allLibNames = null;
-
+    
     private STCWFrame theParentFrame = null;
    
     private boolean isSeq=true;
-    private String [] nfoldLibNames=null;
 }

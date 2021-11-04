@@ -25,15 +25,14 @@ import java.awt.event.ItemListener;
 import java.util.prefs.Preferences;
 import java.util.Vector;
 
-
 import sng.database.Globals;
 import sng.util.FieldMapper;
 import sng.util.Tab;
 import sng.viewer.STCWFrame;
 import util.methods.Static;
+import util.methods.ErrorReport;
 import util.ui.CollapsiblePanel;
 import util.ui.UserPrompt;
-import util.ui.DisplayFloat;
 
 public class FieldSeqTab extends Tab implements ActionListener {
 	private static final long serialVersionUID = -1208399171249754290L;
@@ -53,7 +52,7 @@ public class FieldSeqTab extends Tab implements ActionListener {
 		
 		sTCWdb = theParentFrame.getdbName(); 
 		prefsRoot = theParentFrame.getPreferencesRoot();
-		theMapper = FieldSeqData.createContigFieldMapper(theParentFrame);
+		fMapObj = FieldSeqData.createSeqFieldMapper(theParentFrame);
 		
 		createColumnPanel();
 		
@@ -88,16 +87,16 @@ public class FieldSeqTab extends Tab implements ActionListener {
 	}
 	
 	/***************************************
-	 * when the Mapper was created, all columns were instantiate from FieldContigData.
+	 * when the Mapper was created, all columns were instantiate from FieldSeqData.
 	 * Use those for creating the UI. Not all are instantiated.
 	 */
 	private void createUIFromMapper(int tabLevel) {
-		String[] grpNames = theMapper.getGroupNames();
-		String[] grpDesc = theMapper.getGroupDescriptions();
+		String[] grpNames = fMapObj.getGroupNames();
+		String[] grpDesc =  fMapObj.getGroupDescriptions();
 		
 		for (int i = 0;  i < grpNames.length;  i++) {
-	        String[] fieldNames = theMapper.getFieldNamesByGroup(grpNames[i]);
-	        String[] fieldDesc = theMapper.getFieldDescriptionsByGroup(grpNames[i]);
+	        String[] fieldNames = fMapObj.getFieldNamesByGroup(grpNames[i]);
+	        String[] fieldDesc =  fMapObj.getFieldDescriptionsByGroup(grpNames[i]);
 	        
 	        if(grpNames[i].equals(FieldSeqData.GROUP_NAME_OVER_BEST)) {
 	        		bestObj.addNames(fieldNames, FieldSeqData.GROUP_NAME_OVER_BEST);
@@ -115,29 +114,29 @@ public class FieldSeqTab extends Tab implements ActionListener {
 	        CollapsiblePanel subPanel = new CollapsiblePanel(name, desc);
 	     
 	        if(grpNames[i].equals(FieldSeqData.GROUP_NAME_CONTIG)) {
-	        		ctgGeneralSelect = createGroupUIFromFields(subPanel, fieldNames, fieldDesc, grpNames[i]);
+	        	ctgGeneralSelect = createGroupUIFromFields(subPanel, fieldNames, fieldDesc, grpNames[i]);
 	        }
 	        else if(grpNames[i].equals(FieldSeqData.GROUP_NAME_LIB)) {
 		        createLibUIFromFields(subPanel, fieldNames, grpNames[i], fieldDesc);
 	        }
 	        else if(grpNames[i].equals(FieldSeqData.GROUP_NAME_SEQ_SET)) {
-	        		ctgSetSelect = createGroupUIFromFields(subPanel, fieldNames, fieldDesc, grpNames[i]);
+	        	ctgSetSelect = createGroupUIFromFields(subPanel, fieldNames, fieldDesc, grpNames[i]);
 	        }
 	        else if(grpNames[i].equals(FieldSeqData.GROUP_NAME_PVAL)) {
-	        		createPvalUIFromFields(subPanel, fieldNames, fieldDesc, grpNames[i]);
+	        	createPvalUIFromFields(subPanel, fieldNames, fieldDesc, grpNames[i]);
 	        }
 	        else if(grpNames[i].equals(FieldSeqData.GROUP_NAME_RSTAT)) {
- 				nFoldObj = new UIfieldNFold(libListSelect, false); 
+ 				nFoldObj = new UIfieldNFold(libListSelect, fMapObj); 
  				subPanel.add(nFoldObj);
  				
  				subPanel.add(new JSeparator());
-	        		ctgRStatSelect = createGroupUIFromFields(subPanel, fieldNames, fieldDesc, grpNames[i]);
+	        	ctgRStatSelect = createGroupUIFromFields(subPanel, fieldNames, fieldDesc, grpNames[i]);
 	        }
 	        else if(grpNames[i].equals(FieldSeqData.GROUP_NAME_FIRST_BEST)) {
-	        		createBestHit(subPanel, fieldNames, fieldDesc, name);
+	        	createBestHit(subPanel, fieldNames, fieldDesc, name);
 	        }
 	        else if(grpNames[i].equals(FieldSeqData.GROUP_NAME_SNPORF)) {
-	        		ctgSNPORFSelect = createGroupUIFromFields(subPanel, fieldNames, fieldDesc, grpNames[i]);
+	        	ctgSNPORFSelect = createGroupUIFromFields(subPanel, fieldNames, fieldDesc, grpNames[i]);
 	        }
 	        centerPanel.add(new ItemPanel(subPanel, tabLevel));	 // create a "tab" option	
 		}
@@ -149,23 +148,23 @@ public class FieldSeqTab extends Tab implements ActionListener {
 		JCheckBox [] retVal = new JCheckBox[fieldNames.length];
 	
 		for (int j = 0;  j < fieldNames.length;  j++) {
-		    	retVal[j] = new JCheckBox(fieldNames[j], false);
-		    	retVal[j].setBackground(Color.WHITE);
-		    	retVal[j].addActionListener(this);
-		    	
-		    	boolean done = false;
-		    	for(int x=0; x<ALWAYS_SELECTED.length && !done; x++) {
-		    		if(fieldNames[j].equals(ALWAYS_SELECTED[x])) {
-		    			done = true;
-		    			retVal[j].setSelected(true);
-		    			retVal[j].setEnabled(false);
-		    		}
-		    	}
-		    	if (grpName.equals(FieldSeqData.GROUP_NAME_CONTIG)) {
-		    		if (fieldNames[j].equals("#Taxonomy") || fieldNames[j].equals("SeqGroup"))
-		    			subPanel.add(new JSeparator());
-		    	}
-		    	subPanel.add(createRowWithCheck(retVal[j], fieldDesc[j]));
+	    	retVal[j] = new JCheckBox(fieldNames[j], false);
+	    	retVal[j].setBackground(Color.WHITE);
+	    	retVal[j].addActionListener(this);
+	    	
+	    	boolean done = false;
+	    	for(int x=0; x<ALWAYS_SELECTED.length && !done; x++) {
+	    		if(fieldNames[j].equals(ALWAYS_SELECTED[x])) {
+	    			done = true;
+	    			retVal[j].setSelected(true);
+	    			retVal[j].setEnabled(false);
+	    		}
+	    	}
+	    	if (grpName.equals(FieldSeqData.GROUP_NAME_CONTIG)) {
+	    		if (fieldNames[j].equals("#Taxonomy") || fieldNames[j].equals("SeqGroup"))
+	    			subPanel.add(new JSeparator());
+	    	}
+	    	subPanel.add(createRowWithCheck(retVal[j], fieldDesc[j]));
 		}
 		return retVal;
 	}
@@ -195,18 +194,17 @@ public class FieldSeqTab extends Tab implements ActionListener {
 	}
 	private void createLibUIFromFields(CollapsiblePanel subPanel, 
 			String [] fieldNames, String grpName, String[] fieldDesc) {
-		Integer[] fieldIDs = theMapper.getFieldIDsByGroup(grpName);
-		int minID = FieldSeqData.N_LIBRARY_COUNT_ALL;
+		Integer[] fieldIDs = fMapObj.getFieldIDsByGroup(grpName);
+		int minID = FieldSeqData.LIBRARY_TPM_ALL;
 		int maxID = FieldSeqData.CONTIG_SET_COUNT;
 		
-		// Count RPKM Panel
+		// Count TPM/RPKM Panel
 		JPanel libCntPanel = Static.createRowPanel();
 		
 		chkLibExpLevel = Static.createCheckBox("Counts");
 		chkLibExpLevel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				updateLibSelectedGroupFields(FieldSeqData.LIBRARY_COUNT_ALL, 
-						FieldSeqData.N_LIBRARY_COUNT_ALL);
+				updateLibSelectedGroupFields(FieldSeqData.LIBRARY_COUNT_ALL, FieldSeqData.LIBRARY_TPM_ALL);
 			}
 		});
 		libCntPanel.add(chkLibExpLevel);
@@ -215,8 +213,7 @@ public class FieldSeqTab extends Tab implements ActionListener {
 		chkLibNExpLevel = Static.createCheckBox(norm + " Normalized Counts");
 		chkLibNExpLevel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				updateLibSelectedGroupFields(FieldSeqData.N_LIBRARY_COUNT_ALL, 
-						FieldSeqData.CONTIG_SET_COUNT);
+				updateLibSelectedGroupFields(FieldSeqData.LIBRARY_TPM_ALL, FieldSeqData.CONTIG_SET_COUNT);
 			}
 		});
 		libCntPanel.add(chkLibNExpLevel);
@@ -245,7 +242,6 @@ public class FieldSeqTab extends Tab implements ActionListener {
 	   	}
 		libListSelect = mainList.toArray(new JCheckBox[0]);
 		
-		// Check/Uncheck
 		chkLibSelAll = Static.createCheckBox("Check/uncheck all");
 		chkLibSelAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -264,18 +260,14 @@ public class FieldSeqTab extends Tab implements ActionListener {
 		pValSelect = createGroupUIFromFields(subPanel, fieldNames, fieldDesc, grpName);
 		
 		JCheckBox chkAllPval = Static.createCheckBox("Check/uncheck all"); 
-		chkAllPval.addItemListener(	
-			new ItemListener() 
-			{
-				public void itemStateChanged(ItemEvent e) 
-				{
-					JCheckBox chkall = (JCheckBox)e.getSource();
-					for (JCheckBox chk : pValSelect) {
-						chk.setSelected(chkall.isSelected());
-					}
+		chkAllPval.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				JCheckBox chkall = (JCheckBox)e.getSource();
+				for (JCheckBox chk : pValSelect) {
+					chk.setSelected(chkall.isSelected());
 				}
 			}
-		);
+		});
 		JPanel chkPanel = Static.createRowPanel();
 		chkPanel.add(chkAllPval);
 		subPanel.add(chkPanel);
@@ -287,7 +279,6 @@ public class FieldSeqTab extends Tab implements ActionListener {
 				expandGroups(true);
 			}
 		});
-		
 		JButton btnCollapseAll = new JButton("Collapse All");
 		btnCollapseAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {	
@@ -306,7 +297,6 @@ public class FieldSeqTab extends Tab implements ActionListener {
 				refreshAllTables();
 			}
 		});
-		
 		JButton btnHelp = new JButton("Help");
 		btnHelp.setBackground(Globals.HELPCOLOR);
 		btnHelp.addActionListener(new ActionListener() {
@@ -325,8 +315,7 @@ public class FieldSeqTab extends Tab implements ActionListener {
 		buttonPanel.add( Box.createHorizontalGlue() );
 		buttonPanel.add(btnHelp);   
 		buttonPanel.add(Box.createHorizontalStrut(40));
-		buttonPanel.setMaximumSize( new Dimension ( Integer.MAX_VALUE, 
-				(int)buttonPanel.getPreferredSize ().getHeight() ) );
+		buttonPanel.setMaximumSize(new Dimension (Integer.MAX_VALUE, (int)buttonPanel.getPreferredSize ().getHeight()));
 		return buttonPanel;
 	}
 	// end create UI
@@ -337,35 +326,33 @@ public class FieldSeqTab extends Tab implements ActionListener {
 		
 		String prefList = prefsRoot.get(prefLabel(), "");
 		if (!prefList.contains("Seq ID")) prefList += "\tSeq ID"; // Remove: It is required -- just while changing code, lost it.
-		theMapper.setVisibleFieldNames(prefList.split("\t"));
+		fMapObj.setVisibleFieldNames(prefList.split("\t"));
 		
 		setNFoldFromPrefs();
 	}
 	private void setNFoldFromPrefs() {
 		if (prefsRoot==null || nFoldObj==null) return;
 		
-        String [] names = prefsRoot.get(prefLabel(), "").split("\t");
-        String [] ids =   prefsRoot.get(prefID(), "").split(",");
+        String [] names = prefsRoot.get(prefLabel(), "").split("\t"); // columns names
+        String [] ids =   prefsRoot.get(prefID(), "").split(",");	  // ids from FieldSeqData
         if (names.length <= 1) return;
-
         	
         for(int x=0; x<ids.length; x++) {	// initiates columns in nFold object
-			if(theMapper.isNFoldField(Integer.parseInt(ids[x])) && x<names.length) {
-				nFoldObj.initFoldColumn(names[x]);
+        	int nID = Integer.parseInt(ids[x]);
+			if(fMapObj.isNFoldField(nID) && x<names.length) {
+				nFoldObj.initColumnFromPref(names[x]);
 			}
 		}
-        theMapper.setVisibleNFold(getFoldColumns());  // assigns the names to mapper
-        
-        nFoldObj.addFoldColumns(theMapper); // assigns column numbers to mapper 
+        nFoldObj.addColumnsToMapper(fMapObj); // assigns column numbers to mapper 
 	}
 	
 	// On started and Restore Defaults
 	private void setSelectedFromMapper() {
 		setSelectedForGroup(ctgGeneralSelect, 	FieldSeqData.GROUP_NAME_CONTIG);
 		setSelectedForGroup(ctgSetSelect,  		FieldSeqData.GROUP_NAME_SEQ_SET);
-		setSelectedForGroup(pValSelect, 			FieldSeqData.GROUP_NAME_PVAL);
-		setSelectedForGroup(ctgRStatSelect, 		FieldSeqData.GROUP_NAME_RSTAT);
-		setSelectedForGroup(ctgDBHitSelect, 		FieldSeqData.GROUP_NAME_CNTS);
+		setSelectedForGroup(pValSelect, 		FieldSeqData.GROUP_NAME_PVAL);
+		setSelectedForGroup(ctgRStatSelect, 	FieldSeqData.GROUP_NAME_RSTAT);
+		setSelectedForGroup(ctgDBHitSelect, 	FieldSeqData.GROUP_NAME_CNTS);
 		setSelectedForGroup(ctgSNPORFSelect, 	FieldSeqData.GROUP_NAME_SNPORF);
 		
 		setSelectedForBest();
@@ -377,12 +364,12 @@ public class FieldSeqTab extends Tab implements ActionListener {
 		for(int x=0; x<chkFields.length; x++) {
 			String name = chkFields[x].getText();
 		
-			if (theMapper.getFieldRequiredByName(name)) {
+			if (fMapObj.getFieldRequiredByName(name)) {
 				chkFields[x].setEnabled(false);
 				chkFields[x].setSelected(true);
 			}
 			else {
-				boolean selected = theMapper.isFieldVisible(name);
+				boolean selected = fMapObj.isFieldVisible(name);
 				chkFields[x].setSelected(selected);
 			}
 		}
@@ -393,19 +380,19 @@ public class FieldSeqTab extends Tab implements ActionListener {
 		JCheckBox [] chk = bestObj.firstChk;
 		String [] name = bestObj.firstLabel;
 		for(int i=0; i<chk.length; i++) {
-			boolean selected = theMapper.isFieldVisible(name[i]);
+			boolean selected = fMapObj.isFieldVisible(name[i]);
 			chk[i].setSelected(selected);
 		}
 		chk = bestObj.overChk;
 		name = bestObj.overLabel;
 		for(int i=0; i<chk.length; i++) {
-			boolean selected = theMapper.isFieldVisible(name[i]);
+			boolean selected = fMapObj.isFieldVisible(name[i]);
 			chk[i].setSelected(selected);
 		}
 		chk = bestObj.goChk;
 		name = bestObj.goLabel;
 		for(int i=0; i<chk.length; i++) {
-			boolean selected = theMapper.isFieldVisible(name[i]);
+			boolean selected = fMapObj.isFieldVisible(name[i]);
 			chk[i].setSelected(selected);
 		}
 	}
@@ -416,25 +403,24 @@ public class FieldSeqTab extends Tab implements ActionListener {
 		Vector<String> colNames = new Vector<String> ();
 		for(int x=0; x<temp.length; x++) colNames.add(temp[x]);
 		
-		String [] strIDList = theMapper.getVisibleFieldIDsStr();
-		String [] strLabelList = theMapper.getVisibleFieldNames();
+		String [] strIDList = fMapObj.getVisibleFieldIDsStr();
+		String [] strLabelList = fMapObj.getVisibleFieldNames();
 		boolean expLevel = chkLibExpLevel.isSelected();
 		boolean expNLevel = chkLibNExpLevel.isSelected();
 		
 		for(int x=0; x<strIDList.length; x++) {
 			int id = Integer.parseInt(strIDList[x]);
-			if(id >= FieldSeqData.LIBRARY_COUNT_ALL && id < FieldSeqData.N_LIBRARY_COUNT_ALL && 
+			if(id >= FieldSeqData.LIBRARY_COUNT_ALL && id < FieldSeqData.LIBRARY_TPM_ALL && 
 					colNames.contains(strLabelList[x])) {
 				expLevel = true;
 				chkFields[id - FieldSeqData.LIBRARY_COUNT_ALL].setSelected(true);
 			}
-			else if(id >= FieldSeqData.N_LIBRARY_COUNT_ALL && id < FieldSeqData.CONTIG_SET_COUNT && 
+			else if(id >= FieldSeqData.LIBRARY_TPM_ALL && id < FieldSeqData.CONTIG_SET_COUNT && 
 					colNames.contains(strLabelList[x])) {
 				expNLevel = true;
-				chkFields[id - FieldSeqData.N_LIBRARY_COUNT_ALL].setSelected(true);
+				chkFields[id - FieldSeqData.LIBRARY_TPM_ALL].setSelected(true);
 			}
 		}
-
 		chkLibExpLevel.setSelected(expLevel);
 		chkLibNExpLevel.setSelected(expNLevel);
 		
@@ -452,7 +438,6 @@ public class FieldSeqTab extends Tab implements ActionListener {
 		chkLibSelAll.setSelected(found);
 	}
 	
-	
 	/************************************************
 	 * Set Mapper fields from Selected so used in Query. 
 	 */
@@ -467,10 +452,10 @@ public class FieldSeqTab extends Tab implements ActionListener {
 		selected.addAll(getSelecteForGroup(ctgDBHitSelect));
 		selected.addAll(getSelectedForBest());
 		selected.addAll(getSelecteForGroup(ctgSNPORFSelect));
-		selected.addAll(getSelectedFromNFold());
+		if (nFoldObj!=null)
+			selected.addAll(nFoldObj.getFoldColsVec());
 		
-		theMapper.setVisibleField(selected.toArray());
-		theMapper.setVisibleNFold(getFoldColumns());
+		fMapObj.setVisibleField(selected.toArray());
 		
 		setPrefFromMapper();
 	}
@@ -481,7 +466,7 @@ public class FieldSeqTab extends Tab implements ActionListener {
 		for(int x=0; x<chkSelections.length; x++) {
 			String name = chkSelections[x].getText();
 			if (chkSelections[x].isSelected()) {
-				if (theMapper.hasFieldName(name)) retVal.add(name);
+				if (fMapObj.hasFieldName(name)) retVal.add(name);
 			}			
 		}	
 		return retVal;
@@ -493,19 +478,19 @@ public class FieldSeqTab extends Tab implements ActionListener {
 		for (int i=0; i<bestObj.firstChk.length; i++) {
 			if (bestObj.firstChk[i].isSelected()) {
 				String name = bestObj.firstLabel[i];
-				if (theMapper.hasFieldName(name)) retVal.add(name);
+				if (fMapObj.hasFieldName(name)) retVal.add(name);
 			}
 		}
 		for (int i=0; i<bestObj.overChk.length; i++) {
 			if (bestObj.overChk[i].isSelected()) {
 				String name = bestObj.overLabel[i];
-				if (theMapper.hasFieldName(name)) retVal.add(name);
+				if (fMapObj.hasFieldName(name)) retVal.add(name);
 			}
 		}
 		for (int i=0; i<bestObj.goChk.length; i++) {
 			if (bestObj.goChk[i].isSelected()) {
 				String name = bestObj.goLabel[i];
-				if (theMapper.hasFieldName(name)) retVal.add(name);
+				if (fMapObj.hasFieldName(name)) retVal.add(name);
 			}
 		}
 		return retVal;
@@ -527,26 +512,16 @@ public class FieldSeqTab extends Tab implements ActionListener {
 		return retVal;		
 	}
 	
-	private Vector<String> getSelectedFromNFold() {
-		Vector<String> retVal = new Vector<String> ();
-		if (nFoldObj==null) return retVal;
-		
-		String [] names = nFoldObj.getColumnNames();
-		for(int x=0; x<names.length; x++) {
-			if(!retVal.contains(names[x])) retVal.add(names[x]);
-		}
-		return retVal;		
-	}
 	private void updateLibSelectedGroupFields(int min, int max) {
 		if(min >= 0 && max >= 0)
-			theMapper.hideIDRange(min, max);
+			fMapObj.hideIDRange(min, max);
 	}
 	
 	private void setPrefFromMapper() {
 		try {
 			if (prefsRoot==null) return;
-	        String strLabelList = Static.join(theMapper.getVisibleFieldNames(), "\t");
-	        String strIDList = Static.join( theMapper.getVisibleFieldIDsStr(), "," );
+	        String strLabelList = Static.join(fMapObj.getVisibleFieldNames(), "\t");
+	        String strIDList    = Static.join(fMapObj.getVisibleFieldIDsStr(), "," );
 	        prefsRoot.put ( prefID(), strIDList );
 	        prefsRoot.flush();
 	        prefsRoot.put ( prefLabel(), strLabelList );
@@ -555,9 +530,7 @@ public class FieldSeqTab extends Tab implements ActionListener {
 	        //prefsRoot.put(DisplayFloat.pvalCutPref, DisplayFloat.getPvalCutPrefString());
 			prefsRoot.flush();
 		}
-		catch (Exception err) { 
-			System.err.println("Could not get preferences -- continuing... ");
-		}
+		catch (Exception err) {ErrorReport.prtReport(err, "Could not get preferences -- continuing... ");}
 	}
 	
 	/************** Utilities ************************/
@@ -577,7 +550,7 @@ public class FieldSeqTab extends Tab implements ActionListener {
 	private void refreshAllTables() {
 		Tab tabs[] = getParentFrame().tabbedPane.getTabs();
 		for ( int i = 0; i < tabs.length; ++i ) {
-			// Update any open contig list tabs
+			// Update any open seq list tabs
 			if ( tabs[i] instanceof SeqTableTab ) {
 				SeqTableTab tab = (SeqTableTab)tabs[i];
 				if(tab.getQuery() != null && tab.getContigIDs() != null)
@@ -590,45 +563,36 @@ public class FieldSeqTab extends Tab implements ActionListener {
 	
 	/*************** Public *****************/
 	// something is selected/deselected on column panel
-	public void actionPerformed(ActionEvent e) {
-		
-	}
+	public void actionPerformed(ActionEvent e) {}
 			
 	public FieldMapper getMapper() { // called before query. mapObj is belongs to this query.
 		setMapperFromSelected();
-		FieldMapper mapObj = FieldSeqData.createContigFieldMapper(theParentFrame);
-		mapObj.setVisibleFieldNames(theMapper.getVisibleFieldNames());
-		mapObj.setNFoldLibNames(theMapper.getNfoldLibNames());
+		FieldMapper mapObj = FieldSeqData.createSeqFieldMapper(theParentFrame);
+		mapObj.setVisibleFieldNames(fMapObj.getVisibleFieldNames());
+		// CAS335 get them, then set them? 
+		// mapObj.setNFoldLibNames(theMapper.getNfoldLibNames());
 		return mapObj;
 	}
 	
-	public String [] getFoldColumns() { 
-		if (nFoldObj==null) return null;
-		return nFoldObj.getColumnNames(); 
+	public UIfieldNFold getNFoldObj() {
+		return nFoldObj;
 	}
-	public int getNFoldFieldID(String name) { 
-		if (nFoldObj==null) return 0;
-		return nFoldObj.getIDForName(name); 
-	}
-	
 	private void clear() {
 		if (nFoldObj!=null) nFoldObj.clear();
 		
-		theMapper.setVisibleFieldIDsList(null); // sets defaults
+		fMapObj.setVisibleFieldIDsList(null); // sets defaults
 		setSelectedFromMapper();
 		
 		if(libListSelect != null) {
-			for(int x=0; x<libListSelect.length; x++) {
+			for(int x=0; x<libListSelect.length; x++) 
 				libListSelect[x].setSelected(false);
-			}
 		
 			chkLibSelAll.setSelected(false);
 			chkLibExpLevel.setSelected(false);
 			chkLibNExpLevel.setSelected(true);
 		}
 	}
-	public void close()
-	{
+	public void close(){
 		setMapperFromSelected();
 		setPrefFromMapper();
 		
@@ -641,12 +605,12 @@ public class FieldSeqTab extends Tab implements ActionListener {
 
 		public ItemPanel(CollapsiblePanel cp, int tabLevel)
 		{
-	    		setLayout(new BoxLayout ( this, BoxLayout.X_AXIS ));
-	    		setAlignmentX(Component.LEFT_ALIGNMENT);
-	    		setBackground(Color.WHITE);
-	    		if(tabLevel > 0)
-	    			add(Box.createRigidArea(new Dimension(tabLevel, 0)));
-	    		add(cPanel = cp);
+    		setLayout(new BoxLayout ( this, BoxLayout.X_AXIS ));
+    		setAlignmentX(Component.LEFT_ALIGNMENT);
+    		setBackground(Color.WHITE);
+    		if(tabLevel > 0)
+    			add(Box.createRigidArea(new Dimension(tabLevel, 0)));
+    		add(cPanel = cp);
 		}
 		
 		public CollapsiblePanel getPanel() { return cPanel; }
@@ -675,6 +639,6 @@ public class FieldSeqTab extends Tab implements ActionListener {
 	private JPanel centerPanel = null;
 	
 	private STCWFrame theParentFrame=null;
-	private FieldMapper theMapper=null;
+	private FieldMapper fMapObj=null;
 	private Preferences prefsRoot = null;
 }

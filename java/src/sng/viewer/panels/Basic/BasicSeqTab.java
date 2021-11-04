@@ -393,9 +393,12 @@ public class BasicSeqTab extends Tab {
 	public Object getValueAt(int row, int index) {
 		 return seqObjList.get(row).getValueAt(index);
 	}
-	public void removeFromList(int row) {
-		 seqObjList.remove(row);
+	public void deleteFromList(int [] rows) { // CAS335 BasicTable was calling row by row
+		for(int x=rows.length-1; x>=0; x--) {
+			seqObjList.remove(rows[x]);
+		}
 	}
+	
 	public void updateTopButtons(int row) {
 		btnViewSeqs.setEnabled(row>0);
 		btnCopy.setEnabled(row==1);
