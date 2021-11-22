@@ -440,103 +440,103 @@ public class FieldSeqData implements Serializable
     private static void addHits(FieldMapper mapper, MetaData metaData) {
         mapper.addStringField( FIRST_BEST_UNIPROT_FIELD, "BS Hit ID", TABLE_FIRST_BEST, 
         		"uniprot_id", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-        		"AnnoDB ID of hit with the best bitscore to the sequence." ); 
+        		"AnnoDB ID of hit with the best bit-score to the sequence." ); 
         mapper.setFieldSubQuery(FIRST_BEST_UNIPROT_FIELD, "firstbestid", TABLE_FIRST_BEST + ".uniprot_id");
         
         mapper.addStringField( FIRST_BEST_DESCRIPTION, "BS Description", TABLE_FIRST_BEST_DETAIL, 
         		"description", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-        		"Description of the best bitscore." ); 
+        		"Description of the best bit-score." ); 
         mapper.setFieldSubQuery(FIRST_BEST_DESCRIPTION, "firstbestdescrip", TABLE_FIRST_BEST_DETAIL + ".description");
          
         mapper.addStringField( FIRST_BEST_SPECIES, "BS Species", TABLE_FIRST_BEST_DETAIL, 
         		"species", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-        		"Species of the best bitscore." ); 
+        		"Species of the best bit-score." ); 
         mapper.setFieldSubQuery(FIRST_BEST_SPECIES, "firstbestspecies", TABLE_FIRST_BEST_DETAIL + ".species");
         
         mapper.addStringField( FIRST_BEST_DBTYPE_FIELD, "BS DB type", TABLE_FIRST_BEST, 
         		"dbtype", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-        		"Type (e.g. SP (SwissProt) or TR (TrEMBL)) of the best bitscore." ); 
+        		"Type (e.g. SP (SwissProt) or TR (TrEMBL)) of the best bit-score." ); 
         mapper.setFieldSubQuery(FIRST_BEST_DBTYPE_FIELD, "firstbestdbtype", TABLE_FIRST_BEST + ".dbtype");
         
         mapper.addStringField( FIRST_BEST_TAXO_FIELD, "BS Taxo", TABLE_FIRST_BEST, 
         		"taxonomy", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-        		"Taxonomy (or sequence type) of the database for the best bitscore." ); 
+        		"Taxonomy (or sequence type) of the database for the best bit-score." ); 
         mapper.setFieldSubQuery(FIRST_BEST_TAXO_FIELD, "firstbesttaxo", TABLE_FIRST_BEST + ".taxonomy");
        
         mapper.addFloatField( FIRST_BEST_EVALUE_FIELD, "BS E-val", TABLE_FIRST_BEST, 
         		"e_value", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-        		"E-value of the best bitscore." );
+        		"E-value of the best bit-score." );
         mapper.setFieldSubQuery(FIRST_BEST_EVALUE_FIELD, "firstbesteval", TABLE_FIRST_BEST + ".e_value");
         
         mapper.addFloatField( FIRST_BEST_BIT_SCORE_FIELD, "BS Bitscore", TABLE_FIRST_BEST, //CAS331 change from Int
         		"bit_score", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-        		"Bit score of the best bitscore." );
+        		"Bit-score of the best bit-score." );
         mapper.setFieldSubQuery(FIRST_BEST_BIT_SCORE_FIELD, "firstbestbitscore", TABLE_FIRST_BEST + ".bit_score");
         
         mapper.addFloatField( FIRST_BEST_PERCENT_IDENT, "BS %Sim", TABLE_FIRST_BEST, //CAS331 change from Int
         		"percent_id", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST,
-        		"Percent similarity of the best bitscore");
+        		"Percent similarity of the best bit-score");
         mapper.setFieldSubQuery(FIRST_BEST_PERCENT_IDENT, "firstbestpercentid", TABLE_FIRST_BEST + ".percent_id");
  
         mapper.addIntField( FIRST_BEST_ALIGN_LEN_FIELD, "BS Align", TABLE_FIRST_BEST, 
         		"alignment_len", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-        		"Alignment length of the best bitscore." ); 
+        		"Alignment length of the best bit-score." ); 
         mapper.setFieldSubQuery(FIRST_BEST_ALIGN_LEN_FIELD, "firstbestalignlen", TABLE_FIRST_BEST + ".alignment_len");
         
         mapper.addIntField( FIRST_BEST_CTG_START_FIELD, "BS SeqStart", TABLE_FIRST_BEST, 
         		"ctg_start", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-        		"Start of the match of the sequence for the best bitscore." );
+        		"Start of the match of the sequence for the best bit-score." );
         mapper.setFieldSubQuery(FIRST_BEST_CTG_START_FIELD, "firstbestctgstart", TABLE_FIRST_BEST + ".ctg_start");
         
         mapper.addIntField( FIRST_BEST_CTG_END_FIELD, "BS SeqEnd", TABLE_FIRST_BEST, 
         		"ctg_end", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-        		"End of the match of the sequence for the best bitscore." );
+        		"End of the match of the sequence for the best bit-score." );
         mapper.setFieldSubQuery(FIRST_BEST_CTG_END_FIELD, "firstbestctgend", TABLE_FIRST_BEST + ".ctg_end");
         
         mapper.addIntField( FIRST_BEST_CTG_COV_FIELD, "BS %SeqCov", TABLE_FIRST_BEST, 
         		"ctg_cov", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-        		"Percent coverage of sequence for the best bitscore." );
+        		"Percent coverage of sequence for the best bit-score." );
         mapper.setFieldSubQuery(FIRST_BEST_CTG_COV_FIELD, "firstbestctgcov", TABLE_FIRST_BEST + ".ctg_cov");
         
         mapper.addIntField( FIRST_BEST_PRO_START_FIELD, "BS HitStart", TABLE_FIRST_BEST, 
         		"prot_start", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-        		"Start of match of the HSP for the best bitscore." );
+        		"Start of match of the HSP for the best bit-score." );
         mapper.setFieldSubQuery(FIRST_BEST_PRO_START_FIELD, "firstbestprotstart", TABLE_FIRST_BEST + ".prot_start");
         
         mapper.addIntField( FIRST_BEST_PRO_END_FIELD, "BS HitEnd", TABLE_FIRST_BEST, 
         		"prot_end", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-        		"End of match of the HSP for the best bitscore." );
+        		"End of match of the HSP for the best bit-score." );
         mapper.setFieldSubQuery(FIRST_BEST_PRO_END_FIELD, "firstbestprotend", TABLE_FIRST_BEST + ".prot_end");
         
         mapper.addIntField( FIRST_BEST_PRO_COV_FIELD, "BS %HitCov", TABLE_FIRST_BEST, 
         		"prot_cov", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-        		"Percent coverage of hit for the best bitscore." );
+        		"Percent coverage of hit for the best bit-score." );
         mapper.setFieldSubQuery(FIRST_BEST_PRO_COV_FIELD, "firstbestprotcov", TABLE_FIRST_BEST + ".prot_cov");
         
         if(metaData.hasGOs()) {
     	 	mapper.addStringField( FIRST_BEST_GO, "BS GO", TABLE_FIRST_BEST_DETAIL, 
 	        		"goList", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-	        		"GO IDs for the overall best bitscore." );
+	        		"GO IDs for the overall best bit-score." );
     	 	mapper.setFieldSubQuery(FIRST_BEST_GO, "firstbestgo", TABLE_FIRST_BEST_DETAIL + ".goList");
     	 	
 	        mapper.addStringField( FIRST_BEST_INTERPRO, "BS Interpro", TABLE_FIRST_BEST_DETAIL, 
 	        		"interpro", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-	        		"Interpro ID for the overall best bitscore." );
+	        		"Interpro ID for the overall best bit-score." );
 	        mapper.setFieldSubQuery(FIRST_BEST_INTERPRO, "firstbestinterpro", TABLE_FIRST_BEST_DETAIL + ".interpro");
     	
         	mapper.addStringField( FIRST_BEST_KEGG, "BS KEGG", TABLE_FIRST_BEST_DETAIL, 
         		"kegg", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-        		"KEGG ID for the overall best bitscore." );
+        		"KEGG ID for the overall best bit-score." );
         	mapper.setFieldSubQuery(FIRST_BEST_KEGG, "firstbestkegg", TABLE_FIRST_BEST_DETAIL + ".kegg");
         	
         	mapper.addStringField( FIRST_BEST_PFAM, "BS PFam", TABLE_FIRST_BEST_DETAIL, 
         		"pfam", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-        		"PFam ID for the overall best bitscore." );
+        		"PFam ID for the overall best bit-score." );
 	         mapper.setFieldSubQuery(FIRST_BEST_PFAM, "firstbestpfam", TABLE_FIRST_BEST_DETAIL + ".pfam");
 	         	
         	mapper.addStringField( FIRST_BEST_EC, "BS EC", TABLE_FIRST_BEST_DETAIL, 
         		"ec", GROUP_NAME_FIRST_BEST, GROUP_DESC_FIRST_BEST, 
-        		"EC (enzyme) ID for the overall best bitscore." );
+        		"EC (enzyme) ID for the overall best bit-score." );
         	mapper.setFieldSubQuery(FIRST_BEST_EC, "firstbestec", TABLE_FIRST_BEST_DETAIL + ".ec");
         }
         //////////////////////////////////////////////
@@ -573,7 +573,7 @@ public class FieldSeqData implements Serializable
         
         mapper.addFloatField( OVER_BEST_BIT_SCORE_FIELD, "AN Bitscore", TABLE_OVER_BEST, // CAS331 change from int
         		"bit_score", GROUP_NAME_OVER_BEST, GROUP_DESC_OVER_BEST, 
-        		"Bit score of the overall BestAnno." );
+        		"Bit-score of the overall BestAnno." );
         mapper.setFieldSubQuery(OVER_BEST_BIT_SCORE_FIELD, "overbitscore", TABLE_OVER_BEST + ".bit_score");
         
         mapper.addFloatField( OVER_BEST_PERCENT_IDENT, "AN %Sim", TABLE_OVER_BEST, // CAS331 change from int
@@ -680,7 +680,7 @@ public class FieldSeqData implements Serializable
         
         mapper.addFloatField( GO_BEST_BIT_SCORE_FIELD, "WG Bitscore", TABLE_GO_BEST, //CAS331 change from hit
         		"bit_score", GROUP_NAME_GO_BEST, GROUP_DESC_GO_BEST, 
-        		"Bit score of the BestHitWithGO." );
+        		"Bit-score of the BestHitWithGO." );
         mapper.setFieldSubQuery(GO_BEST_BIT_SCORE_FIELD, "gobitscore", TABLE_GO_BEST + ".bit_score");
         
         mapper.addFloatField( GO_BEST_PERCENT_IDENT, "WG %Sim", TABLE_GO_BEST, //CAS331 change from hit

@@ -66,7 +66,7 @@ first word will be taken as an ID.
 very large. 
 <li>List hits that have at least one sequence where:
 <ol> 
-<li><u>Best Bits</u>&nbsp;&nbsp;The hit has the best bitscore over all annoDBs.
+<li><u>Best Bits</u>&nbsp;&nbsp;The hit has the best bit-score over all annoDBs.
 <li><u>Best Anno</u>&nbsp;&nbsp;The hit has the best annotation over all annoDBs.
 <li><u>Bits&amp;Anno</u>&nbsp;&nbsp;The hit has both Best Bits and Best Anno over all annoDBs.
 <li><u>Bits|Anno</u>&nbsp;&nbsp;The hit has Best Bits or Best Anno over all annoDBs.
@@ -130,57 +130,5 @@ The <i>Hit table</i> and <i>Seq-Hit table</i> have the same number of columns, a
 against the annoDBs using an heuristic search program (BLAST or DIAMOND); for simplicity,
 the results are referred to as <i>hits</i>.
 
-<p><b><i>Modify Table</i></b> 
-<ul>
-<li><b>Delete Selected</b> and <b>Deleted Unselected</b>: 
-The selected rows or unselected rows will be removed, respectively. The corresponding rows will
-be removed from the other (not-displayed) list.
-<li><b>Select All</b> and <b>Unselect All</b>: Selects and unselects all rows, respectively.
-<li><b>Sort by other list</b>: If a list has been sorted, and then <b>Group by Hit ID</b> is
-check or unchecked, the other list will have retained its original
-order. To order the 2nd list according to the 1st list, click this button. Beware,
-the sort takes a while if the sequence-hit pair list is very large.
-</ul>
-<hr>
-
-<h2>Top Row of Options</h2>
-
-<b>Seq Table</b>&nbsp;&nbsp;Select a one or more hitIDs or seqIDs in the table, 
-then select <b>Seq Table</b>.
-The sequences will be shown in the main table, where you can select it to view the <b>Seq Details</b>.
-<p>
-<b>Align</b>&nbsp;&nbsp;Select a one or more hitIDs or seqIDs in the table, 
-then select <b>Align</b>. Each hit-sequence pair will be aligned; the resulting panel
-will replace the visible panel, i.e. annoDB hits panel. <i>The alignment uses
-dynamic programming, so the coordinates may appear different from the hit values.</i>
-<p>
-<b>Show...</b>&nbsp;&nbsp;Select one sequence or hit, then select one of the 
-following to get a popup window of the information:
-<ul>
-<li><u>Assigned GOs for hit</u>&nbsp;&nbsp;UniProt has assigned GOs to many proteins. This options
-show the assigned GOs with their level and description. 
-<br>&nbsp;
-<li><u>All GOs for hit</u>&nbsp;&nbsp;All ancestors of a GO ID inherit the protein-GO
-association. This option shows the assigned GOs (as the previous option), but also all
-inherited GOs. See the <b>GO Help</b> on the <b>Basic GO</b> for a more detailed explanation.
-<br>&nbsp;
-<li><u>All columns of selected</u> All columns for the selected sequence or hit. A benefit of this window
-is that the values can be copied to be pasted elsewhere, e.g. KEGG identifier.
-</ul>
-<p>
-<u><b>Export...</b></u>&nbsp;&nbsp;This has the same first two items as <b>Show...</b>, but the results
-are written to file. The "*" is at the end of each option indicates that there will 
-be a choice between writing <u>All Info</u> or <u>ID only</u>; writing the "IDs only" is useful for loading in the <b>Basic GOs</b> panel to view.
-<p>
-<u><b>Table...</b></u> 
-<ul>
-<li><u>Show column stats</u>&nbsp;&nbsp;A window will pop-up with statistics for all numeric columns
-that are displayed.
-<br>&nbsp;
-<li><u>Copy table</u>&nbsp;&nbsp;The table will be copied so that you can paste it into a file.
-<br>&nbsp;
-<li><u>Export table</u>&nbsp;&nbsp;A window will pop-up with a file chooser, and the table will be
-written to the selected file.
-</ul>
 </body>
 </html>

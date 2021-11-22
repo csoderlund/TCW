@@ -549,7 +549,7 @@ public class Overview {
 	    			for (int x : noHit) if (x==2) cntNoHit++;
 	    			Out.PrtSpCntMsg2(1, hitSeq[dbid], "Seqs with hits for DB#" + dbid, cntNoHit, "No Rank=1");
 	    		}
-	    		else Out.PrtSpCntMsg(1, hitSeq[dbid], "Seqs with hits for DB#" + dbid + "             ");
+	    		else Out.prtSpCnt(1, hitSeq[dbid], "Seqs with hits for DB#" + dbid + "             ");
 	     	}
 	     	
 	   /* Loop through annoDBs creating table */ // CAS327 change BEST HIT to Rank=1
@@ -1461,7 +1461,7 @@ public class Overview {
         lines.add("   annoDB:");
         lines.add("      ANNODB    is DBTYPE-TAXO, which is the DBtype and taxonomy");
         lines.add("      ONLY      #Seqs that hit the annoDB and no others");
-        lines.add("      BITS      #Seqs with the overall best bitscore from the annoDB");
+        lines.add("      BITS      #Seqs with the overall best bit-score from the annoDB");
         lines.add("      ANNO      #Seqs with the overall best annotation from the annoDB ");
         lines.add("      UNIQUE    #Unique hits to the annoDB");
         lines.add("      TOTAL     #Total seq-hit pairs for the annoDB");

@@ -33,16 +33,14 @@ import sng.viewer.STCWFrame;
 import util.methods.ErrorReport;
 import util.methods.Out;
 import util.methods.Static;
-import util.ui.UserPrompt;
 
 public class BasicSeqTab extends Tab {
 	private static final long serialVersionUID = -5515249017308285183L;	
 	private static final Color BGCOLOR = Globals.BGCOLOR;
-	private final String helpHTML = Globals.helpDir + "BasicQuerySeq.html";
 
 	public BasicSeqTab(STCWFrame parentFrame) {
 		super(parentFrame, null);
-		theParentFrame = parentFrame;	
+		theMainFrame = parentFrame;	
 		
 		setBackground(BGCOLOR);
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -52,36 +50,29 @@ public class BasicSeqTab extends Tab {
 		add(topRowPanel);
 		add(Box.createVerticalStrut(6));
 		
-		theFilterPanel = new BasicSeqFilterPanel(theParentFrame, this);
+		theFilterPanel = new BasicSeqFilterPanel(theMainFrame, this);
 		add(theFilterPanel);
 		add(Box.createVerticalStrut(6));
 		
-		theTablePanel = new BasicTablePanel(theParentFrame, this, 
-				theFilterPanel.getColNames(), theFilterPanel.getColSelect());
+		theTablePanel = new BasicTablePanel(theMainFrame, this, theFilterPanel.getColNames(), theFilterPanel.getColSelect());
 		add(theTablePanel);
 	}
 	/******************************************
 	 * Top button panel
 	 */
 	private void createTopRowPanel() {
-		btnViewSeqs = new JButton(Globals.seqTableLabel);
-		btnViewSeqs.setBackground(Globals.FUNCTIONCOLOR);
+		btnViewSeqs = Static.createButton(Globals.seqTableLabel, false, Globals.FUNCTIONCOLOR);
 		btnViewSeqs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				viewSelectedSeqs();
 			}
 		});
-		btnViewSeqs.setEnabled(false);
-		
-		btnDetail = new JButton(Globals.seqDetailLabel);
-		btnDetail.setBackground(Globals.FUNCTIONCOLOR);
+		btnDetail = Static.createButton(Globals.seqDetailLabel, false, Globals.FUNCTIONCOLOR);
 		btnDetail.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				viewSelectedDetail();
 			}
 		});
-		btnDetail.setEnabled(false);
-		
 		// Copy
 		final JPopupMenu copypopup = new JPopupMenu();
 		
@@ -99,8 +90,8 @@ public class BasicSeqTab extends Tab {
 				} catch (Exception er) {ErrorReport.reportError(er, "Error copying Seq ID");}
 			}
 		}));
-		if (!theParentFrame.getMetaData().bUseOrigName()) {// CAS311
-			String longLabel = theParentFrame.getMetaData().getLongLabel(); // CAS311
+		if (!theMainFrame.getMetaData().bUseOrigName()) {// CAS311
+			String longLabel = theMainFrame.getMetaData().getLongLabel(); // CAS311
 			
 			copypopup.add(new JMenuItem(new AbstractAction(longLabel) {
 				private static final long serialVersionUID = 4692812516440639008L;
@@ -131,14 +122,12 @@ public class BasicSeqTab extends Tab {
 				} catch (Exception er) {ErrorReport.reportError(er, "Error copying HitID"); }
 			}
 		}));	
-		btnCopy = new JButton("Copy...");
-		btnCopy.setBackground(Color.WHITE);
+		btnCopy = Static.createButton("Copy...", false);
 		btnCopy.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 copypopup.show(e.getComponent(), e.getX(), e.getY());
             }
         });		
-		btnCopy.setEnabled(false);
 		
 		// Table
 		final JPopupMenu tablepopup = new JPopupMenu();
@@ -162,36 +151,20 @@ public class BasicSeqTab extends Tab {
 				} catch (Exception er) {ErrorReport.reportError(er, "Error export table"); }
 			}
 		}));
-		btnTable = new JButton("Table...");
-		btnTable.setBackground(Color.WHITE);
+		btnTable = Static.createButton("Table...", false);
 		btnTable.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 tablepopup.show(e.getComponent(), e.getX(), e.getY());
             }
         });	
-		
-		btnHelp = new JButton("Help");
-		btnHelp.setBackground(Globals.HELPCOLOR);
-		btnHelp.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-					UserPrompt.displayHTMLResourceHelp(theParentFrame, 
-					"Filter Sequences", helpHTML);
-			}
-		});
 
 		topRowPanel = Static.createRowPanel();
-		topRowPanel.add(new JLabel("Selected:"));
-		topRowPanel.add(Box.createHorizontalStrut(1));
-		topRowPanel.add(btnViewSeqs);
-		topRowPanel.add(Box.createHorizontalStrut(1));
-		topRowPanel.add(btnDetail);
-		topRowPanel.add(Box.createHorizontalStrut(1));
-		topRowPanel.add(btnCopy);
-		topRowPanel.add(Box.createHorizontalStrut(60));
-		topRowPanel.add(btnTable);
-		topRowPanel.add(Box.createHorizontalStrut(160)); // CAS334 help was off the page
-		topRowPanel.add(Box.createHorizontalGlue());
-		topRowPanel.add(btnHelp);
+		topRowPanel.add(new JLabel("Selected:"));	topRowPanel.add(Box.createHorizontalStrut(1));
+		topRowPanel.add(btnViewSeqs);				topRowPanel.add(Box.createHorizontalStrut(1));
+		topRowPanel.add(btnDetail);					topRowPanel.add(Box.createHorizontalStrut(1));
+		topRowPanel.add(btnCopy);					topRowPanel.add(Box.createHorizontalStrut(40));
+		topRowPanel.add(btnTable);		
+		
 		topRowPanel.setMaximumSize(topRowPanel.getPreferredSize());
 		topRowPanel.setMinimumSize(topRowPanel.getPreferredSize());
 	}
@@ -202,16 +175,18 @@ public class BasicSeqTab extends Tab {
 	public void hideAll() {
 		topRowPanel.setVisible(false);
 		theTablePanel.setVisible(false);
-		theParentFrame.setButtonsVisible(false);
+		theMainFrame.setButtonsVisible(false);
 	}
-	
 	public void showAll() {
 		topRowPanel.setVisible(true);
 		theTablePanel.setVisible(true);
 	}
-	
-	public void setStatus(String txt) {theTablePanel.setStatus(txt);}
-	
+	public void setStatus(String txt) {
+		theTablePanel.setStatus(txt);
+	}
+	public void appendStatus(String txt) {
+		theTablePanel.setStatus(theFilterStr + "        " + txt);
+	}
 	/*******************************************************
 	 * Private methods
 	 */
@@ -220,7 +195,7 @@ public class BasicSeqTab extends Tab {
 		int len = seqNames.length;
 		if (len==0) return;
 
-		theParentFrame.addSeqDetailPage(seqNames[0], this, -1);
+		theMainFrame.addSeqDetailPage(seqNames[0], this, -1);
 	}
 	private void viewSelectedSeqs() {
 		String [] seqNames = getSelectedSeqs();
@@ -228,7 +203,7 @@ public class BasicSeqTab extends Tab {
 		if (len==0) return;
 
 		String tag = (len>1) ? "Seqs" : seqNames[0];
-		theParentFrame.loadContigs(tag, seqNames, STCWFrame.BASIC_QUERY_MODE_SEQ );
+		theMainFrame.loadContigs(tag, seqNames, STCWFrame.BASIC_QUERY_MODE_SEQ );
 	}
 	private String [] getSelectedSeqs() {
 		int [] rows = theTablePanel.getSelectedRows();
@@ -252,7 +227,6 @@ public class BasicSeqTab extends Tab {
 			strBestHit = (String) values[5];
 			if (strBestHit==null) strBestHit=""; 
 		}
-		
 		public Object getValueAt(int column) {
 			switch(column) {
 				case 0: return nRowNum;
@@ -266,7 +240,6 @@ public class BasicSeqTab extends Tab {
 					return 0;
 			}
 		}
-		
 		public int compareTo(SeqData obj, boolean ascOrder, int column) {
 			int order = 1;
 			if(!ascOrder) order = -1;
@@ -283,14 +256,12 @@ public class BasicSeqTab extends Tab {
 			default: return 0;
 			}
 		}
-		
 		private int compareStrings(String str1, String str2) {
 			if(str1==null && str2==null) return -1;
 			if(str1==null) return -1;
 			if(str2==null) return 1;
 			return str1.compareTo(str2);
 		}
-		
 		private int nRowNum = -1;
 		private String strSeqID = "";
 		private int nTotalExp = 0;
@@ -315,24 +286,25 @@ public class BasicSeqTab extends Tab {
 	 // The database call was performed in BasicSeqFilterPanel, and passes in the results for display
 	 public void tableBuild(ArrayList<Object []> results, String summary) {
 		 try {
-			 enableTopButtons(false);
+			 theTablePanel.setStatus("Building " + results.size() + " rows...");
+			 
 			 seqObjList.clear();
 			 int row=1;
 			 for (Object [] o : results) {
 				 seqObjList.add(new SeqData(row, o));
 				 row++;
 			 }
-			 theTablePanel.tableRefresh();			
-			 String r = String.format("Results: %,d      %s", seqObjList.size(), summary);
-			 theTablePanel.setStatus(r);
+			 theTablePanel.tableRefresh();	
+			 theFilterStr = String.format("Seqs: %,d      %s", seqObjList.size(), summary);
+			 theTablePanel.setStatus(theFilterStr);
 		 }
 		 catch (Exception e) {ErrorReport.prtReport(e, "Updating table");}
 	}
-	 public void tableAdd(ArrayList<Object []> results, String summary) {
+	public void tableAdd(ArrayList<Object []> results, String summary) {
 		 try {
-			 enableTopButtons(false);
+			 theTablePanel.setStatus("Adding " + results.size() + " rows. Please Wait..");
 			
-			 int row=seqObjList.size();
+			 int row=seqObjList.size(), cnt=0;
 			 for (Object [] o : results) {
 				 boolean add=true;
 				 String seqid = (String) o[0];
@@ -344,13 +316,12 @@ public class BasicSeqTab extends Tab {
 				 }
 				 if (add) {
 					 seqObjList.add(new SeqData(row, o));
-					 row++;
+					 row++; cnt++;
 				 }
 			 }
-			 
-			 theTablePanel.tableRefresh();			
-			 String r = String.format("Results: %,d       %s", seqObjList.size(), summary);
-			 theTablePanel.setStatus(r);
+			 theTablePanel.tableRefresh();	
+			 theFilterStr = String.format("Seqs: %,d  (add %d)     %s", seqObjList.size(),  cnt, summary);
+			 theTablePanel.setStatus(theFilterStr);
 		 }
 		 catch (Exception e) {ErrorReport.prtReport(e, "Updating table");}
 	}
@@ -360,7 +331,6 @@ public class BasicSeqTab extends Tab {
 	 public void tableSelect(ArrayList<Object []> results, String summary) {
 		 try {
 			 theTablePanel.setStatus("Selecting " + results.size() + " possible rows. Please Wait..");
-			 enableTopButtons(false);
 			
 			 int cnt=0;
 			 for (int i=0; i<seqObjList.size(); i++) { 
@@ -372,13 +342,10 @@ public class BasicSeqTab extends Tab {
 						 break;
 					 }
 				 }
-				 if (i>0 && i%5000==0) setStatus("Selected " + cnt + " from " + i + ". Still working...");
-			 }
-		
-			 theTablePanel.setStatus("");
-			 //theTablePanel.tableRefresh();	Loses highlight		
-			 String r = String.format("Results: %,d   Select %d  %s", seqObjList.size(), cnt, summary);
-			 theTablePanel.setStatus(r);
+				 if (i>0 && i%5000==0) 
+					 theTablePanel.setStatus("Selected " + cnt + " from " + i + ". Still working...");
+			 }	
+			 appendStatus(String.format("Select %,d", cnt));
 		 }
 		 catch (Exception e) {ErrorReport.prtReport(e, "Updating table");}
 	}
@@ -397,21 +364,24 @@ public class BasicSeqTab extends Tab {
 		for(int x=rows.length-1; x>=0; x--) {
 			seqObjList.remove(rows[x]);
 		}
+		theFilterStr = "Seqs: " + getNumRow();
+		theTablePanel.setStatus(theFilterStr);
 	}
 	
-	public void updateTopButtons(int row) {
-		btnViewSeqs.setEnabled(row>0);
-		btnCopy.setEnabled(row==1);
-		btnDetail.setEnabled(row==1);
-	}
-	public void enableTopButtons(boolean b) {
+	public void enableButtons(boolean b) {
 		btnViewSeqs.setEnabled(b);
 		btnCopy.setEnabled(b);
 		btnDetail.setEnabled(b);
-	}
-	public void enableBottomButtons(boolean b) { // CAS334 for new SELECT
+		btnTable.setEnabled(b);
 		theTablePanel.enableButtons(b);
 	}
+	public void updateTopButtons(int nSel, int nRow) {
+		btnViewSeqs.setEnabled(nSel>0);
+		btnCopy.setEnabled(nSel==1);
+		btnDetail.setEnabled(nSel==1);
+		btnTable.setEnabled(nRow>0);
+	}
+	
 	public void tableRefresh() {
 		theTablePanel.setColumns(theFilterPanel.getColNames(), theFilterPanel.getColSelect());
 		theTablePanel.tableRefresh();
@@ -419,18 +389,19 @@ public class BasicSeqTab extends Tab {
 	public void close() {
 		seqObjList.clear();
 	}
+	public BasicSeqFilterPanel getFilterPanel() { return theFilterPanel;}
+	public BasicTablePanel getTablePanel() { return theTablePanel;}
+	
 	//Table panel
 	private BasicTablePanel theTablePanel = null;
 	private Vector<SeqData> seqObjList = new Vector<SeqData> (); // CAS334 was ArrayList; possible synchronization problem
 	
 	//User interface
-	private JButton btnViewSeqs = null;
-	private JButton btnDetail = null;	// CAS334
-	private JButton btnTable = null;
-	private JButton btnCopy = null;
-	private JButton btnHelp = null;
+	private JButton btnViewSeqs = null, btnTable = null, btnCopy = null, btnDetail = null;	// CAS334 add detail
 	
 	private JPanel topRowPanel = null;
 	private BasicSeqFilterPanel theFilterPanel = null;
-	private STCWFrame theParentFrame=null;
+	private STCWFrame theMainFrame=null;
+	
+	private String theFilterStr=""; // append to this
 }

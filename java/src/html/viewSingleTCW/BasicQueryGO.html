@@ -87,7 +87,7 @@ options for applying the cutoff, either:
 
 <hr>
 <h2>Results</h2>
-Select one or more filters, then click <b>BUILD TABLE</b> or <b>ADD to TABLE</b> to execute the 
+Select one or more filters, then click <b>BUILD</b> or <b>ADD</b> to execute the 
 search, which builds a new table or adds to the existing table, respectively.
 <p>Using the <b>Columns</b> button, columns can be added/removed. 
 Columns can be rearranged by dragging and sorted
@@ -108,130 +108,6 @@ in the category, else its left blank.
 <tr><td>P-values<td>See <b>Decimal Display</b> on upper left panel for their display.
 </table>
 
-<p><b><i>Modify Table</i></b>
-<ul>
-<li><b>Delete Selected</b> and <b>Deleted Unselected</b>: 
-The selected rows or unselected rows will be removed, respectively. The corresponding rows will
-be removed from the other (not-displayed) list.
-<li><b>Select All</b> and <b>Unselect All</b>: Selects and unselects all rows, respectively.
-</ul>
-
-<hr>
-<h2>Top row of options</h2>
-<i><b>Selected:</b></i>
-<ul>
-<li><b>Seq Table</b> view the sequences in the main table for the selected GO.
-
-<li><b>Copy...</b> to the clipboard, which can be pasted elsewhere
-<ol type='a'>
-<li><u>Go ID</u>&nbsp;&nbsp;from corresponding column
-<li><u>GO Name</u>&nbsp;&nbsp;from corresponding column
-</ol>
-
-<li><b>Show...</b> 
-
-<ol type='a'>
-<li><u>Hits - assigned</u>&nbsp;&nbsp; 
-All proteins in the database that have this GO directly assigned to them.
-<br>&nbsp;
-
-<li><u>Hits - inherited</u>&nbsp;&nbsp; 
-All proteins in the database that inherited the GO. 
-Each hit is associated with one descendant  GO; a hit may have multiple descendant 
-GOs to the selected one (a note at the bottom of the
-popup will say "Multiple Descendant GO Hits:" followed by the number). 
-NOTE: This query can be slow if there are many descendant  GOs that have many assigned
-proteins; some have &gt; 1000.
-<br>&nbsp;
-
-<li><u>Sequences - has hit with GO</u>&nbsp;&nbsp;
-This shows the sequences that have a hit that has been assigned or inherited
-the GO. The associated hit information is a bit confusing, but is as follows:
-<ul>
-<li>If the sequence has multiple hits with the GO, only the one with the best E-value
-is shown. This is not necessarily a hit with the GO assigned.
-<li>If the <b>Seq Table</b> is used, 
-the resulting table only shows the GO hits if it is 'Best Bits' or 'Best Anno',
-which is not the same as this "Best". 
-<li>All sequences with the GO are shown, regardless of their DE values.
-</ul>
-
-<li><u>GO - Neighborhood with relations</u>&nbsp;&nbsp;
-The immediate parents and children of the GO ID. 
-The relation of 'is_a' or 'part_of' is shown for this option.
-NOTE: same note as for descendants. Starting with sTCW v3.1.8, there is also a relation 'replaced_by'
-and 'replaces'.
-<br>&nbsp;
-
-<li><u>GO - Ancestors</u>&nbsp;&nbsp;  
-All ancestors of the GO ID sorted by level. 
-<br>&nbsp;
-
-<li><u>GO - Descendants</u>&nbsp;&nbsp; 
-All descendants of the GO ID sorted by level. 
-NOTE: if a descendant  GO does not have any assigned or inherited hits, it is not in the
-database so is not shown. 
-<br>&nbsp;
-<li><u>GO - Ancestor path table</u>&nbsp;&nbsp;  
-The same GOs as in the Ancestor List, but shows the paths in table form. If all paths have the 
-same GOs at the top and bottom of the graph, they are only shown once and the row will be gray.
-NOTE: Occasionally, this query may be slow when there are many paths for the GO; some GOs have over 1000 paths.
-<br>&nbsp;
-<li><u>GO - Related in table</u>&nbsp;&nbsp; 
-A list of the GOs ancestors and descendants will be listed IF they are also in the 
-table. The GOs will be listed in the same order as found in the table.
-</ol>
-
-<li><b>Export...</b>&nbsp;&nbsp; The exact same options as above, but the results are written
-to file. When an "*" is at the end of the option, this indicates that there will 
-be a choice between writing <u>All Info</u> or <u>ID only</u>. For example, if the <u>Hits - assigned*</u>
-is selected and <u>ID only</u> is then selected in the popup window, the HitIDs will be written
-to file; this is useful for loading in the <b>Basic Hit</b> panel to view.
-</ul>
-
-<p><i><b>Table:</b></i>
-<ul><li><b>Show...</b>
-<ol type='a'>
-<li><u>Show Columns Stats</u>&nbsp;&nbsp;A popup window of statistics for the numeric columns.
-<br>&nbsp;
-<li><u>Each GO parents with relations</u>&nbsp;&nbsp;For each GO in table, print its parents and relations (e.g. <tt>is_a</tt>)
-<br>&nbsp;
-<li><u>Set of ancestors</u>&nbsp;&nbsp;The combined list of ancestors for all GOs in the table, sorted by level.
-<br>&nbsp;
-<li><u>Longest paths</u>&nbsp;&nbsp;  The longest paths of the GOs in the table;
-that is, shorter paths that are contained in another will not be shown. NOTE: This can take minutes
-to compute and be large.
-<br>&nbsp;
-<li><u>All paths</u>&nbsp;&nbsp;All paths of the GOs in the table. NOTE: This can be a very large.
-
-</ol>
-
-<li><b>Export...</b>
-<ol type='a'>
-<li><u>Table columns</u>&nbsp;&nbsp;A tab-delimited file of the contents of the table.
-<br>If you just select two columns, (GO ID, #Seqs) or (GO ID, P-value), 
-the exported file can be used as input to REVIGO (http://revigo.irb.hr). 
-<br>&nbsp;
-<li><u>GO IDs</u>&nbsp;&nbsp;A single column file of only the GO IDs from the table.
-<br>&nbsp;
-<li><u>Export SeqIDs with GOs</u>&nbsp;&nbsp;A tab-delimited file of each SeqID followed by
-its list of assigned and inherited GOs (from associated seq-hit list), where the GOs are from the displayed GO table. 
-<br>This can be used as input to WeGO (http://wego.genomics.org.cn/) using native format.
-<br>&nbsp;
-
-<li><u>Create/Merge #Seqs</u>&nbsp;&nbsp;A tab-delimited file that contains
-the GOs grouped by ontology, followed by the GO-Name and #Seqs. The merge
-allows multiple columns of #Seqs based on different queries (e.g. two different
-p-values).  The file must not be edited until
-all #Seqs columns are added (TCW needs the format exact). The resulting file can
-be used in Excel to make bar graphs.
-<br>&nbsp;
-
-<li>The next four option are the same as option b-e of <b>Show...</b>.
-<br>&nbsp;
-<li><u>Copy Table</u>&nbsp;&nbsp;Copy the table to the clipboard for pasting elsewhere.
-</ol>
-</ul>
 <hr>
 <h2>#Seqs</h2>
 There are two occurrences <b>#Seqs</b> on this panel, and the second effects the column <b>#Seqs</b>. 

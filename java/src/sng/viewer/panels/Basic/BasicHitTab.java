@@ -46,8 +46,6 @@ public class BasicHitTab extends Tab {
 	private static final long serialVersionUID = -5515249017308285183L;	
 	private static final Color BGCOLOR = Globals.BGCOLOR;
 	
-	private String helpHTML =  Globals.helpDir + "BasicQueryHit.html";
-
 	public BasicHitTab(STCWFrame parentFrame) {
 		super(parentFrame, null);
 		theParentFrame = parentFrame;
@@ -137,14 +135,12 @@ public class BasicHitTab extends Tab {
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error copying hit sequence", null);}
 			}
 		}));
-		btnCopy = new JButton("Copy...");
-		btnCopy.setBackground(Color.WHITE);
+		btnCopy = Static.createButton("Copy...", false);
 		btnCopy.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 copypopup.show(e.getComponent(), e.getX(), e.getY());
             }
         });
-		btnCopy.setEnabled(false);
 				
 //Show
 		final JPopupMenu selPopup = new JPopupMenu();
@@ -235,33 +231,18 @@ public class BasicHitTab extends Tab {
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error copying table", null);}
 			}
 		}));
-		btnTable = new JButton("Table...");
-		btnTable.setBackground(Color.WHITE);
+		btnTable = Static.createButton("Table...", false);
 		btnTable.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 tablepopup.show(e.getComponent(), e.getX(), e.getY());
             }
         });
 		
-		btnHelp = new JButton("Help");
-		btnHelp.setBackground(Globals.HELPCOLOR);
-		btnHelp.setAlignmentX(RIGHT_ALIGNMENT);
-		btnHelp.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-					UserPrompt.displayHTMLResourceHelp(getParentFrame(), 
-					"Filter DB Hits ", helpHTML);
-			}
-		});
-
 		topRowPanel = Static.createRowPanel();
-		topRowPanel.add(new JLabel("Selected:"));
-		topRowPanel.add(Box.createHorizontalStrut(2));
-		topRowPanel.add(btnViewSeqs);
-		topRowPanel.add(Box.createHorizontalStrut(2));
-		topRowPanel.add(btnAlignSeqs);
-		topRowPanel.add(Box.createHorizontalStrut(2));
-		topRowPanel.add(btnCopy);
-		topRowPanel.add(Box.createHorizontalStrut(2));
+		topRowPanel.add(new JLabel("Selected:"));	topRowPanel.add(Box.createHorizontalStrut(2));
+		topRowPanel.add(btnViewSeqs);				topRowPanel.add(Box.createHorizontalStrut(2));
+		topRowPanel.add(btnAlignSeqs);				topRowPanel.add(Box.createHorizontalStrut(2));
+		topRowPanel.add(btnCopy);					topRowPanel.add(Box.createHorizontalStrut(2));
 		topRowPanel.add(btnShow);
 		if (metaData.hasGOs()) {
 			topRowPanel.add(Box.createHorizontalStrut(2));
@@ -271,9 +252,6 @@ public class BasicHitTab extends Tab {
 		topRowPanel.add(Box.createHorizontalStrut(25));
 		topRowPanel.add(btnTable);
 		
-		topRowPanel.add(Box.createHorizontalStrut(25));
-		//topRowPanel.add( Box.createHorizontalGlue() ); remove setMaximumSize and min
-		topRowPanel.add(btnHelp);
 		// the Glue does not work with these on Mac
 		topRowPanel.setMaximumSize(topRowPanel.getPreferredSize());
 		topRowPanel.setMinimumSize(topRowPanel.getPreferredSize());
@@ -287,14 +265,20 @@ public class BasicHitTab extends Tab {
 		theTablePanel.setVisible(false);
 		theParentFrame.setButtonsVisible(false);
 	}
-	
 	public void showAll() {
 		topRowPanel.setVisible(true);
 		theTablePanel.setVisible(true);
 	}
-
-	public void setStatus(String txt) {theTablePanel.setStatus(txt);}
-	
+	public String getStatusCounts() { 
+		return String.format("Seqs: %,d   Hits: %,d  Pairs: %,d    ",
+				 seqCntMap.size(), hitGrpList.size(),  hitSeqList.size());
+	}
+	public void setStatus(String txt) {
+		theTablePanel.setStatus(txt);
+	}
+	public void appendStatus(String txt) {
+		theTablePanel.setStatus(theFilterStr + "       " + txt);
+	}
 	/*******************************************************
 	 * Private methods
 	 */
@@ -897,13 +881,13 @@ public class BasicHitTab extends Tab {
 	    			cnt=0;
 	    		 }
 			 }
-			 setStatus("Create Hits....");
+			 theTablePanel.setStatus("Create Hits....");
 			 isSorted=false;
 			 convertToGroupedHits(true);
-			 setStatus("Done");
 			 
 			 theTablePanel.tableRefresh();
-			 theTablePanel.setStatus(getStatus() + summary);
+			 theFilterStr=getStatusCounts() + summary;
+			 theTablePanel.setStatus(theFilterStr); 
 		 }
 		 catch (Exception e) {ErrorReport.prtReport(e, "Updating table");}
 	}
@@ -928,19 +912,19 @@ public class BasicHitTab extends Tab {
 					hitSeqList.add(new HitSeqData(row, o));	
 					row++; cnt++; add++;
 					if (cnt==10000) {
-		    				setStatus("Add " + add + x + " to sequence table...        ");
-		    				cnt=0;
-		    			}
+						theTablePanel.setStatus("Add " + add + x + " to sequence table...        ");
+		    			cnt=0;
+		    		}
 					addSeqCntMap(seqid);
 				 }
 			 }
-			 setStatus("Create Hits....");
+			 theTablePanel.setStatus("Create Hits....");
 			 isSorted=false;
 			 convertToGroupedHits(true);
-			 setStatus("Done");
 			 
 			 theTablePanel.tableRefresh();
-			 theTablePanel.setStatus(getStatus() + "(added " + add + ") " + summary);
+			 theFilterStr=getStatusCounts() + "(add " + add + ") " + summary;
+			 theTablePanel.setStatus(theFilterStr);
 		 }
 		 catch (Exception e) {ErrorReport.prtReport(e, "Updating table");}
 	}
@@ -949,11 +933,7 @@ public class BasicHitTab extends Tab {
 			 seqCntMap.put(seqid, seqCntMap.get(seqid) +1);
 		else seqCntMap.put(seqid, 1);
 	}
-	
-	public String getStatus() { 
-		return String.format("Seqs: %,d   Hits: %,d  Pairs: %,d    ",
-				 seqCntMap.size(), hitGrpList.size(),  hitSeqList.size());
-	}
+
 	private void convertToGroupedHits(boolean first) {
 		try {
 			hitGrpList = new ArrayList<HitGroupData> ();
@@ -977,14 +957,14 @@ public class BasicHitTab extends Tab {
 				if (first) {
 					cnt++;
 					if (cnt%10000==0) {
-		    			setStatus("Added " + hitGrpList.size() + " to grouped table, processed " + cnt + x);
+		    			theTablePanel.setStatus("Added " + hitGrpList.size() + " to grouped table, processed " + cnt + x);
 		    		}
 				}
 			}
 			Runtime.getRuntime().gc();
 		}
 		catch (OutOfMemoryError e) {
-			setStatus("Out of memory -- make your filter more stringent");
+			theTablePanel.setStatus("Out of memory -- make your filter more stringent");
 			JOptionPane.showMessageDialog(null, "Out of memory ");
 		}
 	}
@@ -1021,7 +1001,7 @@ public class BasicHitTab extends Tab {
 			Runtime.getRuntime().gc();
 		}
 		catch (OutOfMemoryError e) {
-			setStatus("Out of memory -- cannot sort list");
+			theTablePanel.setStatus("Out of memory -- cannot sort list");
 			JOptionPane.showMessageDialog(null, "Out of memory ");
 		}
 	}
@@ -1059,6 +1039,9 @@ public class BasicHitTab extends Tab {
 			}
 			hitGrpList.clear();
 			convertToGroupedHits(false);
+			
+			theFilterStr=getStatusCounts();
+			theTablePanel.setStatus(theFilterStr);
 			return;
 		}
 		
@@ -1072,7 +1055,7 @@ public class BasicHitTab extends Tab {
 			
 		ArrayList <HitGroupData> rmHitObj = new ArrayList <HitGroupData> ();
 		
-		if (Globalx.debug) Out.prt("Before: " + getStatus());
+		if (Globalx.debug) Out.prt("Before: " + getStatusCounts());
 		for(int ih=rows.length-1; ih>=0; ih--) { 
 			HitGroupData hitObj = hitGrpList.get(rows[ih]); 
 			String hitID = hitObj.hd.strHitID;
@@ -1100,15 +1083,18 @@ public class BasicHitTab extends Tab {
 			hitObj=null;
 		}
 		Out.r("                                                 ");
-		if (Globalx.debug) Out.prt("After:  " + getStatus());
+		theFilterStr=getStatusCounts();
+		theTablePanel.setStatus(theFilterStr);
+		if (Globalx.debug) Out.prt("After:  " + getStatusCounts());
 	}
 	
-	public void updateTopButtons(int row) {
-		btnViewSeqs.setEnabled(row>0);
-		btnAlignSeqs.setEnabled(row>0);
-		btnShow.setEnabled(row==1);
-		btnExport.setEnabled(row==1);
-		btnCopy.setEnabled(row==1);
+	public void updateTopButtons(int sel, int nRow) {
+		btnViewSeqs.setEnabled(sel>0);
+		btnAlignSeqs.setEnabled(sel>0);
+		btnShow.setEnabled(sel==1);
+		btnExport.setEnabled(sel==1);
+		btnCopy.setEnabled(sel==1);
+		btnTable.setEnabled(nRow>0);
 	}
 	public void enableTopButtons(boolean b) {
 		btnViewSeqs.setEnabled(b);
@@ -1137,7 +1123,7 @@ public class BasicHitTab extends Tab {
 	
 	//User interface
 	private JButton btnViewSeqs = null, btnAlignSeqs = null, btnShow = null;
-	private JButton btnTable = null, btnCopy = null, btnExport = null, btnHelp = null;
+	private JButton btnTable = null, btnCopy = null, btnExport = null;
 	
 	private JPanel topRowPanel = null;
 	private BasicHitFilterPanel theFilterPanel = null;
@@ -1149,4 +1135,6 @@ public class BasicHitTab extends Tab {
 	private boolean isSorted=true;
 	
 	private int numLibs=0, numPvals=0;
+	
+	private String theFilterStr="";
 }

@@ -11,6 +11,8 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.sql.ResultSet;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Vector;
 import java.util.prefs.Preferences;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -25,8 +28,10 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
@@ -34,15 +39,21 @@ import javax.swing.JTextField;
 import sng.database.Globals;
 import sng.viewer.STCWFrame;
 import util.database.DBConn;
+import util.database.Globalx;
 import util.file.FileC;
 import util.file.FileRead;
 import util.methods.ErrorReport;
 import util.methods.Out;
 import util.methods.Static;
+import util.ui.UserPrompt;
 
 public class BasicSeqFilterPanel extends JPanel {
 	private static final long serialVersionUID = -434438354961245720L;
 	private static final Color BGCOLOR = Globals.BGCOLOR;
+	
+	private final String topHTML = 		Globals.helpDir + "BasicTopSeq.html";
+	private final String queryHTML = 	Globals.helpDir + "BasicQuerySeq.html";
+	private final String lowerHTML =   	Globals.helpDir + "BasicModify.html"; 
 	
 	private static final String seqPref= "_seqPrefs"; // save to preferences; same columns for hit&seq
 	
@@ -50,7 +61,7 @@ public class BasicSeqFilterPanel extends JPanel {
 	
 	// Any change here will work in this file, but needs to be changed in BasicSeqQueryTab.SeqData class!!!
 	// These are columns from database and do not include row#
-	// Do not move Seq ID, as it is expected to be first
+	// Do not move Seq ID, as it is expected to be index 0
 	private static final String rowCol = "Row";
 	private static int idxLong = 1;
 	private static String [] STATIC_COLUMNS   = { "Seq ID", "Longest", "TCW Remark", "User Remark", "Counts",  "Best HitID"};
@@ -113,7 +124,6 @@ public class BasicSeqFilterPanel extends JPanel {
 	 */
 	private class QueryPanel extends JPanel {
 		private static final long serialVersionUID = -5987399873828589062L;
-		private static final int DEFAULT_PROMPT_SIZE = 20;
 		private static final int MAIN_PANEL_LABEL_WIDTH = 70; // labels on left
 
 		public QueryPanel() {
@@ -147,14 +157,10 @@ public class BasicSeqFilterPanel extends JPanel {
 			allbg.add(radUser); 
 			
 			row1.add(new JLabel("Substring: "));
-			txtField  = new JTextField(DEFAULT_PROMPT_SIZE);
-			txtField.setMaximumSize(txtField.getPreferredSize());
-			row1.add(txtField);
-			row1.add(Box.createHorizontalStrut(5));
+			txtField  = Static.createTextField("", 20, true);
+			row1.add(txtField); row1.add(Box.createHorizontalStrut(5));
 			
-			btnFindFile = new JButton("Load File");
-			btnFindFile.setBackground(Globals.BGCOLOR);
-			
+			btnFindFile = Static.createButton("Load File", true);
 			btnFindFile.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					try {
@@ -165,7 +171,7 @@ public class BasicSeqFilterPanel extends JPanel {
 					}
 					catch(Exception e) {ErrorReport.prtReport(e, "Error finding file");}
 				}});
-			row1.add(btnFindFile); row1.add(Box.createHorizontalStrut(2));
+			row1.add(btnFindFile); row1.add(Box.createHorizontalStrut(3));
 			
 			JButton clearall = new JButton("Clear");
 			clearall.addActionListener(new ActionListener() {
@@ -186,55 +192,84 @@ public class BasicSeqFilterPanel extends JPanel {
 			add(new JSeparator());
 			add(Box.createVerticalStrut(3));	
 			
-			JPanel row3 = Static.createRowPanel();
-			row3.add(getRowHeader("Results"));
-			btnBuildTable = new JButton("BUILD TABLE");
-			btnBuildTable.setBackground(Globals.FUNCTIONCOLOR);
+			btnBuildTable = Static.createButton("BUILD", true, Globals.FUNCTIONCOLOR);
 			btnBuildTable.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					loadDataForTable(BUILD);
 				}
 			});
-			row3.add(btnBuildTable);
-			row3.add(Box.createHorizontalStrut(10));
-			
-			btnAddTable = new JButton("ADD to TABLE");
-			btnAddTable.setBackground(Globals.FUNCTIONCOLOR);
+			btnAddTable = Static.createButton("ADD", true, Globals.FUNCTIONCOLOR);
 			btnAddTable.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					loadDataForTable(ADD);
 				}
 			});
-			row3.add(btnAddTable);
-			row3.add(Box.createHorizontalStrut(10));
-			
-			btnSelectRows = new JButton("SELECT ROWS");
-			btnSelectRows.setBackground(Globals.MENUCOLOR);
-			btnSelectRows.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					loadDataForTable(SELECT);
-				}
-			});
-			row3.add(btnSelectRows);	
-			add(row3);
-			row3.add(Box.createHorizontalStrut(20));
-			
-			btnSetColumns = new JButton("Columns");
-			btnSetColumns.setBackground(Globals.MENUCOLOR);
+			btnSetColumns = Static.createButton("Columns", true, Globals.MENUCOLOR);
 			btnSetColumns.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					hideMain();
 					columnPanel.setVisible(true);
 				}
 			});
-			row3.add(btnSetColumns);	
+			createHelp();
+			
+			JPanel row3 = Static.createRowPanel(); // CAS336 added glue and dropdown help
+			Box hzBox = Box.createHorizontalBox();
+			
+			 hzBox.add(Static.createLabel("Table", true)); hzBox.add(Box.createHorizontalStrut(5));
+			 hzBox.add(btnBuildTable);					   hzBox.add(Box.createHorizontalStrut(5));
+			 hzBox.add(btnAddTable);
+			 
+			 hzBox.add(Box.createGlue());
+			 hzBox.add(btnSetColumns);
+			
+			 hzBox.add(Box.createGlue());
+			 hzBox.add(btnHelp);
+			 row3.add(hzBox);
+			
 			add(row3);
 			
 			setMinimumSize(getPreferredSize());
 			setMaximumSize(getPreferredSize());
 			setVisible(true);
 		}
-		
+		private void createHelp() {
+			final JPopupMenu popup = new JPopupMenu();
+			
+			popup.add(new JMenuItem(new AbstractAction("Top buttons") {
+				private static final long serialVersionUID = 4692812516440639008L;
+				public void actionPerformed(ActionEvent e) {
+					try {
+						UserPrompt.displayHTMLResourceHelp(theMainFrame, "Top Buttons", topHTML);
+					} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
+				}
+			}));
+			popup.add(new JMenuItem(new AbstractAction("Search and Table") {
+				private static final long serialVersionUID = 4692812516440639008L;
+				public void actionPerformed(ActionEvent e) {
+					try {
+						UserPrompt.displayHTMLResourceHelp(theMainFrame, "Search, Filter and Table", queryHTML);
+					} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
+				}
+			}));
+			popup.add(new JMenuItem(new AbstractAction("Modify Buttons") {
+				private static final long serialVersionUID = 4692812516440639008L;
+				public void actionPerformed(ActionEvent e) {
+					try {
+						UserPrompt.displayHTMLResourceHelp(theMainFrame, "Modify Buttons", lowerHTML);
+					} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
+				}
+			}));
+			
+			
+			btnHelp = Static.createButton("Help...", true, Globalx.HELPCOLOR);
+			btnHelp.addMouseListener(new MouseAdapter() {
+	            public void mousePressed(MouseEvent e) {
+	                popup.show(e.getComponent(), e.getX(), e.getY());
+	            }
+	        });
+			btnHelp.setAlignmentX(Component.RIGHT_ALIGNMENT);
+		}
 		private JLabel getRowHeader(String label) {
 			JLabel lblHeader = new JLabel(label);
 			Dimension dim = lblHeader.getPreferredSize();
@@ -314,14 +349,6 @@ public class BasicSeqFilterPanel extends JPanel {
 			return Static.addQuote(x); 
 		}
 		
-		// CAS334 disable everything while changing or selecting row
-		public void enableTableButton(boolean b) {
-			btnBuildTable.setEnabled(b);
-			btnAddTable.setEnabled(b);
-			btnSelectRows.setEnabled(b);
-			
-			theParentTab.enableBottomButtons(b);
-		}
 		// Search:
 		public JRadioButton radSeqID = null, radLong=null;
 		public JRadioButton radTCW = null, radUser = null;
@@ -329,46 +356,35 @@ public class BasicSeqFilterPanel extends JPanel {
 		public Vector <String> loadList = null;
 		
 		// Results
-		private JButton btnBuildTable = null;
-		private JButton btnAddTable = null;
-		private JButton btnSelectRows = null;
-		private JButton btnSetColumns = null;
+		private JButton btnBuildTable = null, btnAddTable = null;
+		private JButton btnSetColumns = null, btnHelp = null;
 	} // end QueryPanel
-	
 	
 	/*************************************************
 	 * Column Select Panel
 	 */
-	private class ColumnPanel extends JPanel
-	{
+	private class ColumnPanel extends JPanel {
 		private static final long serialVersionUID = -49938519942155818L;
 
 		public ColumnPanel() {
 			setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 			setBackground(Color.white);
-			setAlignmentX(Component.CENTER_ALIGNMENT);
-			setAlignmentY(Component.CENTER_ALIGNMENT);
 			
-			JPanel headerPanel = new JPanel();
-			headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.LINE_AXIS));
-			headerPanel.setBackground(Color.white);
-			
+			JPanel headerPanel = Static.createRowCenterPanel();
 			JLabel theHeader = new JLabel("<HTML><H2>Select columns to view</H2></HTML>");
-			theHeader.setBackground(Color.white);
-			theHeader.setAlignmentX(CENTER_ALIGNMENT);
 			headerPanel.add(theHeader);
 			headerPanel.add(Box.createVerticalStrut(10));
-			headerPanel.setMaximumSize(headerPanel.getPreferredSize());
-			headerPanel.setAlignmentX(CENTER_ALIGNMENT);
+			Static.center(headerPanel);
+			
 			add(Box.createVerticalStrut(30));
 			add(headerPanel);
 			add(Box.createVerticalStrut(10));
 			
 			createSelectPanel();
 			add(selectPanel);
+			add(Box.createVerticalStrut(20));
 			
-			add(Box.createVerticalStrut(30));
-			btnOK = new JButton("Accept");
+			btnOK = Static.createButton("Accept", true);
 			btnOK.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					saveSelections();
@@ -377,7 +393,7 @@ public class BasicSeqFilterPanel extends JPanel {
 					theParentTab.tableRefresh();
 				}
 			});
-			btnCancel = new JButton("Discard");
+			btnCancel = Static.createButton("Discard", true);
 			btnCancel.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					restoreSelections();
@@ -385,34 +401,24 @@ public class BasicSeqFilterPanel extends JPanel {
 					setVisible(false);
 				}
 			});
-			
-			JPanel buttonPanel = new JPanel();
-			buttonPanel.setBackground(Color.white);
-			buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
-			buttonPanel.add(btnOK);
-			buttonPanel.add(Box.createHorizontalStrut(10));
+			JPanel buttonPanel = Static.createRowCenterPanel();
+			buttonPanel.add(btnOK);		buttonPanel.add(Box.createHorizontalStrut(10));
 			buttonPanel.add(btnCancel);
-			buttonPanel.setMaximumSize(buttonPanel.getPreferredSize());
-			buttonPanel.setAlignmentX(CENTER_ALIGNMENT);
+			Static.center(buttonPanel);
 			add(buttonPanel);
+			
 			setVisible(false);
 		}
  		private void createSelectPanel() {
  			String [] staticNames = new String [staticColNames.length+1];
  			staticNames[0] = rowCol;
  			for (int i=0; i<staticColNames.length; i++) staticNames[i+1] = staticColNames[i];
- 			
- 		// initialize
-			chkStaticColNames = new JCheckBox[staticNames.length];	
-			for(int x=0; x<chkStaticColNames.length; x++) chkStaticColNames[x] = null;
  					
 		/** Static columns **/ 
-			JPanel staticPanel = Static.createPagePanel();
-			staticPanel.setAlignmentY(TOP_ALIGNMENT);
-			
+			JPanel staticPanel = Static.createPageCenterPanel();
+			chkStaticColNames = new JCheckBox[staticNames.length];	
 			for(int x=0; x<staticNames.length; x++) {
-				chkStaticColNames[x] = new JCheckBox(staticNames[x], false);
-				chkStaticColNames[x].setAlignmentX(LEFT_ALIGNMENT);
+				chkStaticColNames[x] = Static.createCheckBox(staticNames[x], false);
 				chkStaticColNames[x].addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						setOKEnabled();
@@ -425,10 +431,7 @@ public class BasicSeqFilterPanel extends JPanel {
 			staticPanel.add(Box.createVerticalStrut(10));	
 			
 			JPanel genCheck = Static.createRowPanel();
-			genCheck.setBackground(Color.white);
-			
-			final JCheckBox sAll = new JCheckBox("check/uncheck all", true);
-			sAll.setAlignmentX(LEFT_ALIGNMENT);
+			final JCheckBox sAll = Static.createCheckBox("check/uncheck all", true);
 			sAll.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					for(int x=0; x<chkStaticColNames.length; x++)
@@ -437,26 +440,15 @@ public class BasicSeqFilterPanel extends JPanel {
 				}
 			});
 			genCheck.add(sAll);
-			genCheck.setBorder(BorderFactory.createLineBorder(Color.BLACK));	
-			genCheck.setMinimumSize(genCheck.getPreferredSize());
-			genCheck.setMaximumSize(genCheck.getPreferredSize());
+			Static.border(genCheck);
 			staticPanel.add(genCheck);	
 			
-			staticPanel.setMinimumSize(staticPanel.getPreferredSize());
-			staticPanel.setMaximumSize(staticPanel.getPreferredSize());
-			staticPanel.setAlignmentX(CENTER_ALIGNMENT);
-
-			selectPanel = Static.createRowPanel();
+			selectPanel = Static.createRowCenterPanel();
 			selectPanel.add(staticPanel);
-			
-			selectPanel.setMinimumSize(selectPanel.getPreferredSize());
-			selectPanel.setMaximumSize(selectPanel.getPreferredSize());
-			selectPanel.setAlignmentX(CENTER_ALIGNMENT);
+			Static.center(selectPanel);
 			
 			initSelections();
-		
  		}
-		
 		// Accept is enabled if nothing is selected
 		private void setOKEnabled() {
 			boolean enable = false;
@@ -473,7 +465,6 @@ public class BasicSeqFilterPanel extends JPanel {
  			
  			return colName;
  		}
- 		
  		public boolean [] getColSelect() {
  			boolean [] isChk = new boolean[totalColumns];
  			int index = 0;
@@ -482,8 +473,7 @@ public class BasicSeqFilterPanel extends JPanel {
  				isChk[index++] = chkStaticColNames[x].isSelected();
  			
  			return isChk;
- 		}
-				
+ 		}			
 		private void saveSelections() {
 			String prefs="";
 			bSaveStaticSelect = new boolean[chkStaticColNames.length];
@@ -494,13 +484,11 @@ public class BasicSeqFilterPanel extends JPanel {
 			}
 			prefsRoot.put(prefLabel, prefs);
 		}
-		
 		private void restoreSelections() {
 			if(bSaveStaticSelect != null)
 				for(int x=0; x<bSaveStaticSelect.length; x++)
 					chkStaticColNames[x].setSelected(bSaveStaticSelect[x]);
 		}
-
 		private void initSelections() {
 			totalColumns = chkStaticColNames.length;
 			
@@ -542,13 +530,16 @@ public class BasicSeqFilterPanel extends JPanel {
 	/****************************************************************
 	 * Database query
 	 ***************************************************************/
+	public void loadSelect() { // called from BasicTablePanel for "Select Query"
+		loadDataForTable(SELECT);
+	};
 	private void loadDataForTable(int type){
 		final int iType = type; 
 		Thread thread = new Thread(new Runnable() {
 		public void run() {
 			try {	
 				theParentTab.setStatus("Loading Sequences. Please Wait..");
-				queryPanel.enableTableButton(false);
+				theParentTab.enableButtons(false);
 					
 				ArrayList<Object []> results = loadFromDatabase();
 				
@@ -557,17 +548,17 @@ public class BasicSeqFilterPanel extends JPanel {
 				if (!statusSearch.equals("")) {
 					String op = (queryPanel.isLoadFile()) ? " = " : " contains ";
 					statusSearch = queryPanel.getStatusCol() + op + statusSearch;
+					statusSearch = "Search: " + statusSearch;
 				}
-				statusSearch = "Search: " + statusSearch;
 				
 				if (iType==0) 		theParentTab.tableBuild(results, statusSearch);
 				else if (iType==1)  theParentTab.tableAdd(results, statusSearch);
-				else theParentTab.tableSelect(results, statusSearch);
+				else 				theParentTab.tableSelect(results, statusSearch);
 				
-				queryPanel.enableTableButton(true); // CAS334 moved after Build/Add/Select
+				theParentTab.enableButtons(true); // CAS334 moved after Build/Add/Select
 				
 			} catch (Exception err) {
-				queryPanel.enableTableButton(true);
+				theParentTab.enableButtons(true);
 				theParentTab.setStatus("Error during query");
 				JOptionPane.showMessageDialog(null, "Query failed due to unknown reasons ");
 				ErrorReport.reportError(err, "Internal error: building hit table");
@@ -588,7 +579,6 @@ public class BasicSeqFilterPanel extends JPanel {
 	        	if (queryPanel.isLoadFile())  strQuery+= " IN ("  + searchStr + ")"; 
 	        	else 						  strQuery+= " LIKE " + searchStr; 
 	        }
-	        
 	        strQuery += " ORDER BY contig.contigid ASC"; 
 	        
 	        DBConn dbc = theMainFrame.getNewDBC();

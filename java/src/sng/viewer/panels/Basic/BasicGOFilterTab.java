@@ -3,10 +3,7 @@ package sng.viewer.panels.Basic;
 /**************************************************
  * Creates the Top Row of buttons and the Filter panel
  * 
- * query: go_info for everything except:
- * 		pja_gotree for making the 'show tree' view and DEtrim
- * 		pja_unitrans_go for selecting sequences to view
- * CAS324 removed Trim stuff for now....
+ * CAS324 removed Trim stuff - was disabled in v318
  */
 import java.awt.Color;
 import java.awt.Component;
@@ -20,6 +17,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.BorderLayout;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.sql.ResultSet;
@@ -61,9 +59,11 @@ import util.ui.UserPrompt;
 public class BasicGOFilterTab extends Tab {
 	private static final long serialVersionUID = 5545816581105885864L;
 	
-	private final String helpHTML =   Globals.helpDir + "BasicQueryGO.html";
-	private final String goHelpHTML = Globals.helpDir + "goHelp/index.html"; // CAS318 new GO help
-	private final String goEvCHTML =  Globals.helpDir + "goHelp/evc.html"; // CAS323
+	private final String queryHTML =   	Globals.helpDir + "BasicQueryGO.html";
+	private final String topHTML =   	Globals.helpDir + "BasicTopGO.html";
+	private final String lowerHTML =   	Globals.helpDir + "BasicModify.html"; 
+	private final String goHelpHTML = 	Globals.helpDir + "goHelp/index.html"; // CAS318 new GO help
+	private final String goEvCHTML =  	Globals.helpDir + "goHelp/evc.html"; // CAS323
 	
 	private static final Color BGCOLOR = Globals.BGCOLOR;
 	
@@ -159,35 +159,16 @@ public class BasicGOFilterTab extends Tab {
         createTopSelected();
 	    createTopTable();
 		
-		JButton btnHelp = new JButton("Help");
-		btnHelp.setBackground(Globals.HELPCOLOR);
-		btnHelp.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(theParentFrame, 
-						"Filter GO annotations", helpHTML);
-			}
-		});
+		topRowPanel.add(new JLabel("Selected: ")); topRowPanel.add(Box.createHorizontalStrut(1));
+		topRowPanel.add(btnViewSeqs);				topRowPanel.add(Box.createHorizontalStrut(1));
+		topRowPanel.add(btnSelCopy);				topRowPanel.add(Box.createHorizontalStrut(1));
+		topRowPanel.add(btnSelShow);				topRowPanel.add(Box.createHorizontalStrut(1));
+		topRowPanel.add(btnSelExport);				topRowPanel.add(Box.createHorizontalStrut(15));
 		
-		topRowPanel.add(new JLabel("Selected: "));
-		topRowPanel.add(Box.createHorizontalStrut(1));
-		topRowPanel.add(btnViewSeqs);
-		topRowPanel.add(Box.createHorizontalStrut(1));
-		topRowPanel.add(btnSelCopy);
-		topRowPanel.add(Box.createHorizontalStrut(1));
-		topRowPanel.add(btnSelShow);
-		topRowPanel.add(Box.createHorizontalStrut(1));
-		topRowPanel.add(btnSelExport);
-		topRowPanel.add(Box.createHorizontalStrut(5));
+		topRowPanel.add(new JLabel("Table: "));		topRowPanel.add(Box.createHorizontalStrut(1));
+		topRowPanel.add(btnTableShow);				topRowPanel.add(Box.createHorizontalStrut(1));
+		topRowPanel.add(btnTableExport);			topRowPanel.add(Box.createHorizontalStrut(5));
 		
-		topRowPanel.add(new JLabel("Table: "));
-		topRowPanel.add(Box.createHorizontalStrut(1));
-		topRowPanel.add(btnTableShow);
-		topRowPanel.add(Box.createHorizontalStrut(1));
-		topRowPanel.add(btnTableExport);
-		topRowPanel.add(Box.createHorizontalStrut(5));
-		
-		topRowPanel.add( Box.createHorizontalGlue() );
-		topRowPanel.add(btnHelp);
 		topRowPanel.setMaximumSize(topRowPanel.getPreferredSize());
 		topRowPanel.setMinimumSize(topRowPanel.getPreferredSize());
 	}
@@ -200,7 +181,7 @@ public class BasicGOFilterTab extends Tab {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
-					String ts = goTablePanel.getSelectedGO();
+					String ts = goTablePanel.getSelectedGOid();
 					if (ts!=null)cb.setContents(new StringSelection(ts), null);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
 			}
@@ -226,7 +207,7 @@ public class BasicGOFilterTab extends Tab {
 	 * Selected popup and export
 	 */
 	private void createTopSelected() {
-	// Selected show
+/* Popup and select */
 		final JPopupMenu selPopup = new JPopupMenu();
 		selPopup.add(new JMenuItem(new AbstractAction("Hits - assigned") {
 			private static final long serialVersionUID = 1L;
@@ -280,6 +261,25 @@ public class BasicGOFilterTab extends Tab {
 				goTablePanel.showRelatedFromTable(GOtree.DO_POPUP, btnSelShow);
 			}
 		}));	
+		selPopup.addSeparator();
+		selPopup.add(new JMenuItem(new AbstractAction("GO - Select related in table") { // CAS336 added
+			private static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent e) {
+				goTablePanel.selectRelatedFromTable(GOtree.DO_HIGH_RELATED);
+			}
+		}));
+		selPopup.add(new JMenuItem(new AbstractAction("GO - Select ancestors in table") { // CAS336 added
+			private static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent e) {
+				goTablePanel.selectRelatedFromTable(GOtree.DO_HIGH_ANC);
+			}
+		}));
+		selPopup.add(new JMenuItem(new AbstractAction("GO - Select descendents in table") { // CAS336 added
+			private static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent e) {
+				goTablePanel.selectRelatedFromTable(GOtree.DO_HIGH_DESC);
+			}
+		}));
 		
 		btnSelShow = Static.createButton("Show...", false);
 		btnSelShow.addMouseListener(new MouseAdapter() {
@@ -287,7 +287,8 @@ public class BasicGOFilterTab extends Tab {
                 selPopup.show(e.getComponent(), e.getX(), e.getY());
             }
         });
-		/**************************************************************************/
+		
+/* Export*/
 		final JPopupMenu selExport = new JPopupMenu();
 		selExport.add(new JMenuItem(new AbstractAction("Hits - assigned*") {
 			private static final long serialVersionUID = 1L;
@@ -357,7 +358,7 @@ public class BasicGOFilterTab extends Tab {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
 				try {
-					goTablePanel.statsPopUp("GO " + theStatusStr);
+					goTablePanel.statsPopUp("GO " + theFilterStr);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error on column stats");
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error column stats", null);}
 			}
@@ -428,6 +429,40 @@ public class BasicGOFilterTab extends Tab {
 			}
 		}));
 		
+		tablePopup.addSeparator();
+		tablePopup.add(new JMenuItem(new AbstractAction("Select terminal terms") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					btnTableShow.setEnabled(false); 
+					enabledFunctions(false);
+					appendStatus("Computing terminal terms...");
+					
+					loadObj.computeEnds();
+					
+					enabledFunctions(true);
+					btnTableShow.setEnabled(true);
+					
+				} catch (Exception er) {ErrorReport.reportError(er, "Compute trim");}
+			}
+		}));
+		if (pvalColumnNames.size()<0) { // change to >0 when algorithm is working
+			tablePopup.add(new JMenuItem(new AbstractAction("Select trim set") {
+				private static final long serialVersionUID = 4692812516440639008L;
+				public void actionPerformed(ActionEvent e) {
+					try {
+						btnTableShow.setEnabled(false); 
+						enabledFunctions(false);
+						
+						// loadObj.computeTrim(); 
+						
+						enabledFunctions(true);
+						btnTableShow.setEnabled(true);
+						
+					} catch (Exception er) {ErrorReport.reportError(er, "Compute trim");}
+				}
+			}));
+		}
 		btnTableShow = Static.createButton("Show...", false);
 		btnTableShow.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
@@ -663,10 +698,9 @@ public class BasicGOFilterTab extends Tab {
 		      }
 		 });
 		row1.add(chkGOID);
-		row1.add(lblGOID);
-		row1.add(Box.createHorizontalStrut(2));
+		row1.add(lblGOID);		row1.add(Box.createHorizontalStrut(2));
 		
-		lblDesc = Static.createLabel(Globalx.goTerm + " (Substring)", false);
+		lblDesc = Static.createLabel(Globalx.goTerm + " (Substring) ", false);
 		chkGODesc =  Static.createRadioButton("", false);
 		chkGODesc.addActionListener(new ActionListener() {
 		      public void actionPerformed(ActionEvent ae) {
@@ -676,15 +710,14 @@ public class BasicGOFilterTab extends Tab {
 		      }
 		 });
 		row1.add(chkGODesc);
-		row1.add(lblDesc);
-		row1.add(Box.createHorizontalStrut(2));
+		row1.add(lblDesc);		row1.add(Box.createHorizontalStrut(2));
 		
 		ButtonGroup grp = new ButtonGroup();
 		grp.add(chkGOID);
 		grp.add(chkGODesc);	
 		
 		txtSubString = Static.createTextField("", 20);
-		row1.add(txtSubString);
+		row1.add(txtSubString); row1.add(Box.createHorizontalStrut(5));
 		
 		btnFindFile = Static.createButton("Load File", false);
 		btnFindFile.addActionListener(new ActionListener() {
@@ -771,14 +804,7 @@ public class BasicGOFilterTab extends Tab {
 		});
 		row2.add(chkUseEvC);
 		row2.add(btnEvC); row2.add(Box.createHorizontalStrut(1));
-		JButton btnInfo = Static.createButton("Info", true, Globals.MENUCOLOR);
-		btnInfo.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					UserPrompt.displayHTMLResourceHelp(theParentFrame, 
-							"EvC Info", goEvCHTML);
-				}
-		});
-		row2.add(btnInfo);
+		
 		filterPanel.add(row2);
 	}
 	private void createFilterRow3Level() {
@@ -892,7 +918,7 @@ public class BasicGOFilterTab extends Tab {
 		chkUseEnrich = Static.createCheckBox("", enable);
     	chkUseEnrich.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				enablePvalSection(chkUseEnrich.isSelected());
+				enableEnrich();
 			}
 		});  
     	row4.add(chkUseEnrich);		row4.add(Box.createHorizontalStrut(4));
@@ -935,62 +961,106 @@ public class BasicGOFilterTab extends Tab {
 		
 			filterPanel.add(row4);
 			filterPanel.add(Box.createVerticalStrut(5));
-			enablePvalSection(false);
+			enableEnrich();
 		}
 	}
 	private void createFilterRow5Results() {
-	    JPanel row5 = Static.createRowPanel();
-	    row5.add(createLabel("  Results", lblFilter.getPreferredSize().width + 
-					radUseFilter.getPreferredSize().width));
-			
 	    filterPanel.add(Box.createVerticalStrut(5));
-		btnBuildTable = new JButton("BUILD TABLE");
-		btnBuildTable.setBackground(Globals.FUNCTIONCOLOR);
+		btnBuildTable = Static.createButton("BUILD", true, Globals.FUNCTIONCOLOR);
 		btnBuildTable.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				goTablePanel.clear();
-				loadBuildStart();
+				goTablePanel.highClear();
+				goTablePanel.clear(); 
+				loadBuildStart(BasicGOLoadFromDB.BUILD);
 			}
 		});
-		row5.add(btnBuildTable);
-		row5.add(Box.createHorizontalStrut(10));
 		
-		btnAddTable = new JButton("ADD to TABLE");
-		btnAddTable.setBackground(Globals.FUNCTIONCOLOR);
+		btnAddTable = Static.createButton("ADD", true, Globals.FUNCTIONCOLOR);
 		btnAddTable.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				loadBuildStart();
+				loadBuildStart(BasicGOLoadFromDB.ADD);
 			}
 		});
-		row5.add(btnAddTable);
-		row5.add(Box.createHorizontalStrut(10));
 		
-		btnSelectColumns = new JButton("Columns");
-		btnSelectColumns.setBackground(Globals.MENUCOLOR);
+		btnSelectColumns = Static.createButton("Columns", true, Globals.MENUCOLOR);
 		btnSelectColumns.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				goTablePanel.showColumns();
 				mainPanel.setVisible(false);
 			}
 		});
-		row5.add(btnSelectColumns);
 		
-		JButton btnGoHelp = new JButton("GO Help");
-		btnGoHelp.setBackground(Globals.HELPCOLOR);
-		btnGoHelp.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(theParentFrame, "GO Help", goHelpHTML);
-			}
-		});
-		btnGoHelp.setAlignmentX(RIGHT_ALIGNMENT);
-		row5.add(Box.createHorizontalGlue());
-		row5.add(Box.createHorizontalStrut(160));
-	    row5.add(btnGoHelp);
-	    
+		createHelp();
+		
+		 JPanel row5 = Static.createRowPanel(); // CAS336 added glue and dropdown help
+		 Box hzBox = Box.createHorizontalBox();
+		
+		 hzBox.add(Static.createLabel("Table", true)); hzBox.add(Box.createHorizontalStrut(5));
+		 hzBox.add(btnBuildTable);					   hzBox.add(Box.createHorizontalStrut(5));
+		 hzBox.add(btnAddTable);
+		 
+		 hzBox.add(Box.createGlue());
+		 hzBox.add(btnSelectColumns);
+		
+		 hzBox.add(Box.createGlue());
+		 hzBox.add(btnHelp);
+		 row5.add(hzBox);
 	   
-	    row5.setMaximumSize(row5.getPreferredSize());
-	    
 		filterPanel.add(row5);
+	}
+	/* CAS336 put all information under one Help button */
+	private void createHelp() {
+		final JPopupMenu popup = new JPopupMenu();
+		
+		popup.add(new JMenuItem(new AbstractAction("Top buttons") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theParentFrame, "Top Buttons", topHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
+			}
+		}));
+		popup.add(new JMenuItem(new AbstractAction("Search, Filter and Table") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theParentFrame, "Search, Filter and Table", queryHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
+			}
+		}));
+		popup.add(new JMenuItem(new AbstractAction("Modify Buttons") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theParentFrame, "Modify Buttons", lowerHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
+			}
+		}));
+		popup.addSeparator();
+		popup.add(new JMenuItem(new AbstractAction("Evidence information") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theParentFrame, "Evidence Information", goEvCHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
+			}
+		}));
+		popup.add(new JMenuItem(new AbstractAction("GO information") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theParentFrame, "GO Information", goHelpHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
+			}
+		}));
+		
+		btnHelp = Static.createButton("Help...", true, Globalx.HELPCOLOR);
+		btnHelp.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                popup.show(e.getComponent(), e.getX(), e.getY());
+            }
+        });
+		btnHelp.setAlignmentX(Component.RIGHT_ALIGNMENT);
 	}
 	private void createPvalColPanel() { 
 		pvalColumnsPanel = Static.createPageCenterPanel();
@@ -1106,7 +1176,7 @@ public class BasicGOFilterTab extends Tab {
 		evidCodePanel.setAlignmentY(Component.CENTER_ALIGNMENT);
 		
 		evidCodePanel = Static.createPageCenterPanel();	
-		String html = "<HTML><H2>Select evidence code category - see Info</H2></HTML>";
+		String html = "<HTML><H2>Select evidence code category - see Help</H2></HTML>";
 	 	JLabel header = new JLabel(html); 
 	 	header.setAlignmentX(Component.CENTER_ALIGNMENT);
 	 	header.setMaximumSize(header.getPreferredSize());
@@ -1180,27 +1250,23 @@ public class BasicGOFilterTab extends Tab {
 	 */
 	private void viewSequencesFromSelected() {
 		btnViewSeqs.setEnabled(false);
-		String [] contigNames = loadSelectedContigs();
+		String [] contigNames = loadSelectedSeqs();
 		btnViewSeqs.setEnabled(true);
 		if (contigNames==null) return;
 		
 		int nGO = goTablePanel.getSelectedRowCount();
 		String label = (nGO==1) ? currentGO : nGO + " GOs";
 
-		// always go to Table 
-		//if(contigNames.length == 1)
-		//	getParentFrame().addContigPage(contigNames[0], this, theTable.getSelectedRow(), STCWFrame.BasicGOQuery);
-		//else 
-			getParentFrame().loadContigs(label, contigNames, STCWFrame.BASIC_QUERY_MODE_GO );
+		getParentFrame().loadContigs(label, contigNames, STCWFrame.BASIC_QUERY_MODE_GO );
 	}
 	/**********************************************
 	 * XXX if Up Only or Down Only, only load associated contigs
 	 * NOTE: Filter DE<0.05 and hasGO gives many more sequences because it does not include GOseq<0.05
 	 * The ones shown are only the ones included in 
 	 */
-	private String [] loadSelectedContigs() {
+	private String [] loadSelectedSeqs() {
 		try {
-			int [] goIDs = goTablePanel.getSelectedGOs();
+			int [] goIDs = goTablePanel.getSelectedGOnums();
 			currentGO = String.format(GO_FORMAT, goIDs[0]);
 			
 			String theQuery = "SELECT DISTINCT(c.contigid) ";
@@ -1251,30 +1317,32 @@ public class BasicGOFilterTab extends Tab {
 		return tmp;
 	}
 	
-	public void updateTopButtons() {
+	public void updateAllButtons() {
+		int cnt = goTablePanel.getRowCount();
+		btnTableShow.setEnabled(cnt>0);
+		btnTableExport.setEnabled(cnt > 0);
+		
 		boolean enable = (goTablePanel.getSelectedRowCount()>0);
 		btnViewSeqs.setEnabled(enable);
+		
 		enable = (goTablePanel.getSelectedRowCount()==1);
 		btnSelShow.setEnabled(enable);
 		btnSelCopy.setEnabled(enable);
 		btnSelExport.setEnabled(enable);
+		
+		goTablePanel.updateBottomButtons();
 	}
     /**************************
      * BUILD TABLE
      */
-	private void loadBuildStart() {
-		txtStatus.setText("Building table....");
+	public void loadBuildStart(int type) {
+		if (!checkIFvalues()) return; // CAS336 fails if incorrect input
 		
-		updateTopButtons();
-		btnBuildTable.setSelected(true);
-		btnBuildTable.setEnabled(false);
-		btnBuildTable.setSelected(false);
+		enabledFunctions(false);
 		
 		try {
-			checkIFvalues();
-			
 			txtStatus.setText("Performing query - please wait");
-			loadObj.runQuery(BasicGOLoadFromDB.BUILD);
+			loadObj.runQuery(type);
 		}
 		catch(Exception e) {
 			txtStatus.setText("Query failed");
@@ -1283,60 +1351,82 @@ public class BasicGOFilterTab extends Tab {
 		}
 	}
 	// called from thread when finished
+	public void loadSelectFinish(int rowadd) {
+		appendStatus("Select Query " + rowadd);
+		
+		enabledFunctions(true);
+		updateAllButtons();
+	}
 	public void loadBuildFinish(int rowadd, int rowcnt) {
-		String msg;
 		if (rowadd==rowcnt)
-			msg = String.format("Results: %,d  GOs   %s", rowcnt, theStatusStr);
+			theStatusStr = String.format("GOs: %,d    %s", rowcnt, theFilterStr);
 		else 
-			msg = String.format("Results: %,d (add %,d) GOs   %s", rowcnt, rowadd, theStatusStr);
-		txtStatus.setText(msg);
+			theStatusStr = String.format("GOs: %,d (add %,d)   %s", rowcnt, rowadd, theFilterStr);
+		
+		txtStatus.setText(theStatusStr);
 	
 		goTablePanel.tableRefresh();
 		
-		btnBuildTable.setSelected(false);
-		btnBuildTable.setEnabled(true);
-		btnTableShow.setEnabled(goTablePanel.getRowCount() > 0);
-		btnTableExport.setEnabled(goTablePanel.getRowCount() > 0);
+		enabledFunctions(true);
+		updateAllButtons();
 	}
 	public void deleteFinish(int rowcnt) {
-		txtStatus.setText(String.format("Results: %,d GOs", rowcnt));
+		theStatusStr = String.format("Results: %,d GOs", rowcnt);
+		txtStatus.setText(theStatusStr);
 	}
 	
-	private void checkIFvalues() {
+	private boolean checkIFvalues() {// CAS336 changed from popup and run to setStatus and fail.
 		try {
 			if(chkLevelRange.isSelected()) {
-				nLevelMin = Integer.parseInt(txtLevelMin.getText());
-				nLevelMax = Integer.parseInt(txtLevelMax.getText());
-			}
-			else {
-				nLevelMin = nLevelMax = Integer.parseInt(txtLevelSpecific.getText());
+				nLevelMin = Integer.parseInt(txtLevelMin.getText().trim());
+				nLevelMax = Integer.parseInt(txtLevelMax.getText().trim());
 			}
 		}
 		catch (Exception e) {
-			JOptionPane.showMessageDialog(null, "Leval(s) must be numeric -- set to defaults");
-			nLevelMin = MIN_LEVEL;
-			nLevelMax = MAX_LEVEL;
+			setStatus("Range must be numeric. Values entered '" + txtLevelMin.getText() + "' and '" + txtLevelMax.getText() + "'");
+			txtLevelMin.setText(MIN_LEVEL + "");
+			txtLevelMax.setText(MAX_LEVEL + "");
+			return false;
 		}
-		
 		try {
-			if (chkUseEval.isSelected()) {
-				Double.parseDouble(txtEvalVal.getText());
-			}
+			if (chkLevelSpecific.isSelected())
+				nLevelMin = nLevelMax = Integer.parseInt(txtLevelSpecific.getText().trim());
 		}
 		catch (Exception e) {
-			JOptionPane.showMessageDialog(null, "Best E-val must be numeric - set to default");
+			setStatus("Specific level must be numeric. Value entered '" + txtLevelSpecific.getText() + "'");
+			txtLevelSpecific.setText("2");
+			return false;
+		}
+		try {
+			if (chkUseEval.isSelected()) 
+				Double.parseDouble(txtEvalVal.getText().trim());
+		}
+		catch (Exception e) {
+			setStatus("Best E-val must be numeric. Value entered '" + txtEvalVal.getText() + "'");
 			txtEvalVal.setText(DEF_EVAL);
+			return false;
 		}
 		
 		try {
-			if (chkUseNSeq.isSelected()) {
-				Integer.parseInt(txtNSeqVal.getText());
-			}
+			if (chkUseNSeq.isSelected()) 
+				Integer.parseInt(txtNSeqVal.getText().trim());
 		}
 		catch (Exception e) {
-			JOptionPane.showMessageDialog(null, "#Seq must be numeric - set to default");
+			setStatus("#Seq must be numeric. Value entered '" + txtNSeqVal.getText() + "'");
 			txtNSeqVal.setText("2");
+			return false;
 		}
+		
+		try {
+			if (chkUseEnrich.isSelected()) 
+				Double.parseDouble(txtCutoff.getText());
+		}
+		catch (Exception e) {
+			setStatus("P-value must be numeric. Value entered '" + txtCutoff.getText() + "'");
+			txtCutoff.setText("0.05");
+			return false;
+		}
+		return true;
 	}
 	
 	// called by Building query
@@ -1344,7 +1434,7 @@ public class BasicGOFilterTab extends Tab {
 		String theQuery = goTablePanel.getColumns(); 
 		String theWhereStr="";
 		
-		theStatusStr="";
+		theFilterStr="";
 		String searchStr = (radUseSearch.isSelected()) ? txtSubString.getText() : "";
 		singleMode = false;
 		if(searchStr.length() > 0) {
@@ -1354,49 +1444,53 @@ public class BasicGOFilterTab extends Tab {
 				theVal = theVal.trim(); // CAS327
 				try {
 					if (loadList!=null && searchStr.startsWith(loadStart)) { // gonums checked in loadFile
-						theStatusStr = "GO ID=" + searchStr;
+						theFilterStr = "GO ID=" + searchStr;
 						String x = Static.addQuoteDBList(loadList);
 						theWhereStr = " where go_info.gonum  IN ("  + x + ")"; 
 					}
 					else {
-						theStatusStr="GO ID=" + String.format(GO_FORMAT, Integer.parseInt(theVal));
+						theFilterStr="GO ID=" + String.format(GO_FORMAT, Integer.parseInt(theVal));
 						theWhereStr= " where go_info.gonum = " + theVal ;
 					}
 				}
 				catch(Exception e) {
-					theStatusStr="    *****Invalid GO ID: '" + searchStr + "'*****";
+					theFilterStr="    *****Invalid GO ID: '" + searchStr + "'*****";
 					txtStatus.setText("Error: Invalid GO ID: " + searchStr);
-					theWhereStr = " where go_info.descr LIKE '%xxyy9zzcc7bbttgg1%'"; // force search failure
+					return null;
 				}
 			}
 			else {
 				if (loadList!=null && searchStr.startsWith(loadStart)) {
-					theStatusStr = "Description=" + searchStr;
+					theFilterStr = "Description=" + searchStr;
 					String x = Static.addQuoteDBList(loadList);
 					theWhereStr= " where go_info.descr  IN ("  + x + ")"; 
 				}
 				else {
-					theStatusStr= "Description contains '" + searchStr + "'";
+					theFilterStr= "Description contains '" + searchStr + "'";
 					theWhereStr= " where go_info.descr LIKE '%" + searchStr + "%' ";
 				}
 			}
-			theStatusStr = "    Search: " + theStatusStr;
+			if (theFilterStr!="") theFilterStr = "    Search: " + theFilterStr;
 		}
 		
 		if (!singleMode)
 		{
-			theStatusStr="";
+			theFilterStr="";
 			String tmp="";
 			if (chkUseEval.isSelected()) {
 				String eval = txtEvalVal.getText().trim();
+				if (!Static.isDouble(eval)) {
+					setStatus("Incorrect e-value '" + eval + "'");
+					return null;
+				}
 				if (eval.startsWith("e") || eval.startsWith("E")) eval = "1" + eval;
 				theWhereStr = " go_info.bestEval<=" + eval;
-				theStatusStr = strMerge(theStatusStr, "E-value " + eval);
+				theFilterStr = strMerge(theFilterStr, "E-value " + eval);
 			}
 			if (chkUseNSeq.isSelected()) {
 				String nseq = txtNSeqVal.getText().trim();
 				theWhereStr = strAndMerge(theWhereStr, " go_info.nUnitranHit>=" + nseq);
-				theStatusStr = strMerge(theStatusStr, "#Seq " + nseq);
+				theFilterStr = strMerge(theFilterStr, "#Seq " + nseq);
 			}
 			if (evColumnNames.length > 0 && chkUseEvC.isSelected()) {
 				tmp = makeQueryEvCClause();
@@ -1405,35 +1499,44 @@ public class BasicGOFilterTab extends Tab {
 			if(cmbTermTypes.getSelectedIndex() > 0) {
 				tmp = "(go_info.term_type = '" + cmbTermTypes.getSelectedItem() + "') ";
 				theWhereStr = strAndMerge(theWhereStr, tmp);
-				theStatusStr = strMerge(theStatusStr, cmbTermTypes.getSelectedItem());
+				theFilterStr = strMerge(theFilterStr, cmbTermTypes.getSelectedItem());
 			}
 			if(chkLevelSpecific.isSelected()) {
-				tmp = "go_info.level = " + txtLevelSpecific.getText();
+				String level = txtLevelSpecific.getText().trim();
+				if (!Static.isInteger(level)) {
+					setStatus("Incorrect level '" + level + "'");
+					return null;
+				}
+				tmp = "go_info.level = " + level;
 				theWhereStr = strAndMerge(theWhereStr, tmp);
-				theStatusStr = strMerge(theStatusStr, "Level=" + txtLevelSpecific.getText());
+				theFilterStr = strMerge(theFilterStr, "Level=" + txtLevelSpecific.getText());
 			}
 			else {
 				if (nLevelMin>MIN_LEVEL || nLevelMax<MAX_LEVEL) {
 					tmp = "(go_info.level >= " + nLevelMin + " and go_info.level <= " + nLevelMax + ")";
 					theWhereStr = strAndMerge(theWhereStr, tmp);
-					theStatusStr = strMerge(theStatusStr, "Level [" + nLevelMin + "," + nLevelMax + "]");
+					theFilterStr = strMerge(theFilterStr, "Level [" + nLevelMin + "," + nLevelMax + "]");
+				}
+				else { // CAS336 obsolete is level 0
+					theWhereStr = strAndMerge(theWhereStr, "(go_info.level >= 1)");
 				}
 			}
 			if (chkSlims.isSelected()) {
 				tmp = " go_info.slim=1";
 				theWhereStr = strAndMerge(theWhereStr, tmp);
-				theStatusStr = strMerge(theStatusStr, "Is Slim");
+				theFilterStr = strMerge(theFilterStr, "Is Slim");
 			}
 			if (pvalColumnNames.size() > 0 && chkUseEnrich.isSelected()) {
 				tmp = makeQueryDEClause();
+				if (tmp==null) return null;
 				theWhereStr = strAndMerge(theWhereStr, tmp);
 			}
 			if (theWhereStr.equals("")) theWhereStr=" ";
 			else theWhereStr = " where " + theWhereStr;
-			theStatusStr = "    Filter: " + theStatusStr;
+			if (theFilterStr!="") theFilterStr = "    Filter: " + theFilterStr;
 			
 			if (chkUseEnrich.isSelected())
-				theStatusStr += "   #Seqs: " + boxDEseq.getSelectedItem();
+				theFilterStr += "   #Seqs: " + boxDEseq.getSelectedItem();
 		}
 		
 		theQuery += " " + theWhereStr + " order by go_info.gonum";
@@ -1469,6 +1572,10 @@ public class BasicGOFilterTab extends Tab {
 		String clause = "", summary="";
 		
 		String thresh = txtCutoff.getText().trim();
+		if (!Static.isDouble(thresh)) {
+			setStatus("Incorrect p-value '" + thresh + "'");
+			return null;
+		}
 		if (thresh.startsWith("e") || thresh.startsWith("E")) thresh = "1" + thresh;
 		
 		String ops = chkPvalAny.isSelected() ? "|" : "&";
@@ -1488,12 +1595,12 @@ public class BasicGOFilterTab extends Tab {
 		}
 		if (clause == "") {
 			chkUseEnrich.setSelected(false);
-			enablePvalSection(false); 
+			enableEnrich(); 
 			return "";
 		}
 		
-		summary = "Pval<" + thresh + " " + summary;
-		theStatusStr = strMerge(theStatusStr,summary);
+		summary = "p-value<" + thresh + " " + summary;
+		theFilterStr = strMerge(theFilterStr,summary);
 				
 		return " (" + clause + ") ";
 	}
@@ -1521,7 +1628,7 @@ public class BasicGOFilterTab extends Tab {
 				}
 				cnt++;
 			}
-		theStatusStr = strMerge(theStatusStr, summary);
+		theFilterStr = strMerge(theFilterStr, summary);
 		
 		return " (" + clause + ") ";
 	}
@@ -1598,8 +1705,8 @@ public class BasicGOFilterTab extends Tab {
 		if (chkUseNSeq.isSelected()) return Static.getInteger(txtNSeqVal.getText().trim());
 		else return 0;
 	}
-	public String getStatusStr() {
-		return theStatusStr;
+	public String getBuildFilter() {
+		return theFilterStr;
 	}
 	
 	/****************************************************************
@@ -1690,9 +1797,15 @@ public class BasicGOFilterTab extends Tab {
 		lblTo.setEnabled(isRg & isF);
 		txtLevelMin.setEnabled(isRg & isF);
 		txtLevelMax.setEnabled(isRg & isF);
+		
+		if (chkSlims!=null) chkSlims.setEnabled(isF);
 	}
-	private void enablePvalSection(boolean enable)
+	private void enableEnrich()
     {
+		boolean isF= radUseFilter.isSelected();
+		boolean isE = chkUseEnrich.isSelected();
+		boolean enable = isF & isE;
+		
 	 	lblDErow.setEnabled(enable);
 	 	
 		lblCutoff.setEnabled(enable);
@@ -1740,7 +1853,7 @@ public class BasicGOFilterTab extends Tab {
 			chkUseEnrich.setSelected(false);
 			txtCutoff.setText(DEF_PVAL);
 			boxDEseq.setSelectedIndex(0);
-			enablePvalSection(false);
+			enableEnrich();
 		}
 		if (chkUseEvC!=null) {
 			chkUseEvC.setSelected(false);
@@ -1762,30 +1875,20 @@ public class BasicGOFilterTab extends Tab {
 		}
 		
 		// Seq-hit
-		chkUseEval.setEnabled(bfilter); chkUseNSeq.setEnabled(bfilter); 
+		chkUseEval.setEnabled(bfilter); 
+		chkUseNSeq.setEnabled(bfilter); 
 		if (chkUseEvC!=null) chkUseEvC.setEnabled(bfilter);
 		
+		// CAS336 removed logic here and used enableLevels and enablePval
 		// Level
-		lblRange.setEnabled(bfilter);lblTo.setEnabled(bfilter);
 		cmbTermTypes.setEnabled(bfilter);
-		chkLevelSpecific.setEnabled(bfilter); chkLevelRange.setEnabled(bfilter);
-		txtLevelSpecific.setEnabled(bfilter); txtLevelMin.setEnabled(bfilter); txtLevelMax.setEnabled(bfilter);
-		if (chkSlims!=null) chkSlims.setEnabled(bfilter);
+		enableLevels();
 		
-		// DE
+		// enrich
 	  	if (pvalColumnNames.size() > 0) {
 	  		chkUseEnrich.setEnabled(bfilter);
+			enableEnrich();
 	  	}
-		if (!bfilter) {
-			if (evColumnNames.length>0)   btnEvC.setEnabled(bfilter);
-			if (pvalColumnNames.size() > 0) btnPval.setEnabled(bfilter);
-		}
-		else {
-			if (evColumnNames.length>0)
-				if (chkUseEvC.isSelected()) btnEvC.setEnabled(bfilter);
-			if (pvalColumnNames.size() > 0)
-				if (chkUseEnrich.isSelected()) btnPval.setEnabled(bfilter);
-		}
 	}
 	private void setPvalLabel() {
 		int cnt=0; 
@@ -1798,7 +1901,7 @@ public class BasicGOFilterTab extends Tab {
 		if (cnt==0) {
 			btnPval.setText(pvalColLabel);
 			chkUseEnrich.setSelected(false);
-			enablePvalSection(false);
+			enableEnrich();
 		}
 		else {
 			if (cnt==1) btnPval.setText(name);
@@ -1811,6 +1914,9 @@ public class BasicGOFilterTab extends Tab {
 	}
 	public void setStatus(String msg) {
 		txtStatus.setText(msg);
+	}
+	public void appendStatus(String msg) {
+		txtStatus.setText(theStatusStr + "             " + msg);
 	}
 	/***********************************************
 	 * private
@@ -1874,7 +1980,8 @@ public class BasicGOFilterTab extends Tab {
 
 	// Last row
 	private JButton btnBuildTable = null, btnAddTable = null, btnSelectColumns = null;
-
+	private JButton btnHelp = null;
+	
 	//Data members
 	private int nLevelMin = -1, nLevelMax = -1;
 	private STCWFrame theParentFrame = null;
@@ -1891,8 +1998,9 @@ public class BasicGOFilterTab extends Tab {
 	private Vector<String> pvalColumnNames = null;   // dePvalMap.keySet - P_
 	
 	boolean singleMode = false;
-	private String theStatusStr="";
+	
+	private String theFilterStr=""; // set by search and filter routines
+	private String theStatusStr=""; // the status shown,
 	// keep join on contig - much faster
-	private String sqlForGoSeqs = " FROM pja_unitrans_go as p " +
-			" JOIN contig as c ON c.CTGID = p.CTGID WHERE ";
+	private String sqlForGoSeqs = " FROM pja_unitrans_go as p JOIN contig as c ON c.CTGID = p.CTGID WHERE ";
 }

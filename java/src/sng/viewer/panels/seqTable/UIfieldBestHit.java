@@ -100,7 +100,7 @@ public class UIfieldBestHit extends JPanel implements ActionListener  {
 	private String [] desc = {
 			"Identifier", "Description", "Species", 
 			"Type (e.g. SP (SwissProt) or TR (TrEMBL))", "Taxonomy of the database", 
-			"E-value", "Bit score", "Percent similarity", "Alignment length (amino acid)", 
+			"E-value", "Bit-score", "Percent similarity", "Alignment length (amino acid)", 
 			"Start of the match to the sequence", "End of the match to the sequence", 
 			"Percent coverage of sequence",
 			"Start of the match to the hit", "End of the match to the hit", 

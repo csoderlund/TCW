@@ -8,10 +8,9 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.Font;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashSet;
 import java.io.PrintWriter;
 
 import javax.swing.BorderFactory;
@@ -51,40 +50,65 @@ import util.ui.DisplayFloat;
 public class BasicTablePanel extends JPanel {
 	private static final long serialVersionUID = 2737912903605181053L;
 	private final int MAX_COL = 260;
+	private final int idIdx = 0;		// Seq and Hit start with seqID/HitID column (index 0)
+	
+	private final Color BGCOLOR = 		Globalx.BGCOLOR;
+	private final Color HIGHCOLOR =   Globalx.HIGHCOLOR;
 	private final Color altRowColor = Globalx.altRowColor;
 	private final Color selectColor = Globalx.selectColor;
 	
-	public BasicTablePanel (STCWFrame mf, BasicHitTab hitTab, String [] col, boolean [] b, String [] pvalColNames) {
+	public BasicTablePanel (STCWFrame mf, BasicHitTab hitTab, String [] columns, boolean [] visible, String [] pvalColNames) {
 		this.hitTab = hitTab;
 		this.pvalColNames = pvalColNames;
-		setColumns(col, b);
 		
+		setColumns(columns, visible);
+		
+		createStatusBar();
 		createBasicTable();
+		createTableButtonPanel();
 	}
-	public BasicTablePanel (STCWFrame mf, BasicSeqTab t, String [] col, boolean [] b) {
-		seqTab = t;
-		setColumns(col, b);
+	public BasicTablePanel (STCWFrame mf, BasicSeqTab seqTab, String [] columns, boolean [] visible) {
+		this.seqTab = seqTab;
 		
+		setColumns(columns, visible);
+		
+		createStatusBar();
 		createBasicTable();
+		createTableButtonPanel();
+	}
+	private void createStatusBar() {
+		txtStatus = new JTextField(400);
+		txtStatus.setAlignmentX(Component.LEFT_ALIGNMENT);
+		txtStatus.setEditable(false);
+		txtStatus.setBackground(Color.WHITE);
+		txtStatus.setBorder(BorderFactory.createEmptyBorder());
+		Dimension dimStat = txtStatus.getPreferredSize();
+		dimStat.width = 500;
+		txtStatus.setPreferredSize(dimStat);
+		txtStatus.setMaximumSize(txtStatus.getPreferredSize());
 	}
 	private void createBasicTable () {
-		createStatusBar();
-		
 		theTablePanel = Static.createPagePanel();
 		theTableModel = new TableModel();
-		theTable = new JTable(theTableModel)
-		{
+		theTable = new JTable(theTableModel) {
 			private static final long serialVersionUID = -1559706452814091003L;
 
 			public Component prepareRenderer(
 			        TableCellRenderer renderer, int row, int column)
 		    {
 		        Component c = super.prepareRenderer(renderer, row, column);
-		        if (theTable.isRowSelected(row)) c.setBackground(selectColor);
+		        if (theTable.isRowSelected(row)) {
+		        	c.setBackground(selectColor);
+		        }
+		        else if (highSet.size()>0) {
+	        		String id = (seqTab!=null) ? seqTab.getValueAt(row, 0).toString() : hitTab.getValueAt(row, 0).toString();
+	        		if (highSet.contains(id)) c.setBackground( HIGHCOLOR );
+	        		else c.setBackground( BGCOLOR );
+		        }			
 		        else {
 			        boolean bBlueBG = row % 2 == 1;
-			        if ( bBlueBG )c.setBackground( altRowColor );
-					else c.setBackground( Globalx.BGCOLOR );
+			        if ( bBlueBG )	c.setBackground( altRowColor );
+					else 			c.setBackground( BGCOLOR );
 		        }
 		        /* CAS322 added, CAS323 removed because problems, CAS324 fixed */
 		        if (hitTab!=null && DisplayDecimalTab.isHighPval() && pvalColNames!=null) { 
@@ -103,7 +127,6 @@ public class BasicTablePanel extends JPanel {
 							}
 							else 
 								Out.prt("Cannot read table obj " + obj.toString());
-					
 				        	break;
 			    		}
 			    	}
@@ -118,10 +141,12 @@ public class BasicTablePanel extends JPanel {
 		theTable.setDefaultRenderer( Object.class, new BorderLessTableCellRenderer() );
 		theTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent arg0) {
-				updateTopButtons();
+				if (hitTab!=null) 		hitTab.updateTopButtons(getSelectedRowCount(), theTable.getRowCount());
+				else if (seqTab!=null) 	seqTab.updateTopButtons(getSelectedRowCount(), theTable.getRowCount());
+				
+				updateBottomButtons(); // CAS336
 			}
 		});
-
 		JTableHeader header = theTable.getTableHeader();
 		header.setUpdateTableInRealTime(true);
 		colListener = theTableModel.new ColumnListener(theTable);
@@ -138,24 +163,166 @@ public class BasicTablePanel extends JPanel {
 	
 		add(txtStatus);		add(Box.createVerticalStrut(5));
 		add(theTablePanel);	add(Box.createVerticalStrut(5));
-		createTableButtonPanel();
 	}
-	private void createStatusBar() {
-		txtStatus = new JTextField(400);
-		txtStatus.setAlignmentX(Component.LEFT_ALIGNMENT);
-		txtStatus.setEditable(false);
-		txtStatus.setBackground(Color.WHITE);
-		txtStatus.setBorder(BorderFactory.createEmptyBorder());
-		Dimension dimStat = txtStatus.getPreferredSize();
-		dimStat.width = 500;
-		txtStatus.setPreferredSize(dimStat);
-		txtStatus.setMaximumSize(txtStatus.getPreferredSize());
+	
+	/*************************************************************
+	 * Table methods
+	 */
+	public void tableResizeColumns() {
+		if(theTable.getRowCount() > 0) theTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		else theTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+		int margin = 4;
+		
+		for(int x=0; x < theTable.getColumnCount(); x++) {
+			DefaultTableColumnModel colModel = (DefaultTableColumnModel) theTable.getColumnModel();
+			TableColumn col = colModel.getColumn(x);
+			int maxSize = 0;
+			
+			TableCellRenderer renderer = col.getHeaderRenderer();
+			if(renderer == null) renderer = theTable.getTableHeader().getDefaultRenderer();
+			
+			Component comp = renderer.getTableCellRendererComponent(theTable, 
+					col.getHeaderValue(), false, false, 0, 0);
+			maxSize = comp.getPreferredSize().width;
+	 	
+			for(int y=0; y<theTable.getRowCount() && y<20; y++) {
+				renderer = theTable.getCellRenderer(y, x);
+				comp = renderer.getTableCellRendererComponent(theTable, 
+						theTable.getValueAt(y, x), false, false, y, x);
+				maxSize = Math.max(maxSize, comp.getPreferredSize().width);
+			}
+			maxSize += margin;
+			col.setPreferredWidth(Math.min(maxSize, MAX_COL)); 
+		}
+		((DefaultTableCellRenderer) 
+				theTable.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(SwingConstants.LEFT);
+		 theTableModel.fireTableDataChanged();
 	}
+	public void tableRefresh() {
+		SwingUtilities.invokeLater(
+			new Runnable() {
+				public void run() {
+					if(theTableModel != null) {
+						JTableHeader header = theTable.getTableHeader();
+						header.removeMouseListener(colListener);
+					}
+					theTableModel = new TableModel();
+					theTable.setModel(theTableModel);
+					tableResizeColumns();
+					
+					JTableHeader header = theTable.getTableHeader();
+					header.setUpdateTableInRealTime(true);
+					colListener = theTableModel.new ColumnListener(theTable);
+					header.addMouseListener(colListener);
+					theTable.getTableHeader().setBackground(Color.WHITE);
+					theTable.setDefaultRenderer( Object.class, new BorderLessTableCellRenderer() );
+					
+					updateBottomButtons(); // CAS336
+				}
+			}
+		);
+	}
+	 // XXX Table model
+	private class TableModel extends AbstractTableModel {
+		private static final long serialVersionUID = 774460555629612058L;
+		
+		public TableModel() {
+			changeColumns(columns, visible);
+		}
+		public void changeColumns(String [] columns, boolean [] visible) {
+			colNamesList = new String[columns.length];
+			for(int x=0; x<columns.length; x++)	colNamesList[x] = columns[x];
+			
+			colIsVisList = new boolean[visible.length];
+			for(int x=0; x<visible.length; x++)	colIsVisList[x] = visible[x];	
+		}
+		public int getColumnCount() {
+        	int count = 0;
+   
+        	for(int x=0; x<colIsVisList.length; x++)
+        		if(colIsVisList[x]) count++;        	
+        	return count;
+        }
+        public int getRowCount() {
+        	return getNumRow();
+        }
+        public Object getValueAt(int row, int col) {
+        	int index = getMappedColumn(col);
+        	return getValue(row, index);
+        }
+        public String getColumnName(int col) { 
+        	int index = getMappedColumn(col);
+        	return colNamesList[index]; 
+        }
+        // return index that includes invisible columns
+        private int getMappedColumn(int tableIndex) {
+        	int iTable = 0;
+        	int absIndex = -1;
+        	
+        	for(int iAbs=0; iAbs<colIsVisList.length && absIndex < 0; iAbs++) {
+        		if(colIsVisList[iAbs] && (tableIndex == iTable)) absIndex = iAbs;
+        		if(colIsVisList[iAbs]) iTable++;
+        	}
+        	return absIndex;
+        }        
+  	  	public class ColumnListener extends MouseAdapter {
+		    protected JTable table;
+
+		    public ColumnListener(JTable t) {
+	    		table = t;
+		    	bAscend = new boolean[table.getColumnCount()];
+		    	for(int x=0; x<bAscend.length; x++) bAscend[x] = true;
+		    }
+		    public void mouseClicked(MouseEvent e) {
+		    	sortTable(e.getX(), SwingUtilities.isLeftMouseButton(e));						
+		    }
+  	  		private void sortTable(int xLoc, boolean leftclick) {
+  	  			TableColumnModel colModel = table.getColumnModel();
+  	  			int columnModelIndex = colModel.getColumnIndexAtX(xLoc);
+  	  			if (columnModelIndex==-1) return;
+  	  			
+  	  			int modelIndex = colModel.getColumn(columnModelIndex).getModelIndex();
+  	  			if (modelIndex < 0) return;
+  	  			
+  	  			int mappedColumn = getMappedColumn(modelIndex);
+  	  			  	  			
+  	  			if(leftclick) bAscend[modelIndex] = !bAscend[modelIndex];
+  	  			else bAscend[modelIndex] = true;
+  	  			
+  	  			tableSort(bAscend[modelIndex], mappedColumn);
+  	  			
+  	  			table.tableChanged(new TableModelEvent(TableModel.this));
+  	  			table.repaint();
+  	  		}
+  	  		private boolean [] bAscend = null;
+  	  	}
+        private String [] colNamesList = null;
+		private boolean [] colIsVisList = null;		
+	} // end TableModelClass
+		
+	 private static class BorderLessTableCellRenderer extends DefaultTableCellRenderer {
+		private static final long serialVersionUID = 6447910004356379503L;
+
+			public Component getTableCellRendererComponent(
+		            final JTable table,
+		            final Object value,
+		            final boolean isSelected,
+		            final boolean hasFocus,
+		            final int row,
+		            final int col) {
+
+		        final boolean showFocusedCellBorder = false; // change this to see the behavior change
+
+		        final Component c = super.getTableCellRendererComponent(
+		                table, value, isSelected,
+		                showFocusedCellBorder, // && hasFocus, // shall obviously always evaluate to false in this example
+		                row, col
+		        );
+		        return c;
+		    }
+	}
+	 /*************************************************************/
 	// Parent specific
-	private void updateTopButtons() {
-		if (hitTab!=null) 		hitTab.updateTopButtons(getSelectedRowCount());
-		else if (seqTab!=null) 	seqTab.updateTopButtons(getSelectedRowCount());
-	}
 	private Object getValue(int row, int index) {
 		if (index == 0)  return row+1;
 		if (hitTab!=null) 		return hitTab.getValueAt(row, index);
@@ -163,8 +330,8 @@ public class BasicTablePanel extends JPanel {
 		else return null;
 	}
 	private void tableSort(boolean sortAsc, int mode) {
-		if (hitTab!=null) hitTab.tableSort(sortAsc, mode);
-		else if (seqTab!=null) seqTab.tableSort(sortAsc, mode);
+		if (hitTab!=null) 		hitTab.tableSort(sortAsc, mode);
+		else if (seqTab!=null) 	seqTab.tableSort(sortAsc, mode);
 	}
 	private int getNumRow() {
 		if (hitTab!=null) 		return hitTab.getNumRow();
@@ -176,7 +343,7 @@ public class BasicTablePanel extends JPanel {
 	public void setStatus(String status) {
 		txtStatus.setText(status);
 	}
-	public void setColumns(String [] col, boolean [] b) {
+	public void setColumns(String [] col, boolean [] b) { // when columns change
 		columns = new String [col.length];
 		visible = new boolean [b.length];
 		for (int i=0; i<col.length; i++) {
@@ -199,13 +366,189 @@ public class BasicTablePanel extends JPanel {
 		}
 		catch (Exception e) {return 0;}
 	}
-	// CAS334 the following were added for the new Basic Sequence select option
+	
+	// XXX CAS334 the following were added for the new Basic Sequence select option
 	public void selectRow(int row) {
 		theTable.addRowSelectionInterval(row, row);
 	}
+	 /*********************
+	  *  BOTTOM BUTTONS - 
+	  ***/
+	 private void createTableButtonPanel() {
+		lblHeader = new JLabel("Modify");
+		
+		btnDelete = Static.createButtonPlain("Delete selected", false);
+		btnDelete.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				deleteFromList();
+				updateAllButtons();
+			}
+		});	
+		btnKeep = Static.createButtonPlain("Keep selected", false);
+		btnKeep.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				keepFromList();
+				updateAllButtons();
+			}
+		});
+		btnUnselectAll = Static.createButtonPlain("Unselect All", false);
+		btnUnselectAll.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				theTable.clearSelection();
+				updateAllButtons();
+			}
+		});
+		btnSelectAll = Static.createButtonPlain("Select All", false);
+		btnSelectAll.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				theTable.selectAll();
+				updateAllButtons();
+			}
+		});
+		btnSort = Static.createButtonPlain("Sort by other list", false);
+		btnSort.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				hitTab.convertToOrder();
+				updateAllButtons();
+				theTableModel.fireTableDataChanged(); // is not automatically triggered
+			}
+		});
+		btnQuery = Static.createButtonPlain("Select Query", false); // CAS336 move from beside BUILD
+		btnQuery.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				seqTab.getFilterPanel().loadSelect();
+			}
+		});
+		btnHighSelect = Static.createButtonPlain("Highlight", false); // CAS336 new
+		btnHighSelect.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				highSelect();
+				theTable.clearSelection();
+				updateAllButtons();
+			}
+		});
+		btnHighClear = Static.createButtonPlain("Clear", false); // CAS336 new
+		btnHighClear.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				highClear();
+				updateAllButtons();
+				theTableModel.fireTableDataChanged(); // is not automatically triggered
+			}
+		});
+		
+		JPanel bottomPanel = Static.createRowPanel();
+		bottomPanel.add(lblHeader); 	bottomPanel.add(Box.createHorizontalStrut(4));
+		bottomPanel.add(btnDelete);		bottomPanel.add(Box.createHorizontalStrut(2));
+		bottomPanel.add(btnKeep);		bottomPanel.add(Box.createHorizontalStrut(14));
+		
+		bottomPanel.add(btnSelectAll);	bottomPanel.add(Box.createHorizontalStrut(2));
+		bottomPanel.add(btnUnselectAll);bottomPanel.add(Box.createHorizontalStrut(2));
+		
+		if (hitTab!=null) {
+			bottomPanel.add(Box.createHorizontalStrut(12));
+			bottomPanel.add(btnSort); bottomPanel.add(Box.createHorizontalStrut(14));
+		}
+		else {
+			bottomPanel.add(btnQuery);	bottomPanel.add(Box.createHorizontalStrut(14));
+		}
+		bottomPanel.add(btnHighSelect);	bottomPanel.add(Box.createHorizontalStrut(2));
+		bottomPanel.add(btnHighClear);
+		
+		bottomPanel.add(Box.createHorizontalGlue());
+		bottomPanel.setMaximumSize(bottomPanel.getPreferredSize());
+		add(bottomPanel);
+	}
+	
+	/******************************************************
+	 * Keep Selected and Remove Selected
+	 */
+	private void keepFromList(){
+		int numElements = theTable.getRowCount();
+		int [] selValues = theTable.getSelectedRows();		
+
+		int [] opposite = new int[numElements - selValues.length];
+		int x=0, selPos=0, nextval=0;
+		
+		for(x=0; x<opposite.length; x++) {
+			while(selPos<selValues.length && selValues[selPos] == nextval) {
+				selPos++;
+				nextval++;
+			}
+			opposite[x] = nextval++;
+		}
+		deleteFromList(opposite);
+	}
+	private void deleteFromList(){
+		int [] selValues = theTable.getSelectedRows();
+		deleteFromList(selValues);
+	}
+	// CAS335 change to send the list instead of row by row; CAS336 the status is set in hitTab and seqTab
+	private void deleteFromList(int [] selValues) {
+		theTable.clearSelection(); 
+		if (hitTab!=null) 	hitTab.deleteFromList(selValues);
+		else 				seqTab.deleteFromList(selValues);
+	}
+	// CAS336 adds selected to highSet, which is highlighted on display. 
+	private void highClear() {
+		highSet.clear();
+		if (hitTab!=null) 	hitTab.appendStatus("");
+		else 				seqTab.appendStatus("");
+	}
+	private void highSelect() {
+		int [] selRow = theTable.getSelectedRows();	
+		
+		int cntOrig = highSet.size(), cntNew=0;
+		for(int x=0; x<selRow.length; x++)  {
+			String id = (seqTab!=null) ? seqTab.getValueAt(selRow[x], idIdx).toString() :
+										 hitTab.getValueAt(selRow[x], idIdx).toString();
+			if (!highSet.contains(id)) {
+				 highSet.add(id);
+				 cntNew++;
+			}
+		}
+		String msg = (cntOrig==0) ? "Highlight " + highSet.size() : "Highlight " + cntOrig + "+" + cntNew;
+		if (seqTab!=null) 	seqTab.appendStatus(msg);	
+		else				hitTab.appendStatus(msg);
+	}
+	
+	public void enableButtons(boolean b) {// CAS334 new - called when database query starts/stops
+		btnDelete.setEnabled(b);
+		btnKeep.setEnabled(b);
+		btnUnselectAll.setEnabled(b);
+		btnSelectAll.setEnabled(b);
+		btnSort.setEnabled(b);
+		btnQuery.setEnabled(b);
+		btnHighSelect.setEnabled(b);
+		btnHighClear.setEnabled(b);
+	}
+	private void updateAllButtons() { // called from lower buttons
+		updateBottomButtons();
+		
+		int sel = getSelectedRowCount();
+		int row = getNumRow();
+		if (hitTab!=null) 	hitTab.updateTopButtons(sel, row);
+		else  				seqTab.updateTopButtons(sel, row);
+	}
+	private void updateBottomButtons() { // CAS336 new
+		boolean bSel = (theTable.getSelectedRows().length>0);
+		btnDelete.setEnabled(bSel);
+		btnKeep.setEnabled(bSel);
+		
+		btnUnselectAll.setEnabled(bSel);
+		btnHighSelect.setEnabled(bSel);
+		
+		boolean bRow = (theTable.getRowCount()>0);
+		btnSort.setEnabled(bRow);
+		
+		btnSelectAll.setEnabled(bRow);
+		btnQuery.setEnabled(bRow);
+		
+		if (!bRow) highSet.clear();
+		btnHighClear.setEnabled(highSet.size()>0);
+	}
 	
 	/****************************************************************
-	 * Shared table functions
+	 * Popup/export/copy
 	 */
 	public void statsPopUp(final String title) {
 		String info = statsPopUpCompute(title);
@@ -279,7 +622,6 @@ public class BasicTablePanel extends JPanel {
 		
 		} catch(Exception e) {ErrorReport.reportError(e, "Error create column stats"); return "Error"; }
 	}
-	
 	public String tableCopyString(String delim) {
  		StringBuilder retVal = new StringBuilder();
  	
@@ -347,303 +689,28 @@ public class BasicTablePanel extends JPanel {
 		pw.close();
 		Out.prtSp(0, "Complete writing " + theTable.getRowCount() + " rows");
 	}
-	
-	public void tableResizeColumns() {
-		if(theTable.getRowCount() > 0) theTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		else theTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
-		int margin = 4;
-		
-		for(int x=0; x < theTable.getColumnCount(); x++) {
-			DefaultTableColumnModel colModel = (DefaultTableColumnModel) theTable.getColumnModel();
-			TableColumn col = colModel.getColumn(x);
-			int maxSize = 0;
-			
-			TableCellRenderer renderer = col.getHeaderRenderer();
-			if(renderer == null) renderer = theTable.getTableHeader().getDefaultRenderer();
-			
-			Component comp = renderer.getTableCellRendererComponent(theTable, 
-					col.getHeaderValue(), false, false, 0, 0);
-			maxSize = comp.getPreferredSize().width;
-	 	
-			for(int y=0; y<theTable.getRowCount() && y<20; y++) {
-				renderer = theTable.getCellRenderer(y, x);
-				comp = renderer.getTableCellRendererComponent(theTable, 
-						theTable.getValueAt(y, x), false, false, y, x);
-				maxSize = Math.max(maxSize, comp.getPreferredSize().width);
-			}
-			maxSize += margin;
-			col.setPreferredWidth(Math.min(maxSize, MAX_COL)); 
-		}
-		((DefaultTableCellRenderer) 
-				theTable.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(SwingConstants.LEFT);
-		 theTableModel.fireTableDataChanged();
-	}
-	public void tableRefresh() {
-		SwingUtilities.invokeLater(
-			new Runnable() {
-				public void run() {
-					if(theTableModel != null) {
-						JTableHeader header = theTable.getTableHeader();
-						header.removeMouseListener(colListener);
-					}
-					theTableModel = new TableModel();
-					theTable.setModel(theTableModel);
-					tableResizeColumns();
-					
-					JTableHeader header = theTable.getTableHeader();
-					header.setUpdateTableInRealTime(true);
-					colListener = theTableModel.new ColumnListener(theTable);
-					header.addMouseListener(colListener);
-					theTable.getTableHeader().setBackground(Color.WHITE);
-					theTable.setDefaultRenderer( Object.class, new BorderLessTableCellRenderer() );
-				}
-			}
-		);
-	}
-	 // Table model
-	private class TableModel extends AbstractTableModel {
-		private static final long serialVersionUID = 774460555629612058L;
-		
-		public TableModel() {
-			changeColumns(columns, visible);
-		}
-		// CAS323 THIS doesn't do anything
-		public void changeColumns(String [] columns, boolean [] visible) {
-			colNamesList = new String[columns.length];
-			for(int x=0; x<columns.length; x++)
-				colNamesList[x] = columns[x];
-			
-			colIsVisList = new boolean[visible.length];
-			for(int x=0; x<visible.length; x++)
-				colIsVisList[x] = visible[x];	
-			
-		}
-		public int getColumnCount() {
-        	int count = 0;
-        	
-        	for(int x=0; x<colIsVisList.length; x++)
-        		if(colIsVisList[x]) count++;        	
-        	return count;
-        }
-        public int getRowCount() {
-        	return getNumRow();
-        }
-        public Object getValueAt(int row, int col) {
-        	int index = getMappedColumn(col);
-        	return getValue(row, index);
-        }
-        public String getColumnName(int col) { 
-        	int index = getMappedColumn(col);
-        	return colNamesList[index]; 
-        }
-        /************************
-         * 1 2 3 4 5 6
-         * a b c x y z
-         * t f t f t f
-         * 1   2   3
-         * if relIndex=3 from columns shown in table, absIndex=5 for index into 
-         */
-        private int getMappedColumn(int tableIndex) {
-        	int iTable = 0;
-        	int absIndex = -1;
-        	
-        	for(int iAbs=0; iAbs<colIsVisList.length && absIndex < 0; iAbs++) {
-        		if(colIsVisList[iAbs] && (tableIndex == iTable)) absIndex = iAbs;
-        		if(colIsVisList[iAbs]) iTable++;
-        	}
-        	return absIndex;
-        }        
-  	  	public class ColumnListener extends MouseAdapter {
-		    protected JTable table;
-
-		    public ColumnListener(JTable t) {
-	    		table = t;
-		    	bAscend = new boolean[table.getColumnCount()];
-		    	for(int x=0; x<bAscend.length; x++) bAscend[x] = true;
-		    }
-		    public void mouseClicked(MouseEvent e) {
-		    	sortTable(e.getX(), SwingUtilities.isLeftMouseButton(e));						
-		    }
-  	  		private void sortTable(int xLoc, boolean leftclick) {
-  	  			TableColumnModel colModel = table.getColumnModel();
-  	  			int columnModelIndex = colModel.getColumnIndexAtX(xLoc);
-  	  			if (columnModelIndex==-1) return;
-  	  			
-  	  			int modelIndex = colModel.getColumn(columnModelIndex).getModelIndex();
-  	  			if (modelIndex < 0) return;
-  	  			
-  	  			int mappedColumn = getMappedColumn(modelIndex);
-  	  			  	  			
-  	  			if(leftclick) bAscend[modelIndex] = !bAscend[modelIndex];
-  	  			else bAscend[modelIndex] = true;
-  	  			
-  	  			tableSort(bAscend[modelIndex], mappedColumn);
-  	  			
-  	  			table.tableChanged(new TableModelEvent(TableModel.this));
-  	  			table.repaint();
-  	  		}
-  	  		
-  	  		private boolean [] bAscend = null;
-  	  	}
-  	 
-        private String [] colNamesList = null;
-		private boolean [] colIsVisList = null;		
-	} // end TableModelClass
-		
-	 private static class BorderLessTableCellRenderer extends DefaultTableCellRenderer {
-		private static final long serialVersionUID = 6447910004356379503L;
-
-			public Component getTableCellRendererComponent(
-		            final JTable table,
-		            final Object value,
-		            final boolean isSelected,
-		            final boolean hasFocus,
-		            final int row,
-		            final int col) {
-
-		        final boolean showFocusedCellBorder = false; // change this to see the behavior change
-
-		        final Component c = super.getTableCellRendererComponent(
-		                table, value, isSelected,
-		                showFocusedCellBorder, // && hasFocus, // shall obviously always evaluate to false in this example
-		                row, col
-		        );
-		        return c;
-		    }
-	}
-	 /*********************
-	  *  BOTTOM BUTTONS - 
-	  ***/
-	 private void createTableButtonPanel() {
-		lblHeader = new JLabel("Modify table");
-		
-		btnUnselectAll = new JButton("Unselect All");
-		btnUnselectAll.setMargin(new Insets(0, 0, 0, 0));
-		btnUnselectAll.setFont(new Font(btnUnselectAll.getFont().getName(),Font.PLAIN,10));
-		btnUnselectAll.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				theTable.clearSelection();
-			}
-		});
-		
-		btnSelectAll = new JButton("Select All");
-		btnSelectAll.setMargin(new Insets(0, 0, 0, 0));
-		btnSelectAll.setFont(new Font(btnSelectAll.getFont().getName(),Font.PLAIN,10));
-		btnSelectAll.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				theTable.selectAll();
-			}
-		});
-		
-		btnDelete = new JButton("Delete selected");
-		btnDelete.setMargin(new Insets(0, 0, 0, 0));
-		btnDelete.setFont(new Font(btnDelete.getFont().getName(),Font.PLAIN,10));
-		btnDelete.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				deleteFromList();
-				tableRefresh();
-			}
-		});
-		
-		btnKeep = new JButton("Keep selected");
-		btnKeep.setMargin(new Insets(0, 0, 0, 0));
-		btnKeep.setFont(new Font(btnKeep.getFont().getName(),Font.PLAIN,10));
-		btnKeep.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				keepFromList();
-				tableRefresh();
-			}
-		});
-		
-		btnSort = new JButton("Sort by other list");
-		btnSort.setMargin(new Insets(0, 0, 0, 0));
-		btnSort.setFont(new Font(btnSort.getFont().getName(),Font.PLAIN,10));
-		btnSort.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				hitTab.convertToOrder();
-				tableRefresh();
-			}
-		});
-		
-		JPanel bottomPanel = Static.createRowPanel();
-		
-		bottomPanel.add(lblHeader); 	bottomPanel.add(Box.createHorizontalStrut(5));
-		bottomPanel.add(btnDelete);		bottomPanel.add(Box.createHorizontalStrut(3));
-		bottomPanel.add(btnKeep);
-		
-		bottomPanel.add(Box.createHorizontalStrut(15));
-		bottomPanel.add(btnSelectAll);	bottomPanel.add(Box.createHorizontalStrut(3));
-		bottomPanel.add(btnUnselectAll);
-		
-		bottomPanel.add(Box.createHorizontalStrut(15));
-		if (hitTab!=null) bottomPanel.add(btnSort);
-
-		bottomPanel.add(Box.createHorizontalGlue());
-		bottomPanel.setMaximumSize(bottomPanel.getPreferredSize());
-		add(bottomPanel);
-	}
-	/******************************************************
-	 * Keep Selected and Remove Selected
-	 */
-	private void keepFromList(){
-		int numElements = theTable.getRowCount();
-		int [] selValues = theTable.getSelectedRows();		
-
-		int [] opposite = new int[numElements - selValues.length];
-		int x=0, selPos=0, nextval=0;
-		
-		for(x=0; x<opposite.length; x++)
-		{
-			while(selPos<selValues.length && selValues[selPos] == nextval) {
-				selPos++;
-				nextval++;
-			}
-			opposite[x] = nextval++;
-		}
-		deleteFromList(opposite);
-	}
-		
-	private void deleteFromList(){
-		int [] selValues = theTable.getSelectedRows();
-		deleteFromList(selValues);
-	}
-	// CAS335 change to send the list instead of row by row
-	private void deleteFromList(int [] selValues) {
-		theTable.clearSelection(); 
-		if (hitTab!=null) { 
-			hitTab.deleteFromList(selValues);
-			setStatus(hitTab.getStatus());
-		}
-		else {
-			seqTab.deleteFromList(selValues);
-			setStatus("Results: " + seqTab.getNumRow());
-		}
-	}
-	/*************************************************************/
-	// CAS334 added for Basic Sequence SELECT ROWS
-	public void enableButtons(boolean b) {
-		btnDelete.setEnabled(b);
-		btnKeep.setEnabled(b);
-		btnUnselectAll.setEnabled(b);
-		btnSelectAll.setEnabled(b);
-		btnSort.setEnabled(b);
-	}
-	//Table button panel
-	private JButton btnDelete = null, btnKeep = null;
-	private JButton btnUnselectAll = null, btnSelectAll = null, btnSort=null;
-	private JLabel lblHeader = null;
-
-	private String [] columns = null;
+	// Table
+	// if a column is invisible, it is not accessible from this file
+	// seqTab.getValueAt(row, col) and hitTab.getValueAt(row, col) are sorted rows
+	//		with all columns except row - hence, the seqID and hitID are index 0
+	private TableModel theTableModel = null;	// rows sorted, but visible columns in order
+	private JTable theTable = null;				// what is viewed
+	private String [] columns = null;			// same as theTableModel.colNamesList
 	private boolean [] visible = null;
 	
 	private JPanel theTablePanel = null;
-	private TableModel theTableModel = null;
-	private JTable theTable = null;
 	private TableModel.ColumnListener colListener = null;
 	private JScrollPane tableScroll = null;
 	private JTextField txtStatus = null;
 	
+	//Table button panel
+	private JLabel lblHeader = null;
+	private JButton btnDelete = null, btnKeep = null;
+	private JButton btnUnselectAll = null, btnSelectAll = null, btnSort=null;
+	private JButton btnHighSelect=null, btnHighClear=null, btnQuery=null;
+
 	private BasicHitTab hitTab=null;
 	private BasicSeqTab seqTab=null;
 	private String [] pvalColNames;
+	private HashSet <String> highSet = new HashSet <String> ();
 }

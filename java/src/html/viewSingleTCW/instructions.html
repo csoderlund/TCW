@@ -34,14 +34,14 @@ it can hit multiple different annoDBs (have alignments in more than one annoDB).
 <tr><td colspan=2><u>The following are characterizations assigned to DB hits</u></td>
 </tr>
 <tr><td valign=top nowrap><i>Best Bits (BS/BITS)</i></td>
-<td>The hit with the best bitscore. 
+<td>The hit with the best bit-score. 
 If there is a tie, a SP (SwissProt) or TR (TrEMBL) takes precedence.
 If there is still a tie, the best e-value takes precedence.</td>
 </tr>
 
 <tr><td  valign=top nowrap><i>Best Anno (AN/ANNO)</i></td>
 <td>The hit with the best
-bitscore from the list of informative descriptions, where an informative description
+bit-score from the list of informative descriptions, where an informative description
 is one that does not contain phrases such as  "uncharacterized protein". 
 It also looks for names such as "Os02g0768200 protein", though this means it sometimes 
 gets it wrong, e.g "B1 protein" is detected as non-informative as it has the general composition of a name.
@@ -49,22 +49,22 @@ gets it wrong, e.g "B1 protein" is detected as non-informative as it has the gen
 </td>
 </tr>
 <tr><td valign=top nowrap><i>Best with GO (WG)</i></td>
-<td>From a list sorted on bitscore, the first one with at least one GO ID assigned.</td>
+<td>From a list sorted on bit-score, the first one with at least one GO ID assigned.</td>
 </tr>
 
 <tr><td valign=top><i>Rank</i></td>
-<td>The rank is assigned based on the bitscore sort followed by the 
-e-value sort, i.e. when the bitscore is tied, the order is
+<td>The rank is assigned based on the bit-score sort followed by the 
+e-value sort, i.e. when the bit-score is tied, the order is
 based on the e-value.
 Note that the <tt>Blast</tt> and <tt>Diamond</tt> default order is the e-value sort followed by the
-bitscore. </td>
+bit-score. </td>
 </tr>
 </table>
-NOTE: The bitscore takes precedence over the e-value since the e-value takes into account the size of the database, whereas
-the bitscore will be the same regardless of the size of the database.
+NOTE: The bit-score takes precedence over the e-value since the e-value takes into account the size of the database, whereas
+the bit-score will be the same regardless of the size of the database.
 <p>Special Case - <i>Best Anno (AN/ANNO)</i>:  The database may having been built with the "SwissProt precedence" option set, in which
 case, this will be stated at the end of the <b>Overview</b> panel. When this is selected, a SwissProt hit will be selected
-if its bitscore is sufficiently close the non-SP best annotation.
+if its bit-score is sufficiently close the non-SP best annotation.
 
 <hr>
 <p>Detailed Help is provided on each page; the following provides an overview

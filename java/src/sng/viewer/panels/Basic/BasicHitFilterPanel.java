@@ -8,7 +8,8 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.sql.ResultSet;
@@ -23,6 +24,7 @@ import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -34,8 +36,10 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
@@ -54,6 +58,7 @@ import sng.viewer.panels.align.AlignData;
 import sng.viewer.panels.align.PairViewPanel;
 import sng.viewer.panels.seqDetail.LoadFromDB;
 import util.database.DBConn;
+import util.database.Globalx;
 import util.file.FileC;
 import util.file.FileRead;
 import util.methods.ErrorReport;
@@ -64,6 +69,12 @@ import util.ui.UserPrompt;
 
 public class BasicHitFilterPanel extends JPanel {
 	private static final long serialVersionUID = 6371517539623729378L;
+	
+	private final String topHTML = 		Globals.helpDir + "BasicTopHit.html";
+	private final String queryHTML = 	Globals.helpDir + "BasicQueryHit.html";
+	private final String lowerHTML =   	Globals.helpDir + "BasicModify.html"; 
+	private final String speciesHTML =	Globals.helpDir + "BasicQueryHitSpecies.html";
+	
 	public static final int VIEW_BY_GRP = 1; 
 	public static final int VIEW_BY_SEQ = 2; 
 	private static final Color BGCOLOR = Globals.BGCOLOR;
@@ -275,22 +286,19 @@ public class BasicHitFilterPanel extends JPanel {
 			 });
 			radHitID.setSelected(true);
 			rowSearch.add(radDesc);
-			rowSearch.add(lblDesc);
-			rowSearch.add(Box.createHorizontalStrut(5));
+			rowSearch.add(lblDesc);		rowSearch.add(Box.createHorizontalStrut(8));
 			
 			ButtonGroup allbg = new ButtonGroup();
 			allbg.add(radHitID); 
 			allbg.add(radDesc); 
 			
 			
-			lblSubstring = new JLabel("  Substring: ");
+			lblSubstring = new JLabel("Substring: ");
 			rowSearch.add(lblSubstring);
 			txtField  = Static.createTextField("", 20, false);
-			txtField.setMaximumSize(txtField.getPreferredSize());
-			rowSearch.add(txtField);
-			rowSearch.add(Box.createHorizontalStrut(5));
+			rowSearch.add(txtField);	rowSearch.add(Box.createHorizontalStrut(4));
 			
-			btnFindFile = Static.createButton("Load File", false);
+			btnFindFile = Static.createButton("Load File", true);
 			btnFindFile.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					try {
@@ -499,11 +507,8 @@ public class BasicHitFilterPanel extends JPanel {
 			add(new JSeparator());
 			add(Box.createVerticalStrut(3));	
 			
-			JPanel rowResults = Static.createRowPanel();
 			
-			rowResults.add(createLabel("  Results", lblSearch.getPreferredSize().width + 
-									chkUseFilters.getPreferredSize().width));
-			btnBuildTable = new JButton("BUILD TABLE");
+			btnBuildTable = new JButton("BUILD");
 			btnBuildTable.setBackground(Globals.FUNCTIONCOLOR);
 			btnBuildTable.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -511,10 +516,8 @@ public class BasicHitFilterPanel extends JPanel {
 						loadDataForTable(true /* isBuild */);
 				}
 			});
-			rowResults.add(btnBuildTable);
-			rowResults.add(Box.createHorizontalStrut(10));
 			
-			btnAddTable = new JButton("ADD to TABLE");
+			btnAddTable = new JButton("ADD");
 			btnAddTable.setBackground(Globals.FUNCTIONCOLOR);
 			btnAddTable.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -522,8 +525,7 @@ public class BasicHitFilterPanel extends JPanel {
 						loadDataForTable(false /* isAdd */);
 				}
 			});
-			rowResults.add(btnAddTable);
-			rowResults.add(Box.createHorizontalStrut(10));
+			
 			
 			btnSetColumns = new JButton("Hit Columns");
 			btnSetColumns.setBackground(Globals.MENUCOLOR);
@@ -534,8 +536,6 @@ public class BasicHitFilterPanel extends JPanel {
 					else colSeqPanel.setVisible(true);
 				}
 			});
-			rowResults.add(btnSetColumns);
-			rowResults.add(Box.createHorizontalStrut(10));
 			
 			showGrouped = new JCheckBox("Group by Hit ID", true);
 			showGrouped.addActionListener(new ActionListener() {
@@ -546,7 +546,24 @@ public class BasicHitFilterPanel extends JPanel {
 					theParentTab.tableRefresh(isGrpView);
 				}
 			});
-			rowResults.add(showGrouped);
+			createHelp();
+			
+			JPanel rowResults = Static.createRowPanel(); // CAS336 added glue and dropdown help
+			
+			Box hzBox = Box.createHorizontalBox();
+			
+			 hzBox.add(Static.createLabel("Table", true)); hzBox.add(Box.createHorizontalStrut(5));
+			 hzBox.add(btnBuildTable);					   hzBox.add(Box.createHorizontalStrut(5));
+			 hzBox.add(btnAddTable);
+			 
+			 hzBox.add(Box.createGlue());
+			 hzBox.add(btnSetColumns);						hzBox.add(Box.createHorizontalStrut(3));
+			 hzBox.add(showGrouped);
+			
+			 hzBox.add(Box.createGlue());
+			 hzBox.add(btnHelp);
+			 rowResults.add(hzBox);
+			
 			add(rowResults); // CAS313 Occasionally, gets extra lines. Also, Align has extra lines. 
 			
 			enableSections();
@@ -554,7 +571,43 @@ public class BasicHitFilterPanel extends JPanel {
 			setMaximumSize(getPreferredSize());
 			setVisible(true);
 		}
-		
+		private void createHelp() {
+			final JPopupMenu popup = new JPopupMenu();
+			
+			popup.add(new JMenuItem(new AbstractAction("Top buttons") {
+				private static final long serialVersionUID = 4692812516440639008L;
+				public void actionPerformed(ActionEvent e) {
+					try {
+						UserPrompt.displayHTMLResourceHelp(theMainFrame, "Top Buttons", topHTML);
+					} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
+				}
+			}));
+			popup.add(new JMenuItem(new AbstractAction("Search and Table") {
+				private static final long serialVersionUID = 4692812516440639008L;
+				public void actionPerformed(ActionEvent e) {
+					try {
+						UserPrompt.displayHTMLResourceHelp(theMainFrame, "Search, Filter and Table", queryHTML);
+					} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
+				}
+			}));
+			popup.add(new JMenuItem(new AbstractAction("Modify Buttons") {
+				private static final long serialVersionUID = 4692812516440639008L;
+				public void actionPerformed(ActionEvent e) {
+					try {
+						UserPrompt.displayHTMLResourceHelp(theMainFrame, "Modify Buttons", lowerHTML);
+					} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
+				}
+			}));
+			
+			
+			btnHelp = Static.createButton("Help...", true, Globalx.HELPCOLOR);
+			btnHelp.addMouseListener(new MouseAdapter() {
+	            public void mousePressed(MouseEvent e) {
+	                popup.show(e.getComponent(), e.getX(), e.getY());
+	            }
+	        });
+			btnHelp.setAlignmentX(Component.RIGHT_ALIGNMENT);
+		}
 		private JLabel createLabel(String label, int width) {
 			JLabel tmp = new JLabel(label);
 			Dimension dim = tmp.getPreferredSize();
@@ -793,9 +846,7 @@ public class BasicHitFilterPanel extends JPanel {
 		private JButton  btnAnnoDBs = null, btnSpecies = null, btnGOetc = null;
 				
 		// Results
-		private JButton btnBuildTable = null;
-		private JButton btnAddTable = null;
-		private JButton btnSetColumns = null;
+		private JButton btnBuildTable = null, btnAddTable = null, btnSetColumns = null, btnHelp = null;
 		private JCheckBox showGrouped = null;
 	} // end QueryPanel
 	
@@ -1378,7 +1429,7 @@ public class BasicHitFilterPanel extends JPanel {
 			btnHelp.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 						UserPrompt.displayHTMLResourceHelp(theMainFrame, 
-						"Basic DB Hits Query", "html/viewSingleTCW/BasicQueryHitSpecies.html");
+						"Basic DB Hits Query", speciesHTML);
 				}
 			});
 			
@@ -2019,7 +2070,7 @@ public class BasicHitFilterPanel extends JPanel {
 			
 			// Check/uncheck
 			JPanel libChkRow = Static.createRowPanel();
-			final JCheckBox chkAllLib = new JCheckBox("check/uncheck all", false);
+			final JCheckBox chkAllLib = new JCheckBox("Check/uncheck all", false);
 			
 			chkAllLib.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
@@ -2101,9 +2152,9 @@ public class BasicHitFilterPanel extends JPanel {
 			}
 			pvalPanel.add(Box.createVerticalStrut(10));
 			
-			// check/uncheck
+			// Check/uncheck
 			JPanel pvalChkRow = Static.createRowPanel();
-			final JCheckBox chkAllPval = new JCheckBox("check/uncheck all", false);
+			final JCheckBox chkAllPval = new JCheckBox("Check/uncheck all", false);
 			
 			chkAllPval.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
@@ -2288,24 +2339,15 @@ public class BasicHitFilterPanel extends JPanel {
 		public ColumnPanel(String [] staticNames, boolean isGrp) {
 			setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 			setBackground(Color.white);
-			setAlignmentX(Component.CENTER_ALIGNMENT);
-			setAlignmentY(Component.CENTER_ALIGNMENT);
 			
-			JPanel headerPanel = new JPanel();
-			headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.LINE_AXIS));
-			headerPanel.setBackground(Color.white);
-			String head="";
-			if (isGrp) 	head = "<HTML><H2>Hit columns</H2></HTML>";
-			else 		head = "<HTML><H2>Sequence columns</H2></HTML>";
+			JPanel headerPanel = Static.createRowCenterPanel();
+			String head= (isGrp) ? "<HTML><H2>Hit columns</H2></HTML>" : "<HTML><H2>Sequence columns</H2></HTML>";
 			JLabel theHeader = new JLabel(head);
-			theHeader.setBackground(Color.white);
-			theHeader.setAlignmentX(CENTER_ALIGNMENT);
 			headerPanel.add(theHeader);
-			headerPanel.add(Box.createVerticalStrut(5));
-			headerPanel.setMaximumSize(headerPanel.getPreferredSize());
-			headerPanel.setAlignmentX(CENTER_ALIGNMENT);
+			headerPanel.add(Box.createVerticalStrut(10));
+			Static.center(headerPanel);
 			
-			add(Box.createVerticalStrut(5)); // CAS331 changed VerticalStrut to take less room
+			add(Box.createVerticalStrut(5)); 
 			add(headerPanel);
 			add(Box.createVerticalStrut(10));
 			
@@ -2313,7 +2355,7 @@ public class BasicHitFilterPanel extends JPanel {
 			add(selectPanel);
 			
 			add(Box.createVerticalStrut(10));
-			btnAccept = new JButton("Accept");
+			btnAccept = Static.createButton("Accept", true);
 			btnAccept.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					saveSelections();
@@ -2322,7 +2364,7 @@ public class BasicHitFilterPanel extends JPanel {
 					theParentTab.tableRefresh(isGrpView);
 				}
 			});
-			btnDiscard = new JButton("Discard");
+			btnDiscard = Static.createButton("Discard", true);
 			btnDiscard.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					restoreSelections();
@@ -2343,42 +2385,60 @@ public class BasicHitFilterPanel extends JPanel {
 					theParentTab.tableRefresh(isGrpView);
 				}
 			});
-			JPanel buttonPanel = new JPanel();
-			buttonPanel.setBackground(Color.white);
-			buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
-			
-			buttonPanel.add(btnAccept);
-			buttonPanel.add(Box.createHorizontalStrut(10));
-		
-			buttonPanel.add(btnSyncThis);
-			buttonPanel.add(Box.createHorizontalStrut(10));
-			
+			JPanel buttonPanel = Static.createRowCenterPanel();
+			buttonPanel.add(btnAccept);		buttonPanel.add(Box.createHorizontalStrut(10));
+			buttonPanel.add(btnSyncThis);	buttonPanel.add(Box.createHorizontalStrut(10));
 			buttonPanel.add(btnDiscard);
-				
-			buttonPanel.setMaximumSize(buttonPanel.getPreferredSize());
-			buttonPanel.setAlignmentX(CENTER_ALIGNMENT);
+			Static.center(buttonPanel);	
+			
 			add(buttonPanel);
 			setVisible(false);
 		}
-		
  		private void createColSelectPanel(String [] staticNames, boolean is) {
- 		// initialize check boxes
  			isGrp = is;
+			
+			JPanel genPanel =  createGenPanel(staticNames, is);
+			JPanel libPanel =  createColLibPanel();
+			JPanel pvalPanel = createColPvalPanel();
+			
+			// Add three column panels side by side in columnSelectPanel
+			selectPanel = Static.createRowPanel();
+	
+			JPanel subP = Static.createRowPanel();
+			subP.add(genPanel);
+			subP.add(Box.createHorizontalStrut(60));
+			if (libPanel!=null) {
+				subP.add(libPanel);
+				if (pvalPanel!=null) {
+					subP.add(Box.createHorizontalStrut(60));
+					subP.add(pvalPanel);
+				}
+			}
+			Static.center(subP);
+			
+			if ((libColNames!=null && libColNames.length>20)||(pvalColNames!=null && pvalColNames.length>20)) {
+				JScrollPane sp = new JScrollPane(subP);
+				selectPanel.add(sp);
+			}
+			else {
+				selectPanel.add(subP);
+			}
+			Static.center(selectPanel);
+			
+			initSelections();
+ 		}
+ 		private JPanel createGenPanel(String [] staticNames, boolean is) {
+ 			JPanel genPage = Static.createPageTopPanel();
+ 			
+ 			JPanel genRow = Static.createRowPanel();
+			genRow.add(Static.createLabel("General"));
+			genPage.add(genRow);
+			genPage.add(Box.createVerticalStrut(5));
+			
 			chkStaticColNames = new JCheckBox[staticNames.length];	
-			for(int x=0; x<chkStaticColNames.length; x++) chkStaticColNames[x] = null;
-			
-		/** Static columns -- left panel **/ 
-			JPanel staticPanel = Static.createPagePanel();
-			staticPanel.setAlignmentY(TOP_ALIGNMENT);
-			
-			JPanel genRow = Static.createRowPanel();
-			genRow.add(new JLabel("General"));
-			staticPanel.add(genRow);
-			staticPanel.add(Box.createVerticalStrut(5));
 			
 			for(int x=0; x<staticNames.length; x++) {
-				chkStaticColNames[x] = new JCheckBox(staticNames[x], false);
-				chkStaticColNames[x].setAlignmentX(LEFT_ALIGNMENT);
+				chkStaticColNames[x] = Static.createCheckBox(staticNames[x], false);
 				chkStaticColNames[x].addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						setOKEnabled();
@@ -2386,14 +2446,12 @@ public class BasicHitFilterPanel extends JPanel {
 				});
 				genRow = Static.createRowPanel();
 				genRow.add(chkStaticColNames[x]);
-				if (x==SEQ_STATIC_COLUMNS.length) staticPanel.add(Box.createVerticalStrut(10));
-				staticPanel.add(genRow);
+				if (x==SEQ_STATIC_COLUMNS.length) genPage.add(Box.createVerticalStrut(10));
+				genPage.add(genRow);
 			}
 			
 			JPanel genChkRow = Static.createRowPanel();
-			
-			final JCheckBox chkGeneral = new JCheckBox("check/uncheck all", false);
-			chkGeneral.setAlignmentX(LEFT_ALIGNMENT);
+			final JCheckBox chkGeneral = Static.createCheckBox("Check/uncheck all", false);
 			chkGeneral.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					boolean b = chkGeneral.isSelected();
@@ -2403,88 +2461,42 @@ public class BasicHitFilterPanel extends JPanel {
 				}
 			});
 			genChkRow.add(chkGeneral);
-			genChkRow.setBorder(BorderFactory.createLineBorder(Color.BLACK));	
-			genChkRow.setMinimumSize(genChkRow.getPreferredSize());
-			genChkRow.setMaximumSize(genChkRow.getPreferredSize());
-			staticPanel.add(genChkRow);
+			Static.border(genChkRow);
+			genPage.add(Box.createVerticalStrut(3));
+			genPage.add(genChkRow);
 			
-			staticPanel.add(Box.createVerticalStrut(2));
-			if (isGrp) staticPanel.add(new JLabel("*Seq-Hit values of best"));
-			else  staticPanel.add(new JLabel("+Seq-Hit values"));
-				
-			staticPanel.setMinimumSize(staticPanel.getPreferredSize());
-			staticPanel.setMaximumSize(staticPanel.getPreferredSize());
-			staticPanel.setAlignmentX(CENTER_ALIGNMENT);
-
-		/** Make adjacent General, RPKM, DE panels **/
-			JPanel libPanel = createColLibPanel();
-			JPanel pvalPanel = createColPvalPanel();
-			
-			// Add three column panels side by side in columnSelectPanel
-			selectPanel = Static.createRowPanel();
-			
-			JPanel subP = Static.createRowPanel();
-			subP.add(staticPanel);
-			subP.add(Box.createHorizontalStrut(60));
-			if (libPanel!=null) {
-				subP.add(libPanel);
-				if (pvalPanel!=null) {
-					subP.add(Box.createHorizontalStrut(60));
-					subP.add(pvalPanel);
-				}
-			}
-			subP.setMinimumSize(subP.getPreferredSize());
-			subP.setMaximumSize(subP.getPreferredSize());
-			subP.setAlignmentX(CENTER_ALIGNMENT);
-			
-			if ((libColNames != null && libColNames.length > 20) ||  
-				(pvalColNames != null && pvalColNames.length > 20))
-			{
-				JScrollPane sp = new JScrollPane(subP);
-				selectPanel.add(sp);
-			}
-			else
-			{
-				selectPanel.add(subP);
-			}
-			selectPanel.setMaximumSize(selectPanel.getPreferredSize());
-			selectPanel.setAlignmentX(CENTER_ALIGNMENT);
-			
-			initSelections();
+			genPage.add(Box.createVerticalStrut(2));
+			if (isGrp) 	genPage.add(Static.createLabel("*Seq-Hit values of best"));
+			else  		genPage.add(Static.createLabel("+Seq-Hit values"));
+			return genPage;
  		}
 		private JPanel createColLibPanel() {
 			if(libColNames == null || libColNames.length == 0) return null;
 			
-			chkLibColNames = new JCheckBox[libColNames.length];
-			for(int x=0; x<chkLibColNames.length; x++) chkLibColNames[x] = null;
-			
-			JPanel libPanel = Static.createPagePanel();
-			libPanel.setAlignmentY(TOP_ALIGNMENT);
-			
+			JPanel libPage = Static.createPageCenterPanel();
+		
 			JPanel libRow = Static.createRowPanel();
 			String l = (isGrp) ? "Best " + norm : norm;
 			libRow.add(new JLabel(l));
-			libPanel.add(libRow);		
+			libPage.add(libRow);		
 					
-			// List of RPKM value
+			// List of TPM/RPKM value
+			chkLibColNames = new JCheckBox[libColNames.length];
 			for(int x=0; x<libColNames.length; x++) {
-				chkLibColNames[x] = new JCheckBox(libColNames[x], false); // RPKM not on by default
-				chkLibColNames[x].setAlignmentX(LEFT_ALIGNMENT);
+				chkLibColNames[x] = Static.createCheckBox(libColNames[x], false); // RPKM not on by default
 				chkLibColNames[x].addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						setOKEnabled();
 					}
 				});
-			
 				JPanel libx = Static.createRowPanel();
 				libx.add(chkLibColNames[x]);
-				libPanel.add(libx);
+				libPage.add(libx);
 			}
 			
 			// Check/uncheck
 			JPanel libChkRow = Static.createRowPanel();
-			final JCheckBox chkAllLib = new JCheckBox("check/uncheck all", false);
-			
+			final JCheckBox chkAllLib = Static.createCheckBox("Check/uncheck all", false);
 			chkAllLib.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					boolean check = chkAllLib.isSelected();
@@ -2494,52 +2506,41 @@ public class BasicHitFilterPanel extends JPanel {
 				}
 			});
 			libChkRow.add(chkAllLib);
-			libChkRow.setBorder(BorderFactory.createLineBorder(Color.BLACK));	
-			libChkRow.setMinimumSize(libChkRow.getPreferredSize());
-			libChkRow.setMaximumSize(libChkRow.getPreferredSize());
+			Static.border(libChkRow);
 			
-			libPanel.add(libChkRow);
-			libPanel.add(Box.createVerticalStrut(5));
+			libPage.add(Box.createVerticalStrut(3));
+			libPage.add(libChkRow);
+			Static.center(libPage);
 			
-			libPanel.setMinimumSize(libPanel.getPreferredSize());
-			libPanel.setMaximumSize(libPanel.getPreferredSize());
-			libPanel.setAlignmentX(CENTER_ALIGNMENT); 
-			
-			return libPanel;
+			return libPage;
 		}
 		private JPanel createColPvalPanel() {
 			if(pvalColNames == null || pvalColNames.length == 0) return null;
 
-			chkPvalColNames = new JCheckBox[pvalColNames.length];
-			for(int x=0; x<chkPvalColNames.length; x++) chkPvalColNames[x] = null;
-			
-			JPanel pvalPanel = Static.createPagePanel();
-			pvalPanel.setAlignmentY(TOP_ALIGNMENT);
+			JPanel pvalPage = Static.createPageCenterPanel();
 				
 			JPanel row = Static.createRowPanel();
 			String l = (isGrp) ? "Best DE" : "DE";
 			row.add(new JLabel(l));
-			pvalPanel.add(row);		
+			pvalPage.add(row);		
 					
 			// List of DE values
+			chkPvalColNames = new JCheckBox[pvalColNames.length];
 			for(int x=0; x<pvalColNames.length; x++) {
-				chkPvalColNames[x] = new JCheckBox(pvalColNames[x], false); 
-				chkPvalColNames[x].setAlignmentX(LEFT_ALIGNMENT);
+				chkPvalColNames[x] = Static.createCheckBox(pvalColNames[x], false); 
 				chkPvalColNames[x].addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						setOKEnabled();
 					}
 				});
-			
 				JPanel rowx = Static.createRowPanel();
 				rowx.add(chkPvalColNames[x]);
-				pvalPanel.add(rowx);
+				pvalPage.add(rowx);
 			}
 			
-			// check/uncheck
+			// Check/uncheck
 			JPanel pvalChkRow = Static.createRowPanel();
-			final JCheckBox chkAllPval = new JCheckBox("check/uncheck all", false);
-			
+			final JCheckBox chkAllPval = Static.createCheckBox("Check/uncheck all", false);
 			chkAllPval.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					boolean check = chkAllPval.isSelected();
@@ -2549,18 +2550,13 @@ public class BasicHitFilterPanel extends JPanel {
 				}
 			});
 			pvalChkRow.add(chkAllPval);
-			pvalChkRow.setBorder(BorderFactory.createLineBorder(Color.BLACK));	
-			pvalChkRow.setMinimumSize(pvalChkRow.getPreferredSize());
-			pvalChkRow.setMaximumSize(pvalChkRow.getPreferredSize());
+			Static.border(pvalChkRow);
 			
-			pvalPanel.add(pvalChkRow);
-			pvalPanel.add(Box.createVerticalStrut(5));
+			pvalPage.add(Box.createVerticalStrut(3));
+			pvalPage.add(pvalChkRow);
+			Static.center(pvalPage);
 			
-			pvalPanel.setMinimumSize(pvalPanel.getPreferredSize());
-			pvalPanel.setMaximumSize(pvalPanel.getPreferredSize());
-			pvalPanel.setAlignmentX(CENTER_ALIGNMENT); 
-			
-			return pvalPanel;
+			return pvalPage;
 		}
 		/*********************************************************************/
 		private void syncThis() {
@@ -2753,13 +2749,13 @@ public class BasicHitFilterPanel extends JPanel {
 					if (queryPanel.chkSpecies.isSelected()) status = strMerge(status, speciesPanel.getSummary());
 					if (queryPanel.chkGOetc.isSelected())   status = strMerge(status, goPanel.getSummary());
 					filters = status;
-					status = "  Filters: " + status;
+					if (status!="") status = "  Filters: " + status;
 				}
 				if (useSearch) {
 					String op = (queryPanel.isLoadFile()) ? " = " : " contains ";
 					String statusSearch = queryPanel.getSummaryColumn() + op + queryPanel.getSummaryText();
 					filters = statusSearch + ";" + filters;
-					status = "  Search: " + statusSearch + status;
+					if (status!="") status = "  Search: " + statusSearch + status;
 				}
 				
 				queryPanel.enableAddToTable(true);

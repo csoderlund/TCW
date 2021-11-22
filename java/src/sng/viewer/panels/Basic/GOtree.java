@@ -54,6 +54,10 @@ public class GOtree {
 	public static final int DO_EXPORT_ALL=3;
 	public static final int DO_EXPORT_ASK=4;
 	
+	public static final int DO_HIGH_RELATED=1;
+	public static final int DO_HIGH_ANC=2;
+	public static final int DO_HIGH_DESC=3;
+	
 	// GO basic table
 	public static final int ALL_PARENTS=0;
 	public static final int ALL_ANCESTORS=1;
@@ -289,10 +293,14 @@ public class GOtree {
 	 */
 	private Vector <String> goRelatedInTable(int gonum, String godesc, int [] goset,
 			   BasicGOTablePanel goTabObj) {
-		try {		
+		try {
+			// Get all ancestors, then only keep ones from goset
 			ancMap = new HashMap <Integer, Integer> ();
 			Vector <String> ancLines = computeGoAncestorAsk(gonum, godesc); 
+			
+			
 			Vector <String> ancTab = new Vector <String> ();
+			
 			for (int row=0; row<goset.length; row++) {
 				int go = goset[row];
 				if (ancMap.containsKey(go)) {
@@ -301,8 +309,10 @@ public class GOtree {
 				}
 			}
 			
+			// Get all descendants, then only keep ones from goset
 			descMap = new HashMap <Integer, Integer> ();
 			Vector <String> descLines = computeGoDescendantAsk(gonum, godesc);
+			
 			Vector <String> descTab = new Vector <String> ();
 			
 			for (int row=0; row<goset.length; row++) {
@@ -457,6 +467,45 @@ public class GOtree {
 		return null;
 	}	
 	/**************** GO Ancestors *****************/ 
+	 // CAS336 new to highlight ancestors in table
+	public HashSet <Integer> computeRelatedForSet(int gonum, int [] goset, int type) {
+		HashSet <Integer> inTab = new HashSet <Integer> ();
+		HashSet <Integer> related = new HashSet <Integer> ();
+		
+		try {
+			DBConn mDB = theMainFrame.getNewDBC();
+			ResultSet rs;
+			
+			if (type==DO_HIGH_RELATED || type==DO_HIGH_ANC) {
+				rs = mDB.executeQuery("select " +
+					" p.ancestor " +
+					" from go_graph_path as p" +
+					" join go_info as g on g.gonum=p.ancestor" +
+					" where child=" + gonum + 
+					" and relationship_type_id!=3 " + 
+					" order by g.level, p.ancestor"); 
+			
+				while (rs.next()) related.add(rs.getInt(1));
+			}
+			
+			if (type==DO_HIGH_RELATED || type==DO_HIGH_DESC) {
+				rs = mDB.executeQuery("Select child, relationship_type_id, i.descr, i.level " +
+						" from go_graph_path as p, " +
+						" go_info as i " +
+						" where p.child=i.gonum and ancestor=" + gonum + 
+						" and relationship_type_id!=3 " + 
+						" order by i.level, p.child");
+				while (rs.next()) related.add(rs.getInt(1));
+			}
+			for (int go : goset) {
+				if (related.contains(go)) 
+					inTab.add(go);	
+			}
+			
+			return inTab;
+		}
+		catch(Exception e) {ErrorReport.prtReport(e, "query for Ancestor list"); return inTab;}
+	}
 	private Vector <String> computeGoAncestorAsk(int gonum, String godesc) {
 		try {															
 			DBConn mDB = theMainFrame.getNewDBC();
@@ -500,8 +549,9 @@ public class GOtree {
 			lines.add("");
 			
 			if (goLines.size()>0) {
-				lines.add(String.format("%-10s  %-5s  %s", Globalx.goID.replace(" ", "-"), 
-						"Level",  Globalx.goTerm));		
+				lines.add(String.format("%-10s  %-5s  %s", 
+						Globalx.goID.replace(" ", "-"), "Level",  Globalx.goTerm));	
+				
 				for (String g : goLines) lines.add(g);
 			}
 			lines.add("");
@@ -594,7 +644,7 @@ public class GOtree {
 			
 			bSortByLevel=false;
 			String rType;
-			HashMap <Integer, GOterm> neighGOs = new HashMap <Integer, GOterm> ();
+			HashMap <Integer, GOterm> neighGOs = new HashMap <Integer, GOterm> (); // is sorted below
 			HashSet <Integer> altId = new HashSet <Integer> ();
 			int repId = 0;
 			for (int i=0; i<2; i++) { // 0=parent, 1=child
@@ -602,15 +652,14 @@ public class GOtree {
 					rType = "Parents: ";
 					rs = mDB.executeQuery("select t.parent, t.relationship_type_id, i.descr " +
 						" from go_term2term as t, go_info as i" +
-						" where parent>0 and child=" + gonum + 
-						" and t.parent=i.gonum ");
+						" where parent>0 and child=" + gonum + " and t.parent=i.gonum"); 
 				}
 				else {
 					neighGOs.clear(); // CAS318
 					rType = "Children: ";
 					rs = mDB.executeQuery("select t.child, t.relationship_type_id, i.descr " +
-							" from go_term2term as t, go_info as i" +
-							" where child>0 and parent=" + gonum + " and t.child=i.gonum");
+						" from go_term2term as t, go_info as i" +
+						" where child>0 and parent=" + gonum + " and t.child=i.gonum"); 
 				}
 				while (rs.next()) { 
 					int gonum2 = rs.getInt(1);
@@ -1070,7 +1119,7 @@ public class GOtree {
 	}
 	
 	/**************************************************************
-	 * XXX  GO annotation: Table... methods
+	 * GO annotation: Table... methods
 	 */
 	public void goPopupExportList(Component btnC, int showType, int mode, TreeSet <Integer> goMap) {
 		try {		
@@ -1236,7 +1285,7 @@ private class AllDialog extends JDialog {
 	}
 	private boolean setFile() {
 		try {
-			FileWrite fw = new FileWrite(FileC.bNoVer, FileC.bDoPrt); // XXX CAS314
+			FileWrite fw = new FileWrite(FileC.bNoVer, FileC.bDoPrt); // CAS314
 			int ftype = (dOut==OUT_TSV) ? FileC.fTSV : FileC.fHTML;
 			
 			exportFH = fw.run(fileBtn, fName, ftype, FileC.wONLY);

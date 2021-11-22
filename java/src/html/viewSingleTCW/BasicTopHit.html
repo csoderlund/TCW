@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Basic Filters for AnnoDB Hits</title>
+</head>
+
+<body style="padding:20px;width:650px;font-family:Times">
+
+<h1>Top Row of Options for Anno Hits</h1>
+
+<b>Seq Table</b>&nbsp;&nbsp;Select a one or more hitIDs or seqIDs in the table, 
+then select <b>Seq Table</b>.
+The sequences will be shown in the main table, where you can select it to view the <b>Seq Details</b>.
+<p>
+<b>Align</b>&nbsp;&nbsp;Select a one or more hitIDs or seqIDs in the table, 
+then select <b>Align</b>. Each hit-sequence pair will be aligned; the resulting panel
+will replace the visible panel, i.e. annoDB hits panel. <i>The alignment uses
+dynamic programming, so the coordinates may appear different from the hit values.</i>
+<p>
+<b>Show...</b>&nbsp;&nbsp;Select one sequence or hit, then select one of the 
+following to get a popup window of the information:
+<ul>
+<li><u>Assigned GOs for hit</u>&nbsp;&nbsp;UniProt has assigned GOs to many proteins. This options
+show the assigned GOs with their level and description. 
+<br>&nbsp;
+<li><u>All GOs for hit</u>&nbsp;&nbsp;All ancestors of a GO ID inherit the protein-GO
+association. This option shows the assigned GOs (as the previous option), but also all
+inherited GOs. See the <b>GO Help</b> on the <b>Basic GO</b> for a more detailed explanation.
+<br>&nbsp;
+<li><u>All columns of selected</u> All columns for the selected sequence or hit. A benefit of this window
+is that the values can be copied to be pasted elsewhere, e.g. KEGG identifier.
+</ul>
+<p>
+<u><b>Export...</b></u>&nbsp;&nbsp;This has the same first two items as <b>Show...</b>, but the results
+are written to file. The "*" is at the end of each option indicates that there will 
+be a choice between writing <u>All Info</u> or <u>ID only</u>; writing the "IDs only" is useful for loading in the <b>Basic GOs</b> panel to view.
+<p>
+<u><b>Table...</b></u> 
+<ul>
+<li><u>Show column stats</u>&nbsp;&nbsp;A window will pop-up with statistics for all numeric columns
+that are displayed.
+<br>&nbsp;
+<li><u>Copy table</u>&nbsp;&nbsp;The table will be copied so that you can paste it into a file.
+<br>&nbsp;
+<li><u>Export table</u>&nbsp;&nbsp;A window will pop-up with a file chooser, and the table will be
+written to the selected file.
+</ul>
+</body>
+</html>

@@ -4,8 +4,10 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Window;
+import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -31,12 +33,34 @@ import util.ui.UserPrompt;
 public class Static {
 	
 	/******** Interface ***********/
+	static public void center(JPanel panel) {
+		panel.setMinimumSize(panel.getPreferredSize());
+		panel.setMaximumSize(panel.getPreferredSize());
+		panel.setAlignmentX(Component.CENTER_ALIGNMENT);
+	}
+	static public void border(JPanel panel) {
+		panel.setMinimumSize(panel.getPreferredSize());
+		panel.setMaximumSize(panel.getPreferredSize());
+		panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+	}
+	static public void setSize(JPanel panel) {
+		panel.setMinimumSize(panel.getPreferredSize());
+		panel.setMaximumSize(panel.getPreferredSize());
+	}
 	static public JPanel createPagePanel() {
 		JPanel row = new JPanel();
 		row.setLayout(new BoxLayout(row, BoxLayout.PAGE_AXIS)); // Y_AXIS
 		row.setBackground(Globalx.BGCOLOR);
 		row.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+		return row;
+	}
+	static public JPanel createPageTopPanel() {
+		JPanel row = new JPanel();
+		row.setLayout(new BoxLayout(row, BoxLayout.PAGE_AXIS)); // Y_AXIS
+		row.setBackground(Globalx.BGCOLOR);
+		row.setAlignmentX(Component.LEFT_ALIGNMENT);
+		row.setAlignmentY(Component.TOP_ALIGNMENT);
 		return row;
 	}
 	static public JPanel createPageCenterPanel() {
@@ -47,6 +71,7 @@ public class Static {
 		row.setAlignmentY(Component.TOP_ALIGNMENT);
 		return row;
 	}
+	
 	static public JPanel createRowPanel() {
 		JPanel row = new JPanel();
 		row.setLayout(new BoxLayout(row, BoxLayout.LINE_AXIS)); // X_AXIS
@@ -95,6 +120,15 @@ public class Static {
 		JButton button = new JButton(label);
 		button.setBackground(Color.white);
 		button.setAlignmentX(Component.LEFT_ALIGNMENT);
+		button.setEnabled(enable);
+		return button;
+	}
+	static public JButton createButtonPlain(String label, boolean enable) {
+		JButton button = new JButton(label);
+		button.setBackground(Color.white);
+		button.setAlignmentX(Component.LEFT_ALIGNMENT);
+		button.setMargin(new Insets(0, 0, 0, 0));
+		button.setFont(new Font(button.getFont().getName(),Font.PLAIN,10));
 		button.setEnabled(enable);
 		return button;
 	}
@@ -500,5 +534,9 @@ public class Static {
     }
     public static boolean isS1InS2(int s1, int e1, int s2, int e2) {
     	return (s1>=s2 && e1 <= e2); 
+    }
+    public static String dFormat(int num) {
+    	DecimalFormat df = new DecimalFormat("#,###,###");
+    	return df.format(num);
     }
 }

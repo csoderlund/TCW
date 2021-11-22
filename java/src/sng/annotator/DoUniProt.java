@@ -83,7 +83,7 @@ public class DoUniProt
 	 		DoUniAssign assignObj = new DoUniAssign(mDB);
 	 		 
 			// calculate filters
-		 	pRC = assignObj.Step2_processAllHitsPerSeq(isAAstcwDB, bUseSP, flank, annoSeqSet);
+		 	pRC = assignObj.Step2_processAllHitsPerSeq(isAAstcwDB, bUseSP, flank, annoSeqSet); // XXX 
 		 	if (!pRC) return false;  
 		 	
 		 	// final things
@@ -199,7 +199,7 @@ public class DoUniProt
     		if (reader==null) return false;
     		
     		LineParser lpObj = new LineParser(); // Gets seqID
-    		int cntHits=0, cntPrt=0;
+    		int cntPrt=0;
     		
     		while ((line = reader.readLine()) != null) {
     			if ( line.length() == 0 || line.charAt(0) == '#' ) continue;  			
@@ -240,7 +240,6 @@ public class DoUniProt
 			        	if (noSeq==0) Out.PrtError("No sequence '" + curSeqName + "' in database; no further such error messages will be printed");
 						noSeq++;
 			        }
-			        cntHits=0;
 			        curHitName="";
 				}
 				
@@ -252,7 +251,7 @@ public class DoUniProt
 				if (curHitName.equals(newHitName)) continue;
 				curHitName = newHitName;
 				
-				cntHits++;
+				// cntHits++;
 				//if (cntHits>maxHitsPerAnno) { // CAS331 allow user to control
 				//	continue;
 				//}
@@ -283,7 +282,7 @@ public class DoUniProt
 	    	}
 	    	if ( reader != null ) reader.close();
 		
-			System.err.print("                                                                         \r");
+			Out.r("                                                                         ");
 			
 			if (cntUniqueExists > 0) 
 				Out.PrtWarn(cntUniqueExists + " DB ids already existed in sTCW -- ignored ");
@@ -524,7 +523,7 @@ public class DoUniProt
 			}
 			if ( reader != null ) reader.close();
 
-			System.err.print("                                                                      \r");
+			Out.r("                                                                      ");
 			
 			Step1d_updateHitCov();
 			

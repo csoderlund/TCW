@@ -718,9 +718,8 @@ public class Schema
 				" unique(gonum), " +
 				" index(gonum) " +
 				") ENGINE=MyISAM;");
-			// this is used in GOtree.java
-			// if distance=1, then immediate parent so in term2term (CAS318 currently no value)
-			// GO database: graph_path table except use child/ancestor instead of their term1_id and term2_id	
+			// this is used in GOtree.java - all paths ancestors
+			// if distance=1, then immediate parent so in term2term (CAS318 currently distance has no value)	
 			db.executeUpdate(
 				"create table go_graph_path (" +
 				" relationship_type_id tinyint unsigned, " +
@@ -731,7 +730,7 @@ public class Schema
     			" index(ancestor)" +
     			" ) ENGINE=MyISAM;");
 				
-			// this is used in GOtree.java 
+			// this is used in GOtree.java  - immediate parent only
 			if (db.tableExists("go_term2term")) db.executeUpdate("drop table go_term2term");
 			db.executeUpdate(
 				"create table go_term2term (" +

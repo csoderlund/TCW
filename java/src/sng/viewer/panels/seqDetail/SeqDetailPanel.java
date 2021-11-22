@@ -687,7 +687,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 	 */
 	private String [] columnHeadings() {
 		String [] x = { "Hit ID",  "annoDB", "Description", "Species",  
-				"#GO", "Best","RF", "Bit",  "E-value", "%Sim",   "%Seq", "%Hit",  "Align", "Start", "End"};
+				"#GO", "Best","RF", "Bitscore",  "E-value", "%Sim",   "%Seq", "%Hit",  "Align", "Start", "End"};
 		return x;
 	}
 	private class HitListData {
@@ -1241,7 +1241,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		lines.add(String.format(fd, "Seq Start:End", String.format("%d:%d", hd.nStart, hd.nEnd)));
 		lines.add(String.format(fd, "Hit Start:End", String.format("%d:%d", hStart, hEnd)));
 		lines.add(String.format(fd, "E-value", String.format("%.2E", hd.eval)));
-		lines.add(String.format(fd, "Bit Score", String.format("%.2f", hd.dBit)));
+		lines.add(String.format(fd, "Bit-score", String.format("%.2f", hd.dBit)));
 		
 		lines.add("");
 		lines.add(pre + "Computed columns");

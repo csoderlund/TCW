@@ -197,29 +197,23 @@ public class SeqQueryTab extends Tab
 		libTitles = metaData.getLibTitles();
 		
 		JComponent thePanel = new CollapsiblePanel(LIBRARY_HEADER, LIBRARY_DESCRIPTION);
-		String [] libLabels = {"Every", "Any"};
-		
-		chkCounts = new JRadioButton("use counts");
-		chkCounts.setBackground(Color.WHITE);
-		
-		String ppx = "use  " + norm + " ";
-		chkRPKM = new JRadioButton(ppx);
-		chkRPKM.setBackground(Color.WHITE);
-		chkCounts.addActionListener(btnListener);
-		chkRPKM.addActionListener(btnListener);
-		
-		ButtonGroup libModeGroup = new ButtonGroup();
-		libModeGroup.add(chkCounts);
-		libModeGroup.add(chkRPKM);
-		chkRPKM.setSelected(true);
 		
 		JPanel libModePanel = Static.createRowPanel();
-		libModePanel.add(chkCounts);
-		libModePanel.add(Box.createHorizontalStrut(20));
+		chkCounts = Static.createRadioButton("use counts", false);  // CAS336 use Static
+		chkCounts.addActionListener(btnListener);
+		libModePanel.add(chkCounts); libModePanel.add(Box.createHorizontalStrut(20));
+		
+		chkRPKM = Static.createRadioButton("use  " + norm, true);
+		chkRPKM.addActionListener(btnListener);
 		libModePanel.add(chkRPKM);
 		libModePanel.setMaximumSize(libModePanel.getPreferredSize());
 		addRowToPanel(libModePanel, thePanel);
 		
+		ButtonGroup libModeGroup = new ButtonGroup();
+		libModeGroup.add(chkCounts);
+		libModeGroup.add(chkRPKM);
+		
+		String [] libLabels = {"Every", "Any"};
 		incLibQuery = new UIqueryIncExLib(
 				"At least   ", 1, " from ", libLabels, " included condition",  
 				0, defaultNumDims, filterLibListener);

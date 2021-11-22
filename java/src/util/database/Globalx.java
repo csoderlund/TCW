@@ -8,8 +8,8 @@ import java.awt.Font;
 public class Globalx {
 	public static boolean debug = false; // changed in STCWMain or MTCWMain from command line 
 	
-	public static final String strRelDate = "(4-Nov-21)"; 
-	public static final String strTCWver = "3.3.5";  //  3.3.5 must be 3 digits
+	public static final String strRelDate = "(22-Nov-21)"; 
+	public static final String strTCWver = "3.3.6";  //  3.3.6 must be 3 digits
 	public static final String URL = "http://www.agcol.arizona.edu ";
 	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate;
 	public static final String sTCWver = "sTCW v" + strTCWver;
@@ -159,6 +159,7 @@ public class Globalx {
 	public static final Color PROMPTCOLOR = new Color(243, 235, 227);	// light beige
 	public static final Color LAUNCHCOLOR = new Color(200, 200, 240); // light purple
 	public static final Color BUTTONCOLOR = Color.LIGHT_GRAY; // CAS310
+	public static final Color HIGHCOLOR = new Color(229, 245, 237); // CAS336
 	
 	public static final Color altRowColor = new Color(0xEEF2FF);
 	public static final Color selectColor = new Color(0xB0C4DE);

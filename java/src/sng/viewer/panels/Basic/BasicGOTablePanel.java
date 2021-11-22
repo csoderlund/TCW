@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -70,34 +71,37 @@ import util.ui.UIHelpers;
 import util.ui.UserPrompt;
 
 public class BasicGOTablePanel {
-	private static final Color BGCOLOR = Globalx.BGCOLOR;
-	private static final Color EvCOLOR = new Color(255, 102, 102);
-	private static final String GO_FORMAT = Globalx.GO_FORMAT;
-	private static final int MAX_COL = 300;
+	private final Color BGCOLOR = 		Globalx.BGCOLOR;
+	private final Color HIGHCOLOR = 	Globalx.HIGHCOLOR;
+	private final Color altRowColor = 	Globalx.altRowColor;
+	private final Color selectColor = 	Globalx.selectColor;
 	
-	private static final String goPref= "_goPrefs";
+	private final Color EvCOLOR = new Color(255, 102, 102);
+	private final String GO_FORMAT = Globalx.GO_FORMAT;
+	private final int MAX_COL = 300;
+	
+	private final String goPref= "_goPrefs";
 	private final String EVALUE = "Best E-val";
 	
-	// IF CHANGE COLUMNS, FIX THESE TOO!!!
-	public static final int GOindex=0;
-	public static final int GOdomain=1;
-	private static final int GOdesc=2; // CAS333 was 3
-	private static final int GOnSeq=4; // CAS334 was 5 (wasn't fixed after column change), which broke #Seqs DE
+	// IF CHANGE COLUMNS, FIX THESE TOO!!! use theResults with these indices
+	private static final int GOrow=0;   
+	public  static final int GOindex=1;
+	public  static final int GOdomain=2;
+	private static final int GOdesc=3; 
+	private static final int GOnSeq=5; // CAS334 was 5 (wasn't fixed after column change), which broke #Seqs DE
 	
+	// CAS336 add row
 	private  final Class<?> [] COL_TYPES = 
-	 {Integer.class,  String.class, String.class, Integer.class, Integer.class, Integer.class,  Double.class }; 
+	 {Integer.class, Integer.class,  String.class, String.class, Integer.class, Integer.class, Integer.class,  Double.class }; 
 	private  final String [] COL_MYSQL = 
-	 {"go_info.gonum","go_info.term_type", "go_info.descr", "go_info.level", 
+	 {null, "go_info.gonum","go_info.term_type", "go_info.descr", "go_info.level", 
 			 "go_info.nUnitranHit", "go_info.nDirectHit","go_info.bestEval" }; // CAS330 change column order
 	
 	private final String [] COL_NAMES = 
-		 {Globalx.goID, Globalx.goOnt, Globalx.goTerm , "Level",   "#Seqs", "#Assign", EVALUE};
+		 {"Row", Globalx.goID, Globalx.goOnt, Globalx.goTerm , "Level",   "#Seqs", "#Assign", EVALUE};
 	private String []      evColNames = null;
 	private String []	 pvalColNames = null; // No P_	// CAS324 changed from Vector
 	private int endEvC=0, endStatic=0;
-	
-	private boolean []       selectedCol = null;	// full set - true are displayed
-	private Vector<Object []> theResults = null;    // results - columns and rows get rearranged on sort/move
 	
 	public BasicGOTablePanel(STCWFrame f, BasicGOFilterTab g) {
 		theMainFrame=f;
@@ -117,21 +121,67 @@ public class BasicGOTablePanel {
 		private ColumnPanel() {
 			setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 			setBackground(Color.white);
-			setAlignmentX(Component.CENTER_ALIGNMENT);
-			setAlignmentY(Component.CENTER_ALIGNMENT);
-		     	  
+			 	  
 			initColumns();
 			
-	    /// General 
-	    	JPanel generalColsPanel = Static.createPagePanel();
-	    	generalColsPanel.setAlignmentY(Component.TOP_ALIGNMENT);
-	    	generalColsPanel.add(new JLabel("General"));
+			JPanel headerPanel = Static.createRowCenterPanel();
+			JLabel theHeader = new JLabel("<HTML><H2>Select columns to view</H2></HTML>");
+			headerPanel.add(theHeader);
+			headerPanel.add(Box.createVerticalStrut(10));
+			Static.center(headerPanel);
+			
+	    	JPanel generalColsPanel = 	createGenPanel();
+		    JPanel evcColsPanel =  		createEvcPanel(); 
+	    	JPanel pvalColsPanel = 		createPvalPanel(); 
+	    	
+		    JPanel sideBySidePanel = Static.createRowPanel();
+		    sideBySidePanel.add(generalColsPanel);	sideBySidePanel.add(Box.createHorizontalStrut(30));
+		    sideBySidePanel.add(evcColsPanel);		sideBySidePanel.add(Box.createHorizontalStrut(30));
+	    	sideBySidePanel.add(pvalColsPanel);
+	    	Static.center(sideBySidePanel);
+    	
+	    	/////// Accept Discard
+	    	JPanel buttonPanel = Static.createRowCenterPanel();
+	    	JButton keepButton = Static.createButton("Accept", true);
+	    	keepButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					saveColumns();
+					theTableModel.fireTableStructureChanged();
+					tablePanel.tableResizeColumns();
+					
+					setVisible(false);
+					theGOQuery.showMain();
+				}
+			});
+			JButton discardButton = Static.createButton("Discard", true);
+			discardButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					setVisible(false);
+					theGOQuery.showMain();
+				}
+			});
+	    	buttonPanel.add(keepButton);	buttonPanel.add(Box.createHorizontalStrut(10));
+	    	buttonPanel.add(discardButton);
+	    	Static.center(buttonPanel);
+			
+		    add(Box.createVerticalStrut(10));
+	    	add(headerPanel);
+	    	add(Box.createVerticalStrut(10));
+	    	add(sideBySidePanel);
+	    	add(Box.createVerticalStrut(20));
+	    	add(buttonPanel);
+	    	setVisible(false);
+	    	
+	    	initSelections();
+		} // end createColumnPanel
+		private JPanel createGenPanel() {
+			JPanel generalColsPanel = Static.createPageTopPanel();
+	    	generalColsPanel.add(Static.createLabel("General"));
 	    	generalColsPanel.add(Box.createVerticalStrut(10));
     	
 	    	chkStaticColumns = new JCheckBox[COL_NAMES.length];
 	    	for(int x=0; x < COL_NAMES.length; x++) {
-	    		chkStaticColumns[x] = new JCheckBox(COL_NAMES[x], false);
-	    		chkStaticColumns[x].setBackground(BGCOLOR);
+	    		chkStaticColumns[x] = Static.createCheckBox(COL_NAMES[x], false);
 	    		chkStaticColumns[x].addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						checkAllGen();
@@ -139,45 +189,36 @@ public class BasicGOTablePanel {
 				});
 	    		generalColsPanel.add(chkStaticColumns[x]);
 	    	}
-	    	// chkStaticColumns[GOindex].setEnabled(false); CAS334 may want to just write description
 		    generalColsPanel.add(Box.createVerticalStrut(10));
 		    
 	    	JPanel checkGenPanel = Static.createRowPanel();
-	    	chkSelectAllGen = new JCheckBox("Check/uncheck all");
-	    	chkSelectAllGen.setSelected(false);
-	    	chkSelectAllGen.setBackground(BGCOLOR);
+	    	chkSelectAllGen = Static.createCheckBox("Check/uncheck all", false);
 	    	chkSelectAllGen.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
-					for(int x=1; x<chkStaticColumns.length; x++) { // Skip GOindex
+					for(int x=0; x<chkStaticColumns.length; x++) { 
 						boolean isSel = chkSelectAllGen.isSelected();
 						chkStaticColumns[x].setSelected(isSel);
 					}
 				}
 			});
 	    	checkGenPanel.add(chkSelectAllGen);
-	    	checkGenPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+	    	Static.border(checkGenPanel);
 	    	generalColsPanel.add(checkGenPanel);
 	    	
-		    int rowBreak=10; // for both EvC and Pval
-	
-		  //evidence code
-		 	JPanel evcColsPanel = Static.createPagePanel();
-		 	evcColsPanel.setAlignmentY(Component.TOP_ALIGNMENT);
+			return generalColsPanel;
+		}
+		private JPanel createEvcPanel() {
+			JPanel evcColsPanel = Static.createPageTopPanel();
 	    	  
-	    	evcColsPanel.add(new JLabel("Evidence Categories")); 
+	    	evcColsPanel.add(Static.createLabel("Evidence Categories")); 
 	    	evcColsPanel.add(Box.createVerticalStrut(10));
 	    
 	    	int ecNum = evColNames.length;
 	    	chkEvCColumns = new JCheckBox[ecNum];
-	    	int nRow = ecNum;
-	    	if (ecNum>rowBreak) nRow=(int) ((ecNum/2.0)+0.5);
-	  
-	    	JPanel subPanel1 = Static.createPagePanel();
-		    subPanel1.setAlignmentY(Component.TOP_ALIGNMENT);
-	    	    	
+	    	
+	    	JPanel subPanel1 = Static.createPageTopPanel();    	
 	    	for (int x=0; x<ecNum; x++) {
-	    		chkEvCColumns[x] = new JCheckBox(evColNames[x], false);
-	    		chkEvCColumns[x].setBackground(BGCOLOR);
+	    		chkEvCColumns[x] = Static.createCheckBox(evColNames[x], false);
 	    		chkEvCColumns[x].addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					checkAllEvC();
@@ -188,9 +229,7 @@ public class BasicGOTablePanel {
 	    	evcColsPanel.add(Box.createVerticalStrut(10));
 	    	
 	    	JPanel checkEvCRow = Static.createRowPanel();
-	    	chkSelectAllECs = new JCheckBox("Check/uncheck all");
-	    	chkSelectAllECs.setSelected(false);
-	    	chkSelectAllECs.setBackground(BGCOLOR);
+	    	chkSelectAllECs = Static.createCheckBox("Check/uncheck all", false);
 	    	chkSelectAllECs.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					for(int x=0; x<chkEvCColumns.length; x++) {
@@ -200,7 +239,7 @@ public class BasicGOTablePanel {
 				}
 			});
 	    	checkEvCRow.add(chkSelectAllECs); 
-	    	checkEvCRow.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+	    	Static.border(checkEvCRow);
 	    	
 	    	evcColsPanel.add(checkEvCRow);
 	    	evcColsPanel.add(Box.createVerticalStrut(10));
@@ -212,7 +251,7 @@ public class BasicGOTablePanel {
 			    	  	isEvCcolor=false;
 			      }
 			 });
-			checkDisplayRow.add(chkEvClong); checkDisplayRow.add(Box.createVerticalStrut(1));
+			checkDisplayRow.add(chkEvClong); checkDisplayRow.add(Box.createHorizontalStrut(1));
 			
 			JRadioButton chkEvCshort = Static.createRadioButton("Short", true);
 			chkEvCshort.addActionListener(new ActionListener() {
@@ -226,118 +265,60 @@ public class BasicGOTablePanel {
 			ButtonGroup grpLevel = new ButtonGroup();
 			grpLevel.add(chkEvClong);
 			grpLevel.add(chkEvCshort);
+			
+			Static.setSize(evcColsPanel);
+			return evcColsPanel;
+		}
+		private JPanel createPvalPanel(){
+			int rowBreak=10; 
+			JPanel pvalColsPanel = Static.createPageTopPanel();
+			
+			if (pvalColNames==null || pvalColNames.length == 0) return pvalColsPanel;
+		
+    		int nPval = pvalColNames.length;
+    	 	pvalColsPanel.add(Static.createLabel("P-value"));
+	    	pvalColsPanel.add(Box.createVerticalStrut(10));
 	    	
-/////// Pval
-	    	JPanel pvalColsPanel = Static.createPagePanel();
-	    	pvalColsPanel.setAlignmentY(Component.TOP_ALIGNMENT);
-	   
-	    	if (pvalColNames!=null && pvalColNames.length > 0)
-	    	{
-	    		int nPval = pvalColNames.length;
-	    	 	pvalColsPanel.add(new JLabel("P-value"));
-		    	pvalColsPanel.add(Box.createVerticalStrut(10));
-		    	
-			    nRow = nPval;
-		    	if (nPval>rowBreak) nRow=(int) ((nPval/2.0)+0.5);
-		    	
-	    		JPanel deSubPanel1 = Static.createPagePanel();
-	    		deSubPanel1.setAlignmentY(Component.TOP_ALIGNMENT);
-	    		JPanel deSubPanel2 = Static.createPagePanel();
-	    		deSubPanel2.setAlignmentY(Component.TOP_ALIGNMENT);
-	    		
-		    	chkPvalColumns = new JCheckBox[nPval];
-		    	for(int x=0; x<chkPvalColumns.length; x++) {
-		    		chkPvalColumns[x] = new JCheckBox(pvalColNames[x], false);
-		    		chkPvalColumns[x].setBackground(BGCOLOR);
-		    		chkPvalColumns[x].addActionListener(new ActionListener() {
-						public void actionPerformed(ActionEvent e) {
-							checkAllPval();
-						}
-					});
-		    		if (x<nRow) deSubPanel1.add(chkPvalColumns[x]);
-		    		else deSubPanel2.add(chkPvalColumns[x]);
-		    	}
-		    	if (nRow!=nPval) {
-		    		JPanel subPanel =  Static.createRowPanel();
-			    	subPanel.add(deSubPanel1);
-			    	subPanel.add(Box.createHorizontalStrut(10));
-			    	subPanel.add(deSubPanel2);
-			    	pvalColsPanel.add(subPanel);
-		    	}
-		    	else pvalColsPanel.add(deSubPanel1);
-		    	pvalColsPanel.add(Box.createVerticalStrut(10));  	
-		    
-			    JPanel checkPvalPanel = Static.createRowPanel();
-		    	chkSelectAllPvals = new JCheckBox("Check/uncheck all");
-		    	chkSelectAllPvals.setSelected(false);
-		    	chkSelectAllPvals.setBackground(BGCOLOR);
-		    	chkSelectAllPvals.addActionListener(new ActionListener() {
+		    int nRow = nPval;
+	    	if (nPval>rowBreak) nRow=(int) ((nPval/2.0)+0.5);
+	    	
+    		JPanel deSubPanel1 = Static.createPageTopPanel();
+    		JPanel deSubPanel2 = Static.createPageTopPanel(); 
+    		
+	    	chkPvalColumns = new JCheckBox[nPval];
+	    	for(int x=0; x<chkPvalColumns.length; x++) {
+	    		chkPvalColumns[x] = Static.createCheckBox(pvalColNames[x], false);
+	    		chkPvalColumns[x].addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						checkAllPval();
+					}
+				});
+	    		if (x<nRow) deSubPanel1.add(chkPvalColumns[x]);
+	    		else        deSubPanel2.add(chkPvalColumns[x]);
+	    	}
+	    	if (nRow!=nPval) {
+	    		JPanel subPanel =  Static.createRowPanel();
+		    	subPanel.add(deSubPanel1);		subPanel.add(Box.createHorizontalStrut(10));
+		    	subPanel.add(deSubPanel2);
+		    	pvalColsPanel.add(subPanel);
+	    	}
+	    	else pvalColsPanel.add(deSubPanel1);
+	    	pvalColsPanel.add(Box.createVerticalStrut(10));  	
+	    
+		    JPanel checkPvalPanel = Static.createRowPanel();
+	    	chkSelectAllPvals = Static.createCheckBox("Check/uncheck all", false);
+	    	chkSelectAllPvals.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					boolean isSel = chkSelectAllPvals.isSelected();
 					for(int x=0; x<chkPvalColumns.length; x++)
 						chkPvalColumns[x].setSelected(isSel);
-				}});
-		    	checkPvalPanel.add(chkSelectAllPvals);
-		    	checkPvalPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		    	
-		    	pvalColsPanel.add(checkPvalPanel);
-	    	}
-	    	
-		   	/**** Select puts general and Pval side by side ****/
-		    JPanel sideBySidePanel = Static.createRowPanel();
-		    sideBySidePanel.add(generalColsPanel);
-		    sideBySidePanel.add(Box.createHorizontalStrut(30));
-		    sideBySidePanel.add(evcColsPanel);
-	    	sideBySidePanel.add(Box.createHorizontalStrut(30));
-	    	sideBySidePanel.add(pvalColsPanel);
-	    	
-	    	sideBySidePanel.setMaximumSize(sideBySidePanel.getPreferredSize());
-	    	sideBySidePanel.setMinimumSize(sideBySidePanel.getPreferredSize());
-	    	sideBySidePanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+			}});
+	    	checkPvalPanel.add(chkSelectAllPvals);
+	    	Static.border(checkPvalPanel);
+	    	pvalColsPanel.add(checkPvalPanel);
     	
-	    	/////// Accept Discard
-	    	JPanel buttonPanel = Static.createRowPanel();
-	    	buttonPanel.setBackground(BGCOLOR);
-	    	JButton keepButton = new JButton("Accept");
-	    	keepButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				saveColumns();
-				theTableModel.fireTableStructureChanged();
-				tablePanel.tableResizeColumns();
-				
-				setVisible(false);
-				theGOQuery.showMain();
-			}
-			});
-		
-			JButton discardButton = new JButton("Discard");
-			discardButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					setVisible(false);
-					theGOQuery.showMain();
-				}
-			});
-	    	buttonPanel.add(keepButton);
-	    	buttonPanel.add(Box.createHorizontalStrut(10));
-	    	buttonPanel.add(discardButton);
-	    	buttonPanel.setMaximumSize(buttonPanel.getPreferredSize());
-	    	buttonPanel.setMinimumSize(buttonPanel.getPreferredSize());
-	    	buttonPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-	    	
-	    	JLabel tmpLabel = new JLabel("<HTML><H2>Select columns to view</H2></HTML>");
-	    	tmpLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-	    	tmpLabel.setMaximumSize(tmpLabel.getPreferredSize());
-	    	tmpLabel.setMinimumSize(tmpLabel.getPreferredSize());
-		    add(Box.createVerticalStrut(10));
-	    	add(tmpLabel);
-	    	add(Box.createVerticalStrut(10));
-	    	add(sideBySidePanel);
-	    	add(Box.createVerticalStrut(20));
-	    	add(buttonPanel);
-	    	setVisible(false);
-	    	
-	    	initSelections();
-		} // end createColumnPanel
+			return pvalColsPanel;
+		}
 		/************************************************/
 		private void initColumns() {
 			try {
@@ -352,8 +333,8 @@ public class BasicGOTablePanel {
 		
 				selectedCol = new boolean[COL_NAMES.length + evColNames.length + pvalColNames.length];		
 				for(int i=0; i<selectedCol.length; i++) {
-					if (i<endStatic) selectedCol[i] = true;
-					else selectedCol[i] = false;
+					if (i<endStatic) 	selectedCol[i] = true;
+					else 				selectedCol[i] = false;
 				}
 			}
 			catch(Exception e) {
@@ -361,8 +342,7 @@ public class BasicGOTablePanel {
 				ErrorReport.prtReport(e, "Error getting column names");
 			}
 		}
-		 
-		 public void setupVisible() {
+		public void setupVisible() {
 			int x=0;
 			for(; x<chkStaticColumns.length; x++)
 				chkStaticColumns[x].setSelected(selectedCol[x]);
@@ -428,7 +408,7 @@ public class BasicGOTablePanel {
 	    }
 	    private void initSelections() {
 	    	nStatic = chkStaticColumns.length;
-	    	nEvC = (chkEvCColumns==null ? 0 : chkEvCColumns.length);
+	    	nEvC =  (chkEvCColumns==null ? 0 : chkEvCColumns.length);
 			nPval = (chkPvalColumns==null ? 0 : chkPvalColumns.length);
 			
 			totalColumns = nStatic + nPval + nEvC;
@@ -447,15 +427,16 @@ public class BasicGOTablePanel {
 					if (x<0 || x>=totalColumns) continue; 
 					
 					cnt++;
-					if (x<nStatic) chkStaticColumns[x].setSelected(true);
-					else if (x<offset) chkEvCColumns[x-nStatic].setSelected(true);
-					else chkPvalColumns[x-offset].setSelected(true);
+					if (x<nStatic) 		chkStaticColumns[x].setSelected(true);
+					else if (x<offset) 	chkEvCColumns[x-nStatic].setSelected(true);
+					else 				chkPvalColumns[x-offset].setSelected(true);
 				}
 			}
 			if (cnt==0) {
-				for (int x=0; x<nStatic; x++) {
-					chkStaticColumns[x].setSelected(true);
-				}
+				chkStaticColumns[GOindex].setSelected(true);
+				chkStaticColumns[GOdomain].setSelected(true);
+				chkStaticColumns[GOdesc].setSelected(true);
+				chkStaticColumns[GOdomain].setSelected(true);
 			}
 			// CAS324 initialized in selectedCol = new boolean [totalColumns];
 			saveColumns(); // sets selectedCol
@@ -506,7 +487,7 @@ public class BasicGOTablePanel {
 				return theResults.get(row)[index];
 			}
 			
-			if (index >= endStatic && index < endEvC) { // CAS323 TODO
+			if (index >= endStatic && index < endEvC) { // CAS323 
 				String result = ((((String)theResults.get(row)[index]))).trim();
 				if (isEvCcolor) {
 					if (result.equals("")) return "";
@@ -546,14 +527,6 @@ public class BasicGOTablePanel {
 			return -1;
 		}
 		
-		// Following two methods are for Export; Column relative to static order of results.
-		private Object getValue(int row, int col) {
-			return theResults.get(row)[col];
-		}
-		private double getPval(int row, int deCol) {
-			return ((((Double)theResults.get(row)[deCol]).doubleValue()));
-		}
-		
 		/***********************************************
 		 * Sort and display
 		 */
@@ -572,24 +545,28 @@ public class BasicGOTablePanel {
   	  		
 		    public void mouseClicked(MouseEvent e) {
 		    	sortTable(e.getX(), SwingUtilities.isLeftMouseButton(e));
+		    	
 		    	theTableModel.fireTableDataChanged();
 		    }
 		 	   
   	  		private void sortTable(int xLocation, boolean leftClick) {
   	  			TableColumnModel colModel = table.getColumnModel();
   	  			int columnModelIndex = (colModel.getColumnIndexAtX(xLocation));
-  	  			if (columnModelIndex<0) return; 
+  	  			if (columnModelIndex<0) return;  
   	  			
   	  			int modelIndex = (colModel.getColumn(columnModelIndex).getModelIndex());
   	  
-  	  			if (modelIndex < 0) return;
-
+  	  			if (modelIndex < 0) return; 
+  	  		
   	  			if(leftClick)
    	  				bAscend[modelIndex] = !bAscend[modelIndex];
   	  			else
   	  				bAscend[modelIndex] = true;
   	  			
-   	  			sort(modelIndex, bAscend[modelIndex]);   	  			
+   	  			sort(modelIndex, bAscend[modelIndex]);  
+   	  			
+   	  			for (int row=0; row<theResults.size(); row++) // CAS336  - row gets sorted too
+   	  				theResults.get(row)[GOrow] = (row+1);
   	  		}
   	  		
   	  		private void sort(final int sortColumn, final boolean ascend) {
@@ -598,7 +575,9 @@ public class BasicGOTablePanel {
 				public int compare(Object[] arg0, Object[] arg1) {
 					int sign = 1;
 					if(!ascend) sign = -1;
-	  	  			int absCol = getMappedColumn(sortColumn);  	  			
+	  	  			int absCol = getMappedColumn(sortColumn); 
+	  	  			if (absCol==0) return 0;		// row#
+	  	  			
 		  	  		if (absCol >= endStatic && absCol<endEvC) { //evidence code
 		  	  			return sign * ((String)arg0[absCol]).compareTo((String)arg1[absCol]);
 	  				}
@@ -633,8 +612,7 @@ public class BasicGOTablePanel {
 			setBackground(Color.white);
 			
 			theTableModel = new GoTableModel();
-			theTable = new JTable(theTableModel)
-			{
+			theTable = new JTable(theTableModel) {
 				private static final long serialVersionUID = -1559706452814091003L;
 
 				public Component prepareRenderer(
@@ -642,10 +620,17 @@ public class BasicGOTablePanel {
 			    {
 			        Component c = super.prepareRenderer(renderer, row, column);
 			       
-				    if (theTable.isRowSelected(row)) 	c.setBackground(Globalx.selectColor);
+				    if (theTable.isRowSelected(row)) 	{
+				    	c.setBackground(selectColor);
+				    }
+				    else if (highSet.size()>0) {
+				    	int gonum = (Integer) theResults.get(row)[GOindex];
+			    		if (highSet.contains(gonum)) c.setBackground(HIGHCOLOR);
+			    		else 						 c.setBackground(BGCOLOR);
+				    }
 				    else {
 				    	boolean bBlueBG = ((row % 2) == 1);
-				    	if ( bBlueBG ) 	c.setBackground( Globalx.altRowColor );
+				    	if ( bBlueBG ) 	c.setBackground( altRowColor );
 						else            c.setBackground( null );
 				    }
 				    /* XXX CAS322 added, CAS324 fixed so works with moving columns */
@@ -692,7 +677,7 @@ public class BasicGOTablePanel {
 			theTable.setDefaultRenderer( Object.class, new BorderLessTableCellRenderer() );
 			theTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 				public void valueChanged(ListSelectionEvent arg0) {
-					theGOQuery.updateTopButtons();
+					theGOQuery.updateAllButtons();
 				}
 			});
 
@@ -711,27 +696,9 @@ public class BasicGOTablePanel {
 		  *  BOTTOM BUTTONS - 
 		  ***/
 		 private JPanel createTableButtonPanel() {
-			lblHeader = new JLabel("Modify table");
+			lblHeader = new JLabel("Modify");
 			
-			btnUnselectAll = new JButton("Unselect All");
-			btnUnselectAll.setMargin(new Insets(0, 0, 0, 0));
-			btnUnselectAll.setFont(new Font(btnUnselectAll.getFont().getName(),Font.PLAIN,10));
-			btnUnselectAll.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					theTable.clearSelection();
-				}
-			});
-			
-			btnSelectAll = new JButton("Select All");
-			btnSelectAll.setMargin(new Insets(0, 0, 0, 0));
-			btnSelectAll.setFont(new Font(btnSelectAll.getFont().getName(),Font.PLAIN,10));
-			btnSelectAll.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					theTable.selectAll();
-				}
-			});
-			
-			btnDelete = new JButton("Delete selected");
+			btnDelete = Static.createButton("Delete selected", false);
 			btnDelete.setMargin(new Insets(0, 0, 0, 0));
 			btnDelete.setFont(new Font(btnDelete.getFont().getName(),Font.PLAIN,10));
 			btnDelete.addActionListener(new ActionListener() {
@@ -741,7 +708,7 @@ public class BasicGOTablePanel {
 				}
 			});
 			
-			btnKeep = new JButton("Keep selected");
+			btnKeep = Static.createButton("Keep selected", false);
 			btnKeep.setMargin(new Insets(0, 0, 0, 0));
 			btnKeep.setFont(new Font(btnKeep.getFont().getName(),Font.PLAIN,10));
 			btnKeep.addActionListener(new ActionListener() {
@@ -751,27 +718,100 @@ public class BasicGOTablePanel {
 				}
 			});
 			
-			JPanel bottomPanel = new JPanel();
-			bottomPanel.setLayout(new BoxLayout ( bottomPanel, BoxLayout.X_AXIS ));
-			bottomPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-			bottomPanel.setBackground(Globalx.BGCOLOR);
-			bottomPanel.setAlignmentY(LEFT_ALIGNMENT);
+			btnUnselectAll = Static.createButton("Unselect All", false);
+			btnUnselectAll.setMargin(new Insets(0, 0, 0, 0));
+			btnUnselectAll.setFont(new Font(btnUnselectAll.getFont().getName(),Font.PLAIN,10));
+			btnUnselectAll.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					theTable.clearSelection();
+				}
+			});
 			
-			bottomPanel.add(lblHeader);
-			bottomPanel.add(Box.createHorizontalStrut(5));
-			bottomPanel.add(btnDelete);
-			bottomPanel.add(Box.createHorizontalStrut(3));
-			bottomPanel.add(btnKeep);
+			btnSelectAll = Static.createButton("Select All", false);
+			btnSelectAll.setMargin(new Insets(0, 0, 0, 0));
+			btnSelectAll.setFont(new Font(btnSelectAll.getFont().getName(),Font.PLAIN,10));
+			btnSelectAll.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					theTable.selectAll();
+				}
+			});
 			
-			bottomPanel.add(Box.createHorizontalStrut(15));
-			bottomPanel.add(btnSelectAll);
-			bottomPanel.add(Box.createHorizontalStrut(3));
-			bottomPanel.add(btnUnselectAll);
+			btnQuery = Static.createButton("Select Query", false); // CAS336 new
+			btnQuery.setMargin(new Insets(0, 0, 0, 0));
+			btnQuery.setFont(new Font(btnSelectAll.getFont().getName(),Font.PLAIN,10));
+			btnQuery.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					theGOQuery.loadBuildStart(BasicGOLoadFromDB.SELECT);
+				}
+			});
+			
+			btnHighSelect = Static.createButton("Highlight", false); // CAS336 new
+			btnHighSelect.setMargin(new Insets(0, 0, 0, 0));
+			btnHighSelect.setFont(new Font(btnKeep.getFont().getName(),Font.PLAIN,10));
+			btnHighSelect.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					highSelect();
+					theTable.clearSelection();
+				}
+			});
+			btnHighClear = Static.createButton("Clear", false); // CAS336 new
+			btnHighClear.setMargin(new Insets(0, 0, 0, 0));
+			btnHighClear.setFont(new Font(btnKeep.getFont().getName(),Font.PLAIN,10));
+			btnHighClear.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					highClear();
+				}
+			});
+			
+			JPanel bottomPanel = Static.createRowPanel();
+			
+			bottomPanel.add(lblHeader);		bottomPanel.add(Box.createHorizontalStrut(3));
+			bottomPanel.add(btnDelete);		bottomPanel.add(Box.createHorizontalStrut(2));
+			bottomPanel.add(btnKeep);		bottomPanel.add(Box.createHorizontalStrut(10));
+			bottomPanel.add(btnSelectAll);	bottomPanel.add(Box.createHorizontalStrut(2));
+			bottomPanel.add(btnUnselectAll);bottomPanel.add(Box.createHorizontalStrut(2));
+			bottomPanel.add(btnQuery);		bottomPanel.add(Box.createHorizontalStrut(10));
+			bottomPanel.add(btnHighSelect); bottomPanel.add(Box.createHorizontalStrut(2));
+			bottomPanel.add(btnHighClear);
 			
 			bottomPanel.add(Box.createHorizontalGlue());
 			bottomPanel.setMaximumSize(bottomPanel.getPreferredSize());
 			return bottomPanel;
 		}
+		// CAS336 adds in selected to highSet, which is highlighted on display. Clear 
+		private void highSelect() {
+			int [] selRow = theTable.getSelectedRows();	
+			
+			int cntOrig = highSet.size(), cntNew=0;
+			for(int x=0; x<selRow.length; x++)  {
+				int gonum = (Integer) theResults.get(selRow[x])[GOindex];
+				if (!highSet.contains(gonum)) {
+					highSet.add(gonum);
+					cntNew++;
+				}
+			}
+			String msg = (cntOrig==0) ? "Highlight " + highSet.size() : "Highlight " + cntOrig + "+" + cntNew;
+			
+			theGOQuery.appendStatus(msg);
+			if (Globalx.debug) prtTab();
+		}
+		private void prtTab() {
+			for (int row=0; row<1; row++) {
+				String x="", y="", z="", s="";
+				for (int col=0; col<5; col++) {
+					if (x!="") x += "\t";	x += theTableModel.getValueAt(row, col).toString();
+					if (y!="") y += "\t";	y += theTable.getValueAt(row, col).toString();
+					if (z!="") z += "\t";	z += theResults.get(row)[col].toString();
+					if (s!="") s += "\t";	s += selectedCol[col];
+				}
+				Out.prt("");
+				Out.prt("table:  " + y);
+				Out.prt("model:  " + x);
+				Out.prt("result: " + z);
+				Out.prt("select: " + s);
+			}
+		}
+		
 		private void keepFromList() {
 			int numElements = theTable.getRowCount();
 			int [] selValues = theTable.getSelectedRows();		
@@ -879,8 +919,7 @@ public class BasicGOTablePanel {
 		        return c;
 		    }
 		}
-		private JButton btnDelete = null, btnKeep = null;
-		private JButton btnUnselectAll = null, btnSelectAll = null;
+		
 		private JLabel lblHeader = null;
 	
 		private GoTableModel.ColumnListener colListener = null;
@@ -892,13 +931,10 @@ public class BasicGOTablePanel {
 	 */
 	public void clear() {
 		theResults.clear();
-		
+		highSet.clear();
 		theTableModel.fireTableDataChanged();
 	}
 	
-	private String trimStatus() { // still could be usefule
-		return "";
-	}
 	/**********************************************************
 	 * building table 
 	 */
@@ -906,7 +942,7 @@ public class BasicGOTablePanel {
 		theResults.add(newRow);	
 	}
 	
-	public Vector<Object []> getTheResults() {return theResults;} // used by un-used Trim
+	public Vector<Object []> getTheResults() {return theResults;} // used by Trim
 	
 	public void showColumns() { // Called when Column button selected
 		columnPanel.setupVisible();
@@ -914,18 +950,19 @@ public class BasicGOTablePanel {
 	public ColumnPanel getColumnPanel() { return columnPanel;}
 	public TablePanel getTablePanel() { return tablePanel;}
 	
-	public int [] getSelectedGOs() {
+	public int [] getSelectedGOnums() {
 		int [] sels = theTable.getSelectedRows();
-		int [] goIDs = new int[sels.length];
+		int [] gonums = new int[sels.length];
 		for(int x=0; x<sels.length; x++) {
-			goIDs[x] = Integer.parseInt(((String)theTableModel.getValueAt(sels[x], GOindex)).substring(3));
+			gonums[x] = (Integer) theResults.get(sels[x])[GOindex]; //CAS336 Results instead of theTableModel
 		}
-		return goIDs;
+		return gonums;
 	}
-	public String getSelectedGO() {
+	public String getSelectedGOid() {
 		int [] sels = theTable.getSelectedRows();
 		if (sels!=null && sels.length>0) {
-			return ((String)theTableModel.getValueAt(sels[0], GOindex));
+			int gonum = (Integer) theResults.get(sels[0])[GOindex];//CAS336 Results instead of theTableModel
+			return String.format(GO_FORMAT, gonum);
 		}
 		return null;
 	}
@@ -1004,6 +1041,46 @@ public class BasicGOTablePanel {
 		}
  		return retVal.toString();
 	 }
+	// XXX CAS336 for automatic select
+	public void selectRows(String msg, HashSet <Integer> rowSet) {
+		int cnt=0;	
+		for(int x=0; x<theTable.getRowCount(); x++)  {
+			int gonum = (Integer) theResults.get(x)[GOindex];
+			
+			if (rowSet.contains(gonum)) {
+				theTable.addRowSelectionInterval(x, x);
+				cnt++;
+			}
+		}
+		theGOQuery.appendStatus(String.format("%s: %,d", msg, cnt));
+	}
+	public void selectRelatedFromTable(int type) { // XXX CAS336
+		try {
+			int [] sels = theTable.getSelectedRows();
+			if (sels.length==0) {
+				JOptionPane.showMessageDialog(null, "No selected GO ");
+				return;		
+			}
+			int gonum = (Integer)  theResults.get(sels[0])[GOindex];
+			
+			int [] goIDs = new int[theTable.getRowCount()];
+			for(int x=0; x<goIDs.length; x++) {
+				goIDs[x] = (Integer) theResults.get(x)[GOindex];
+			}
+			HashSet <Integer> inTab = new GOtree(theMainFrame).computeRelatedForSet(gonum, goIDs, type);
+			
+			int cnt=0;
+			for(int x=0; x<goIDs.length; x++)  {
+				if (inTab.contains(goIDs[x])) {
+					theTable.addRowSelectionInterval(x, x);
+					cnt++;
+				}
+			}
+			theGOQuery.appendStatus("Select " + cnt + " for " + String.format(GO_FORMAT, gonum));
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "Show Hits for Selected"); }
+	}
+	
 	public void showRelatedFromTable(int mode, JButton btnShow) {
 		try {
 			int [] sels = theTable.getSelectedRows();
@@ -1014,21 +1091,19 @@ public class BasicGOTablePanel {
 			int gonum = (Integer)  theResults.get(sels[0])[GOindex];
 			String desc = (String) theResults.get(sels[0])[GOdesc];
 			
-			int [] goIDs = new int[theTable.getRowCount()];
-			for(int x=0; x<goIDs.length; x++) {
-				goIDs[x] = Integer.parseInt(((String)theTableModel.getValueAt(x, GOindex)).substring(3));
+			int [] allGonums = new int[theTable.getRowCount()];
+			for(int x=0; x<allGonums.length; x++) {
+				allGonums[x] = (Integer) theResults.get(x)[GOindex];
 			}
-			new GOtree(theMainFrame).goRelatedPopup(gonum, desc, goIDs, mode, btnShow, this);
+			new GOtree(theMainFrame).goRelatedPopup(gonum, desc, allGonums, mode, btnShow, this);
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Show Hits for Selected"); }
 	}
+	
 	public String getRowHeading() {
 		return "#Seqs";
 	}
-	public String getRowInfo(int row) {
-		String line = String.format("%5d", (Integer) theTableModel.getValue(row, GOnSeq));
-		return line;
-	}
+	
 	/************ GOtree options  ***************/
 	public void showExportGOtreeSelected(int actionType, int outType, JButton btnFrom) {
 		try {
@@ -1037,7 +1112,7 @@ public class BasicGOTablePanel {
 				JOptionPane.showMessageDialog(null, "No selected GO ");
 				return;		
 			}
-			int gonum = (Integer) theResults.get(sels[0])[GOindex];
+			int gonum =  (Integer) theResults.get(sels[0])[GOindex];
 			String desc = (String) theResults.get(sels[0])[GOdesc];
 			
 			new GOtree(theMainFrame).computeSelected(gonum, desc, actionType, outType, btnFrom);
@@ -1191,8 +1266,8 @@ public class BasicGOTablePanel {
 		private boolean exportTableColumns(boolean bAppend, File out, boolean bLog) {
 			try {
 				PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(out, bAppend)));
-				headerLine = String.format("### %s %d GOs   %s   %s", 
-						tcwid, getRowCount(), theGOQuery.getStatusStr(), trimStatus());
+				headerLine = String.format("### %s %d GOs   %s ", 
+						tcwid, getRowCount(), theGOQuery.getBuildFilter());
 				pw.println(headerLine);
 				
 				StringBuilder line = new StringBuilder();
@@ -1276,16 +1351,16 @@ public class BasicGOTablePanel {
 				HashMap <Integer, Vector<Integer>> seqGO = new HashMap <Integer, Vector<Integer>> ();
 				String query = "select CTGID from pja_unitrans_go where gonum=";
 				for(int row=0; row<rowCnt; row++) {
-					int go = (Integer) theTableModel.getValue(row, GOindex);
+					int gonum = (Integer) theResults.get(row)[GOindex]; // CAS336 was theTableModel
 					
-					rs = mDB.executeQuery(query + go);
+					rs = mDB.executeQuery(query + gonum);
 					while (rs.next()) {
 						int ctgid = rs.getInt(1);
 						if (seqID.containsKey(ctgid)) {
 							Vector <Integer> list;
 							if (seqGO.containsKey(ctgid)) list = seqGO.get(ctgid);
 							else list = new Vector <Integer> ();
-							list.add(go);
+							list.add(gonum);
 							seqGO.put(ctgid, list);
 						}
 						cnt++;
@@ -1300,7 +1375,7 @@ public class BasicGOTablePanel {
 				StringBuilder line = new StringBuilder();
 				String goFormat = Globalx.GO_FORMAT;
 				
-				headerLine = String.format("!!! %s %d Seqs   %s  %s", tcwid, seqGO.size(), theGOQuery.getStatusStr(), trimStatus());
+				headerLine = String.format("!!! %s %d Seqs   %s", tcwid, seqGO.size(), theGOQuery.getBuildFilter());
 				pw.println(headerLine);
 				
 				for (int id : seqGO.keySet()) {
@@ -1322,7 +1397,7 @@ public class BasicGOTablePanel {
 			catch (Exception e) {ErrorReport.prtReport(e, "Exporting GO table");}
 			return false;
 		}
-		// CAS324 add GO ids - use theTableModel so no worry about GO column being moved
+		// CAS324 add GO ids - use theTableModel so no worry about GO column being moved; CAS336 - theResults
 		private boolean exportGOids(Component btnC) {
 			try {
 				FileWrite fw = new FileWrite(FileC.bNoVer, FileC.bDoPrt);
@@ -1330,8 +1405,8 @@ public class BasicGOTablePanel {
 	         	if (pw==null) return false;
 				
 				for(int x=0; x< theTableModel.getRowCount(); x++) { 
-					String go = (String)theTableModel.getValueAt(x, GOindex);
-					pw.write(go + "\n");
+					int gonum = (Integer) theResults.get(x)[GOindex];
+					pw.write(String.format(GO_FORMAT, gonum) + "\n");
 				}
 				pw.close();
 				
@@ -1368,9 +1443,8 @@ public class BasicGOTablePanel {
 							
 							int nSeqs = theMainFrame.getMetaData().nContigs();
 							headerLine += String.format(
-									"### %-6s %6d  Column: %-6s  %s   %s", 
-									tcwid, nSeqs, colHead,
-									theGOQuery.getStatusStr(), trimStatus());
+									"### %-6s %6d  Column: %-6s  %s ", 
+									tcwid, nSeqs, colHead, theGOQuery.getBuildFilter());
 							
 							domainAddTable();
 							domainWriteFile(fh);
@@ -1392,10 +1466,11 @@ public class BasicGOTablePanel {
 				int count=0;
 				
 				for (int row=0; row<getRowCount(); row++) {
-					String domain = (String)  theTableModel.getValue(row, GOdomain);
-					String desc = 	(String)  theTableModel.getValue(row, GOdesc);
-					if (isSeq) count = 	(Integer) theTableModel.getValue(row, GOnSeq);
-					else score =    theTableModel.getPval(row, colIdx);
+					String domain = (String)  theResults.get(row)[GOdomain];
+					String desc = 	(String)  theResults.get(row)[GOdesc];
+					if (isSeq) count = 	(Integer) theResults.get(row)[GOnSeq];
+					else score =  ((((Double)theResults.get(row)[colIdx]).doubleValue()));
+					
 					String [] abbr = Globalx.GO_TERM_ABBR;
 					if      (domain.equals(abbr[0])) domainAdd(biolMap, desc, score, count, j);
 	    			else if (domain.equals(abbr[1])) domainAdd(cellMap, desc, score, count, j);
@@ -1565,8 +1640,8 @@ public class BasicGOTablePanel {
 			double [] dArr = new double [tableRows];
 
 		    for(int y=0; y < tableCols; y++) {
-		    		String colName = theTable.getColumnName(y);
-		    		if (colName.equals("Row")) continue;
+		    	String colName = theTable.getColumnName(y);
+		    	if (colName.equals("Row")) continue;
 		    		
 			 	Object obj = theTable.getValueAt(0,y);
 			 	if (obj==null) continue; 
@@ -1616,14 +1691,51 @@ public class BasicGOTablePanel {
 		
 		} catch(Exception e) {ErrorReport.reportError(e, "Error create column stats"); return "Error"; }
 	}
+
+	public void updateBottomButtons() { // CAS336 new - called on select
+		boolean b = (theTable.getSelectedRows().length>0);
+		btnDelete.setEnabled(b);
+		btnKeep.setEnabled(b);
+		
+		btnUnselectAll.setEnabled(b);
+		btnHighSelect.setEnabled(b);
+		
+		b = (theTable.getRowCount()>0);
+		btnSelectAll.setEnabled(b);
+		btnQuery.setEnabled(b);
+		
+		btnHighClear.setEnabled(highSet.size()>0);
+	}
+	public void highClear() {
+		highSet.clear();
+		theGOQuery.appendStatus("");
+		theTableModel.fireTableDataChanged();
+	}
 	/*****************************************************/
-	private JTable theTable = null;
+	// CAS336 changed everything to use theResults for static indices (at top)
+	// Sorted rows: all theResults, theTable, theTableModel
+	// Columns:     theResults has all columns. theTable and theTableModel have selectedCol
+	//              theTable has columns re-arranged - it is what you see
+	// Gonum/goID:  theResults has gonum. theTable and theTableModel have goID.
+	// theTable is what is shown. theResults maintains the row indices (e.g. GOindex). 
+	private boolean []       selectedCol = null;	// full set - true are displayed
+	private Vector<Object []> theResults = null;    
+		
+	private JTable theTable = null;				// exactly what is displayed
+	private GoTableModel theTableModel = null;  // what is displayed but columns not rearranged
+	
 	private TablePanel tablePanel = null;
 	private ColumnPanel columnPanel = null;
-	private GoTableModel theTableModel = null;
 	
 	private STCWFrame theMainFrame;
 	private BasicGOFilterTab theGOQuery;
 	private boolean isEvCcolor=true;
 	private String projName="";
+	
+	// created in TablePanel
+	private JButton btnDelete = null, btnKeep = null;
+	private JButton btnUnselectAll = null, btnSelectAll = null, btnQuery=null;
+	private JButton btnHighSelect=null, btnHighClear=null;
+	
+	private HashSet <Integer> highSet = new HashSet <Integer> ();
 }
