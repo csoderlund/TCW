@@ -33,6 +33,14 @@ import util.ui.UserPrompt;
 public class Static {
 	
 	/******** Interface ***********/
+	static public void active(JButton button) {
+		button.setBackground(Globalx.FUNCTIONCOLOR); // linux
+		button.setSelected(true);					 // mac
+	}
+	static public void inActive(JButton button) {
+		button.setBackground(Globalx.BGCOLOR);
+		button.setSelected(false);
+	}
 	static public void center(JPanel panel) {
 		panel.setMinimumSize(panel.getPreferredSize());
 		panel.setMaximumSize(panel.getPreferredSize());
@@ -111,7 +119,9 @@ public class Static {
 	}
 	static public JButton createButton(String label, boolean enable, Color color) {
 		JButton button = new JButton(label);
-		if (color!=null) button.setBackground(color); // create obique background by default
+		if (color!=null) {
+			button.setBackground(color); // only works on linux
+		}
 		button.setAlignmentX(Component.LEFT_ALIGNMENT);
 		button.setEnabled(enable);
 		return button;

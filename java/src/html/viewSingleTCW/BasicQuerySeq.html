@@ -22,9 +22,9 @@ the <b>Filter</b> bullet on the left panel.
 Choose one of four search modes and enter a string to search on.  
 <table class=tablex>
 <tr><td nowrap><b>Seq ID</b><td>Sequence name. Only one name is allowed unless loaded from file. 
-<tr><td nowrap><b>Orig ID</b><td>(1) Original name if Seq ID != Orig ID  (2) Longest read of contig
-if assembled, (3) no query if neither of the previous. 
-<tr><td><b>TCW</b><td>TCW Remarks are entered when the database is built; they provide information
+<tr><td nowrap valign="top"><b>Orig ID</b> or <b>Longest</b>: <td>Either (1) Original name if Seq ID != Orig ID, or  (2) Longest read of contig
+if assembled. If neither condition is met, then neither option will be available.
+<tr><td valign="top"><b>TCW</b><td>TCW Remarks are entered when the database is built; they provide information
 on the ORFs, and if the sequence has hits in multiple frames.
 <tr><td><b>User</b><td>User Remarks may be associated with each sequence (entered with <tt>runSingleTCW</tt>).
 </table>
@@ -61,36 +61,12 @@ sort it.
 <hr>
 <h2>Columns</h2>
 <table class=tablex>
-<tr><td><u>TCW Remark</u><td>Assigned by TCW during <tt>runSingleTCW</tt> ORF computation. See last section.
+<tr><td><u>TCW Remark</u><td>Assigned by TCW during <tt>runSingleTCW</tt> ORF computation. See <u>TCW Remark</u> in <b>Help</b> drop-down.
 <tr><td><u>User Remark</u><td>Uploaded by the user with <tt>runSingleTCW</tt>.
 <tr><td><u>Count</u><td>Total count from all conditions/libraries. 
 <tr><td><u>Orig ID or Longest</u><td>See <b>Search</b> above.
 <tr><td><u>Best HitID</u><td>The HitID of the hit with the best e-value.
 </table>
-
-<hr>
-<h2>TCW Remark Legend</h2>
-<table class=tablex>
-<tr><td>ORF=Hit<td>The ORF has the same coordinates as the hit.
-<tr><td>ORF=Hit+<td>The ORF has the same coordinates as the hit and Start and Stop codons.
-<tr><td>ORF&gt;Hit<td>The Hit is contained in the ORF.
-<tr><td>ORF&lt;Hit<td>The ORF is contained in the Hit.
-<tr><td>ORF~Hit<td>The ORF coordinates overlap the Hit.
-<tr><td valign=top>$<td>The dollar sign may be appended to any of the ORF remarks above, which indicates that the ORF has a Hit, is the longest,
-and has the best Markov score (there will not be a ORF!Lg or ORF!Mk).
-<tr><td valign=top>ORF!Lg<td>The ORF is not the longest in comparison with the other 5 frames.
-<tr><td valign=top>ORF!Mk<td>The ORF does not have the best Markov score in comparison with the other 5 frames.
-
-<tr><td>!5!3<td>No Start or Stop codon.
-<tr><td>!5<td>No Start codon.
-<tr><td>!3<td>No Stop codon.
-
-<tr><td>ORF!Hit<td>The ORF frame is not the same as the Hit frame.
-<tr><td>ORF&gt;=9Ns<td>There are &gt;=9Ns in the ORF.
-<tr><td valign=top>ORF:AN<td>Typically, the BS (Best Bits) hit is used. But if the BS is a nucleotide hit, then
-the AN (Best Annotation) hit is used.
-<tr><td nowrap>Multi-frame<td>Hits to multiple different frames
-<tr><td>StopHit<i>n</i><td>Stops in best hit, where <i>n</i> is the number of Stops found.
 
 </table>
 </body>

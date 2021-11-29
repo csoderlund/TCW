@@ -7,27 +7,26 @@
 
 
 <h1>Sequence Align Hits with DP</h1>
-Heuristic search versus dynamic programming, where this display show the results of 
-dynamic programming (DP):
+The alignment shown uses dynamic programming (DP), whereas <tt>BLAST</tt> or <tt>DIAMOND</tt> 
+use an heuristic algorithm:
 <ul>
-<li>Hits were assigned to sequences using heuristic search programs (e.g. <tt>BLAST</tt> or <tt>DIAMOND</tt>) 
+<li>Hits were assigned to sequences using an heuristic search program (<tt>BLAST</tt> or <tt>DIAMOND</tt>) 
  when the database was build, and
 their coordinates stored in the database; any references to 'Hit' indicate these coordinates.
-<li>Dynamic programming is a slower search, but is considered more likely to get the correct alignment;
-this display uses a semi-global dynamic programming with 
-affine gaps algorithm. 
+<li>Dynamic programming is a slower alignment, but is considered more likely to get the correct alignment;
+this display uses a semi-global dynamic programming with affine gaps algorithm. 
 <li>In the display:
 <ul>
 <li><b>DP:</b> The percentage is the similarity for the dynamic programming algorithm. 
 <li><b>Hit:</b> The statistics are from the search program results; they are percent similarity,
 E-value, bit-score and alignment length, respectively.
 </ul>
-<li>For the <b>Seq</b> view, overhangs are automatically trimmed to first and last 15 bases.
 </ul>
 
 <h2>Second row of buttons</h2>
-<p><b>View Seq/Line</b> changes the display from a line drawing to the actual sequence.
-<p><b>Zoom</b> changes the horizontal zoom. The 1:1 displays each mismatch with no space between adjacent ones.
+<b>View Seq/Line</b> Changes the display from a line drawing to the actual sequence. For the <b>Seq</b> view, overhangs are automatically trimmed to first and last 15 bases.
+
+<p><b>Zoom</b> Changes the horizontal zoom. The 1:1 displays each mismatch with no space between adjacent ones.
 The 1:N (N&gt;1) compresses the mismatches. The N:1 (N&gt;1) puts a space between adjacent mismatches, and 
 increases the width of the mismatch vertical line.
 
@@ -67,13 +66,13 @@ and tries to reduce the number of gap stretches.
 <p>If you compare the alignment with the UniProt alignment for the selected sequence-hit pair, there may be
 some variation as it all depends on the Blosum matrix used and penalties set.
 
-<h4>Dynamic programming sequence alignment terms</h4>
+<h3>Dynamic programming sequence alignment terms</h3>
 
 <ol>
-<li><b>Semi-global</b> find the alignment of the entire
+<li><b>Semi-global</b> finds the alignment of the entire
 shorter string to the longer string. This works
 fine if they are almost the exact same gene.
-<li><b>Local</b> find the best substring in one sequence that aligns well with a substring in the other.
+<li><b>Local</b> finds the best substring in one sequence that aligns well with a substring in the other.
 <li><b>Affine gaps</b> instructs the algorithm to cluster gaps if possible
 instead of having them spread out. A simple nucleotide example is:
 <pre>

@@ -411,6 +411,7 @@ public class BasicHitTab extends Tab {
 			new GOtree(theParentFrame).computeSelected(hitID, desc, actionType, outType, btnShow);
 		}
 		catch (Exception e) {
+			Out.PrtErr("");
 			JOptionPane.showMessageDialog(null, "Query failed");
 			ErrorReport.prtReport(e, "Creating Sequence GO popup");
 		}
@@ -732,7 +733,7 @@ public class BasicHitTab extends Tab {
 			int nCol=theFilterPanel.NUM_HIT_COL;
 			if (column<nCol) {
 				switch(column) {
-				case 0: return nRowNum;
+				case 0: return nRowNum; // is sorted with the row, but not displayed
 				case 1: return hd.strHitID;
 				case 2: return hd.hitLen;
 				
@@ -780,7 +781,7 @@ public class BasicHitTab extends Tab {
 			int nCol=theFilterPanel.NUM_HIT_COL;
 			if (column<nCol) {
 				switch(column) {
-				case 0: return 0; // CAS326 order * ((Integer) nRowNum).compareTo((Integer) obj.nRowNum);
+				case 0: return 0; // row# does not change; CAS326 quit sorting;
 				case 1: return order * compareStrings(hd.strHitID, obj.hd.strHitID);
 				case 2: return order * ((Integer) hd.hitLen).compareTo((Integer) obj.hd.hitLen);
 				
@@ -865,8 +866,6 @@ public class BasicHitTab extends Tab {
 	    There may be multiple HitSeqData for a seqID since there is one for each seq-hit pair */
 	 public void tableBuild(ArrayList<Object []> results, String summary) {
 		 try {
-			 enableTopButtons(false);
-			
 			 hitSeqList.clear();
 			 seqCntMap.clear(); 
 			 String x = " (of " + results.size() + ") ...";
@@ -893,7 +892,6 @@ public class BasicHitTab extends Tab {
 	}
 	 public void tableAdd(ArrayList<Object []> results, String summary) {
 		 try {
-			 enableTopButtons(false);
 			 String x = " (of " + results.size() + ") ...";
 			 int row=hitSeqList.size();
 			 int cnt=0, add=0;
@@ -1088,7 +1086,7 @@ public class BasicHitTab extends Tab {
 		if (Globalx.debug) Out.prt("After:  " + getStatusCounts());
 	}
 	
-	public void updateTopButtons(int sel, int nRow) {
+	public void enableTopButtons(int sel, int nRow) {
 		btnViewSeqs.setEnabled(sel>0);
 		btnAlignSeqs.setEnabled(sel>0);
 		btnShow.setEnabled(sel==1);
@@ -1096,12 +1094,15 @@ public class BasicHitTab extends Tab {
 		btnCopy.setEnabled(sel==1);
 		btnTable.setEnabled(nRow>0);
 	}
-	public void enableTopButtons(boolean b) {
+	public void enableAllButtons(boolean b) { // start of query (b=false), or fail query (b=true)
 		btnViewSeqs.setEnabled(b);
 		btnAlignSeqs.setEnabled(b);
 		btnShow.setEnabled(b);
 		btnExport.setEnabled(b);
 		btnCopy.setEnabled(b);
+		btnTable.setEnabled(b);
+		
+		theTablePanel.enableLowButtons(b);
 	}
 	
 	public void tableRefresh(boolean b) {

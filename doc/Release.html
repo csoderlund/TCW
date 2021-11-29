@@ -6,6 +6,45 @@
 <a id=top>
 <!--#include virtual="./ssi/start1.html" -->
 
+<h4>v3.3.7  29-Dec-2021</h4>
+This is a minor release.
+<p><ttp>viewSingleTCW </ttp>
+<ul>
+<li>Improved some of the text of the <b>Help</b> popups.
+<li>Basic Filters: buttons are made inactive when they cannot be used - this was not done
+consistently, but now is.
+<li>Seq Details: (1) Only highlight top drop-down buttons if an item is selected. (2) Speeded up
+<u>Seq hits - inherited</u>.
+</ul>
+
+
+<h4>v3.3.6  22-Nov-2021</h4>
+This release has improvements to the Basic Filters (Seq, Hit, and GO).
+<p><ttp>viewSingleTCW </ttp>
+<ul>
+<li>All Basic
+<ul>
+<li>Help has been split into a single Help.. drop-down.
+<li><font color=green>New</font> They all have a new feature that highlights the selected rows in the table.
+<li>The information on the status line above the tables is consistent and more informative.
+</ul>
+
+<li>Basic GO: 
+<ul>
+<li><font color=green>New</font> Add <u>Select related in table</u>, <u>Select ancestors in table</u>, <u>Select descendents in table</u> 
+to the <ttc>Show</ttc> button. 
+<li><font color=green>New</font> Add <u>Select terminal terms</u> for the <ttc>Table...</ttc> button; this selects all rows that do not
+have descendents in the table.
+<li><ttc>Select query</ttc> was implemented, which executes the query and selects the intersecting rows.
+<li>Add Row number column.
+</ul>
+<li>Basic Sequences:
+<ul>
+<li>The <ttc>SELECT ROWS</ttc> feature has been moved to the bottom set of buttons and called <ttc>Select Query</ttc>.
+</ul>
+<li>Minor fixes: (1) Use "bit-score" everywhere in Help. Otherwise use bitscore. It was different everywhere.<br>(2) Basic GO: Was not disabling "#Seq" on Enrich line when Search was selected. Was not checking for a valid p-value.
+Was showing a level 0 (obsolete) when the range started at 1. Exports did not work right if GOid was not displayed.
+</ul>
 <h4>v3.3.5  4-Nov-2021</h4>
 The main change from this release is a feature to allow log2FC analysis besides FC.
 <p><ttp>runSingleTCW</ttp>

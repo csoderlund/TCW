@@ -12,7 +12,7 @@
 <h1>Filters</h1>
 Overall rules:
 <ol>
-<li>Set the desired filters, then select <b>View Filtered Sequences</b>; only the sequences
+<li>Set the desired filters, then select <b>Seq Table</b>; only the sequences
 that pass all filters will be shown in the resulting sequence table. 
 <li>Sections are collapsible; to expand a section to see its filters, click on the +. 
 <li>
@@ -45,19 +45,19 @@ This filter would results in a list of sequence where both condA and condB are >
 and both condC and condD are = 0.0.
 
 <h2>N-fold</h2>
-This applies to the TPM columns. Whether using Log2FC or FC, a "0.1" is added to both A and B to avoid ambiguities with 
-a zero value.
+This applies to the TPM columns. Whether using Log2FC or FC, a "0.1" is added to both A and B to avoid zero values.
 <table>
-<tr><td>N-fold<td>&nbsp;<td>This must be checked and a value entered into the box beside it.
-<tr><td valign="top">Direction<sup>1</sup>&nbsp;<td><td>Up-Down, Up or Down can be selected.
+<tr><td><b>N-fold</b><td>&nbsp;<td>This must be checked and a value entered into the box beside it.
+<tr><td valign="top">Direction<sup>1</sup>&nbsp;<td><td><b>Up-Down</b>, <b>Up</b> or <b>Down</b> can be selected.
 
-<tr><td valign="top" nowrap>Every/Any<td>&nbsp;<td>If more than one A-B pair is selected, the "Every" requires them all to
-pass the N-fold test whereas the "Any" only requires one of the pairs to pass the filter.
-<tr><td valign="top" nowrap>Select A<td>&nbsp;<td>Select the first condition.
-<tr><td valign="top" nowrap>Select B<td>&nbsp;<td>Select the second condition.
-<tr><td valign="top" nowrap>Add<sup>2</sup><td>&nbsp;<td>After A and B are selected, this will add them to the box.
-<td><tr><td valign="top" nowrap>Remove<td>&nbsp;<td>Select an entry in the box followed by "Remove" to remove it.
-<td><tr><td valign="top" nowrap>Log2<sup>3</sup><td>&nbsp;<td>If this is selected, then the box will contain "A:B", else it will contain
+<tr><td valign="top" nowrap><b>Every/Any</b><td>&nbsp;<td>If more than one A-B pair is selected, the <b>Every</b> 
+requires them all to
+pass the N-fold test whereas the <b>Any</b> only requires one of the pairs to pass the filter.
+<tr><td valign="top" nowrap><b>Select A</b><td>&nbsp;<td>Select the first condition.
+<tr><td valign="top" nowrap><b>Select B</b><td>&nbsp;<td>Select the second condition.
+<tr><td valign="top" nowrap><b>Add</b><sup>2</sup><td>&nbsp;<td>After A and B are selected, this will add them to the box.
+<td><tr><td valign="top" nowrap><b>Remove</b><td>&nbsp;<td>Select an entry in the box followed by "Remove" to remove it.
+<td><tr><td valign="top" nowrap><b>Log2</b><sup>3</sup><td>&nbsp;<td>If this is selected, then the box will contain "A:B", else it will contain
 "A/B".
 </table>
 <sup>1</sup>E/U/D will be displayed in the box beside the pair, depending on whether up-down, up, or down was selected.
@@ -65,7 +65,7 @@ pass the N-fold test whereas the "Any" only requires one of the pairs to pass th
 to change the direction in the box. 
 <br><sup>3</sup>When checked or unchecked, the entries in the box will change from "A:B" to "A/B" or vice versa.
 <p>To view the associated values, use the <b>Columns</b> tab on the left and select the same conditions and Log2 setting.
-<p>
+
 <h2>Differential Expression</h2>
 This filter will only be available if the person who built the database ran
 the function to add DE (Differential
@@ -73,8 +73,7 @@ expression) p-values to your database.
 
 <ol>
 <li>You must check the box next to <b>p-value</b> and enter a p-value.
-<li>You must select one or more DE values. Listed here will be the columns that were
-added with the runDE function.
+<li>You must select one or more DE columns.
 <li>Change <b>Every</b> to <b>Any</b> if you wish to see results where any of the selected DE values
 meets the threshold.
 </ol>
@@ -84,7 +83,7 @@ For example, if you select <b>Up</b>, then you will see only results for which t
 has a <i>positive</i> value.
 
 <h2>Best Hit</h2>
-Selecting <b>Annotated</b> shows a table of all annotated sequences, with any filters applied.
+Selecting <b>Annotated</b> shows a table of all annotated sequences, with any other filters applied.
 <p>All Filters below the <b>Search</b> label are applied to the selected <b>Best</b>, e.g. 
  <b>Best Bits</b>, <b>Best Anno</b> or <b>Best With GO</b>. (See Instructions for their definitions).
 <p>Filters requiring explanation:

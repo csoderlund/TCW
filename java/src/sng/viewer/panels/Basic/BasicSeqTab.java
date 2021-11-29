@@ -245,7 +245,7 @@ public class BasicSeqTab extends Tab {
 			if(!ascOrder) order = -1;
 			
 			switch(column) {
-			case 0: return 0; // CAS326 order * ((Integer) nRowNum).compareTo((Integer) obj.nRowNum);
+			case 0: return 0; // row# does not change; CAS326 quit sorting
 			case 1: return order * strSeqID.compareTo(obj.strSeqID);
 			case 2: return order * compareStrings(longestRead, obj.longestRead);
 			case 3: return order * compareStrings(strTCW, obj.strTCW);
@@ -346,8 +346,9 @@ public class BasicSeqTab extends Tab {
 					 theTablePanel.setStatus("Selected " + cnt + " from " + i + ". Still working...");
 			 }	
 			 appendStatus(String.format("Select %,d", cnt));
+			 if (cnt==0) theTablePanel.enableAllButtons(); // not automatically fired
 		 }
-		 catch (Exception e) {ErrorReport.prtReport(e, "Updating table");}
+		 catch (Exception e) {Out.PrtErr("Select " + summary);ErrorReport.prtReport(e, "Table select");}
 	}
 	public void tableSort (boolean sortAsc, int mode) {
 		try {// CAS314 Comparison method violates its general contract!
@@ -368,14 +369,15 @@ public class BasicSeqTab extends Tab {
 		theTablePanel.setStatus(theFilterStr);
 	}
 	
-	public void enableButtons(boolean b) {
+	public void enableAllButtons(boolean b) { // start of query (b=false), or fail query (b=true)
 		btnViewSeqs.setEnabled(b);
 		btnCopy.setEnabled(b);
 		btnDetail.setEnabled(b);
 		btnTable.setEnabled(b);
-		theTablePanel.enableButtons(b);
+		
+		theTablePanel.enableLowButtons(b);
 	}
-	public void updateTopButtons(int nSel, int nRow) {
+	public void enableTopButtons(int nSel, int nRow) {
 		btnViewSeqs.setEnabled(nSel>0);
 		btnCopy.setEnabled(nSel==1);
 		btnDetail.setEnabled(nSel==1);

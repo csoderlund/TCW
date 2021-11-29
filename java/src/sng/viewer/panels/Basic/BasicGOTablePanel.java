@@ -7,8 +7,6 @@ package sng.viewer.panels.Basic;
  */
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Font;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -105,7 +103,7 @@ public class BasicGOTablePanel {
 	
 	public BasicGOTablePanel(STCWFrame f, BasicGOFilterTab g) {
 		theMainFrame=f;
-		theGOQuery=g;
+		filterPanel=g;
 		projName = theMainFrame.getdbID();
 		
 		theResults = 	new Vector<Object []> ();
@@ -150,14 +148,14 @@ public class BasicGOTablePanel {
 					tablePanel.tableResizeColumns();
 					
 					setVisible(false);
-					theGOQuery.showMain();
+					filterPanel.showMain();
 				}
 			});
 			JButton discardButton = Static.createButton("Discard", true);
 			discardButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					setVisible(false);
-					theGOQuery.showMain();
+					filterPanel.showMain();
 				}
 			});
 	    	buttonPanel.add(keepButton);	buttonPanel.add(Box.createHorizontalStrut(10));
@@ -677,7 +675,7 @@ public class BasicGOTablePanel {
 			theTable.setDefaultRenderer( Object.class, new BorderLessTableCellRenderer() );
 			theTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 				public void valueChanged(ListSelectionEvent arg0) {
-					theGOQuery.updateAllButtons();
+					enableAllButtons();
 				}
 			});
 
@@ -690,73 +688,55 @@ public class BasicGOTablePanel {
 			tableScroll = new JScrollPane(theTable);
 			
 			add(tableScroll);
-			add(createTableButtonPanel());
+			add(createLowButtonPanel());
 		}
 		 /*********************
 		  *  BOTTOM BUTTONS - 
 		  ***/
-		 private JPanel createTableButtonPanel() {
+		 private JPanel createLowButtonPanel() {
 			lblHeader = new JLabel("Modify");
 			
-			btnDelete = Static.createButton("Delete selected", false);
-			btnDelete.setMargin(new Insets(0, 0, 0, 0));
-			btnDelete.setFont(new Font(btnDelete.getFont().getName(),Font.PLAIN,10));
+			btnDelete = Static.createButtonPlain("Delete selected", false);
 			btnDelete.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					deleteFromList();
 					tableRefresh();
 				}
 			});
-			
-			btnKeep = Static.createButton("Keep selected", false);
-			btnKeep.setMargin(new Insets(0, 0, 0, 0));
-			btnKeep.setFont(new Font(btnKeep.getFont().getName(),Font.PLAIN,10));
+			btnKeep = Static.createButtonPlain("Keep selected", false);
 			btnKeep.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					keepFromList();
 					tableRefresh();
 				}
 			});
-			
-			btnUnselectAll = Static.createButton("Unselect All", false);
-			btnUnselectAll.setMargin(new Insets(0, 0, 0, 0));
-			btnUnselectAll.setFont(new Font(btnUnselectAll.getFont().getName(),Font.PLAIN,10));
+			btnUnselectAll = Static.createButtonPlain("Unselect All", false);
 			btnUnselectAll.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					theTable.clearSelection();
 				}
 			});
-			
-			btnSelectAll = Static.createButton("Select All", false);
-			btnSelectAll.setMargin(new Insets(0, 0, 0, 0));
-			btnSelectAll.setFont(new Font(btnSelectAll.getFont().getName(),Font.PLAIN,10));
+			btnSelectAll = Static.createButtonPlain("Select All", false);
 			btnSelectAll.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					theTable.selectAll();
 				}
 			});
-			
-			btnQuery = Static.createButton("Select Query", false); // CAS336 new
-			btnQuery.setMargin(new Insets(0, 0, 0, 0));
-			btnQuery.setFont(new Font(btnSelectAll.getFont().getName(),Font.PLAIN,10));
+			btnQuery = Static.createButtonPlain("Select Query", false); // CAS336 new
 			btnQuery.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					theGOQuery.loadBuildStart(BasicGOLoadFromDB.SELECT);
+					theTable.clearSelection();
+					filterPanel.loadQueryStart(BasicGOLoadFromDB.SELECT);
 				}
-			});
-			
-			btnHighSelect = Static.createButton("Highlight", false); // CAS336 new
-			btnHighSelect.setMargin(new Insets(0, 0, 0, 0));
-			btnHighSelect.setFont(new Font(btnKeep.getFont().getName(),Font.PLAIN,10));
+			});	
+			btnHighSelect = Static.createButtonPlain("Highlight", false); // CAS336 new
 			btnHighSelect.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					highSelect();
 					theTable.clearSelection();
 				}
 			});
-			btnHighClear = Static.createButton("Clear", false); // CAS336 new
-			btnHighClear.setMargin(new Insets(0, 0, 0, 0));
-			btnHighClear.setFont(new Font(btnKeep.getFont().getName(),Font.PLAIN,10));
+			btnHighClear = Static.createButtonPlain("Clear", false); // CAS336 new
 			btnHighClear.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					highClear();
@@ -792,26 +772,8 @@ public class BasicGOTablePanel {
 			}
 			String msg = (cntOrig==0) ? "Highlight " + highSet.size() : "Highlight " + cntOrig + "+" + cntNew;
 			
-			theGOQuery.appendStatus(msg);
-			if (Globalx.debug) prtTab();
+			filterPanel.appendStatus(msg);
 		}
-		private void prtTab() {
-			for (int row=0; row<1; row++) {
-				String x="", y="", z="", s="";
-				for (int col=0; col<5; col++) {
-					if (x!="") x += "\t";	x += theTableModel.getValueAt(row, col).toString();
-					if (y!="") y += "\t";	y += theTable.getValueAt(row, col).toString();
-					if (z!="") z += "\t";	z += theResults.get(row)[col].toString();
-					if (s!="") s += "\t";	s += selectedCol[col];
-				}
-				Out.prt("");
-				Out.prt("table:  " + y);
-				Out.prt("model:  " + x);
-				Out.prt("result: " + z);
-				Out.prt("select: " + s);
-			}
-		}
-		
 		private void keepFromList() {
 			int numElements = theTable.getRowCount();
 			int [] selValues = theTable.getSelectedRows();		
@@ -842,7 +804,7 @@ public class BasicGOTablePanel {
 			}
 			
 			theTableModel.fireTableDataChanged();
-			theGOQuery.deleteFinish(getRowCount());
+			filterPanel.deleteFinish(getRowCount());
 		}
 		public void tableRefresh() {
 			SwingUtilities.invokeLater(
@@ -862,6 +824,8 @@ public class BasicGOTablePanel {
 						header.addMouseListener(colListener);
 						theTable.getTableHeader().setBackground(Color.WHITE);
 						theTable.setDefaultRenderer( Object.class, new BorderLessTableCellRenderer() );
+						
+						enableAllButtons();
 					}
 				}
 			);
@@ -1052,7 +1016,7 @@ public class BasicGOTablePanel {
 				cnt++;
 			}
 		}
-		theGOQuery.appendStatus(String.format("%s: %,d", msg, cnt));
+		filterPanel.appendStatus(String.format("%s: %,d", msg, cnt));
 	}
 	public void selectRelatedFromTable(int type) { // XXX CAS336
 		try {
@@ -1076,7 +1040,7 @@ public class BasicGOTablePanel {
 					cnt++;
 				}
 			}
-			theGOQuery.appendStatus("Select " + cnt + " for " + String.format(GO_FORMAT, gonum));
+			filterPanel.appendStatus("Select " + cnt + " for " + String.format(GO_FORMAT, gonum));
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Show Hits for Selected"); }
 	}
@@ -1267,7 +1231,7 @@ public class BasicGOTablePanel {
 			try {
 				PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(out, bAppend)));
 				headerLine = String.format("### %s %d GOs   %s ", 
-						tcwid, getRowCount(), theGOQuery.getBuildFilter());
+						tcwid, getRowCount(), filterPanel.getBuildFilter());
 				pw.println(headerLine);
 				
 				StringBuilder line = new StringBuilder();
@@ -1336,7 +1300,7 @@ public class BasicGOTablePanel {
 				int rowCnt = getRowCount();
 				Out.PrtSpCntMsg(1, rowCnt, "rows to process");
 				
-				String where = theGOQuery.makeNseqClause(false); 
+				String where = filterPanel.makeNseqClause(false); 
 				if (where!=null && where.length()>0) where = " and " + where;
 				HashMap <Integer, String> seqID = new HashMap <Integer, String> ();
 				DBConn mDB = theMainFrame.getNewDBC();
@@ -1375,7 +1339,7 @@ public class BasicGOTablePanel {
 				StringBuilder line = new StringBuilder();
 				String goFormat = Globalx.GO_FORMAT;
 				
-				headerLine = String.format("!!! %s %d Seqs   %s", tcwid, seqGO.size(), theGOQuery.getBuildFilter());
+				headerLine = String.format("!!! %s %d Seqs   %s", tcwid, seqGO.size(), filterPanel.getBuildFilter());
 				pw.println(headerLine);
 				
 				for (int id : seqGO.keySet()) {
@@ -1421,7 +1385,7 @@ public class BasicGOTablePanel {
 		 */
 		private boolean exportDomainMerge(boolean bInMerge, File Infh) {
 			try {
-				String de = theGOQuery.selectOneDE();
+				String de = filterPanel.selectOneDE();
 				String name = (de!=null) ? de : tcwid;
 				final ExportColumn et = new ExportColumn(name);
 				et.setVisible(true);
@@ -1444,7 +1408,7 @@ public class BasicGOTablePanel {
 							int nSeqs = theMainFrame.getMetaData().nContigs();
 							headerLine += String.format(
 									"### %-6s %6d  Column: %-6s  %s ", 
-									tcwid, nSeqs, colHead, theGOQuery.getBuildFilter());
+									tcwid, nSeqs, colHead, filterPanel.getBuildFilter());
 							
 							domainAddTable();
 							domainWriteFile(fh);
@@ -1692,7 +1656,16 @@ public class BasicGOTablePanel {
 		} catch(Exception e) {ErrorReport.reportError(e, "Error create column stats"); return "Error"; }
 	}
 
-	public void updateBottomButtons() { // CAS336 new - called on select
+	public void enableLowButtons(boolean b) { // called when query starts
+		btnDelete.setEnabled(b);
+		btnKeep.setEnabled(b);
+		btnUnselectAll.setEnabled(b);
+		btnHighSelect.setEnabled(b);
+		btnSelectAll.setEnabled(b);
+		btnQuery.setEnabled(b);
+		btnHighClear.setEnabled(b);
+	}
+	public void enableAllButtons() { // CAS336 new - called on select and tableRefresh
 		boolean b = (theTable.getSelectedRows().length>0);
 		btnDelete.setEnabled(b);
 		btnKeep.setEnabled(b);
@@ -1705,10 +1678,12 @@ public class BasicGOTablePanel {
 		btnQuery.setEnabled(b);
 		
 		btnHighClear.setEnabled(highSet.size()>0);
+		
+		filterPanel.enableAllButtons();
 	}
 	public void highClear() {
 		highSet.clear();
-		theGOQuery.appendStatus("");
+		filterPanel.appendStatus("");
 		theTableModel.fireTableDataChanged();
 	}
 	/*****************************************************/
@@ -1728,7 +1703,7 @@ public class BasicGOTablePanel {
 	private ColumnPanel columnPanel = null;
 	
 	private STCWFrame theMainFrame;
-	private BasicGOFilterTab theGOQuery;
+	private BasicGOFilterTab filterPanel;
 	private boolean isEvCcolor=true;
 	private String projName="";
 	

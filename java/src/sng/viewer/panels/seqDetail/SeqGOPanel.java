@@ -71,13 +71,13 @@ import util.file.FileWrite;
 public class SeqGOPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	
-	private static final String helpHTML =  Globals.helpDir + "DetailGoPanel.html";
-	private static final String helpGoHTML =  Globals.helpDir + "goHelp/index.html";
+	private static final String helpHTML =  	Globals.helpDir + "DetailGoPanel.html";
+	private static final String helpGoHTML =  	Globals.helpDir + "goHelp/index.html";
 	
 	static final private int SHOW_ASSIGNED_GO = SeqTopRowTab.SHOW_ASSIGNED_GO;
-	static final private int SHOW_ALL_GO = SeqTopRowTab.SHOW_ALL_GO;
-	static final private int SHOW_SEL_GO = SeqTopRowTab.SHOW_SEL_GO;
-	static final private int SHOW_SEL_ALL_GO = SeqTopRowTab.SHOW_SEL_ALL_GO;
+	static final private int SHOW_ALL_GO = 		SeqTopRowTab.SHOW_ALL_GO;
+	static final private int SHOW_SEL_GO = 		SeqTopRowTab.SHOW_SEL_GO;
+	static final private int SHOW_SEL_ALL_GO = 	SeqTopRowTab.SHOW_SEL_ALL_GO;
 	
 	private static final String GO_FORMAT = Globals.GO_FORMAT;
 	private static final int MAX_COL = 250;
@@ -117,36 +117,28 @@ public class SeqGOPanel extends JPanel {
 		
 		createTopSelected();
 		
-		toolPanel.add(new JLabel(" Selected GO: "));
-		toolPanel.add(Box.createHorizontalStrut(1));
+		toolPanel.add(new JLabel(" Selected GO: ")); 	toolPanel.add(Box.createHorizontalStrut(1));
 	
-		toolPanel.add(btnSelCopy);
-		toolPanel.add(Box.createHorizontalStrut(1));
+		toolPanel.add(btnSelCopy);						toolPanel.add(Box.createHorizontalStrut(1));
 	
-		toolPanel.add(btnSelShow);
-		toolPanel.add(Box.createHorizontalStrut(1));
+		toolPanel.add(btnSelShow);						toolPanel.add(Box.createHorizontalStrut(1));
 	
-		toolPanel.add(btnSelExport);
-		toolPanel.add(Box.createHorizontalStrut(10));
+		toolPanel.add(btnSelExport);					toolPanel.add(Box.createHorizontalStrut(10));
 		
 	/****** Table Show *****************/
-		toolPanel.add(new JLabel("  Table: "));
-		toolPanel.add(Box.createHorizontalStrut(1));
-		
 		createTopTable();
 		
-		toolPanel.add(btnTableShow);
-		toolPanel.add(Box.createHorizontalStrut(1));
+		toolPanel.add(new JLabel("  Table: "));			toolPanel.add(Box.createHorizontalStrut(1));
 		
-		toolPanel.add(btnTableExport);
-		toolPanel.add(Box.createHorizontalStrut(1));
+		toolPanel.add(btnTableShow);					toolPanel.add(Box.createHorizontalStrut(1));
+		
+		toolPanel.add(btnTableExport);					toolPanel.add(Box.createHorizontalStrut(1));
 
 	/****** Help ***/
 		JButton btnGoHelp = Static.createButton("GO Help", true, Globals.HELPCOLOR);
 		btnGoHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(getInstance(), 
-						"GO Help", helpGoHTML);
+				UserPrompt.displayHTMLResourceHelp(getInstance(), "GO Help", helpGoHTML);
 			}
 		});
 		toolPanel.add( Box.createHorizontalGlue() );
@@ -154,28 +146,21 @@ public class SeqGOPanel extends JPanel {
 		btnHelp.setBackground(Globals.HELPCOLOR);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(theParentFrame, 
-						"Sequence GO Help", helpHTML);
+				UserPrompt.displayHTMLResourceHelp(theParentFrame, "Sequence GO Help", helpHTML);
 			}
 		});
+		toolPanel.add(btnGoHelp);						toolPanel.add(Box.createHorizontalStrut(2));
+		toolPanel.add(btnHelp);							toolPanel.add(Box.createHorizontalStrut(5));
 		
-		toolPanel.add(btnGoHelp);
-		toolPanel.add(Box.createHorizontalStrut(2));
-		toolPanel.add(btnHelp);
-		toolPanel.add(Box.createHorizontalStrut(5));
-		
-		toolPanel.setBackground(Color.WHITE);
-		toolPanel.setMaximumSize( new Dimension ( Integer.MAX_VALUE, 
-				(int)toolPanel.getPreferredSize ().getHeight() ) );	
+		toolPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE,(int)toolPanel.getPreferredSize().getHeight()));	
 	}
 	/**************************************************************/
 	private void createTopSelected() {
 	// Selected copy
 		final JPopupMenu copypopup = new JPopupMenu();
-		
 		copypopup.add(new JMenuItem(new AbstractAction(Globalx.goID) {
-		private static final long serialVersionUID = 4692812516440639008L;
-		public void actionPerformed(ActionEvent e) {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
 				try {
 					Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
 					int [] selections = theGoTable.getSelectedRows();
@@ -219,7 +204,6 @@ public class SeqGOPanel extends JPanel {
 				showExportHitsSelected(GOtree.SEQ_ALL, GOtree.DO_POPUP, btnSelShow);
 			}
 		}));	
-		
 		selPopup.addSeparator();
 		
 		selPopup.add(new JMenuItem(new AbstractAction("GO - Neighborhood with relations") { // CAS318 put first
@@ -240,14 +224,12 @@ public class SeqGOPanel extends JPanel {
 				showExportGOtreeSelected(GOtree.DESCENDANTS, GOtree.DO_POPUP, btnSelShow);
 			}
 		}));	
-		
 		selPopup.add(new JMenuItem(new AbstractAction("GO - Ancestor path table") {
 			private static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent e) {
 				showExportGOtreeSelected(GOtree.PATHS, GOtree.DO_POPUP, btnSelShow);
 			}
 		}));	
-		
 		btnSelShow = Static.createButton("Show...", false);
 		btnSelShow.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
@@ -736,20 +718,18 @@ public class SeqGOPanel extends JPanel {
 			int gonum = theGoData.get(selections[0]).getID();
 			String desc = theGoData.get(selections[0]).getDesc();
 			
-			String msg="";
+			String msg="", go = String.format(GO_FORMAT, gonum); ;
 			Vector <String> lines = null;
 			
 			if (actionType==GOtree.SEQ_ASSIGNED) {
-				msg = seqDetailPanel.getSeqName() + " hits with assigned " 
-						+ String.format(GO_FORMAT, gonum) + " ";
+				msg = seqDetailPanel.getSeqName() + " hits with assigned " + go+ " ";
 				lines = showHitsAssignedForGO(gonum, msg + " - " + desc);
 			}
 			else if (actionType==GOtree.SEQ_ALL) {
-				msg = seqDetailPanel.getSeqName() + " hits with inherited " 
-						+ String.format(GO_FORMAT, gonum) + " ";
+				msg = seqDetailPanel.getSeqName() + " hits with inherited " + go + " ";
 				lines = showHitsInheritedForGO(gonum, msg + " - " + desc);
 			}
-			// CAS324 use GOtree for output
+			// CAS324 use GOtree.java for output
 			new GOtree(theParentFrame).computeSelected(lines, gonum, actionType, outType, show);
 		}
 		catch (Exception e) {
@@ -759,6 +739,7 @@ public class SeqGOPanel extends JPanel {
     }
    /******************************************************
     * Inherited hits - get ancestor GOs, then an
+    * CAS337 changed to just write hits without associated GOs since each hit can have many GOs
     */
     private Vector <String> showHitsInheritedForGO(int theGonum, String msg) {
     try {
@@ -767,10 +748,13 @@ public class SeqGOPanel extends JPanel {
 		lines.add("");
     	Vector <GOinfo> goDescList = new Vector <GOinfo> ();
     	DBConn mDB = theParentFrame.getNewDBC();
+    	
+    	// Find descendants
 		ResultSet rs = mDB.executeQuery("select child, g.descr, g.level " +
 				"from go_graph_path as p, go_info as g " +
 				"where p.child=g.gonum and child>0 and ancestor=" + theGonum + 
 				" order by g.level, p.child"); 
+		
 		while (rs.next()) {
 			int gonum2=rs.getInt(1);
 			if (theGonum== gonum2) continue;
@@ -789,53 +773,46 @@ public class SeqGOPanel extends JPanel {
 			mDB.close();
 			return lines;
 		}
-		Collections.sort(goDescList);
 		
+	// Find what Hits have GO descendants
 		Vector <String> sortHit = seqDetailPanel.getHitList(); // list of hits
 		Collections.sort(sortHit);
 		
-		int count=0, cntDup=0;
-		HashSet <String> found = new HashSet <String> ();
-		String line = String.format("%-16s  %6s  %-30s  (%3s)  %10s %5s %s", 
-				"Hit-ID","E-val", "Description",  Globalx.evCode, "Descendant", "Level", Globalx.goTerm);
-		lines.add(line);
+		Out.r("GO Descendents " + goDescList.size() + " Hits " + sortHit.size());
 		
-		for (GOinfo gt : goDescList) {
-			for (String hitID : sortHit) { 
-				if (hitID==null) continue; // CAS318 linux gets null hitID -
+		int count=0, cntHit=0;
+		String line = String.format("%-16s  %7s  %-30s", "Hit-ID","E-value", "Description");
+		lines.add(line);
+		for (String hitName : sortHit) { 
+			if (hitName==null) continue; // CAS318 linux gets null hitID -
+			
+			if (!seqDetailPanel.hasHitGO(hitName)) continue;
+
+			for (GOinfo gt : goDescList) {		
+				int hitID = seqDetailPanel.getHitID(hitName);
+				// want to know if Hit has GO - do not need g.EC
+				rs = mDB.executeQuery("SELECT g.EC FROM pja_uniprot_go as g " +
+						"WHERE g.gonum=" + gt.gonum + " and g.DUHID=" + hitID );
+				if (!rs.next()) continue; 
 				
-				rs = mDB.executeQuery("SELECT g.EC " +
-						"FROM pja_uniprot_go as g " +
-						"join pja_db_unique_hits as up on g.DUHID=up.DUHID " +
-						"WHERE g.gonum=" + gt.gonum + " and up.hitID='" + hitID + "'" );
-				if (!rs.next()) continue;
-				
-				if (found.contains(hitID)) { // the query shows that the hitID has multiple descendants
-					cntDup++;
-					continue;
-				}
-				found.add(hitID);
-				
-				String evc = rs.getString(1);
-				
-				String eval =  (new DecimalFormat("0E0")).format(seqDetailPanel.getHitEval(hitID));
-				String desc = seqDetailPanel.getHitDesc(hitID);
+				String eval =  (new DecimalFormat("0E0")).format(seqDetailPanel.getHitEval(hitName));
+				String desc = seqDetailPanel.getHitDesc(hitName);
 				if (desc.length()>30) desc = desc.substring(0,28) + "..";
 				
-				String goDesc = String.format(GO_FORMAT, gt.gonum);
-				
-				line = String.format("%-16s  %6s  %-30s  (%3s)  %10s  %3s  %s",
-						hitID, eval, desc, evc, goDesc, gt.level, gt.desc);
+				line = String.format("%-16s  %7s  %-30s", hitName, eval, desc);
 				lines.add(line);
 				count++;
+				break;
 			}
+			cntHit++;
+			if (cntHit%10==0) Out.rp("Processed hits ", cntHit, sortHit.size());
 		}
 		if (rs!=null) rs.close();
 		mDB.close(); 
+		Out.rClear(); 
 		
 		lines.add("");
-		lines.add("# Count: " + count);
-		if (cntDup>0) lines.add("# Hits with multiple descendant GOs: " + cntDup);
+		lines.add("# Count: " + count); // CAS337 stop writing #Dups - takes too long
 		return lines;	
     }
 	catch (Exception e) {
@@ -860,20 +837,25 @@ public class SeqGOPanel extends JPanel {
 			Collections.sort(sortHit);
 			
 			int count=0;
-			String line = String.format("%-16s  %6s  %-30s  %-20s  %-3s", 
-					"Hit-ID","E-val", "Description", "Species", Globalx.evCode);
+			String line = String.format("%-16s  %-3s  %7s  %-30s  %-20s ", 
+					"Hit-ID", Globalx.evCode, "E-value", "Description", "Species");
 			lines.add(line);
 			
 			// check all hits for sequence to see if they have this go
 			for (String hitID : sortHit) { 
 				if (hitID==null) continue; // CAS318 linux gets null hitID - 
+				if (!seqDetailPanel.hasHitGO(hitID)) continue; // CAS337
+				
 				String goStr="";
-				rs = mDB.executeQuery("select goList from pja_db_unique_hits where hitID='" 
-							+ hitID + "'");
+				rs = mDB.executeQuery("select goList from pja_db_unique_hits where hitID='" + hitID + "'");
 				if (rs.next()) goStr = rs.getString(1);
 				else {
 					lines.add("Error on " + hitID);
-					return lines;
+					continue;
+				}
+				if (goStr==null || goStr.contentEquals("")) {
+					lines.add("Error on " + hitID);
+					continue;
 				}
 				String [] goForHit = goStr.split(";");
 				
@@ -893,7 +875,7 @@ public class SeqGOPanel extends JPanel {
 					String species = seqDetailPanel.getHitSpecies(hitID);
 					if (species.length()>20) species = species.substring(0,18) + "..";
 					
-					line = String.format("%-16s  %6s  %-30s  %-20s  %3s", hitID, eval, desc, species, evid);
+					line = String.format("%-16s  %3s  %7s  %-30s  %-20s", hitID, evid, eval, desc, species);
 					lines.add(line);
 					count++;
 					break;
@@ -1303,26 +1285,11 @@ public class SeqGOPanel extends JPanel {
 		((DefaultTableCellRenderer) 
 				theGoTable.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(SwingConstants.LEFT);
 	}
-	
+    
     /********************************************************
 	 * private variables
 	 */
-    private JPanel goPanel = null;
-	private JTextArea textAreaTop = null;
-	private JScrollPane mainScrollPanel = null;
-	private JPanel toolPanel = null;
-	
-	private Vector<GoListData> theGoData = null;
-	private JTable theGoTable = null;
-	private GoTableModel theGoTableModel = null;
-	private JScrollPane scrollTablePane = null;
-	private String [][] rows = null;
-	
-	private STCWFrame theParentFrame = null;
-	private SeqDetailPanel seqDetailPanel = null;
-	
-	private JButton btnSelCopy, btnSelShow, btnSelExport, btnTableShow, btnTableExport;
-	
+   
 	// for main table
 	private Vector <GOinfo> goOrder = new Vector <GOinfo> ();
 	private HashMap <Integer, GOinfo> goInfoMap = new HashMap <Integer, GOinfo> ();
@@ -1358,6 +1325,23 @@ public class SeqGOPanel extends JPanel {
     		HashSet <Integer> goSet = new HashSet <Integer> (); 
     		public void add() {cnt++;}
     }
+    
+    private JPanel goPanel = null;
+   	private JTextArea textAreaTop = null;
+   	private JScrollPane mainScrollPanel = null;
+   	private JPanel toolPanel = null;
+   	
+   	private Vector<GoListData> theGoData = null;
+   	private JTable theGoTable = null;
+   	private GoTableModel theGoTableModel = null;
+   	private JScrollPane scrollTablePane = null;
+   	private String [][] rows = null;
+   	
+   	private STCWFrame theParentFrame = null;
+   	private SeqDetailPanel seqDetailPanel = null;
+   	
+   	private JButton btnSelCopy, btnSelShow, btnSelExport, btnTableShow, btnTableExport;
+   	
 	private String strHit = "";
 	private int cntHitsWithGOs=0;
 	private int displayType=0;

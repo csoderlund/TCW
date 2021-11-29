@@ -21,7 +21,6 @@ import java.util.Vector;
 import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -54,6 +53,7 @@ public class BasicSeqFilterPanel extends JPanel {
 	private final String topHTML = 		Globals.helpDir + "BasicTopSeq.html";
 	private final String queryHTML = 	Globals.helpDir + "BasicQuerySeq.html";
 	private final String lowerHTML =   	Globals.helpDir + "BasicModify.html"; 
+	private final String remarkHTML =   Globals.helpDir + "TCWremark.html"; 
 	
 	private static final String seqPref= "_seqPrefs"; // save to preferences; same columns for hit&seq
 	
@@ -61,8 +61,8 @@ public class BasicSeqFilterPanel extends JPanel {
 	
 	// Any change here will work in this file, but needs to be changed in BasicSeqQueryTab.SeqData class!!!
 	// These are columns from database and do not include row#
-	// Do not move Seq ID, as it is expected to be index 0
-	private static final String rowCol = "Row";
+	// Do not move Seq ID, it is index 1
+	private static final String rowCol = "Row"; // inserted at index 0
 	private static int idxLong = 1;
 	private static String [] STATIC_COLUMNS   = { "Seq ID", "Longest", "TCW Remark", "User Remark", "Counts",  "Best HitID"};
 	private static final Class<?> [] COLUMN_TYPES =   { String.class, String.class, String.class, String.class , Integer.class,  String.class}; 
@@ -74,7 +74,7 @@ public class BasicSeqFilterPanel extends JPanel {
 	* The top queries, and 4 selection panels 
 	*/
 	public BasicSeqFilterPanel(STCWFrame frame, BasicSeqTab parentTab) {
-		theParentTab = parentTab;
+		theSeqTab = parentTab;
 		theMainFrame = frame;
 		
 		bUseOrigName = theMainFrame.getMetaData().bUseOrigName(); // CAS311
@@ -86,10 +86,10 @@ public class BasicSeqFilterPanel extends JPanel {
 		setAlignmentX(Component.LEFT_ALIGNMENT);
 		setBackground(Color.white);
 		
-		queryPanel = new QueryPanel();
+		filterPanel = new FilterPanel();
 		columnPanel = new ColumnPanel();
 		
-		add(queryPanel);
+		add(filterPanel);
 		add(columnPanel);
 	}
 	private void initColumns() {
@@ -107,12 +107,12 @@ public class BasicSeqFilterPanel extends JPanel {
 		}	
 	}
 	private void hideMain() {
-		queryPanel.setVisible(false);
-		theParentTab.hideAll();
+		filterPanel.setVisible(false);
+		theSeqTab.hideAll();
 	}
 	private void showMain() {
-		queryPanel.setVisible(true);
-		theParentTab.showAll();
+		filterPanel.setVisible(true);
+		theSeqTab.showAll();
 	}
 	/****************************************
 	 * Called by BasicHitQueryTab
@@ -122,11 +122,11 @@ public class BasicSeqFilterPanel extends JPanel {
 	/***************************************************
 	 * The main filter panel
 	 */
-	private class QueryPanel extends JPanel {
+	private class FilterPanel extends JPanel {
 		private static final long serialVersionUID = -5987399873828589062L;
 		private static final int MAIN_PANEL_LABEL_WIDTH = 70; // labels on left
 
-		public QueryPanel() {
+		public FilterPanel() {
 			setBackground(BGCOLOR);
 			setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 			setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -241,7 +241,7 @@ public class BasicSeqFilterPanel extends JPanel {
 				public void actionPerformed(ActionEvent e) {
 					try {
 						UserPrompt.displayHTMLResourceHelp(theMainFrame, "Top Buttons", topHTML);
-					} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
+					} catch (Exception er) {ErrorReport.reportError(er, "Error showing buttons"); }
 				}
 			}));
 			popup.add(new JMenuItem(new AbstractAction("Search and Table") {
@@ -249,7 +249,7 @@ public class BasicSeqFilterPanel extends JPanel {
 				public void actionPerformed(ActionEvent e) {
 					try {
 						UserPrompt.displayHTMLResourceHelp(theMainFrame, "Search, Filter and Table", queryHTML);
-					} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
+					} catch (Exception er) {ErrorReport.reportError(er, "Error showing filter"); }
 				}
 			}));
 			popup.add(new JMenuItem(new AbstractAction("Modify Buttons") {
@@ -257,10 +257,18 @@ public class BasicSeqFilterPanel extends JPanel {
 				public void actionPerformed(ActionEvent e) {
 					try {
 						UserPrompt.displayHTMLResourceHelp(theMainFrame, "Modify Buttons", lowerHTML);
-					} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
+					} catch (Exception er) {ErrorReport.reportError(er, "Error showing modify"); }
 				}
 			}));
-			
+			popup.addSeparator();
+			popup.add(new JMenuItem(new AbstractAction("TCW Remark") {
+				private static final long serialVersionUID = 4692812516440639008L;
+				public void actionPerformed(ActionEvent e) {
+					try {
+						UserPrompt.displayHTMLResourceHelp(theMainFrame, "TCW Remark", remarkHTML);
+					} catch (Exception er) {ErrorReport.reportError(er, "Error showing remark"); }
+				}
+			}));
 			
 			btnHelp = Static.createButton("Help...", true, Globalx.HELPCOLOR);
 			btnHelp.addMouseListener(new MouseAdapter() {
@@ -348,7 +356,10 @@ public class BasicSeqFilterPanel extends JPanel {
 			if (x.equals("")) return "";
 			return Static.addQuote(x); 
 		}
-		
+		public void enableButtons(boolean b) {
+			btnBuildTable.setEnabled(b);
+			btnAddTable.setEnabled(b);
+		}
 		// Search:
 		public JRadioButton radSeqID = null, radLong=null;
 		public JRadioButton radTCW = null, radUser = null;
@@ -390,7 +401,7 @@ public class BasicSeqFilterPanel extends JPanel {
 					saveSelections();
 					showMain();
 					setVisible(false);
-					theParentTab.tableRefresh();
+					theSeqTab.tableRefresh();
 				}
 			});
 			btnCancel = Static.createButton("Discard", true);
@@ -538,28 +549,30 @@ public class BasicSeqFilterPanel extends JPanel {
 		Thread thread = new Thread(new Runnable() {
 		public void run() {
 			try {	
-				theParentTab.setStatus("Loading Sequences. Please Wait..");
-				theParentTab.enableButtons(false);
+				theSeqTab.setStatus("Loading Sequences. Please Wait..");
+				theSeqTab.enableAllButtons(false);
+				filterPanel.enableButtons(false);
 					
 				ArrayList<Object []> results = loadFromDatabase();
 				
 				// CAS327 changed rules to always use contains (was doing =, and if failed, do contain)
-				String statusSearch = queryPanel.getStatusStr();
+				String statusSearch = filterPanel.getStatusStr();
 				if (!statusSearch.equals("")) {
-					String op = (queryPanel.isLoadFile()) ? " = " : " contains ";
-					statusSearch = queryPanel.getStatusCol() + op + statusSearch;
+					String op = (filterPanel.isLoadFile()) ? " = " : " contains ";
+					statusSearch = filterPanel.getStatusCol() + op + statusSearch;
 					statusSearch = "Search: " + statusSearch;
 				}
 				
-				if (iType==0) 		theParentTab.tableBuild(results, statusSearch);
-				else if (iType==1)  theParentTab.tableAdd(results, statusSearch);
-				else 				theParentTab.tableSelect(results, statusSearch);
+				if (iType==0) 		theSeqTab.tableBuild(results, statusSearch);
+				else if (iType==1)  theSeqTab.tableAdd(results, statusSearch);
+				else 				theSeqTab.tableSelect(results, statusSearch);
 				
-				theParentTab.enableButtons(true); // CAS334 moved after Build/Add/Select
-				
-			} catch (Exception err) {
-				theParentTab.enableButtons(true);
-				theParentTab.setStatus("Error during query");
+				filterPanel.enableButtons(true); // tableRefresh updates the rest
+			} 
+			catch (Exception err) {
+				filterPanel.enableButtons(true);
+				theSeqTab.enableAllButtons(true);
+				theSeqTab.setStatus("Error during query");
 				JOptionPane.showMessageDialog(null, "Query failed due to unknown reasons ");
 				ErrorReport.reportError(err, "Internal error: building hit table");
 			}
@@ -572,11 +585,11 @@ public class BasicSeqFilterPanel extends JPanel {
         try {
 		    String strQuery = "SELECT " + mysqlCols + " FROM contig";
 		  	
-		    String searchStr = queryPanel.getSearchStr();
+		    String searchStr = filterPanel.getSearchStr();
 		    if (!searchStr.equals("")) {
-	        	strQuery += " where " + queryPanel.getSearchCol();
+	        	strQuery += " where " + filterPanel.getSearchCol();
 	        	
-	        	if (queryPanel.isLoadFile())  strQuery+= " IN ("  + searchStr + ")"; 
+	        	if (filterPanel.isLoadFile())  strQuery+= " IN ("  + searchStr + ")"; 
 	        	else 						  strQuery+= " LIKE " + searchStr; 
 	        }
 	        strQuery += " ORDER BY contig.contigid ASC"; 
@@ -609,12 +622,12 @@ public class BasicSeqFilterPanel extends JPanel {
 	private String mysqlCols="";
 	
 	// main panel
-	private QueryPanel queryPanel = null;
+	private FilterPanel filterPanel = null;
 	
 	// sub panels
 	private ColumnPanel columnPanel = null;
 
-	private BasicSeqTab theParentTab = null;
+	private BasicSeqTab theSeqTab = null;
 	private STCWFrame theMainFrame = null;
 	private JButton btnFindFile = null;
 	

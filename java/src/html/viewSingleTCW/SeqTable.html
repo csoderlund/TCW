@@ -21,8 +21,6 @@ See the <b>Columns</b> panel <b>Help</b> for a description of the columns.
 <p><b><i>Decimal Display</i></b>
 <ul>
 <li>The display of numbers and the color-coding of p-values can be changed in <b>Decimal Display</b>.
-<li>Though the change is immediate, the values stay rounded according to the initial display.
-<li><b>Refresh Columns</b> to apply the new rounding and/or color-coding. 
 <li>See <b>Decimal Display - Help</b> for an explanation.
 </ul>
 
@@ -51,40 +49,40 @@ to update the table.
 Shows statistics for all numeric columns in the table. 
 
 <p><u>Copy Table</u>: Copies the table to the clipboard, which can then be pasted into a file.
-<p><u>Export selected rows of columns:</u> tab-delimited file of the selected rows from the table.
-<p><u>Export table of columns:</u> tab-delimited file of the table.
-<p><u>Export sequences from table:</u> fasta file of sequences for the seqIDs in the table. 
-<p><u>Export translated ORFs from table:</u> fasta file of translated ORFs for the seqIDs in the table, 
+<p><u>Export selected rows of columns:</u> Tab-delimited file of the selected rows from the table.
+<p><u>Export table of columns:</u> Tab-delimited file of the table.
+<p><u>Export sequences from table:</u> FASTA file of sequences for the seqIDs in the table. 
+<p><u>Export translated ORFs from table:</u> FASTA file of translated ORFs for the seqIDs in the table, 
 where the translated ORFs correspond to the TCW selected frame and coordinates.
-<p><u>Export library replicates from table:</u> combined file of library replicates for the seqIDs in the table
-<p><u>Export hit sequences from table:</u> creates a file of the combined best hit sequences that are either:
+<p><u>Export library replicates from table:</u> File of count replicates for the seqIDs in the table.
+<p><u>Export hit sequences from table:</u> Creates a file of the combined best hit sequences that are either:
 <ol type='a'>
-<li>Best Bits: the best bit-score per sequence.
-<li>Best Anno: the best annotation per sequence.
+<li>Best Bits: the Best Bits hit per sequence.
+<li>Best Anno: the Best Anno hit per sequence.
 <li>Both: all Best Bits and Best Anno hits.
 </ol>
-<p><u>Export sequences with Best GO:</u> creates a text file of all sequences that have a Best GO. The output
-corresponds with the "WG GO" column, which is the best hit for the sequence with GOs assigned. 
+<p><u>Export sequences with Best GO:</u> Creates a text file of all sequences that have a Best GO. The output
+corresponds with the <u>WG GO</u> column, which is the best hit for the sequence with GOs assigned. 
 <br>&nbsp;
 
-<p><u>Export GOs from table...</u> list GOs associated with the seqIDs in the table along with the count (#Seqs)
-of the number of sequences that have the GO (assigned or inherited). The output columns
-are: GO ID, #Seqs, Level, Domain, Description and all p-values.
+<p><u>Export GOs from table...</u> Creates a text file of all assigned and inherited GOs 
+associated with the seqIDs in the table. The output columns
+are: GO ID, #Seqs (with the GO), Level, Ont (BP, CC, MG), Description and all p-values.
 <ol>
 <li>GO Level: 
 <ol type='a'>
-<li>Level 1 is the three domains. Level 2 are the GO IDs directly beneath
-a domain, etc (see Basic GO Annotation 'GO Help' for more explanation). 
+<li>Level 1 is the three ontologies. Level 2 are the GO IDs directly beneath
+the ontolology, etc (see Basic GO Annotation 'GO Help' for more explanation). 
 <li>If you leave this blank, it will output all GOs. 
 <li>If you just want a couple of levels, e.g. 2 and 3, first export level 2, then export level 3
 to the same file and use the append option (there will be a pop-up asking whether you want to append).
 </ol>
-<li>Any domain: This toggles through the three main domains. If you select one, it will only 
-export the GOs in that domain.
+<li>Any Ontology: This toggles through the three ontologies. If you select one, it will only 
+export the GOs in that ontology.
 <li>E-value: If you leave this blank, it will ignore the E-value. Otherwise,
 this applies to each sequence-hit E-value where the hit has the GO. The #Seqs
 column is the number of sequences that have at least one hit with the GO and its E-value&lt; the value.
 </ol>
-See <b>Basic GO</b> for more Export options.
+See <b>Basic GO Annotation</b> for more export options.
 </body>
 </html>

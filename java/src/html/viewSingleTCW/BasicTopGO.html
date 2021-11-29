@@ -9,15 +9,17 @@
 
 <h2>Selected:</h2>
 <ul>
-<li><b>Seq Table</b> view the sequences in the main table for the selected GO.
+<li><b>Seq Table</b> view the sequences in the main table for the selected GOs.
 <br>&nbsp;
-<li><b>Copy...</b> to the clipboard, which can be pasted elsewhere
+<li><b>Copy...</b> 
 <ol type='a'>
-<li><u>Go ID</u>&nbsp;&nbsp;from corresponding column
-<li><u>GO Name</u>&nbsp;&nbsp;from corresponding column
+<li><u>GO ID</u>&nbsp;&nbsp;select a row to copy the GO ID to the clipboard, which can be pasted elsewhere.
+<li><u>GO Name</u>&nbsp;&nbsp;select a row to copy the GO Name to the clipboard, which can be pasted elsewhere.
 </ol>
 
-<li><b>Show...</b> 
+<li><b>Show...</b> For all relations (parent, ancestor, child, descendent), they are only in the database
+if the GO has a direct assignment to a hit. Hence, for all the following, the relation is ONLY shown if its
+in the database.
 
 <ol type='a'>
 <li><u>Hits - assigned</u>&nbsp;&nbsp; 
@@ -26,11 +28,7 @@ All proteins in the database that have this GO directly assigned to them.
 
 <li><u>Hits - inherited</u>&nbsp;&nbsp; 
 All proteins in the database that inherited the GO. 
-Each hit is associated with one descendant  GO; a hit may have multiple descendant 
-GOs to the selected one (a note at the bottom of the
-popup will say "Multiple Descendant GO Hits:" followed by the number). 
-NOTE: This query can be slow if there are many descendant  GOs that have many assigned
-proteins; some have &gt; 1000.
+NOTE: This query can be slow and the list long.
 <br>&nbsp;
 
 <li><u>Sequences - has hit with GO</u>&nbsp;&nbsp;
@@ -45,13 +43,10 @@ is shown.
 it only shows the sequence if the 'Best Bits' or 'Best Anno' has the GO.
 This display shows all sequences with any hit that has the GO.
 </ul>
-<br>&nbsp;
 
 <li><u>GO - Neighborhood with relations</u>&nbsp;&nbsp;
 The immediate parents and children of the GO ID. 
 The relation of 'is_a' or 'part_of' is shown for this option.
-NOTE: same note as for descendants. Starting with sTCW v3.1.8, there is also a relation 'replaced_by'
-and 'replaces'.
 <br>&nbsp;
 
 <li><u>GO - Ancestors</u>&nbsp;&nbsp;  
@@ -60,8 +55,7 @@ All ancestors of the GO ID sorted by level.
 
 <li><u>GO - Descendants</u>&nbsp;&nbsp; 
 All descendants of the GO ID sorted by level. 
-NOTE: if a descendant  GO does not have any assigned or inherited hits, it is not in the
-database so is not shown. 
+ 
 <br>&nbsp;
 <li><u>GO - Ancestor path table</u>&nbsp;&nbsp;  
 The same GOs as in the Ancestor List, but shows the paths in table form. If all paths have the 
@@ -70,17 +64,17 @@ NOTE: Occasionally, this query may be slow when there are many paths for the GO;
 <br>&nbsp;
 <li><u>GO - Related in table</u>&nbsp;&nbsp; 
 A list of the GOs ancestors and descendants will be listed IF they are also in the 
-table. The GOs will be listed in the same order as found in the table.
+displayed table. The GOs will be listed in the same order as found in the table.
 <br>&nbsp;
 <br>&nbsp;
 <li><u>GO - Selected related in table</u>&nbsp;&nbsp; 
 Same as the above "Related in table", but the rows are selected.
 <br>&nbsp;
 <li><u>GO - Selected ancestors in table</u>&nbsp;&nbsp; 
-Select the GO terms ancestors in the table.
+Select a GO, and the GO's ancestors will also be selected in the table.
 <br>&nbsp;
 <li><u>GO - Selected related in table</u>&nbsp;&nbsp; 
-Select the GO terms descendents in the table.
+Select a GO, and the GO's descendents will also be selected in the table.
 </ol>
 <br>&nbsp;
 <li><b>Export...</b>&nbsp;&nbsp; The exact same options as a-to-h above, but the results are written
@@ -95,7 +89,8 @@ to file; this is useful for loading in the <b>Basic Hit</b> panel to view.
 <ol type='a'>
 <li><u>Show Columns Stats</u>&nbsp;&nbsp;A popup window of statistics for the numeric columns.
 <br>&nbsp;
-<li><u>Each GO parents with relations</u>&nbsp;&nbsp;For each GO in table, print its parents and relations (e.g. <tt>is_a</tt>)
+<li><u>Each GO parents with relations</u>&nbsp;&nbsp;For each GO in table, print its parents and relations 
+(i.e. <tt>is_a</tt> or <tt>part_of</tt>)
 <br>&nbsp;
 <li><u>Set of ancestors</u>&nbsp;&nbsp;The combined list of ancestors for all GOs in the table, sorted by level.
 <br>&nbsp;
@@ -112,8 +107,11 @@ to compute and be large.
 <li><b>Export...</b>
 <ol type='a'>
 <li><u>Table columns</u>&nbsp;&nbsp;A tab-delimited file of the contents of the table.
-<br>If you just select two columns, (GO ID, #Seqs) or (GO ID, P-value), 
+<br>If you just select two columns, (GO ID, #Seqs) or (GO ID, p-value), 
 the exported file can be used as input to REVIGO (http://revigo.irb.hr). 
+<br>&nbsp;
+<li><u>Table columns with -log10(p-value)</u>&nbsp;&nbsp;A tab-delimited file of the contents of the table,
+where any p-values in the table will be written as -log10(p-value), which is good for plotting in Excel.
 <br>&nbsp;
 <li><u>GO IDs</u>&nbsp;&nbsp;A single column file of only the GO IDs from the table.
 <br>&nbsp;

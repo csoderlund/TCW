@@ -1,36 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Sequence GOs</title>
+<title>Seq Detail GOs</title>
 </head>
 <body style="padding:20px;width:650px;font-family:Times">
 
-<h1>Sequence GOs</h1>
+<h1>Seq Detail GOs</h1>
 See <b>GO Help</b> for explanation of terms.
 <p>First four columns of table:
 <ul>
 <li><u>GO ID</u>: The GO identifier.
 <li><u>GO Name</u>: The term name from the GO database for the GO ID.
-<li><u>GO</u>: Abbreviation of the ontology (top level): BP is biological_process, CC is cellular_component, MF is molecular_function.
+<li><u>Ont</u>: Abbreviation of the ontology (top level): BP is biological_process, CC is cellular_component, MF is molecular_function.
 <li><u>Level</u>: A GO ID can be at multiple levels in the tree. This is its maximum level.
 </ul>
 The remaining columns depends on the <b>GO...</b> pull-down view:
 <ul>
 <li><u>Assigned GOs for all hits</u> 
 <ul>
-<li><u>#:EvC</u>: Each hit-GO association has a EvC (evidence code). Each hit may have more
-than one assigned GO. This list provides the number of hits with a given EvC for the GO.
+<li><u>#:EvC</u>: Each hit-GO association has a EvC (evidence code). 
+This list provides the number of hits with a given EvC for the GO.
 <li><u>Best Hit ID</u> and <u>E-value</u>: Of all the hits for the sequence with the GO,
-this is the Hit ID with its best E-value. NOTE: The GO may be assigned to a hit for
-the sequence,  but not necessarily to the Best Hit ID.
+this is the Hit ID with its best E-value. 
 </ul>
 
 <li><u>All GOs for all hits</u> 
 <ul>
 <li><u>Assigned</u>: If yes, then there is at least one hit-GO pair that is assigned.
 <li><u>Best Hit ID</u> and <u>E-value</u>: Of all the hits for the sequence with the GO,
-this is the Hit ID with its best E-value. NOTE: The GO may be assigned to a hit for
-the sequence,  but not necessarily to the Best Hit ID.
+this is the Hit ID with its best E-value. NOTE: The <b>Show...</b> option will show all Hit ID/E-values for a selected GO.
 </ul>
 
 <li><u>Assigned GOs for selected hit</u>  
@@ -53,13 +51,12 @@ counterparts on <b>Basic GO</b>.
 	<ul>
 	<li><u>Seq Hits - assigned</u>&nbsp;&nbsp;Hits to the current sequence that have the GO assigned.
 	<br>&nbsp;
-	<li><u>Seq Hits - inherited</u>&nbsp;&nbsp;Hits to the current sequence that have the GO assigned or inherited.
+	<li><u>Seq Hits - inherited</u>&nbsp;&nbsp;Hits to the current sequence that have the GO inherited. <i>This can
+	take a few minutes for a high level GO</i>.
 	<br>&nbsp;
-	<li><u>GO - Neighborhood with relations</u> 
-The immediate parents and children of the GO ID. 
+	<li><u>GO - Neighborhood with relations</u> The immediate parents and children of the GO ID. 
 The relation of 'is_a' or 'part_of' is shown for this option.
-NOTE: same note as for descendants. Starting with sTCW v3.1.8, there is also a relation 'replaced_by'
-and 'replaces'.
+NOTE: same note as for descendants. 
 <br>&nbsp;
 
 	<li><u>GO - Ancestors</u>&nbsp;&nbsp;  All ancestors of the GO ID sorted by level. 
@@ -73,10 +70,6 @@ database so is not shown.
 The same GOs as in the Ancestor List, but shows the paths in table form. If all paths have the 
 same GOs at the top and bottom of the graph, they are only shown once and the row will be gray.
 NOTE: Occasionally, this query may be slow when there are many paths for the GO; some GOs have over 1000 paths.
-<br>&nbsp;
-	<li><u>GO - Related in table</u>&nbsp;&nbsp; 
-A list of the GOs ancestors and descendants will be listed IF they are also in the 
-table. The GOs will be listed in the same order as found in the table.
 </ul>
 
 <li><b>Export...</b>&nbsp;&nbsp; The exact same options as above, but the results are written
@@ -107,6 +100,7 @@ that hit the sequence. This shows how they group. For example:
 The first set only has one GO, and 25 hits were assigned the GO. The second
 set has 5 GOs, but only one hit was assigned the 5 GOs.
 </ul>
+
 <li><b>Export...</b>
 <ul>
 <li><u>Table columns</u>&nbsp;&nbsp;The table is written to file in a tab-delimited format.

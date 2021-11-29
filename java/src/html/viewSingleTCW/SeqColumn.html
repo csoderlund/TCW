@@ -11,45 +11,45 @@
 
 
 <h1>Sequence Columns</h1>
-Use this interface to select columns for the results tables from Sequence queries. Note that
+Use this interface to select columns for the <b>Seq Table</b>. Note that
 sections are collapsible; to expand a section and see the filter options,
 click on the "+". There are descriptions of each beside the column name in each
-of these interfaces, so this Help provides any additional information.
+of these interfaces, so this <b>Help</b> provides any additional information.
 
 <p>The columns available depend on the attributes of the database, e.g. whether
 its TCW-assembled, differential expression was computed, annotation was performed.
 
 <p>Both <b>All Seqs</b> and <b>Filters</b> use these column setting for the
  respective table. To change the columns in a given
- table, display it and then use "Refresh Columns" to update the columns.
+ table, change them on this panel, display the table and then use <b>Refresh Columns</b>.
  
 <h2>General</h2>
 General sequence attributes: ID, length, total reads, etc. The columns available
 depend on the attributes of the database, e.g. if it is an assembled set, it
 will have the column <u>#buried</u>. 
-<br><br>In the <b>User Remark</b> column has user-supplied information added with
-<tt>runSingleTCW</tt>. The <b>TCW Remark</b> is information added by the TCW <tt>ORF finder</tt> during annotation
-(See <b>Basic Sequence Help</b> for the TCW Remark Legend).
+<br><br>The <u>User Remark</u> column has user-supplied information added with
+<tt>runSingleTCW</tt>. The <u>TCW Remark</u> has information added by the TCW <tt>ORF finder</tt> during annotation
+(See <b>Basic Sequence Help</b> for the <u>TCW Remark</u> Legend).
 
 
 <h2>Counts and TPM (or RPKM)</h2>
 The raw count and normalized TPM is available for each "Condition",
 i.e. the combined replicates of the experimental conditions (tissue, treatment, etc).
-NOTE: If RPKM was computed instead of TPM, then the Column page will say RPKM instead of TPM.
+NOTE: If RPKM was computed instead of TPM, then the <b>Column</b> panel will say RPKM instead of TPM.
 
 <h2>N Fold and R Statistic</h2>
-N Fold - Select pairs of conditions to show their fold-change difference as a column. 
+N Fold - Select pairs of conditions to show their fold-change as a column. 
 The fold change is calculated with TPM values using either of the following:
 <table>
 <tr><td><i>Log2</i>&nbsp;<td><td><i>Compute<sup>1</sup></i>&nbsp;<td><td><i>Display</i>
-<tr><td>Check<td>&nbsp;<td>&nbsp;Log2(A/B)<td>&nbsp;<td>&nbsp;lib1/lib2
-<tr><td>Un-Check<td>&nbsp;<td>&nbsp;A/B if A&gt;=B; -(B/A) if A&lt;B<td>&nbsp;<td>&nbsp;lib1:lib2
+<tr><td>Check<td>&nbsp;<td>&nbsp;Log2(A/B)<td>&nbsp;<td>&nbsp;lib1:lib2
+<tr><td>Un-Check<td>&nbsp;<td>&nbsp;A/B if A&gt;=B; -(B/A) if A&lt;B<td>&nbsp;<td>&nbsp;lib1/lib2
 </table>
 <sup>1</sup>0.1 is added to both A and B before Log2FC or FC is computed in order to avoid problems with zero.
 
 <p>Check or un-checking <ttc>Log2</tt> will immediately change all selected pairs by replacing the "/" with ":" or vice versa.
 However, existing tables must be refreshed to change the column. 
-<p>The <ttc>Filter</ttc> has a <ttc>N-fold<ttc> filter,
+<p>The <b>Filter</b> has a <b>N-fold</b> filter,
 which is separate from the column, e.g. the column can be Log2FC but the filter can be using FC, so make sure
 both the filter and column contain either ":" for Log2FC or "/" for FC.
 <p>
@@ -72,9 +72,9 @@ file (i.e. produced by <tt>BLAST</tt> or <tt>DIAMOND</tt>). The last set (if pre
 are from the <tt>UniProt .dat file</tt>.
 <br>&nbsp;
 <table class=tablex>
-<tr><td valign=top nowrap><u>Best Bitscore</u> <td>The hit with the best bit-score. See Instructions for more information.
-<tr><td valign=top nowrap><u>Best Annotation</u> <td>The hit with the best annotation. See Instructions for more information.
-<tr><td valign=top nowrap><u>Best with GO</u><td> (if the database has GO annotation)
+<tr><td valign=top nowrap>BS - Best Bitscore <td>The hit with the best bit-score. See Instructions for more information.
+<tr><td valign=top nowrap>AN - Best Annotation <td>The hit with the best annotation. See Instructions for more information.
+<tr><td valign=top nowrap>WG - Best with GO<td> (if the database has GO annotation)
 The best hit with at least one assigned GO ID.
 </table>
 
@@ -85,7 +85,6 @@ Note that SNPs are only available if the  assembly was performed within TCW.
 <P>ORFs is the best "Open Reading Frame"". The best ORF is determined using 
 the best hit, longest open reading frame, and 5th-order Markov score. 
 For details, see the online <a href="http://www.agcol.arizona.edu/software/tcw/doc/stcw/ORF.html">ORF Finder</a>.
-The ORF finder add "TCW Remarks", which are described in the <b>Basic Sequence Help</b>.
 <p>
 <hr>
 <p>

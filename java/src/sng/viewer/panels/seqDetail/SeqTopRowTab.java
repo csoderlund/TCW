@@ -39,6 +39,7 @@ import sng.viewer.panels.align.PairViewPanel;
 import sng.viewer.panels.align.ContigViewPanel;
 import sng.viewer.panels.seqTable.SeqTableTab;
 import util.methods.Static;
+import util.methods.Out;
 import util.ui.UserPrompt;
 import util.database.DBConn;
 
@@ -82,19 +83,14 @@ public class SeqTopRowTab extends Tab {
 		rbDetails = Static.createButton("Details", true, funColor); 
 		rbDetails.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				setInActive();
-				rbDetails.setBackground(activeColor);
-				rbDetails.setSelected(true);
+				setInActive(rbDetails);
 				opDetails();
 			}
 		});
-		
 		rbFrame = Static.createButton("Frame", true, funColor); 
 		rbFrame.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				setInActive();
-				rbFrame.setBackground(activeColor);
-				rbFrame.setSelected(true);
+				setInActive(rbFrame);
 				opFrame();
 			}
 		});
@@ -102,18 +98,14 @@ public class SeqTopRowTab extends Tab {
 		rbContig = Static.createButton("Contig", true, funColor); 
 		rbContig.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				setInActive();
-				rbContig.setBackground(activeColor);
-				rbContig.setSelected(true);
+				setInActive(rbContig);
 				opContig();
 			}
 		});
 		rbSNP = Static.createButton("SNPs", true, funColor); 
 		rbSNP.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				setInActive();
-				rbSNP.setBackground(activeColor);
-				rbSNP.setSelected(true);
+				setInActive(rbSNP);
 				opSNPs();
 			}
 		});
@@ -122,35 +114,36 @@ public class SeqTopRowTab extends Tab {
 		gopopup.add(new JMenuItem(new AbstractAction("Assigned GOs for all hits") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
+				setInActive(rbGO);
 				opGO(SHOW_ASSIGNED_GO);
 			}
 		}));
 		gopopup.add(new JMenuItem(new AbstractAction("All GOs for all hits") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
+				setInActive(rbGO);
 				opGO(SHOW_ALL_GO);
 			}
 		}));
 		gopopup.add(new JMenuItem(new AbstractAction("Assigned GOs for selected hit") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
+				setInActive(rbGO);
 				opGO(SHOW_SEL_GO);
 			}
 		}));
 		gopopup.add(new JMenuItem(new AbstractAction("All GOs for selected hit") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
+				setInActive(rbGO);
 				opGO(SHOW_SEL_ALL_GO);
 			}
 		}));
 		
 		rbGO = Static.createButton("GO...", true, funColor); 
 		rbGO.addMouseListener(new MouseAdapter() {
-            public void mousePressed(MouseEvent e) {
-        			setInActive();
-        			rbGO.setBackground(activeColor);
-        			rbGO.setSelected(true);
-        			gopopup.show(e.getComponent(), e.getX(), e.getY());
+            public void mousePressed(MouseEvent e) { // CAS337 moved setInActive to Items	
+        		gopopup.show(e.getComponent(), e.getX(), e.getY());
             }
         });
 		
@@ -159,13 +152,14 @@ public class SeqTopRowTab extends Tab {
 		alignpopup.add(new JMenuItem(new AbstractAction("Best Hits") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
+				setInActive(rbAlign);
 				opAlign(ALIGN_BEST_SEQUENCES);
 			}
 		}));
-		
 		alignpopup.add(new JMenuItem(new AbstractAction("DB hits: Selected hit(s)") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
+				setInActive(rbAlign);
 				opAlign(ALIGN_SELECTED);
 			}
 		}));
@@ -173,19 +167,16 @@ public class SeqTopRowTab extends Tab {
 			alignpopup.add(new JMenuItem(new AbstractAction("DB hits: Selected hit(s) in all frames") {
 				private static final long serialVersionUID = 4692812516440639008L;
 				public void actionPerformed(ActionEvent e) {
+					setInActive(rbAlign);
 					opAlign(ALIGN_SELECTED_ALL);
 				}
 			}));
 		}
-		
 		rbAlign = Static.createButton("Align Hits...", true, funColor);
 		rbAlign.setBackground(Globals.FUNCTIONCOLOR);
 		rbAlign.addMouseListener(new MouseAdapter() {
-            public void mousePressed(MouseEvent e) {      		
-        			setInActive();
-        			rbAlign.setBackground(activeColor);
-        			rbAlign.setSelected(true);
-        			alignpopup.show(e.getComponent(), e.getX(), e.getY());
+            public void mousePressed(MouseEvent e) {// CAS337 moved setInActive to Items      		
+        		alignpopup.show(e.getComponent(), e.getX(), e.getY());
             }
         });
 		
@@ -196,7 +187,7 @@ public class SeqTopRowTab extends Tab {
 				if (getParentTab() instanceof SeqTableTab) {
 					addPrevNextTab( ((SeqTableTab)getParentTab()).getPrevRowNum( nRecordNum ) );
 				}
-				else System.err.println("<< Prev TCW error"); 
+				else Out.PrtErr("<< Prev TCW error"); 
 			}
 		});
 
@@ -209,11 +200,10 @@ public class SeqTopRowTab extends Tab {
 				if (getParentTab() instanceof SeqTableTab) { 
 					addPrevNextTab( ((SeqTableTab) getParentTab()).getNextRowNum( nRecordNum ) );
 				}
-				else System.err.println("Next >> TCW error"); 
+				else Out.PrtErr("Next >> TCW error"); 
 			}
 		});
-		if (recordNum < 0)
-		{
+		if (recordNum < 0){
 			btnPrev.setEnabled(false);
 			btnNext.setEnabled(false);
 		}
@@ -226,8 +216,7 @@ public class SeqTopRowTab extends Tab {
 			}
 		});
 		
-		// Top panel with buttons and drop-down		
-		setInActive(); 
+		// Top panel with buttons and drop-down		 
 		JPanel topPanel = new JPanel ( );
 		topPanel.setLayout( new BoxLayout ( topPanel, BoxLayout.X_AXIS ) );
 		topPanel.add( Box.createHorizontalStrut(5) );
@@ -254,7 +243,7 @@ public class SeqTopRowTab extends Tab {
 			topPanel.add( rbAlign ); 
 			
 			topPanel.add( Box.createHorizontalGlue() );
-			//topPanel.add( Box.createHorizontalStrut(5) );
+			
 			topPanel.add( btnPrev ); 	
 			topPanel.add( Box.createHorizontalStrut(1) );
 			topPanel.add( btnNext ); 	
@@ -275,13 +264,12 @@ public class SeqTopRowTab extends Tab {
 		add ( Box.createVerticalStrut(5) );
 		add ( bottomPanel );	
 		
-		rbDetails.setBackground(activeColor);
-		rbDetails.setSelected(true);
+		setInActive(rbDetails);
 		
 		if (parent==capTab) opFirstCAP3(listData);
 		else opFirst(); 
 	}
-	private void setInActive() {
+	private void setInActive(JButton button) {
 		// this works on mac but not linux
 		rbDetails.setSelected(false);
 		rbFrame.setSelected(false);
@@ -297,6 +285,9 @@ public class SeqTopRowTab extends Tab {
 		rbAlign.setBackground(funColor);
 		rbContig.setBackground(funColor);
 		rbSNP.setBackground(funColor);
+		
+		button.setBackground(activeColor); // CAS337 put here instead of on every button
+		button.setSelected(true);
 	}
 	private void opFirstCAP3(MultiCtgData listData) {
 		ctgFullData = listData; 

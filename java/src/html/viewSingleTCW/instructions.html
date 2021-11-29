@@ -64,7 +64,7 @@ NOTE: The bit-score takes precedence over the e-value since the e-value takes in
 the bit-score will be the same regardless of the size of the database.
 <p>Special Case - <i>Best Anno (AN/ANNO)</i>:  The database may having been built with the "SwissProt precedence" option set, in which
 case, this will be stated at the end of the <b>Overview</b> panel. When this is selected, a SwissProt hit will be selected
-if its bit-score is sufficiently close the non-SP best annotation.
+if its bit-score is sufficiently close to the non-SP best annotation.
 
 <hr>
 <p>Detailed Help is provided on each page; the following provides an overview
@@ -73,14 +73,14 @@ of what is available.
 <h2>General</h2>
 <b>&gt;&gt;Instructions</b> - this page
 <p><b>&gt;&gt;Overview</b> - Summary of everything in database.
-<p><b>&gt;&gt;Decimal Display</b> - Specify how to display decimal numbers and highlight p-values.
+<p><b>&gt;&gt;Decimal Display</b> - Specify how to display decimal numbers and highlight p-values. This
+applies to all table displays.
 <p><b>&gt;&gt;Find hits</b> - Search a sequence against the sequences in the database or a user
-selected protein database. This requires the <tt>Blast</tt> and optional <tt>Diamond</tt> paths to 
-be in the HOSTS.cfg file. 
+selected protein database. 
 <p><b>&gt;&gt;Results</b> - List all sequence results corresponding to labels on the left.
 <ul>
-<li>All queries that have been performed will be listed in a table. 
-<li>Selecting a label will redisplay it on the right, or select it from this Results table.
+<li>All queries that have been performed will be listed in the Results table. 
+<li>Selecting a label will redisplay it on the right, or select it from the Results table.
 <li>To remove a label, select the 'x' beside it on the left panel, or remove it from the Results
 table.
 </ul>
@@ -88,15 +88,16 @@ table.
 
 <b>&gt;&gt;All Seqs</b> - A table of all sequences in the database. 
 <ul>
-<li>To view a sequence from the table, select the sequence and then "View Selected Sequence".
-<li>Change the columns in the table using "Columns" under "Sequence.
+<li>To view a sequence from the table, select the sequence and then "Seq Detail".
+<li>Change the columns in the table using "Columns" under "All Seqs.
 </ul>
 
 <b>&gt;&gt;Columns</b> - Menu of columns for the sequence table.
 <ul>
 <li>Select or deselect columns.
-<li>The columns are not immediately changed for existing tables. Either select "Refresh All Existing Tables"
-or redisplay the table (listed on the left panel) and select "Refresh columns".
+<li>The columns are not immediately changed for existing tables. 
+Either select "Refresh All Existing Tables"
+or redisplay a table (click its label on the left panel) and select "Refresh columns".
 </ul>
 
 <b>&gt;&gt;Filters</b> - A menu with specific filters for sequences.
@@ -111,30 +112,27 @@ the columns, come back to the table (it will be listed on the left), and click "
 </ul>
 
 <h2>Basic Filters</h2>
-<b>&gt;&gt;Sequences</b> - Search on Seq ID, TCW Remarks or User Remarks.  
+<b>&gt;&gt;Sequences</b> - Search on Seq ID, Orig ID, TCW Remarks or User Remarks.  
 <ul>
-<li> 
-This builds a table from the results of the selected filters.
-<li>The resulting sequences can be shown as "Seq Table". 
-<li>Columns can be changed with "Select Columns". 
-
+<li> This builds a table from the results of the selected filters.
+<li>Columns can be changed with the "Columns" button on this panel. 
 </ul>
 
-<b>&gt;&gt;AnnoDB Hits</b> - Search on the Hit Id (e.g. UniProt ID) or description. 
+<b>&gt;&gt;AnnoDB Hits</b> - Search on the Hit Id (e.g. UniProt ID), description and other filters. 
 <ul>
-<li>It works like the basic Sequences.
+<li>It works like the Basic Sequences.
 </ul>
 
-<b>&gt;&gt;GO Annotation</b> - Search on the GO ID or description. 
+<b>&gt;&gt;GO Annotation</b> - Search on the GO ID, description and other filters. 
 <ul>
-<li>It works like the basic Sequences.
+<li>It works like the Basic Sequences.
 </ul>
 
 
 <hr>
 <h2>Pair Table</h2>
 This section will only exist if the database was built with the <b>Similar Pairs</b> option of <tt>runSingleTCW</tt>.
-All options are the same as above, except apply to sequence pairs. 
+All options are the similar to the "Seq Table", except apply to sequence pairs. 
 
 </BODY>
 </HTML>

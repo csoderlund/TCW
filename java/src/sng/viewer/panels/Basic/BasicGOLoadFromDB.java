@@ -23,13 +23,12 @@ public class BasicGOLoadFromDB  {
 	private static final int GOindex=BasicGOTablePanel.GOindex;
 	private static final int GOdomain=BasicGOTablePanel.GOdomain;
 	
-	
 	public static final int BUILD=1, ADD=2, SELECT=3;
 	
 	public BasicGOLoadFromDB(STCWFrame f, BasicGOFilterTab g, BasicGOTablePanel t) {
 		theMainFrame=f;
-		goQueryPanel=g;
-		goTablePanel=t;
+		filterPanel=g;
+		tablePanel=t;
 	}
 	public boolean runQuery(int runtype) {
 		final int type=runtype;
@@ -39,7 +38,8 @@ public class BasicGOLoadFromDB  {
 					loadBuildTable(type);
 				}
 				catch (Exception err) {
-					goQueryPanel.setErrorStatus("Error during query");
+					Out.PrtErr("");
+					filterPanel.setErrorStatus("Error during query");
 					JOptionPane.showMessageDialog(null, "Query failed due to unknown reasons ");
 					ErrorReport.reportError(err, "Internal error: building hit table");
 				}
@@ -57,21 +57,21 @@ public class BasicGOLoadFromDB  {
 	 */
 	public void loadBuildTable(int type) {
 		try {
-			String query 				= goQueryPanel.makeQuerySelectClause();	
+			String query 				= filterPanel.makeQuerySelectClause();	
 			if (query==null) return;
 			
-			Class<?> [] COLUMN_TYPES 	= goTablePanel.getColumnTypes();
-			int endStatic 				= goTablePanel.getNumStaticCols();
-			int endEvC 					= goTablePanel.getEndEvC();
+			Class<?> [] COLUMN_TYPES 	= tablePanel.getColumnTypes();
+			int endStatic 				= tablePanel.getNumStaticCols();
+			int endEvC 					= tablePanel.getEndEvC();
 			
 			DBConn mDB = theMainFrame.getNewDBC();
 			ResultSet rs = mDB.executeQuery(query);
 			ResultSetMetaData rsmd = rs.getMetaData();
 			int numCols = rsmd.getColumnCount();
-			int cnt=0, rowcnt=goTablePanel.getRowCount();
+			int cnt=0, rowcnt=tablePanel.getRowCount();
 			
 			// deUp and deDn
-			String deWhere = goQueryPanel.makeNseqClause(true); 
+			String deWhere = filterPanel.makeNseqClause(true); 
 			Vector <Integer> gonum = new Vector <Integer> ();
 			String [] terms = Globalx.GO_TERM_LIST;
 			String [] abbr =  Globalx.GO_TERM_ABBR;
@@ -103,7 +103,7 @@ public class BasicGOLoadFromDB  {
 				} 
 				// finish building row, now process
 				if (type!=SELECT) {
-					goTablePanel.addResult(vals);	
+					tablePanel.addResult(vals);	
 					if (deWhere!="")
 						gonum.add((Integer) vals[BasicGOTablePanel.GOindex]);
 				}
@@ -116,13 +116,13 @@ public class BasicGOLoadFromDB  {
 			
 			if (type==SELECT) {
 				mDB.close();
-				goTablePanel.selectRows("Query", goSet);
-				goQueryPanel.loadSelectFinish(cnt);
+				tablePanel.selectRows("Query", goSet);
+				filterPanel.loadSelectFinish(cnt);
 				return;
 				
 			}
 			// The nSeq column value needs to be changed, and if <nSeqFilter, then removed.
-			int nSeqFilter = goQueryPanel.getNseqs();
+			int nSeqFilter = filterPanel.getNseqs();
 			if (deWhere!=null) {
 				deWhere+="=";
 				
@@ -131,21 +131,21 @@ public class BasicGOLoadFromDB  {
 				for (int row=gonum.size()-1; row>=0; row--) {
 					int nseq = mDB.executeCount("select count(*) " + deWhere + gonum.get(row));
 					
-					boolean rm = goTablePanel.changeNSeq(row, nseq, nSeqFilter);
+					boolean rm = tablePanel.changeNSeq(row, nseq, nSeqFilter);
 					if (rm) {cnt--; rowcnt--; }
 					else cntAdd++;
 					
 					if (row%1000==0) 
-						goQueryPanel.setStatus("Added " + cntAdd + " of possible " +cntTotal + "...");
+						filterPanel.setStatus("Added " + cntAdd + " of possible " +cntTotal + "...");
 				}
 			}
 			mDB.close();
 			
-			goQueryPanel.loadBuildFinish(cnt, rowcnt);
+			filterPanel.loadTableFinish(cnt, rowcnt);
 		}
 		catch (Exception e) {
 			ErrorReport.prtReport(e, "Querying GO table");
-			goQueryPanel.setErrorStatus("Error in query");
+			filterPanel.setErrorStatus("Error in query");
 		}
 	}
 	
@@ -162,7 +162,7 @@ public class BasicGOLoadFromDB  {
 			}
 			allNodeMap.clear();
 			
-			goTablePanel.selectRows("Terminal terms ", trimGOSet);
+			tablePanel.selectRows("Terminal terms ", trimGOSet);
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Trim GOs");}
 	}
@@ -171,7 +171,7 @@ public class BasicGOLoadFromDB  {
 	 *  Create list of nodes from table and add parent list from DB, but only with parents from table */
 	private void listFromTable() {
 		try {
-			Vector<Object []> theResults = goTablePanel.getTheResults();
+			Vector<Object []> theResults = tablePanel.getTheResults();
 			for (Object[] r : theResults)
 			{
 				Node nodeObj = new Node ();
@@ -194,10 +194,6 @@ public class BasicGOLoadFromDB  {
 						allNodeMap.get(nObj.gonum).add(child);	
 				}
 			}
-			if (Globalx.debug) {
-				Out.prt("Tree Nodes:");
-				for (Node nObj : allNodeMap.values()) nObj.prt();
-			}
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Create list from table");}
 	}
@@ -209,13 +205,6 @@ public class BasicGOLoadFromDB  {
 		void add(int pgo) {
 			if (!child.contains(pgo)) child.add(pgo);
 		}
-		
-		void prt() {
-			Out.prt(String.format("GO %10d %s ", gonum, ont));
-			String msg="";
-			for (int go : child) msg += " " + go;
-			if (msg!="") Out.prt("Descendents: " + msg);
-		}
 		public int compareTo (Node n) {
 			return gonum=n.gonum;
 		}
@@ -226,6 +215,6 @@ public class BasicGOLoadFromDB  {
 	/***********************************************************************/
 	 
 	private STCWFrame theMainFrame;
-	private BasicGOFilterTab goQueryPanel; // the parent panel
-	private BasicGOTablePanel goTablePanel;
+	private BasicGOFilterTab filterPanel; // the parent panel
+	private BasicGOTablePanel tablePanel;
 }

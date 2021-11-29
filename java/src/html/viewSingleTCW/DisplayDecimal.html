@@ -25,7 +25,7 @@ the number of digits after the decimal point, e.g.
 123.45 has two decimal places. Minimum: 1, Default: 2.
 </ol>
 
-<ol>
+<ul>
 <li><b>E-notation</b>: This allows the user to set how big or small 
 the <i>absolute value</i> of the 
 number can be before switching to E-notation. 
@@ -35,15 +35,15 @@ To view all numbers in E-notation, enter 1 in both boxes.
 <br>Defaults: 999999.9 and 0.01
 <br>&nbsp;
 <li><b>Java defaults</b>: Java determines when to switch to E-notation.
-</ol>
+</ul>
 
 Highlight good p-values: (only available if p-values exist in sTCWdb)
 <ul>
 <li><b>Highlight good p-values</b>: Turn this option on/off.  
 <br>&nbsp;
 <li><b>Color Schemes [1-4]</b>: Select any of the 4 color schemes, where the color (A-D) corresponds
-to the cutoffs. For example, if color scheme 1 is selected and  cutoff A is 0.05, 
-a p-value will be highlighted light blue if its &lt;0.05.
+to the cutoffs. For example, if color scheme 1 is selected and cutoff A is 0.05, 
+a p-value will be highlighted light brown if it is &lt;0.05.
 <br>&nbsp;
 <li><b>Cutoffs</b>: Change the cutoffs with the restriction that A&gt;B&gt;C&gt;D, then select <b>Apply Cutoffs</b>. 
 <br>Any of 
@@ -61,13 +61,13 @@ requires 4 significant digits to view 0.04996.
 <li>The filter is on the full value, which correctly determines that 0.0499590 &lt; 0.05.
 <li>But when it is tested for highlighting, it is different between the Main and Basic tables, as discussed below.
 </ol>
-Main sequence table:
+<b>Seq Table</b>:
 <ol>
 <li>The result is rounded BEFORE testing for highlight, so the rounded 0.05 cell will be white.  
 <li>Changing the significant digits on the <b>Decimal Display</b> does NOT change the value or highlighting unless 
 you refresh columns.
 </ol>
-Basic Hit and GO tables:
+Basic <b>AnnoDB Hit</b> and <b>GO Annotation</b> tables:
 <ol>
 <li>The result is rounded AFTER testing for highlight, so the rounded 0.05 cell while be highlighted. 
 <li>Changing the significant digits to 4 on the <b>Decimal Display</b> will show it correctly as 0.04996.

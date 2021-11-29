@@ -100,10 +100,11 @@ public class BasicTablePanel extends JPanel {
 		        if (theTable.isRowSelected(row)) {
 		        	c.setBackground(selectColor);
 		        }
-		        else if (highSet.size()>0) {
-	        		String id = (seqTab!=null) ? seqTab.getValueAt(row, 0).toString() : hitTab.getValueAt(row, 0).toString();
-	        		if (highSet.contains(id)) c.setBackground( HIGHCOLOR );
-	        		else c.setBackground( BGCOLOR );
+		        else if (highSet.size()>0) { // col=0 is the row number, that gets sorted with the row, but not displayed
+	        		String id = (seqTab!=null) ? seqTab.getValueAt(row, 0).toString() : 
+	        									 hitTab.getValueAt(row, 0).toString();
+	        		if (highSet.contains(id)) 	c.setBackground( HIGHCOLOR );	
+	        		else 						c.setBackground( BGCOLOR );
 		        }			
 		        else {
 			        boolean bBlueBG = row % 2 == 1;
@@ -141,10 +142,7 @@ public class BasicTablePanel extends JPanel {
 		theTable.setDefaultRenderer( Object.class, new BorderLessTableCellRenderer() );
 		theTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent arg0) {
-				if (hitTab!=null) 		hitTab.updateTopButtons(getSelectedRowCount(), theTable.getRowCount());
-				else if (seqTab!=null) 	seqTab.updateTopButtons(getSelectedRowCount(), theTable.getRowCount());
-				
-				updateBottomButtons(); // CAS336
+				enableAllButtons(); // CAS336
 			}
 		});
 		JTableHeader header = theTable.getTableHeader();
@@ -217,7 +215,7 @@ public class BasicTablePanel extends JPanel {
 					theTable.getTableHeader().setBackground(Color.WHITE);
 					theTable.setDefaultRenderer( Object.class, new BorderLessTableCellRenderer() );
 					
-					updateBottomButtons(); // CAS336
+					enableAllButtons();
 				}
 			}
 		);
@@ -381,35 +379,35 @@ public class BasicTablePanel extends JPanel {
 		btnDelete.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				deleteFromList();
-				updateAllButtons();
+				enableAllButtons();
 			}
 		});	
 		btnKeep = Static.createButtonPlain("Keep selected", false);
 		btnKeep.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				keepFromList();
-				updateAllButtons();
+				enableAllButtons();
 			}
 		});
 		btnUnselectAll = Static.createButtonPlain("Unselect All", false);
 		btnUnselectAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				theTable.clearSelection();
-				updateAllButtons();
+				enableAllButtons();
 			}
 		});
 		btnSelectAll = Static.createButtonPlain("Select All", false);
 		btnSelectAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				theTable.selectAll();
-				updateAllButtons();
+				enableAllButtons();
 			}
 		});
 		btnSort = Static.createButtonPlain("Sort by other list", false);
 		btnSort.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				hitTab.convertToOrder();
-				updateAllButtons();
+				enableAllButtons();
 				theTableModel.fireTableDataChanged(); // is not automatically triggered
 			}
 		});
@@ -424,15 +422,15 @@ public class BasicTablePanel extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				highSelect();
 				theTable.clearSelection();
-				updateAllButtons();
+				enableAllButtons();
 			}
 		});
 		btnHighClear = Static.createButtonPlain("Clear", false); // CAS336 new
 		btnHighClear.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				highClear();
-				updateAllButtons();
 				theTableModel.fireTableDataChanged(); // is not automatically triggered
+				enableAllButtons();
 			}
 		});
 		
@@ -511,7 +509,7 @@ public class BasicTablePanel extends JPanel {
 		else				hitTab.appendStatus(msg);
 	}
 	
-	public void enableButtons(boolean b) {// CAS334 new - called when database query starts/stops
+	public void enableLowButtons(boolean b) {// CAS334 new - called when database query starts
 		btnDelete.setEnabled(b);
 		btnKeep.setEnabled(b);
 		btnUnselectAll.setEnabled(b);
@@ -521,23 +519,21 @@ public class BasicTablePanel extends JPanel {
 		btnHighSelect.setEnabled(b);
 		btnHighClear.setEnabled(b);
 	}
-	private void updateAllButtons() { // called from lower buttons
-		updateBottomButtons();
+	public void enableAllButtons() { // called from lower buttons, valueChanged, tableRefresh CAS337
+		int sel = theTable.getSelectedRowCount();
+		int row = theTable.getRowCount();
 		
-		int sel = getSelectedRowCount();
-		int row = getNumRow();
-		if (hitTab!=null) 	hitTab.updateTopButtons(sel, row);
-		else  				seqTab.updateTopButtons(sel, row);
-	}
-	private void updateBottomButtons() { // CAS336 new
-		boolean bSel = (theTable.getSelectedRows().length>0);
+		if (hitTab!=null) 	hitTab.enableTopButtons(sel, row);
+		else  				seqTab.enableTopButtons(sel, row);
+		
+		boolean bSel = (sel>0);
 		btnDelete.setEnabled(bSel);
 		btnKeep.setEnabled(bSel);
 		
 		btnUnselectAll.setEnabled(bSel);
 		btnHighSelect.setEnabled(bSel);
 		
-		boolean bRow = (theTable.getRowCount()>0);
+		boolean bRow = (row>0);
 		btnSort.setEnabled(bRow);
 		
 		btnSelectAll.setEnabled(bRow);
@@ -712,5 +708,6 @@ public class BasicTablePanel extends JPanel {
 	private BasicHitTab hitTab=null;
 	private BasicSeqTab seqTab=null;
 	private String [] pvalColNames;
+	private boolean hitView=true; // if hitTab, is the highSet HitID or SeqID
 	private HashSet <String> highSet = new HashSet <String> ();
 }

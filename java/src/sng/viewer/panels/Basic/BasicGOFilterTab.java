@@ -371,11 +371,11 @@ public class BasicGOFilterTab extends Tab {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					btnTableShow.setEnabled(false); 
-					enabledFunctions(false);
+					enabledAllButtons(false);
 					
 					goTablePanel.showExportGOtreeTable(btnTableShow, GOtree.ALL_PARENTS, GOtree.DO_POPUP);
 					
-					enabledFunctions(true);
+					enabledAllButtons(true);
 					btnTableShow.setEnabled(true);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error all paths for table");
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error all paths for table", null);}
@@ -387,11 +387,11 @@ public class BasicGOFilterTab extends Tab {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					btnTableShow.setEnabled(false); 
-					enabledFunctions(false);
+					enabledAllButtons(false);
 					
 					goTablePanel.showExportGOtreeTable(btnTableShow, GOtree.ALL_ANCESTORS, GOtree.DO_POPUP);
 					
-					enabledFunctions(true);
+					enabledAllButtons(true);
 					btnTableShow.setEnabled(true);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error all paths for table");
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error all paths for table", null);}
@@ -402,11 +402,11 @@ public class BasicGOFilterTab extends Tab {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					btnTableShow.setEnabled(false); 
-					enabledFunctions(false);
+					enabledAllButtons(false);
 					
 					goTablePanel.showExportGOtreeTable(btnTableShow, GOtree.LONGEST_PATHS, GOtree.DO_POPUP);
 					
-					enabledFunctions(true);
+					enabledAllButtons(true);
 					btnTableShow.setEnabled(true);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error all paths for table");
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error all paths for table", null);}
@@ -418,11 +418,11 @@ public class BasicGOFilterTab extends Tab {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					btnTableShow.setEnabled(false); 
-					enabledFunctions(false);
+					enabledAllButtons(false);
 					
 					goTablePanel.showExportGOtreeTable(btnTableShow, GOtree.ALL_PATHS, GOtree.DO_POPUP);
 					
-					enabledFunctions(true);
+					enabledAllButtons(true);
 					btnTableShow.setEnabled(true);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error all paths for table");
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error all paths for table", null);}
@@ -435,34 +435,18 @@ public class BasicGOFilterTab extends Tab {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					btnTableShow.setEnabled(false); 
-					enabledFunctions(false);
+					enabledAllButtons(false);
 					appendStatus("Computing terminal terms...");
 					
 					loadObj.computeEnds();
 					
-					enabledFunctions(true);
+					enabledAllButtons(true);
 					btnTableShow.setEnabled(true);
 					
 				} catch (Exception er) {ErrorReport.reportError(er, "Compute trim");}
 			}
 		}));
-		if (pvalColumnNames.size()<0) { // change to >0 when algorithm is working
-			tablePopup.add(new JMenuItem(new AbstractAction("Select trim set") {
-				private static final long serialVersionUID = 4692812516440639008L;
-				public void actionPerformed(ActionEvent e) {
-					try {
-						btnTableShow.setEnabled(false); 
-						enabledFunctions(false);
-						
-						// loadObj.computeTrim(); 
-						
-						enabledFunctions(true);
-						btnTableShow.setEnabled(true);
-						
-					} catch (Exception er) {ErrorReport.reportError(er, "Compute trim");}
-				}
-			}));
-		}
+		
 		btnTableShow = Static.createButton("Show...", false);
 		btnTableShow.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
@@ -479,11 +463,11 @@ public class BasicGOFilterTab extends Tab {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					btnTableExport.setEnabled(false);
-					enabledFunctions(false);
+					enabledAllButtons(false);
 					
 					goTablePanel.tableExport(btnTableExport, 0);
 					
-					enabledFunctions(true);
+					enabledAllButtons(true);
 					btnTableExport.setEnabled(true);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error export table");
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error export table", null);}
@@ -494,11 +478,11 @@ public class BasicGOFilterTab extends Tab {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					btnTableExport.setEnabled(false);
-					enabledFunctions(false);
+					enabledAllButtons(false);
 					
 					goTablePanel.tableExport(btnTableExport, 5); // CAS326 new
 					
-					enabledFunctions(true);
+					enabledAllButtons(true);
 					btnTableExport.setEnabled(true);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error export table");
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error export table", null);}
@@ -509,11 +493,11 @@ public class BasicGOFilterTab extends Tab {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					btnTableExport.setEnabled(false);
-					enabledFunctions(false);
+					enabledAllButtons(false);
 					
 					goTablePanel.tableExport(btnTableExport, 4); // CAS324 new
 					
-					enabledFunctions(true);
+					enabledAllButtons(true);
 					btnTableExport.setEnabled(true);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error export table");
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error export table", null);}
@@ -524,11 +508,11 @@ public class BasicGOFilterTab extends Tab {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					btnTableExport.setEnabled(false);
-					enabledFunctions(false);
+					enabledAllButtons(false);
 					
 					goTablePanel.tableExport(btnTableExport, 1);
 					
-					enabledFunctions(true);
+					enabledAllButtons(true);
 					btnTableExport.setEnabled(true);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error export table");
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error export table", null);}
@@ -539,11 +523,11 @@ public class BasicGOFilterTab extends Tab {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					btnTableExport.setEnabled(false);
-					enabledFunctions(false);
+					enabledAllButtons(false);
 					
 					goTablePanel.tableExport(btnTableExport, 2);
 					
-					enabledFunctions(true);
+					enabledAllButtons(true);
 					btnTableExport.setEnabled(true);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error export table");
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error export table", null);}
@@ -558,11 +542,11 @@ public class BasicGOFilterTab extends Tab {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					btnTableExport.setEnabled(false); 
-					enabledFunctions(false);
+					enabledAllButtons(false);
 					
 					goTablePanel.showExportGOtreeTable(btnTableExport, GOtree.ALL_PARENTS, GOtree.DO_EXPORT_ALL);
 					
-					enabledFunctions(true);
+					enabledAllButtons(true);
 					btnTableExport.setEnabled(true);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error all paths for table");
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error all paths for table", null);}
@@ -574,11 +558,11 @@ public class BasicGOFilterTab extends Tab {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					btnTableExport.setEnabled(false); 
-					enabledFunctions(false);
+					enabledAllButtons(false);
 					
 					goTablePanel.showExportGOtreeTable(btnTableExport, GOtree.ALL_ANCESTORS, GOtree.DO_EXPORT_ALL);
 					
-					enabledFunctions(true);
+					enabledAllButtons(true);
 					btnTableExport.setEnabled(true);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error all paths for table");
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error all paths for table", null);}
@@ -589,11 +573,11 @@ public class BasicGOFilterTab extends Tab {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					btnTableExport.setEnabled(false); 
-					enabledFunctions(false);
+					enabledAllButtons(false);
 					
 					goTablePanel.showExportGOtreeTable(btnTableExport,GOtree.LONGEST_PATHS,GOtree.DO_EXPORT_ALL);
 					
-					enabledFunctions(true);
+					enabledAllButtons(true);
 					btnTableExport.setEnabled(true);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error all paths for table");
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error all paths for table", null);}
@@ -605,11 +589,11 @@ public class BasicGOFilterTab extends Tab {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					btnTableExport.setEnabled(false); 
-					enabledFunctions(false);
+					enabledAllButtons(false);
 					
 					goTablePanel.showExportGOtreeTable(btnTableExport, GOtree.ALL_PATHS, GOtree.DO_EXPORT_ALL);
 					
-					enabledFunctions(true);
+					enabledAllButtons(true);
 					btnTableExport.setEnabled(true);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error all paths for table");
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error all paths for table", null);}
@@ -971,14 +955,14 @@ public class BasicGOFilterTab extends Tab {
 			public void actionPerformed(ActionEvent arg0) {
 				goTablePanel.highClear();
 				goTablePanel.clear(); 
-				loadBuildStart(BasicGOLoadFromDB.BUILD);
+				loadQueryStart(BasicGOLoadFromDB.BUILD);
 			}
 		});
 		
 		btnAddTable = Static.createButton("ADD", true, Globals.FUNCTIONCOLOR);
 		btnAddTable.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				loadBuildStart(BasicGOLoadFromDB.ADD);
+				loadQueryStart(BasicGOLoadFromDB.ADD);
 			}
 		});
 		
@@ -1250,14 +1234,14 @@ public class BasicGOFilterTab extends Tab {
 	 */
 	private void viewSequencesFromSelected() {
 		btnViewSeqs.setEnabled(false);
-		String [] contigNames = loadSelectedSeqs();
+		String [] seqIDs = loadSelectedSeqs();
 		btnViewSeqs.setEnabled(true);
-		if (contigNames==null) return;
+		if (seqIDs==null) return;
 		
 		int nGO = goTablePanel.getSelectedRowCount();
 		String label = (nGO==1) ? currentGO : nGO + " GOs";
 
-		getParentFrame().loadContigs(label, contigNames, STCWFrame.BASIC_QUERY_MODE_GO );
+		getParentFrame().loadContigs(label, seqIDs, STCWFrame.BASIC_QUERY_MODE_GO );
 	}
 	/**********************************************
 	 * XXX if Up Only or Down Only, only load associated contigs
@@ -1267,6 +1251,8 @@ public class BasicGOFilterTab extends Tab {
 	private String [] loadSelectedSeqs() {
 		try {
 			int [] goIDs = goTablePanel.getSelectedGOnums();
+			if (goIDs.length==0) return null;
+			
 			currentGO = String.format(GO_FORMAT, goIDs[0]);
 			
 			String theQuery = "SELECT DISTINCT(c.contigid) ";
@@ -1316,48 +1302,58 @@ public class BasicGOFilterTab extends Tab {
 		tmp.setMaximumSize(tmp.getPreferredSize());
 		return tmp;
 	}
-	
-	public void updateAllButtons() {
+	private void enabledAllButtons(boolean b) { // begin/end table building
+		btnBuildTable.setEnabled(b);
+		btnAddTable.setEnabled(b);
+		btnTableShow.setEnabled(b);
+		btnTableExport.setEnabled(b);
+		btnViewSeqs.setEnabled(b);
+		
+		btnSelShow.setEnabled(b);
+		btnSelCopy.setEnabled(b);
+		btnSelExport.setEnabled(b);
+		
+		goTablePanel.enableLowButtons(b);
+	}
+	public void enableAllButtons() { // end table building, valueChanged
+		btnBuildTable.setEnabled(true);
+		btnAddTable.setEnabled(true);
+		
 		int cnt = goTablePanel.getRowCount();
-		btnTableShow.setEnabled(cnt>0);
-		btnTableExport.setEnabled(cnt > 0);
+		boolean enable = (cnt>0);
 		
-		boolean enable = (goTablePanel.getSelectedRowCount()>0);
-		btnViewSeqs.setEnabled(enable);
+		btnTableShow.setEnabled(enable);
+		btnTableExport.setEnabled(enable);
 		
-		enable = (goTablePanel.getSelectedRowCount()==1);
+		cnt = goTablePanel.getSelectedRowCount();
+		btnViewSeqs.setEnabled(cnt>0);
+		
+		enable = (cnt==1);
 		btnSelShow.setEnabled(enable);
 		btnSelCopy.setEnabled(enable);
 		btnSelExport.setEnabled(enable);
-		
-		goTablePanel.updateBottomButtons();
 	}
     /**************************
-     * BUILD TABLE
+     * BUILD, ADD, Select TABLE
      */
-	public void loadBuildStart(int type) {
+	public void loadQueryStart(int type) {
 		if (!checkIFvalues()) return; // CAS336 fails if incorrect input
 		
-		enabledFunctions(false);
+		enabledAllButtons(false);
 		
 		try {
 			txtStatus.setText("Performing query - please wait");
 			loadObj.runQuery(type);
 		}
 		catch(Exception e) {
+			enabledAllButtons(true);
 			txtStatus.setText("Query failed");
 			JOptionPane.showMessageDialog(null, "Query failed ");
 			ErrorReport.prtReport(e, "Error when building table");
 		}
 	}
-	// called from thread when finished
-	public void loadSelectFinish(int rowadd) {
-		appendStatus("Select Query " + rowadd);
-		
-		enabledFunctions(true);
-		updateAllButtons();
-	}
-	public void loadBuildFinish(int rowadd, int rowcnt) {
+	// called when loadQueryStart is finished
+	public void loadTableFinish(int rowadd, int rowcnt) {
 		if (rowadd==rowcnt)
 			theStatusStr = String.format("GOs: %,d    %s", rowcnt, theFilterStr);
 		else 
@@ -1365,10 +1361,11 @@ public class BasicGOFilterTab extends Tab {
 		
 		txtStatus.setText(theStatusStr);
 	
-		goTablePanel.tableRefresh();
-		
-		enabledFunctions(true);
-		updateAllButtons();
+		goTablePanel.tableRefresh(); // enable all buttons
+	}
+	public void loadSelectFinish(int nSelect) {
+		appendStatus("Select " + nSelect); // buttons enabled when rows selected
+		if (nSelect==0) goTablePanel.enableAllButtons(); // but if not selected...
 	}
 	public void deleteFinish(int rowcnt) {
 		theStatusStr = String.format("Results: %,d GOs", rowcnt);
@@ -1816,10 +1813,7 @@ public class BasicGOFilterTab extends Tab {
 	    boxDEseq.setEnabled(enable);
     }
     
-    private void enabledFunctions(boolean b) {
-		btnBuildTable.setEnabled(b);
-		btnAddTable.setEnabled(b);
-    }
+   
 	private void clear() {
 		loadList=null; 
 		loadStart="";

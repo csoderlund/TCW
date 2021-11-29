@@ -1132,10 +1132,13 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		}
 		else return false;
 	}
+	public int getHitID(String id) { // CAS337 for SeqGOPanel
+		if (hitMap.containsKey(id)) return hitMap.get(id).hitID;
+		else return -1;
+	}
+	
 	public String getHitGO(String id) {
-		if (hitMap.containsKey(id)) {
-			return hitMap.get(id).nGO;
-		}
+		if (hitMap.containsKey(id)) return hitMap.get(id).nGO;
 		else return null;
 	}
 	public int getHitAlignLen(String id) {
@@ -1180,6 +1183,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 			hits.add(hitData[i].hitName);
 		return hits;
 	}
+	
 	public HashSet <String> getHitNameGO() { 
 		if (hitData==null || hitData.length==0) return null;
 		HashSet <String> hits = new HashSet <String> ();

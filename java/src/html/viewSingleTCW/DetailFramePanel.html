@@ -10,13 +10,64 @@ If this is a protein database, the sequence is displayed and the rest of this is
 <p>
 During annotation, TCW selects the frame that is most likely to be coding.
 It uses a combination of protein hit, 5th-order Markov Chain 
-and length (for more detail, see www.agcol.arizona.edu/software/tcw/doc/stcw/ORF.html). 
+and length (for more detail, see 
+<a href="http://www.agcol.arizona.edu/software/tcw/doc/stcw/ORF.html">www.agcol.arizona.edu/software/tcw/doc/stcw/ORF.html</a>). 
 
-<h3>Display</h3>
-The first line provides the RF of the Best ORF along with its length;
-the Best ORF is displayed by default. The following lines best ORF in each of the 6 frames. The selected
-ORF will have a ">" in front of it. 
-<p>To calculate the <i>nucleotide</i> coordinate of a particular base: 
+<h3>Frame Options - second row of buttons</h3>
+<table>
+<tr><td valign=top><b>Frame</b><td> By default, the TCW selected frame is shown. Select a different frame
+to view the its best frame.
+
+<tr><td valign=top><b>ORFs/NT</b><td> Changes the display from <b>ORFs/NT</b> to  <b>Scores/AA</b>. 
+The <b>ORFs/NT</b> shows the nucleotide codons and the <b>Scores/AA</b> shows the amino acid sequence.
+The top display is discussed below.
+
+<tr><td valign=top><b>Start</b><td> By default, start sites are highlighted in grey (alternative start sites are lower case,
+ATG is upper case). This toggle changes the highlight from grey to cyan.
+
+<tr><td valign=top><b>CDS</b><td> Highlights the entire selected ORF in green.
+
+<tr><td valign=top><b>Hit</b><td> Highlight the hit region using italics; the drop-down beside this can change the italics to 
+blue. This is only present if the "Best Bits" hit is to a protein and to this frame.
+The hit coordinates are from the heuristic search program (e.g. Blast) and assigned during annotation.
+</table>
+
+<h3>Top text display</h3>
+
+<p><b>ORFs/NT</b> The first line provides number of the selected RF along with any remark assigned by the <tt>ORF finder</tt>;
+see the <b>Basic Sequence Help</b> for a description. The "Seq Length" is the full length of the nucleotide
+sequence.
+<p>
+The following lines have information about the best ORF in each of the 6 frames, where
+the ORF being viewed will have a ">" in front of it. The information is:
+<ul>
+<li>The ORF coordinates are listed, where a single quote (') after the start codon indicates that
+the ORF does not have a start codon, likewise for the stop codon.
+<br>&nbsp;
+<li>The 5th-order Markov model and Codon Usage scores.  
+<ul>
+<li>A <i>good</i> Markov score is positive
+and the best score for all frames <i>of the given ORF</i> (see the <b>Scores/AA</b> display); if a score
+is not <i>good</i>, it will have a single quote (') beside it. 
+<li>The <i>best</i> Markov score is the best over all 6 ORFs shown in the <b>ORFs/NT</b> display. If the
+selected best ORF is not the <i>best</i>, the sequence will be remarked with "ORF!Mk".
+</ul>
+<li>The number of stop codons in the entire sequence. If there are stop codons in the hit region, then the
+sequence will be remarked with "StopHit". 
+</ul>
+
+<p><b>Scores/AA</b> The <i>6-frame score for ORF frame N</i>, where N is the frame being displayed. 
+It shows the Markov and Codon scores
+for the current ORF sequence in all 6 frames, with the starting location of 
+the ORF equal to position 1,2,3,-1,-2,-3.
+If the Markov score on the <b>ORFs/NT</b> display has a single quote beside it, then the first
+score will either be negative and/or not the best of all frames for this ORF.
+
+
+<h3>Sequence Display Coordinates</h3>
+
+In the lower panel, the start and stop of the ORF are highlighted in green.
+To calculate the <i>nucleotide</i> coordinate of a particular base: 
 <ul>
 <li><u>Forward</u>: 
 <br>&emsp;&emsp;&emsp;&emsp;Y-axis# + X-axis# =  last base of the codon.
@@ -35,66 +86,7 @@ ORF will have a ">" in front of it.
 <li><u>Forward</u>: Y-axis# + X-axis# 
 <li><u>Reverse</u> :Y-axis# - X-axis#
 </ul>
-<h3>Frame Options - second row of buttons</h3>
-
-<b>Frame</b> toggle: By default, the TCW selected frame is shown. This button allows 
-the other frames to be displayed.
-
-<p><b>ORFs/NT</b> to <b>Scores/AA</b> toggle: Changes the content of the upper panel, as discussed below. 
-Also, "Scores" shows
-the corresponding amino acid sequence instead of the nucleotide sequence for the frame.
-
-<p><b>Start</b>: Changes the highlighting of the start codons.
-
-<p><b>CDS</b>: Highlights in green the CDS; overrides the highlighted start codons.
-
-<p><b>Hit</b>: Highlight the hit region using italics (or blue font, which will overrides the highlighted CDS region). 
-The region coordinates are from the heuristic search program (e.g. Blast) and assigned during annotation.
-This is only present if there are hits to the sequence and the "Best Bits" hit is
-to a protein sequence. It only works for the frame with the hit.
-
-
-<h4>ORFs/NT</h4>
-The TCW selected ORF will occur first in the list, followed by the following information: 
-<ul>
-<li>The ORF coordinates are listed, where a single quote (') after the start codon indicates that
-the ORF does not have a start codon, likewise for the stop codon.
-<br>&nbsp;
-<li>The 5th-order Markov model and Codon Usage scores. The Markov score was computed according to Hass et al. (2013) Nature Protocols 8:1494-1512 for TransDecoder. A <b>good</b> Markov score is positive
-and the best score for all frames <i>of the given ORF</i> (see the <b>Scores/AA</b> display). 
-This is in contrast to the
-<i>best</i> Markov score, which is the best over all ORFs shown in the <b>ORFs/NT</b> display. 
-<ul>
-<li>Not good Markov score:  (1) A single quote (') after the Markov score. (2)
-A "!g" will be in the ORFmk remark. 
-<li>Not best Markov score: (1) It will not be the best score from the list of ORFs.
-(2) A "!b" will be in the ORFmk remark. 
-<br>&nbsp;
-</ul>
-
-<li>The number of stop codons. 
-<br>&nbsp;
-<li>Hit-ORF relation:
-<ul>
-<li>If a frame has the best hit, the E-value and percent hit overlap is shown. 
-<br>Note: As discussed in
-the online ORF finder document (see URL listed above),  these values
-limit how far the hit coordinates will be extended.
-<li>If the frame is the selected
-one and it is the same as the hit frame, then the relation of the ORF coordinates to the
-hit coordinates (this is also listed in the Sequence Remark column). 
-<li>Caveat: If the databases has nucleotide annoDBs such that the Hit with the best E-value is a NT sequence,
-then the E-value will not be shown (see URL listed above)
-</ul>
-</ul>
-
-<h4>Scores/AA</h4>
-
-<i>Scores - for the selected ORF</i>: It shows the Markov and Codon scores
-for the current ORF sequence in all 6 frames, with the starting location of 
-the ORF equal to position 1,2,3,-1,-2,-3 (in that order, the negatives are reverse complemented).
-
-<p><i>No Markov Score</i>: if the Markov scores were not computed for this sTCW database, then
-this ORF/Score pull-down will not exist and the Markov and Codon scores will not be shown.
+<h4>References</h4>
+The Markov score was computed according to Hass et al. (2013) Nature Protocols 8:1494-1512 for TransDecoder.
 </body>
 </html>

@@ -183,7 +183,7 @@ public class FieldSeqData implements Serializable
     
     // The three BEST are grouped together. So these names are only used for grouping
     public static final String GROUP_NAME_FIRST_BEST = "Best Hit";
-    public static final String GROUP_DESC_FIRST_BEST = "Best Bitscore, Best Annotation, Best with GO";
+    public static final String GROUP_DESC_FIRST_BEST = "Best Bit-score, Best Annotation, Best with GO";
     
     public static final String GROUP_NAME_OVER_BEST 	= "Best Annotation";
     public static final String GROUP_DESC_OVER_BEST 	= "annoDB hit with the best annotation (i.e. excluding phrases such as \'uncharacterized protein\', see Help)";

@@ -6,22 +6,22 @@
 <body style="padding:20px;width:650px;font-family:Times">
 
 <h1>Sequence Details</h1>
-<ol>
-<li>Best ORF: shows the RF (reading frame) and coordinates; a "'" indicates a missing start or stop. 
+<b>Best ORF:</b> Shows the RF (reading frame) and coordinates; a "'" indicates a missing start or stop. 
 The TCW remark is at the end (See Basic Sequence Help for the TCW Remark Legend).
-<li>DB hits table: 
+<p><b>DB hits:</b> 
 <ul>
-<li>The columns <u>E-value</u>, <u>%Sim</u>, <u>AlignLen</u>, <u>Start</u> and <u>End</u> are from the best 
+<li>The columns <u>E-value</u>, <u>%Sim</u>, <u>Align</u>, <u>Start</u> and <u>End</u> are from the best 
 search results for the hit (i.e. from <tt>BLAST</tt> or <tt>DIAMOND</tt>). 
-<li>The column <u>Align</u> is in the hit coordinates (e.g. amino acids if the hit is a protein), whereas the Start and End in the sequence coordinates.
+<li>The column <u>Align</u> is in the hit coordinates (e.g. amino acids if the hit is a protein), 
+whereas the <u>Start</u> and <u>End</u> are in the sequence coordinates.
 <li>The options <b>GO...</b>, <b>Align...</b> and <b>Show/Copy/Export...</b> all have options that use
 the DB hits table contents or selection.
 </ul>
-</ol>
+
 
 <h3>Detail Options - second row of buttons</h3>
 <ol>
-<li><b>Counts</b> toggle: Toggles between counts, TPM (or RPKM), Replicates (if there are replicates).
+<li><b>Counts</b> toggle: Toggles between counts, TPM (or RPKM), and Replicates (if there are replicates).
 
 <li><b>DB hits</b> toggle: Changes the set of hits listed in the DB hits table.
 <ul>
@@ -53,8 +53,8 @@ This only has one option, which is <u>Selected Hit Info</u>. This shows all info
 hit to sequence.
 
 <li><b>Copy...</b>
-This is a menu of options to copy content to the clipboard (to "Paste" elsewhere). The first two require 
-a hit to be selected in the DB hits table. The last four copy the seqID or sequence.
+This is a menu of options to copy content to the clipboard (to "Paste" elsewhere). The first five refer
+to the sequence. The last three require a hit to be selected in the DB hits table. 
 
 <li><b>Export...</b> Writes a file of the sequence or DB hits.
 </ol>

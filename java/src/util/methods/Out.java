@@ -296,6 +296,9 @@ public class Out {
 	static public void r(String msg) {
 		System.err.print("  " + msg + "...\r");
 	}
+	static public void rClear() {
+		System.err.print("                                                        \r");
+	}
 	static public void mem(String msg) {
 		System.err.print("  " + msg + "   " + TimeHelpers.getMemoryUsedMb() + "...\n");
 	}

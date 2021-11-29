@@ -118,7 +118,7 @@ public class BasicHitFilterPanel extends JPanel {
 	* The top queries, and 4 selection panels 
 	*/
 	public BasicHitFilterPanel(STCWFrame frame, BasicHitTab parentTab) {
-		theParentTab = parentTab;
+		theHitTab = parentTab;
 		theMainFrame = frame;
 		metaData = frame.getMetaData();
 		hasGO = metaData.hasGOs();
@@ -135,13 +135,13 @@ public class BasicHitFilterPanel extends JPanel {
 		speciesPanel = 	new SpeciesPanel();
 		goPanel = 		new GOetcPanel(); // checkbox not added in MainQueryPanel if !hasGO
 		countPanel = 	new CountPanel();
-		queryPanel = 	new MainQueryPanel();
+		filterPanel = 	new FilterPanel();
 		
 		colSeqPanel = new ColumnPanel(seqStaticColNames, false);
 		colGrpPanel = new ColumnPanel(grpStaticColNames, true);
 		alignPanel = Static.createPagePanel();
 		
-		add(queryPanel);
+		add(filterPanel);
 		add(annoDBPanel);
 		add(colGrpPanel);
 		add(colSeqPanel);
@@ -175,12 +175,12 @@ public class BasicHitFilterPanel extends JPanel {
 		}
 	}
 	private void hideMain() {
-		queryPanel.setVisible(false);
-		theParentTab.hideAll();
+		filterPanel.setVisible(false);
+		theHitTab.hideAll();
 	}
 	private void showMain() {
-		queryPanel.setVisible(true);
-		theParentTab.showAll();
+		filterPanel.setVisible(true);
+		theHitTab.showAll();
 	}
 	/****************************************
 	 * Called by BasicHitQueryTab
@@ -240,10 +240,10 @@ public class BasicHitFilterPanel extends JPanel {
 	/***************************************************
 	 * The main filter panel
 	 */
-	private class MainQueryPanel extends JPanel {
+	private class FilterPanel extends JPanel {
 		private static final long serialVersionUID = -5987399873828589062L;
 	
-		public MainQueryPanel() {
+		public FilterPanel() {
 			setBackground(BGCOLOR);
 			setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 			setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -492,7 +492,7 @@ public class BasicHitFilterPanel extends JPanel {
 						speciesPanel.clear();
 						goPanel.clear();
 						countPanel.clear();
-						queryPanel.clear();
+						filterPanel.clear();
 					}
 					catch(Exception e) {ErrorReport.prtReport(e, "GO etc");}
 			}});
@@ -543,7 +543,7 @@ public class BasicHitFilterPanel extends JPanel {
 					isGrpView = showGrouped.isSelected();
 					if (isGrpView) btnSetColumns.setText("Hit Columns");
 					else  btnSetColumns.setText("Seq Columns");
-					theParentTab.tableRefresh(isGrpView);
+					theHitTab.tableRefresh(isGrpView);
 				}
 			});
 			createHelp();
@@ -818,7 +818,10 @@ public class BasicHitFilterPanel extends JPanel {
 			}
 		}
 		
-		public void enableAddToTable(boolean b) {btnBuildTable.setEnabled(b);}
+		public void enableButtons(boolean b) {
+			btnBuildTable.setEnabled(b);
+			btnAddTable.setEnabled(b);
+		}
 		
 		private JCheckBox chkUseSearch = null, chkUseFilters = null;
 		private JLabel lblSearch=null, lblFilters=null;
@@ -2361,7 +2364,7 @@ public class BasicHitFilterPanel extends JPanel {
 					saveSelections();
 					showMain();
 					setVisible(false);
-					theParentTab.tableRefresh(isGrpView);
+					theHitTab.tableRefresh(isGrpView);
 				}
 			});
 			btnDiscard = Static.createButton("Discard", true);
@@ -2382,7 +2385,7 @@ public class BasicHitFilterPanel extends JPanel {
 					saveSelections();
 					showMain();
 					setVisible(false);
-					theParentTab.tableRefresh(isGrpView);
+					theHitTab.tableRefresh(isGrpView);
 				}
 			});
 			JPanel buttonPanel = Static.createRowCenterPanel();
@@ -2723,48 +2726,51 @@ public class BasicHitFilterPanel extends JPanel {
 		Thread thread = new Thread(new Runnable() {
 		public void run() {
 			try {	
-				if (bBuild) theParentTab.tableClear();
+				if (bBuild) theHitTab.tableClear();
+				filterPanel.enableButtons(false);
+				theHitTab.enableAllButtons(false);
 				
-				boolean useSearch = queryPanel.useSearch();
+				boolean useSearch = filterPanel.useSearch();
 				
 				String status = "Querying database. Please Wait...";
-				if (queryPanel.isDesc() && useSearch) status += " Description search can be slow";
-				else if (queryPanel.chkSpecies.isSelected() &&
+				if (filterPanel.isDesc() && useSearch) status += " Description search can be slow";
+				else if (filterPanel.chkSpecies.isSelected() &&
 						speciesPanel.getNumSelectedSpecies()>0) status += " Species search can be slow";
 				else status += " May be slow if getting many of the " + Out.df(totalSeqHitPairs) + " possible results";
-				theParentTab.setStatus(status);
-				queryPanel.enableAddToTable(false);		
+				theHitTab.setStatus(status);		
 				
 				ArrayList<Object []> results = loadFromDatabase();
 				
-				theParentTab.setStatus("Populating table with " + results.size() + " sequence-hit pairs... ");
+				theHitTab.setStatus("Populating table with " + results.size() + " sequence-hit pairs... ");
 				
 				// create status
-				boolean useFilter = queryPanel.useFilter();
+				boolean useFilter = filterPanel.useFilter();
 				filters = status="";
 				if (useFilter) {
-					status = queryPanel.getSummary();
-					if (queryPanel.chkCount.isSelected())   status = strMerge(status, countPanel.getSummary());
-					if (queryPanel.chkAnnoDBs.isSelected()) status = strMerge(status, annoDBPanel.getSummary());
-					if (queryPanel.chkSpecies.isSelected()) status = strMerge(status, speciesPanel.getSummary());
-					if (queryPanel.chkGOetc.isSelected())   status = strMerge(status, goPanel.getSummary());
+					status = filterPanel.getSummary();
+					if (filterPanel.chkCount.isSelected())   status = strMerge(status, countPanel.getSummary());
+					if (filterPanel.chkAnnoDBs.isSelected()) status = strMerge(status, annoDBPanel.getSummary());
+					if (filterPanel.chkSpecies.isSelected()) status = strMerge(status, speciesPanel.getSummary());
+					if (filterPanel.chkGOetc.isSelected())   status = strMerge(status, goPanel.getSummary());
 					filters = status;
 					if (status!="") status = "  Filters: " + status;
 				}
 				if (useSearch) {
-					String op = (queryPanel.isLoadFile()) ? " = " : " contains ";
-					String statusSearch = queryPanel.getSummaryColumn() + op + queryPanel.getSummaryText();
+					String op = (filterPanel.isLoadFile()) ? " = " : " contains ";
+					String statusSearch = filterPanel.getSummaryColumn() + op + filterPanel.getSummaryText();
 					filters = statusSearch + ";" + filters;
 					if (status!="") status = "  Search: " + statusSearch + status;
 				}
 				
-				queryPanel.enableAddToTable(true);
-				if (bBuild) theParentTab.tableBuild(results, status);
-				else theParentTab.tableAdd(results, status);
+				if (bBuild) theHitTab.tableBuild(results, status);
+				else 		theHitTab.tableAdd(results, status);
+				
+				filterPanel.enableButtons(true); // tableRefresh updates the rest
 			} 
 			catch (Exception err) {
-				queryPanel.enableAddToTable(true);
-				theParentTab.setStatus("Error during query");
+				filterPanel.enableButtons(true);
+				theHitTab.enableAllButtons(true);
+				theHitTab.setStatus("Error during query");
 				JOptionPane.showMessageDialog(null, "Query failed due to unknown reasons ");
 				ErrorReport.reportError(err, "Internal error: building hit table");
 			}
@@ -2814,14 +2820,14 @@ public class BasicHitFilterPanel extends JPanel {
             		fields += col + pvalColNames[x];
             }
             // build where clause
-            String strQuery = "SELECT " + fields + whereBegin + queryPanel.getWhereSearch();
+            String strQuery = "SELECT " + fields + whereBegin + filterPanel.getWhereSearch();
            
-            if (queryPanel.useFilter()) { 
-            	strQuery += queryPanel.getWhere();
-            	if (queryPanel.chkCount.isSelected())   strQuery += countPanel.getWhere();
-	            if (queryPanel.chkAnnoDBs.isSelected()) strQuery += annoDBPanel.getWhere();
-	            if (queryPanel.chkSpecies.isSelected()) strQuery += speciesPanel.getWhere();
-	            if (queryPanel.chkGOetc.isSelected())   strQuery += goPanel.getWhere();
+            if (filterPanel.useFilter()) { 
+            	strQuery += filterPanel.getWhere();
+            	if (filterPanel.chkCount.isSelected())   strQuery += countPanel.getWhere();
+	            if (filterPanel.chkAnnoDBs.isSelected()) strQuery += annoDBPanel.getWhere();
+	            if (filterPanel.chkSpecies.isSelected()) strQuery += speciesPanel.getWhere();
+	            if (filterPanel.chkGOetc.isSelected())   strQuery += goPanel.getWhere();
             }
             strQuery += " ORDER BY tn.uniprot_id ASC";
  
@@ -2833,7 +2839,7 @@ public class BasicHitFilterPanel extends JPanel {
 	    	int cnt=0;
             while( rset.next() )
     		{	
-        		int cutoff = queryPanel.getAlign();
+        		int cutoff = filterPanel.getAlign();
         		if (cutoff>0) { 
         			int hlen = rset.getInt(17); // CAS332 didnt fix when added bitscore; fails when Hcov is selected
         			int halign = Math.abs(rset.getInt(9)-rset.getInt(8)+1);
@@ -2843,7 +2849,7 @@ public class BasicHitFilterPanel extends JPanel {
     	        Object [] readBuffer = new Object[numStaticFields + numSetFields];
     	        
     	        for (int i=0; i<numStaticFields; i++) {
-    	        		readBuffer[i] = rset.getString( i+1 );
+    	        	readBuffer[i] = rset.getString( i+1 );
     	        }	
     			for(int x=0; x<numSetFields; x++) {
     				readBuffer[numStaticFields + x] = rset.getDouble(numStaticFields+x+1);
@@ -2851,7 +2857,7 @@ public class BasicHitFilterPanel extends JPanel {
     			resultList.add(readBuffer);
     			cnt++;
     			if (cnt==1000) {
-    				theParentTab.setStatus("Loaded " + resultList.size() + " from database...");
+    				theHitTab.setStatus("Loaded " + resultList.size() + " from database...");
     				cnt=0;
     			}
     		}
@@ -2947,7 +2953,7 @@ public class BasicHitFilterPanel extends JPanel {
 	private boolean isGrpView=true;
 	
 	// main panel
-	private MainQueryPanel queryPanel = null;
+	private FilterPanel filterPanel = null;
 	private JPanel alignPanel = null;
 	
 	// sub panels
@@ -2958,7 +2964,7 @@ public class BasicHitFilterPanel extends JPanel {
 	private GOetcPanel goPanel = null;
 	private CountPanel countPanel = null;
 
-	private BasicHitTab theParentTab = null;
+	private BasicHitTab theHitTab = null;
 	private STCWFrame theMainFrame = null;
 	private MetaData metaData = null;
 	private boolean hasGO=false;
