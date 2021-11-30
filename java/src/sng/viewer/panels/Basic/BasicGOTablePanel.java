@@ -905,8 +905,9 @@ public class BasicGOTablePanel {
 	public void addResult(Object [] newRow) {
 		theResults.add(newRow);	
 	}
-	
-	public Vector<Object []> getTheResults() {return theResults;} // used by Trim
+	public Vector<Object []> getTheResults() {
+		return theResults;
+	} 
 	
 	public void showColumns() { // Called when Column button selected
 		columnPanel.setupVisible();
@@ -937,6 +938,14 @@ public class BasicGOTablePanel {
 			return desc; 
 		}
 		return null;
+	}
+	public HashSet <Integer> getAllGOnums() { // CAS337 for ADD function
+		HashSet <Integer> gonums = new HashSet <Integer> ();
+		
+		for (int x=0; x<theResults.size(); x++)
+			gonums.add((Integer) theResults.get(x)[GOindex]); 
+		
+		return gonums;
 	}
 	
 	public int getSelectedRowCount() 		{return theTable.getSelectedRowCount();}

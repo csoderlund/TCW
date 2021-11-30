@@ -2,22 +2,45 @@
 <HTML>
 <!--#set var=TITLE value="TCW Release Notes" -->
 <!--#include virtual="./ssi/head.html" -->
+<style type="text/css">
+  td {
+    padding: 0 15px;
+  }
+</style>
 <body>
 <a id=top>
 <!--#include virtual="./ssi/start1.html" -->
 
-<h4>v3.3.7  29-Dec-2021</h4>
-This is a minor release.
-<p><ttp>viewSingleTCW </ttp>
+There have been many improvements, but the following provides some recent critical points.
+<table>
+<tr><td><a href=#v337>v3.3.7</a><td>30-Nov-21<td><ttp><font color=green>Latest</font></ttp><td>Help updates and button activation
+<tr><td><a href=#v336>v3.3.6</a><td>22-Nov-21<td><ttp>viewSingle</ttp><td>improvements to the Basic Filters (Seq, Hit, and GO).
+<tr><td><a href=#v335>v3.3.5</a><td>04-Nov-21<td><ttp>viewSingle</ttp><td>log2FC TPM analysis 
+<tr><td><a href=#v334>v3.3.4</a><td>18-Oct-21<td><ttp>runSingle</ttp><td><ttl>ORF finder</ttl> improvements.
+<tr><td><a href=#v331>v3.3.1</a><td>01-Sep-21<td><ttp>runSingle</ttp><td> Add Prune Hits algorithm.
+<tr><td><a href=#v330>v3.3.0</a><td>15-Aug-21<td>All<td>Update Diamond and Blast and default parameters.
+<tr><td><a href=#v327>v3.2.7</a><td>20-Jul-21<td><ttp>viewSingle</ttp><td>Add enhanced Decimal Display (highlight p-values)
+<tr><td><a href=#v325>v3.2.5</a><td>04-Jun-21<td><ttp>runMulti</ttp><td>Fix <ttp>orthoMCL</ttp> to work with MariaDB
+<tr><td><a href=#v325>v3.2.3</a><td>09-May-21<td><ttp>viewSingle</ttp><td>Enhance the Hit-GO evidence codes query and display.
+<tr><td><a href=#v321>v3.2.1</a><td>09-Apr-21<td><ttp>runDE</ttp><td>The built-in GOseq was changed to any script that is run by runDE.
+<tr><td><a href=#v318>v3.1.8</a><td>18-Mar-21<td><ttp>runAS</ttp><td>Changed the source of GO to the go-basic.obo file
+<tr><td><a href=#v312>v3.1.2</a><td>04-Dec-20<td><ttp>runMulti</ttp><td>Improve MSA scores
+<tr><td><a href=#v310>v3.1.0</a><td>05-Nov-20<td><ttp>viewMulti</ttp><td>Add Hit Filter and Table
+</table>
+
+<a name=v337>
+<h4>v3.3.7  30-Nov-2021</h4>
+<p><ttp>viewSingleTCW </ttp> - minor changes
 <ul>
 <li>Improved some of the text of the <b>Help</b> popups.
 <li>Basic Filters: buttons are made inactive when they cannot be used - this was not done
 consistently, but now is.
-<li>Seq Details: (1) Only highlight top drop-down buttons if an item is selected. (2) Speeded up
+<li>Basic GO: The "ADD" function would add duplicate GOs.
+<li>Seq Details: (1) Change to only highlight top drop-down buttons if an item is selected. (2) Speeded up
 <u>Seq hits - inherited</u>.
 </ul>
 
-
+<a name=v336>
 <h4>v3.3.6  22-Nov-2021</h4>
 This release has improvements to the Basic Filters (Seq, Hit, and GO).
 <p><ttp>viewSingleTCW </ttp>
@@ -25,16 +48,16 @@ This release has improvements to the Basic Filters (Seq, Hit, and GO).
 <li>All Basic
 <ul>
 <li>Help has been split into a single Help.. drop-down.
-<li><font color=green>New</font> They all have a new feature that highlights the selected rows in the table.
+<li><font color=blue>New</font> They all have a new feature that highlights the selected rows in the table.
 <li>The information on the status line above the tables is consistent and more informative.
 </ul>
 
 <li>Basic GO: 
 <ul>
-<li><font color=green>New</font> Add <u>Select related in table</u>, <u>Select ancestors in table</u>, <u>Select descendents in table</u> 
+<li><font color=blue>New</font> Add <u>Select related in table</u>, <u>Select ancestors in table</u>, <u>Select descendants in table</u> 
 to the <ttc>Show</ttc> button. 
-<li><font color=green>New</font> Add <u>Select terminal terms</u> for the <ttc>Table...</ttc> button; this selects all rows that do not
-have descendents in the table.
+<li><font color=blue>New</font> Add <u>Select terminal terms</u> for the <ttc>Table...</ttc> button; this selects all rows that do not
+have descendants in the table.
 <li><ttc>Select query</ttc> was implemented, which executes the query and selects the intersecting rows.
 <li>Add Row number column.
 </ul>
@@ -42,9 +65,11 @@ have descendents in the table.
 <ul>
 <li>The <ttc>SELECT ROWS</ttc> feature has been moved to the bottom set of buttons and called <ttc>Select Query</ttc>.
 </ul>
-<li>Minor fixes: (1) Use "bit-score" everywhere in Help. Otherwise use bitscore. It was different everywhere.<br>(2) Basic GO: Was not disabling "#Seq" on Enrich line when Search was selected. Was not checking for a valid p-value.
+<li>Minor fixes: (1) Use "bit-score" everywhere in Help. Otherwise use bit-score. It was different everywhere.<br>(2) Basic GO: Was not disabling "#Seq" on Enrich line when Search was selected. Was not checking for a valid p-value.
 Was showing a level 0 (obsolete) when the range started at 1. Exports did not work right if GOid was not displayed.
 </ul>
+<a href=#top>Go to top</a>
+<a name=v335>
 <h4>v3.3.5  4-Nov-2021</h4>
 The main change from this release is a feature to allow log2FC analysis besides FC.
 <p><ttp>runSingleTCW</ttp>
@@ -54,19 +79,20 @@ The main change from this release is a feature to allow log2FC analysis besides 
 
 <ttp>viewSingleTCW </ttp>
 <ul>
-<li>Basic Hits: <ttc>Seq Table</ttc>, <ttc>Delete Selected</ttc>, <ttc>Keep Selected</ttc> for "Group by Hit ID"":
-<ul>
-<li>If there were many seq-hit pairs,  these functions could take a very long time - its faster now, but can still
-take a long time (a popup will advice the user now). 
-<li>Tiny rare bugs: (1) The <ttc>Clear All</ttc> did not work if there were no counts for the sequences.
-(2) The hit 'best align' value on rare occasions was wrong.
-</ul>
 
 <li>Sequence Table: <ttc>Filter</ttc> and <ttc>Column</ttc>:
 <ul>
 <li>The N-fold column and filters are given the option of displaying and filtering on the log2FC or just the FC.
 <li>Bug fix: Differential Expression: The "Any" for "Up" would only show up-regulated for all selected DE columns
 that had at least one &lt;p-value; that restriction has been removed. Same for "Down". 
+</ul>
+
+<li>Basic Hits: <ttc>Seq Table</ttc>, <ttc>Delete Selected</ttc>, <ttc>Keep Selected</ttc> for "Group by Hit ID"":
+<ul>
+<li>If there were many seq-hit pairs,  these functions could take a very long time - its faster now, but can still
+take a long time (a popup will advice the user now). 
+<li>Tiny rare bugs: (1) The <ttc>Clear All</ttc> did not work if there were no counts for the sequences.
+(2) The hit 'best align' value on rare occasions was wrong.
 </ul>
 
 <li>Seq Detail: - minor change
@@ -77,7 +103,8 @@ and <ttc>Distinct Regions</ttc> is displayed, one of the bests may not be in the
 be aligned).
 </ul>
 </ul>
-
+<a href=#top>Go to top</a>
+<a name=v334>
 <h4>v3.3.4  18-Oct-2021</h4>
 This release is improvements for the <ttl>ORF finder</ttl>.
 <p><ttp>runSingleTCW</ttp>
@@ -90,7 +117,7 @@ This release is improvements for the <ttl>ORF finder</ttl>.
 (default 2000), after removing similar sequences. N can be changed by executing <ttc>execAnno</ttc> with the
 -t option.
 <li><u>Sort</u>: (1) Instead of comparing the Markov scores, it tests against (Abs(log(score1)-log(score2)&gt;0.3), where negative
-markov scores are -(log(-score1)); (2) If the length and Markov scores are similar, a 4th rule checks for ends (Start & Stop codon).
+Markov scores are -(log(-score1)); (2) If the length and Markov scores are similar, a 4th rule checks for ends (Start & Stop codon).
 <li><u>With Hit</u>: If the hit ends at start/stop codons, always use those coordinates. Otherwise, it finds all possible ORFs (including Stop to Stop),
 and sorts for the best ORF.
 <li><u>Stop codons</u>: If there was stop codons in the hit, it was not always finding the best coordinates - now it does. 
@@ -104,9 +131,7 @@ the log for comparing lengths.
 <li>The output files are now sorted by SeqID.
 <li>Previously, allGoodORFs.pep.fa + bestORFs.pep.fa provided all candidate ORFs; now all 
 candidate ORFs are in allGoodORFs.pep.fa.
-
 </ul>
-
 </ul>
 
 <ttp>viewSingleTCW </ttp>
@@ -118,14 +143,14 @@ This allows files to be used that have other information on each line.
 <li><ttc>Basic GO annotations</ttc>: Add "#" before column headings so an exported file can later be read in 
 (The other Exports already do this).
 </ul>
-<li><font color=green>New</font> <ttc>Sequence Table</ttc> has new Export option to output the columns
+<li><font color=blue>New</font> <ttc>Sequence Table</ttc> has new Export option to output the columns
 of the selected row.
 <li><ttc>Basic Sequence</ttc>: 
 <ul>
-<li><font color=green>New</font> Select one sequence from the table followed by <ttc>Seq Detail</ttc> to see the <ttc>Sequence Detail</ttc>
+<li><font color=blue>New</font> Select one sequence from the table followed by <ttc>Seq Detail</ttc> to see the <ttc>Sequence Detail</ttc>
 panel. This is in contrast to the <ttc>Seq Table</ttc> ,which results the sequences being shown in the 
 <ttc>Sequence Table</ttc>.
-<li><font color=green>New</font> The result of a search will <ttc>SELECT ROWS</ttc> from the existing table.
+<li><font color=blue>New</font> The result of a search will <ttc>SELECT ROWS</ttc> from the existing table.
 </ul>
 
 
@@ -145,6 +170,7 @@ Other
 <li>demoTra: add N's to a few of the sequences.
 </ul>
 
+<a name=v333>
 <h4>v3.3.3  25-Sept-2021</h4>
 
 <ttp>viewSingleTCW</ttp> - tiny fixes
@@ -163,9 +189,9 @@ off by 1.
 <li>Main Table "Export GOs from Table" did not work if there were no GOseq values.
 <li>Basic GO: The "Show" was recently broken, and has been fixed.
 </ul>
-
+<a href=#top>Go to top</a>
+<a name=v332>
 <h4>v3.3.2  15-Sept-2021</h4>
-Fixes for bugs recently introduced bugs and one display improvement. 
 
 <p><ttp>runSingleTCW</ttp> 
 <ul>
@@ -175,13 +201,13 @@ Fixes for bugs recently introduced bugs and one display improvement.
 
 <ttp>viewSingleTCW</ttp> 
 <ul>
-<li>AnnoDB Hits bug fix from v3.3.0: Filtering on "%HitCov" stopped working.
 <li>Pair Alignment: if multiple pairs are shown, the alignment will start in the same place across all alignments.
 <li>Verified all "Reproduce" information from "Overview" and improved the description.
+<li>AnnoDB Hits bug fix from v3.3.0: Filtering on "%HitCov" stopped working.
 </ul>
-
+<a href=#top>Go to top</a>
+<a name=v331>
 <h4>v3.3.1  1-Sept-2021</h4>
-
 The singleTCW database has a small schema update that will be applied the first time an existing
 database is viewed.
 
@@ -194,7 +220,6 @@ A new function removes all but the best based on same alignment values or same d
 This function can be set to run in the AnnoDBs <ttl>Options</ttl> or from the command line.
 <li>Tiny changes;
 <ul>
-
 
 <li>DIAMOND - removed '--max-hsps 1' as TCW defaults because it is a DIAMOND default.
 Removed '--top 20' as this misses some good descriptions.
@@ -234,7 +259,9 @@ the minus sign before an DE value (as <ttp>viewSingleTCW</ttp> does).
 <ul>
 <li>The Best Bits, etc assignment was moved from DoUniProt.java to DoUniAssign.java
 </ul>
+<a href=#top>Go to top</a>
 <!-------------------------------------------------------------------->
+<a name=v330>
 <h4>v3.3.0  15-August-2021</h4>
 <i>Update existing multiTCW databases for this release</i>: 
 There is a small mTCWdb schema change, which will be updated the first time you access the database. However,
@@ -245,7 +272,7 @@ the pairs table <ttl>NTbest</ttl> column will not have values unless you reload 
 A slight change to the TCW was necessary for the latest DIAMOND and there is better error checking for the <ttl>Find Hits</ttl> feature.
 <li>The TCW DIAMOND defaults have changed to the following:
 <ul>
-<li>Sequences against annoDB: <tt>--max-hsps 1 --masking 0 --top 20</tt>
+<li>Sequences against annoDB: <tt>--max-hsps 1 --masking 0 --top 20</tt> (changed again in v3.3.1 1-Sep-21)
 <li>Self-search: <tt>--max-hsps 1 --masking 0 --sensitive  --query-cover 25 --subject-cover 25</tt>
 </ul>
 
@@ -294,7 +321,8 @@ that the pre-computed MSAs did not exist (anymore).
 <li><ttp>viewSingleTCW</ttp> Overview includes the <ttp>runDE</ttp> filtering options under 
 PROCESSING INFORMATION.
 </ul>
-
+<a href=#top>Go to top</a>
+<a name=v327>
 <h4>v3.2.7  20-July-2021</h4>
 This release has improved <ttc>Decimal Display</ttc> and multiple tiny improvements.
 
@@ -305,7 +333,6 @@ latter does not have the color coding.
 <li>A third parameter has been added for the leading digits for E-notation, i.e. 1.2E-02 versus 1E-02.
 </ul>
 
-
 <p><ttp>runSingleTCW</ttp> - all minor
 <ul>
 <li>Overview: slight changes to the AnnoDB and ORF section. 
@@ -313,7 +340,6 @@ latter does not have the color coding.
 <ul>
 <li>The <ttc>Default</ttc> button resets to "Train with Best Hits"". 
 If "Train with CDS file" is selected but no file entered, an error message will be written.
-<li>The ORF remark for Stop in frame was using "EV", which has been changed to "BS" for best bit score.
 </ul>
 </ul>
 
@@ -353,6 +379,8 @@ Software Details
 <ul>
 <li>mTCW db v64: the OrigID was added to the sequence table and hasOrig to the info table.
 </ul>
+
+
 <h4>v3.2.6  6-July-21</h4>
 There is a small schema update (dbVer 5.9) for <ttp>singleTCW</ttp>; the first time a sTCWdb is accessed, it will be updated.
 <p>
@@ -366,7 +394,7 @@ There is a small schema update (dbVer 5.9) for <ttp>singleTCW</ttp>; the first t
 <li>Multi Align: Use built-in DP to create Multi-alignment if the cluster is size 2; this greatly speeds up 
 this step.
 <li><font color=blue>New</font> Remove...: Add <tt>Remove clusters from database</tt>.
-<li>BUG FIX - Remove cluster: If a cluster set was removed after Multi Stats was run, then new clusters added, it did not work.
+<li>Bug fix - Remove cluster: If a cluster set was removed after Multi Stats was run, then new clusters added, it did not work.
 </ul>
 
 <ttp>runDE</ttp>
@@ -408,7 +436,9 @@ what the semi-global (default) algorithm uses.
 <li>BUG FIX - Basic Sequence: If the database was built using the original sequence names, the
 Search did not work.
 </ul>
+<a href=#top>Go to Top</a>
 <hr>
+<a name=v325>
 <h4>v3.2.5  4-June-21</h4>
 This release make fixes and small changes to <ttp>runMultiTCW</ttp>.
 <ul>
@@ -442,11 +472,10 @@ A method was added for a project with non-default parameters, exit <ttp>runMulti
 TCW on the three 'ex' demos; this can be added as an "User Defined" method.
 </ul>
 <hr>
+<a name=v324>
 <h4>v3.2.4  16-May-21</h4>
 This release has improvements to <ttp>viewSingleTCW</ttp> for exploring GOs. 
 <ul>
-<li>The two display problems from v3.2.2 have been fixed correctly.
-	
 <li><ttl>Basic GO, Basic Hit, Sequence Detail GO Panel</ttl>
 	<ul>
 	<li>These three panels now have separate <b>Show</b> and <b>Export</b> buttons.
@@ -463,17 +492,11 @@ This release has improvements to <ttp>viewSingleTCW</ttp> for exploring GOs.
 	<li>A <b>Set Defaults</b> button returns all parameters to their defaults.
 	</ul>
 </ul>
+<a href=#top>Go to top</a>
 <hr>
+<a name=v323>
 <h4>v3.2.3  9-May-21</h4>
-Removed two small features in order to fix two display bugs introduced in the last release:
-<ol>
-<li>The Basic Hit Table no longer has the highlighted p-value option (only of interest in the Hit-Seq mode).
-<br>Problem: It shares table code with Basic Sequence, which was messed up by this.
-<li>The Basic GO table no longer allows the columns to be moved, but sorting is still possible.
-<br>Problem: Some combinations of moving columns seriously messed up.
-</ol> 
-There will be a new release soon with the above two items working.
-<p>Additionally in this release, the approach for GO evidence codes has been changed.
+The approach for GO evidence codes has been changed.
 <ul>
 <li>For existing sTCWdbs, there is a small schema update and its necessary to redo the <ttp>runSingleTCW</ttp> <ttc>GO only</ttc>
 options.
@@ -489,6 +512,7 @@ options.
 	</ul>
 </ul>
 <hr>
+<a name=v322>
 <h4>v3.2.2  4-May-21</h4>
 <ul>
 <li>Terminology changes: 
@@ -526,7 +550,9 @@ options.
 	<li>All Exports files have been rechecked - no problems found.
 	</ul>
 </ul>
+<a href=#top>Go to top</a>
 <hr>
+<a name=v321>
 <h4>v3.2.1  19-Apr-21</h4>
 <i>Update existing sTCW databases for this release</i>: There is a small sTCWdb schema change, which will be 
 updated the first time you access the database.
@@ -548,6 +574,7 @@ This required changes in Schema, MetaData, Overview, runDE.QRprocess, annotator.
 </ul>
 
 <hr>
+<a name=v320>
 <h4>v3.2.0  29-Mar-21</h4>
 
 <p><i>Existing GOdb and sTCWdb</i>: 
@@ -574,7 +601,7 @@ is removed, e.g. "<tt>2.4.1.- {ECO:0000256|RuleBase:RU362057}</tt>" is
 </ul>
 <li><ttp>runSingleTCW</ttp>
 <ul>
-<li><ttc>Evidence Codes</ttc>: <font color=red>Bug</font> The evidence codes were wrong (I don't know what release broke this).
+<li><ttc>Evidence Codes</ttc>: Bug - The evidence codes were wrong (I don't know what release broke this).
 <br>This has been fixed and only the evidence codes from the UniProt hits with the GO assigned will be shown. 
 </ul>
 <li><ttp>viewSingleTCW</ttp> - <ttc>Basic GO</ttc>
@@ -588,12 +615,12 @@ is removed, e.g. "<tt>2.4.1.- {ECO:0000256|RuleBase:RU362057}</tt>" is
 <hr>
 <hr>
 <h3>TCW Version 3.1</h3>
+<a name=v319>
 <h4>v3.1.9  25-Mar-21</h4>
-This release fixes a few tiny bugs created by the last release.
+
 <ul>
 <li><ttc>Overview</ttc>
 <ul>
-<li>No GO info in <ttc>Overview</ttc>.
 <li>Rearranged <ttc>Overview</ttc>.
 <li>Added some GO statistics
 </ul>
@@ -623,14 +650,16 @@ part_of         GO:0042273      bio     ribosomal large subunit biogenesis
 <li>A new GO Help page, see <a href="./tour/viewSingle/goHelp/go794.html" a class=ext target="_blank">GO:0000794</a>
 </ul>
 </ul>
+<a href=#top>Go to top</a>
 <hr>
+<a name=v318>
 <h4>v3.1.8  19-Mar-21</h4>
 <ul>
 <li><ttp>runAS</ttp> - building the <tt>GOdb</tt> mysql database of GOs and UniProts.
 	<ul>
 	<li>The GOs were obtained from the downloaded <tt>go_&lt;date&gt;-termdb-tables.tar.gz</tt>, which has been discontinued.
 	Now <ttp>runAS</ttp> downloads the <tt>go-basic.obo</tt> file and builds the <tt>GOdb</tt> from scratch.
-	<li>The <ttc>GO Trim</ttc> function is temporarily disabled until a later release.
+	<li>The <ttc>GO Trim</ttc> function is disabled (probably permanently).
 	<li><b>Previous GOdbs</b> - should still work except that for the GO_slims, which will be ignored.
 	</ul>
 <li>Documentation
@@ -675,8 +704,9 @@ to make the database consistent with the interface (e.g. Best Bitscore has repla
 <ul>
 <li>Best and Rank:
 <table class=tablex>
-<tr><td class="top"><ttx>Best Bits</ttx><td> The <ttx>Best Eval</ttx> (best e-value) has been replaced with <ttx>Best Bits</ttx>. The <ttx>Best Bits</ttx> hit has the best bitscore of the
-set of hits for the sequence. This is much better than using the e-value, which depends on the database size.
+<tr><td class="top"><ttx>Best Bits</ttx><td> 
+The <ttx>Best Eval</ttx> (best e-value) has been replaced with <ttx>Best Bits</ttx>. 
+This is much better than using the e-value, which depends on the database size.
 <tr><td  class="top"><ttx>Best Anno</ttx><td> (1) It used to be the case that the e-value of the candidate best anno hit 
 had to be reasonable close to the <ttx>Best Eval</ttx> e-value. It no longer checks the e-value or bitscore.
 <br>(2) The rules for determining an un-informative hit have been slightly changed, e.g. "unnamed protein product" has been added to the un-informative list, which is found in nr.gz.
@@ -923,8 +953,9 @@ A few confusing aspects of the interface were fixed, mainly dealing with paramet
 </ul>
 
 </ul>
-
+<a href=#top>Go to tope</a>
 <hr>
+<a name=v312>
 <h4>v3.1.2  4-Dec-20</h4>
 This release concentrates on improving the multiTCW MSA scores and viewing alignments.
 <ul>
@@ -1011,7 +1042,9 @@ and add it to the <ttx>Copy...</ttx> drop-down.
 </ul>
 <li>Update all of Tour.
 </ul>
+<a href=#top>Go to top</a>
 <hr>
+<a name=v310>
 <h4>v3.1.0  5-Nov-20</h4>
 
 <ul>
@@ -1030,7 +1063,7 @@ has been improved (albeit, still a bit confusing). There are now two AAsim perce
 one is the percent of equal AA chars from all aligned AA chars, and second is the average
 of the %similarities for each pair alignment. The same two numbers exist for NTsim, AAcov, and NTcov.</ul>
 
-<li>Hit Table and Filter:
+<li><font color=blue>New</font> Hit Table and Filter:
 <ul>
 <li>This is a new table and filter. It only links to the Sequence Table.
 </ul>
@@ -1252,7 +1285,7 @@ Now only the pairs that have not been aligned will be re-aligned and written to 
 <p><ttp>viewMultiTCW</ttp>
 <ol>
 <li>The Cluster and Pairs filters have a Yes/No toggle to find clusters with or without a description substring.
-<li>The Export GOs has a count cutoff, and an option for outputing the description and count.
+<li>The Export GOs has a count cutoff, and an option for outputting the description and count.
 <li>The Pairs table will have a hitName of "NoShare" if there is no shared description.
 <li>Sequence details has new 'best' column on hit table.
 </ol>
@@ -1454,7 +1487,7 @@ Release 21Oct18: Requires Java 1.7 (instead of 1.6). Added User Remark to sTCW a
 <li>Parameters were established that result in <ttp>Diamond</ttp> getting close to the same hits as <ttp>Blast</ttp>. 
 <br>It uses "--top 20" instead of "-k 25", hence, there can be many hits when using TrEMBL. Therefore, there is now an internal cutoff of 25 hits per annoDB per sequence. (14Oct18)
 <br>The "--masking 0" option has been added to the Diamond TCW default parameters, as tests show that good hits were not being reported (this reduction
-of false-negatives does increas the false-positives a little).
+of false-negatives does increase the false-positives a little).
 <li>When adding annoDBs, the search program option of "TCW Select" is no longer available. If <ttp>Diamond</ttp> path in in the HOSTS.cfg file, it is the
 default. Diamond 0.9.22 was tested.
 <li>The ability to use Legacy blast has been removed. 
@@ -1614,7 +1647,7 @@ it with <ttp>runMultiTCW</ttp> or <ttp>viewMultiTCW</ttp>. However, you need to 
 <li>Overview: 
 <ul>
 <li>The percentages were for the whole dataset, e.g. the percent of exact codons from all codons. This
-has been changed to be the average of the individual precentages, e.g. the average percent codon from all pairs. This makes the numbers consistent with
+has been changed to be the average of the individual percentages, e.g. the average percent codon from all pairs. This makes the numbers consistent with
 the new 'Columns Stats" in <ttp>viewMultiTCW</ttp>, which also provide standard deviation, median and ranges.
 <li>The KaKs quartiles were incorrect in some cases, plus changed the p-value table for the overview. The standard deviation method was changed from population to sample calculation.
 </ul>

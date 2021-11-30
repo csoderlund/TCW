@@ -17,7 +17,7 @@ import util.methods.Out;
 
 /**********************************************************
  * Load data from database for the GO table
- * CAS336 Trim was disabled after v317. The code was removed in v336 and replaced with "Select end GOs".
+ * CAS336 Trim was disabled after v317. The code was removed in v336 and replaced with "Select End GOs".
  */
 public class BasicGOLoadFromDB  {
 	private static final int GOindex=BasicGOTablePanel.GOindex;
@@ -68,15 +68,17 @@ public class BasicGOLoadFromDB  {
 			ResultSet rs = mDB.executeQuery(query);
 			ResultSetMetaData rsmd = rs.getMetaData();
 			int numCols = rsmd.getColumnCount();
-			int cnt=0, rowcnt=tablePanel.getRowCount();
+			int cntAdd=0, cntRow=tablePanel.getRowCount();
 			
 			// deUp and deDn
 			String deWhere = filterPanel.makeNseqClause(true); 
-			Vector <Integer> gonum = new Vector <Integer> ();
+			
 			String [] terms = Globalx.GO_TERM_LIST;
 			String [] abbr =  Globalx.GO_TERM_ABBR;
 			
-			HashSet <Integer> goSet = new HashSet <Integer> ();
+			Vector  <Integer> goResults = new Vector <Integer> ();
+			HashSet <Integer> goSelect = new HashSet <Integer> ();
+			HashSet <Integer> goBuild = (type==ADD) ? tablePanel.getAllGOnums() : null; // CAS337
 			
 			int nRow=1; // CAS336 add row
 			while(rs.next()) {
@@ -102,46 +104,55 @@ public class BasicGOLoadFromDB  {
 					}
 				} 
 				// finish building row, now process
-				if (type!=SELECT) {
+				int gonum = (Integer) vals[BasicGOTablePanel.GOindex];
+				if (type==BUILD) {
 					tablePanel.addResult(vals);	
-					if (deWhere!="")
-						gonum.add((Integer) vals[BasicGOTablePanel.GOindex]);
+					if (deWhere!="") goResults.add(gonum);
+					cntAdd++; cntRow++;
 				}
-				else { // CAS336 add select
-					goSet.add((Integer) vals[BasicGOTablePanel.GOindex]);
+				else if (type==ADD) {
+					if (!goBuild.contains(gonum)) {
+						tablePanel.addResult(vals);	// CAS337 was never checking
+						cntAdd++; cntRow++;
+					}
+					if (deWhere!="") goResults.add(gonum);
 				}
-				cnt++; rowcnt++;
+				else { // CAS336 type=SELECT
+					goSelect.add(gonum);
+					cntAdd++;
+				}	
 			}
 			rs.close();
 			
+		/** Finish **/
+			
 			if (type==SELECT) {
 				mDB.close();
-				tablePanel.selectRows("Query", goSet);
-				filterPanel.loadSelectFinish(cnt);
+				tablePanel.selectRows("Query", goSelect);
+				filterPanel.loadSelectFinish(cntAdd);
 				return;
-				
 			}
-			// The nSeq column value needs to be changed, and if <nSeqFilter, then removed.
+			/* BUILD and ADD */
+			/* The nSeq column value needs to be changed, and if <nSeqFilter, then removed. */
 			int nSeqFilter = filterPanel.getNseqs();
 			if (deWhere!=null) {
 				deWhere+="=";
 				
-				int cntAdd=0, cntTotal = gonum.size();
+				int cntChg=0, cntTotal = goResults.size();
 				// needs to be in descending order because rows may be removed based on nseq value
-				for (int row=gonum.size()-1; row>=0; row--) {
-					int nseq = mDB.executeCount("select count(*) " + deWhere + gonum.get(row));
+				for (int row=goResults.size()-1; row>=0; row--) {
+					int nseq = mDB.executeCount("select count(*) " + deWhere + goResults.get(row));
 					
-					boolean rm = tablePanel.changeNSeq(row, nseq, nSeqFilter);
-					if (rm) {cnt--; rowcnt--; }
-					else cntAdd++;
+					boolean rmRow = tablePanel.changeNSeq(row, nseq, nSeqFilter);
+					if (rmRow) {cntAdd--; cntRow--; } 
+					else        cntChg++;
 					
 					if (row%1000==0) 
-						filterPanel.setStatus("Added " + cntAdd + " of possible " +cntTotal + "...");
+						filterPanel.setStatus("Update " + cntChg + " of possible " + cntTotal + "...");
 				}
 			}
 			mDB.close();
-			
-			filterPanel.loadTableFinish(cnt, rowcnt);
+			filterPanel.loadTableFinish(cntAdd, cntRow); // the same on build, diff on add
 		}
 		catch (Exception e) {
 			ErrorReport.prtReport(e, "Querying GO table");
@@ -176,7 +187,7 @@ public class BasicGOLoadFromDB  {
 			{
 				Node nodeObj = new Node ();
 				nodeObj.gonum = (Integer)r[GOindex];
-				nodeObj.ont = (String) r[GOdomain];
+				//nodeObj.ont = (String) r[GOdomain];
 				
 				allNodeMap.put(nodeObj.gonum, nodeObj);
 			}
@@ -200,7 +211,6 @@ public class BasicGOLoadFromDB  {
 	
 	private class Node implements Comparable <Node>{
 		int gonum;
-		String ont;
 		
 		void add(int pgo) {
 			if (!child.contains(pgo)) child.add(pgo);
