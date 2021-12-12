@@ -51,19 +51,19 @@ public class DoUniProt
      **/
 	public boolean processAllDBhitFiles(boolean isAA, TreeMap<String, Integer> seqs) {
 		if (bUseSP) Out.PrtSpMsg(1, "Best Anno - SwissProt preference");
-		if (bRmECO) Out.PrtSpMsg(1, "Remove {ECO...} from UniProt descripts");
-		else Out.PrtSpMsg(1, "Do NOT remove {ECO...} from UniProt descripts");
+		if (bRmECO) Out.PrtSpMsg(1, "Remove {ECO...} from UniProt descriptions");
+		else Out.PrtSpMsg(1, "Do NOT remove {ECO...} from UniProt descriptions");
 		Out.PrtSpMsg(1,"");
 		
 	 	long totalTime = Out.getTime();
-	 	seqMap  = seqs;
+	 	seqIdMap  = seqs;
 	 	isAAstcwDB = isAA;
 	 	
 	 	init();
 		if (!pRC) return false;  
 		
 	 	// Annotated sequences are added to annoSeq set and entered into database
-	 	Step1_processAllHitFiles();
+	 	step0_processAllHitFiles();
 	 	if (!pRC) return false;  
 	 	
 	 	Out.PrtSpCntMsgZero(1, nTotalBadHits, "hits ignored -- see " + badHitFile);
@@ -92,7 +92,7 @@ public class DoUniProt
 	 	}
 	 	
 	 	Out.PrtSpMsgTime(1, 
-	 			"Finished " + annoSeqSet.size() + " annotated  " + (seqMap.size()-annoSeqSet.size()) + " unannotated",
+	 			"Finished " + annoSeqSet.size() + " annotated  " + (seqIdMap.size()-annoSeqSet.size()) + " unannotated",
 	 			totalTime);
 	 	Out.PrtSpMsg(1," ");
 	 	cleanup();
@@ -107,6 +107,11 @@ public class DoUniProt
 			if (!mDB.tableColumnExists("assem_msg", "prune")) // CAS332 - also run in DoUniPrune
 				mDB.tableCheckAddColumn("assem_msg", "prune", "tinyint default -1", null);
 			mDB.executeUpdate("update assem_msg set prune = " + pruneType);
+			
+			ResultSet rs = mDB.executeQuery("SELECT CTGID, consensus_bases from contig");
+			while (rs.next()) {
+				idLenMap.put(rs.getInt(1), rs.getInt(2));
+			}
 		}
 		catch (Exception e) {
 			pRC = false;
@@ -116,13 +121,13 @@ public class DoUniProt
 	/**********************************************************
 	 * Read all files, add hits, annoDB and unique hit information to db
 	 */
-    private int Step1_processAllHitFiles() {	   
+    private int step0_processAllHitFiles() {	   
 	    int total = 0;
 	    int nFiles = hitObj.numDB();
     	
 		try {
 			Out.PrtSpMsg(1, "Annotate sequences with sequence hits from " + nFiles + " DB file(s)");
-			hitsInDB = s1_loadUniqueHitSet();
+			hitsInDB = step0x_loadUniqueHitSet();
 	    	
 	    	for (int i=0; i< nFiles; i++) { 
 	    		long totalTime = Out.getTime();
@@ -141,7 +146,7 @@ public class DoUniProt
 	    		dbTaxo = hitObj.getDBtaxo(i); 
 			    		
 		/** 1. Add to pja_unitran_hits and contig SQL tables from blast file **/
-				Step1a_processHitFile(i, hitFile);   				
+				step1_processHitFile(i, hitFile);   				
 		    	
 				if (nAnnoSeq==0 && nTotalHits==0) continue;
 				
@@ -150,14 +155,14 @@ public class DoUniProt
 				String db = hitObj.getDBfastaFile(i);
 				if (db.equals("-")) db = hitFile;
 				String date = hitObj.getDBdate(i);
-				DBID = Step1b_saveAnnoDB(db, isAAannoDB, dbType, dbTaxo, nAnnoSeq, hitsAddToDB.size(), 
+				DBID = step2_saveAnnoDB(db, isAAannoDB, dbType, dbTaxo, nAnnoSeq, hitsAddToDB.size(), 
 						nTotalHits, date, hitObj.getDBparams(i));
 				
 		/** 3.  Add to pja_unique_hits the sequence and header info from DB fasta file **/
 				if (db.equals("-")) 
-						Step1c_addUniqueNoFastaFile(i);
+						step3_addUniqueNoFastaFile(i);
 				else 	
-						Step1c_addUniqueFromFastaFile(i);
+						step3_addUniqueFromFastaFile(i);
 				
 		    	hitsAddToDB.clear();
 		    	
@@ -177,12 +182,12 @@ public class DoUniProt
    
     /*************************************************
   	* Read hit File 
-  	* 	call processHitDataForContig to update pja_unitrans_hits  
+  	* 	create list of hitIDs found  
 	*************************************************************/
-    private boolean Step1a_processHitFile(int ix, String hitFile ) 
+    private boolean step1_processHitFile(int ix, String hitFile ) 
     {     	
        	BlastHitData hitData = null;
-       	int nHitNum=0, cntUniqueExists=0, noSeq=0, nTotalDups=0;
+       	int nHitNum=0, cntUniqueExists=0, nTotalDups=0;
        	String curSeqName="", curHitName="";
        	nAnnoSeq = nTotalHits = 0;
     	long time = Out.getTime();
@@ -206,8 +211,7 @@ public class DoUniProt
 		    	nHitNum++; cntPrt++;
 		        if (cntPrt == COMMIT) {     
 		        	cntPrt=0;
-		          	Out.r("      Annotated sequences " + nAnnoSeq + ", total hits " + 
-		          		nTotalHits + ", HSPs " + nHitNum);
+		          	Out.r("Anno-Seqs " + nAnnoSeq + " Seq-hits " +  nTotalHits + " HSPs " + nHitNum);
 		        }	   
     			String[] tokens = line.split("\t");
     			if (tokens == null || tokens.length < 11) continue;
@@ -217,29 +221,24 @@ public class DoUniProt
 					
 					if (! curSeqName.equals("")) { // process previous
 						if (curHitDataForSeq.size() > 0) {// may have had bad hit
-							s1_saveHitDataForSeq(); 
+							step2x_saveHitDataForSeq(); 
 							curHitDataForSeq.clear();
 						}
 					}
 					
-					if (!seqMap.containsKey(newSeqName)) {
+					if (!seqIdMap.containsKey(newSeqName)) {
 						if (!notFoundSeq.contains(newSeqName)) {
 							BlastHitData.printWarning("Sequence " + newSeqName + " in hit file but not in database");
-			    				notFoundSeq.add(newSeqName); 
+			    			notFoundSeq.add(newSeqName); 
 						}
-		        			continue;
+		        		continue;
 					}
 					curSeqName = newSeqName;					
 			        curSeqData.clearAnno();
-			        curSeqData = CoreDB.loadContigData(mDB, curSeqName); 
-			        if (curSeqData!=null) { 
-			        	curSeqData.setContigID(curSeqName); 
-			        	curSeqData.setCTGID(seqMap.get(curSeqName));
-			        }
-			        else {
-			        	if (noSeq==0) Out.PrtError("No sequence '" + curSeqName + "' in database; no further such error messages will be printed");
-						noSeq++;
-			        }
+			        curSeqData = new ContigData (); // CAS338 was loading sequence, but don't need
+			       
+			        curSeqData.setContigID(curSeqName); 
+			        curSeqData.setCTGID(seqIdMap.get(curSeqName));
 			        curHitName="";
 				}
 				
@@ -252,10 +251,9 @@ public class DoUniProt
 				curHitName = newHitName;
 				
 				// cntHits++;
-				//if (cntHits>maxHitsPerAnno) { // CAS331 allow user to control
-				//	continue;
-				//}
-		    	// create list of hits for current contig
+				//if (cntHits>maxHitsPerAnno) continue; // CAS331 allow user to control
+				
+		    	// create list of hits for current seq
 		    	hitData = new BlastHitData (isAAannoDB, line);
 		    	
 		    	// if HIT id already in database, then this is being run again
@@ -274,15 +272,15 @@ public class DoUniProt
 	    	}  // end loop through hit tab file
     		
 	    	//-----------------------------------------------------------//
-	    	if (! curSeqName.equals("")) { // process last contig
+	    	if (! curSeqName.equals("")) { // process last seq
 	    		if (curHitDataForSeq.size() > 0) {// may have had bad hit
-					s1_saveHitDataForSeq(); 
+					step2x_saveHitDataForSeq(); 
 					curHitDataForSeq.clear();
 				}
 	    	}
 	    	if ( reader != null ) reader.close();
 		
-			Out.r("                                                                         ");
+			Out.rClear();
 			
 			if (cntUniqueExists > 0) 
 				Out.PrtWarn(cntUniqueExists + " DB ids already existed in sTCW -- ignored ");
@@ -304,9 +302,9 @@ public class DoUniProt
     }
  
     // gathered all hits in hitDataForCtg per sequence per annoDB. Save each hit. 
-    private void s1_saveHitDataForSeq() {
+    private void step2x_saveHitDataForSeq() {
 	    try {
-	    	int seqLen = curSeqData.getConsensusBases();
+	    	int seqLen = idLenMap.get(curSeqData.getCTGID()); // CAS338 was from database everytime
 				
 	    	Collections.sort(curHitDataForSeq); // CAS317 was blast (eval/bitsore) order, make TCW (bitscore/eval) order
 	    	
@@ -315,7 +313,8 @@ public class DoUniProt
 			  "mismatches, gap_open, ctg_start, ctg_end, prot_start, prot_end, " +
 			  "bit_score , e_value, dbtype, taxonomy, blast_rank, isProtein, ctg_cov, prot_cov) " +
 			  "VALUES (?,1,0,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?, ?,?)");
-	    		mDB.openTransaction(); 
+	    	
+	    	mDB.openTransaction(); 
 	    		
        		for (int i=0; i<curHitDataForSeq.size(); i++) {
        			BlastHitData hitData = curHitDataForSeq.get(i);
@@ -349,7 +348,7 @@ public class DoUniProt
 			    ps.setString(17, b);
 			    ps.setInt(18, seqCov);
 			    ps.setInt(19, hitCov);
-			    ps.execute();
+			    ps.addBatch();
 	       
 		       // the pid gets updated in the contig record in the calling routine
 		       int pid = mDB.lastID();
@@ -360,24 +359,25 @@ public class DoUniProt
        			
 				nTotalHits++;
        		}
+       		ps.executeBatch(); // CAS338
        		ps.close();
        		mDB.closeTransaction();
        		
        		nAnnoSeq++;
        		// CAS304
        		String name = curSeqData.getContigID();
-       		int id = seqMap.get(name);
+       		int id = seqIdMap.get(name);
 		    if (!annoSeqSet.contains(id)) annoSeqSet.add(id);
 	    }
-        catch ( Exception err ) {
+        catch (Exception e) {
         	pRC=false;
-			ErrorReport.reportError(err, "Annotator - processing hit data");
+			ErrorReport.reportError(e, "Annotator - processing hit data");
         }
     }
     /************************************************************
      * pja_database update
      */
-    private int Step1b_saveAnnoDB(String fileName, boolean isProtein, String dbtype, String dbtaxo, 
+    private int step2_saveAnnoDB(String fileName, boolean isProtein, String dbtype, String dbtaxo, 
     		int bestHits, int uniqueHits, int totalHits,  String dbdate,
     		String parameters) throws Exception
     {
@@ -416,38 +416,44 @@ public class DoUniProt
     }
    
     /*********************************************************************
-     * Populate pja_unique_hits
+     * Populate pja_unique_hits - hasn't been tested in long time
      ************************************************************/
-    private void Step1c_addUniqueNoFastaFile(int ix) 
+    private void step3_addUniqueNoFastaFile(int ix) 
     {
         int cnt_add=0;
        	long time = Out.getTime();
        
 		Out.PrtSpMsg(2,"DB#" + dbNum + " descriptions: no Database Fasta file provided");
     	try {
+    		PreparedStatement ps = mDB.prepareStatement("INSERT INTO pja_db_unique_hits set " + 
+ 		           "AID=1, DBID=?,  hitID=?, repID=?, dbtype=?, taxonomy=?, isProtein=?, " +
+ 		           "description=?, species=?, length=?, sequence=?");
+ 	
     		mDB.renew();
 	    	while (!hitsAddToDB.isEmpty()) {
 	    		String hitID = hitsAddToDB.iterator().next();
 	    		
-			s1_saveDBhitUnique(DBID, isAAannoDB, dbType, dbTaxo, hitID, "", "", "", "", 0);
-			hitsInDB.add(hitID); // so do not get divide by zero error
+	    		step3x_saveDBhitUnique(ps, DBID, isAAannoDB, dbType, dbTaxo, hitID, "", "", "", "", 0);
+	    		hitsInDB.add(hitID); // so do not get divide by zero error
 	    		hitsAddToDB.remove(hitID); 
 	    	}
-	    	System.err.print("                                                                      \r");
-	    	Step1d_updateHitCov();
+	    	Out.rClear();
+	    	step3x_updateDatabase();
 	    	Out.PrtSpCntMsgTimeMem(3,cnt_add, "unique hits added",time);
     	}
         catch ( Exception err ) {
-        		pRC=false;
+        	pRC=false;
 			ErrorReport.reportError(err, "Annotator - creating unique hit records for hit file w/o description file");
 			return;
         }
     }
-        
-    private void Step1c_addUniqueFromFastaFile(int ix)  
+    // add sequences found in hit file
+    private void step3_addUniqueFromFastaFile(int ix)  
     {
         int cnt_add=0, read=0, failParse=0, cntPrt=0;
-        String hitID="", hitSeq = "", line=null;
+        String hitID="",  line=null, hitSeq=null;
+        StringBuilder hitSeqBuf = new StringBuilder (); // CAS338 - not thread safe
+        
         LineParser lp = new LineParser();
        	BufferedReader reader = null;
        	long time = Out.getTime();
@@ -455,77 +461,92 @@ public class DoUniProt
 		Out.PrtSpMsg(2,"DB#" + dbNum + " descriptions: " + hitObj.getDBfastaNoPath(ix) );
         try {
     		mDB.renew();
+    		mDB.openTransaction(); // CAS338
     		boolean addHit = false;
     	
     		reader = FileHelpers.openGZIP(hitObj.getDBfastaFile(ix));
     		if (reader==null) return;
-        		
+    		
+    		PreparedStatement ps = mDB.prepareStatement("INSERT INTO pja_db_unique_hits set " + 
+			           "AID=1, DBID=?,  hitID=?, repID=?, dbtype=?, taxonomy=?, isProtein=?, " +
+			           "description=?, species=?, length=?, sequence=?");
+		
 			while((line = reader.readLine()) != null) {	
 				line = line.trim();
 				if (line.length() == 0 || line.charAt(0) == '#') continue;
 				
-		// build up sequence 
+		// not header,  so build up sequence 
 				if (line.charAt(0) != '>') {
-					if (addHit) {
-						if (hitSeq.length()+line.length() > maxHitSeq) {
-							if (hitSeq.length() == 0) hitSeq = line.substring(0,maxHitSeq-1);  
-							BlastHitData.printWarning(lp.getHitID() + " > " + maxHitSeq + "; truncated to " 
-											+ hitSeq.length() + " to put in database");
-							nSeqTooLong++;
-						}
-						else hitSeq += line;
-					}
+					if (addHit) 
+						hitSeqBuf.append(line);
+				
 					continue;
 				}
 		// > description line 
-					
-				// Add previous 
-				if (addHit) {
+				
+				if (addHit) { // Add previous 
 					String desc = (bRmECO) ? BestAnno.rmECO(lp.getDescription()) : lp.getDescription();
-					s1_saveDBhitUnique(DBID, isAAannoDB, dbType, dbTaxo, hitID, 
+					
+					hitSeq = hitSeqBuf.toString();
+					if (hitSeq.length()+line.length() > maxHitSeq) {
+						if (hitSeq.length() == 0) hitSeq = line.substring(0,maxHitSeq-1);  
+						BlastHitData.printWarning(lp.getHitID() + " > " + maxHitSeq + "; truncated to " + hitSeq.length() + " to put in database");
+						nSeqTooLong++;
+					}
+					
+					step3x_saveDBhitUnique(ps, DBID, isAAannoDB, dbType, dbTaxo, hitID, 
 						lp.getOtherID(), desc, lp.getSpecies(), hitSeq, 0);
 					cnt_add++;
 					
 					cntPrt++; // CAS330 moved from end of loop
 					if (cntPrt == COMMIT) {	                
-				         Out.rp("Read " + read + ", added ", cnt_add, total); 
+				         Out.rp("Read " + read + "  Add", cnt_add, total); 
+				         ps.executeBatch(); // CAS338
 				         cntPrt=0;
+				         System.gc(); // CAS338 Mac was running out of memory on tr_plants
 					}
 				}
 					
 				// start the next
-				hitSeq = "";	
+				hitSeqBuf.setLength(0); // clear
+				addHit = false;
+				
 				if (!lp.parseFasta(line)) {
 		        	Out.PrtWarn("Cannot parse line: " + line);
-		        	failParse++;
-		        	if (failParse>20) Out.die("Too many parse errors");
-					addHit = false;
+		        	failParse++;	if (failParse>20) Out.die("Too many parse errors");
 					continue;
 				}
 				
-				// new hit from fast file
 				hitID = lp.getHitID();
-				
 				if (hitsAddToDB.contains(hitID)) {
 					addHit = true;
 					hitsInDB.add(hitID); 
 					hitsAddToDB.remove(hitID); 
 				}
-				else addHit = false;
 				read++; 
 			}
 			// add last
 			if (addHit) { 
 				String desc = (bRmECO) ? BestAnno.rmECO(lp.getDescription()) : lp.getDescription(); // CAS305
-				s1_saveDBhitUnique(DBID, isAAannoDB, dbType, dbTaxo, lp.getHitID(), lp.getOtherID(), 
+				
+				hitSeq = hitSeqBuf.toString();
+				if (hitSeq.length() > maxHitSeq) {
+					if (hitSeq.length() == 0) hitSeq = hitSeq.substring(0,maxHitSeq-1);  
+					BlastHitData.printWarning(lp.getHitID() + " > " + maxHitSeq + "; truncated to " + hitSeq.length() + " to put in database");
+					nSeqTooLong++;
+				}
+				
+				step3x_saveDBhitUnique(ps, DBID, isAAannoDB, dbType, dbTaxo, lp.getHitID(), lp.getOtherID(), 
 					desc, lp.getSpecies(), hitSeq, 0);
-				cnt_add++;
+				cnt_add++; cntPrt++;
 			}
-			if ( reader != null ) reader.close();
-
-			Out.r("                                                                      ");
+			if (cntPrt>0) ps.executeBatch();
+			mDB.closeTransaction(); // CAS338
 			
-			Step1d_updateHitCov();
+			if ( reader != null ) reader.close();
+			Out.rClear();
+			
+			step3x_updateDatabase();
 			
 			if (cnt_add==0) {
 				Out.PrtError("The annoDB fasta file does not correspond to the hit tab file -- or the headers lines are weird");
@@ -550,77 +571,72 @@ public class DoUniProt
         }
     }
     // do not have lengths until after add annoDBs sequences
-    private boolean Step1d_updateHitCov() {
+    private void step3x_updateDatabase() {
     	try {
+    		Out.r("update indices.....");
+    		
+    		// CAS338 do all it once - update all unitran records with DUHID duidMap.put(hitID, DUHID);
+    		HashMap <String, Integer> duidMap = new HashMap <String, Integer> ();
+     		ResultSet rs = mDB.executeQuery("select hitID, DUHID from pja_db_unique_hits");
+    		while (rs.next()) duidMap.put(rs.getString(1), rs.getInt(2));
+    		
+    		for (String hitID : duidMap.keySet()) {
+    			int DUHID = duidMap.get(hitID);
+    			mDB.executeUpdate("UPDATE pja_db_unitrans_hits SET DUHID=" + DUHID +
+            		" WHERE uniprot_id = '" + hitID + "' ");
+    		}
+    		
 			Out.r("update hit coverage.....");
 			mDB.executeUpdate("update pja_db_unitrans_hits as seq " +
-			"inner join pja_db_unique_hits as hit on seq.DUHID = hit.DUHID " +
-			"set seq.prot_cov = round( ((abs(seq.prot_end - seq.prot_start)+1)/ hit.length)* 100.0, 0) " +
-			"where hit.length>0 and seq.prot_cov=0 and seq.prot_end>seq.prot_start");
+				"inner join pja_db_unique_hits as hit on seq.DUHID = hit.DUHID " +
+				"set seq.prot_cov = round( ((abs(seq.prot_end - seq.prot_start)+1)/ hit.length)* 100.0, 0) " +
+				"where hit.length>0 and seq.prot_cov=0 and seq.prot_end>seq.prot_start");
 			
-			// X-Y doesn't work if X<Y, so to both ways; NT-NT can have this happen
+			// X-Y doesn't work if X<Y, so do it both ways; NT-NT can have this happen (see end of where clause)
 			mDB.executeUpdate("update pja_db_unitrans_hits as seq " +
-					"inner join pja_db_unique_hits as hit on seq.DUHID = hit.DUHID " +
-					"set seq.prot_cov = round( ((abs(seq.prot_start - seq.prot_end)+1)/ hit.length)* 100.0, 0) " +
-					"where hit.length>0 and seq.prot_cov=0 and seq.prot_start>seq.prot_end");
-			Out.r("                                    ");
-			return true;
+				"inner join pja_db_unique_hits as hit on seq.DUHID = hit.DUHID " +
+				"set seq.prot_cov = round( ((abs(seq.prot_start - seq.prot_end)+1)/ hit.length)* 100.0, 0) " +
+				"where hit.length>0 and seq.prot_cov=0 and seq.prot_start>seq.prot_end");
+			
+			Out.rClear();
     	}
     	catch (Exception e) {
 			pRC = false;
-			ErrorReport.prtReport(e, "updateHitCov");
-			return false;
+			ErrorReport.prtReport(e, "updateDatabase");
 		}
     }
-    private void s1_saveDBhitUnique(int DBID, boolean isProtein, String dbtype, String dbtaxo, 
+    private void step3x_saveDBhitUnique(PreparedStatement ps, int DBID, boolean isProtein, String dbtype, String dbtaxo, 
     		String hitID, String otherID, String description, String species, String sequence, int cntUni) 
-    			throws Exception
     {    
 		try {
-    		int DUHID=0;
-    		PreparedStatement ps = mDB.prepareStatement("INSERT INTO pja_db_unique_hits set " + 
-    			           "AID=1, DBID=?,  hitID=?, repID=?, dbtype=?, taxonomy=?, isProtein=?, " +
-    			           "description=?, species=?, length=?, sequence=?");
 			// The following situation can make this happen:
-    			// 	-v 25 does not necessarily give 25 hits, so one may not be hit in species
-    			// 	but hit in all; will get the the species DUHID, but have the ALL taxo.
-			if (duidMap.containsKey(hitID)) DUHID = duidMap.get(hitID);
-	        else {
-	        	// a " occurred in UniProt description which causes an SQL error
-	        	if (description.indexOf("\"") != -1) {
-	        		String x = description.replace("\"", "");
-	        		description = x;
-	        	}
-
-		        ps.setInt(1, DBID);
-		        ps.setString(2,hitID);
-		        ps.setString(3,otherID);
-		        ps.setString(4,dbtype);
-		        ps.setString(5,dbtaxo);
-		        ps.setBoolean(6,isProtein);
-		        ps.setString(7,description);
-		        ps.setString(8,species);
-		        ps.setInt(9,sequence.length());
-		        ps.setString(10, sequence);
-		        ps.execute();
-		       
-		        DUHID = mDB.lastID();          
-	        }
-	        if (DUHID == 0 ) {
-	        	Out.PrtError("Internal: could not get DUHID for " + hitID);
-	        	return;
-	        }
-	        // update all unitran records with DUHID
-            mDB.executeUpdate("UPDATE pja_db_unitrans_hits SET DUHID=" + DUHID +
-            		" WHERE uniprot_id = '" + hitID + "' ");
-            duidMap.put(hitID, DUHID);
+			// 	-v 25 does not necessarily give 25 hits, so one may not be hit in species
+			// 	but hit in all; will get the the species DUHID, but have the ALL taxo.
+			if (hitAddSet.contains(hitID)) return; // accumlative
+			
+        	// a " occurred in UniProt description which causes an SQL error
+        	if (description.indexOf("\"") != -1) {
+        		String x = description.replace("\"", "");
+        		description = x;
+        	}
+	        ps.setInt(1, DBID);
+	        ps.setString(2,hitID);
+	        ps.setString(3,otherID);
+	        ps.setString(4,dbtype);
+	        ps.setString(5,dbtaxo);
+	        ps.setBoolean(6,isProtein);
+	        ps.setString(7,description);
+	        ps.setString(8,species);
+	        ps.setInt(9,sequence.length());
+	        ps.setString(10, sequence);
+	        ps.addBatch();
+	       
+            hitAddSet.add(hitID);
         }
-        catch (Exception e) {
-        		ErrorReport.die(e, "Error saving hit description to database");
-        }   
+        catch (Exception e) {ErrorReport.die(e, "Error saving hit description to database");}   
     }
-    
-    private HashSet<String> s1_loadUniqueHitSet() {
+  
+    private HashSet<String> step0x_loadUniqueHitSet() {
     	HashSet <String> hit = new HashSet<String>();
         try {
             ResultSet rset = mDB.executeQuery( "SELECT hitID FROM pja_db_unique_hits " );
@@ -688,7 +704,7 @@ public class DoUniProt
 		if (curHitDataForSeq!=null) curHitDataForSeq.clear();
 		// if (ctgMap!=null) ctgMap.clear(); - not this one, was passed from caller
 		if (annoSeqSet!=null) annoSeqSet.clear();
-		if (duidMap!=null) duidMap.clear();
+		if (hitAddSet!=null) hitAddSet.clear();
 		if (notFoundSeq!=null) notFoundSeq.clear();
 	}
 	// current file
@@ -699,17 +715,18 @@ public class DoUniProt
 	private String dbType = "";
 	private boolean isAAannoDB = true, isAAstcwDB=false;
     
-	private HashSet<String> hitsAddToDB = new HashSet<String> (); // unique set in dbFasta
+	private HashSet<String> hitsAddToDB = new HashSet<String> (); // found in hit file, add from dbFasta
 	private HashSet<String> hitsInDB = new HashSet<String> (); // already in sTCW
 	
 	private ContigData curSeqData = new ContigData ();
    	private ArrayList <BlastHitData> curHitDataForSeq = new ArrayList <BlastHitData> ();
    	
-    private TreeMap<String, Integer> seqMap = new TreeMap<String, Integer> (); // sequences in database 
+    private TreeMap<String, Integer> seqIdMap = new TreeMap<String, Integer> (); // sequences in database 
+    private HashMap<Integer, Integer> idLenMap = new HashMap<Integer, Integer> ();
     private HashSet<Integer> annoSeqSet = new HashSet<Integer> (); // sequences with annotation (CAS317 was Map)
     
 	private int flank = 0, minBitScore = 0; // neither of these are ever set, but can be
-	private HashMap <String, Integer> duidMap = new HashMap <String, Integer> ();
+	private HashSet <String> hitAddSet = new HashSet <String> ();
 	private int pruneType=0;
 	private String godbName=null; // for DoUniPrune
 	

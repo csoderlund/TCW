@@ -408,6 +408,7 @@ public class FileHelpers
 	}
 	
 	// CAS303 Move external_osx to ext/mac and external to ext/lintel
+	// CAS338 changed this to untar Ext/linux.tar.gz or mac.tar.gz; however, mac loses its executable permissions
 	static public boolean makeExt() {
 		try {
 			String newDir = getExtDir(); // ext/mac or ext/lintel
@@ -415,44 +416,46 @@ public class FileHelpers
 			
 			Out.PrtWarn("Directory does not exist: " + newDir);
 			
-			String oldDir = (isMac()) ? "external_osx" : "external";
-			if (!existDir(oldDir)) return false;
-			
-			Out.Print("OS: " + getOsArch());
-			Out.Print("/external     should be renamed /Ext/linux");
-			Out.Print("/external_osx should be renamed /Ext/mac");
-			if (!FileHelpers.yesNo("Do you want TCW to move the directories?")) return false;
-			
-			if (!createDir(Globalx.extDir)) {
-				Out.Print("Cannot create directory: " + Globalx.extDir);
-				Out.PrtError("Cannot create TCW ext directory; see SystemGuide.html");
+			String tarFile = newDir + ".tar.gz";
+			if (!fileExists(tarFile)) {
+				Out.PrtWarn("External tar file does not exist: " + tarFile);
+				return false;
 			}
-			if (existDir("external_osx")) {
-				File from = new File("external_osx");
-				File to = new File(Globalx.macDir);
-				
-				boolean success = from.renameTo(to);
-				if (!success) {
-					deleteDir(Globalx.extDir);
-					Out.PrtError("Cannot rename external_osx to " + Globalx.macDir);
-				}
-				else Out.Print("Rename external_osx to " + Globalx.macDir);
+			
+			Out.PrtSpMsg(1, "Untarring external programs in " + tarFile);
+			if (systemCall("tar xf " + tarFile)) {
+				String sub = newDir.replace(Globalx.extDir + "/", "");
+				if (systemCall("mv " + sub + " " + Globalx.extDir)) return true;
+				else Out.PrtWarn("Cannot move " + sub + " to " + Globalx.extDir);
 			}
-			if (existDir("external")) {
-				File from = new File("external");
-				File to = new File(Globalx.lintelDir);
-				
-				boolean success = from.renameTo(to);
-				if (!success) {
-					deleteDir(Globalx.extDir);
-					Out.PrtError("Cannot rename external_osx to " + Globalx.lintelDir);
-				}
-				else Out.Print("Rename external_osx to " + Globalx.lintelDir);
+			
+			Out.PrtWarn("Cannot access external programs (e.g. Blast, Diamond, MAFFT, etc");
+			return false;
+		}
+		catch (Exception e){
+			ErrorReport.prtReport(e, "Could not untar external programs in /Ext");
+			return false;
+		}
+	}
+	static public boolean systemCall(String cmd) {
+		try {
+			Process p = Runtime.getRuntime().exec(cmd);
+			
+			String line;
+			BufferedReader input = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+			while ((line = input.readLine()) != null) System.out.println(line);
+			input.close();
+			
+			p.waitFor();
+			
+			if (p.exitValue() != 0) {
+				Out.PrtError(cmd + " failed with exit value = " + p.exitValue());
+				return false;
 			}
 			return true;
 		}
-		catch (Exception e){
-			ErrorReport.prtReport(e, "Cannot move /external to /Ext");
+		catch (Exception e) {
+			ErrorReport.prtReport(e, "Could execute '" + cmd + "'");
 			return false;
 		}
 	}

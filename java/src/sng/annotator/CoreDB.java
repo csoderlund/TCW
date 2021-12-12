@@ -185,15 +185,16 @@ public class CoreDB {
        		   
        	   mDB.executeUpdate("UPDATE assembly SET annotationdate=null WHERE AID=1");
        	   
-       	   Out.PrtSpMsg(1, "Remove annotation tables...");
-       	   mDB.tableDelete("pja_pairwise");
-       	   mDB.tableDelete("pja_db_unitrans_hits");
-       	   mDB.tableDelete("pja_db_unique_hits");
-       	   mDB.tableDelete("pja_databases");
-       	   mDB.tableDelete("pja_db_species");
-       	   mDB.tableDelete("tuple_orfs"); // CAS305
-       	   mDB.tableDelete("tuple_usage");// CAS305
-         
+       	   Out.PrtSpMsg(1, "Remove annotation tables..."); // CAS338 add Out.r
+       	   Out.r("   Remove pairwise"); 	mDB.tableDelete("pja_pairwise");			
+       	   Out.r("   Remove seq hits");	mDB.tableDelete("pja_db_unitrans_hits");
+       	   Out.r("   Remove unique hits");	mDB.tableDelete("pja_db_unique_hits");
+       	   Out.r("   Remove annoDBs");		mDB.tableDelete("pja_databases");
+       	   Out.r("   Remove species");		mDB.tableDelete("pja_db_species");
+       	   Out.r("   Remove ORF tuples");	mDB.tableDelete("tuple_orfs"); // CAS305
+       	   Out.r("   Remove tuple usage");	mDB.tableDelete("tuple_usage");// CAS305
+       	   Out.rClear();
+        
        	   Schema.dropGOtables(mDB); // CAS332 was dropping from here, and not complete
        	   
        	   // CAS331 Created during prune from command-line
@@ -566,14 +567,13 @@ public class CoreDB {
      * Static methods
      */
 	
-	// called by DoUniProt (why does it need sequence?) and doHomology 
-	static public ContigData loadContigData (DBConn mDB, String ctgName ) 
-   {
+	// called for doHomology 
+	static public ContigData loadContigData (DBConn mDB, String ctgName ) {
        ResultSet rset = null;
        
-       try
-       {
+       try{
            ContigData curContig = new ContigData ();
+           curContig.setContigID( ctgName);
            
            String strQuery = "SELECT consensus, consensus_bases, numclones, bestmatchid, o_frame " +
        			"FROM contig " +
@@ -581,13 +581,9 @@ public class CoreDB {
            
            rset = mDB.executeQuery( strQuery );
            if ( !rset.next() ) return null; 
-
-           curContig.setContigID( ctgName);
-           curContig.setCTGID( rset.getInt(5) );
            
            String seqString = (getStringFromReader(rset.getCharacterStream(1))).trim();       
            SequenceData consensus = new SequenceData ("consensus");
-           
            consensus.setName( ctgName );
            // CAS313 consensus.setSequence ( SequenceData.normalizeBases( seqString, '*', Globals.gapCh ) ); 
            consensus.setSequence (seqString );
@@ -602,8 +598,8 @@ public class CoreDB {
            return curContig;
        }
        catch (Exception e) {
-	    	   ErrorReport.die(e, "Loading Consensus and Data");
-	    	   return null;
+    	   ErrorReport.die(e, "Loading Consensus and Data");
+    	   return null;
        }
    }
 	public boolean setLongestSeq() { 

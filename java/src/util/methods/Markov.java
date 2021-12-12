@@ -40,9 +40,10 @@ public class Markov {
 	}
 	
 	public String scoreSeq(String tag, int type, String seq) {
-		scoreSeqAllFrames(type, seq);
-		return String.format(" %-6s %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f\n",
-				tag, score[0], score[1], score[2],score[3], score[4], score[5]); // remove (Pos & best) Good score
+		scoreSeqAllFrames(type, seq); 
+		// CAS338 i removed the good frame score, and now I'm putting it back
+		return String.format(" %-6s %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f  %s\n",
+				tag, score[0], score[1], score[2],score[3], score[4], score[5], allFramesStr); 
 	}
 	
 	public boolean isGood() {return isGood;}

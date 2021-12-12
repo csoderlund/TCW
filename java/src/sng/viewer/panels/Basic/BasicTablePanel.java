@@ -380,6 +380,7 @@ public class BasicTablePanel extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				deleteFromList();
 				enableAllButtons();
+				theTableModel.fireTableDataChanged(); // CAS338 was not displaying right w/o this
 			}
 		});	
 		btnKeep = Static.createButtonPlain("Keep selected", false);
@@ -387,6 +388,7 @@ public class BasicTablePanel extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				keepFromList();
 				enableAllButtons();
+				theTableModel.fireTableDataChanged(); // CAS338 was not displaying right w/o this
 			}
 		});
 		btnUnselectAll = Static.createButtonPlain("Unselect All", false);

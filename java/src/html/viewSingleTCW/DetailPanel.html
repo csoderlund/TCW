@@ -40,8 +40,9 @@ hit for each is listed.
 <li><u>Distinct regions</u>: A set of hits that represent the regions of the sequence for which
 hits align to based on hit coordinates. Note the Start and End coordinates in the table, they will
 not be the same, though may overlap some.
-<li><u>Unique annotation</u>: Determines the unique descriptions, after filtering on: 
-(1) ignore putative, hypothetical and predicted, (2) remove last character of description as often a number or letter.
+<li><u>Unique description</u>: This is a representative set of descriptions. A list of descriptions is created 
+from trimming words like "uncharacterized", words that appear to be gene names from the end, and numbers at the end. From this list, one of each is
+shown.
 <li><u>Unique species</u>: Lists one of each species that was hit
 <li><u>Total</u>: All hits to the sequence. 
 </ul>

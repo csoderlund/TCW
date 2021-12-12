@@ -91,7 +91,7 @@ public class DoUniAssign {
 		    		else {
 		    			if (bestBit.isAA && hitData.isAA && hitData.frame!=bestBit.frame) cntDiffFrame++;
 		    			
-		    			if (hitData.frame<0 && bestBit.frame>0) cntDiffOrient++; // CAS331 add for NT hits
+		    			if (hitData.frame<0 && bestBit.frame>0) 	 cntDiffOrient++; // CAS331 add for NT hits
 		    			else if (hitData.frame>0 && bestBit.frame<0) cntDiffOrient++; 
 		    		}
 		    		
@@ -122,8 +122,8 @@ public class DoUniAssign {
     					specSet.add(spec);
     					hitData.filter |= 4;
     				}
-    				// filter 8 is top hit for gene annotation
-    				String gene = lp.getGeneRep(hitData.desc);
+    				// filter 8 is top hit for unique description
+    				String gene = lp.getUniqueDesc(hitData.desc);
     				if (gene != null && !geneSet.contains(gene)) {
     					geneSet.add(gene);
     					hitData.filter |= 8;

@@ -130,7 +130,7 @@ public class BasicHitTab extends Tab {
 						String x = ">" + name + "\n" + hit; // CAS313
 						cb.setContents(new StringSelection(x), null);
 					}
-					else System.err.println("Failed to get sequence for hit");
+					else Out.PrtErr("Failed to get sequence for hit");
 				} catch (Exception er) {ErrorReport.reportError(er, "Error copying hit sequence");
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error copying hit sequence", null);}
 			}
@@ -411,7 +411,6 @@ public class BasicHitTab extends Tab {
 			new GOtree(theParentFrame).computeSelected(hitID, desc, actionType, outType, btnShow);
 		}
 		catch (Exception e) {
-			Out.PrtErr("");
 			JOptionPane.showMessageDialog(null, "Query failed");
 			ErrorReport.prtReport(e, "Creating Sequence GO popup");
 		}
@@ -449,7 +448,7 @@ public class BasicHitTab extends Tab {
 					lines.add(x);
 				}
 				lines.add("");
-				lines.add("+ Blast values");
+				lines.add("+ Heuristic search values");
 			}
 			String [] alines = new String [lines.size()];
 			lines.toArray(alines);
@@ -485,7 +484,7 @@ public class BasicHitTab extends Tab {
 			nRowNum=r;
 			int nCol=0;
 			strSeqID = 		(String) values[nCol++];
-			hd.strHitID = 		(String) values[nCol++];
+			hd.strHitID = 	(String) values[nCol++];
 			bitscore = 		Double.parseDouble((String) values[nCol++]); // CAS331
 			evalue = 		Double.parseDouble((String) values[nCol++]);
 			sim = 			Double.parseDouble((String) values[nCol++]);
@@ -868,7 +867,7 @@ public class BasicHitTab extends Tab {
 		 try {
 			 hitSeqList.clear();
 			 seqCntMap.clear(); 
-			 String x = " (of " + results.size() + ") ...";
+			 String x = " (of " + results.size() + ")";
 			 int row=1, cnt=0;
 			 for (Object [] rObj : results) {
 				 String seqid = (String) rObj[0];
@@ -892,21 +891,20 @@ public class BasicHitTab extends Tab {
 	}
 	 public void tableAdd(ArrayList<Object []> results, String summary) {
 		 try {
-			 String x = " (of " + results.size() + ") ...";
+			 String x = " (of " + results.size() + ")";
 			 int row=hitSeqList.size();
 			 int cnt=0, add=0;
+			 HashSet <String> seqHitSet = new HashSet <String> (); // CAS338 for fast lookup - major speedup!
+			 for (HitSeqData sd : hitSeqList) {
+				 seqHitSet.add(sd.strSeqID + ":" + sd.hd.strHitID);
+			 }
 			 
 			 for (Object [] o : results) {
-				 boolean isAdd=true;
 				 String seqid = (String) o[0];
 				 String hitid = (String) o[1];
-				 for (HitSeqData sd : hitSeqList) {
-					 if (sd.strSeqID.equals(seqid) && sd.hd.strHitID.equals(hitid)) {
-						 isAdd = false;
-						 break;
-					 }
-				 }
-				 if (isAdd) {
+				 String pair = seqid + ":" + hitid;
+				 
+				 if (!seqHitSet.contains(pair)) {
 					hitSeqList.add(new HitSeqData(row, o));	
 					row++; cnt++; add++;
 					if (cnt==10000) {

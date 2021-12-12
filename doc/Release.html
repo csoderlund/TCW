@@ -13,20 +13,47 @@
 
 There have been many improvements, but the following provides some recent critical points.
 <table>
-<tr><td><a href=#v337>v3.3.7</a><td>30-Nov-21<td><ttp><font color=green>Latest</font></ttp><td>Help updates and button activation
-<tr><td><a href=#v336>v3.3.6</a><td>22-Nov-21<td><ttp>viewSingle</ttp><td>improvements to the Basic Filters (Seq, Hit, and GO).
+<tr><td><a href=#v338>v3.3.8</a><td>12-Dec-21<td><ttp><ttp>runSingle</ttp></ttp><td>Improved loading of FASTA file.
 <tr><td><a href=#v335>v3.3.5</a><td>04-Nov-21<td><ttp>viewSingle</ttp><td>log2FC TPM analysis 
 <tr><td><a href=#v334>v3.3.4</a><td>18-Oct-21<td><ttp>runSingle</ttp><td><ttl>ORF finder</ttl> improvements.
 <tr><td><a href=#v331>v3.3.1</a><td>01-Sep-21<td><ttp>runSingle</ttp><td> Add Prune Hits algorithm.
 <tr><td><a href=#v330>v3.3.0</a><td>15-Aug-21<td>All<td>Update Diamond and Blast and default parameters.
-<tr><td><a href=#v327>v3.2.7</a><td>20-Jul-21<td><ttp>viewSingle</ttp><td>Add enhanced Decimal Display (highlight p-values)
-<tr><td><a href=#v325>v3.2.5</a><td>04-Jun-21<td><ttp>runMulti</ttp><td>Fix <ttp>orthoMCL</ttp> to work with MariaDB
+<tr><td><a href=#v327>v3.2.7</a><td>20-July-21<td><ttp>viewSingle</ttp><td>Add enhanced Decimal Display (highlight p-values)
+<tr><td><a href=#v325>v3.2.5</a><td>04-June-21<td><ttp>runMulti</ttp><td>Fix <ttp>orthoMCL</ttp> to work with MariaDB
 <tr><td><a href=#v325>v3.2.3</a><td>09-May-21<td><ttp>viewSingle</ttp><td>Enhance the Hit-GO evidence codes query and display.
 <tr><td><a href=#v321>v3.2.1</a><td>09-Apr-21<td><ttp>runDE</ttp><td>The built-in GOseq was changed to any script that is run by runDE.
 <tr><td><a href=#v318>v3.1.8</a><td>18-Mar-21<td><ttp>runAS</ttp><td>Changed the source of GO to the go-basic.obo file
-<tr><td><a href=#v312>v3.1.2</a><td>04-Dec-20<td><ttp>runMulti</ttp><td>Improve MSA scores
-<tr><td><a href=#v310>v3.1.0</a><td>05-Nov-20<td><ttp>viewMulti</ttp><td>Add Hit Filter and Table
+<tr><td><a href=#early>Earlier</a><td>2020<td>&nbsp;<td>&nbsp;
 </table>
+
+<a name=v338>
+<h4>v3.3.8 12-Dec-2021</h4>
+<p><ttp>runSingleTCW </ttp> 
+<ul>
+<li>Annotate: 
+<ol>
+<li><i>Loading FASTA files</i>: 
+<ul>
+<li>Speedup - cut the time in half on Linux. 
+<li>On Mac, was running out of memory loading TrEMBL plants, which has been fixed.
+<li><i>UniProt FASTA headers</i>: Changed the rules for parsing FASTA headers to better fit UniProt 2018 descriptions.
+</ul>
+<li><i>Uninformative descriptions</i>: The rules for computing uninformative descriptions have slightly changed. Though the rules should strictly adhere
+to the "International Protein Nomenclature Guidelines" bullet item "where no domain or motif is observed", many
+other uninformative descriptions seemed to be entered. The rules can be changed in the file "util/methods/BestAnno.java".
+<li><i>Unique Description</i> (displayed in <ttc>Seq Detail</ttc>): Slight changes.
+</ol>
+</ul>
+<p><ttp>viewSingleTCW </ttp> 
+<ul>
+<li><ttc>Basic AnnoDB Hits</ttc>: The <ttc>Add</ttc> has been significantly speeded up.
+<li><ttc>Basic AnnoDB Hits and Sequences</ttc>: The <ttc>Delete selected</ttc> and <ttc>Keep selected</ttc> were not
+displaying the table correctly (though corrected itself on any sort, etc).
+</ul>
+<p><ttp>TCW package</ttp>
+<ul>
+<li>The "/doc" directory has been made into a tar file with instructions in the README on how to use it.
+</ul>
 
 <a name=v337>
 <h4>v3.3.7  30-Nov-2021</h4>
@@ -1044,6 +1071,7 @@ and add it to the <ttx>Copy...</ttx> drop-down.
 </ul>
 <a href=#top>Go to top</a>
 <hr>
+
 <a name=v310>
 <h4>v3.1.0  5-Nov-20</h4>
 
@@ -1105,7 +1133,16 @@ selected seqID in Pairs table or hitID in Hit Table.
 </ul>
 
 <hr>
-
+<a name=early>
+<h3>2020 releases</h3>
+<table>
+<tr><td><a href=#v312>v3.1.2</a><td>04-Dec-20<td><ttp>runMulti</ttp><td>Improve MSA scores
+<tr><td><a href=#v310>v3.1.0</a><td>05-Nov-20<td><ttp>viewMulti</ttp><td>Add Hit Filter and Table
+<tr><td><a href=#v303>v3.0.4</a><td>04-Sep-20<td><ttp>runSingle</ttp><td>TPM for normalization instead of RPKM
+<tr><td><a href=#v304>v3.0.3</a><td>16-Jun-20<td>Package<td>Moved external and external_osx to Ext/linux and Ext/mac
+</table>
+<br><a href=#top>Go to top</a>
+<hr>
 <h4>v3.0.5 7-Oct-20</h4>
 <ol>
 <li><ttp>runMultiTCW</ttp>:
@@ -1154,6 +1191,7 @@ be changed to <ttx>Coatomer subunit zeta-2</ttx>.
 </ul>
 </ol>
 <hr>
+<a name=v304>
 <h4>v3.0.4 4-Sept-20</h4>
 This release is  mainly some clean-up, along with the computation of TPM replacing RPKM.
 <ol>
@@ -1180,6 +1218,7 @@ Also, the <ttx>Basic Sequence</ttx> panel allows the longest sequence name to be
 <li>The <ttx>/doc</ttx> has been updated.
 </ol>
 <hr>
+<a name=v303>
 <h4>v3.0.3 16-June-20</h4>
 <ol>
 <li>Update for MySQL v8:

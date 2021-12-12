@@ -5,12 +5,12 @@ import java.util.regex.Pattern;
 import java.util.HashSet;
 
 import sng.dataholders.BlastHitData;
+import util.methods.BestAnno;
 import util.methods.ErrorReport;
 import util.methods.Out;
 
 /********************************************************
- * Static methods to parse the > fasta line, a blast tabular line,
- * and "|" names.
+ * Static methods to parse the > fasta line, a blast tabular line and "|" names.
  */
 public class LineParser {
 	static final int maxHitNameLen = 30; // should correspond to schema for name lengths
@@ -25,12 +25,12 @@ public class LineParser {
 	
 	public boolean parseLine(String line) {
 		strDBtype =strHitID =strOtherID =strDesc =strOS = "";
-		if (line.startsWith(">")) return parseFasta(line);
-		else return parseTab(line);
+		if (line.startsWith(">")) 	return parseFasta(line);
+		else 						return parseTab(line);
 	}
 	
 	/*********************************************
-	 * Create species and geneRep for DoUniProt
+	 * Create species and unique description for DoUniProt
 	 */
 	private Pattern u = Pattern.compile("\\s+");
 	public String getSpecies(String spec) {
@@ -39,46 +39,64 @@ public class LineParser {
 		if (r.length == 1) return r[0];
 		return r[0] + " " + r[1];
 	}
-	public String getGeneRep(String fulldesc) {
+	// return description to be compared with other "similar" descriptions
+	// CAS338 quite removing uncharacterized descriptions, and a few other changed
+	public String getUniqueDesc(String fulldesc) {
 		String desc = fulldesc.trim().toLowerCase();
-		int ix;
-
-		if (desc.contains("putative")) return null;
-		if (desc.contains("predicted")) return null;
-		if (desc.contains("hypothetical")) return null;
-		if (desc.contains("uncharacterized")) return null;
-		if (desc.contains("unknown")) return null;
-		if (desc.contains("whole genome shotgun")) return null;
-		if (desc.contains("scaffold")) return null;
-
-		ix = desc.indexOf("{ec");  
-		if (ix != -1) {
-			String s = desc.substring(0,ix).trim();
-			if (s.length() > 5) desc = s;
-		}
-		else {
-			ix = desc.indexOf("(fragment)");
-			if (ix != -1) {
-				String s = desc.substring(0,ix);
-				if (s.length() > 1) desc = s;
+	
+		try {
+			int ix= desc.indexOf("{");
+			if (ix != -1) 	
+				desc = desc.substring(0,ix).trim();
+			
+			if (desc.endsWith("-like")) 
+				desc = desc.replace("-like", "").trim(); // CAS338
+			
+			String [] words = desc.split(" "); 
+			if (words.length>2) {
+				String lastWord = words[words.length-1];
+				if (BestAnno.isName(lastWord)) 
+					desc = desc.substring(0, desc.lastIndexOf(" ")); // CAS338
 			}
-		}
-		// remove number
-		ix = desc.lastIndexOf(" ");
-		if (ix != -1) {
-			if (ix == desc.length()-2) return desc.substring(0, ix);
-			if (ix == desc.length()-3) return desc.substring(0, ix);
-		}
-		ix = desc.lastIndexOf("-");
-		if (ix != -1) {
-			if (ix == desc.length()-2) return desc.substring(0, ix);
-			if (ix == desc.length()-3) return desc.substring(0, ix);
-		}
-		ix = desc.lastIndexOf("_");
-		if (ix != -1) {
-			if (ix == desc.length()-2) return desc.substring(0, ix);
-			if (ix == desc.length()-3) return desc.substring(0, ix);
-		}
+			
+			String [] prefix = {"putative", "probable", "uncharacterized"}; // after removing isName
+			for (String pre : prefix) {
+				if (desc.startsWith(pre)) {
+					desc = desc.replace(pre, "").trim();
+					break;
+				}
+			}
+			
+			int len = desc.length();
+			if (len<4) return desc;
+			
+			boolean trim=false;
+			String [] suffix = {" ", "-", "_"}; // remove suffix followed by number
+			for (String x : suffix) {
+				ix = desc.lastIndexOf(x);
+				if (ix==-1) continue;
+				
+				String end = desc.substring(ix+1, desc.length());
+				if (end.length()>=3) continue;
+				
+				try {
+					Integer.parseInt(end);
+					desc = desc.substring(0, ix);
+					trim=true;
+					break;
+				}
+				catch (Exception e) {};
+			}
+			if (!trim) { 						// remove trailing digit
+				String end = desc.substring(len-1, len);
+				try {
+					Integer.parseInt(end);
+					desc = desc.substring(0, len-1);
+				}
+				catch (Exception e) {};
+			}
+		} catch (Exception e) {}; 				// so continues if any problem
+	
 		return desc;
 	}
 
@@ -130,79 +148,81 @@ public class LineParser {
     /*********************************************************** 
      * FASTA parse > line
      */ 
-	public boolean parseFasta(String line) {	
-		boolean rc=true;
-		strDBtype = strHitID = strOtherID = strOS = strDesc = "";	
-		line = line.substring(1); // get rid of >
-				
-		if (line.startsWith("sp|") || line.startsWith("tr|")) rc = matchUniProt(line);
-		else if (line.startsWith("gi|")) 					  rc = matchRefSeq(line); // old nr.gz
-		else {
-			if (line.indexOf("\u0001")!=-1) { 
-				String [] tok = line.split("\u0001"); 	// This is for nr.gz, which has long lines 
-				if (tok.length>1) line = tok[0];		// So only pattern match on first description
+	public boolean parseFasta(String line) {
+		try {
+			boolean rc=true;
+			strDBtype = strHitID = strOtherID = strOS = strDesc = "";	
+			line = line.substring(1); // get rid of >
+					
+			if (line.startsWith("sp|") || line.startsWith("tr|")) rc = matchUniProt(line);
+			else if (line.startsWith("gi|")) 					  rc = matchRefSeq(line); // old nr.gz
+			else {
+				if (line.indexOf("\u0001")!=-1) { 
+					String [] tok = line.split("\u0001"); 	// This is for nr.gz, which has long lines 
+					if (tok.length>1) line = tok[0];		// So only pattern match on first description
+				}
+				rc = matchGeneral(line);
 			}
-			rc = matchGeneral(line);
+			// CAS317 was checking description length and #species here
+				
+			if (rc==false) return false;
+			return true;
 		}
-		// CAS317 was checking description length and #species here
-			
-		if (rc==false) return false;
-		return true;
+		catch (Exception e) {ErrorReport.prtReport(e, line); return false;}
 	}
-
 	// uniprot line
     //>sp|Q9V2L2|1A1D_PYRAB Putative 1-ami OS=Pyrococcus abyssi GN=PYRAB00630 PE=3 SV=1v
-    // 		GN is not always present
-
+	// CAS338 rewrote removing dependancy on Java RE, but didn't make much difference
 	private boolean matchUniProt(String line) {
-		try {		
-		    Pattern u1 = Pattern.compile("(\\S+)\\|(\\S+)\\|(\\S+)\\s+(.+)OS=(.+)GN="); 	
-			Pattern u2 = Pattern.compile("(\\S+)\\|(\\S+)\\|(\\S+)\\s+(.+)OS=(.+)PE="); 
-			Pattern u3 = Pattern.compile("(\\S+)\\|(\\S+)\\|(\\S+)\\s+(.+)"); 
-
-			Matcher m = u1.matcher(line);
-			if (m.find()) {
-				strDBtype = m.group(1);
-				strOtherID = m.group(2);
-				strHitID = m.group(3);
-				strDesc = m.group(4).trim();
-				strOS = m.group(5).trim();
-				// this check makes it backwards compatiable
-				if (strOS.endsWith(".")) strOS = strOS.substring(0, strOS.length()-1);
+		try {	
+			strDesc = strOS = "unk";
+			String name=null, rest=null;
+			
+		// identifier - up too first blank
+			int idx = line.indexOf(" ");
+			if (idx==-1) name=line;
+			else {
+				name = line.substring(0,idx);
+				rest = line.substring(idx+1);
+			}
+			String [] tok = name.split("\\|");
+			if (tok.length!=3) {
+				Out.PrtErr("Bad identifier: " + name);
+				return false;
+			}
+			strDBtype =  tok[0];
+			strOtherID = tok[1];
+			strHitID =   tok[2];
+			
+			if (rest==null || !rest.contains("OS=")) {
+				strDesc = rest;
 				return true;
-			}	
-			m = u2.matcher(line);
-			if (m.find()) {
-				strDBtype = m.group(1);
-				strOtherID = m.group(2);
-				strHitID = m.group(3);
-				strDesc = m.group(4).trim();
-				strOS = m.group(5).trim(); // trim necessary for endsWith(".")
-				// this check makes it backwards compatiable
-				if (strOS.endsWith(".")) strOS = strOS.substring(0, strOS.length()-1);
-				return true;
-			}								
-			m = u3.matcher(line);
-			if (m.find()) {
-				strDBtype = m.group(1);
-				strOtherID = m.group(2);
-				strHitID = m.group(3);
-				strDesc = m.group(4);
-				strOS = "unk";
-				return true;
-			}	
-			if (strHitID.length() > 25) strHitID = line.substring(25);
-			else strHitID = line;
-			strDesc = "unk";
-			strOS = "unk";
-			return false;
+			}
+		
+		// Description - before OS=
+			tok = rest.split("OS=");
+			if (tok.length!=2) {
+				Out.PrtErr("Strange line: " + line);
+				return false;
+			}
+			strDesc = tok[0].trim();
+			rest =    tok[1].trim();
+		
+		// Species - everything up to XX= where XX is two letters (OX, GN, PE)
+			idx = rest.indexOf("=");
+			if (idx == -1 || rest.length()<3) strOS=rest;
+			else strOS = rest.substring(0,idx-2).trim();
+			
+			if (strOS.endsWith(".")) strOS = strOS.substring(0, strOS.length()-1);// backwards compatible
+			return true;
+			
 		}
 		catch (Exception err) {
-			String s = "Annotator - parsing UniProt: " + line;
-			ErrorReport.reportError(err, s);
+			ErrorReport.reportError(err, "Annotator - parsing UniProt: " + line);
 			return false;
 		}
 	}
+	
 	// refset line
 	//>gi|13591923|ref|NM_031017.1| Rattus norvegicus cAMP responsive element binding protein 1 (Creb1), transcript va
 	//>gi|66818355|ref|XP_642837.1| hypothetical protein DDB_G0276911 [Dictyostelium discoideum AX4]^Agi|60470987|gb|EAL68957.1| hypothetical protein DDB_G0276911 [Dictyostelium discoideum AX4]
@@ -241,16 +261,14 @@ public class LineParser {
 	}
 	
 	// NCBI nr
-	//>name description [OS]			
-	//>type|x|name description [OS]	-- does not work right now
-	//>type||name description [OS] -- also does not work right now
+	//>name description [OS]
 	//General
 	//>type|name description OS=
 	//>name description OS=
 	//>name description
 	private boolean matchGeneral(String line) {
 		try {
-			Pattern gi =  Pattern.compile("(\\S+)\\s+(.+)\\[(.+)\\]"); // for NCBI nr
+			Pattern gi = Pattern.compile("(\\S+)\\s+(.+)\\[(.+)\\]"); // for NCBI nr
 			Pattern g0 = Pattern.compile("(\\S+)\\|(\\S+)\\s+(.+)OS=(.+)");
 			Pattern g1 = Pattern.compile("(\\S+)\\s+(.+)OS=(.+)");
 			Pattern g2 = Pattern.compile("(\\S+)\\s+(.+)"); 	
@@ -302,13 +320,6 @@ public class LineParser {
 			return false;
 		}
 	}
-	public void PrtInfo(String msg) {
-		System.err.println(msg);
-		System.err.println("HitID:   " + strHitID);
-		System.err.println("OtherID: " + strOtherID);
-		System.err.println("Species: " + strOS);
-		System.err.println("Descrip: " + strDesc);
-	}
 	
 	public String getDBtype() {return strDBtype;}
 	public String getHitID() {return strHitID;}
@@ -357,9 +368,6 @@ public class LineParser {
 	private HashSet <String>badDesc = new HashSet <String> ();
 	
 	// from FASTA description lines 
-	private String strDBtype = "";
-	private String strHitID = "";
-	private String strOtherID = "";
-	private String strDesc = "";
-	private String strOS = "";
+	private String strDBtype = "", strHitID = "", strOtherID = "";
+	private String strDesc = "", strOS = "";
 }
