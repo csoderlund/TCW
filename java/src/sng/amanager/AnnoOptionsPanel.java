@@ -1,5 +1,7 @@
 package sng.amanager;
 
+import java.awt.Component;
+
 /****************************************************
  * Options button on Main Panel opens this window.
  * 1. GO
@@ -12,6 +14,8 @@ package sng.amanager;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -19,13 +23,16 @@ import java.sql.Statement;
 import java.util.Vector;
 
 import javax.swing.JOptionPane;
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
@@ -55,6 +62,7 @@ public class AnnoOptionsPanel extends JPanel {
 	private static final int INDENT_RADIO = 25;
 	private static final int VERT1 = 5, VERT2=10;
 	private final String helpHTML = Globals.helpRunDir + "AnnotationOptions.html";
+	private static final String searchHelpHTML = Globalx.searchHelp;
 	
 	public AnnoOptionsPanel(ManagerFrame parentFrame) {
 		theManFrame = parentFrame;
@@ -117,13 +125,31 @@ public class AnnoOptionsPanel extends JPanel {
 			}
 		});
 		
-		JButton btnHelp = new JButton("Help");
-		btnHelp.setBackground(Globalx.HELPCOLOR);
-		btnHelp.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				UserPrompt.displayHTMLResourceHelp(theManFrame, "Annotation Options Help", helpHTML);
+		// CAS339 add two level help
+		final JPopupMenu popup = new JPopupMenu();
+		popup.add(new JMenuItem(new AbstractAction("Options") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theManFrame, "Options", helpHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error on Annotation Options help"); }
 			}
-		});
+		}));
+		popup.add(new JMenuItem(new AbstractAction("Search Parameters") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theManFrame, "Search Parameters", searchHelpHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error on search parameters help"); }
+			}
+		}));
+		JButton btnHelp = Static.createButton("Help...", true, Globalx.HELPCOLOR);
+		btnHelp.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                popup.show(e.getComponent(), e.getX(), e.getY());
+            }
+        });
+		btnHelp.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		
 		JPanel buttonRow = Static.createRowCenterPanel();		
 		buttonRow.add(btnKeep);				buttonRow.add(Box.createHorizontalStrut(15));

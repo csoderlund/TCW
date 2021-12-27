@@ -34,13 +34,15 @@ All files are created in the "UniProt" directory, default <tt>projects/DBfasta/U
 <br>This will download each selected UniProt .dat file(s) and create .fasta files from them.
 <br>&nbsp;
 <li>Select the "SwissProt" under "Full UniProt", followed by <b>Build Full</b>.
-<br>This will download the full SwissProt .dat file, create a new .dat file without 
-the taxonomic entries from the downloaded files,
-and then create the .fasta file from the new .dat file.
+<br>This will download the full SwissProt .dat file, and then create the .fasta file 
+minus the sequences from the selected downloaded taxonomic databases.
+See the online <a href=http://www.agcol.arizona.edu/software/tcw/doc/stcw/AnnoDBs.html#full>Full Subsets</a>
+for detailed information.
 <br>&nbsp;
 <li>Create the GO database with <b>Build GO</b>.
-<br>This will download the GO database, creates a local mySQL GO database with a mapping of the UniProts from your downloaded set. 
-This uses the information in HOSTS.cfg. 
+<br>This will download the GO database, creates a local mySQL GO database from the go-basic.obo file,
+and then add information from the downloaded taxonomic UniProt .dat files. 
+This uses the information in HOSTS.cfg for creating the mySQL database. 
 </ol>
 
 <h2>Suggestions</h2>
@@ -49,6 +51,8 @@ This uses the information in HOSTS.cfg.
 <li>Download only the most relevant TrEMBL files. Do not download the Full TrEMBL UniProt unless absolutely necessary.
 <li>See the online <a href=http://www.agcol.arizona.edu/software/tcw/doc/stcw/AnnoDBs.html#mem>Memory and time</a>
 and <a href=http://www.agcol.arizona.edu/software/tcw/doc/stcw/AnnoDBs.html#best>What AnnoDBs to use</a>.
+<li>Download all desired taxonomic UniProt files and build the GO database in the same day to make sure they
+are consistent.
 </ul>
 
 <h2>Check</h2> 
@@ -80,11 +84,10 @@ uses.
 <li>The GO directory, as the information has been transferred to the GO database. 
 </ul>
 However, if you do not have a space problem, keep them just for insurance. 
-When UniProt does the monthly update, your downloaded files will no longer available
+When UniProt does the monthly update, your downloaded files will no longer be available
 on their site. 
 
 <p>If you are going to use <code>DIAMOND</code> for the searches, you may gzip the .fasta
 files.
-
 
 </html>

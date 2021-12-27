@@ -1,166 +1,82 @@
 <html>
-<body>
 <pre>
-Start Taxonomic UniProt                             24-Jan-21 15:38:43
+Start Taxonomic UniProt                             20-Dec-21 16:47:15
    Check Directories
-      Creating directory: ./projects/DBfasta/UniProt_Jan2021
-      Creating directory: ./projects/DBfasta/UniProt_Jan2021/sp_bacteria/
-      Creating directory: ./projects/DBfasta/UniProt_Jan2021/sp_fungi/
-      Creating directory: ./projects/DBfasta/UniProt_Jan2021/sp_invertebrates/
-      Creating directory: ./projects/DBfasta/UniProt_Jan2021/sp_plants/
-      Creating directory: ./projects/DBfasta/UniProt_Jan2021/sp_viruses/
-      Creating directory: ./projects/DBfasta/UniProt_Jan2021/tr_bacteria/
-      Creating directory: ./projects/DBfasta/UniProt_Jan2021/tr_fungi/
-      Creating directory: ./projects/DBfasta/UniProt_Jan2021/tr_invertebrates/
-      Creating directory: ./projects/DBfasta/UniProt_Jan2021/tr_plants/
-      Creating directory: ./projects/DBfasta/UniProt_Jan2021/tr_viruses/
+      Creating directory: projects/DBfasta/UniProt_Dec2021
+      Creating directory: projects/DBfasta/UniProt_Dec2021/sp_fungi/
+      Creating directory: projects/DBfasta/UniProt_Dec2021/sp_plants/
    Check complete
-   
-   Download SwissProt files                             24-Jan-21 15:38:43
-      Downloading uniprot_sprot_bacteria.dat.gz
-      curl complete ./projects/DBfasta/UniProt_Jan2021/sp_bacteria/uniprot_sprot_bacteria.dat.gz   1m:10s
+   Download SwissProt files                             20-Dec-21 16:47:15
       Downloading uniprot_sprot_fungi.dat.gz
-      curl complete ./projects/DBfasta/UniProt_Jan2021/sp_fungi/uniprot_sprot_fungi.dat.gz   0m:8s
-      Downloading uniprot_sprot_invertebrates.dat.gz
-      curl complete ./projects/DBfasta/UniProt_Jan2021/sp_invertebrates/uniprot_sprot_invertebrates.dat.gz   0m:12s
+      curl complete projects/DBfasta/UniProt_Dec2021/sp_fungi/uniprot_sprot_fungi.dat.gz   0m:10s
       Downloading uniprot_sprot_plants.dat.gz
-      curl complete ./projects/DBfasta/UniProt_Jan2021/sp_plants/uniprot_sprot_plants.dat.gz   0m:14s
-      Downloading uniprot_sprot_viruses.dat.gz
-      curl complete ./projects/DBfasta/UniProt_Jan2021/sp_viruses/uniprot_sprot_viruses.dat.gz   0m:3s
+      curl complete projects/DBfasta/UniProt_Dec2021/sp_plants/uniprot_sprot_plants.dat.gz   0m:9s
+   Complete SwissProt download                                           0m:20s
    
-   Download TrEMBL files                                24-Jan-21 15:40:32
-      Downloading uniprot_trembl_bacteria.dat.gz
-      curl complete ./projects/DBfasta/UniProt_Jan2021/tr_bacteria/uniprot_trembl_bacteria.dat.gz   6h:36m:40s
-      Downloading uniprot_trembl_fungi.dat.gz
-      curl complete ./projects/DBfasta/UniProt_Jan2021/tr_fungi/uniprot_trembl_fungi.dat.gz   26m:23s
-      Downloading uniprot_trembl_invertebrates.dat.gz
-      curl complete ./projects/DBfasta/UniProt_Jan2021/tr_invertebrates/uniprot_trembl_invertebrates.dat.gz   32m:5s
-      Downloading uniprot_trembl_plants.dat.gz
-      curl complete ./projects/DBfasta/UniProt_Jan2021/tr_plants/uniprot_trembl_plants.dat.gz   28m:43s
-      Downloading uniprot_trembl_viruses.dat.gz
-      curl complete ./projects/DBfasta/UniProt_Jan2021/tr_viruses/uniprot_trembl_viruses.dat.gz   13m:35s
-   
-   Create FASTA files                                   24-Jan-21 23:58:01
-      Make FASTA from ./projects/DBfasta/UniProt_Jan2021/sp_bacteria/uniprot_sprot_bacteria.dat.gz
-         334,772 written to uniprot_sprot_bacteria.fasta                 0m:24s 
-      Make FASTA from ./projects/DBfasta/UniProt_Jan2021/sp_fungi/uniprot_sprot_fungi.dat.gz
-         35,073 written to uniprot_sprot_fungi.fasta                     0m:4s  
-      Make FASTA from ./projects/DBfasta/UniProt_Jan2021/sp_invertebrates/uniprot_sprot_invertebrates.dat.gz
-         28,129 written to uniprot_sprot_invertebrates.fasta             0m:2s  
-      Make FASTA from ./projects/DBfasta/UniProt_Jan2021/sp_plants/uniprot_sprot_plants.dat.gz
-         43,403 written to uniprot_sprot_plants.fasta                    0m:5s  
-      Make FASTA from ./projects/DBfasta/UniProt_Jan2021/sp_viruses/uniprot_sprot_viruses.dat.gz
-         17,008 written to uniprot_sprot_viruses.fasta                   0m:1s  
-      Make FASTA from ./projects/DBfasta/UniProt_Jan2021/tr_bacteria/uniprot_trembl_bacteria.dat.gz
-         140,981,583 written to uniprot_trembl_bacteria.fasta            2h:21m:3s  
-      Make FASTA from ./projects/DBfasta/UniProt_Jan2021/tr_fungi/uniprot_trembl_fungi.dat.gz
-         12,550,674 written to uniprot_trembl_fungi.fasta                14m:28s  
-      Make FASTA from ./projects/DBfasta/UniProt_Jan2021/tr_invertebrates/uniprot_trembl_invertebrates.dat.gz
-         12,275,877 written to uniprot_trembl_invertebrates.fasta        13m:22s  
-      Make FASTA from ./projects/DBfasta/UniProt_Jan2021/tr_plants/uniprot_trembl_plants.dat.gz
-         20,516,158 written to uniprot_trembl_plants.fasta               18m:48s  
-      Make FASTA from ./projects/DBfasta/UniProt_Jan2021/tr_viruses/uniprot_trembl_viruses.dat.gz
-         4,761,529 written to uniprot_trembl_viruses.fasta               5m:30s  
-Complete Taxonomic UniProt                                               11h:33m:10s
+   Create FASTA files                                   20-Dec-21 16:47:36
+      Create SP FASTA from projects/DBfasta/UniProt_Dec2021/sp_fungi/uniprot_sprot_fungi.dat.gz (Size 52.6Mb)
+          35,623 of 35,623 written to uniprot_sprot_fungi.fasta
+      Complete SP FASTA file                                             0m:1s  (6Mb)
+      Create SP FASTA from projects/DBfasta/UniProt_Dec2021/sp_plants/uniprot_sprot_plants.dat.gz (Size 53.4Mb)
+          43,739 of 43,739 written to uniprot_sprot_plants.fasta
+      Complete SP FASTA file                                             0m:1s  (6Mb)
+   Complete create files                                                 0m:3s
+Complete Taxonomic UniProt                                               0m:23s  (6Mb)
 
-Start Full UniProt                                  25-Jan-21 06:08:41
+Download Full UniProt                               20-Dec-21 16:48:18
    Check Directories 
-      Creating directory: ./projects/DBfasta/UniProt_Jan2021/sp_fullSubset/
-   Download SwissProt                                   25-Jan-21 06:08:41
+   Download SwissProt                                   20-Dec-21 16:48:18
+      Creating directory: projects/DBfasta/UniProt_Dec2021/sp_full/
       Downloading uniprot_sprot.dat.gz
-      curl complete ./projects/DBfasta/UniProt_Jan2021/sp_fullSubset/uniprot_sprot.dat.gz   1m:16s
-   Create subset files                                  25-Jan-21 06:09:57
-      Make .dat subset ./projects/DBfasta/UniProt_Jan2021/sp_fullSubset/uniprot_sprot_fullSubset.dat.gz
-         Count taxonomic entries
-            334,772 IDs in uniprot_sprot_bacteria.fasta
-             35,073 IDs in uniprot_sprot_fungi.fasta
-             28,129 IDs in uniprot_sprot_invertebrates.fasta
-             43,403 IDs in uniprot_sprot_plants.fasta
-             17,008 IDs in uniprot_sprot_viruses.fasta
-         Allocate memory for 458,385 total entries
-         Record taxonomic entries
-            458,385 IDs will not be written to subset
-         Complete making list                                            0m:4s  
-         Sort list
-         Write .dat.gz subset file 
-            105,587 wrote from 563,972 (19%)                             1m:29s  
-      Complete creating .dat subset file                                 1m:36s
-      Make FASTA from ./projects/DBfasta/UniProt_Jan2021/sp_fullSubset/uniprot_sprot_fullSubset.dat.gz
-         105,587 written to uniprot_sprot_fullSubset.fasta               0m:17s  
-Complete Full UniProt                                                    3m:11s  
+      curl complete projects/DBfasta/UniProt_Dec2021/sp_full/uniprot_sprot.dat.gz   0m:56s
+Complete Full Download                                                   0m:56s
 
-Start Full UniProt                                  25-Jan-21 17:46:10
-   Check Directories 
-      Creating directory: ./projects/DBfasta/UniProt_Jan2021/tr_fullSubset/
-   Download TrEMBL                                      25-Jan-21 17:46:10
-      Downloading uniprot_trembl.dat.gz
-      curl complete ./projects/DBfasta/UniProt_Jan2021/tr_fullSubset/uniprot_trembl.dat.gz   7h:3m:10s
-   Create subset files                                  26-Jan-21 07:46:12
-      Make .dat subset ./projects/DBfasta/UniProt_Jan2021/tr_fullSubset/uniprot_trembl_fullSubset.dat.gz
-         Count taxonomic entries
-            140,981,583 IDs in uniprot_trembl_bacteria.fasta.gz
-            12,550,674 IDs in uniprot_trembl_fungi.fasta.gz
-            12,275,877 IDs in uniprot_trembl_invertebrates.fasta.gz
-            20,516,158 IDs in uniprot_trembl_plants.fasta.gz
-            4,761,529 IDs in uniprot_trembl_viruses.fasta.gz
-         Allocate memory for 191,085,821 total entries
-         Record taxonomic entries
-            191,085,821 IDs will not be written to subset
-         Complete making list                                            1h:34m:4s
-         Sort list
-         Write .dat.gz subset file 
-            18,071,318 wrote from 209,157,139 (9%)                       3h:28m:51s
-      Complete creating .dat subset file                                 5h:9m:41s
-      Make FASTA from ./projects/DBfasta/UniProt_Jan2021/tr_fullSubset/uniprot_trembl_fullSubset.dat.gz 12.9Gb
-         18,071,318 written to uniprot_trembl_fullSubset.fasta 10.3Gb    23m:40s
-Complete Full UniProt                                                    5h:33m:22s
+Create Full UniProt Fasta                           20-Dec-21 16:49:19
+      Create SP hitID list from selected fasta files
+          35,623 IDs in uniprot_sprot_fungi.fasta
+          43,739 IDs in uniprot_sprot_plants.fasta
+          79,362 sequences will not be written to subset fasta file
+      Complete SP hitID list                                             0m:0s
+      Create SP FASTA from projects/DBfasta/UniProt_Dec2021/sp_full/uniprot_sprot.dat.gz (Size 625.8Mb)
+         486,566 of 565,928 written to uniprot_sprot_xxFxxxPxxx.fasta
+      Complete SP FASTA file                                             0m:17s  (17Mb)
+Complete Full UniProt fasta                                              0m:18s  (7Mb)
 
-## Author's note: typically, the GOdb should be created as the same time as the UniProts.
-##  Whereas the UniProt were downloaded two months earlier than the GOs in this log.
-##	However, there seems to be some obsolete GOs even if they are downloaded the same day.
-
-Start GO processing go_Mar2021                      28-Mar-21 14:17:15
-   UniProt directory: ./projects/DBfasta/UniProt_Jan2021
-   GO temporary directory: ./projects/DBfasta/GO_oboMar2021
-   Delete mySQL database go_Mar2021
+Start GO processing go_Dec2021                      20-Dec-21 16:50:36
+   UniProt directory: projects/DBfasta/UniProt_Dec2021
+   GO temporary directory: projects/DBfasta/GO_oboDec2021
    URL: http://current.geneontology.org/ontology/
-         50,514 Total GOs     3,305 Alt GOs    3,125 Obsolete
-         32,542 Biological   56,609 is_a       5,533 part_of 
-         13,289 Molecular    15,018 is_a          11 part_of 
-          4,683 Cellular      5,127 is_a       2,097 part_of 
-             14 Slims           208 GOs in Slim
-   Complete Load OBO file                                                0m:6s  (12Mb)
-   Loading ./projects/DBfasta/UniProt_Jan2021 to go_Mar2021
-      Processing sp_bacteria/uniprot_sprot_bacteria.dat.gz
-               334,772 UniProts   5 Obsolete GOs                         1m:16s  (12Mb)
-      Processing sp_fungi/uniprot_sprot_fungi.dat.gz       
-                35,073 UniProts  18 Obsolete GOs                         0m:9s  (12Mb)
-      Processing sp_invertebrates/uniprot_sprot_invertebrates.dat.gz       
-                28,129 UniProts   8 Obsolete GOs                         0m:7s  (12Mb)
-      Processing sp_plants/uniprot_sprot_plants.dat.gz        
-                43,403 UniProts   2 Obsolete GOs                         0m:12s  (12Mb)
-      Processing sp_viruses/uniprot_sprot_viruses.dat.gz           
-                17,008 UniProts   1 Obsolete GOs                         0m:4s  (12Mb)
-      Processing tr_invertebrates/uniprot_trembl_invertebrates.dat.gz           
-            12,275,877 UniProts   12 Obsolete GOs                        28m:41s  (12Mb)
-      Processing tr_plants/uniprot_trembl_plants.dat.gz              
-            20,516,158 UniProts    4 Obsolete GOs                        39m:14s  (12Mb)
-      Processing sp_fullSubset/uniprot_sprot_fullSubset.dat.gz
-               105,587 UniProts   46 Obsolete GOs                        0m:43s  (12Mb)
+      Downloading go-basic.obo
+      curl complete projects/DBfasta/GO_oboDec2021/go-basic.obo          0m:2s
+         50,757 Total GOs     3,496 Alt GOs    3,472 Obsolete
+         32,645 Biological   56,021 is_a       5,417 part_of 
+         13,403 Molecular    15,089 is_a          13 part_of 
+          4,709 Cellular      5,128 is_a       2,092 part_of 
+             14 Slims           225 GOs in Slim
+   Complete Load OBO file                                                0m:1s  (19Mb)
+   Loading projects/DBfasta/UniProt_Dec2021 to go_Dec2021
+      Processing sp_fungi/uniprot_sprot_fungi.dat.gz
+           35,623 UniProts   31 Obsolete GOs                             0m:3s  (15Mb)
+      Processing sp_plants/uniprot_sprot_plants.dat.gz
+           43,739 UniProts   19 Obsolete GOs                             0m:4s  (15Mb)
+      Processing sp_full/uniprot_sprot.dat.gz
+          486,566 UniProts   74 Obsolete GOs   79,362 Already in GOdb    0m:55s  (15Mb)
       Totals:
-         GO: 49,907,782  Pfam: 21,175,254  KEGG: 2,806,531  EC: 3,736,965  InterPro: 56,704,777
+         GO: 3,513,268  Pfam: 889,988  KEGG: 554,505  EC: 318,075  InterPro: 2,621,448
    Compute levels
-         19,633 Parent-child
-        924,561 edges for biological_process; max level 18
-         37,471 edges for cellular_component; max level 14
-         28,245 edges for molecular_function; max level 13
+         18,345 Parent-child
+        833,504 edges for biological_process; max level 18
+         41,061 edges for cellular_component; max level 14
+         25,151 edges for molecular_function; max level 12
       Add GO level numbers to term table
-   Complete GO Levels                                                    0m:14s  (16Mb)
+   Complete GO Levels                                                    0m:10s  (23Mb)
    Compute ancestors
-         50,514 GOs to process ancestors
-        676,026 Ancestor paths 
-   Complete ancestors                                                    2m:57s  (94Mb)
-Complete creating GO database go_Mar2021                                 1h:13m:48s  (94Mb)
+         50,757 GOs to process ancestors
+        658,497 Ancestor paths 
+   Complete ancestors                                                    2m:2s  (100Mb)
+Complete creating GO database go_Dec2021                                 3m:26s  (100Mb)
+
+Write projects/AnnoDBs_UniProt_Dec2021.cfg
+   3 entries written
 </pre>
-</body>
-</html>    
+</html>

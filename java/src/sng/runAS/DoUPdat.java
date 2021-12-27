@@ -103,10 +103,15 @@ public class DoUPdat {
 			HashMap <String, Integer> badEC = new HashMap <String, Integer> ();
 			
 			boolean inSeq=false, inRec=false;
-			int cnt=0, cnt1=0;
+			int cnt=0, cntAdd=0;
 			
+			// e.g. file=sp_full/uniprot_sprot.dat
+			String subDir = (file.contains("/")) ? file.substring(0, file.indexOf("/")) : file;
+        	subDir = (subDir.length()>=15) ? subDir.substring(0,15) : subDir;
+        	
 			goDB.openTransaction(); 
 			
+			// CAS339 will have duplicates from full SwissProt and TrEMBL, but will be ignored
 			PreparedStatement ps = goDB.prepareStatement(
 					"insert ignore into " + Globalx.goUpTable + " (upid, acc, go, pfam, kegg, ec, interpro) " +
 					"values (?,?,?,?,?,?,?)");
@@ -115,7 +120,7 @@ public class DoUPdat {
 	        /* Save last protein which ends with // */
 	            if (line.startsWith("//")) { 
             	 	ps.setString(1, prID);
-            	 	ps.setString(2, acc);
+            	 	ps.setString(2, subDir); // CAS339 change from acc to subDir because acc not used.
             	 	ps.setString(3, goList);
             		ps.setString(4, pfamList);
             		ps.setString(5, keggList);
@@ -123,15 +128,14 @@ public class DoUPdat {
             		ps.setString(7, ipList);
             		err = prID + "\n" + goList + "\n"+  pfamList + "\n"+ keggList + "\n"+ ec + "\n"+ ipList;
 	 				ps.addBatch();
-	 				cnt++;cnt1++;
-	 	            if (cnt == 1000) {
-	 	     	        Out.r("Load " + cnt1);
+	 				cnt++;cntAdd++;
+	 	            if (cnt == 10000) { // CAS339 was 1000
+	 	     	        Out.r("Load " + cntAdd);
 	 					ps.executeBatch();
 	 					cnt=0;
 	 				}
-	 	          
 	 	            inSeq=false;
-	 	            prID=acc=goList=pfamList=keggList=ec=ipList="";
+	 	            prID=goList=pfamList=keggList=ec=ipList="";
 	 	            continue;
 	            }
 	            
@@ -154,7 +158,6 @@ public class DoUPdat {
     					Out.PrtWarn("Invalid ID line: " + line);
         	 		continue;
         	 	}
-        	 	
         	 	// AC   Q6V4H0;
         	 	if (acc =="" && line.startsWith("AC")) {
         	 		x = patAC.matcher(line);
@@ -247,14 +250,12 @@ public class DoUPdat {
         	 			continue;
         	 		}
         	 	}
-	         }
+	         }	// End read file loop
 	         if (cnt>0) ps.executeBatch();
 	         in.close(); ps.close();
-	      
-			goDB.closeTransaction();
-	         
-	        System.out.print("                                                     \r");
-	        if (prID!="") Out.PrtWarn("Incomplete -- did not add " + prID);
+	         goDB.closeTransaction();
+	         Out.rClear();
+	         if (prID!="") Out.PrtWarn("Incomplete -- did not add " + prID);
 	         
 	        if (goNoSet.size()>0) {
 	        	Out.PrtSpMsg(4, "Unknown GOs: " + goNoSet.size());
@@ -272,8 +273,12 @@ public class DoUPdat {
 		 		for (String ecx : badEC.keySet()) xx += " " + ecx + ":" + badEC.get(ecx);
 		 		Out.PrtSpMsg(4, "Unknown ECs: " + xx);
 		 	}
-	        String msg = (goFdObsSet.size()==0) ? "UniProts" : "UniProts    " + Out.df(goFdObsSet.size()) + " Obsolete GOs";
-	        Out.PrtSpCntMsgTimeMemM(3, cnt1, msg, time);
+	        int cntDB = goDB.executeCount("select count(*) from " + Globalx.goUpTable + " where acc='" + subDir + "'");
+	        String igMsg = (cntDB==cntAdd) ? "" : Out.df(cntAdd-cntDB) + " Already in GOdb";
+	        String obMsg = (goFdObsSet.size()==0) ? "" : Out.df(goFdObsSet.size()) + " Obsolete GOs   ";
+	        String msg =  "UniProts   " + obMsg + igMsg;
+	        		
+	        Out.PrtSpCntMsgTimeMemM(2, cntDB, msg, time);
 	        return true;
 		}
 		catch (Exception e) {
@@ -296,56 +301,59 @@ public class DoUPdat {
 	}
 	/********************************************************************
 	 * UniProt dat -> fasta file
-	 * 
+	 * skipIDs is for the subset file. It is null for taxo files.
 	 */
-	public boolean dat2fasta(String prefix, String upDir, String inFile, String outFile) {
-		String datSize = FileHelpers.getFileSize(upDir+inFile); // CAS315 add size
-		Out.PrtSpMsg(2, "Make FASTA from " + (upDir+inFile) + " " + datSize);
+	public boolean dat2fasta(String prefix, String upDir, String fullDatFile, String outFile, HashSet <String> skipIDs) {
+		String datSize = FileHelpers.getFileSize(fullDatFile); // CAS315 add size
+		Out.PrtSpMsg(2, "Create " + prefix.toUpperCase() + " FASTA from " + fullDatFile + " (Size " + datSize + ")");
 		errPath = upDir + errFile;
 		Matcher x;
 		String line="";
+		
 		try {
 			long time=Out.getTime();
-			BufferedReader in=FileHelpers.openGZIP(upDir+inFile);
-			if (in==null) return false;
-			BufferedWriter out = new BufferedWriter(new FileWriter(upDir+outFile, false));
+			BufferedReader inFA=FileHelpers.openGZIP(fullDatFile);
+			if (inFA==null) return false;
 			
-			boolean inSeq=false;
-			String id="",ac="", de="",os="", gn="";
-			int cnt=0, cntSeq=0;
-	        while ((line = in.readLine()) != null) {
-        	 	if (line.startsWith("//")) {
-        	 		inSeq=false;
-        	 		ac=id=de=os=gn="";
-        	 		if (cntSeq==0) {
-        	 			prtParseErr("Missing sequence: " + " ID=" + id + " AC=" + ac + " DE=" + de + " OS="+os);
-        	 		}
+			BufferedWriter outFA = new BufferedWriter(new FileWriter(upDir+outFile, false));
+			
+			boolean bInSeq=false, bPrtSeq=false;
+			String hitID="",ac="", de="",os="", gn="";
+			int cntRead=0, cntWrite=0;
+			
+	        while ((line = inFA.readLine()) != null) {
+        	 	if (line.startsWith("//")) { // end last sequence
+        	 		bInSeq=false;
+        	 		ac=hitID=de=os=gn="";
         	 	}
-        	 	else if (inSeq) {
+        	 	else if (bInSeq && bPrtSeq) {  // print sequence
         	 		line = line.replace(" ", "");
-        	 		out.write(line + "\n");
-        	 		cntSeq++;
+        	 		outFA.write(line + "\n");
         	 	}
-        	 	else if (line.startsWith("SQ")) {
-        	 		checkOK(ac,id,de,os); // print even if error
-        	 		if (id!="") {
-        	 			String desc = ">" + prefix + "|" + ac + "|" + id + " " + de + " OS=" + os + " GN=" + gn;
-        	 			out.write(desc+"\n");
-        	 			inSeq=true;
-        	 			cntSeq=0;
+        	 	else if (line.startsWith("SQ")) { // start sequence on next line
+        	 		if (hitID!="" && bPrtSeq) {    // print header line 
+        	 			checkOK(ac,hitID,de,os); 
+        	 			
+        	 			String desc = ">" + prefix + "|" + ac + "|" + hitID + " " + de + " OS=" + os + " GN=" + gn;
+        	 			outFA.write(desc+"\n");
+        	 			
+        	 			bInSeq=true;
+        	 			cntWrite++;
         	 		}
         	 	}
-        	 	else if (id=="" && line.startsWith("ID")) {
-        	 		if (inSeq) {
-        	 			prtParseErr("Sequence not terminated: " + " ID=" + id + " AC=" + ac + " DE=" + de + " OS="+os);
-        	 			inSeq=false;
+        	 	else if (hitID=="" && line.startsWith("ID")) { // start of new entry
+        	 		if (bInSeq) {
+        	 			prtParseErr("Sequence not terminated: " + " ID=" + hitID + " AC=" + ac + " DE=" + de + " OS="+os);
+        	 			bInSeq=false;
         	 		}
         	 		x = patID.matcher(line);
-        	 		if (x.find()) id = x.group(1);
-    				else Out.PrtErr("Invalid line: " + line);
+        	 		if (x.find()) 	hitID = x.group(1);
+    				else 			Out.PrtErr("Invalid line: " + line);
         	 		
-        	 		cnt++;
-        	 		if (cnt%10000==0) Out.r("Wrote " + cnt);
+        	 		bPrtSeq =  (skipIDs!=null && skipIDs.contains(hitID)) ? false : true; // CAS339
+        	
+        	 		cntRead++;
+        	 		if (cntRead%10000==0) Out.r("Wrote " + cntRead);
         	 	}
         	 	else if (ac =="" && line.startsWith("AC")) {
         	 		x = patAC.matcher(line);
@@ -368,31 +376,29 @@ public class DoUPdat {
         	 		if (x.find()) gn = x.group(1);
         	 	} 
 	         }
-	         in.close(); out.close();
-	         if (id!="")   Out.PrtWarn("Incomplete file. Entry not complete: " + id);
-	         if (cntErr>0) Out.PrtWarn("Parse errors " + cntErr + " see " + errPath);
+	         inFA.close(); outFA.close();
+	         if (hitID!="")  Out.PrtWarn("Incomplete file. Entry not complete: " + hitID);
+	         if (cntErr>0) 	 Out.PrtWarn("Parse errors " + cntErr + " see " + errPath);
 	         
-	         String faSize = FileHelpers.getFileSize(upDir+outFile);
-	         Out.PrtSpMsgTime(3, df.format(cnt) + " written to " + outFile + " " + faSize, time);
+	         Out.PrtSpCntMsg(3, cntWrite, "of " + df.format(cntRead) + " written to " + outFile);
+	         Out.PrtSpMsgTimeMem(2, "Complete " + prefix.toUpperCase() + " FASTA file", time);
 	         
 	         return true;
 		}
 		catch (Exception e) {
 			Out.PrtErr("Check your space, you may have run out.");
 			ErrorReport.reportError("Failed on: " + line);
-			ErrorReport.reportError(e, "Making FASTA " + inFile); 
+			ErrorReport.reportError(e, "Making FASTA from " + fullDatFile); 
 			return false;
 		}
 	}
 	private void prtParseErr(String err) {
 		try {
 			PrintWriter pWriter = new PrintWriter(new FileWriter(errPath, true));
-			pWriter.println(err + "\n");
+			pWriter.println(err);
 			pWriter.close();
 			cntErr++;
-		} catch (Exception e1) {
-			Out.PrtErr("An error has occurred writing to file " + errPath);
-		}
+		} catch (Exception e1) {Out.PrtErr("An error has occurred writing to file " + errPath);}
 	}
 	
 	private boolean checkOK(String ac, String id, String de, String os) {

@@ -5,14 +5,19 @@ package cmp.compile.panels;
  */
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.Vector;
 
+import javax.swing.AbstractAction;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JCheckBox;
 import javax.swing.JTextField;
 
@@ -29,6 +34,8 @@ public class EditBlastPanel extends JPanel {
 	private static final long serialVersionUID = -6189127919667748457L;
 	
 	private final String helpHTML = Globals.helpRunDir + "EditBlastPanel.html";
+	private final String searchHelpHTML = Globalx.searchHelp;
+	
 	private final String BLAST_AA_TAB = Globals.Search.BLAST_AA_TAB;
 	private final String BLAST_NT_TAB = Globals.Search.BLAST_NT_TAB;
 
@@ -77,13 +84,30 @@ public class EditBlastPanel extends JPanel {
 			}
 		});
 		
-		btnHelp = new JButton("Help");
-		btnHelp.setBackground(Globals.HELPCOLOR);
-		btnHelp.addActionListener(new ActionListener() {
+		// CAS339 add two level help
+		final JPopupMenu popup = new JPopupMenu();
+		popup.add(new JMenuItem(new AbstractAction("Search Settings") {
+			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(theCompilePanel.getParentFrame(), "Edit Search Settings", helpHTML);
+				try {
+					UserPrompt.displayHTMLResourceHelp(null, "Search Settings", helpHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error on search settings help"); }
 			}
-		});
+		}));
+		popup.add(new JMenuItem(new AbstractAction("Search Parameters") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(null, "Search Parameters", searchHelpHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error on search parameters help"); }
+			}
+		}));
+		JButton btnHelp = Static.createButton("Help...", true, Globalx.HELPCOLOR);
+		btnHelp.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                popup.show(e.getComponent(), e.getX(), e.getY());
+            }
+        });
 	
 		buttonPanel = Static.createRowPanel();
 		buttonPanel.add(Box.createHorizontalGlue());

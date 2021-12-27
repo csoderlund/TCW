@@ -17,6 +17,8 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -49,6 +51,7 @@ public class FindHits extends JPanel
 {
 	private static final long serialVersionUID = 653192706293635582L;
 	private static final String helpHTML = Globals.helpDir + "FindHits.html"; // CAS330 rename file and help
+	private static final String searchHelpHTML = Globalx.searchHelp; // CAS339 
 	
 	private final String RESULTS0 = ".results" + FileC.TEXT_SUFFIX;
 	private final String RESULTS6 = ".results" + FileC.TSV_SUFFIX;;
@@ -92,13 +95,34 @@ public class FindHits extends JPanel
 		row.add(Box.createHorizontalStrut(150));
 		
 		row.add(Box.createHorizontalGlue());
-        JButton btnHelp = Static.createButton("Help", true, Globals.HELPCOLOR);
-        btnHelp.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				UserPrompt.displayHTMLResourceHelp(theParentFrame, "Find Hits", helpHTML);
+		
+		// CAS339 add two level help
+		final JPopupMenu popup = new JPopupMenu();
+		popup.add(new JMenuItem(new AbstractAction("Find Hits") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theParentFrame, "Find Hits", helpHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error on Find hits help"); }
 			}
-		});	
+		}));
+		popup.add(new JMenuItem(new AbstractAction("Search Parameters") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theParentFrame, "Search Parameters", searchHelpHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error on Find hits help"); }
+			}
+		}));
+		JButton btnHelp = Static.createButton("Help...", true, Globalx.HELPCOLOR);
+		btnHelp.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                popup.show(e.getComponent(), e.getX(), e.getY());
+            }
+        });
+		btnHelp.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		row.add(btnHelp);
+		
 		pnlRealMain.add(row);
 		pnlRealMain.add(Box.createVerticalStrut(10));
 		

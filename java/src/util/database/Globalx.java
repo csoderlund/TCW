@@ -8,8 +8,8 @@ import java.awt.Font;
 public class Globalx {
 	public static boolean debug = false; // changed in STCWMain or MTCWMain from command line 
 	
-	public static final String strRelDate = "(12-Dec-21)"; 
-	public static final String strTCWver = "3.3.8";  //  3.3.8 must be 3 digits
+	public static final String strRelDate = "(27-Dec-21)"; 
+	public static final String strTCWver = "3.3.9";  //  3.3.8 must be 3 digits
 	public static final String URL = "http://www.agcol.arizona.edu ";
 	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate;
 	public static final String sTCWver = "sTCW v" + strTCWver;
@@ -39,6 +39,7 @@ public class Globalx {
 	public static final String USERDIR = 	"Userfiles";   
 	public static final String HTMLDIR = 	"OverviewHTML";
 	public static final String DEDIR = 		"RunDE"; // CAS326
+	public static final String searchHelp = "html/SearchParam.html"; // CAS339 shared
 	
 	// for specific project
 	public final static String pLOGDIR =   "logs";

@@ -4,14 +4,19 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import java.util.Vector;
@@ -21,6 +26,7 @@ import util.database.Globalx;
 import util.file.FileC;
 import util.file.FileRead;
 import util.methods.BlastArgs;
+import util.methods.ErrorReport;
 import util.methods.Static;
 import util.methods.Out;
 import util.ui.ButtonComboBox;
@@ -33,6 +39,8 @@ public class EditAnnoPanel extends JPanel {
 	private static final long serialVersionUID = 4830755874697242929L;
 	
 	private static String helpHTML =  Globals.helpRunDir + "EditAnnoDBPanel.html";
+	private static final String searchHelpHTML = Globalx.searchHelp;
+	
 	private static final int COLUMN_WIDTH = 200;
 	private static final int TAB_WIDTH = 20;
 	private static final int COL_MINUS_TAB = COLUMN_WIDTH-TAB_WIDTH;
@@ -237,13 +245,30 @@ public class EditAnnoPanel extends JPanel {
 			}
 		});
 		
-		JButton btnHelp = new JButton("Help");
-		btnHelp.setBackground(Globals.HELPCOLOR);
-		btnHelp.addActionListener(new ActionListener() {
+		// CAS339 add two level help
+		final JPopupMenu popup = new JPopupMenu();
+		popup.add(new JMenuItem(new AbstractAction("Add annoDB") {
+			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(theManFrame, "AnnoDB Help", helpHTML);	
+				try {
+					UserPrompt.displayHTMLResourceHelp(theManFrame, "Add annoDB", helpHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error on Add annoDB help"); }
 			}
-		});
+		}));
+		popup.add(new JMenuItem(new AbstractAction("Search Parameters") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theManFrame, "Search Parameters", searchHelpHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error on search parameters help"); }
+			}
+		}));
+		JButton btnHelp = Static.createButton("Help...", true, Globalx.HELPCOLOR);
+		btnHelp.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                popup.show(e.getComponent(), e.getX(), e.getY());
+            }
+        });
 
 		row = Static.createRowPanel();
 		JPanel buttonPanel = Static.createRowPanel();

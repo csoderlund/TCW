@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Search parameters</title>
+<style>
+.tabley    		{border: 1px  solid black; border-spacing: 0px;  border-collapse: collapse;}
+.tabley td 		{border: 1px  solid black; padding: 3px; }
+</style>
+</head>
+<body style="padding:20px;width:650px;font-family:Times">
+
+<h2>Some search parameters</h2>
+This Help just shows some useful parameters, to see the full list:
+<br><tt>DIAMOND</tt>: Execute 'diamond help' from the command line.
+<br><tt>BLASTX</tt>:&nbsp;&nbsp;Execute 'blastx -help' or 'blastp -help' from the command line.
+
+<h3>DIAMOND</h3>
+<table class=tabley>
+<tr><td><b>Parameter</b><td><b>Default</b><td><b>Description</b>
+<tr><td>--evalue (-e)<td>0.001 (1e-03)<td>Maximum e-value to report alignments
+<tr><td>--masking<td>1<td>enable masking of low complexity regions (0/1=default)
+<tr><td>--min-score <td>--<td>Minimum bit score to report alignments (overrides e-value setting)
+<tr><td>--id<td>--<td> Minimum identity% to report an alignment
+
+<tr><td nowrap>--max-target-seqs (-k)<td>25<td>Maximum number of target sequences to report alignments for
+<tr><td>--max-hsps<td>1<td>Maximum number of HSPs per target sequence to report for each query
+<tr><td>--query-cover<td>--<td>Report only alignments above the given percentage of query cover.
+<tr><td>--subject-cover<td>--<td>Report only alignments above the given percentage of subject cover.
+
+<tr><td>--sensitive<td>off<td>       Enable sensitive mode (slower)
+<tr><td>--more-sensitive<td>off<td>  Enable more sensitive mode (even slower)
+<tr><td>--dbsize<td>Size of input<td>Effective database size (in letters)
+<tr><td>--matrix  <td>BLOSUM62<td>score matrix for protein alignment
+
+</table>
+
+<h3>BLAST</h3>
+<table class=tabley>
+<tr><td><b>Parameter</b><td><b>Default</b><td><b>Description</b>
+<tr><td nowrap>-evalue<td>10 (1e+01)<td>Maximum e-value to report alignments
+<tr><td  nowrap>-max_target_seqs<td>500<td> Maximum number of aligned sequences to keep
+<tr><td>-max_hsps<td>--<td>Set maximum number of HSPs per subject sequence to save for each query
+<tr><td>-use_sw_tback<td>--<td> Compute locally optimal Smith-Waterman alignments 
+<tr><td>-dbsize<td>Size of input<td>Effective length of the database
+<tr><td>-matrix<td>BLOSUM62<td>Scoring matrix name
+</table>
+
+<h3>E-value</h3>
+The e-value takes into account the number of sequences in the database. Hence, by using different sized taxonomic
+databases, two identical alignments from two different databases may have different e-values. Moreover,
+aligning a single sequence using <b>Find Hits</b> will have a different e-value from the one in 
+the TCW database.
+
+</body>
+</html>

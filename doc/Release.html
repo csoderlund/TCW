@@ -13,7 +13,7 @@
 
 There have been many improvements, but the following provides some recent critical points.
 <table>
-<tr><td><a href=#v338>v3.3.8</a><td>12-Dec-21<td><ttp><ttp>runSingle</ttp></ttp><td>Improved loading of FASTA file.
+<tr><td><a href=#v338>v3.3.9</a><td>27-Dec-21<td><ttp><ttp>runAS</ttp></ttp><td>Improved interface for full subset UniProt.
 <tr><td><a href=#v335>v3.3.5</a><td>04-Nov-21<td><ttp>viewSingle</ttp><td>log2FC TPM analysis 
 <tr><td><a href=#v334>v3.3.4</a><td>18-Oct-21<td><ttp>runSingle</ttp><td><ttl>ORF finder</ttl> improvements.
 <tr><td><a href=#v331>v3.3.1</a><td>01-Sep-21<td><ttp>runSingle</ttp><td> Add Prune Hits algorithm.
@@ -25,6 +25,27 @@ There have been many improvements, but the following provides some recent critic
 <tr><td><a href=#v318>v3.1.8</a><td>18-Mar-21<td><ttp>runAS</ttp><td>Changed the source of GO to the go-basic.obo file
 <tr><td><a href=#early>Earlier</a><td>2020<td>&nbsp;<td>&nbsp;
 </table>
+
+<a name=v339>
+<h4>v3.3.9 27-Dec-2021</h4>
+
+Share: All interfaces that use <ttp>Blast</ttp> and <ttp>Diamond</ttp> have access to a Help page of parameters.
+<p>Demo: The demo has been updated to Dec 2021, and updated as described in #3 below. 
+
+<p><ttp>runAS</ttp>
+<ol>
+<li>For the Full SwissProt and TrEMBL, there is now the option of creating the different subsets of the downloaded taxonomic
+databases and the complete SwissProt and/or TrEMBL. See <a href="stcw/AnnoDBs.html#full">Full subsets</a> for an explanation.
+
+<br>&nbsp;
+<li>Both adding UniProts for the <ttp>runAS</ttp> <ttc>Build GOs</ttc> and <ttp>runSingleTCW </ttp> <ttc>Annotate</ttc> 
+is updated to better handle duplicate SwissProt hits (which can happen if the full
+SwissProt is used along with taxonomic databases). 
+<br>&nbsp;
+<li>The demo <tt>sp_fullSubset</tt> is renamed to <tt>sp_full</tt>, which contains the files 
+<tt>uniprot_sprot.dat</tt>, <tt>uniprot_sprot_xBFxIxPxxx.fasta</tt> that has the bacteria, fungus, invertebrate and plant SwissProt entries removed,
+and <tt>uniprot_sprot_xxxxIxxxxx.fasta</tt>  that has the invertebrate only removed.
+</ol>
 
 <a name=v338>
 <h4>v3.3.8 12-Dec-2021</h4>

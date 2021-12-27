@@ -3,11 +3,9 @@ package sng.runAS;
  * DoUP perform file handling for downloading taxonomic and full uniprot
  */
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.text.DecimalFormat;
+import java.util.HashSet;
 import java.util.Vector;
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,82 +15,80 @@ import util.database.Globalx;
 import util.file.FileHelpers;
 import util.methods.ErrorReport;
 import util.methods.Out;
-import util.methods.Static;
 import util.methods.TimeHelpers;
 
 public class DoUP {
-	private final String upTaxURL = 
-"ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/taxonomic_divisions/";
-	private String upFullURL = 
-"ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/";
+	private final String upTaxURL = GlobalAS.upTaxURL;
+	private final String upFullURL = GlobalAS.upFullURL;
 	
-	// test stuff -- so read file on disk instead of over network for testing
-	private boolean test=ASMain.test;
-	private String demoIn = "./projects/DBfasta/dats/";
-	
-	// naming
-	public static final String subset = "fullSubset";
-	private final String SP = Globalx.SP, TR=Globalx.TR;
-	private final String spPre = "uniprot_sprot", trPre = "uniprot_trembl";
+	private final String fullTaxo = GlobalAS.fullTaxo;					// full
+	private final String SP = Globalx.SP, TR=Globalx.TR;				// sp, tr
 	
 	private final Pattern fasta =  Pattern.compile(">(\\S+)");
-	private final Pattern patID = Pattern.compile("ID\\s+(\\S*)"); 
-	private final DecimalFormat df = new DecimalFormat("#,###,###");
 	
 	public DoUP (ASFrame asf) {frameObj=asf;} 
 	
 	/**************************************************************
 	 * XXX Taxonomic
 	 */
-	public void xTaxo(Vector <String> spFiles, Vector <String> trFiles, 
-			Vector <Boolean> spDats, Vector <Boolean> trDats, String dir) {
+	public void xTaxo(Vector <String> spTaxo, Vector <String> trTaxo, 
+			Vector <Boolean> spHasDat, Vector <Boolean> trHasDat, String dir) {
 		try {
 			Out.PrtDateMsg("\nStart Taxonomic UniProt");
 			targetUpDir = dir;
-			if (!mkDirTaxo(spFiles, trFiles)) return;
+			if (!mkDirTaxo(spTaxo, trTaxo)) return;
 			
 			long startTime = Out.getTime();
 			
-			if (spFiles.size()>0) {
+			if (spTaxo.size()>0) {
 				long downTime = Out.getTime(); //CAS331 add sub-times
 				Out.PrtSpDateMsg(1, "Download SwissProt files");
-				for (int i=0; i<spFiles.size(); i++) {
-					if (!spDats.get(i)) {
-						String f = spFiles.get(i);
-						if (!runDownload(SP, spPre, f, f)) return;	
+				for (int i=0; i<spTaxo.size(); i++) {
+					if (!spHasDat.get(i)) {
+						String f = spTaxo.get(i);
+						if (!runDownload(SP, f, f)) return;	
 					}
 				}
 				Out.PrtSpMsgTime(1,"Complete SwissProt download", downTime);
 			}
 			
-			
-			if (trFiles.size()>0) {
+			if (trTaxo.size()>0) {
 				long downTime = Out.getTime();
 				Out.PrtSpMsg(1,"");
 				Out.PrtSpDateMsg(1, "Download TrEMBL files");
-				for (int i=0; i<trFiles.size(); i++) {
-					if (!trDats.get(i)) {
-						String f = trFiles.get(i);
-						if (!runDownload(TR, trPre, f, f)) return;	
+				for (int i=0; i<trTaxo.size(); i++) {
+					if (!trHasDat.get(i)) {
+						String f = trTaxo.get(i);
+						if (!runDownload(TR, f, f)) return;	
 					}
 				}
 				Out.PrtSpMsgTime(1, "Complete TrEMBL download", downTime);
 			}
+			
 			long createTime=Out.getTime();
 			Out.PrtSpMsg(1,"");
 			Out.PrtSpDateMsg(1, "Create FASTA files");
 			DoUPdat datObj = new DoUPdat(frameObj);
-			for (String f : spFiles) {
-				if (!datObj.dat2fasta(SP, mkNameDir(SP,f), 
-						mkNameDat(spPre,f), mkNameFasta(spPre,f))) return;
-			}
-			for (String f : trFiles) {
-				if (!datObj.dat2fasta(TR, mkNameDir(TR,f), mkNameDat(trPre,f), 
-						mkNameFasta(trPre,f))) return;
-			}
-			Out.PrtSpMsgTime(1, "Complete create files", createTime);
+			GlobalAS fileObj = new GlobalAS(targetUpDir);
 			
-			Out.PrtMsgTime("Complete Taxonomic UniProt", startTime);
+			for (String taxo : spTaxo) {
+				String spDir =    fileObj.mkNameDir(SP,taxo);	  	// targetDir/sp_taxo
+				String spOutFa =  fileObj.mkNameFa(SP,taxo); 		// uniprot_sprot + "_" + tax + faSuffix;
+				
+				String spFullDat = fileObj.mkFullDatExists(SP, taxo, taxo);
+				
+				if (!datObj.dat2fasta(SP, spDir, spFullDat, spOutFa, null)) return;
+			}
+			for (String taxo : trTaxo) {
+				String trDir = fileObj.mkNameDir(TR,taxo);	  	// targetDir/tr_taxo
+				String trOutFa =  fileObj.mkNameFa(TR,taxo); 	// uniprot_trembl + "_" + tax + faSuffix;
+				String trFullDat = fileObj.mkFullDatExists(TR, taxo, taxo);
+				
+				if (!datObj.dat2fasta(TR, trDir, trFullDat, trOutFa, null)) return;
+			}
+			
+			Out.PrtSpMsgTime(1, "Complete create files", createTime);
+			Out.PrtMsgTimeMem("Complete Taxonomic UniProt", startTime);
 		}
 		catch (Exception e) {ErrorReport.reportError(e, "Problems getting file");}
 	}
@@ -100,128 +96,108 @@ public class DoUP {
 	/*******************************************************
 	 * XXX Full
 	 */
-	public void xFull(boolean isSP, boolean isTR, boolean hasSPdat, boolean hasTRdat, String dir) {
-		Out.PrtDateMsg("\nStart Full UniProt");
+	public boolean xFullDown( boolean noSPdat, boolean noTRdat, String dir) {
+		Out.PrtDateMsg("\nDownload Full UniProt");
+		long startTime = Out.getTime();
+		
 		targetUpDir = dir;
-		long startTime = Out.getTime();
+		Out.PrtSpMsg(1, "Check Directories ");
+		if (!mkCheckDir(targetUpDir)) return false;
 		
-		if (!mkDirFull(isSP, isTR)) return;
+		GlobalAS fileObj = new GlobalAS(targetUpDir);
 		
-		if (isSP && !hasSPdat) {
+		if (noSPdat) {
 			Out.PrtSpDateMsg(1, "Download SwissProt");
-			if (!runDownload(SP, spPre, "", subset)) return;	
+			if (!mkCheckDir(fileObj.mkNameDir(SP, fullTaxo))) return false;
+			if (!runDownload(SP, "", fullTaxo)) return false;	
 		}
-		if (isTR && !hasTRdat) {
+		if (noTRdat) {
 			Out.PrtSpDateMsg(1, "Download TrEMBL");
-			if (!runDownload(TR, trPre, "", subset)) return;	
+			if (!mkCheckDir(fileObj.mkNameDir(TR, fullTaxo))) return false;
+			if (!runDownload(TR,  "", fullTaxo)) return false;	
 		}
-		Out.PrtSpDateMsg(1, "Create subset files");
-		DoUPdat datObj = new DoUPdat(frameObj);
-		if (isSP) {
-			if (!fullCreateSubset(SP,spPre)) return;
-			
-			if (!datObj.dat2fasta(SP, mkNameDir(SP, subset), 
-					mkNameDat(spPre, subset), mkNameFasta(spPre, subset))) return;
-		}
-		if (isTR) {
-			if (!fullCreateSubset(TR,trPre)) return;
-			
-			if (!datObj.dat2fasta( TR,mkNameDir(TR, subset), 
-					mkNameDat(trPre, subset), mkNameFasta(trPre, subset))) return;
-		}
-		Out.PrtSpMsgTime(0, "Complete Full UniProt", startTime);
+		Out.PrtSpMsgTime(0, "Complete Full Download", startTime);
+		return true;
 	}
-	
-	/*********************************************
-	 * XXX Make subset: Read uniprot_Px.data.gz, write uniprot_Px_subset.data, then gzip 
-	 */
-	
-	private boolean fullCreateSubset(String type, String Px) {
-		long startTime = Out.getTime();
-		String path = mkNameDir(type, subset);
-		String inPath = path + mkNameDat(Px, "");
-		String outPath = path + mkNameDat(Px, subset);
-		Out.PrtSpMsg(2, "Make .dat subset " + outPath);
+	public void xFullFasta(	String spSuffix, HashSet <String> spTaxoSet, 
+							String trSuffix, HashSet <String> trTaxoSet, String upDir) {
+		Out.PrtDateMsg("\nCreate Full UniProt Fasta");
+		targetUpDir = upDir;
+		GlobalAS fileObj = new GlobalAS(targetUpDir);
 		
-		try {	
-			if (!fullReadFasta(type)) return false;
+		long startTime = Out.getTime();
+		
+		if (spTaxoSet!=null) {
+			HashSet <String> spHitIDs = fullReadFastas(SP, spTaxoSet); // get all hitIDs from selected .fasta
 			
-			Out.PrtSpMsg(3, "Sort list");
-			if (taxoIDs==null) { 
-				Out.PrtError("Error createing full subset (taxoIDs is null)");
-				Out.die("Cannot continue - may have run out of memory");
-			}
-			Arrays.sort(taxoIDs);
+			String fullDir = 	 fileObj.mkNameDir(SP, fullTaxo);		// sp_full
+			String outFaFile =	 fileObj.mkNameFa(SP, spSuffix);	    // uniprot_sprot_spSuffix.fasta
+			String fullDatFile = fileObj.mkFullDatExists(SP, fullTaxo, "");
 			
-			if (!fullWriteDat(inPath, outPath)) return false;
-			Out.PrtSpMsgTime(2, "Complete creating .dat subset file ", startTime);
-			return true;
+			DoUPdat spObj = new DoUPdat(frameObj);
+			if (!spObj.dat2fasta(SP, fullDir, fullDatFile, outFaFile, spHitIDs)) return; 
 		}
-		catch (Exception e) {ErrorReport.prtReport(e, "creating full subset");}
-		catch (OutOfMemoryError e) {prtMemError(e, "creating full subset");}
-		return false;
+		if (trTaxoSet!=null) {
+			HashSet <String> trHitIDs = fullReadFastas(TR, trTaxoSet);
+			
+			String fullDir = fileObj.mkNameDir(TR, fullTaxo);  		// tr_full
+			String outFaFile=fileObj.mkNameFa(TR, trSuffix);	// uniprot_trembl_trSuffix.fasta
+			
+			String fullDatFile = fileObj.mkFullDatExists(TR, fullTaxo, "");			// uniprot_trembl.dat.gz
+			
+			DoUPdat trObj = new DoUPdat(frameObj);
+			if (!trObj.dat2fasta(TR, fullDir, fullDatFile, outFaFile, trHitIDs)) return;
+		}
+		Out.PrtSpMsgTimeMem(0, "Complete Full UniProt fasta", startTime);
 	}
+	
 	/***************************************************
-	 * First count entries in taxonmic fasta file
+	 * action=0; count hitIDs in taxonomic fasta file
 	 * Allocate string array
-	 * Enter entries from taxonomic fasta files
+	 * action=1; set hitIDs from taxonomic fast
 	 */
-	private boolean fullReadFasta(String type) {
+	private HashSet <String> fullReadFastas(String type, HashSet <String> taxoSet) {
 		long startTime = Out.getTime();
 		try {
-			File dir = new File(targetUpDir);
-			File [] dirs = dir.listFiles();
+			Out.PrtSpMsg(2, "Create " + type.toUpperCase() + " hitID list from selected fasta files");
+			HashSet <String> hitIDs = new HashSet <String> ();
 			
-			for (int x=0; x<2; x++) {
-				if (x==0) Out.PrtSpMsg(3, "Count taxonomic entries");
-				else Out.PrtSpMsg(3, "Record taxonomic entries");
+			GlobalAS fileObj = new GlobalAS(targetUpDir);
+			
+			for (String taxo : taxoSet) {
+				String fullname = fileObj.mkFullFaExists(type, taxo);	
 				
-				for (File d : dirs) {
-					if (!d.isDirectory()) continue;
-					
-					String fname = d.getName();
-					if (!fname.startsWith(type) || fname.contains(subset)) continue;
-					
-					File [] xfiles = d.listFiles();
-					for (File f : xfiles) {
-						String fName = f.getName();
-						if (fName.endsWith(".fasta") || fName.endsWith(".fasta.gz")) {
-							if (fullReadTaxo(f, x)) break;
-							else return false;
-						}
-					}
-				}
-				if (x==0) {
-					Out.PrtSpMsg(3, "Allocate memory for " + df.format(index) + " total entries");
-					taxoIDs = new String [index];
-					index=0;
-				}
+				if (fullname==null) 
+					Out.PrtErr("No valid .fasta or fasta.fz file for " + type + "_" + taxo);
+				else 
+					fullReadFastaFile(new File(fullname), hitIDs);
 			}
-			Out.PrtSpCntMsg(4, index, "IDs will not be written to subset");
-			Out.PrtSpMsgTime(3, "Complete making list", startTime);
-			return true;
+			
+			Out.PrtSpCntMsg(3, hitIDs.size(), "sequences will not be written to subset fasta file");
+			Out.PrtSpMsgTime(2, "Complete " + type.toUpperCase() + " hitID list", startTime);
+			return hitIDs;
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Error reading file");}
 		catch (OutOfMemoryError e) {ErrorReport.prtReport(e, "Memory error reading file ");}
-		return false;
+		return null;
 	}
+	// read hitIDs into HashSet
 	// " >sp|Q6V4H0|10HGO_CATRO 8-hyxxxxxxxxxx xxxxxxxx xxxxxx";
-	private boolean fullReadTaxo(File f, int action) { 
+	private boolean fullReadFastaFile(File faFH, HashSet <String> hitIDs) { 
 		String line="";
-		int cnt=0, cntErr=0;
+		int cnt=0, cntErr=0, cntFound=0;
 		Matcher x;
-		String fn = f.getName();
+		String fn = faFH.getName();
 		
 		try {		
-			BufferedReader in = FileHelpers.openGZIP(f.getAbsolutePath()); // CAS315
-			if (in==null) Out.die("Cannot continue");
+			BufferedReader inFH = FileHelpers.openGZIP(faFH.getAbsolutePath()); // CAS315
+			if (inFH==null) Out.die("Cannot continue");
 		
-			while ((line = in.readLine()) != null) {
+			while ((line = inFH.readLine()) != null) {
 				if (!line.startsWith(">")) continue;
 				line = line.trim();
-				cnt++;
 				x = fasta.matcher(line);
-				if (!x.find()) System.err.println("Parse error: " + line);
+				if (!x.find()) Out.PrtErr("Parse error: " + line);
 				else {
 					String [] tok = x.group(1).split("\\|");
 					if (tok.length!=3) {
@@ -235,134 +211,59 @@ public class DoUP {
 						Out.prt("Line: " +  line);
 						continue;
 					}
-					if (action==1) taxoIDs[index] = tok[2];
-					tok = null; 
-					index++;
-					if (cnt%100000==0) Out.r("read " + cnt + " in " + fn);
+					hitIDs.add(tok[2]);
+					cntFound++;
+					
+					if (cnt%100000==0) Out.r("read " + cntFound + " in " + fn);
 				}
 			}
-			in.close();
-			System.err.print("                                                     \r");
-			if (action==0) Out.PrtSpCntMsg(4, cnt, "IDs in " + fn);
+			inFH.close();
+			Out.rClear();
+			Out.PrtSpCntMsg(3, cntFound, "IDs in " + fn);
 		
 			return true;
 		}
 		catch (Exception e) {
-			String msg = "Reading #" + cnt + " " + fn + "                 \n" + 
-					"Error parsing: " + line;
+			String msg = "Reading #" + cnt + " " + fn + "                 \n" + "Error parsing: " + line;
 			ErrorReport.prtReport(e, msg);
 		}
 		catch (OutOfMemoryError e) { prtMemError(e, "reading taxonomic databases");}
 		return false;
 	}
-	/**********************************************
-	 * Read full sp/tr .dat UniProt
-	 * Write entries not in taxonomic fasta files
-	 */
-	private boolean fullWriteDat(String inPath, String outPath) {
-		long startTime = Out.getTime();
-		try {		
-			Out.PrtSpMsg(3, "Write .dat.gz subset file ");
-			
-			BufferedReader in = FileHelpers.openGZIP(inPath);
-			if (in==null) return false;
-			BufferedWriter out = FileHelpers.createGZIP(outPath);
-			if (out==null) return false;
-			
-			String line, id="";
-			boolean bwrite=false;
-			long cnt=0, cnt1=0;
-			while ((line = in.readLine()) != null) {
-				if (!line.startsWith("ID")) {
-					if (bwrite) out.write(line + "\n");
-					continue;
-				}
-				cnt++;
-				Matcher x = patID.matcher(line);
-				if (x.find()) {
-					id = x.group(1);
-					int index = Arrays.binarySearch(taxoIDs,id);
-					if (index>=0) bwrite=false;
-					else {
-						cnt1++;
-						bwrite=true;
-						out.write(line + "\n");
-					}
-				}
-				else System.out.println("Invalid line: " + line);
-				
-				if (cnt%5000==0) System.err.print(cnt1 + " wrote from " + cnt + "\r");
-			}
-			String p = Static.perText(cnt1, cnt);
-			Out.PrtSpMsgTime(4,  df.format(cnt1) + " wrote from " +  df.format(cnt) + " " + p, startTime);
-			in.close(); out.close();
-			return true;
-		}
-		catch (Exception e) {ErrorReport.prtReport(e, "Error writing full fasta");}
-		catch (OutOfMemoryError e) {prtMemError(e, "Writing subset fasta");}
-		return false;
-	}
+	
 	/*********************************************************
 	 * XXX Utilities
 	 */
-	private boolean runDownload(String type, String prefix, String tax, String dir) {
+	private boolean runDownload(String type,  String tax, String dir) {
 		try {
 			boolean rc=false;
-			String inFile =  mkNameDat(prefix, tax);
-			String outPath = mkNameDir(type, dir) + mkNameDat(prefix, tax);
-			if (test) {
-				String cmd = "cp " + (demoIn+inFile) + " " + outPath;
-				if (new File(outPath).exists()) {
-	    				Out.PrtSpMsg(2, "File exists " + outPath);
-	    				return true;
-	    			}
-				int ret = new RunCmd().runP(cmd, null, true);
-				rc = (ret==0) ? true: false;
-			}
-			else {
-				if (tax=="") rc = ASMain.ioURL(upFullURL, inFile, outPath);
-				else rc = ASMain.ioURL(upTaxURL, inFile, outPath);
-			}
+			GlobalAS fileObj = new GlobalAS(targetUpDir);
+			
+			String inFile = 	fileObj.mkNameDatGz(type, tax);
+			String outPath = 	fileObj.mkNameDir(type, dir) + inFile;
+			
+			if (tax=="") 	rc = ASMain.ioURL(upFullURL, inFile, outPath);
+			else 			rc = ASMain.ioURL(upTaxURL, inFile, outPath);
+			
 			return rc;
 		}
 		catch (Exception e) {ErrorReport.reportError(e, "Problems getting file");}
 		return false;
 	}
-	private String mkNameDir(String type, String tax) { 
-		if (!targetUpDir.endsWith("/")) targetUpDir += "/";
-		return targetUpDir + type + "_" + tax  + "/";
-	}
-	private String mkNameFasta(String ptx, String tax) {
-		return ptx + "_" + tax + ".fasta";
-	}
-	private String mkNameDat(String ptx, String tax) {
-		if (tax=="") return ptx + ".dat.gz";
-		return ptx + "_" + tax + ".dat.gz";
-	}
-	
-	private boolean mkDirFull(boolean bsp, boolean btr) {
-		try {
-			Out.PrtSpMsg(1, "Check Directories ");
-			if (!mkCheckDir(targetUpDir)) return false;
-			
-			if (bsp && !mkCheckDir(mkNameDir(SP, subset))) return false;
-			if (btr && !mkCheckDir(mkNameDir(TR, subset))) return false;
-			return true;
-		}
-		catch (Exception e) {ErrorReport.reportError(e, "Problems creating directories");}
-		return false;
-	}
+	/* Make taxo directories */
 	private boolean mkDirTaxo(Vector <String> spFiles, Vector <String> trFiles) {
 		try {
 			Out.PrtSpMsg(1, "Check Directories");
 	        
+			GlobalAS fileObj = new GlobalAS(targetUpDir);
+			
 			if (!mkCheckDir(targetUpDir)) return false;
 			
 			for (String f : spFiles) {
-				if (!mkCheckDir(mkNameDir(SP, f))) return false;
+				if (!mkCheckDir(fileObj.mkNameDir(SP, f))) return false;
 			}
 			for (String f : trFiles) {
-				if (!mkCheckDir(mkNameDir(TR, f))) return false;
+				if (!mkCheckDir(fileObj.mkNameDir(TR, f))) return false;
 			}
 			Out.PrtSpMsg(1, "Check complete");
 			return true;
@@ -375,13 +276,13 @@ public class DoUP {
 		try {
 			File d = new File(name);
 	        if (!d.exists()) {
-	        		Out.PrtSpMsg(2, "Creating directory: " + name);
-	        		boolean b = d.mkdir();
-	        		if (!b) {
-	        			JOptionPane.showMessageDialog(frameObj,"Could not create directory: " + name + "\n"); 
-	        			Out.PrtError("Count not make directory: " + name);
-	        			return false;
-	        		}
+        		Out.PrtSpMsg(2, "Creating directory: " + name);
+        		boolean b = d.mkdir();
+        		if (!b) {
+        			JOptionPane.showMessageDialog(frameObj,"Could not create directory: " + name + "\n"); 
+        			Out.PrtError("Count not make directory: " + name);
+        			return false;
+        		}
 	        }
 	        return true;
 		}
@@ -395,7 +296,4 @@ public class DoUP {
 	}
 	private String targetUpDir=null;
 	private ASFrame frameObj=null;
-	
-	private String [] taxoIDs;
-	private int index=0;
 }

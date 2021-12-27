@@ -241,6 +241,15 @@ public class UserPrompt extends JDialog {
 				msg, "Message", JOptionPane.PLAIN_MESSAGE);
 	}
 	// No is cancel
+	static public boolean showConfirm (Component c, String title, String msg) {
+		String [] options = {"Confirm", "Cancel"};
+		int ret = JOptionPane.showOptionDialog(c, 
+				msg,
+				title, JOptionPane.YES_NO_OPTION, 
+				JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+		if (ret == JOptionPane.NO_OPTION) return false;
+		return true;
+	}
 	static public boolean showConfirm (String title, String msg) {
 		String [] options = {"Confirm", "Cancel"};
 		int ret = JOptionPane.showOptionDialog(null, 
@@ -263,6 +272,15 @@ public class UserPrompt extends JDialog {
 		String [] options = {"Continue", "Cancel"};
 		int ret = JOptionPane.showOptionDialog(c, 
 				msg + "\nContinue?",
+				title, JOptionPane.YES_NO_OPTION, 
+				JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+		if (ret == JOptionPane.NO_OPTION) return false;
+		return true;
+	}
+	static public boolean showContinue2 (Component c,String title, String msg) {
+		String [] options = {"Continue", "Cancel"};
+		int ret = JOptionPane.showOptionDialog(c, 
+				msg,							// no continue added
 				title, JOptionPane.YES_NO_OPTION, 
 				JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 		if (ret == JOptionPane.NO_OPTION) return false;

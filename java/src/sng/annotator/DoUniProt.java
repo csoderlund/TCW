@@ -29,7 +29,7 @@ public class DoUniProt
 	private boolean bUseSP = false; // Best Anno only replaces 'uncharcterized'unless true
 	private boolean bRmECO = true;  // Remove {ECO... string
 	
-	private final int COMMIT = 10000; 
+	private final int COMMIT = 1000; // CAS339 was 10000
 	private final int maxHitSeq = 32000;
 	private final String badHitFile = BlastHitData.badHits;
 	
@@ -187,8 +187,9 @@ public class DoUniProt
     private boolean step1_processHitFile(int ix, String hitFile ) 
     {     	
        	BlastHitData hitData = null;
-       	int nHitNum=0, cntUniqueExists=0, nTotalDups=0;
+       	int nHitNum=0, nTotalDups=0;
        	String curSeqName="", curHitName="";
+       	HashSet <String> dupIDs = new HashSet <String> (); // CAS309 avoid multiple counts (added for Full SP)
        	nAnnoSeq = nTotalHits = 0;
     	long time = Out.getTime();
 			
@@ -256,9 +257,9 @@ public class DoUniProt
 		    	// create list of hits for current seq
 		    	hitData = new BlastHitData (isAAannoDB, line);
 		    	
-		    	// if HIT id already in database, then this is being run again
+		    	// CAS339 loading SPfull after SP-taxos
 		    	if (hitsInDB.contains(hitData.getHitID())) {
-		    		cntUniqueExists++;
+		    		if (!dupIDs.contains(hitData.getHitID())) dupIDs.add(hitData.getHitID());
 		    		continue;
 		    	}
 		    	// hit is past the 32k limit so no use saving
@@ -282,8 +283,7 @@ public class DoUniProt
 		
 			Out.rClear();
 			
-			if (cntUniqueExists > 0) 
-				Out.PrtWarn(cntUniqueExists + " DB ids already existed in sTCW -- ignored ");
+			Out.PrtSpCntMsgZero(3, dupIDs.size(), "hitIDs already loaded");
 	
 			if (nHitNum==0) 
 				Out.PrtSpMsgTime(3, "NO HIT RESULTS", time);

@@ -18,15 +18,22 @@ See the <b>runAS</b> Help and on-line documentation for instructions on annoDBs.
 	<td valign="top"><b>Taxonomy</b></td>
 	<td>
 		The taxonomy of an annoDB (e.g. 'plants') or it can be some other identifier.  
-		<br><u><i>Naming Rules</i></u>:
+		<p><u><i>Naming Rules</i></u>:
 		<ul>
-		<li>The annoDB is named by its DBtype + Taxonomy, e.g. "SP-plants".
-		
+		<li>The annoDB is named by its <u><i>DBtype</i></u>-<u><i>Taxonomy</i></u>, e.g. "SP-plants".
+		<br>&nbsp;
 		<li><u><i>DBtype</i></u>: If the annotation file uses definition lines like
 		">sp|Q6V4H0|10HGO_CATRO", then the two letters before the "|" are used as the DBtype, 
 		e.g. "SP" for SwissProt, "TR" for TrEMBL.
 		Otherwise, the DBtype is "PR" for proteins files and "NT" for nucleotide files.
-		
+		<br>&nbsp;
+		<li><u><i>Taxonomy</i></u>: 
+		<ul>
+			<li>Use the UniProt taxonomy, e.g. plants. 
+			<li>For the full SwissProt (or TrEMBL), use the term 'full' and follow it by any taxonomies removed 
+			using <tt>runAS</tt>; e.g. "full_PF" would have plants and fungi entries removed.
+			<li>If using a specialized database such as PlantTFDB, use a short unique descriptor such as 'tf'.
+		</ul>
 		<li>Often the annoDB name is abbreviated in <tt>viewSingleTCW</tt> (e.g. SPpla). Hence, it is important
 		that the DBtype plus the first 3 letters of the taxonomy are unique.
 		</ul>

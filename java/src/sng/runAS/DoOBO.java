@@ -40,17 +40,17 @@ import util.methods.Out;
  *   It is expected that: is_a:1 part_of:2 alt_id:3 -- where the relation (e.g. is_a) are hardcoded in places
  */
 public class DoOBO {
-	private final String goURL = "http://current.geneontology.org/ontology/";
-	public  static final String goFile = "go-basic.obo";
+	private static final String goURL = GlobalAS.goURL; 	// "http://current.geneontology.org/ontology/";
+	private static final String goFile = GlobalAS.goFile; 	// "go-basic.obo";
 	
-	private final String subset = DoUP.subset;
+	private static final String datSuffix = GlobalAS.datSuffix, datGzSuffix=GlobalAS.datGzSuffix;
 
-	static private final int ISA = 1;
-	static private final int PARTOF = 2;
-	static private final int ALTID = 3; // CAS320 changed from replaced_by
+	private static final int ISA = 1;
+	private static final int PARTOF = 2;
+	private static final int ALTID = 3; // CAS320 changed from replaced_by
 	
-	static private final String goMetaTable = Globalx.goMetaTable; // CAS318 was prefixed with PAVE_
-	static private final String goUpTable =   Globalx.goUpTable;
+	private static final String goMetaTable = Globalx.goMetaTable; // CAS318 was prefixed with PAVE_
+	private static final String goUpTable =   Globalx.goUpTable;
 	
 	public DoOBO(ASFrame asf) { 
 		frameObj = asf;
@@ -97,7 +97,7 @@ public class DoOBO {
 			ErrorReport.prtReport(e, "Creating GO database");
 		}
 		finally {
-			goDB.close();
+			if (goDB!=null) goDB.close();
 		}	
 		Out.PrtSpMsgTimeMem(0, "Complete creating GO database " + goDBname, startTime);
 	}
@@ -576,6 +576,8 @@ public class DoOBO {
 		String action = "Loading " + upDir + " to " + goDBname;
 		Out.PrtSpMsg(1, action);
 		try {	
+			Vector <String> fullSet = new Vector <String> ();
+			
 			DoUPdat datObj = new DoUPdat(frameObj);
 			File [] dirs = (new File(upDir)).listFiles();
 			for (File d : dirs) {
@@ -586,14 +588,17 @@ public class DoOBO {
 				for (File f : xfiles) {
 					String fname = f.getName();
 					if (fname.startsWith(".")) continue; 
-					if (!fname.endsWith(".dat") && !fname.endsWith(".dat.gz")) continue;
+					if (!fname.endsWith(datSuffix) && !fname.endsWith(datGzSuffix)) continue;
 					
-					// The fullSubset have original and new reduced -- used reduced
-					if (dname.contains(subset) && !fname.contains(subset)) continue;
-						
-					if (!datObj.dat2godb(upDir, dname+f.getName(),  goDB, goSet, obsSet)) return false; 
+					// CAS339 was using subset dat.gz; use full dat.gz so can use any subset
+					//if (dname.contains(fullTaxo) && !fname.contains(fullTaxo)) continue;
+					if (dname.contains("full")) fullSet.add(dname+f.getName());
+					else if (!datObj.dat2godb(upDir, dname+f.getName(),  goDB, goSet, obsSet)) return false; 
 					break;
 				}	
+			}
+			for (String file : fullSet) { // CAS339 do fulls last since they contain taxos
+				if (!datObj.dat2godb(upDir, file,  goDB, goSet, obsSet)) return false; 
 			}
 			
 			return datObj.prtTotals();
@@ -604,7 +609,6 @@ public class DoOBO {
 	
 	/***********************************************************
 	 * Levels added to term table - these are not technically valid, but an easy way to browse
-	 * GOTRIM the TCW_go_tree is removed - but needed for the Basic GO trim function
 	 */
 	public boolean computeLevels() {
 		try {	
@@ -625,7 +629,7 @@ public class DoOBO {
 				parent2child.get(parent).add(child);
 			}
 			rs.close();
-			Out.PrtCntMsg(parent2child.size(), "Parent-child");
+			// CAS339 only shows #parents, Out.PrtCntMsg(parent2child.size(), "Parent-child");
 			
 			// Now get the top-level nodes and do a depth-first traversal, adding as we go.
 			// Note, some gonums appear in multiple places in the "tree", up to 300+ times.
