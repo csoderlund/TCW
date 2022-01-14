@@ -196,13 +196,14 @@ public class Overview {
     			lines.add( "Project: cannot create overview");
     			return false;
     		}
-	        strAssmID = mDB.executeString( "SELECT assemblyid from assembly");
-	        if (strAssmID==null || strAssmID=="" || strAssmID.contains("Not assembled")) {
+	    	strDBname = mDB.getDBname();
+	        strDBID = mDB.executeString( "SELECT assemblyid from assembly");
+	        if (strDBID==null || strDBID=="" || strDBID.contains("Not assembled")) {
 	        	hasTranscripts=false;
 	        	lines.add( "Project: Not instantiated yet");
 	        }
 	        else { // CAS303 add more information in header
-	        	String h = "Project:  " + strAssmID ;
+	        	String h = "Project:  " + strDBID ;
 	        	if (isProteinDB) h += "  Protein";
 	        	
 	        	if (!hasNoAssembly) h += "   #Contigs: "  + dff.format(numSeqs);
@@ -1586,8 +1587,9 @@ public class Overview {
 	// HTML
 	 private void writeHTML(String text) {
 		try {
-			if (strAssmID==null) return; // CASz 10oct19
-			String file=strAssmID + ".html";
+			if (strDBID==null) return; // CASz 10oct19
+			String db = strDBname.replace(Globalx.STCW, "");
+			String file= db + ".html";	// CAS340 use database name instead of id
 			if (new File("./projects").exists()) {
 				File h = new File("./projects/" + Globalx.HTMLDIR);
 				if (!h.exists()) {
@@ -1600,10 +1602,10 @@ public class Overview {
 			FileOutputStream out = new FileOutputStream(file);
 			PrintWriter fileObj = new PrintWriter(out); 
 			fileObj.println("<html>");
-			fileObj.println("<title>" + strAssmID + " overview</title>");
+			fileObj.println("<title>" + strDBID + " overview</title>");
 			fileObj.println("<body>");
 			fileObj.println("<center>");
-			fileObj.println("<h2>TCW overview for " + strAssmID + " </h2>");
+			fileObj.println("<h2>Overview for " + strDBname + " </h2>"); // CAS340 add DBname
 			fileObj.println("<table width=700 border=1><tr><td>");
 			fileObj.println("<pre>");
     		fileObj.println(text);
@@ -1694,7 +1696,7 @@ public class Overview {
   		return x.substring(0, index) + x.substring(index+sub.length());
     }
 	
-	private String strAssmID = "";
+	private String strDBID = "", strDBname="";
 	private boolean hasAnno = true, hasTranscripts=true;; 
 	// set flags
 	private int numSeqs = 0, nUniqueHits=0, nUniqueGOs=0, nAnnoDBs=0;

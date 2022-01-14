@@ -28,7 +28,7 @@ JAVA_FILES=	./src/sng/runDE/*.java \
            	./src/cmp/viewer/panels/*.java \
            	./src/cmp/viewer/seqDetail/*.java \
            	./src/cmp/viewer/seq/*.java \
-           	./src/cmp/viewer/seq/align/*.java \
+           	./src/cmp/viewer/align/*.java \
            	./src/cmp/viewer/groups/*.java \
            	./src/cmp/viewer/pairs/*.java \
            	./src/cmp/viewer/hits/*.java \

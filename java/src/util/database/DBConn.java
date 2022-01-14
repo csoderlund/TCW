@@ -320,10 +320,7 @@ public class DBConn
 			}
 			return false;
 		}
-		catch(Exception e)
-		{
-			ErrorReport.prtReport(e, "MySQL error: " + cmd);
-		}
+		catch(Exception e){ErrorReport.prtReport(e, "MySQL error: " + cmd);}
 		return false;
 	}
 	public void tableCheckDropColumn(String table, String col) throws Exception
@@ -346,19 +343,14 @@ public class DBConn
 	
 	public void tableCheckModifyColumn(String table, String col, String type) throws Exception
 	{
-		if (tableColumnExists(table,col))
-		{
+		if (tableColumnExists(table,col)){
 			String curDesc = tableGetColDesc(table,col);
-			if (!curDesc.equalsIgnoreCase(type))
-			{
+			if (!curDesc.equalsIgnoreCase(type)){
 				String cmd = "alter table " + table + " modify " + col + " " + type ;
 				executeUpdate(cmd);
 			}
 		}
-		else
-		{
-			System.err.println("Warning: tried to change column " + table + "." + col + ", which does not exist");
-		}
+		else {Out.PrtWarn("Tried to change column " + table + "." + col + ", which does not exist");}
 	}
 	
 	// Change column to new definition, if it doesn't already match.
@@ -367,40 +359,31 @@ public class DBConn
 	// If defs don't match, it will re-change the column, wasting time. 
 	public void tableCheckChangeColumn(String table, String col, String type) throws Exception
 	{
-		if (tableColumnExists(table,col))
-		{
+		if (tableColumnExists(table,col)){
 			String curDesc = tableGetColDesc(table,col);
-			if (!curDesc.equalsIgnoreCase(type))
-			{
+			if (!curDesc.equalsIgnoreCase(type)){
 				String cmd = "alter table " + table + " change " + col + " " + col + " " + type ;
 				executeUpdate(cmd);
 			}
 		}
-		else
-		{
-			System.err.println("Warning: tried to change column " + table + "." + col + ", which does not exist");
-		}
+		else{Out.PrtWarn("Tried to change column " + table + "." + col + ", which does not exist");}
 	}
 	public String tableGetColDesc(String tbl, String col)
 	{
 		String ret = "";
-		try
-		{
+		try {
 			ResultSet rs = executeQuery("describe " + tbl);
 			while (rs.next())
 			{
 				String fld = rs.getString("Field");
 				String desc = rs.getString("Type");
-				if (fld.equalsIgnoreCase(col))
-				{
+				if (fld.equalsIgnoreCase(col)){
 					ret = desc;
 					break;
 				}
 			}
 		}
-		catch(Exception e)
-		{
-			ErrorReport.prtReport(e, "checking column description for " + tbl + "." + col);
+		catch(Exception e){ErrorReport.prtReport(e, "checking column description for " + tbl + "." + col);
 		}
 		return ret;
 	}
@@ -462,14 +445,12 @@ public class DBConn
 		// do nested queries
 		Vector<String> tbls = new Vector<String>();
 		ResultSet rs = executeQuery("show tables");	
-		while (rs.next())
-		{
+		while (rs.next()) {
 			String table = rs.getString(1);
 			tbls.add(table);
 		}
 		
-		for (String table : tbls)
-		{
+		for (String table : tbls) {
 			executeQuery("lock tables " + table + " write");
 		}
 	}
@@ -541,7 +522,9 @@ public class DBConn
     {
     		return "dbi:mysql:" + mDBName + ":" + mHost;
     }
-    
+    public String getDBname() { // CAS340
+    	return mDBName;
+    }
     /************************************************************** 
      * Static methods 
      * ******************************************/
@@ -591,8 +574,7 @@ public class DBConn
 		String dbstr = createDBstr(host, "mysql"); // "jdbc:mysql://" + host + "/mysql";
 		Connection con = null; 
 
-		try
-		{
+		try {
 			Class.forName(driver);
 			con = DriverManager.getConnection(dbstr, user, pass);
 			Statement s = con.createStatement();

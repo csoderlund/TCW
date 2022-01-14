@@ -39,7 +39,7 @@ public class EditMethodPanel extends JPanel {
 		theCompilePanel = parentPanel;
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setAlignmentX(Component.LEFT_ALIGNMENT);
-		setBackground(Globals.BGCOLOR);
+		setBackground(Static.BGCOLOR);
 			
 		JPanel row1 = Static.createRowPanel();
 		lblMode = new JLabel("Method");
@@ -85,8 +85,7 @@ public class EditMethodPanel extends JPanel {
 		
 		// button row of buttons
 		JPanel buttonPanel = Static.createRowPanel();
-		btnKeep = new JButton("Keep");
-		btnKeep.setBackground(Globals.BGCOLOR);
+		btnKeep = Static.createButton("Keep");
 		btnKeep.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				keep();
@@ -95,8 +94,7 @@ public class EditMethodPanel extends JPanel {
 		buttonPanel.add(btnKeep);
 		buttonPanel.add(Box.createHorizontalStrut(10));
 		
-		btnDiscard = new JButton("Cancel");
-		btnDiscard.setBackground(Globals.BGCOLOR);
+		btnDiscard = Static.createButton("Cancel");
 		btnDiscard.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				setVisible(false);
@@ -106,8 +104,7 @@ public class EditMethodPanel extends JPanel {
 		buttonPanel.add(btnDiscard);
 		buttonPanel.add(Box.createHorizontalStrut(10));
 		
-		btnHelp = new JButton("Help");
-		btnHelp.setBackground(Globals.HELPCOLOR);
+		btnHelp = Static.createButtonHelp("Help", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(theCompilePanel.getParentFrame(), "Edit method",helpHTML);

@@ -34,7 +34,6 @@ import cmp.compile.runMTCWMain;
 import cmp.compile.Summary;
 import cmp.compile.panels.CompilePanel;
 import cmp.compile.panels.EditSpeciesPanel;
-import cmp.database.Globals;
 import cmp.viewer.MTCWFrame;
 
 public class DatabaseSelectPanel extends JPanel {
@@ -55,7 +54,7 @@ public class DatabaseSelectPanel extends JPanel {
 		
 		theEditSpeciesPanel = parentPanel;
 	
-		setBackground(Globals.BGCOLOR);
+		setBackground(Static.BGCOLOR);
 		add(createTreePanel());
 	}
 	
@@ -121,33 +120,28 @@ public class DatabaseSelectPanel extends JPanel {
 		txtNumAssemblies.setEditable(false);
 		txtNumAssemblies.setHorizontalAlignment(JTextField.CENTER);
 		txtNumAssemblies.setBorder(BorderFactory.createEmptyBorder());
-		txtNumAssemblies.setBackground(Globals.BGCOLOR);
+		txtNumAssemblies.setBackground(Static.BGCOLOR);
 		thePanel.add(Box.createVerticalStrut(5));
 		thePanel.add(txtNumAssemblies);
 		thePanel.add(Box.createVerticalStrut(10));
 		txtNumAssemblies.setText("Databases available: " + allDBs.size());
                 
-		String buttonLabel;
-		if(theEditSpeciesPanel == null) buttonLabel = "Launch";
-		else buttonLabel = "Keep";
+		
 		
 		JPanel buttonPanel = Static.createPagePanel();
-		
 		JPanel row = Static.createRowCenterPanel();
 		
-		btnKeep = new JButton(buttonLabel);
-		btnKeep.setEnabled(false);
-		if (theEditSpeciesPanel == null) btnKeep.setBackground(Globals.LAUNCHCOLOR);
-		else btnKeep.setBackground(Globals.BGCOLOR);
+		
+		if (theEditSpeciesPanel == null) btnKeep = Static.createButtonPopup("Launch", false);
+		else 							 btnKeep = Static.createButton("Keep", false);;
 		btnKeep.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				keepClicked();
 			}
 		});
 		row.add(btnKeep);
-		btnGetState = new JButton("Overview");
-		btnGetState.setBackground(Globals.LAUNCHCOLOR);
-		btnGetState.setEnabled(false);
+		
+		btnGetState = Static.createButtonPopup("Overview", false);
 		btnGetState.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if(theEditSpeciesPanel == null)
@@ -162,8 +156,7 @@ public class DatabaseSelectPanel extends JPanel {
 		row.setMinimumSize(row.getPreferredSize());
 
 		if(theEditSpeciesPanel != null) {
-			btnDiscard = new JButton("Discard");
-			btnDiscard.setBackground(Globals.BGCOLOR);
+			btnDiscard = Static.createButton("Discard");
 			btnDiscard.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					theEditSpeciesPanel.setMainPanelVisible(true);
@@ -177,8 +170,7 @@ public class DatabaseSelectPanel extends JPanel {
 			// TODO If a Launch and Overview have occurred, and the
 			// Launch was exited, then it does not go back to prompt
 			// because it thinks the Overview is still open
-			btnClose =new JButton("Exit");
-			btnClose.setBackground(Globals.BGCOLOR);
+			btnClose = Static.createButton("Exit");
 			btnClose.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					//Position 0 is the select panel
@@ -191,8 +183,7 @@ public class DatabaseSelectPanel extends JPanel {
 			row.add(Box.createHorizontalStrut(10));
 			row.add(btnClose);
 			
-			btnCloseAll = new JButton("Exit all");
-			btnCloseAll.setBackground(Globals.BGCOLOR);
+			btnCloseAll = Static.createButton("Exit all");
 			btnCloseAll.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					MTCWFrame.closeAllFrames();
@@ -230,7 +221,6 @@ public class DatabaseSelectPanel extends JPanel {
 	}
 	private void showSingleTCW() {
 		try {
-			
 			HostsCfg hosts = new HostsCfg();
 			DatabaseData data = getSelection();
 			if (data==null || data.getDBName()==null) {

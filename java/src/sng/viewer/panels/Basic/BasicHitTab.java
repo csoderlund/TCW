@@ -75,8 +75,7 @@ public class BasicHitTab extends Tab {
 	 * Top button panel
 	 */
 	private void createTopRowPanel() {
-		btnViewSeqs = new JButton(Globals.seqTableLabel);
-		btnViewSeqs.setBackground(Globals.FUNCTIONCOLOR);
+		btnViewSeqs = Static.createButtonTab(Globals.seqTableLabel, true);
 		btnViewSeqs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				viewSelectedSeqs();
@@ -84,8 +83,7 @@ public class BasicHitTab extends Tab {
 		});
 		btnViewSeqs.setEnabled(false);
 		
-		btnAlignSeqs = new JButton("Align");
-		btnAlignSeqs.setBackground(Globals.FUNCTIONCOLOR);
+		btnAlignSeqs = Static.createButtonPanel("Align", true);
 		btnAlignSeqs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				viewAlignSeqs();
@@ -239,7 +237,7 @@ public class BasicHitTab extends Tab {
         });
 		
 		topRowPanel = Static.createRowPanel();
-		topRowPanel.add(new JLabel("Selected:"));	topRowPanel.add(Box.createHorizontalStrut(2));
+		topRowPanel.add(Static.createLabel(Globals.select));	topRowPanel.add(Box.createHorizontalStrut(2));
 		topRowPanel.add(btnViewSeqs);				topRowPanel.add(Box.createHorizontalStrut(2));
 		topRowPanel.add(btnAlignSeqs);				topRowPanel.add(Box.createHorizontalStrut(2));
 		topRowPanel.add(btnCopy);					topRowPanel.add(Box.createHorizontalStrut(2));

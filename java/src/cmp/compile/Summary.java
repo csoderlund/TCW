@@ -48,7 +48,7 @@ public class Summary {
 	public String getMethodSizeTable() {
 		String text="";
 		try {
-			makeMethodsTable();
+			makeMethodsVector();
 			lines.clear(); // just want sizes, but need initialization from makeMethods
 			makeMethodSizeTable();
 			for (int i=0; i< lines.size(); i++) text += lines.get(i) + "\n";
@@ -59,8 +59,8 @@ public class Summary {
 	public String getMethodScoreTable() {
 		String text="";
 		try {
-			makeMethodsTable();
-			lines.clear(); // just want sizes, but need initialization from makeMethods
+			makeMethodsVector();
+			lines.clear(); // just want scores, but need initialization from makeMethods
 			makeMethodScoreTable();
 			for (int i=0; i< lines.size(); i++) text += lines.get(i) + "\n";
 		}
@@ -90,7 +90,6 @@ public class Summary {
         	makeSeqs();
        
         	makeProcessing();
-        	makeLegend();
 	        	
 	 		for (int i=0; i< lines.size(); i++)
 	 			text += lines.get(i) + "\n";
@@ -207,55 +206,77 @@ public class Summary {
     private void makeMethods()
     {
 		try {
-		 	makeMethodsTable();
+		 	makeMethodsVector();
 			if (nMethod==0) return;
 			
-			makeMethodSizeTable();
-			
 			makeMethodScoreTable();
+			lines.add("");
+			makeMethodSizeTable();
 		}
 	    catch (Exception err) {ErrorReport.prtReport(err, "reading database for Clusters");}
     }
     /********************************************************
-     * Table of Methods in compare database
+     * CAS340 Create description to go at end of Score table
      */
-    private void makeMethodsTable() 
+    private void makeMethodsVector() 
     {
    		ResultSet rs;
 		try { 			      
 	        nMethod = mDB.executeCount("SELECT COUNT(*) FROM pog_method");
-	 		
 			lines.add("CLUSTER SETS: " + nMethod);
 	        if (nMethod==0) return;
-	        	
-	        String[] fields = {"Prefix", "Method", "Parameters"};
-	        int [] just = {1,1,1};
-	        int nCol=fields.length;
-			String [][] rows = new String[nMethod][nCol];
-	
-	        String strQ = "SELECT PMid, PMtype, prefix, description from pog_method order by PMid"; // CAS327 changed from PMtype
+	        	    
+	        String strQ = "SELECT PMid, prefix, PMtype,  description from pog_method order by PMid"; // CAS327 changed from PMtype
 	   		rs = mDB.executeQuery(strQ);
-	   		int r=0;
+	   
 	   		while(rs.next()) {
-	   			int pmid = rs.getInt(1);
-	   			String type = rs.getString(2);
-	   			String prefix = rs.getString(3);
+	   			Method m = new Method ();
+	   			m.pmid = rs.getInt(1);
+	   			m.prefix = rs.getString(2);
+	   			String type = rs.getString(3);
 	   			String desc = rs.getString(4);
-	   			rows[r][0] = prefix;
-	   			rows[r][1] = type;
-                rows[r][2] = desc;
-	            r++;
-	            methods.add(pmid + " " + prefix);
+	   			
+	   			String [] tok = desc.split(";");
+	   			int n = tok.length;
+	   			String x=type + " ";
+	   			
+	   			// BBH
+	   			if (n>=3 && type.contentEquals(Globals.Methods.BestRecip.TYPE_NAME)) { // Sim 60; Cov 40(Both); AA; NnR,OlR
+	   				if (n==4) x += tok[3].trim() + " "; // sTCWdbs
+	   				if (tok[2].trim().contentEquals("NT")) x += "NT";
+	   			} 
+	   			// Closure
+	   			else if (n>=3 && type.contentEquals(Globals.Methods.Closure.TYPE_NAME)) {// Sim 60; Cov 40(Both); AA
+	   				if (tok[2].trim().contentEquals("NT")) x += "NT";
+	   			}
+	   			// Best Hit
+	   			else if (n>=4 && type.contentEquals(Globals.Methods.Hit.TYPE_NAME)) { // Sim 20; Cov 20; All; Description
+	   				x += tok[3].trim().substring(0,5) + " ";
+	   				if (tok[2].trim().contentEquals("Any")) x += "Any";
+	   			}
+	   			// OrthoMCL
+	   			else if (n>=1  && type.contentEquals(Globals.Methods.OrthoMCL.TYPE_NAME)) {// Inflation 4
+	   				String [] t = tok[0].split(" ");
+	   				x += t[1].trim();
+	   			}
+	   			// User defined
+	   			else if (n>=1 && type.contentEquals(Globals.Methods.UserDef.TYPE_NAME)) { // orthoMCL.OM-40
+	   				x = tok[0].trim(); // no method, just file name 
+	   			}
+	   			else {
+	   				x += " ???";
+	   				Out.PrtWarn("TCW error - cannot determine method '" + desc + "'");
+	   			}
+	   			m.method = x;
+	            methods.add(m);
             } 
 	   		rs.close();	   		
-	   		Out.makeTable(lines, nCol, r, fields, just, rows);
 		}
 		catch (Exception e) {ErrorReport.die(e, "create Method Table for summary");}
     }
     private void makeMethodSizeTable() 
 	{	
 	try {
-		lines.add("");
 		// info may not be set, do directly get counts
 		int nSet = mDB.executeCount("select count(*) from assembly");
 		int maxSize = mDB.executeCount("select max(count) from pog_groups");
@@ -296,20 +317,20 @@ public class Summary {
 	    
 		lines.add(padTitle + "Sizes");
     	for (int r = 0; r < methods.size(); r++) {
-    		String [] s = methods.get(r).split(" ");
-    		rows[r][0] = s[1];
+    		Method m = methods.get(r);
+    		rows[r][0] = m.prefix;
     		int total=0;
     		for (int i = 0; i<nSiz; i++) {
     			int cnt =  mDB.executeCount("SELECT count(*) FROM pog_groups " +
 	   	          " WHERE count > " + start[i] + " AND count <= " + end[i] + 
-	   	          " AND PMid = " + s[0]);
+	   	          " AND PMid = " + m.pmid);
     			rows[r][i+1] = df.format(cnt);
     			total += cnt;
     		}
     		rows[r][nCol-2] = df.format(total);
     		
     		total = mDB.executeCount("SELECT SUM(count) from pog_groups " +
-    				" WHERE PMid = " + s[0]);
+    				" WHERE PMid = " + m.pmid);
     		rows[r][nCol-1] = Out.perFtxt(total, nSeq);
     		if (total==0) {
     		    System.err.println("+++ No clusters found for " + rows[r][0]);  		    
@@ -325,34 +346,36 @@ public class Summary {
 		int cnt = mDB.executeCount("select count(*) from pog_groups where score1>=0 limit 1");
 		if (cnt==0) return; 
 		
-		lines.add("");
-		String [] dfields = {"Prefix", "conLen", "sdLen", "   Score1","SD  ", "Score2", "SD  "};
-		int [] djust = 	    {1,      0,     0,        0,     0,     0,       0};
+		String [] dfields = {"Prefix",  "Method", "conLen", "sdLen", "   Score1","SD  ", "Score2", "SD  "};
+		int [] djust = 	    {1,      1,     0,        0,     0,     0,       0, 0};
 		int nCol = djust.length;
 		String [][] rows = new String[nMethod][nCol];
     
 		lines.add(padTitle + "Statistics");
 	    for (int r = 0; r < methods.size(); r++) {
-    		String [] s = methods.get(r).split(" ");
-    		rows[r][0] = s[1];
+    		Method m = methods.get(r);
     		
     		ResultSet rs = mDB.executeQuery(
     				"SELECT AVG(conLen), AVG(sdLen), " +
     				"AVG(score1), STDDEV(score1), AVG(score2), STDDEV(score2) FROM pog_groups " +
-		   	          " WHERE PMid = " + s[0]);
+		   	        "WHERE PMid = " + m.pmid);
     		if (!rs.next()) {
     			Out.PrtError("Cannot get averages for overview");
     			return;
     		}
+    		rows[r][0] = m.prefix;
+    		rows[r][1] = m.method;
     		double conLen = rs.getDouble(1);
+    		
     		if (conLen<=0) {
-    			for (int i=1; i<nCol; i++) rows[r][i] = "-";
+    			for (int i=2; i<nCol; i++) rows[r][i] = "-";
     		}
     		else {
-    			for (int i=1; i<nCol; i++) {
-    				rows[r][i] = String.format("%.2f", rs.getDouble(i));
+    			for (int i=2, j=1; i<nCol; i++, j++) {
+    				rows[r][i] = String.format("%.2f", rs.getDouble(j));
     			}
     		}
+    		
     	}
 	    Out.makeTable(lines, nCol, nMethod, dfields, djust, rows);
     }
@@ -570,14 +593,45 @@ public class Summary {
 		lines.add("PROCESSING:");
 		if (aa!="") lines.add("AA: " + aa);
 		if (nt!="") lines.add("NT: " + nt);
-		if (s1!=null && s1!="") lines.add("Score1: " + info.getMSA_Score1());
-		if (s1!=null && s1!="") lines.add("Score2: " + info.getMSA_Score2());
+		
+		String score = "";  
+		if (s1!=null && s1!="") score =  "Score1=" + info.getMSA_Score1() + "    ";
+		if (s2!=null && s2!="") score += "Score2=" + info.getMSA_Score2();
+		if (score != "") {
+			lines.add("");
+			lines.add("MSA: " + score);
+		}
+		lines.add("");
+		
+		// Methods
+		if (nMethod==0) return;
+		 
+		lines.add("Cluster Sets "); // CAS340 move this table to processing
+        	
+        String[] fields = {"Prefix", "Method", "Parameters"};
+        int [] just = {1,1,1};
+        int nCol=fields.length;
+		String [][] rows = new String[nMethod][nCol];
+
+        String strQ = "SELECT PMtype, prefix, description from pog_method order by PMid"; // CAS327 changed from PMtype
+        ResultSet rs = mDB.executeQuery(strQ);
+   		int r=0;
+   		while(rs.next()) {
+   			int i=1;
+   			String type = rs.getString(i++);
+   			String prefix = rs.getString(i++);
+   			String desc = rs.getString(i++);
+   			rows[r][0] = prefix;
+   			rows[r][1] = type;
+            rows[r][2] = desc;
+            r++;
+        } 
+   		rs.close();	   		
+   		Out.makeTable(lines, nCol, r, fields, just, rows);
     }
 	catch (Exception e) {ErrorReport.prtReport(e, "processing");}	
     }
-    private void makeLegend() {
-    	
-    }
+   
 	public void writeOverview(String text) {
 		String projDir = Globals.PROJECTDIR;
 		String sumDir = Globals.summaryPath;
@@ -602,6 +656,11 @@ public class Summary {
 		}
 		catch (Exception e){ErrorReport.prtReport(e, "Error writing to " + overFilePath);}
 	}
+	private class Method {
+		int pmid;
+		String prefix;
+		String method;
+	}
 	private String dbName="";
 	private DBinfo info;
 	private DBConn mDB;  
@@ -611,6 +670,6 @@ public class Summary {
 	private int nAsm=0, nMethod=0, nGrp=0, nPairs=0, nSeq=0;
 	private Vector <String> assmStr = new  Vector <String> ();
 	private Vector <Integer> assmID = new  Vector <Integer> ();
-	private Vector <String> methods = new Vector <String> ();
+	private Vector <Method> methods = new Vector <Method> ();
 	
 }

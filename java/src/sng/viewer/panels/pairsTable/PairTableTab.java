@@ -126,50 +126,40 @@ public class PairTableTab extends Tab
 		final JPanel topPanel = Static.createRowPanel();
 		
 		// Button panel	
-		btnViewAlign = new JButton ("Align Selected Pair");
-		btnViewAlign.setBackground(Globals.FUNCTIONCOLOR);
+		JLabel select = Static.createLabel(Globals.select);
+		btnViewAlign = Static.createButtonTab("Align Pair", false);
 		btnViewAlign.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				addPairAlignTab();
 			}
 		});
-		btnViewAlign.setEnabled(false);
 		
-		btnViewSeqs = new JButton(Globals.seqTableLabel);
-		btnViewSeqs.setBackground(Globals.PROMPTCOLOR);
+		btnViewSeqs = Static.createButtonTab(Globals.seqTableLabel, false);
 		btnViewSeqs.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
             		addPairViewTab();
             }
         });
 		
-		JButton btnRefresh = new JButton ("Refresh Columns");
+		JButton btnRefresh = Static.createButton("Refresh Columns");
 		btnRefresh.addActionListener(refreshListener);
 
 		createToolTable(); // defines btnTable
 		
-		JButton btnHelp = new JButton("Help");
-		btnHelp.setBackground(Globals.HELPCOLOR);
+		JButton btnHelp = Static.createButton("Help", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(getParentFrame(), "Pairs Table", helpDir); 
 			}
 		});
-	
-		topPanel.setBackground(Color.WHITE);
 		topPanel.add( Box.createHorizontalStrut(5) );
-	
-		topPanel.add( btnViewAlign );
-		topPanel.add( Box.createHorizontalStrut(5) );
+		topPanel.add(select);			topPanel.add( Box.createHorizontalStrut(2) );
+		topPanel.add( btnViewAlign ); 	topPanel.add( Box.createHorizontalStrut(2) );
+		topPanel.add( btnViewSeqs );	topPanel.add( Box.createHorizontalStrut(30) );
 		
-		topPanel.add( btnViewSeqs );
-		topPanel.add( Box.createHorizontalStrut(5) );
+		topPanel.add(btnRefresh);		topPanel.add( Box.createHorizontalStrut(5) );
 		
-		topPanel.add(btnRefresh);
-		topPanel.add( Box.createHorizontalStrut(5) );
-		
-		topPanel.add( btnTable );
-		topPanel.add( Box.createHorizontalStrut(5) );
+		topPanel.add( btnTable );		topPanel.add( Box.createHorizontalStrut(5) );
 		
 		topPanel.add( Box.createHorizontalGlue() );
 		

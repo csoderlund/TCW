@@ -31,7 +31,7 @@ import util.methods.Static;
 
 public class GenRepsPanel extends JPanel {
 	private static final long serialVersionUID = -1652821001608191481L;
-
+	private static final String helpHTML =  Globals.helpRunDir + "GenRepsPanel.html";
 	private static final String [] COL_NAMES = { 
 		"SeqID", "Column name from file", "Condition (editable)" };
 	private static final int TABLE_HEIGHT = 300;
@@ -94,12 +94,11 @@ public class GenRepsPanel extends JPanel {
 			}
 		});
 		
-		btnHelp = new JButton("Help");
-		btnHelp.setBackground(Globals.HELPCOLOR);
+		btnHelp = Static.createButtonHelp("Help", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(theParentFrame, 
-						"Define Replicates", "html/runSingleTCW/GenRepsPanel.html");
+						"Define Replicates", helpHTML);
 			}
 		});
 		

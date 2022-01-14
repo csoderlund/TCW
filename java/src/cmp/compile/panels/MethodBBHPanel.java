@@ -38,7 +38,7 @@ public class MethodBBHPanel extends JPanel {
 		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setAlignmentX(Component.LEFT_ALIGNMENT);
-		setBackground(Globals.BGCOLOR);
+		setBackground(Static.BGCOLOR);
 		add(Box.createVerticalStrut(20));
 		
 		int width = Globals.Methods.WIDTH;
@@ -284,7 +284,7 @@ public class MethodBBHPanel extends JPanel {
     		
     		JPanel selectPanel = Static.createPagePanel();
     		
-    		selectPanel.add(new JLabel("Select sTCWdb:"));
+    		selectPanel.add(Static.createLabel("Select sTCWdb:"));
     		asmCheckBox = new JCheckBox [nSets];
     		for (int i=0; i<nSets; i++) {
     			boolean b = (selectSTCW.contains(setNames[i])) ? true: false;

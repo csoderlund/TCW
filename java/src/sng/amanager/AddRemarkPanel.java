@@ -348,7 +348,7 @@ public class AddRemarkPanel extends JPanel {
 		setBackground(Globals.BGCOLOR);
 		
 		JPanel titleRow = Static.createRowCenterPanel();
-		JLabel title = new JLabel("Remarks or Locations");
+		JLabel title = Static.createLabel("Remarks or Locations");
 		title.setFont(getFont().deriveFont(Font.BOLD, 18));
 		title.setBackground(Color.WHITE);
 		titleRow.add(title);
@@ -359,12 +359,12 @@ public class AddRemarkPanel extends JPanel {
 		
 		// Location
 		JPanel locRow = Static.createRowCenterPanel();
-		locRow.add(new JLabel("Location File"));	locRow.add(Box.createHorizontalStrut(5));
+		locRow.add(Static.createLabel("Location File"));	locRow.add(Box.createHorizontalStrut(5));
 		
 		txtLocFile = Static.createTextField("", 25);
 		locRow.add(txtLocFile);						locRow.add(Box.createHorizontalStrut(5));
 		
-		btnLocFile = new JButton("...");
+		btnLocFile = Static.createButtonFile("...", true);;
 		btnLocFile.addActionListener(new ActionListener()  {
 			public void actionPerformed(ActionEvent arg0) {
 				projName = theManFrame.getProjDir(); // project know when this is selected
@@ -376,7 +376,7 @@ public class AddRemarkPanel extends JPanel {
 		});
 		locRow.add(btnLocFile);					locRow.add(Box.createHorizontalStrut(5));
 		
-		btnAddLoc = Static.createButton("Add", true);
+		btnAddLoc = Static.createButtonRun("Add", true);
 		btnAddLoc.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				String file=txtLocFile.getText().trim();
@@ -395,12 +395,12 @@ public class AddRemarkPanel extends JPanel {
 		
 	// Remarks
 		JPanel rmkRow = Static.createRowCenterPanel();
-		rmkRow.add(new JLabel("Remarks File"));			rmkRow.add(Box.createHorizontalStrut(5));
+		rmkRow.add(Static.createLabel("Remarks File"));			rmkRow.add(Box.createHorizontalStrut(5));
 		
 		txtRmkFile = Static.createTextField("", 25);
 		rmkRow.add(txtRmkFile);							rmkRow.add(Box.createHorizontalStrut(5));
 		
-		btnRmkFile = new JButton("...");
+		btnRmkFile = Static.createButtonFile("...", true);
 		btnRmkFile.addActionListener(new ActionListener()  {
 			public void actionPerformed(ActionEvent arg0) {
 				projName = theManFrame.getProjDir();
@@ -413,7 +413,7 @@ public class AddRemarkPanel extends JPanel {
 		});
 		rmkRow.add(btnRmkFile);							rmkRow.add(Box.createHorizontalStrut(5));
 		
-		btnAddRmk = Static.createButton("Add", true);
+		btnAddRmk = Static.createButtonRun("Add", true);
 		btnAddRmk.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				String file = txtRmkFile.getText().trim();
@@ -451,8 +451,7 @@ public class AddRemarkPanel extends JPanel {
 		buttonRow.add(btnRemove);
 		buttonRow.add(Box.createHorizontalStrut(10));
 		
-		btnHelp = new JButton("Help");
-		btnHelp.setBackground(Globals.HELPCOLOR);
+		btnHelp = Static.createButtonHelp("Help", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(theManFrame, "Remark Help", helpDir);

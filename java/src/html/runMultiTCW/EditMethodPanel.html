@@ -60,13 +60,17 @@ be part of a cluster with the same hitID.
 <li>Before comparing the descriptions, each is converted to lower case, and if
 there is text at the end starting with "{", it is removed.
 </ol>
-Clusters are formed as follows:
+Clusters are formed as follows (<i>protein hit</i> or <i>pair hit</i> indicates a DIAMOND/BLAST result):
 <ol>
 <li>All sequences share the same best HitID or best Description.
-<li>Each sequence in the cluster must have &gt;=<b>%Similarity</b> and &gt;=<b>%Coverage</b> to the hit protein. 
-<li>Each sequence must have &gt;=%Similarity and &gt;=%Coverage to at least one other sequence in the cluster.
-<li>If the <b>All Hit</b> filter is "Yes", then all sequences in a cluster must have a hit with all others, otherwise,
-each sequence only needs to have one hit (rule #3).
+<li>Each sequence in the cluster has a protein hit with 
+<b>%Similarity</b>&gt;=N and <b>%Coverage</b>&gt;=M to the representative cluster protein. 
+<li>A sequence must have a pair hit with <b>%Similarity</b>&gt;=N and <b>%Coverage</b>&gt;=M to all/any other sequences in the cluster.
+<ul>
+<li>All: If the <b>All Hit</b> filter is "Yes", then each sequence in a cluster must pass rule #3 with all other
+sequences in the cluster, 
+<li>Any: If the <b>All Hit</b> filter is "No", each sequence only needs to pass rule #3 with one other sequence in cluster.
+</ul>
 If the parameters are too lax, this can create some bad clusters. Rule of thumb:
 <br>Yes - you can reduce <b>%Similarity</b> and <b>%Coverage</b>.
 <br>No -  you should increase <b>%Similarity</b> and <b>%Coverage</b> significantly.

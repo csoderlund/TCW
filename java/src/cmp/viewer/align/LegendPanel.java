@@ -1,4 +1,4 @@
-package cmp.viewer.seq.align;
+package cmp.viewer.align;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -8,7 +8,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 
-import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 import cmp.database.Globals;
@@ -23,8 +22,8 @@ public class LegendPanel extends JPanel
 		this.colorScheme= (isAA) ? colorScheme : 0;
 		
 		setLayout( null );
-        setBackground( Globals.BGCOLOR );
-        setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        setBackground( Globalx.BGCOLOR );
+        //setBorder(BorderFactory.createLineBorder(Color.BLACK));
         setAlignmentX(Component.LEFT_ALIGNMENT);
         
         if (colorScheme==0) setMinimumSize(new Dimension(340, 140)); // width, height

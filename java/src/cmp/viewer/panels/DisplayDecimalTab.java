@@ -130,8 +130,7 @@ public class DisplayDecimalTab  extends JPanel {
 		page.setAlignmentX(Component.CENTER_ALIGNMENT);
 		
 		JPanel helpRow = Static.createRowPanel();
-		JButton btnHelp = new JButton("Help");
-		btnHelp.setBackground(Globals.HELPCOLOR);
+		JButton btnHelp = Static.createButtonHelp("Help", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(getParentFrame(), "Decimal Display", HTML);

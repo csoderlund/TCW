@@ -117,7 +117,7 @@ public class SeqGOPanel extends JPanel {
 		
 		createTopSelected();
 		
-		toolPanel.add(new JLabel(" Selected GO: ")); 	toolPanel.add(Box.createHorizontalStrut(1));
+		toolPanel.add(Static.createLabel(" Selected GO: ")); 	toolPanel.add(Box.createHorizontalStrut(1));
 	
 		toolPanel.add(btnSelCopy);						toolPanel.add(Box.createHorizontalStrut(1));
 	
@@ -128,22 +128,21 @@ public class SeqGOPanel extends JPanel {
 	/****** Table Show *****************/
 		createTopTable();
 		
-		toolPanel.add(new JLabel("  Table: "));			toolPanel.add(Box.createHorizontalStrut(1));
+		toolPanel.add(Static.createLabel("  Table: "));			toolPanel.add(Box.createHorizontalStrut(1));
 		
 		toolPanel.add(btnTableShow);					toolPanel.add(Box.createHorizontalStrut(1));
 		
 		toolPanel.add(btnTableExport);					toolPanel.add(Box.createHorizontalStrut(1));
 
 	/****** Help ***/
-		JButton btnGoHelp = Static.createButton("GO Help", true, Globals.HELPCOLOR);
+		JButton btnGoHelp = Static.createButtonHelp("GO Help", true);
 		btnGoHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(getInstance(), "GO Help", helpGoHTML);
 			}
 		});
 		toolPanel.add( Box.createHorizontalGlue() );
-		JButton btnHelp = Static.createButton("Help2", true, Globals.HELPCOLOR);
-		btnHelp.setBackground(Globals.HELPCOLOR);
+		JButton btnHelp = Static.createButtonHelp("Help2", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(theParentFrame, "Sequence GO Help", helpHTML);

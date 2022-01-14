@@ -172,9 +172,7 @@ public class BuildRepFilePanel extends JPanel {
 		// Second row of buttons
 		pnlButton2 = Static.createRowCenterPanel();
 		
-		btnBuildFile = Static.createButton("Generate File", true, Globalx.FUNCTIONCOLOR);
-		btnBuildFile.setOpaque(true);
-		btnBuildFile.setEnabled(true);
+		btnBuildFile = Static.createButtonRun("Generate File", true);
 		btnBuildFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				generateFile();
@@ -189,8 +187,7 @@ public class BuildRepFilePanel extends JPanel {
 			}
 		});
 		
-		btnGenCountHelp = Static.createButton("Help", true, Globalx.HELPCOLOR);
-		btnGenCountHelp.setBackground(Globalx.HELPCOLOR);
+		btnGenCountHelp = Static.createButtonHelp("Help", true);
 		btnGenCountHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(theParentFrame, "Build Count File Help", HTML);

@@ -5,24 +5,49 @@
 
 
 <h3>Functions at the top</h3>
-<ul>
-<li><u>Sequences</u>:
-Select a cluster or clusters followed by this button to view the sequence table 
+<u>Seqs</u>:
+Select one or more clusters followed by this button to view the sequence table 
 of the members of the cluster(s). 
-<br>&nbsp;
 
-<li><u>Pair</u> Select a cluster or clusters followed by this button to view all pairs
+<p><u>Pair</u> Select one or more clusters followed by this button to view all pairs
 that have a pair hit, which are computed when the database is created. 
 The BBH, Closure and Hit clusters are guaranteed to have a
 hit for all possible pairs in the cluster, however, orthoMCL clusters do not have this
 requirement.
-<br>&nbsp;
 
-<li><u>Copy...</u> Copy to the clipboard the 
+<p><u>MSA...</u> Select a cluster followed by this button, which provides a drop-down of actions.
+All the following actions display the alignment as a tab on the left, and provides the alignment file in the <tt>ResultAlign</tt> directory.
+<ul>
+<li><b>MUSCLE-AA</b>: 
+Run MUSCLE to build a multiple alignment 
+for all amino acid sequences in the table or for the selected set. This can be very time consuming
+when run on many sequences. The command executed is:
+<pre>
+/Ext/linux/muscle/muscle -in ResultAlign/inSeq.fa -out ResultAlign/outAln.fa
+</pre>
+
+<li><b>MAFFT-AA</b>: Same as above.
+The command executed is:
+<pre>
+/Ext/linux/mafft/mafft.bat --auto --reorder --thread N ResultAlign/inSeq.fa
+</pre>
+Where N is the number of available threads (processors/CPUs).
+<br><br>
+<li><b>MAFFT-CDS</b>: (NT-mTCW only) Same as above but with the CDS sequences
+<br><br>
+<li><b>MAFFT-NT</b>: (NT-mTCW only) Same as above but with the NT sequences
+
+</ul>
+<p><i>On Mac, replace <tt>Ext/linux</tt> with <tt>Ext/mac</tt></i>.
+
+<p><u>MSAdb</u> The alignment has been stored in the database, so can be displayed
+without running the program. (If the alignments were not computed, this button
+will not be available).
+
+<p><u>Copy...</u> Copy to the clipboard the 
 Cluster ID, Hit ID or Hit Description.
-<br>&nbsp;
 
-<li><u>Table...</u>
+<p><u>Table...</u>
 <ul>
 <li><b>Show Column Stats</b>: Popup a table of statistics for the numeric columns in the table. 
 <br>&nbsp;
@@ -125,15 +150,14 @@ For example, if a cluster has 4 sequences,
 it has (4*3)/2 = 6 pairs. If two of them have PCC>=0.8, then the perPCC will be 33%. A perPCC of
 100% means that their expression profiles on their shared conditions are highly correlated. 
 Select "Pairs" for a cluster to see the actual PCC values and "Sequences" to view the TPM values.
-<p>TPM NOTE: For pre-v3.0.4 releases, RPKM was computed instead of TPM.
 
 <h3>MSA Scores</h3>
 By default, <tt>Score1</tt> is the Sum-of-Pairs.The Sum-of-pairs score compares each two characters in the column, where there are 22 possible characters (20 amino acids,
 gap '-', and leading/trailing space ' '). The comparison scores are: (aa,aa) is the BLOSUM68 score, (aa,'-') is -4, (aa,' ') is -1,
-('-','-') is 0, (' ',' ') is 0. A large score indicates greater similarity.
+('-','-') is 0, (' ',' ') is 0. A score of 1 indicates the highest similarity.
 <p>By default, <tt>Score2</tt> is Wentropy, as discussed in
 the MstatX documentation (//github.com/gcollet/MstatX) and reviewed in Valdir 2002 "Scoring Residue Conservation"". 
-A score of '1' is the most conserved.
+A score of 1 is the most conserved.
 <p>When the database is built, these defaults can be replaced with other methods from the MstatX package.
 If this occurs, the explanation of the column in the lower left corner will tell what method was used.
 <p>In all cases, the score is computed per column, and the values shown for <tt>Score1</tt> and <tt>Score2</tt>

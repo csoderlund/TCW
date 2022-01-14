@@ -13,18 +13,61 @@
 
 There have been many improvements, but the following provides some recent critical points.
 <table>
-<tr><td><a href=#v338>v3.3.9</a><td>27-Dec-21<td><ttp><ttp>runAS</ttp></ttp><td>Improved interface for full subset UniProt.
+<tr><td><a href=#v338>v3.4.0</a><td>14-Jan-22<td><ttp>Assorted<td><ttp>viewMultiTCW</ttp> improvements
+<tr><td><a href=#v338>v3.3.9</a><td>27-Dec-21<td><ttp><ttp>runAS</ttp></ttp><td>Improved interface for full subset UniProt; updated Demo.
 <tr><td><a href=#v335>v3.3.5</a><td>04-Nov-21<td><ttp>viewSingle</ttp><td>log2FC TPM analysis 
-<tr><td><a href=#v334>v3.3.4</a><td>18-Oct-21<td><ttp>runSingle</ttp><td><ttl>ORF finder</ttl> improvements.
-<tr><td><a href=#v331>v3.3.1</a><td>01-Sep-21<td><ttp>runSingle</ttp><td> Add Prune Hits algorithm.
-<tr><td><a href=#v330>v3.3.0</a><td>15-Aug-21<td>All<td>Update Diamond and Blast and default parameters.
+<tr><td><a href=#v334>v3.3.4</a><td>18-Oct-21<td><ttp>runSingle</ttp><td><ttl>ORF finder</ttl> improvements
+<tr><td><a href=#v331>v3.3.1</a><td>01-Sep-21<td><ttp>runSingle</ttp><td> Add Prune Hits algorithm
+<tr><td><a href=#v330>v3.3.0</a><td>15-Aug-21<td>All<td>Update Diamond and Blast and default parameters
 <tr><td><a href=#v327>v3.2.7</a><td>20-July-21<td><ttp>viewSingle</ttp><td>Add enhanced Decimal Display (highlight p-values)
 <tr><td><a href=#v325>v3.2.5</a><td>04-June-21<td><ttp>runMulti</ttp><td>Fix <ttp>orthoMCL</ttp> to work with MariaDB
-<tr><td><a href=#v325>v3.2.3</a><td>09-May-21<td><ttp>viewSingle</ttp><td>Enhance the Hit-GO evidence codes query and display.
+<tr><td><a href=#v325>v3.2.3</a><td>09-May-21<td><ttp>viewSingle</ttp><td>Enhance the Hit-GO evidence codes query and display
 <tr><td><a href=#v321>v3.2.1</a><td>09-Apr-21<td><ttp>runDE</ttp><td>The built-in GOseq was changed to any script that is run by runDE.
 <tr><td><a href=#v318>v3.1.8</a><td>18-Mar-21<td><ttp>runAS</ttp><td>Changed the source of GO to the go-basic.obo file
 <tr><td><a href=#early>Earlier</a><td>2020<td>&nbsp;<td>&nbsp;
 </table>
+
+<a name=v340>
+<h4>v3.4.0 14-Jan-2022</h4>
+
+<p>Colors: the various buttons were color coded on Linux, but not on Mac; moreover, their
+coloring was inconsistent. Now various buttons are color-coded on Linux and Mac, and represent
+the following:
+<table>
+<tr><td>beige<td>runs an algorithm
+<tr><td>light green<td>replaces the current panel
+<tr><td>rose<td>help
+<tr><td>lavender<td>new window or popup
+<tr><td>light gray<td>request for input file
+<tr><td>light blue<td>tab on left of viewSingle and viewMulti.
+</table> 
+
+<p><ttp>runMultiTCW </ttp> 
+<ul>
+<li>Loading a project with an existing mTCWdb is much faster.
+<li>Change to Overview to put Methods table in Processing section.
+<li>Best Hit: made the output to the terminal and Help more obvious in regard to the algorithm.
+</ul>
+
+<p><ttp>viewMultiTCW </ttp> 
+<ul>
+<li>The pairwise and MSA alignments have been moved from the sequence table:  (1) the Pairs table
+has pairwise alignments and the (2) Cluster table has MSA alignments.
+<li>The alignments create a new tab on the left underneath the respective table.
+<li>All tables created from selecting one row from another table have <ttc>Prev/Next</ttc> buttons.
+The summary of displaying these row tables has been improved and a few little bugs fixed.
+<li>Run MSA on existing cluster: (1) Now shows the correct scores. (2) Shows the type of alignment (e.g. MAFFT CDS).
+</ul>
+
+<p><ttp>runSingleTCW </ttp> 
+<ul>
+<li>Overview: When writing to file, the filename is the database name instead of the sTCWid (the sTCWid is not
+necessarily unique).
+</ul>
+
+<p>Software: (1) All alignment routines have been moved from seq.align to align directory. 
+A new file called AlignButton.java has the code for the alignment buttons.
+(2) All color codes have been consolidated in the methods/Static.java file.
 
 <a name=v339>
 <h4>v3.3.9 27-Dec-2021</h4>

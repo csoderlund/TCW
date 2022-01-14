@@ -145,8 +145,7 @@ public class BasicGOFilterTab extends Tab {
 	private void createTopRowPanel() {
 		topRowPanel = Static.createRowPanel();
 		
-		btnViewSeqs = new JButton(Globals.seqTableLabel);
-		btnViewSeqs.setBackground(Globals.FUNCTIONCOLOR);
+		btnViewSeqs = Static.createButtonTab(Globals.seqTableLabel, true);
 		btnViewSeqs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				viewSequencesFromSelected();
@@ -158,7 +157,7 @@ public class BasicGOFilterTab extends Tab {
         createTopSelected();
 	    createTopTable();
 		
-		topRowPanel.add(new JLabel("Selected: ")); topRowPanel.add(Box.createHorizontalStrut(1));
+		topRowPanel.add(Static.createLabel(Globals.select)); topRowPanel.add(Box.createHorizontalStrut(1));
 		topRowPanel.add(btnViewSeqs);				topRowPanel.add(Box.createHorizontalStrut(1));
 		topRowPanel.add(btnSelCopy);				topRowPanel.add(Box.createHorizontalStrut(1));
 		topRowPanel.add(btnSelShow);				topRowPanel.add(Box.createHorizontalStrut(1));
@@ -702,7 +701,7 @@ public class BasicGOFilterTab extends Tab {
 		txtSubString = Static.createTextField("", 20);
 		row1.add(txtSubString); row1.add(Box.createHorizontalStrut(5));
 		
-		btnFindFile = Static.createButton("Load File", false);
+		btnFindFile = Static.createButtonFile("Load File", false);
 		btnFindFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
@@ -778,7 +777,7 @@ public class BasicGOFilterTab extends Tab {
 		});   
 	
 		createEvCPanel();
-		btnEvC = Static.createButton("Evidence", false, Globals.MENUCOLOR);
+		btnEvC = Static.createButtonPanel("Evidence", false);
 		btnEvC.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				evidCodePanel.setVisible(true);
@@ -915,7 +914,7 @@ public class BasicGOFilterTab extends Tab {
     	row4.add(lblDErow);			row4.add(Box.createHorizontalStrut(1));
 		
     	createPvalColPanel();
-    	btnPval = Static.createButton(pvalColLabel, false, Globals.MENUCOLOR);
+    	btnPval = Static.createButtonPanel(pvalColLabel, false);
 		btnPval.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				pvalColumnsPanel.setVisible(true);
@@ -949,7 +948,7 @@ public class BasicGOFilterTab extends Tab {
 	}
 	private void createFilterRow5Results() {
 	    filterPanel.add(Box.createVerticalStrut(5));
-		btnBuildTable = Static.createButton("BUILD", true, Globals.FUNCTIONCOLOR);
+		btnBuildTable = Static.createButtonRun("BUILD", true);
 		btnBuildTable.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				goTablePanel.highClear();
@@ -958,14 +957,14 @@ public class BasicGOFilterTab extends Tab {
 			}
 		});
 		
-		btnAddTable = Static.createButton("ADD", true, Globals.FUNCTIONCOLOR);
+		btnAddTable = Static.createButtonRun("ADD", true);
 		btnAddTable.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				loadQueryStart(BasicGOLoadFromDB.ADD);
 			}
 		});
 		
-		btnSelectColumns = Static.createButton("Columns", true, Globals.MENUCOLOR);
+		btnSelectColumns = Static.createButtonPanel("Columns", true);
 		btnSelectColumns.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				goTablePanel.showColumns();
@@ -1037,7 +1036,7 @@ public class BasicGOFilterTab extends Tab {
 			}
 		}));
 		
-		btnHelp = Static.createButton("Help...", true, Globalx.HELPCOLOR);
+		btnHelp = Static.createButtonHelp("Help...", true);
 		btnHelp.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 popup.show(e.getComponent(), e.getX(), e.getY());

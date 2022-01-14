@@ -32,9 +32,11 @@ import cmp.viewer.table.FieldData;
 
 public class GrpQueryPanel extends JPanel {
 	private static final long serialVersionUID = 1672776836742705318L;
+	private static final String helpHTML = Globals.helpDir + "GrpQuery.html";
+	
 	private static final String UNIQUE_HITS = FieldData.HIT_TABLE;
 	private static final String GRP_TABLE = FieldData.GRP_TABLE;
-	private static final String helpHTML = "GrpQuery.html";
+	
 	public static final String ALLRadio = "All";
 	
 	private static final String [] SECTIONS = { "Basic", "Dataset", "Cluster Sets"};
@@ -71,7 +73,7 @@ public class GrpQueryPanel extends JPanel {
 		
 		JPanel row = Static.createRowPanel();
 		
-		btnSearch = Static.createButton("View Filtered Clusters", true, Globals.FUNCTIONCOLOR);
+		btnSearch = Static.createButtonTab("View Filtered Clusters", true);
 		btnSearch.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				hasError=false;
@@ -86,7 +88,6 @@ public class GrpQueryPanel extends JPanel {
 							}
 						}
 					}
-					
 					String tab = tabPrefix + theViewerFrame.getNextLabelNum(tabPrefix);
 					GrpTablePanel grpPanel = new GrpTablePanel(theViewerFrame, tab);
 					theViewerFrame.addResultPanel(MTCWFrame.GRP_PREFIX, grpPanel, grpPanel.getName(), grpPanel.getSummary());
@@ -95,8 +96,7 @@ public class GrpQueryPanel extends JPanel {
 		});
 		btnSearch.setEnabled(cntGrp>0);
 		
-		btnExpand = new JButton("Expand All");
-		btnExpand.setBackground(theViewerFrame.getSettings().getFrameSettings().getBGColor());
+		btnExpand = Static.createButton("Expand All");
 		btnExpand.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				for(int x=0; x<theSections.length; x++)
@@ -104,8 +104,7 @@ public class GrpQueryPanel extends JPanel {
 			}
 		});
 		
-		btnCollapse = new JButton("Collapse All");
-		btnCollapse.setBackground(theViewerFrame.getSettings().getFrameSettings().getBGColor());
+		btnCollapse = Static.createButton("Collapse All");
 		btnCollapse.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				for(int x=0; x<theSections.length; x++)
@@ -114,29 +113,23 @@ public class GrpQueryPanel extends JPanel {
 		});
 		
 		btnClear = Static.createButton("Clear", true);
-		btnClear.setBackground(theViewerFrame.getSettings().getFrameSettings().getBGColor());
 		btnClear.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				clearFilters();
 			}
 		});	
 		
-		btnHelp = Static.createButton("Help", true, Globals.HELPCOLOR);
+		btnHelp = Static.createButtonHelp("Help", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(theViewerFrame, "Cluster Filter Help", 
-						"html/viewMultiTCW/" + helpHTML);
+				UserPrompt.displayHTMLResourceHelp(theViewerFrame, "Cluster Filter Help", helpHTML);
 			}
 		});
 		
-		row.add(btnSearch);
-		row.add(Box.createHorizontalStrut(30));
-		row.add(btnExpand);
-		row.add(Box.createHorizontalStrut(5));
-		row.add(btnCollapse);
-		row.add(Box.createHorizontalStrut(5));
-		row.add(btnClear);
-		row.add(Box.createHorizontalStrut(30));
+		row.add(btnSearch);		row.add(Box.createHorizontalStrut(30));
+		row.add(btnExpand);		row.add(Box.createHorizontalStrut(5));
+		row.add(btnCollapse);	row.add(Box.createHorizontalStrut(5));
+		row.add(btnClear);		row.add(Box.createHorizontalStrut(50));
 		
 		row.add(Box.createHorizontalGlue());
 		row.add(btnHelp);
@@ -559,8 +552,8 @@ public class GrpQueryPanel extends JPanel {
 			checkValues();
 			if (!checkOn.isSelected()) return "";
 			
-			String min = txtMin.getText(); // check if proper value
-			String max = txtMax.getText();
+			String min = txtMin.getText().trim(); // check if proper value
+			String max = txtMax.getText().trim();
 			
 			if (min.contentEquals("") && max.contentEquals("")) {
 				checkOn.setSelected(false);
@@ -572,10 +565,8 @@ public class GrpQueryPanel extends JPanel {
 			if (min.contentEquals("")  && !max.contentEquals("")) 
 				return sqlField + "<" + max;
 			
-			if (min.contentEquals("0")  && max.contentEquals("0"))  // CAS330 add
-				return sqlField + "=0";
-			if (min.contentEquals("0.0")  && max.contentEquals("0.0"))  // CAS330 add
-				return sqlField + "=0.0";
+			if (min.contentEquals(max))	// CAS340 (was specifically checking for min=0 and max=0)
+				return sqlField + "=" + max;
 			
 			return "(" + sqlField + ">=" + min + " and " + sqlField + "<" + max + ")";
 		}

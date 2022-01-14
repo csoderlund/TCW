@@ -1,8 +1,8 @@
 <html><title>mTCW_ex overview</title><body><center>
 <h2>mTCW overview for ex</h2>
-<table width=600 border=1><tr><td><pre>Project: ex  Cluster: 641  Pairs: 985  Seqs: 707  Hits: 4.0k  GOs: 8.0k   PCC Stats KaKs Multi
+<table width=600 border=1><tr><td><pre>Project: ex  Cluster: 1.1k  Pairs: 985  Seqs: 707  Hits: 4.0k  GOs: 8.0k   PCC Stats KaKs Multi
 
-Created: 27-Dec-21 v3.3.9
+Created: 12-Jan-22 v3.4.0     Last Update: 13-Jan-22 v3.4.0
 
 DATASETS: 3
            Type  #Seq  #annotated  #annoDB  Created    Remark  
@@ -10,23 +10,22 @@ DATASETS: 3
       fly  NT     207         207        3  13-Aug-21  exFly   
       foo  NT     250         250        3  13-Aug-21  exFoo   
                            
-CLUSTER SETS: 3
-      Prefix  Method        Parameters                             
-      BB      BBH           Sim 60; Cov 40(Both); AA; bar,fly,foo  
-      CL      Closure       Sim 60; Cov 40(Both); AA               
-      OM      User Defined  orthoMCL.OM-40                         
+CLUSTER SETS: 5
+   Statistics
+      Prefix  Method          conLen  sdLen     Score1  SD    Score2  SD    
+      CL      Closure         583.20  59.93       0.48  0.08    0.78  0.15  
+      OM      orthoMCL.OM-40  610.63  86.54       0.45  0.10    0.74  0.17  
+      B12     BBH bar,fly     541.54  60.87       0.50  0.07    0.72  0.17  
+      B13     BBH bar,foo     565.77  38.05       0.53  0.07    0.79  0.15  
+      B23     BBH fly,foo     564.22  71.18       0.47  0.08    0.79  0.21  
 
    Sizes
-      Prefix  =2   =3  4-5  6-10  11-15  16-20  21-25  >25  Total  #Seqs  
-      BB       0  153    0     0      0      0      0    0    153  64.9%  
-      CL      92  151    1     1      0      0      0    0    245  91.7%  
-      OM      51  186    3     3      0      0      0    0    243  98.3%  
-
-   Statistics
-      Prefix  conLen  sdLen     Score1  SD    Score2  SD    
-      BB      548.24  57.20       0.46  0.08    0.81  0.12  
-      CL      583.20  59.93       0.48  0.08    0.78  0.15  
-      OM      610.65  86.54       0.45  0.10    0.74  0.17  
+      Prefix   =2   =3  4-5  6-10  11-15  16-20  21-25  >25  Total  #Seqs  
+      CL       92  151    1     1      0      0      0    0    245  91.7%  
+      OM       51  186    3     3      0      0      0    0    243  98.3%  
+      B12     157    0    0     0      0      0      0    0    157  44.4%  
+      B13     240    0    0     0      0      0      0    0    240  67.9%  
+      B23     166    0    0     0      0      0      0    0    166  47.0%  
 
 PAIRS: 985
    Hits
@@ -75,7 +74,15 @@ SEQUENCES: 707
 PROCESSING:
 AA: diamond --masking 0 --sensitive --query-cover 25 --subject-cover 25
 NT: blastn -evalue 1e-05 -max_hsps 1  -max_target_seqs 25
-Score1: Sum-of-Pairs
-Score2: Wentropy
+
+MSA: Score1=Sum-of-Pairs    Score2=Wentropy
+
+Cluster Sets 
+      Prefix  Method        Parameters                         
+      CL      Closure       Sim 60; Cov 40(Both); AA           
+      OM      User Defined  orthoMCL.OM-40                     
+      B12     BBH           Sim 60; Cov 40(Both); AA; bar,fly  
+      B13     BBH           Sim 60; Cov 40(Both); AA; bar,foo  
+      B23     BBH           Sim 60; Cov 40(Both); AA; fly,foo  
 
 </pre></table></body></html>

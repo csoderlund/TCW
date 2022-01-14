@@ -1,5 +1,6 @@
 package cmp.compile.panels;
 
+import java.awt.Color;
 /*****************************************************
  * Species panel of the main window including the table, which contains all species variables
  * (even if not displayed)
@@ -40,17 +41,18 @@ import util.database.DBConn;
 
 public class SpeciesPanel extends JPanel {
 	private static final long serialVersionUID = -7854401073530999670L;
+	private static final Color BGCOLOR = Color.WHITE;
 	
 	public SpeciesPanel(CompilePanel parentPanel, EditSpeciesPanel editPanel) {
 		theCompilePanel = parentPanel;
 		theEditSpeciesPanel = editPanel;
 		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-		setBackground(Globals.BGCOLOR);
+		setBackground(BGCOLOR);
 		
 		mainPanel = Static.createPagePanel();
 		
-		JLabel lblSpecies = new JLabel("1. sTCWdbs (single TCW databases)");
+		JLabel lblSpecies = Static.createLabel("1. sTCWdbs (single TCW databases)");
 		mainPanel.add(Box.createVerticalStrut(10));
 		mainPanel.add(lblSpecies);
 		
@@ -64,24 +66,23 @@ public class SpeciesPanel extends JPanel {
 			}
 		});
 		sPane = new JScrollPane(theTable);
-		sPane.setBackground(Globals.BGCOLOR);
+		sPane.setBackground(BGCOLOR);
 		sPane.getViewport().setBackground(Globals.BGCOLOR);
 		theTable.getTableHeader().setBackground(Globals.BGCOLOR);
 		ScrollBarUI tUI = new BasicScrollBarUI() {
 		    protected JButton createDecreaseButton(int orientation) {
 		        JButton button = super.createDecreaseButton(orientation);
-		        button.setBackground(Globals.BGCOLOR);
+		        button.setBackground(BGCOLOR);
 		        return button;
 		    }
-
 		    protected JButton createIncreaseButton(int orientation) {
 		        JButton button = super.createIncreaseButton(orientation);
-		        button.setBackground(Globals.BGCOLOR);
+		        button.setBackground(BGCOLOR);
 		        return button;
 		    }
 		};
-		sPane.getHorizontalScrollBar().setBackground(Globals.BGCOLOR);
-		sPane.getVerticalScrollBar().setBackground(Globals.BGCOLOR);
+		sPane.getHorizontalScrollBar().setBackground(BGCOLOR);
+		sPane.getVerticalScrollBar().setBackground(BGCOLOR);
 		sPane.getHorizontalScrollBar().setUI(tUI);
 		sPane.getVerticalScrollBar().setUI(tUI);
 		row.add(sPane);
@@ -90,7 +91,7 @@ public class SpeciesPanel extends JPanel {
 		// action buttons
 		buttonPanel = Static.createPagePanel();
 		
-		btnAdd = Static.createButton("Add", true, Globals.MENUCOLOR);
+		btnAdd = Static.createButtonPanel("Add", true);
 		btnAdd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				theEditSpeciesPanel.clear();
@@ -102,7 +103,7 @@ public class SpeciesPanel extends JPanel {
 		});
 		buttonPanel.add(btnAdd);
 		
-		btnEdit = Static.createButton("Edit", false, Globals.MENUCOLOR);
+		btnEdit = Static.createButtonPanel("Edit", false);
 		btnEdit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				int row = theTable.getSelectedRow();
@@ -125,7 +126,7 @@ public class SpeciesPanel extends JPanel {
 		buttonPanel.add(Box.createVerticalStrut(3));
 		buttonPanel.add(btnEdit);
 		
-		btnRemove = Static.createButton("Remove", false, Globals.MENUCOLOR);
+		btnRemove = Static.createButtonMenu("Remove", false);
 		btnRemove.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				int row = theTable.getSelectedRow();
@@ -159,7 +160,7 @@ public class SpeciesPanel extends JPanel {
 		add(Box.createVerticalStrut(10));
 		
 		row = Static.createRowPanel();
-		btnBuildDatabase = Static.createButton("Build Database", true);
+		btnBuildDatabase = Static.createButtonRun("Build Database", true);
 		btnBuildDatabase.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if (checkInput())
@@ -168,7 +169,7 @@ public class SpeciesPanel extends JPanel {
 		});	
 		row.add(btnBuildDatabase);
 		
-		btnBuildGO = Static.createButton("Add GOs", true);
+		btnBuildGO = Static.createButtonRun("Add GOs", true);
 		btnBuildGO.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				theCompilePanel.execBuildGO(); // build code is in CompileMain.buildDatabase

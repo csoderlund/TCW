@@ -433,7 +433,10 @@ public class MultiAlignData {
 	public double getMSA_gScore1() {return glScore1;}
 	public double getMSA_gScore2() {return glScore2;}
 	
-	public String getGlScores()   {return String.format("(%.3f,%.3f)", glScore1, glScore2);}
+	public String getGlScores()   {
+		if (glScore1==Globalx.dNoVal || glScore2==Globalx.dNoVal) return ""; // CAS340
+		return String.format("(%.3f,%.3f)", glScore1, glScore2);
+	}
 	public String getColScores1() {return strColScores1;} 
 	public String getColScores2() {return strColScores2;}
 	

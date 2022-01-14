@@ -64,7 +64,7 @@ projects are created by merging existing sTCW projects.
 <td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
 Common abbreviations:
-<table class="tablex">
+<table>
 	<tr><td>mTCWdb<td>&nbsp;&nbsp;&nbsp;multiTCW database</tr> 
 	<tr><td>sTCWdb<td>&nbsp;&nbsp;&nbsp;singleTCW database</tr> 
 
@@ -285,7 +285,7 @@ A multiTCW database can be created with a mix of NT-sTCWdbs and AA-sTCWdbs.
 <table class="tablex">	
 <tr>
 	<td class=top>	
-	<a  href="img/cmp1.tiff"><img src="img/cmp1.tiff" alt="" style="border: 1px solid black; width: 300px"></a>
+	<a  href="img/addPairs1.png"><img src="img/addPairs1.png" alt="" style="border: 1px solid black; width: 300px"></a>
 	<p>The image on the right is the <ttc>Settings</ttc>. 
 	The <ttc>Run Search</ttc> puts the results in <ttx>hitsAA.tab</ttx> and <ttx>hitsNT.tab</ttx>;
 	these names cannot be changed.
@@ -305,7 +305,7 @@ A multiTCW database can be created with a mix of NT-sTCWdbs and AA-sTCWdbs.
 <table class="tablex">	
 <tr>
 	<td class=top>	
-<a  href="img/cmp2.tiff"><img src="img/cmp2.tiff" alt="" style="border: 1px solid black; width: 300px"></a>
+<a  href="img/addPairs2.png"><img src="img/addPairs2.png" alt="" style="border: 1px solid black; width: 300px"></a>
 <td>On the main window, loads the pairs from the hits result file.
 This step also assigns the shared description, which is the same algorithm as used for
 the <a href=#best>Majority Hit</a> for clusters. The only difference is that if there is no
@@ -390,18 +390,21 @@ prefix can only be 5 characters, so make it a meaningful 5 characters.
 <table class="tablex">
 <tr>
 	<td class=top>
-	Clusters are formed using the best annotation for each sequences, as follows:
+	Clusters are formed using the best annotation for each sequences, as follows 
+	(<i>protein hit</i> or <i>pair hit</i> indicates a DIAMOND/BLAST result):
 	<ol>
 		<li>All sequences share the same best HitID or best Description. If the best description is used:
 		<ul>
 			<li>If it contains such words as "uncharacterized protein", then the hitID is used.
 			<li>Otherwise, the description is used minus the "{ECO:...}" portion of the UniProt descriptions.
 		</ul>
-		<li>Each sequence must have &gt;=<ttl>%Similarity</ttl> and &gt;=<ttl>%Coverage</ttl> to the hit. 
-		<li>Each sequence must have &gt;=<ttl>%Similarity</ttl> and &gt;=<ttl>%Coverage</ttl> to at 
-		least one other sequence in the cluster.
-		<li>If the <ttl>All Hit</ttl> filter is "Yes", then all sequences in a cluster must have a hit with all others, otherwise,
-		each sequence only needs to have one hit (rule #3).
+		<li>Each sequence must have &gt;=<ttl>%Similarity</ttl> and &gt;=<ttl>%Coverage</ttl> to the protein hit. 
+		<li>Each sequence must have &gt;=<ttl>%Similarity</ttl> and &gt;=<ttl>%Coverage</ttl> to the pair hit with all/any other sequences
+		in the cluster.
+		<ul>
+		<li>All: If the All Hit filter is "Yes", then each sequence in a cluster must pass rule #3 with all other sequences in the cluster.
+		<li>Any: If the All Hit filter is "No", each sequence only needs to pass rule #3 with one other sequence in cluster.
+		</ul>
 		If the parameters are too lax, this can create some bad clusters. Rule of thumb:
 		<br>Yes - you can reduce %Similarity and %Coverage.
 		<br>No -  you should increase %Similarity and %Coverage significantly.

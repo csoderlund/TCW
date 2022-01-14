@@ -7,8 +7,6 @@ package sng.viewer.panels.Basic;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -156,11 +154,11 @@ public class BasicSeqFilterPanel extends JPanel {
 			allbg.add(radTCW); 
 			allbg.add(radUser); 
 			
-			row1.add(new JLabel("Substring: "));
+			row1.add(Static.createLabel("Substring: "));
 			txtField  = Static.createTextField("", 20, true);
 			row1.add(txtField); row1.add(Box.createHorizontalStrut(5));
 			
-			btnFindFile = Static.createButton("Load File", true);
+			btnFindFile = Static.createButtonFile("Load File", true);
 			btnFindFile.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					try {
@@ -173,7 +171,7 @@ public class BasicSeqFilterPanel extends JPanel {
 				}});
 			row1.add(btnFindFile); row1.add(Box.createHorizontalStrut(3));
 			
-			JButton clearall = new JButton("Clear");
+			JButton clearall = Static.createButtonPlain("Clear", true);
 			clearall.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					try {
@@ -181,8 +179,6 @@ public class BasicSeqFilterPanel extends JPanel {
 					}
 					catch(Exception e) {ErrorReport.prtReport(e, "GO etc");}
 			}});
-			clearall.setMargin(new Insets(0, 0, 0, 0));
-			clearall.setFont(new Font(clearall.getFont().getName(),Font.PLAIN,10));
 			clearall.setAlignmentX(RIGHT_ALIGNMENT);
 			row1.add(clearall);
 			add(row1);
@@ -192,19 +188,19 @@ public class BasicSeqFilterPanel extends JPanel {
 			add(new JSeparator());
 			add(Box.createVerticalStrut(3));	
 			
-			btnBuildTable = Static.createButton("BUILD", true, Globals.FUNCTIONCOLOR);
+			btnBuildTable = Static.createButtonRun("BUILD", true);
 			btnBuildTable.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					loadDataForTable(BUILD);
 				}
 			});
-			btnAddTable = Static.createButton("ADD", true, Globals.FUNCTIONCOLOR);
+			btnAddTable = Static.createButtonRun("ADD", true);
 			btnAddTable.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					loadDataForTable(ADD);
 				}
 			});
-			btnSetColumns = Static.createButton("Columns", true, Globals.MENUCOLOR);
+			btnSetColumns = Static.createButtonPanel("Columns", true);
 			btnSetColumns.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					hideMain();
@@ -270,7 +266,7 @@ public class BasicSeqFilterPanel extends JPanel {
 				}
 			}));
 			
-			btnHelp = Static.createButton("Help...", true, Globalx.HELPCOLOR);
+			btnHelp = Static.createButtonHelp("Help...", true);
 			btnHelp.addMouseListener(new MouseAdapter() {
 	            public void mousePressed(MouseEvent e) {
 	                popup.show(e.getComponent(), e.getX(), e.getY());

@@ -44,29 +44,29 @@ public class SeqTableTab extends Tab
 		isAAdb = inFrame.getMetaData().isAAsTCW(); 
 		hasReps = inFrame.getMetaData().hasReps();
 		
-		theContigIDs = contigs;
+		theSeqIDs = contigs;
 		theQuery = inQuery;
         theFields = inContigFields;
        
-        contigTable = new MainTable(theFields, tableRows, 
+        seqTable = new MainTable(theFields, tableRows, 
         		theFields.getVisibleFieldIDs(), refreshListener);
 
-		contigTable.setSelectionMode( ListSelectionModel.MULTIPLE_INTERVAL_SELECTION );
-		contigTable.getTableHeader().setBackground(Color.WHITE);
+		seqTable.setSelectionMode( ListSelectionModel.MULTIPLE_INTERVAL_SELECTION );
+		seqTable.getTableHeader().setBackground(Color.WHITE);
 		
-		contigTable.addSelectionChangeListener(new ActionListener() {
+		seqTable.addSelectionChangeListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) { // responds to clicking header
-				if ( btnViewContig != null )
-					btnViewContig.setEnabled( contigTable.getSelectedRowCount() > 0 );
+				if ( btnViewSeq != null )
+					btnViewSeq.setEnabled( seqTable.getSelectedRowCount() > 0 );
 			}
 		});
 
-		contigTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+		seqTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent arg0) {
-				btnViewContig.setEnabled(true);
+				btnViewSeq.setEnabled(true);
 			}
 		});
-		contigTable.addDoubleClickListener(new ActionListener() {
+		seqTable.addDoubleClickListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				addContigTab();
 			}
@@ -75,8 +75,8 @@ public class SeqTableTab extends Tab
 		JPanel scrollPane = new JPanel();
 
 		scrollPane.setAlignmentY(LEFT_ALIGNMENT);
-		scrollPane.add(contigTable);
-		JScrollPane scroller = new JScrollPane ( contigTable );
+		scrollPane.add(seqTable);
+		JScrollPane scroller = new JScrollPane ( seqTable );
 		scroller.setHorizontalScrollBarPolicy( JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED );
 		scroller.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED );
 		scroller.getViewport().setBackground(Color.WHITE);
@@ -89,12 +89,12 @@ public class SeqTableTab extends Tab
 		if (summary==null || summary=="") summary = "; All sequences";
 		else summary = ";  " + summary;
 		
-		double cnt = contigTable.getDataRowCount();
+		double cnt = seqTable.getDataRowCount();
 		double tot = nTotalContigs;
 		double per = (cnt/tot)*100.0;
 		String sper = String.format(" (%.1f%s)", per, "%");
 		tableSummary = summary;
-		lblSummary = new JLabel ("     " + contigTable.getDataRowCount() + sper +
+		lblSummary = new JLabel ("     " + seqTable.getDataRowCount() + sper +
 				" of " + nTotalContigs +  summary);
 		lblSummary.setAlignmentY(LEFT_ALIGNMENT);
 		sumRow.add(lblSummary);
@@ -115,7 +115,7 @@ public class SeqTableTab extends Tab
 	};
 	
 	public RunQuery getQuery ( ) { return theQuery; }
-	public String [] getContigIDs() { return theContigIDs; }
+	public String [] getContigIDs() { return theSeqIDs; }
 	public int getViewMode() { return nViewMode; }
 	
 	public FieldMapper getFieldMapper ( ) { return theFields; }
@@ -125,22 +125,21 @@ public class SeqTableTab extends Tab
 	{
 		final JPanel toolbarPanel = Static.createRowPanel();
 		
-		btnViewContig = new JButton(Globals.seqDetailLabel); // CAS334 changed from View Selected Sequence
-		btnViewContig.setBackground(Globalx.FUNCTIONCOLOR);
-		btnViewContig.addActionListener(new ActionListener() {
+		JLabel select = Static.createLabel(Globals.select);
+		btnViewSeq = Static.createButtonTab(Globals.seqDetailLabel, true); // CAS334 changed from View Selected Sequence
+		btnViewSeq.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				addContigTab();
 			}
 		});
-		btnViewContig.setEnabled( false ); 
+		btnViewSeq.setEnabled( false ); 
 		
-		JButton btnRefresh = new JButton ("Refresh Columns");
+		JButton btnRefresh = Static.createButton("Refresh Columns");
 		btnRefresh.addActionListener(refreshListener);	
 		
 		createToolTable();
 		
-		btnHelp = new JButton("Help");
-		btnHelp.setBackground(Globalx.HELPCOLOR);
+		btnHelp = Static.createButtonHelp("Help", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(getParentFrame(), "Sequence table", helpDir );
@@ -148,12 +147,10 @@ public class SeqTableTab extends Tab
 		});
 
 		toolbarPanel.add( Box.createHorizontalStrut(5) );
-		toolbarPanel.add( btnViewContig );
-		toolbarPanel.add( Box.createHorizontalStrut(10) );
-		toolbarPanel.add(btnRefresh);
-		toolbarPanel.add( Box.createHorizontalStrut(10) );
-		toolbarPanel.add(btnTable);
-		toolbarPanel.add( Box.createHorizontalStrut(5) );
+		toolbarPanel.add(select); 			toolbarPanel.add( Box.createHorizontalStrut(2) );
+		toolbarPanel.add( btnViewSeq ); 	toolbarPanel.add( Box.createHorizontalStrut(30) );
+		toolbarPanel.add(btnRefresh); 		toolbarPanel.add( Box.createHorizontalStrut(5) );
+		toolbarPanel.add(btnTable);			toolbarPanel.add( Box.createHorizontalStrut(5) );
 		
 		toolbarPanel.add( Box.createHorizontalGlue() );
 		toolbarPanel.add( Box.createHorizontalStrut(5) );
@@ -171,7 +168,7 @@ public class SeqTableTab extends Tab
 			public void actionPerformed(ActionEvent e) {
 				try {
 					String title = "Main table" + tableSummary;
-					String info = contigTable.statsPopUpCompute(title);
+					String info = seqTable.statsPopUpCompute(title);
 					UserPrompt.displayInfoMonoSpace(null, title, info);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error copy table");}
 			}
@@ -182,7 +179,7 @@ public class SeqTableTab extends Tab
 			public void actionPerformed(ActionEvent e) {
 				try {
 					Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
-					StringSelection stuff = new StringSelection(contigTable.copyTableToString());
+					StringSelection stuff = new StringSelection(seqTable.copyTableToString());
 					cb.setContents(stuff, null);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error copy table");}
 			}
@@ -258,9 +255,9 @@ public class SeqTableTab extends Tab
 	}
 	
 	private void doRefreshColumns() {
-		if (contigTable!=null) contigTable.clearTable();
-		if(theContigIDs != null) // from Basic Query, where query is list of contigs
-			getParentFrame().loadQueryContigs( SeqTableTab.this, theQuery, theContigIDs, nViewMode,  null );
+		if (seqTable!=null) seqTable.clearTable();
+		if(theSeqIDs != null) // from Basic Query, where query is list of contigs
+			getParentFrame().loadQueryContigs( SeqTableTab.this, theQuery, theSeqIDs, nViewMode,  null );
 		else if(theQuery != null)
 			getParentFrame().loadQueryFilter( SeqTableTab.this, theQuery, null );
 		else {
@@ -270,17 +267,17 @@ public class SeqTableTab extends Tab
 	// one sequence selected
 	private void addContigTab ( )
 	{
-		int nRow = contigTable.getSelectedRow();
+		int nRow = seqTable.getSelectedRow();
 		if (nRow < 0) return;
 		
-		String strName = (String)theFields.extractFieldByID( contigTable.getRowAt(nRow), 
+		String strName = (String)theFields.extractFieldByID( seqTable.getRowAt(nRow), 
 				FieldSeqData.SEQ_ID_FIELD);
 		getParentFrame().addSeqDetailPage(strName, this, nRow);
 	}
 	
 	public String getContigIDAtRow(int nRow) {
-		if (nRow >= 0 && nRow < contigTable.getDataRowCount())
-			return (String)theFields.extractFieldByID( contigTable.getRowAt(nRow), 
+		if (nRow >= 0 && nRow < seqTable.getDataRowCount())
+			return (String)theFields.extractFieldByID( seqTable.getRowAt(nRow), 
 					FieldSeqData.SEQ_ID_FIELD );		
 		return null;
 	}
@@ -288,7 +285,7 @@ public class SeqTableTab extends Tab
 	public int getNextRowNum ( int nRow )
 	{
 		int nNextRow = nRow + 1;
-		if (nNextRow >= contigTable.getDataRowCount()) 
+		if (nNextRow >= seqTable.getDataRowCount()) 
 			nNextRow = 0;
 		return nNextRow;
 	}
@@ -297,7 +294,7 @@ public class SeqTableTab extends Tab
 	{
 		int nPrevRow = nRow - 1;
 		if (nPrevRow < 0)
-			nPrevRow = contigTable.getDataRowCount() - 1; // get last row
+			nPrevRow = seqTable.getDataRowCount() - 1; // get last row
 		return nPrevRow;
 	}
 
@@ -305,11 +302,11 @@ public class SeqTableTab extends Tab
 	 * Called on closing a sequence table tab
 	 */
 	public void close() {
-		if (contigTable!=null) contigTable.clearTable();
-		contigTable = null;
+		if (seqTable!=null) seqTable.clearTable();
+		seqTable = null;
 		theQuery=null;
 		theFields = null;
-		btnViewContig = null;
+		btnViewSeq = null;
 		lblSummary = null;
 	}
 	/******************************************************************
@@ -332,23 +329,23 @@ public class SeqTableTab extends Tab
 				try {
 					btnTable.setEnabled(false);
 					if(saveMode == EXPORT_TABLE) {
-						contigTable.saveToFileTabDelim(btnTable, filePrefix+"Columns", getParentFrame());
+						seqTable.saveToFileTabDelim(btnTable, filePrefix+"Columns", getParentFrame());
 					}
 					else if(saveMode == EXPORT_SELECT) { // CAS334
-						contigTable.saveSelToFileTabDelim(btnTable, filePrefix+"Select", getParentFrame());
+						seqTable.saveSelToFileTabDelim(btnTable, filePrefix+"Select", getParentFrame());
 					}
 					else if(saveMode == EXPORT_SEQS) {
-                        contigTable.saveToFasta(btnTable, filePrefix+"Seqs", getParentFrame());
+                        seqTable.saveToFasta(btnTable, filePrefix+"Seqs", getParentFrame());
                     }
                     else if(saveMode == EXPORT_ORF) {
-                        contigTable.saveORFToFasta(btnTable, filePrefix+"ORFs", getParentFrame());
+                        seqTable.saveORFToFasta(btnTable, filePrefix+"ORFs", getParentFrame());
                     }
                     else if(saveMode == EXPORT_COUNTS) {
-						contigTable.saveToFileCounts(btnTable, filePrefix+"Reps", getParentFrame(),
+						seqTable.saveToFileCounts(btnTable, filePrefix+"Reps", getParentFrame(),
 						   getParentFrame().getQueryContigTab().getAllLibraryNames()); 
 					}
                     else if(saveMode == EXPORT_SeqGO) { 
-						contigTable.saveGOFromBest(btnTable, filePrefix+"BestGO", getParentFrame()); 
+						seqTable.saveGOFromBest(btnTable, filePrefix+"BestGO", getParentFrame()); 
 					}
 					btnTable.setEnabled(true);
 				}
@@ -368,7 +365,7 @@ public class SeqTableTab extends Tab
 				try {
 					btnTable.setEnabled(false);
 					
-                    contigTable.saveHitsToFasta(btnTable, eh.getHitFile(), getParentFrame(), eh.getHitSQL()); 
+                    seqTable.saveHitsToFasta(btnTable, eh.getHitFile(), getParentFrame(), eh.getHitSQL()); 
 					
                     btnTable.setEnabled(true);
 				}
@@ -388,7 +385,7 @@ public class SeqTableTab extends Tab
 				try {
 					btnTable.setEnabled(false);
 					
-                    contigTable.saveGOtoFile(btnTable, et.getGOfile(), getParentFrame(),
+                    seqTable.saveGOtoFile(btnTable, et.getGOfile(), getParentFrame(),
                     		et.getGOLevel(), et.getGOEval(), et.getTermType()); 
 					
                     btnTable.setEnabled(true);
@@ -638,12 +635,12 @@ public class SeqTableTab extends Tab
     
     private FieldMapper theFields;
 	private RunQuery theQuery;
-	private JButton btnViewContig;
+	private JButton btnViewSeq;
 	private JButton btnTable;
 	private JButton btnHelp = null;
-	private MainTable contigTable;
+	private MainTable seqTable;
 	private JLabel lblSummary;
-	private String [] theContigIDs = null; 
+	private String [] theSeqIDs = null; 
 	private int nViewMode = -1;
 	private boolean hasGOs=false, isAAdb=false, hasReps=false;
 	private String tableSummary="";

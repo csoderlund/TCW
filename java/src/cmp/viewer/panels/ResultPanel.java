@@ -41,10 +41,10 @@ public class ResultPanel extends JPanel {
 		theParentFrame = parentFrame;
 		setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-		setBackground(Globals.BGCOLOR);
+		setBackground(Static.BGCOLOR);
 		
 		theTable = new JTable();
-		theTable.getTableHeader().setBackground(Globals.BGCOLOR);
+		theTable.getTableHeader().setBackground(Static.BGCOLOR);
 		theTable.setColumnSelectionAllowed( false );
 		theTable.setCellSelectionEnabled( false );
 		theTable.setRowSelectionAllowed( true );
@@ -68,7 +68,7 @@ public class ResultPanel extends JPanel {
 		scroll.setBorder( null );
 		scroll.setPreferredSize(java.awt.Toolkit.getDefaultToolkit().getScreenSize()); // force table to use all space
 		scroll.setAlignmentX(Component.LEFT_ALIGNMENT);
-		scroll.getViewport().setBackground(Globals.BGCOLOR);
+		scroll.getViewport().setBackground(Static.BGCOLOR);
 				
 		add(addButtonPanel());
 		add(Box.createVerticalStrut(20));
@@ -97,7 +97,7 @@ public class ResultPanel extends JPanel {
 		thePanel.add(btnRemoveAllPanels);
 		thePanel.add(Box.createHorizontalStrut(5));
 		
-		btnHelp = Static.createButton("Help", true, Globals.HELPCOLOR);
+		btnHelp = Static.createButtonHelp("Help", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(theParentFrame, "Results Help", helpHTML);

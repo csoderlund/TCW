@@ -48,8 +48,8 @@ public class SeqTopRowTab extends Tab {
 	
 	private static final String helpHTML =  Globals.helpDir + "DetailTopRow.html";
 	
-	private Color funColor = Globals.FUNCTIONCOLOR; // CAS318 only works on Linux, but correct coloring
-	private Color activeColor = Globals.MENUCOLOR;  //        changed from gray to green
+	private Color panelColor = Static.PANELCOLOR; 
+	private Color activeColor = Static.RUNCOLOR;  
 	private short parent;
 	private short seqTab = 1;
 	private short capTab = 2;
@@ -80,14 +80,14 @@ public class SeqTopRowTab extends Tab {
 		/********************************************
 		 *  XXX Create dropdown menu of contig
 		 */
-		rbDetails = Static.createButton("Details", true, funColor); 
+		rbDetails = Static.createButtonPanel("Details", true); 
 		rbDetails.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				setInActive(rbDetails);
 				opDetails();
 			}
 		});
-		rbFrame = Static.createButton("Frame", true, funColor); 
+		rbFrame = Static.createButtonPanel("Frame", true); 
 		rbFrame.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				setInActive(rbFrame);
@@ -95,14 +95,14 @@ public class SeqTopRowTab extends Tab {
 			}
 		});
 		// if assembled
-		rbContig = Static.createButton("Contig", true, funColor); 
+		rbContig = Static.createButtonPanel("Contig", true); 
 		rbContig.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				setInActive(rbContig);
 				opContig();
 			}
 		});
-		rbSNP = Static.createButton("SNPs", true, funColor); 
+		rbSNP = Static.createButtonPanel("SNPs", true); 
 		rbSNP.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				setInActive(rbSNP);
@@ -140,7 +140,7 @@ public class SeqTopRowTab extends Tab {
 			}
 		}));
 		
-		rbGO = Static.createButton("GO...", true, funColor); 
+		rbGO = Static.createButtonPanel("GO...", true); 
 		rbGO.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) { // CAS337 moved setInActive to Items	
         		gopopup.show(e.getComponent(), e.getX(), e.getY());
@@ -172,8 +172,7 @@ public class SeqTopRowTab extends Tab {
 				}
 			}));
 		}
-		rbAlign = Static.createButton("Align Hits...", true, funColor);
-		rbAlign.setBackground(Globals.FUNCTIONCOLOR);
+		rbAlign = Static.createButtonPanel("Align Hits...", true);
 		rbAlign.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {// CAS337 moved setInActive to Items      		
         		alignpopup.show(e.getComponent(), e.getX(), e.getY());
@@ -208,11 +207,10 @@ public class SeqTopRowTab extends Tab {
 			btnNext.setEnabled(false);
 		}
 		
-		JButton btnHelp = Static.createButton("Help1", true, Globals.HELPCOLOR);
+		JButton btnHelp = Static.createButtonHelp("Help1", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(theMainFrame,"Sequence Options", 
-						helpHTML);
+				UserPrompt.displayHTMLResourceHelp(theMainFrame,"Sequence Options", helpHTML);
 			}
 		});
 		
@@ -279,12 +277,12 @@ public class SeqTopRowTab extends Tab {
 		rbSNP.setSelected(false);
 		
 		// this works on linux but not mac
-		rbDetails.setBackground(funColor);
-		rbFrame.setBackground(funColor);
-		rbGO.setBackground(funColor);
-		rbAlign.setBackground(funColor);
-		rbContig.setBackground(funColor);
-		rbSNP.setBackground(funColor);
+		rbDetails.setBackground(panelColor);
+		rbFrame.setBackground(panelColor);
+		rbGO.setBackground(panelColor);
+		rbAlign.setBackground(panelColor);
+		rbContig.setBackground(panelColor);
+		rbSNP.setBackground(panelColor);
 		
 		button.setBackground(activeColor); // CAS337 put here instead of on every button
 		button.setSelected(true);

@@ -22,7 +22,7 @@ public class MethodHitPanel  extends JPanel {
 	public MethodHitPanel(CompilePanel parentPanel) {
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setAlignmentX(Component.LEFT_ALIGNMENT);
-		setBackground(Globals.BGCOLOR);
+		setBackground(Static.BGCOLOR);
 		add(Box.createVerticalStrut(20));
 
 		int width = Globals.Methods.WIDTH;

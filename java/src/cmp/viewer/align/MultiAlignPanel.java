@@ -1,4 +1,4 @@
-package cmp.viewer.seq.align;
+package cmp.viewer.align;
 
 /*********************************************************
  * Draw the multi alignment
@@ -25,10 +25,11 @@ import cmp.database.Globals;
 
 public class MultiAlignPanel extends BaseAlignPanel {
 	private static final long serialVersionUID = 8622662337486159085L;
+	private static final Color BGCOLOR = Color.WHITE;
 	
 	public MultiAlignPanel(MultiViewPanel parentPanel, boolean isAA, MultiAlignData alignData) {
 		super ();
-		super.setBackground(Globals.BGCOLOR );
+		super.setBackground(BGCOLOR );
 		super.setLayout( null );
 		
 		viewPanel =  parentPanel;
@@ -163,7 +164,7 @@ public class MultiAlignPanel extends BaseAlignPanel {
             selectNoRows ();
             selectNoColumns ();
         }	
-        viewPanel.updateInfo(msg); // sets back to headerline if ""
+        viewPanel.updateInfo("", msg); // sets back to headerline if ""
         
 		repaint();
 	}

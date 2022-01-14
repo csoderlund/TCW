@@ -80,7 +80,7 @@ public class EditAnnoPanel extends JPanel {
 			row.add(Box.createHorizontalStrut(COLUMN_WIDTH - lblDBfasta.getPreferredSize().width));
 		row.add(txtDBfasta);		row.add(Box.createHorizontalStrut(5));
 		
-		btnDBfasta = new JButton("...");
+		btnDBfasta = Static.createButtonFile("...", true);
 		btnDBfasta.addActionListener(new ActionListener()  {
 			public void actionPerformed(ActionEvent arg0) {
 				String projName = theManFrame.getProjDir();
@@ -186,7 +186,7 @@ public class EditAnnoPanel extends JPanel {
 		
 		txtTabFile = Static.createTextField("", 25);
 		row.add(txtTabFile);		row.add(Box.createHorizontalStrut(5));
-		btnTabFile = new JButton("...");
+		btnTabFile = Static.createButtonFile("...", true);
 		btnTabFile.addActionListener(new ActionListener()  {
 			public void actionPerformed(ActionEvent arg0) {
 				String projName = theManFrame.getProjDir();
@@ -207,8 +207,7 @@ public class EditAnnoPanel extends JPanel {
 		btnGenHitFile.setSelected(true);
 		
 		// Bottom buttons
-		JButton btnKeep = new JButton(Globalx.keepBtn);
-		btnKeep.setBackground(Globals.BGCOLOR);
+		JButton btnKeep = Static.createButton(Globalx.keepBtn);
 		btnKeep.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (!keep()) return;
@@ -222,16 +221,14 @@ public class EditAnnoPanel extends JPanel {
 			}
 		});
 		
-		JButton btnResetDefaults = new JButton(Globalx.defaultBtn);
-		btnResetDefaults.setBackground(Globals.BGCOLOR);
+		JButton btnResetDefaults = Static.createButton(Globalx.defaultBtn);
 		btnResetDefaults.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				setDefaults();
 			}
 		});
 		
-		JButton btnDiscard = new JButton(Globalx.cancelBtn);
-		btnDiscard.setBackground(Globals.BGCOLOR);
+		JButton btnDiscard = Static.createButton(Globalx.cancelBtn);
 		btnDiscard.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if(theManFrame.isRemoveAnnoOnDiscard()) {
@@ -263,7 +260,7 @@ public class EditAnnoPanel extends JPanel {
 				} catch (Exception er) {ErrorReport.reportError(er, "Error on search parameters help"); }
 			}
 		}));
-		JButton btnHelp = Static.createButton("Help...", true, Globalx.HELPCOLOR);
+		JButton btnHelp = Static.createButtonHelp("Help...", true);
 		btnHelp.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 popup.show(e.getComponent(), e.getX(), e.getY());

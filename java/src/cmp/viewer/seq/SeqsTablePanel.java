@@ -3,8 +3,12 @@ package cmp.viewer.seq;
  * Sequence table: called from SeqsTopRowPanel to display the table.
  */
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -12,14 +16,17 @@ import java.awt.event.MouseEvent;
 import java.sql.ResultSet;
 import java.util.Vector;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -31,42 +38,358 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 
 import util.database.DBConn;
+import util.database.Globalx;
 import util.methods.ErrorReport;
 import util.methods.Static;
-
+import util.methods.Out;
+import util.ui.UserPrompt;
+import cmp.database.DBinfo;
 import cmp.database.Globals;
+import cmp.database.Load;
 import cmp.viewer.MTCWFrame;
 import cmp.viewer.ViewerSettings;
+import cmp.viewer.groups.GrpTablePanel;
+import cmp.viewer.hits.HitTablePanel;
+import cmp.viewer.pairs.PairTablePanel;
+import cmp.viewer.seqDetail.SeqTopRowPanel;
 import cmp.viewer.table.FieldData;
 import cmp.viewer.table.SortTable;
 import cmp.viewer.table.TableData;
+import cmp.viewer.table.TableUtil;
 
 public class SeqsTablePanel extends JPanel {
 	private static final long serialVersionUID = 1L;
-	public  static final int MAX_SELECT=20;
 	
+	private static final String helpHTML = Globals.helpDir + "SeqTable.html";
+	private static final int MAX_SELECT=20;
 	private static final int COLUMN_SELECT_WIDTH = 75, COLUMN_PANEL_WIDTH = 900;
-	
+
 	private static final int bSEQ=Globals.bSEQ;
 	private static final int bPAIR=Globals.bPAIR;
 	private static final int bGRP=Globals.bGRP;
 	private static final int bHIT=Globals.bHIT;
 	
 	private static final String TABLE = FieldData.SEQ_TABLE;
-	private static final String AALEN = FieldData.AALEN;
-	private static final String NTLEN = FieldData.NTLEN;
 	private static final String SEQID = FieldData.SEQID;
 	private static final String SEQINDEX = FieldData.SEQ_SQLID;
+	private static final String HITID = FieldData.HITID;
+	private static final String HITDESC = FieldData.HITDESC;
 	
-	public SeqsTablePanel(MTCWFrame parentFrame, SeqsTopRowPanel parentList, 
-			String tab, String summary, String subQuery, int vType) {
-		topRowPanel = parentList;
-		viewType = vType;
-		totalSeq = parentFrame.getInfo().getCntSeq();
-		if (tab.startsWith(MTCWFrame.MENU_PREFIX)) isList=true;
+	private final String pSEQ = MTCWFrame.SEQ_PREFIX;
+	private final String pGRP = MTCWFrame.GRP_PREFIX;
+	private final String pPAIR = MTCWFrame.PAIR_PREFIX;
+	private final String pSEQs = MTCWFrame.SEQ_PREFIX + "s";
+	
+	// Filter or >Sequences
+	public SeqsTablePanel(MTCWFrame parentFrame, String tab) {
+		if (tab.startsWith(MTCWFrame.MENU_PREFIX)) isList=true; // >Sequences
+
+		initData(parentFrame, tab, -1,  bSEQ);
 		
-		initData(parentFrame, tab, summary, subQuery);
+		SeqsQueryPanel theQueryPanel = parentFrame.getSeqsQueryPanel();
+		if (theQueryPanel!=null) {
+			strSubQuery =     theQueryPanel.getSubQuery();
+			strQuerySummary = theQueryPanel.getQuerySummary();
+		}
+		else buildShortList();
+		
+		strQuerySummary = MTCWFrame.FILTER + strQuerySummary;
+		
+		buildQueryThread(); 
 	}
+	
+	// from Cluster table 
+	public SeqsTablePanel(MTCWFrame parentFrame, GrpTablePanel tablePanel, 
+			String subQuery, String tab, String summary, int row,  int grpID, String hitStr) {
+		
+		theGrpTable = tablePanel;
+		
+		initData(parentFrame, tab, row, bGRP);	
+		
+		strSubQuery = subQuery;
+		strQuerySummary = summary;
+		this.grpID = grpID;
+		consensusHitID = hitStr; // CAS305
+		
+		buildQueryThread(); 
+	}
+	
+	// from Pair table
+	public SeqsTablePanel(MTCWFrame parentFrame, PairTablePanel tablePanel, 
+			String subQuery, String tab, String summary,  int row) {
+		thePairTable = tablePanel;
+	
+		strSubQuery = subQuery;
+		strQuerySummary = summary;
+		initData(parentFrame, tab, row,  bPAIR);	
+		
+		buildQueryThread(); 
+	}
+	
+	// from Hit table
+	public SeqsTablePanel(MTCWFrame parentFrame, HitTablePanel tablePanel, 
+			String subQuery, String tab, String summary,  int row) {
+		theHitTable = tablePanel;
+		
+		strSubQuery = subQuery;
+		strQuerySummary = summary;
+		initData(parentFrame, tab, row, bHIT);	
+		
+		buildQueryThread(); 
+	}
+	private void initData(MTCWFrame parentFrame, String tab, int row, int vType) {
+		theViewerFrame = parentFrame;
+		vSettings = parentFrame.getSettings();
+		totalSeq = theViewerFrame.getInfo().getCntSeq();
+
+		tabName = tab;
+		viewType = vType;
+		nParentRow = row;
+		
+		colSelectChange = new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				updateTable(false); 
+				displayTable();
+				vSettings.getSeqSettings().setSelectedColumns(getSelectedColumns());
+			}
+		};
+	}
+	/** XXX Buttons for Seq table */
+    private JPanel createTableButton() {
+    	JPanel buttonPanel = Static.createPagePanel();
+	    	
+    	JPanel topRow = Static.createRowPanel();
+	    topRow.add(Static.createLabel(Globals.select));	topRow.add(Box.createHorizontalStrut(2)); 
+    	   	 
+	    btnViewDetails = Static.createButtonTab(MTCWFrame.SEQ_DETAIL, false);
+        btnViewDetails.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				viewDetails();
+			}
+		});
+       topRow.add(btnViewDetails);				topRow.add(Box.createHorizontalStrut(2)); 
+      
+        btnViewGroups = Static.createButtonTab(MTCWFrame.GRP_TABLE, false);
+        btnViewGroups.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				viewClusters();
+			}
+		});
+       topRow.add(btnViewGroups);
+       topRow.add(Box.createHorizontalStrut(3)); 
+       
+       btnViewPairs = Static.createButtonTab(MTCWFrame.PAIR_TABLE, false);
+       btnViewPairs.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				viewPairs();
+			}
+		});
+       topRow.add(btnViewPairs);				topRow.add(Box.createHorizontalStrut(2)); 
+       
+        createBtnCopy();
+ 		topRow.add(btnCopy);					topRow.add(Box.createHorizontalStrut(20));  
+		
+        createBtnTable();
+        topRow.add(btnTable);					topRow.add(Box.createHorizontalGlue());
+        
+        btnHelp = Static.createButtonHelp("Help", true);
+        btnHelp.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				UserPrompt.displayHTMLResourceHelp(theViewerFrame, "Pair table",  helpHTML);
+			}
+		});
+        topRow.add(btnHelp);					topRow.add(Box.createHorizontalStrut(2)); 
+
+        if(nParentRow >= 0) { // if -1, then showing members from multiple clusters, and no Next/Prev
+ 	 	   JPanel rowChangePanel = Static.createRowPanel();
+ 	 	   rowChangePanel.setBackground(theViewerFrame.getSettings().getFrameSettings().getBGColor());
+ 	 	   
+ 	 	   btnPrevRow = Static.createButton(Globals.prev, true);
+ 	 	   btnPrevRow.addActionListener(new ActionListener() {
+ 	 		   public void actionPerformed(ActionEvent arg0) {
+ 	 			   getNextRow(nParentRow-1);
+ 	 		   }
+ 	 	   }); 
+ 	 	   btnNextRow = Static.createButton(Globals.next, true);
+ 	 	   btnNextRow.addActionListener(new ActionListener() {
+ 	 		   public void actionPerformed(ActionEvent arg0) {
+ 	 			   getNextRow(nParentRow+1);
+ 	 		   }
+ 	 	   });
+ 	 	   rowChangePanel.add(btnPrevRow);		rowChangePanel.add(Box.createHorizontalStrut(1));
+ 	 	   rowChangePanel.add(btnNextRow);
+ 	 	   
+ 	 	   topRow.add(rowChangePanel);
+ 	    }
+        topRow.setAlignmentX(LEFT_ALIGNMENT);
+
+        buttonPanel.add(topRow);
+        buttonPanel.add(Box.createVerticalStrut(5));
+        
+        return buttonPanel;
+    }
+    private void createBtnCopy() {
+		btnCopy = Static.createButtonMenu("Copy...", false);
+	    final JPopupMenu copyPop = new JPopupMenu();
+	    copyPop.setBackground(Color.WHITE);
+	    
+ 		copyPop.add(new JMenuItem(new AbstractAction(SEQID) {
+ 			private static final long serialVersionUID = 4692812516440639008L;
+ 			public void actionPerformed(ActionEvent e) {
+ 				String seqid = getSelectedColumn(SEQID);
+ 				Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+ 				cb.setContents(new StringSelection(seqid), null);
+ 			}
+ 		}));
+		copyPop.add(new JMenuItem(new AbstractAction("AA  Sequence") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				int index = getSelectedSQLid();
+				Load lObj = new Load(theViewerFrame);
+				String id = lObj.loadSeq(index);
+				if (id!=null) {
+					Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+					cb.setContents(new StringSelection(">" + id + "\n" + lObj.getAAseq()), null);
+				}
+			}
+		}));
+		if (theViewerFrame.getInfo().nNTdb()>0) { // CAS310
+			copyPop.add(new JMenuItem(new AbstractAction("CDS Sequence") {
+				private static final long serialVersionUID = 4692812516440639008L;
+				public void actionPerformed(ActionEvent e) {
+					int index = getSelectedSQLid();
+					Load lObj = new Load(theViewerFrame);
+					String id = lObj.loadSeq(index);
+					if (id!=null) {
+						Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+						cb.setContents(new StringSelection(">" + id + "\n" + lObj.getCDSseq()), null);
+					}
+				}
+			}));
+			copyPop.add(new JMenuItem(new AbstractAction("NT  Sequence") {
+				private static final long serialVersionUID = 4692812516440639008L;
+				public void actionPerformed(ActionEvent e) {
+					int index = getSelectedSQLid();
+					Load lObj = new Load(theViewerFrame);
+					String id = lObj.loadSeq(index);
+					if (id!=null) {
+						Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+						cb.setContents(new StringSelection(">" + id + "\n" + lObj.getNTseq()), null);
+					}
+				}
+			}));
+		}
+		copyPop.addSeparator();  
+		copyPop.add(new JMenuItem(new AbstractAction("Best Hit ID") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				String hitid = getSelectedColumn(HITID);
+				Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+				cb.setContents(new StringSelection(hitid), null);
+			}
+		}));
+		copyPop.add(new JMenuItem(new AbstractAction("Best Hit Description") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				String desc = getSelectedColumn(HITDESC);
+				Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+				cb.setContents(new StringSelection(desc), null);
+			}
+		}));
+		copyPop.add(new JMenuItem(new AbstractAction("Best Hit Sequence") { // CAS310 add; move Hit to end
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				String hitID = getSelectedColumn(HITID);
+				Load lObj = new Load(theViewerFrame);
+				String id = lObj.loadHit(hitID);
+				if (id!=null) {
+					Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+					cb.setContents(new StringSelection(">" + id + "\n" + lObj.getHitseq()), null);
+				}
+				
+			}
+		}));	
+		btnCopy.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				copyPop.show(e.getComponent(), e.getX(), e.getY());
+			}
+	    });
+	}
+	private void createBtnTable() {
+		final JPopupMenu popup = new JPopupMenu();	
+		 popup.setBackground(Color.WHITE);
+		 
+ 		popup.add(new JMenuItem(new AbstractAction("Show Column Stats") {
+ 			private static final long serialVersionUID = 1L;
+ 			public void actionPerformed(ActionEvent e) {
+ 				new TableUtil().statsPopUp("Sequence: " + strQuerySummary, getTable());	
+ 			}
+ 		}));
+ 		popup.addSeparator();
+ 		popup.add(new JMenuItem(new AbstractAction("Copy Table") {
+ 			private static final long serialVersionUID = 4692812516440639008L;
+ 			public void actionPerformed(ActionEvent e) {
+ 				Thread copyThread = new Thread(new Runnable() {
+					public void run() {
+						try {											
+							Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+							String table = new TableUtil(theViewerFrame).createTableString(getTable());
+							cb.setContents(new StringSelection(table), null);
+						} catch (Exception e) {ErrorReport.reportError(e, "Error copy table"); }
+					}
+				});
+				copyThread.setPriority(Thread.MIN_PRIORITY);
+				copyThread.start();
+ 			}
+ 		}));
+ 		popup.addSeparator();
+ 		popup.add(new JMenuItem(new AbstractAction("Export table (" + Globalx.CSV_SUFFIX + ")") {
+ 			private static final long serialVersionUID = 4692812516440639008L;
+ 			public void actionPerformed(ActionEvent e) {
+ 				new TableUtil(theViewerFrame).exportTableTab(btnTable, getTable(), Globals.bSEQ);
+ 			}
+ 		}));
+ 		
+ 		popup.add(new JMenuItem(new AbstractAction("Export AA sequences (" + Globalx.FASTA_SUFFIX + ")") {
+ 			private static final long serialVersionUID = 4692812516440639008L;
+ 			public void actionPerformed(ActionEvent e) {
+ 				new TableUtil(theViewerFrame).exportSeqFa(btnTable,getTableSQLid(), FieldData.AASEQ_SQL, false);
+ 			}
+ 		}));
+ 		if (hasNTdbOnly) {
+	 		popup.add(new JMenuItem(new AbstractAction("Export CDS sequences (" + Globalx.FASTA_SUFFIX + ")") {
+	 			private static final long serialVersionUID = 4692812516440639008L;
+	 			public void actionPerformed(ActionEvent e) {
+	 				new TableUtil(theViewerFrame).exportSeqFa(btnTable,getTableSQLid(), FieldData.NTSEQ_SQL, true);
+	 			}
+	 		}));
+ 		
+	 		popup.add(new JMenuItem(new AbstractAction("Export NT sequences (" + Globalx.FASTA_SUFFIX + ")") {
+	 			private static final long serialVersionUID = 4692812516440639008L;
+	 			public void actionPerformed(ActionEvent e) {
+	 				new TableUtil(theViewerFrame).exportSeqFa(btnTable,getTableSQLid(), FieldData.NTSEQ_SQL, false);
+	 			}
+	 		}));
+ 		}
+ 		// XXX
+ 		if (hasGOs) {
+ 			popup.addSeparator();
+	 		popup.add(new JMenuItem(new AbstractAction("Export all GOs (" + Globalx.CSV_SUFFIX + ")...") {
+	 			private static final long serialVersionUID = 4692812516440639008L;
+	 			public void actionPerformed(ActionEvent e) {
+	 				new TableUtil(theViewerFrame).exportSeqGO(btnTable,getTableData(), strQuerySummary);
+	 			}
+	 		}));
+ 		}
+ 		btnTable = Static.createButtonMenu("Table...", true);
+		btnTable.addMouseListener(new MouseAdapter() {
+	          public void mousePressed(MouseEvent e) {
+	              popup.show(e.getComponent(), e.getX(), e.getY());
+	          }
+	    });
+ 		
+	}
+   
 	/**************************************************************
 	 * Perform query and build the panel with results
 	 */
@@ -79,23 +402,22 @@ public class SeqsTablePanel extends JPanel {
 		buildThread = new Thread(new Runnable() {
 			public void run() {
 				try {
-					DBConn conn = theViewerFrame.getDBConnection();
-					String query = buildQueryStr(conn);
-					ResultSet rset = MTCWFrame.executeQuery(conn, query, loadStatus);
+					DBConn mDB = theViewerFrame.getDBConnection();
+					String query = buildQueryStr(mDB);
+					ResultSet rset = MTCWFrame.executeQuery(mDB, query, loadStatus);
 					if(rset != null) {
 						buildTable(rset);
 						MTCWFrame.closeResultSet(rset); //Thread safe way of closing the resultSet
 						updateTable(true);
 					}
-					conn.close();
+					mDB.close();
 					
 					displayTable();
-					topRowPanel.buildPanel();
 					
 					if(isVisible()) {//Makes the table appear (A little hacky, but fast)
 						setVisible(false);
 						setVisible(true);
-						topRowPanel.setTopEnabled(0, theTable.getRowCount());
+						setTopEnabled(0, theTable.getRowCount());
 					}
 				} catch (Exception e) {ErrorReport.reportError(e, "Error generating list");
 				} catch (Error e) {ErrorReport.reportFatalError(e, "Fatal error generating lisr", theViewerFrame);}
@@ -107,12 +429,13 @@ public class SeqsTablePanel extends JPanel {
 	/******************************************************************/
 	private void buildTable(ResultSet rset) {
        
+		tableButtonPanel = createTableButton(); 
 		tableStatusPanel = createTableStatusPanel();	
 		tableSummaryPanel = createTableSummaryPanel();
 		fieldSelectPanel = createFieldSelectPanel();
 		fieldSelectPanel.setVisible(false);
 	
-		showColumnSelect = Static.createButton("Select Columns", true, Globals.MENUCOLOR);
+		showColumnSelect = Static.createButtonPanel("Select Columns", true);
 		showColumnSelect.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(fieldSelectPanel.isVisible()) {
@@ -126,7 +449,7 @@ public class SeqsTablePanel extends JPanel {
 				displayTable();
 			}
 		});
-		clearColumn = Static.createButton("Clear Columns", true, Globals.MENUCOLOR);
+		clearColumn = Static.createButton("Clear Columns", true);
 		clearColumn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				clearColumns();
@@ -150,7 +473,7 @@ public class SeqsTablePanel extends JPanel {
 				else {
 					txtStatus.setText("");	
 				}
-				topRowPanel.setTopEnabled(selCount, theTable.getRowCount());
+				setTopEnabled(selCount, theTable.getRowCount());
 			}
 		};
 
@@ -167,11 +490,19 @@ public class SeqsTablePanel extends JPanel {
         tableHeader.setText(status);
         
         if(!isList) {
-        	    nRow = theTableData.getNumRows();
-            theViewerFrame.changePanelName(topRowPanel, tabName + ": " + nRow, strQuerySummary);
+        	nRow = theTableData.getNumRows();
+            theViewerFrame.changePanelName(this, tabName + ": " + nRow, strQuerySummary);
         }
     }
-	
+	private void setTopEnabled(int selCount, int rowCnt) {
+		boolean b = (selCount == 1) ? true : false;
+		btnViewDetails.setEnabled(b);
+		btnCopy.setEnabled(b);
+		
+		b = (selCount > 0) ? true : false;
+		btnViewPairs.setEnabled(b);
+		btnViewGroups.setEnabled(b);
+	}
     private JPanel createFieldSelectPanel() {
     	JPanel retVal = Static.createPagePanel();
     	
@@ -201,8 +532,7 @@ public class SeqsTablePanel extends JPanel {
     		int space = 0;
     		final String desc = descriptions[x];
     		
-        	chkFields[x] = new JCheckBox(columns[x]);
-        	chkFields[x].setBackground(Globals.BGCOLOR);
+        	chkFields[x] = Static.createCheckBox(columns[x]);
         	chkFields[x].addActionListener(colSelectChange);
         	chkFields[x].addMouseListener(new MouseAdapter() 
         	{
@@ -269,28 +599,11 @@ public class SeqsTablePanel extends JPanel {
     	lblSummary = Static.createLabel(strQuerySummary, true);
     	lblSummary.setFont(getFont());
     	
-    	JLabel header = Static.createLabel(MTCWFrame.FILTER, true);
-    	thePanel.add(header);
     	thePanel.add(lblSummary);
     	
     	return thePanel;
 	}
-	private void initData(MTCWFrame parentFrame, String tab, String querySummary, String subQuery) {
-		theViewerFrame = parentFrame;
-		vSettings = parentFrame.getSettings();
-		tabName = tab;
-		
-		if (querySummary!=null) strQuerySummary = querySummary;
-		if (subQuery!=null)     sqlWhere = subQuery;
-
-		colSelectChange = new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				updateTable(false);
-				displayTable();
-				vSettings.getSeqSettings().setSelectedColumns(getSelectedColumns());
-			}
-		};
-	}
+	
 		
 	public String getSummary() { return strQuerySummary; }
 
@@ -298,60 +611,24 @@ public class SeqsTablePanel extends JPanel {
 	 
     private void validateTable() {validate();} //Called from a thread
     
-    public boolean correctType(String type) {
-    	boolean clearSel = false;
-    	if(theTable.getSelectedRowCount() == 0) {
-    		theTable.selectAll();
-    		clearSel = true;
-    	}
-    	
-     	int [] sels = theTable.getSelectedRows();
-     	int colIndex = 0;
-     	String msg="";
-      	if (type.equals("NT")) {
-      		colIndex = theTableData.getColumnHeaderIndex(NTLEN);
-      		msg = "nucleotide";
-      	}
-      	else {
-      		colIndex = theTableData.getColumnHeaderIndex(AALEN);
-      		msg = "amino acid ";
-      	}
-      	if (clearSel) msg = "Not all selected have " + msg + " sequences.";
-      	else msg = "Not all selected have " + msg + " sequences.";
-      	boolean rc=true;
-      	
-      	// if len=0, no associated NT/AA sequence
-      	for(int x=0; x<sels.length; x++) {
-  			int len = ((Integer)theTableData.getValueAt(sels[x], colIndex));
-  			if (len==0) {
-  				JOptionPane.showMessageDialog(theViewerFrame, 
-  							msg, "Warning", JOptionPane.PLAIN_MESSAGE);
-  				rc = false;
-  				break;
-  			}
-  		} 
-      	
-     	if(clearSel) theTable.clearSelection();
-		return rc;
+    /******************************************************/
+    private void buildShortList() {
+		try {
+			DBConn mDB =  theViewerFrame.getDBConnection(); 
+			DBinfo info = theViewerFrame.getInfo();
+			String x = info.getSampleSeq(mDB);
+			mDB.close();
+			
+			if (x==null || x=="") return;
+			String [] y = x.split(":");
+			if (y.length!=2) Out.PrtError("seq Build short list '" + x + "'");
+			strSubQuery = y[1];
+			strQuerySummary  = y[0];
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "Getting seq sample");}
 	}
     /****************** gets *****************************/
-   
-    public String [] getSelectedSeqIDs() {  
-    	boolean clearSel = false;
-    	if(theTable.getSelectedRowCount() == 0) {
-    		theTable.selectAll();
-    		clearSel = true;
-    	}
-	    int colIndex =	theTableData.getColumnHeaderIndex(SEQID);
-	    int [] sels = theTable.getSelectedRows();
-	 	String [] seqIDs = new String [sels.length];
-	 	
-	  	for(int x=0; x<sels.length; x++)
-	  		seqIDs[x] =  ((String)theTableData.getValueAt(sels[x], colIndex));
-	    	
-	    if(clearSel) theTable.clearSelection();
-	    return seqIDs;
-    }
+  
  
 	public String [] getSelectedColumns() {
 	    String [] retVal = null;
@@ -393,20 +670,21 @@ public class SeqsTablePanel extends JPanel {
 	private String buildQueryStr(DBConn mdb) {
     try {
 		FieldData theFields = FieldData.getSeqFields(theViewerFrame.getSeqLibList(), 
-			theViewerFrame.getSeqDEList(), theViewerFrame.getMethodPrefixes());
+				theViewerFrame.getSeqDEList(), theViewerFrame.getMethodPrefixes());
    
     	String from, strQuery;
-    	if (sqlWhere==null || sqlWhere.equals("")) sqlWhere= " 1 ";
+    	if (strSubQuery==null || strSubQuery.equals("")) strSubQuery= " 1 ";
+    	
+    	from = 	" FROM " + TABLE + " " + theFields.getJoins(); // join on unitrans.HITid=unique_hits.HITid
+    	
     	if (viewType==bGRP) { 
-    		from = 	" FROM " + TABLE + " " + theFields.getJoins() + 
-    				" LEFT JOIN pog_members ON pog_members.UTid = unitrans.UTid" +
-    				" WHERE " + sqlWhere;
+    		from += " LEFT JOIN pog_members ON pog_members.UTid = unitrans.UTid" +
+    				" WHERE " + strSubQuery;
     		strQuery = "SELECT " + theFields.getDBFieldQueryList() +  from +
     				" order by unitrans.UTstr"; // CAS303 group  -> order
     	}
-    	else {  // join on unitrans.HITid=unique_hits.HITid
-    	    from = 	" FROM " + TABLE + " " + theFields.getJoins() + 
-    				" WHERE " + sqlWhere;
+    	else {  
+    	    from += " WHERE " + strSubQuery;
     	    strQuery = "SELECT " + theFields.getDBFieldQueryList() + from;
     	}
     	int cnt  = mdb.executeCount("select count(*) " + from);
@@ -416,71 +694,11 @@ public class SeqsTablePanel extends JPanel {
     	return strQuery;
     } catch(Exception e) {ErrorReport.reportError(e, "Error processing query");return null;}
 	}
-	/**********************************************************
-	 * len[0] is AAlen for pair[0], len[1] is AAlen for pair[1]
-	 * len[2] is NTlen for pair[0], len[3] is NTlen for pair[1]
-	 */
-	public int [] getPairLens() {
-		int [] len = new int [4];
-		int [] sels = theTable.getSelectedRows();
-		if (sels.length==0) {
-			sels = new int [2];
-			sels[0]=0;
-			sels[1]=1;
-		}
-		
-		int idx = theTableData.getColumnHeaderIndex(AALEN);
-		len[0]=(Integer)theTableData.getValueAt(sels[0], idx);
-		len[1]=(Integer)theTableData.getValueAt(sels[1], idx);
-		
-		idx = theTableData.getColumnHeaderIndex(NTLEN);
-		len[2]=(Integer)theTableData.getValueAt(sels[0], idx);
-		len[3]=(Integer)theTableData.getValueAt(sels[1], idx);
-		return len;
-	}
+	
 	public SortTable getTable() { return theTable;}
 	public TableData getTableData() { return theTableData;}
 
-	public int getSelectedSQLid() {
-     	if(theTable.getSelectedRowCount() == 0) return -1;
-     	
-     	int [] sels = theTable.getSelectedRows();
-     	int idx = theTableData.getColumnHeaderIndex(SEQINDEX);
-     	return (Integer)theTableData.getValueAt(sels[0], idx);
-    }
-	public int [] getSelectedSQLids() {
-     	if(theTable.getSelectedRowCount() == 0) return null;
-     	
-     	int [] sels = theTable.getSelectedRows();
-     	int idx = theTableData.getColumnHeaderIndex(SEQINDEX);
-     	
-     	int [] ids = new int [sels.length];
-		for (int i=0; i<sels.length; i++) 
-			ids[i] = (Integer)theTableData.getValueAt(sels[i], idx);
-		return ids;
-    }
-	public String [] getSelectedSEQIDs() {
-		if(theTable.getSelectedRowCount() == 0) return null;
-     	
-     	int [] sels = theTable.getSelectedRows();
-     	int idx = theTableData.getColumnHeaderIndex(SEQID);
-     	String [] list = new String [sels.length];
-     	for (int i=0; i<sels.length; i++) 
-     		list[i] = (String)theTableData.getValueAt(sels[i], idx);
-     	return list;
-	}
-	public int [] getTableSQLid() {
-		int idx = theTableData.getColumnHeaderIndex(SEQINDEX);
-		int nRow = theTable.getRowCount();
-		int [] ids = new int [nRow];
-		for (int i=0; i<nRow; i++) 
-			ids[i] = (Integer)theTableData.getValueAt(i, idx);
-		return ids;
-	}
-	public int getTableSQLid(int row) {
-		int idx = theTableData.getColumnHeaderIndex(SEQINDEX);
-		return (Integer)theTableData.getValueAt(row, idx);
-	}
+	
 	private void clearColumns() {
 		chkFields[0].setSelected(false);
 		chkFields[1].setSelected(true);  // GrpID
@@ -504,25 +722,7 @@ public class SeqsTablePanel extends JPanel {
      	String seqID =  ((String)theTableData.getValueAt(sels[rowIdx], colIndex));
      	return seqID;
 	}
-    public String getSelectedAASeq() {
-    	if(theTable.getSelectedRowCount() == 0) return null;
-     	
-     	return loadSelectedSeq(FieldData.AASEQ_SQL);
-    }
-    private String loadSelectedSeq(String column) {
-		if(theTable.getSelectedRowCount() == 0) return null;
-		try {
-			DBConn mdb = theViewerFrame.getDBConnection();
-			int seqSQL = getSelectedSQLid();
-			String seq=null;
-			ResultSet rs = mdb.executeQuery("select " + column + " from unitrans where UTid=" + seqSQL);
-			if (rs.next()) seq=rs.getString(1);
-			else System.err.println("Could not get " + column + " for " + seqSQL);
-			return seq;
-		}
-		catch (Exception e) {ErrorReport.prtReport(e, "loading sequence from database ");}
-		return null;
-    }
+   
     public void clearSelection() {theTable.clearSelection();}
     
     public int getRowCount() { return theTable.getRowCount();}
@@ -530,22 +730,6 @@ public class SeqsTablePanel extends JPanel {
 	public int getSelectedRow() { return theTable.getSelectedRows()[0];}
 	public int [] getSelectedRows() { return theTable.getSelectedRows();}
 	
-	 /* SeqTopRowPanel next and prev */
-    public int getTranslatedRow(int row) {
-  		if (theTable==null) return 0;
-
-  		if(row == theTable.getRowCount()) return 0;
-  		if(row < 0) return theTable.getRowCount() - 1;
-  		return row;
-    }
-    public int getRowSeqIndex(int row) {
-    	return (Integer)theTableData.getValueAt(row, 
-				theTableData.getColumnHeaderIndex(SEQINDEX));
-    }
-    public String getRowSeqName(int row) {
-		return (String)theTableData.getValueAt(row, 
-			theTableData.getColumnHeaderIndex(SEQID));
-    }
 	 /***************************************************************
 	  * Table stuff
 	  */
@@ -592,7 +776,7 @@ public class SeqsTablePanel extends JPanel {
     private void showProgress() {
     	removeAll();
     	repaint();
-    	setBackground(Globals.BGCOLOR);
+    	setBackground(Static.BGCOLOR);
     	loadStatus = Static.createTextFieldNoEdit(100);
     	JButton btnStop = Static.createButton("Stop", true);
     	btnStop.addActionListener(new ActionListener() {
@@ -612,15 +796,15 @@ public class SeqsTablePanel extends JPanel {
     	loadStatus = null;
     	sPane = new JScrollPane();
     	sPane.setViewportView(theTable);
-    	theTable.getTableHeader().setBackground(Globals.BGCOLOR);
+    	theTable.getTableHeader().setBackground(Static.BGCOLOR);
     	sPane.setColumnHeaderView(theTable.getTableHeader());
     	sPane.setAlignmentX(Component.LEFT_ALIGNMENT);
     	
-    	sPane.getViewport().setBackground(Globals.BGCOLOR);
-    	sPane.getHorizontalScrollBar().setBackground(Globals.BGCOLOR);
-    	sPane.getVerticalScrollBar().setBackground(Globals.BGCOLOR);
-    	sPane.getHorizontalScrollBar().setForeground(Globals.BGCOLOR);
-    	sPane.getVerticalScrollBar().setForeground(Globals.BGCOLOR);
+    	sPane.getViewport().setBackground(Static.BGCOLOR);
+    	sPane.getHorizontalScrollBar().setBackground(Static.BGCOLOR);
+    	sPane.getVerticalScrollBar().setBackground(Static.BGCOLOR);
+    	sPane.getHorizontalScrollBar().setForeground(Static.BGCOLOR);
+    	sPane.getVerticalScrollBar().setForeground(Static.BGCOLOR);
     	
     	if(tableButtonPanel != null) { 	//Is null if a sample table
     		add(tableButtonPanel);
@@ -644,8 +828,7 @@ public class SeqsTablePanel extends JPanel {
     		 else if (viewType==bSEQ) tableType.setText("Sequence View");
     		 else tableType.setText("Sequence ???");
     		 
-    		 if (topRowPanel!=null)
-    			 topRowPanel.setTopEnabled(theTable.getSelectedRowCount(), theTable.getRowCount());
+    		 setTopEnabled(theTable.getSelectedRowCount(), theTable.getRowCount());
     	}
     	invalidate();
     	validateTable();
@@ -684,8 +867,303 @@ public class SeqsTablePanel extends JPanel {
 	    	}
 	    	private boolean [] bColumnAscending = null;
     }
-   /*********************************************************************************/
+    /***************************************************************
+     * Methods for getting info for various displays
+     */
+    public String getSelectedAASeq() {
+    	if(theTable.getSelectedRowCount() == 0) return null;
+     	
+     	return loadSelectedSeq(FieldData.AASEQ_SQL);
+    }
+    private String loadSelectedSeq(String column) {
+		if(theTable.getSelectedRowCount() == 0) return null;
+		try {
+			DBConn mdb = theViewerFrame.getDBConnection();
+			int seqSQL = getSelectedSQLid();
+			String seq=null;
+			ResultSet rs = mdb.executeQuery("select " + column + " from unitrans where UTid=" + seqSQL);
+			if (rs.next()) seq=rs.getString(1);
+			else System.err.println("Could not get " + column + " for " + seqSQL);
+			return seq;
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "loading sequence from database ");}
+		return null;
+    }
+    private int getSelectedSQLid() {
+     	if(theTable.getSelectedRowCount() == 0) return -1;
+     	
+     	int [] sels = theTable.getSelectedRows();
+     	int idx = theTableData.getColumnHeaderIndex(SEQINDEX);
+     	return (Integer)theTableData.getValueAt(sels[0], idx);
+    }
+	private int [] getSelectedSQLids() {
+     	if(theTable.getSelectedRowCount() == 0) return null;
+     	
+     	int [] sels = theTable.getSelectedRows();
+     	int idx = theTableData.getColumnHeaderIndex(SEQINDEX);
+     	
+     	int [] ids = new int [sels.length];
+		for (int i=0; i<sels.length; i++) 
+			ids[i] = (Integer)theTableData.getValueAt(sels[i], idx);
+		return ids;
+    }
+	private String [] getSelectedSEQIDs() {
+		if(theTable.getSelectedRowCount() == 0) return null;
+     	
+     	int [] sels = theTable.getSelectedRows();
+     	int idx = theTableData.getColumnHeaderIndex(SEQID);
+     	String [] list = new String [sels.length];
+     	for (int i=0; i<sels.length; i++) 
+     		list[i] = (String)theTableData.getValueAt(sels[i], idx);
+     	return list;
+	}
+	private int [] getTableSQLid() { // Exports
+		int idx = theTableData.getColumnHeaderIndex(SEQINDEX);
+		int nRow = theTable.getRowCount();
+		int [] ids = new int [nRow];
+		for (int i=0; i<nRow; i++) 
+			ids[i] = (Integer)theTableData.getValueAt(i, idx);
+		return ids;
+	}
+	
+    /**********************************************************
+     * viewCluster - query DB for grpIDs
+     *******************************************************/
+	private void viewClusters() {
+		if(getSelectedRowCount() ==0) { 
+			JOptionPane.showMessageDialog(theViewerFrame, "Select a Sequence");
+			return;
+		}
+		try{
+			int [] seqid = getSelectedSQLids();
+			
+			int numSeqs=seqid.length;
+			String seqstr = getSelectedColumn(SEQID);
+			
+			int row = (numSeqs==1) ? getSelectedRow() : -1; // nParentRow
+			
+			String query = getGrpSQL(seqid);				// query
+			if (query==null) return;
+			
+			String summary, tab;							// Summary
+			if (numSeqs==1) {
+				tab = pGRP + ": " + seqstr;
+				summary =  getSumLine(row, seqstr);
+			}
+			else {
+				tab = pGRP + ": " + pSEQs + " " + numSeqs;
+				summary =  pSEQs + " " + seqstr;
+				for (int i=1; i<numSeqs && i<7; i++) {
+					String seqstr2=getSelectedColumn(SEQID, i);
+					summary += ", " + seqstr2;
+				}
+				if (numSeqs>7) summary += "... (" + numSeqs + " total)";
+			}
+			
+			GrpTablePanel grpPanel = new GrpTablePanel(theViewerFrame, getInstance(), query, tab, summary, row); // CAS310 change in args
+			theViewerFrame.addResultPanel(getInstance(), grpPanel, grpPanel.getName(), grpPanel.getSummary());
+
+		} catch(Exception e) {ErrorReport.reportError(e, "Error viewing groups");
+		} catch(Error e) {ErrorReport.reportFatalError(e, "Fatal error viewing groups", theViewerFrame);}
+	}
+	private String getGrpSQL(int [] utid) {
+	try {
+		DBConn mDB = theViewerFrame.getDBConnection();
+		Vector<Integer> grpIDs = new Vector<Integer> ();
+		ResultSet rset=null;
+		for (int id : utid) {
+			rset = mDB.executeQuery("SELECT PGid FROM pog_members WHERE UTid=" + id + " GROUP BY PGid");
+			while(rset.next()) {
+				int grpid = rset.getInt(1);
+				if (!grpIDs.contains(grpid)) grpIDs.add(grpid);
+			}
+		}
+		if (rset!=null) rset.close(); 
+		mDB.close();
+		
+		if (grpIDs.size()==0) {
+			UserPrompt.showMsg("No clusters for selected sequences");
+			return null;
+		}
+		return GrpTablePanel.makeSQLfromGRPid(grpIDs.toArray(new Integer[0]));
+		
+	} catch(Exception e) {ErrorReport.reportError(e, "Error viewing groups"); return null;}
+	}
+	/************************************************************************
+	 * viewPairs for selected sequences
+	 */
+	private void viewPairs() {
+		if(getSelectedRowCount() ==0 ) { 
+			JOptionPane.showMessageDialog(theViewerFrame, "Select one or more sequences");
+			return;
+		}
+		try{		
+			int [] seqids =    getSelectedSQLids();
+			String [] seqstr = getSelectedSEQIDs();
+			
+			int cnt=0, numSeqs=seqids.length;
+			
+			int row = -1;	// nParentRow;
+			String query = null, summary=null;								// summary, query
+			String tab = pPAIR + ": ";	
+			
+			if (numSeqs==1) {
+				row = getSelectedRow();
+				query = "(" + seqids[0] + ")";
+				summary =  getSumLine(row, seqstr[0]);
+				tab += seqstr[0];
+			}
+			else {
+				summary = pSEQs + " " + seqstr[0];
+				for (int i=0; i<numSeqs; i++) { // make list
+					if (query==null) query = "(" + seqids[i];
+					else {
+						query +=  "," + seqids[i];
+						if (cnt<7) summary += ", " + seqstr[i];
+					}
+					cnt++;
+				}
+				query += ")";
+				if (numSeqs>7) summary = "... (" + numSeqs + " total)";
+				
+				tab += pSEQs + " " + numSeqs;
+			}
+			
+			PairTablePanel pairPanel = new PairTablePanel(theViewerFrame, getInstance(),  query, tab, summary, row);
+			theViewerFrame.addResultPanel(getInstance(), pairPanel, pairPanel.getName(), pairPanel.getSummary());
+			
+		} catch(Exception e) {ErrorReport.reportError(e, "Error viewing groups");
+		} catch(Error e) {ErrorReport.reportFatalError(e, "Fatal error viewing groups", theViewerFrame);}
+	}
+	private void viewDetails() {
+		if (getSelectedRowCount() != 1) { 
+			JOptionPane.showMessageDialog(theViewerFrame, "Select a Sequence");
+			return;
+		}
+		try {
+			int row = getSelectedRow();
+			int seqid = (Integer) getSelectedSQLid();
+			String seqname =      getSelectedColumn(SEQID);
+			
+			SeqTopRowPanel newPanel = new SeqTopRowPanel(theViewerFrame, this, seqname, seqid, row);
+			theViewerFrame.addResultPanel(getInstance(), newPanel, seqname, newPanel.getSummary());
+		}
+		catch(Exception e) {ErrorReport.reportError(e, "Error viewing details");}
+	}
+	/***************************************************************************
+	 * Align - which isn't used right now
+	 */
+    public String [] getSelectedSeqIDs() { // Align 
+    	boolean clearSel = false;
+    	if(theTable.getSelectedRowCount() == 0) {
+    		theTable.selectAll();
+    		clearSel = true;
+    	}
+	    int colIndex = theTableData.getColumnHeaderIndex(SEQID);
+	    int [] sels  = theTable.getSelectedRows();
+	 	String [] seqIDs = new String [sels.length];
+	 	
+	  	for(int x=0; x<sels.length; x++)
+	  		seqIDs[x] =  ((String)theTableData.getValueAt(sels[x], colIndex));
+	    	
+	    if(clearSel) theTable.clearSelection();
+	    return seqIDs;
+    }
     
+	 public String [] getTabSum() {
+    	int [] sels = theTable.getSelectedRows();
+		int row = (sels.length>0) ? sels[0] : 0;
+		
+    	int IDidx = theTableData.getColumnHeaderIndex(SEQID);
+    	String pairNum = ((Integer)theTableData.getValueAt(row, IDidx))+"";
+    	String [] retVal = new String[2];
+    	
+    	retVal[0] = pSEQ + " #" + ((Integer)theTableData.getValueAt(row, IDidx));
+    	retVal[1] = getSumLine(row, pairNum);
+    	return retVal;
+    }
+	// SeqTable Next/Prev button
+	private void getNextRow(int rowNum) {
+		String [] strVals = null;
+		if (theGrpTable!=null) {
+			strVals = theGrpTable.getSeqNextGrpRow(rowNum); // pog_members.PGid = 2
+			grpID = Static.getInteger(strVals[4]);
+		}
+		else if (thePairTable!=null) {
+			strVals = thePairTable.getNextPairRowForSeq(rowNum); // (UTID = 1 or UTID = 350)
+		}
+		else if (theHitTable!=null) {
+			strVals = theHitTable.getNextHitRowForSeq(rowNum);  // unitrans.HITid = 2712
+		}
+		else Out.die("TCW error on table type");
+		
+		strSubQuery = 		strVals[0];
+		tabName = 			strVals[1];
+		strQuerySummary = 	strVals[2];
+		nParentRow = 		Integer.parseInt(strVals[3]);	
+		buildQueryThread();
+		
+        theViewerFrame.changePanelName(this, tabName, strQuerySummary);
+	}
+		
+	// Pair Table Next/Prev to get next sequence row
+    public String [] getNextSeqRowForPair(int nextRow) {
+    	int row = getTranslatedRow(nextRow);
+    		
+		String name = getRowSeqName(row);
+		int id = getRowSeqIndex(row);
+	
+		String [] retVal = new String[4];
+		retVal[0] = "(" + id + ")";					// query
+		retVal[1] = pPAIR + ": " + name;			// tab
+		retVal[2] = getSumLine(row, name);			// summary
+		retVal[3] = row + "";						// nParentRow
+	
+		return retVal;
+    }
+    // Called from GrpTable for Next/Prev sequence - clusters for sequence (could be none)
+ 	public String [] getNextSeqRowForGrp(int nextRow) {
+     	int row = getTranslatedRow(nextRow);
+     		
+ 		String name = getRowSeqName(row);
+ 		
+ 		int [] seqid = new int [1];
+ 		int idx = theTableData.getColumnHeaderIndex(SEQINDEX);
+		seqid[0] =  (Integer)theTableData.getValueAt(row, idx);
+ 		
+ 		String [] retVal = new String[4];
+ 		retVal[0] = getGrpSQL(seqid);		// query
+ 		retVal[1] = pGRP + ": " + name;		// tab
+ 		retVal[2] = getSumLine(row, name);	// summary
+ 		retVal[3] = row + ""; 				// nParentRow
+ 	
+ 		return retVal;
+     } 
+ 	private String getSumLine(int row,  String name) {
+		return "Row " + (row+1) + "/" + getRowCount() + "   " +  pSEQ + " " +  name;	// summary
+	}
+ 	 /* SeqTopRowPanel next and prev */
+    public int getTranslatedRow(int row) {
+  		if (theTable==null) return 0;
+
+  		if(row >= theTable.getRowCount()) return 0; // CAS340 add '>'
+  		if(row < 0) return theTable.getRowCount() - 1;
+  		return row;
+    }
+    public int getRowSeqIndex(int row) {
+    	return (Integer)theTableData.getValueAt(row, 
+				theTableData.getColumnHeaderIndex(SEQINDEX));
+    }
+    public String getRowSeqName(int row) {
+		return (String)theTableData.getValueAt(row, 
+			theTableData.getColumnHeaderIndex(SEQID));
+    }
+ 	
+   /*********************************************************************************/
+	private JButton btnNextRow = null, btnPrevRow = null;
+	private JButton btnCopy = null, btnTable = null, btnHelp = null;
+	private JButton btnViewDetails = null, btnViewGroups = null, btnViewPairs = null;
+	    
     private SortTable theTable = null;
     private TableData theTableData = null;
     private JScrollPane sPane = null;
@@ -711,16 +1189,23 @@ public class SeqsTablePanel extends JPanel {
 	private JButton showColumnSelect = null;
 	private JButton clearColumn = null;
 	private Thread buildThread = null;
-	    
-	private String sqlWhere = "";
-    private String strQuerySummary = null;
+	
+    private String strQuerySummary = null, strSubQuery = null;
 	private String tabName = "";
 	private boolean isList=false;
 	private int totalSeq=0;
 	
 	private MTCWFrame theViewerFrame = null;
 	private ViewerSettings vSettings = null;
-	private SeqsTopRowPanel topRowPanel = null;
 	
+	private GrpTablePanel theGrpTable = null;
+	private PairTablePanel thePairTable = null;
+	private HitTablePanel theHitTable = null;
+	
+	private int nParentRow = -1;
+	private boolean hasNTdbOnly=false, hasGOs=false;
 	private int viewType=0;
+	
+	private int grpID = -1; 
+	private String consensusHitID=null;
 }

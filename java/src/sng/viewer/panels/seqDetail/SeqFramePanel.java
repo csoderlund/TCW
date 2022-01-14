@@ -196,8 +196,7 @@ public class SeqFramePanel extends JPanel {
 		toolPanel.add( Box.createHorizontalStrut(20) );
 		toolPanel.add(Box.createHorizontalGlue());
 		
-		JButton btnHelp = new JButton("Help2");
-		btnHelp.setBackground(Globals.HELPCOLOR);
+		JButton btnHelp = Static.createButtonHelp("Help2", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(getInstance(),"Sequence Frame", helpFile);

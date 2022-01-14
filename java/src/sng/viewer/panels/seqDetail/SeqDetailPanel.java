@@ -213,7 +213,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		createCopy();
 		createExport();
 		
-		JButton btnHelp = Static.createButton("Help2", true, Globalx.HELPCOLOR);
+		JButton btnHelp = Static.createButtonHelp("Help2", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(getInstance(),"Sequence Details", helpHTML);

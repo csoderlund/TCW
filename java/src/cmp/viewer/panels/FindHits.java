@@ -64,7 +64,7 @@ public class FindHits extends JPanel
 	{
 		setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-		setBackground(Globals.BGCOLOR);
+		setBackground(Static.BGCOLOR);
 		
 		theParentFrame = parentFrame;
 		isAAonly = (theParentFrame.getnNTdb()==0);
@@ -75,7 +75,7 @@ public class FindHits extends JPanel
 		dmndDefaults =  BlastArgs.getDiamondArgsHit() + " --threads " + cpu; // CAS330 special for Find Hits
 		
 		// added after Blast is performed; not used right now
-		btnViewContig = Static.createButton("Copy Selected Subject", false, Globals.FUNCTIONCOLOR);
+		btnViewContig = Static.createButton("Copy Selected Subject", false);
 		btnViewContig.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				if (resultTable.getSelectedRowCount() == 1)
@@ -114,7 +114,7 @@ public class FindHits extends JPanel
 				} catch (Exception er) {ErrorReport.reportError(er, "Error on Find hits help"); }
 			}
 		}));
-		JButton btnHelp = Static.createButton("Help...", true, Globalx.HELPCOLOR);
+		JButton btnHelp = Static.createButtonHelp("Help...", true);
 		btnHelp.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 popup.show(e.getComponent(), e.getX(), e.getY());
@@ -134,7 +134,7 @@ public class FindHits extends JPanel
 		row.add(new JLabel("Query: Amino acid or nucleotide sequence(s) - FASTA format"));
 		row.add(Box.createHorizontalStrut(30));
 		
-		JButton btnClear = new JButton("Clear");
+		JButton btnClear = Static.createButton("Clear");
 		btnClear.addActionListener(
 			new ActionListener() {
 				public void actionPerformed(ActionEvent event) {
@@ -143,7 +143,7 @@ public class FindHits extends JPanel
 		});
 		row.add(btnClear); row.add(Box.createHorizontalStrut(5));
 		
-		JButton btnPaste = new JButton("Paste");
+		JButton btnPaste = Static.createButton("Paste");
 		btnPaste.addActionListener(
 			new ActionListener() {
 				public void actionPerformed(ActionEvent event) {
@@ -205,7 +205,7 @@ public class FindHits extends JPanel
 		dbType.add(aaDbCheck);
 		row.add(aaDbCheck); row.add(Box.createHorizontalStrut(2));	
 		
-		btnDBfind = Static.createButton("...", false);
+		btnDBfind = Static.createButtonFile("...", false);
 		btnDBfind.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				FileRead fc = new FileRead("FindHit", FileC.bDoVer, FileC.bNoPrt); // CAS316
@@ -265,7 +265,7 @@ public class FindHits extends JPanel
 		
 		row.add(Box.createHorizontalStrut(30));
 	
-		JButton btnBlast = Static.createButton("RUN SEARCH", true, Globals.FUNCTIONCOLOR);
+		JButton btnBlast = Static.createButtonRun("RUN SEARCH", true);
 		btnBlast.addActionListener(
 			new ActionListener() 
 			{
@@ -289,7 +289,7 @@ public class FindHits extends JPanel
 		row.add(traceCheck);
 		
 		row.add(Box.createHorizontalStrut(30));
-		JButton btnReset = new JButton("Reset");
+		JButton btnReset = Static.createButton("Reset");
 		btnReset.addActionListener(
 			new ActionListener() {
 				public void actionPerformed(ActionEvent event) {
@@ -336,7 +336,7 @@ public class FindHits extends JPanel
 		txtStatus.setAlignmentX(CENTER_ALIGNMENT);
 		txtStatus.setHorizontalAlignment(JTextField.LEFT);
 		txtStatus.setEditable(false);
-		txtStatus.setBackground(Globals.BGCOLOR);
+		txtStatus.setBackground(Static.BGCOLOR);
 		txtStatus.setBorder(BorderFactory.createEmptyBorder());
 		Dimension dimStat = txtStatus.getPreferredSize();
 		dimStat.width = 500;
@@ -869,15 +869,14 @@ public class FindHits extends JPanel
 		public FileTextField(int size) {
 			setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 			setAlignmentX(Component.LEFT_ALIGNMENT);
-			setBackground(Globals.BGCOLOR);
+			setBackground(Static.BGCOLOR);
 			
 			txtValue = new JTextField(size);
 			Dimension dTxt = txtValue.getPreferredSize(); 
 			txtValue.setMaximumSize(dTxt);
 			txtValue.setMinimumSize(dTxt);
 			
-			btnFindFile = new JButton("...");
-			btnFindFile.setBackground(Globals.BGCOLOR);
+			btnFindFile = Static.createButtonFile("...", true);
 			Dimension dBtn = new Dimension();
 			dBtn.width = btnFindFile.getPreferredSize().width;
 			dBtn.height = dTxt.height;

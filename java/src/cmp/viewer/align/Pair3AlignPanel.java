@@ -1,4 +1,4 @@
-package cmp.viewer.seq.align;
+package cmp.viewer.align;
 
 /****************************************************
  * PairViewPanel calls this to draw the graphics of one pair, either CDS, NT, or AA

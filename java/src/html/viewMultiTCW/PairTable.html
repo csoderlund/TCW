@@ -11,15 +11,35 @@ may only exist for certain cluster sets).
 
 <h3>Functions at the top</h3>
 
-<u>Sequences</u> Select a pair followed by this function to view the two sequences
+<u>Seqs</u> Select a pair followed by this function to view the two sequences
 in the sequence table, where the alignment can be viewed.
 <p>
 <u>Clusters</u> Select a pair followed by this function to view the clusters for the two sequences.
 <p>
-<u>Copy...</u> For the selected pair, copy to clipboard a column (SeqID1, SeqID2, HitID or Hit Description).
-<p>
+<u>Pairwise...</u>
+<table border=1 cellpadding=3>
+<tr><td><b>AA for each pair</b> <td><td>Perform pairwise 
+alignment for all pairs of amino acid sequences from the selected sequences. 
+<tr><td><b>NT for each pair</b><td nowrap>NT-mTCW only<td> Perform pairwise 
+alignment for all pairs of nucleotide sequences from the selected sequences. 
+<tr><td><b>AA,NT,CDS for one pair</b> <td>NT-mTCW only<br>1 pair selected 
+<td>Align the selected pair using the amino acid sequence,
+CDS sequence, and nucleotide sequences. The resulting panel will have these 3 alignments.
+<tr><td><b>5UTR, CDS, 3UTR for one pair</b> <td>NT-mTCW only<br>1 pair selected
+<td>Align these three regions separately for the selected pair.
+The resulting panel will have these 3 alignments.
+<tr><td><b>AA to sequence best hit</b><td>
+<td>The best hit for each sequence will be aligned to it.
+<tr><td><b>AA to best shared hit</b> <td>1 pair selected
+<td>The assigned cluster best hit is aligned to each sequence in the cluster.
+</table>
+<br>The Pairwise options can result in many alignments,  e.g. if 20 sequences are selected,
+190 alignments will be computed;  watch progress in lower left corner of viewMultiTCW.
 
-<u>Table...</u>
+<p><u>Copy...</u> For the selected pair, copy to clipboard a column (SeqID1, SeqID2, HitID or Hit Description).
+
+
+<p><u>Table...</u>
 <ul>
 <li><b>Show Columns Stats:</b> Popup a table of statistics for the numeric columns in the table. 
 <br>&nbsp;

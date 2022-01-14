@@ -40,13 +40,13 @@ public class Pairwise {
 	} 
 	/******************************************************
 	 * XXX Called from StatsPanel
-	 * 1. doWriteKaKs says to write alignments and perform all alignments
+	 * 1.  doWriteKaKs says to write alignments and perform all alignments
 	 * 2. !doWriteKaKs says to only do alignments from pair that have not been done before.
 	 */
 	public void saveStatsAndKaKsWrite(boolean doWriteKaKs) {
 		try {
 			PairStats statsObj = new PairStats();
-			int cntPreviouslyAligned = statsObj.run(theCompilePanel, doWriteKaKs);
+			int cntPreviouslyAligned = statsObj.run(theCompilePanel, doWriteKaKs); // align and score pairs
 			
 			DBConn mDB = theCompilePanel.getDBconn();
 			String summary="";
@@ -643,7 +643,7 @@ public class Pairwise {
 			HashMap <Integer, Grp>  grpMap = new HashMap <Integer, Grp> ();
 			ResultSet rs = mDB.executeQuery(
 					"select PGid, PGstr, HITid, count from pog_groups where PMid=" + PMid);
-			long numPairs=0;
+			int numPairs=0;
 			while (rs.next()) {
 				int grpID = rs.getInt(1);
 				int count = rs.getInt(4);
@@ -651,7 +651,7 @@ public class Pairwise {
 				grpMap.put(grpID, g);
 				numPairs += (count*count-1)/2;
 			}
-			Out.PrtSpCntMsg(2, numPairs, " approximate # pairs to update");
+			Out.r("approximate # pairs to update " + numPairs);
 			
 			PreparedStatement ps;
 			if (isBBH) ps = mDB.prepareStatement("update pairwise set hasBBH=1, hasGrp=1,  " +
@@ -699,14 +699,15 @@ public class Pairwise {
 							}
 							else {
 								cntNotPair++;
+								if (runMTCWMain.test) Out.tmp(seqName[i] + " " + seqName[j]);
 							}
 						}
 						cntAllPairs++; 
-						if (cntAllPairs%10000==0) Out.r("processed " + cntAllPairs);
+						if (cntAllPairs%10000==0) Out.rp("processed", cntAllPairs, numPairs);
 					}
 				}
 			}
-			System.err.print("                                                            \r");
+			Out.rClear();
 			rs.close();
 			mDB.closeTransaction(); 
 			
@@ -716,8 +717,8 @@ public class Pairwise {
 				Out.PrtSpMsg(1, "TCW will be fixed to work for your dataset.");
 				return;
 			}
-			Out.PrtSpCntMsg(2, cntUp, " updated pairs with method");
-			Out.PrtSpCntMsgZero(2, cntNotPair, " pairs in clusters together, but not a hit pair");
+			Out.PrtSpCntMsg(2, cntUp, "Updated pairs with method");
+			Out.PrtSpCntMsgZero(2, cntNotPair, "Pairs in clusters that are not a hit pair");
 			
 			if (theCompilePanel.getDBInfo().hasPCC())
 				new PCC().addPCCforNewMethod(PMid); // if PCC computed, not added to new Methods
@@ -734,11 +735,12 @@ public class Pairwise {
 	private class PCC {
 		public void savePCC () {
 			try {
+				long time = Out.getTime();
+				Out.PrtDateMsg("Computing PCC on TPM values");
+				
 				DBConn mDB = theCompilePanel.getDBconn();
 				mDB.executeUpdate("update pog_groups SET perPCC = -1" ); 
 				
-				long time = Out.getTime();
-				Out.PrtDateMsg("Computing PCC on TPM values");
 				ResultSet rs;
 			
 		// get library column headers and make SQL and list
@@ -813,7 +815,7 @@ public class Pairwise {
 				psU.close();
 				mDB.closeTransaction(); 
 				
-				System.err.print("                                                    \r");
+				Out.rClear();
 				Out.PrtSpCntMsg(2, cntPCC, "Pairs with PPC >= " + GOOD_PCC + "                           ");
 				pairSet.clear();
 				seqLibMap.clear();

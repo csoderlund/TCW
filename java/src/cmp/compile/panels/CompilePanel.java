@@ -91,8 +91,7 @@ public class CompilePanel extends JPanel {
 		//panel.add(new JSeparator()); panel.add(Box.createVerticalStrut(5));
 		JPanel row = Static.createRowPanel();
 		
-		btnRunViewer = new JButton("Launch viewMultiTCW");
-		btnRunViewer.setBackground(Globals.LAUNCHCOLOR);
+		btnRunViewer = Static.createButtonPopup("Launch viewMultiTCW", true);
 		btnRunViewer.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				new RunCmd().viewMultiTCW(dbName);
@@ -101,8 +100,7 @@ public class CompilePanel extends JPanel {
 		row.add(btnRunViewer); row.add(Box.createHorizontalStrut(50));
 		btnRunViewer.setEnabled(false);
 		
-		btnDoAll = new JButton("Do All"); 
-		btnDoAll.setBackground(Globals.LAUNCHCOLOR);
+		btnDoAll = Static.createButtonRun("Do All", true); 
 		btnDoAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				//doAll();

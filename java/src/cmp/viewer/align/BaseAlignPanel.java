@@ -1,4 +1,4 @@
-package cmp.viewer.seq.align;
+package cmp.viewer.align;
 
 /**************************************************************
  * Draws lines or characters for a sequences
@@ -22,7 +22,6 @@ import javax.swing.JPanel;
 
 import cmp.align.ScoreAA;
 import util.database.Globalx;
-import util.methods.Out;
 
 public class BaseAlignPanel extends JPanel implements MouseListener
 {

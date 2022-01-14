@@ -637,29 +637,28 @@ public class SeqQueryTab extends Tab
 	 * Collapse buttons
 	 */
 	private JPanel createButtonPanel() {
-		JButton btnExpandAll = new JButton("Expand All");
+		JButton btnExpandAll = Static.createButton("Expand All");
 		btnExpandAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				expandAll(true);
 			}
 		});
 		
-		JButton btnCollapseAll = new JButton("Collapse All");
+		JButton btnCollapseAll = Static.createButton("Collapse All");
 		btnCollapseAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				expandAll(false);
 			}
 		});
 		
-		JButton btnRestore = new JButton("Clear");
+		JButton btnRestore = Static.createButton("Clear");
 		btnRestore.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				clear();
 			}
 		});
 		
-		JButton btnHelp = new JButton("Help");
-		btnHelp.setBackground(Globals.HELPCOLOR);
+		JButton btnHelp = Static.createButtonHelp("Help", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(getParentFrame(), 

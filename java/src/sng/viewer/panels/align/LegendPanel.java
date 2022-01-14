@@ -18,7 +18,7 @@ public class LegendPanel extends JPanel
 		this.isPair=isPair;
 		setLayout( null );
         setBackground( Color.WHITE );
-        setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        // CAS340 setBorder(BorderFactory.createLineBorder(Color.BLACK));
         setAlignmentX(Component.LEFT_ALIGNMENT);
         
         if (isPair) setMinimumSize(new Dimension(330, 130));

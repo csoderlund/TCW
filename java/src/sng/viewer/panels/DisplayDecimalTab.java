@@ -135,8 +135,7 @@ public class DisplayDecimalTab  extends Tab {
 		page.setAlignmentX(Component.CENTER_ALIGNMENT);
 		
 		JPanel helpRow = Static.createRowPanel();
-		JButton btnHelp = new JButton("Help");
-		btnHelp.setBackground(Globals.HELPCOLOR);
+		JButton btnHelp = Static.createButtonHelp("Help", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(getParentFrame(), "Decimal Display", HTML);
@@ -148,7 +147,7 @@ public class DisplayDecimalTab  extends Tab {
 		page.add(Box.createVerticalStrut(10));
 		
 		JPanel titleRow = Static.createRowPanel();
-		JLabel lblTitle = new JLabel("Decimal Display Options");
+		JLabel lblTitle = Static.createLabel("Decimal Display Options");
 		Font f = lblTitle.getFont();
 		lblTitle.setFont(new Font(f.getName(), f.getStyle(), f.getSize()+4));
 		titleRow.add(lblTitle);
@@ -156,7 +155,7 @@ public class DisplayDecimalTab  extends Tab {
 		page.add(Box.createVerticalStrut(5));
 		
 		JPanel textRow = Static.createRowPanel();
-		JLabel txtDesc = new JLabel("Set how decimal numbers are displayed for all tables");
+		JLabel txtDesc = Static.createLabel("Set how decimal numbers are displayed for all tables");
 		txtDesc.setFont(new Font(f.getName(), Font.PLAIN, f.getSize()));
 		txtDesc.setAlignmentX(Component.LEFT_ALIGNMENT);
 		textRow.add(txtDesc);

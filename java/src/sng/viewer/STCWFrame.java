@@ -55,6 +55,7 @@ import sng.viewer.panels.seqTable.FieldSeqTab;
 import sng.viewer.panels.seqTable.SeqQueryTab;
 import util.database.DBConn;
 import util.database.HostsCfg;
+import util.database.Globalx;
 import util.methods.ErrorReport;
 import util.methods.Converters;
 import util.methods.Out;
@@ -307,8 +308,7 @@ public class STCWFrame extends JFrame {
 			}
 
 			// XXX View Filtered Contig
-			btnFiltered = new JButton(ViewFilteredSequences);
-			btnFiltered.setBackground(Globals.FUNCTIONCOLOR);
+			btnFiltered = Static.createButtonTab(ViewFilteredSequences, true);
 			btnFiltered.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent event) {
 

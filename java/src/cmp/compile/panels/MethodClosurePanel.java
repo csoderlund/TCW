@@ -27,7 +27,7 @@ public class MethodClosurePanel extends JPanel {
 		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setAlignmentX(Component.LEFT_ALIGNMENT);
-		setBackground(Globals.BGCOLOR);
+		setBackground(Static.BGCOLOR);
 		add(Box.createVerticalStrut(20));
 		
 		int width = Globals.Methods.WIDTH;

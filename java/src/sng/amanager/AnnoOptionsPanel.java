@@ -93,16 +93,14 @@ public class AnnoOptionsPanel extends JPanel {
 		pnlAnnoDBOptions.add(innerPanel);
 		
 		// buttons
-		JButton btnResetDefaults = new JButton(Globalx.defaultBtn);
-		btnResetDefaults.setBackground(Globalx.BGCOLOR);
+		JButton btnResetDefaults = Static.createButton(Globalx.defaultBtn);
 		btnResetDefaults.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				setDefaults();
 			}
 		});
 
-		JButton btnKeep = new JButton(Globalx.keepBtn);
-		btnKeep.setBackground(Globalx.BGCOLOR);
+		JButton btnKeep = Static.createButton(Globalx.keepBtn);
 		btnKeep.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (keep()) {
@@ -115,8 +113,7 @@ public class AnnoOptionsPanel extends JPanel {
 			}
 		});
 		
-		JButton btnDiscard = new JButton(Globalx.cancelBtn);
-		btnDiscard.setBackground(Globalx.BGCOLOR);
+		JButton btnDiscard = Static.createButton(Globalx.cancelBtn);
 		btnDiscard.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				setVisible(false);
@@ -143,7 +140,7 @@ public class AnnoOptionsPanel extends JPanel {
 				} catch (Exception er) {ErrorReport.reportError(er, "Error on search parameters help"); }
 			}
 		}));
-		JButton btnHelp = Static.createButton("Help...", true, Globalx.HELPCOLOR);
+		JButton btnHelp = Static.createButtonHelp("Help...", true);
 		btnHelp.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 popup.show(e.getComponent(), e.getX(), e.getY());
@@ -251,7 +248,7 @@ public class AnnoOptionsPanel extends JPanel {
 		txtTrainCDSfile = Static.createTextField("", 25);
 		row.add(txtTrainCDSfile);						row.add(Box.createHorizontalStrut(5));
 		
-		btnTrainCDSfile = new JButton("...");
+		btnTrainCDSfile = Static.createButtonFile("...", false);
 		btnTrainCDSfile.addActionListener(new ActionListener()  {
 			public void actionPerformed(ActionEvent arg0) {
 				String projName = theManFrame.getProjDir();
@@ -455,7 +452,7 @@ public class AnnoOptionsPanel extends JPanel {
 		txtSlimOBOFile = Static.createTextField("", 25);
 		row.add(txtSlimOBOFile);						row.add(Box.createHorizontalStrut(5));
 		
-		btnSlimOBOFile = new JButton("...");
+		btnSlimOBOFile = Static.createButtonFile("...", false);
 		btnSlimOBOFile.addActionListener(new ActionListener()  {
 			public void actionPerformed(ActionEvent arg0) {
 				String projName = theManFrame.getProjDir();

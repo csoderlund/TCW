@@ -34,8 +34,11 @@ import cmp.viewer.table.FieldData;
 
 public class SeqTopRowPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
-	private Color buttonColor = Globals.BUTTONCOLOR;
+	
 	private final String helpHTML = Globals.helpDir + "Details.html"; // CAS305 add
+	
+	private Color panelColor = Static.PANELCOLOR; 
+	private Color activeColor = Static.RUNCOLOR; 
 	
 	private static final String SEQID = FieldData.SEQID;
 	private static final String HITID = FieldData.HITID;
@@ -45,8 +48,7 @@ public class SeqTopRowPanel extends JPanel {
 	static final public int SHOW_SEL_GO = 3;
 	static final public int SHOW_SEL_ALL_GO = 4;
 	
-	public SeqTopRowPanel(MTCWFrame parentFrame, SeqsTablePanel seqTable, String name, 
-			int seqid, int row) {
+	public SeqTopRowPanel(MTCWFrame parentFrame, SeqsTablePanel seqTable, String name, int seqid, int row) {
 		
 		hasGOs = parentFrame.getInfo().hasGOs();
 		theSeqTable = seqTable;
@@ -77,58 +79,54 @@ public class SeqTopRowPanel extends JPanel {
 	    if (detailPanel.isAAonly()) btnFrame.setEnabled(false); 
 	    lowerPanel.add(detailPanel);
 	    add(lowerPanel);
+	    
+	    setInActive(btnDetails);
 	}
+	
 	private JPanel createTopRow() {
-		int sp=10, sp1=1;
-		
 	 	JPanel topRow = Static.createRowPanel();
-	 	btnDetails = Static.createButton("Details", true);
+	 	btnDetails = Static.createButtonPanel("Details", true);
 	    btnDetails.addActionListener(new ActionListener() {
     	   	public void actionPerformed(ActionEvent arg0) {
-    	   		setInActive();
-    	   		btnDetails.setBackground(buttonColor);
-    	   		btnDetails.setSelected(true);
+    	   		setInActive(btnDetails);
     	   		opDetails();
     	   	}
 	    });
-	    btnDetails.setBackground(buttonColor);
-	    topRow.add(btnDetails);	 topRow.add(Box.createHorizontalStrut(sp));
+	    topRow.add(btnDetails);	 topRow.add(Box.createHorizontalStrut(2));
+	   
+	    btnFrame = Static.createButtonPanel("Frame", true);
+	    btnFrame.addActionListener(new ActionListener() {
+    	   	public void actionPerformed(ActionEvent arg0) {
+    	   		if (detailPanel.isAAonly()) btnFrame.setEnabled(false); 
+    	   		else {
+	    	   		setInActive(btnFrame);
+	    	   		opFrame();
+    	   		}
+    	   	}
+	    });
+	    topRow.add(btnFrame); topRow.add(Box.createHorizontalStrut(2));
 	    
-	    lblSelect = new JLabel("Selected:");
-	    topRow.add(lblSelect);  topRow.add(Box.createHorizontalStrut(sp1));
+	    createBtnGO();
+	    if (hasGOs) {
+	    	topRow.add(btnGO);
+	    	topRow.add(Box.createHorizontalStrut(2));
+	    }
+	    
+	    topRow.add(Box.createHorizontalStrut(10));
+	    lblSelect = Static.createLabel(Globals.select);
+	    topRow.add(lblSelect);  topRow.add(Box.createHorizontalStrut(2));
 	    
 	    createBtnCopy(); // CAS310 add
-	    topRow.add(btnCopy); 	topRow.add(Box.createHorizontalStrut(sp1));
+	    topRow.add(btnCopy); 	topRow.add(Box.createHorizontalStrut(6));
 	    btnClear  = Static.createButton("Clear", true);
 	    btnClear.addActionListener(new ActionListener() {
     	   	public void actionPerformed(ActionEvent arg0) {
     	   		detailPanel.clearSelection();
     	   	}
 	    });
-	    topRow.add(btnClear);	topRow.add(Box.createHorizontalStrut(sp));
+	    topRow.add(btnClear);	topRow.add(Box.createHorizontalGlue());
 	    
-	    btnFrame = Static.createButton("Frame", true);
-	    btnFrame.addActionListener(new ActionListener() {
-    	   	public void actionPerformed(ActionEvent arg0) {
-    	   		if (detailPanel.isAAonly()) btnFrame.setEnabled(false); 
-    	   		else {
-	    	   		setInActive();
-	    	   		btnFrame.setBackground(buttonColor);
-	    	   		btnFrame.setSelected(true);
-	    	   		opFrame();
-    	   		}
-    	   	}
-	    });
-	    topRow.add(btnFrame);
-	    
-	    createBtnGO();
-	    if (hasGOs) {
-	    	topRow.add(Box.createHorizontalStrut(sp1));
-	    	topRow.add(btnGO);
-	    }
-	    
-	    topRow.add(Box.createHorizontalStrut(sp));
-	    btnHelp = Static.createButton("Help", true, Globals.HELPCOLOR);
+	    btnHelp = Static.createButtonHelp("Help", true);
 	    btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				UserPrompt.displayHTMLResourceHelp(theViewerFrame,  "Details",  helpHTML);
@@ -136,21 +134,19 @@ public class SeqTopRowPanel extends JPanel {
 		});
 	    topRow.add(btnHelp);
 	    
-	    topRow.add(Box.createHorizontalGlue());
-	    
 	    JPanel rowChangePanel = Static.createRowPanel();
 	    rowChangePanel.setBackground(theViewerFrame.getSettings().getFrameSettings().getBGColor());
  	   
-	    btnPrevRow = Static.createButton("<< Prev", true);
+	    btnPrevRow = Static.createButton(Globals.prev, true);
 	    btnPrevRow.addActionListener(new ActionListener() {
 	    		public void actionPerformed(ActionEvent arg0) {
  			   nParentRow = theSeqTable.getTranslatedRow(nParentRow - 1);
  			   loadNewRow(nParentRow);
  		   }
  	   });
-	   rowChangePanel.add(btnPrevRow); topRow.add(Box.createHorizontalStrut(sp1));
+	   rowChangePanel.add(btnPrevRow); topRow.add(Box.createHorizontalStrut(1));
 	    
- 	   btnNextRow = Static.createButton("Next >>", true);
+ 	   btnNextRow = Static.createButton(Globals.next, true);
  	   btnNextRow.addActionListener(new ActionListener() {
  		   public void actionPerformed(ActionEvent arg0) {
  			   nParentRow = theSeqTable.getTranslatedRow(nParentRow + 1);
@@ -169,40 +165,32 @@ public class SeqTopRowPanel extends JPanel {
 	    popup.add(new JMenuItem(new AbstractAction("Assigned GOs for hits") {
  			private static final long serialVersionUID = 1L;
  			public void actionPerformed(ActionEvent e) {
- 				setInActive();
-    	   			btnGO.setBackground(buttonColor);
-    	   			btnGO.setSelected(true);
-    	   			opGO(SHOW_ASSIGNED_GO);
+ 				setInActive(btnGO);
+    	   		opGO(SHOW_ASSIGNED_GO);
  			}
  		}));
 	    popup.add(new JMenuItem(new AbstractAction("All GOs for hits") {
  			private static final long serialVersionUID = 1L;
  			public void actionPerformed(ActionEvent e) {
- 				setInActive();
-    	   			btnGO.setBackground(buttonColor);
-    	   			btnGO.setSelected(true);
-    	   			opGO(SHOW_ALL_GO);
+ 				setInActive(btnGO);
+    	   		opGO(SHOW_ALL_GO);
  			}
  		}));
 	    popup.add(new JMenuItem(new AbstractAction("Assigned GOs for selected hit (or best)") {
  			private static final long serialVersionUID = 1L;
  			public void actionPerformed(ActionEvent e) {
- 				setInActive();
-    	   			btnGO.setBackground(buttonColor);
-    	   			btnGO.setSelected(true);
-    	   			opGO(SHOW_SEL_GO);
+ 				setInActive(btnGO);
+    	   		opGO(SHOW_SEL_GO);
  			}
  		}));
 	    popup.add(new JMenuItem(new AbstractAction("All GOs for selected hit (or best)") {
  			private static final long serialVersionUID = 1L;
  			public void actionPerformed(ActionEvent e) {
- 				setInActive();
-    	   			btnGO.setBackground(buttonColor);
-    	   			btnGO.setSelected(true);
-    	   			opGO(SHOW_SEL_ALL_GO);
+ 				setInActive(btnGO);
+    	   		opGO(SHOW_SEL_ALL_GO);
  			}
  		}));
-	    btnGO = Static.createButton("GO...", true);
+	    btnGO = Static.createButtonPanel("GO...", true);
 		btnGO.addMouseListener(new MouseAdapter() {
 	          public void mousePressed(MouseEvent e) {
 	              popup.show(e.getComponent(), e.getX(), e.getY());
@@ -282,7 +270,7 @@ public class SeqTopRowPanel extends JPanel {
 		}
 	}
 	private void createBtnCopy() {
-		btnCopy = Static.createButton("Copy...", true);
+		btnCopy = Static.createButtonMenu("Copy...", true);
 	    final JPopupMenu copyPop = new JPopupMenu();
 	    copyPop.setBackground(Color.WHITE);
 	    
@@ -390,16 +378,19 @@ public class SeqTopRowPanel extends JPanel {
 		setVisible(true);
 	}
 	// changes background color 
-	private void setInActive() {
+	private void setInActive(JButton button) {
 		// this works on mac but not linux
 		btnDetails.setSelected(false);
 		btnFrame.setSelected(false);
 		btnGO.setSelected(false);
 		
 		// this works on linux but not mac
-		btnDetails.setBackground(Color.white);
-		btnFrame.setBackground(Color.white);
-		btnGO.setBackground(Color.white);
+		btnDetails.setBackground(panelColor);
+		btnFrame.setBackground(panelColor);
+		btnGO.setBackground(panelColor);
+		
+		button.setBackground(activeColor); // CAS337 put here instead of on every button
+		button.setSelected(true);
 	}
 	public String getName() { return seqName; } // tag on left
 	public String getSummary() { return seqName + " details"; } // summary on Results

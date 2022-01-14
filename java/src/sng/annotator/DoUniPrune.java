@@ -67,7 +67,7 @@ public class DoUniPrune {
 			bRC = assignObj.Step3_saveSpeciesSQLTable(); if (!bRC) return;
 			
 			updateAssmMsg();
-			Out.PrtSpMsgTimeMem(1, "Complete remove and update ", time);
+			Out.PrtSpMsgTimeMem(1, "Complete prune, process and species ", time);
 		}
 		catch(Exception e) {ErrorReport.prtReport(e, "Computing duplicate hits");}
 	}

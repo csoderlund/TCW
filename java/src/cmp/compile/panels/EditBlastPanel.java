@@ -47,15 +47,14 @@ public class EditBlastPanel extends JPanel {
 		theCompilePanel = parentPanel;
 		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-		setBackground(Globals.BGCOLOR);
+		setBackground(Static.BGCOLOR);
 		add(Box.createVerticalStrut(15));
 		
 		add(createBlast(AA)); 
 		add(createBlast(NT)); 
 		
 	// Lower buttons
-		btnKeep = new JButton(Globalx.keepBtn);
-		btnKeep.setBackground(Globals.BGCOLOR);
+		btnKeep = Static.createButton(Globalx.keepBtn);
 		btnKeep.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				keep();
@@ -66,8 +65,7 @@ public class EditBlastPanel extends JPanel {
 			}
 		});
 		
-		btnDiscard = new JButton(Globalx.cancelBtn);
-		btnDiscard.setBackground(Globals.BGCOLOR);
+		btnDiscard = Static.createButton(Globalx.cancelBtn);
 		btnDiscard.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				restore();
@@ -76,8 +74,7 @@ public class EditBlastPanel extends JPanel {
 				theCompilePanel.setMainPanelVisible(true);
 			}
 		});
-		btnDef = new JButton(Globalx.defaultBtn);
-		btnDef.setBackground(Globals.BGCOLOR);
+		btnDef = Static.createButton(Globalx.defaultBtn);
 		btnDef.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				setDefaults();
@@ -102,7 +99,7 @@ public class EditBlastPanel extends JPanel {
 				} catch (Exception er) {ErrorReport.reportError(er, "Error on search parameters help"); }
 			}
 		}));
-		JButton btnHelp = Static.createButton("Help...", true, Globalx.HELPCOLOR);
+		JButton btnHelp = Static.createButtonHelp("Help...", true);
 		btnHelp.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 popup.show(e.getComponent(), e.getX(), e.getY());

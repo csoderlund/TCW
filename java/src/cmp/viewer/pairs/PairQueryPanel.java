@@ -37,7 +37,7 @@ public class PairQueryPanel extends JPanel {
 	
 	private final String [] SECTIONS = { "Basic", "Hit", "Statistics", "Datasets", "Cluster Sets"};
 	private final String [] SECTIONS_DESC = {"", "", "", "", ""};// display wrong as applet
-	private final String helpHTML = "PairQuery.html";
+	private final String helpHTML = Globals.helpDir + "PairQuery.html";
 	private final int width=100;
 	
 	public PairQueryPanel (MTCWFrame parentFrame) {
@@ -428,7 +428,7 @@ public class PairQueryPanel extends JPanel {
 		
 		JPanel row = Static.createRowPanel();
 		
-		btnSearch = Static.createButton("View Filtered Pairs", true, Globals.FUNCTIONCOLOR);
+		btnSearch = Static.createButtonTab("View Filtered Pairs", true);
 		btnSearch.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				hasError=false;
@@ -442,8 +442,7 @@ public class PairQueryPanel extends JPanel {
 		});
 		btnSearch.setEnabled(cntPair>0);
 		
-		btnExpand = new JButton("Expand All");
-		btnExpand.setBackground(theViewerFrame.getSettings().getFrameSettings().getBGColor());
+		btnExpand = Static.createButton("Expand All");
 		btnExpand.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				for(int x=0; x<theSections.length; x++)
@@ -451,8 +450,7 @@ public class PairQueryPanel extends JPanel {
 			}
 		});
 		
-		btnCollapse = new JButton("Collapse All");
-		btnCollapse.setBackground(theViewerFrame.getSettings().getFrameSettings().getBGColor());
+		btnCollapse = Static.createButton("Collapse All");
 		btnCollapse.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				for(int x=0; x<theSections.length; x++)
@@ -461,18 +459,16 @@ public class PairQueryPanel extends JPanel {
 		});
 		
 		btnClear = Static.createButton("Clear", true);
-		btnClear.setBackground(theViewerFrame.getSettings().getFrameSettings().getBGColor());
 		btnClear.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				clearFilters();
 			}
 		});	
 		
-		btnHelp = Static.createButton("Help", true, Globals.HELPCOLOR);
+		btnHelp = Static.createButtonHelp("Help", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(theViewerFrame, "Pair Filter Help", 
-						"html/viewMultiTCW/" + helpHTML);
+				UserPrompt.displayHTMLResourceHelp(theViewerFrame, "Pair Filter Help", helpHTML);
 			}
 		});
 		
@@ -757,8 +753,8 @@ public class PairQueryPanel extends JPanel {
 			checkValues();
 			if (!checkOn.isSelected()) return "";
 			
-			String min = txtMin.getText(); // check if proper value
-			String max = txtMax.getText();
+			String min = txtMin.getText().trim(); // check if proper value
+			String max = txtMax.getText().trim();
 			
 			if (min.contentEquals("") && max.contentEquals("")) {
 				checkOn.setSelected(false);
@@ -767,13 +763,11 @@ public class PairQueryPanel extends JPanel {
 			if (!min.contentEquals("") && max.contentEquals(""))  // CAS330 rewrite
 				return sqlField + ">=" + min;
 			
-			if (min.contentEquals("")  && !max.contentEquals("")) 
-				return "(" + sqlField + ">=0 and " + sqlField + "<" + max + ")"; // CAS330 can be < for NA
+			if (min.contentEquals("") && !max.contentEquals(""))  // CAS330 rewrite
+				return sqlField + "<" + max;
 			
-			if (min.contentEquals("0")  && max.contentEquals("0"))  // CAS330 add
-					return sqlField + "=0";
-			if (min.contentEquals("0.0")  && max.contentEquals("0.0"))  // CAS330 add
-					return sqlField + "=0.0";
+			if (min.contentEquals(max))	// CAS340 (was specifically checking for min=0 and max=0)
+				return sqlField + "=" + max;
 			
 			return "(" + sqlField + ">=" + min + " and " + sqlField + "<" + max + ")";
 		}

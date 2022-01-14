@@ -35,12 +35,12 @@ import cmp.database.Globals;
 public class EditStatsPanel  extends JPanel  {
 	private static final long serialVersionUID = 1L;
 	private static final DecimalFormat df = new DecimalFormat("#,###,###");
-	
+	private static final String helpHTML = Globals.helpRunDir + "EditStatsPanel.html";
 	public EditStatsPanel(CompilePanel parentPanel) {
 		theCompilePanel = parentPanel;
 		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-		setBackground(Globals.BGCOLOR);
+		setBackground(Static.BGCOLOR);
 		setAlignmentX(Component.CENTER_ALIGNMENT);
 		
 		add(Box.createVerticalStrut(5));
@@ -96,14 +96,14 @@ public class EditStatsPanel  extends JPanel  {
 		add(Box.createVerticalStrut(25));
 		
 		// Lower buttons
-		btnKeep = Static.createButton("Keep", true,Globals.BGCOLOR);
+		btnKeep = Static.createButton("Keep", true);
 		btnKeep.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				keep();
 			}
 		});
 		
-		btnDiscard = Static.createButton("Cancel", true,Globals.BGCOLOR);
+		btnDiscard = Static.createButton("Cancel", true);
 		btnDiscard.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				cancel();
@@ -111,10 +111,11 @@ public class EditStatsPanel  extends JPanel  {
 			}
 		});
 		
-		btnHelp = Static.createButton("Help", true,Globals.HELPCOLOR);
+		btnHelp = Static.createButtonHelp("Help", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(theCompilePanel.getParentFrame(), "Edit Stats Settings", "html/runMultiTCW/EditStatsPanel.html");
+				UserPrompt.displayHTMLResourceHelp(theCompilePanel.getParentFrame(), 
+						"Edit Stats Settings", helpHTML);
 			}
 		});
 	
@@ -205,7 +206,7 @@ public class EditStatsPanel  extends JPanel  {
 		
 		if (!info.isPairsSet()) {
 			DBConn mDB = theCompilePanel.getDBconn();
-			info.setPairsEdit(mDB);   //  CAS310 these take awhile to compute, so only done for this panel
+			info.updateCntKeys(mDB);   //  CAS310 these take awhile to compute, so only done for this panel
 			mDB.close();
 		}
 		int cntPairs = info.getCntPair();
@@ -257,7 +258,7 @@ public class EditStatsPanel  extends JPanel  {
 		
 		int cntPairGrp = info.getCntPairGrp(); // Pairwise.hasGrp=1
 		lblSum[index++].setText(html(cntPairGrp, "Pairs in clusters", 0));
-		if (cntPairGrp==0) return;
+		// if (cntPairGrp==0) return; CAS340 can still have stats
 		 
 	// Stats
 		int cntStats = info.getCntStats();    // Paiwise.align>0 

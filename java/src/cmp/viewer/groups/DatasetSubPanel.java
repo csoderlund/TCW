@@ -100,17 +100,17 @@ public class DatasetSubPanel extends JPanel {
 		rangePanelInc.add(Box.createVerticalStrut(20));
 		
 		JPanel tempPanel = Static.createRowPanel();
-		tempPanel.add(new JLabel("At least "));
+		tempPanel.add(Static.createLabel("At least "));
 		tempPanel.add(txtIncVal);
-		tempPanel.add(new JLabel(" sequence "));
+		tempPanel.add(Static.createLabel(" sequence(s) "));
 		tempPanel.setMaximumSize(tempPanel.getPreferredSize());	
 		rangePanelInc.add(tempPanel);
 		rangePanelInc.add(Box.createVerticalStrut(5));
 		
 		tempPanel = Static.createRowPanel();
-		tempPanel.add(new JLabel("From "));
+		tempPanel.add(Static.createLabel("From "));
 		tempPanel.add(cmbInc);
-		tempPanel.add(new JLabel(" selected"));
+		tempPanel.add(Static.createLabel("   "));
 		tempPanel.setMaximumSize(tempPanel.getPreferredSize());		
 		rangePanelInc.add(tempPanel);
 		
@@ -120,17 +120,17 @@ public class DatasetSubPanel extends JPanel {
 		rangePanelEx.add(Box.createVerticalStrut(20));
 		
 		tempPanel = Static.createRowPanel();
-		tempPanel.add(new JLabel("At most "));
+		tempPanel.add(Static.createLabel("At most "));
 		tempPanel.add(txtExVal);
-		tempPanel.add(new JLabel(" sequence "));
+		tempPanel.add(Static.createLabel(" sequence(s) "));
 		tempPanel.setMaximumSize(tempPanel.getPreferredSize());		
 		rangePanelEx.add(tempPanel);
 		rangePanelEx.add(Box.createVerticalStrut(5));
 		
 		tempPanel = Static.createRowPanel();
-		tempPanel.add(new JLabel("From "));
+		tempPanel.add(Static.createLabel("From "));
 		tempPanel.add(cmbEx);
-		tempPanel.add(new JLabel(" selected"));
+		tempPanel.add(Static.createLabel("   "));
 		tempPanel.setMaximumSize(tempPanel.getPreferredSize());		
 		rangePanelEx.add(tempPanel);
 		

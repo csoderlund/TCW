@@ -30,6 +30,7 @@ import cmp.compile.panels.MethodClosurePanel;
 import cmp.compile.panels.MethodHitPanel;
 import cmp.compile.panels.MethodLoadPanel;
 import cmp.compile.panels.CompileFrame;
+import cmp.database.DBinfo;
 import cmp.database.Globals;
 import cmp.database.Schema;
 
@@ -315,15 +316,20 @@ public class runMTCWMain {
 				}
 			}
 			if (cnt>0) {
+				DBinfo info = theCompilePanel.getDBInfo(); // CAS340
+				info.clearCntKeys(); 
+				info.updateCntKeys(mDB);
+				
 				Summary sumObj = new Summary(mDB);
 				sumObj.removeSummary();
 				String text = sumObj.getMethodSizeTable();
-				System.out.println("\nSummary\n" + text);
+				Out.Print("\nSummary\n" + text);
 			}
 			Schema.updateVersion(mDB);
 			mDB.close();
+			
 			if (fail > 0) Out.PrtWarn(fail + " failed methods (" + failed + ")");
-			Out.PrtMsgTimeMem("Complete adding " + cnt + " methods for " + theCompilePanel.getDBName() + " at ", startTime);
+			Out.PrtMsgTimeMem("Complete adding " + cnt + " methods for " + theCompilePanel.getDBName(), startTime);
 			Out.close();
 		}
 		catch (Exception e) {

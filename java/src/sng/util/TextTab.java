@@ -48,8 +48,7 @@ public class TextTab extends /*JPanel*/Tab
 		
 		if (htmlHelp!=null) {
 			row = Static.createRowPanel();
-			JButton btnHelp = new JButton("Reproduce");
-			btnHelp.setBackground(Globals.HELPCOLOR);
+			JButton btnHelp = Static.createButtonHelp("Reproduce", true);
 			btnHelp.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					UserPrompt.displayHTMLResourceHelp(null, 

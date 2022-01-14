@@ -15,14 +15,14 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 
-import cmp.database.Globals;
+import util.database.Globalx;
 
 public class CollapsiblePanel extends JPanel {
 	private static final long serialVersionUID = 7114124162647988756L;
 
 	public CollapsiblePanel(String title, String description) {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		setBackground(Globals.BGCOLOR);
+		setBackground(Globalx.BGCOLOR);
 		showIcon = createImageIcon("/images/plus.gif");
 		hideIcon = createImageIcon("/images/minus.gif");
 		
@@ -43,14 +43,14 @@ public class CollapsiblePanel extends JPanel {
 			labelDescription = new JLabel("     " + description);
 			labelDescription.setFont(new Font(labelDescription.getFont().getName(), Font.PLAIN, labelDescription.getFont().getSize()));
 			labelDescription.setAlignmentX(LEFT_ALIGNMENT);
-			labelDescription.setBackground(Globals.BGCOLOR);
+			labelDescription.setBackground(Globalx.BGCOLOR);
 		}
 
 		thePanel = new JPanel();
 		thePanel.setLayout(new BoxLayout(thePanel, BoxLayout.Y_AXIS));
 		thePanel.setBorder ( BorderFactory.createEmptyBorder(5, 20, 10, 20) );
 		thePanel.setAlignmentX(LEFT_ALIGNMENT);
-		thePanel.setBackground(Globals.BGCOLOR);
+		thePanel.setBackground(Globalx.BGCOLOR);
 		thePanel.add(new JSeparator());
 		super.add( showHideButton );
 		if (labelDescription != null) super.add( labelDescription );

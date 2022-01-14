@@ -352,12 +352,10 @@ public class AssmOptionsPanel extends JPanel {
 				}
 			});
 			
-			JButton btnHelp = new JButton("Help");
-			btnHelp.setBackground(Globals.HELPCOLOR);
+			JButton btnHelp = Static.createButtonHelp("Help", true);
 			btnHelp.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
-					UserPrompt.displayHTMLResourceHelp(theParentFrame, 
-							"Assembly options help", helpHTML);
+					UserPrompt.displayHTMLResourceHelp(theParentFrame, "Assembly options help", helpHTML);
 				}
 			});
 			

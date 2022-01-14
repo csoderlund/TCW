@@ -42,7 +42,7 @@ import cmp.viewer.panels.FindHits;
 import cmp.viewer.panels.DisplayDecimalTab;
 import cmp.viewer.panels.TextPanel;
 import cmp.viewer.seq.SeqsQueryPanel;
-import cmp.viewer.seq.SeqsTopRowPanel;
+import cmp.viewer.seq.SeqsTablePanel;
 import cmp.viewer.table.FieldData;
 
 import util.database.DBConn;
@@ -85,7 +85,7 @@ public class MTCWFrame extends JFrame {
 		 ">Clusters", ">Pairs", ">Sequences", ">Hits"}; // s is added to not duplicate the above set
 	private static final String [] MENU_DESCRIP = { 
 		"Basic instructions for using multiTCW", "Information about the database", 
-		"Change significan digits", 
+		"Change significant digits", 
 		"Run Blast or Diamond", "List all result panels" ,
 		 "Filter clusters", "Filter Pairs", "Filter sequences", "Filter hits",
 		 "Sample set of clusters", "Sample set of pairs", "Sample set of sequences", "Sample set of hits"
@@ -300,19 +300,19 @@ public class MTCWFrame extends JFrame {
 		overviewPanel = new TextPanel(getOverviewText(), false, overviewHelp);
 		
 		FieldData.setState(theInfo);
-		grpTablePanel = new GrpTablePanel(this,   MAIN_MENU[SAMP_INDEX]); // have to go before the query panels
+		grpTablePanel =  new GrpTablePanel(this,  MAIN_MENU[SAMP_INDEX]); // have to go before the query panels
 		pairTablePanel = new PairTablePanel(this, MAIN_MENU[SAMP_INDEX+1]);
-		seqTablePanel = new SeqsTopRowPanel(this, MAIN_MENU[SAMP_INDEX+2]);
-		hitTablePanel = new HitTablePanel(this,   MAIN_MENU[SAMP_INDEX+3]);
+		seqTablePanel =  new SeqsTablePanel(this, MAIN_MENU[SAMP_INDEX+2]);
+		hitTablePanel =  new HitTablePanel(this,  MAIN_MENU[SAMP_INDEX+3]);
 		
-		grpQueryPanel = new GrpQueryPanel(this);
+		grpQueryPanel =  new GrpQueryPanel(this);
 		pairQueryPanel = new PairQueryPanel(this);
-		seqQueryPanel = new SeqsQueryPanel(this);
-		hitQueryPanel = new HitQueryPanel(this);
+		seqQueryPanel =  new SeqsQueryPanel(this);
+		hitQueryPanel =  new HitQueryPanel(this);
 		
-		resultPanel = new ResultPanel(this);
-		blastPanel = new FindHits(this);
-		decimalPanel = new DisplayDecimalTab(this);
+		resultPanel =    new ResultPanel(this);
+		blastPanel =     new FindHits(this);
+		decimalPanel =   new DisplayDecimalTab(this);
 
 		int i=0, s=0;
 		JPanel general = Static.createRowPanel();
@@ -603,7 +603,7 @@ public class MTCWFrame extends JFrame {
 	
 	private GrpTablePanel grpTablePanel = null;
 	private PairTablePanel pairTablePanel = null;
-	private SeqsTopRowPanel seqTablePanel = null;
+	private SeqsTablePanel seqTablePanel = null;
 	private HitTablePanel hitTablePanel = null;
 	
 	private GrpQueryPanel grpQueryPanel = null;

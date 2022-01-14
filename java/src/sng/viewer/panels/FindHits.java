@@ -77,7 +77,7 @@ public class FindHits extends Tab
 		dmndDefaults =  BlastArgs.getDiamondArgsHit() + " --threads " + cpu; // CAS330 special for Find Hits
 		
 		// added after Blast is performed
-		btnViewContig = Static.createButton(Globals.seqDetailLabel, false, Globals.FUNCTIONCOLOR);
+		btnViewContig = Static.createButtonTab(Globals.seqDetailLabel, false);
 		btnViewContig.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				if (resultTable.getSelectedRowCount() == 1)
@@ -91,7 +91,7 @@ public class FindHits extends Tab
 	
 	// Header: Above input box
 		JPanel row = Static.createRowPanel();
-		JLabel lblBlast = new JLabel("Search database sequences");
+		JLabel lblBlast = Static.createLabel("Search database sequences");
 		lblBlast.setFont(new Font("Verdana",Font.PLAIN,18));
 		row.add(lblBlast);
 		row.add(Box.createHorizontalStrut(150));
@@ -115,7 +115,7 @@ public class FindHits extends Tab
 				} catch (Exception er) {ErrorReport.reportError(er, "Error on Find hits help"); }
 			}
 		}));
-		JButton btnHelp = Static.createButton("Help...", true, Globalx.HELPCOLOR);
+		JButton btnHelp = Static.createButtonHelp("Help...", true);
 		btnHelp.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 popup.show(e.getComponent(), e.getX(), e.getY());
@@ -135,7 +135,7 @@ public class FindHits extends Tab
 		row.add(new JLabel("Query: Amino acid or nucleotide sequence(s) - FASTA format"));
 		row.add(Box.createHorizontalStrut(30));
 		
-		JButton btnClear = new JButton("Clear");
+		JButton btnClear = Static.createButton("Clear");
 		btnClear.addActionListener(
 			new ActionListener() {
 				public void actionPerformed(ActionEvent event) {
@@ -144,7 +144,7 @@ public class FindHits extends Tab
 		});
 		row.add(btnClear); row.add(Box.createHorizontalStrut(5));
 		
-		JButton btnPaste = new JButton("Paste");
+		JButton btnPaste = Static.createButton("Paste");
 		btnPaste.addActionListener(
 			new ActionListener() {
 				public void actionPerformed(ActionEvent event) {
@@ -178,7 +178,7 @@ public class FindHits extends Tab
 	
 	// Subject: First row below input box
 		row = Static.createRowPanel();
-		row.add(new JLabel("Subject: ")); row.add(Box.createHorizontalStrut(2));	
+		row.add(Static.createLabel("Subject: ")); row.add(Box.createHorizontalStrut(2));	
 		ButtonGroup dbType = new ButtonGroup();
 	
 		ntSeqCheck = Static.createRadioButton("NT-Seqs", false);
@@ -208,7 +208,7 @@ public class FindHits extends Tab
 		dbType.add(aaDbCheck);
 		row.add(aaDbCheck); row.add(Box.createHorizontalStrut(2));	
 	
-		btnDBfind = Static.createButton("...", false);
+		btnDBfind = Static.createButtonFile("...", false);
 		btnDBfind.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				
@@ -245,7 +245,7 @@ public class FindHits extends Tab
 		pgmType.add(dmndCheck);
 		pgmType.add(blastCheck);
 		
-		row.add(new JLabel("Parameters: "));
+		row.add(Static.createLabel("Parameters: "));
 		txtParams = Static.createTextField(dmndDefaults, 35);
 		row.add(txtParams);
 		
@@ -254,7 +254,7 @@ public class FindHits extends Tab
 		
 	// Output format: Third row below input box	
 		row = Static.createRowPanel();
-		row.add(new JLabel("Output format: "));
+		row.add(Static.createLabel("Output format: "));
 	
 		tabCheck = Static.createRadioButton("Tabular", true);
 		row.add(tabCheck);
@@ -270,7 +270,7 @@ public class FindHits extends Tab
 		
 		row.add(Box.createHorizontalStrut(30));
 	
-		JButton btnBlast = Static.createButton("RUN SEARCH", true, Globals.FUNCTIONCOLOR);
+		JButton btnBlast = Static.createButtonRun("RUN SEARCH", true);
 		btnBlast.addActionListener(
 			new ActionListener() 
 			{
@@ -294,7 +294,7 @@ public class FindHits extends Tab
 		row.add(traceCheck);
 		
 		row.add(Box.createHorizontalStrut(30));
-		JButton btnReset = new JButton("Reset");
+		JButton btnReset = Static.createButton("Reset");
 		btnReset.addActionListener(
 			new ActionListener() {
 				public void actionPerformed(ActionEvent event) {

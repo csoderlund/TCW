@@ -47,8 +47,7 @@ public class TextPanel extends JPanel {
 		add(Box.createVerticalStrut(3));
 		
 		row = Static.createRowPanel();
-		JButton btnHelp = new JButton("Explain");
-		btnHelp.setBackground(Globals.HELPCOLOR);
+		JButton btnHelp = Static.createButtonHelp("Explain", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				UserPrompt.displayHTMLResourceHelp(null, 

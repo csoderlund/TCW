@@ -250,7 +250,7 @@ public class SortTable extends JTable implements ListSelectionListener {
 
     	private TableData theData = null;
     }
-    private Color bgColor = Globals.BGCOLOR;
+    private Color bgColor = Globalx.BGCOLOR;
     private Color bgColorAlt = new Color(240,240,255);
     private Color bgColorHighlight = Color.GRAY;
     private Color txtColor = Color.BLACK; 

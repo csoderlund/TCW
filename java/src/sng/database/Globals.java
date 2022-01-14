@@ -29,11 +29,6 @@ public class Globals {
 	public static final String def3p = ".r";
 	
 	public static final Color BGCOLOR = Color.WHITE;
-	public static final Color FUNCTIONCOLOR = Globalx.FUNCTIONCOLOR; // replace with no color
-	public static final Color MENUCOLOR = Globalx.MENUCOLOR;	// beige
-	public static final Color HELPCOLOR = Globalx.HELPCOLOR;	// rose
-	public static final Color PROMPTCOLOR = Globalx.PROMPTCOLOR;	// light beige
-	public static final Color LAUNCHCOLOR = Globalx.LAUNCHCOLOR; // light purple
 	
 	public static final Color altRowColor = Globalx.altRowColor;
 	public static final Color selectColor = Globalx.selectColor;
@@ -54,6 +49,7 @@ public class Globals {
 	static public final String seqTableLabel = "Seq Table"; // CAS334 Changed label everywhere
 	static public final String seqDetailLabel = "Seq Detail"; // CAS334 ditto
 	static public final String pairTableLabel = "Pair Table"; // CAS334 ditto
+	static public final String select = "Selected: ";
 	
 	// For sequence remark column - all assigned in DoORF except MultiFrame, which is assigned in DoUniProt
 	
@@ -89,6 +85,8 @@ public class Globals {
 	static public final String pRM_ECO = "1";
 	static public final String pPRUNE = "0"; // Also change in AnnoOption Defaults
 	static public final String pNO_GO = "0";
+	
+	/********************************************************/
 	
 	public static boolean hasVal(String val) {
 		if (val==null || val.trim().equals("")|| val.trim().equals("-")  ) return false;

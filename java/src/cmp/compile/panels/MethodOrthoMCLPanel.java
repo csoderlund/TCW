@@ -18,7 +18,7 @@ public class MethodOrthoMCLPanel extends JPanel {
 	public MethodOrthoMCLPanel(CompilePanel parentPanel) {
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setAlignmentX(Component.LEFT_ALIGNMENT);
-		setBackground(Globals.BGCOLOR);
+		setBackground(Static.BGCOLOR);
 		int width = Globals.Methods.WIDTH;
 		add(Box.createVerticalStrut(20));
 

@@ -1,4 +1,5 @@
 package cmp.compile.panels;
+import java.awt.Color;
 /************************************************
  * The Methods section of the runMultiTCW
  */
@@ -29,7 +30,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import cmp.compile.runMTCWMain;
 import cmp.compile.Summary;
 import cmp.compile.Pairwise;
-import cmp.database.Globals;
+import cmp.database.DBinfo;
 
 import util.database.DBConn;
 import util.methods.ErrorReport;
@@ -38,14 +39,15 @@ import util.methods.Out;
 
 public class MethodPanel extends JPanel {
 	private static final long serialVersionUID = -8287618156963989136L;
-
+	private static final Color BGCOLOR = Color.WHITE;
+	
 	public MethodPanel(CompilePanel parentPanel, EditMethodPanel editPanel) {
 		theCompilePanel = parentPanel;
 		theEditMethodPanel = editPanel;
 		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setAlignmentX(Component.LEFT_ALIGNMENT);
-		setBackground(Globals.BGCOLOR);
+		setBackground(BGCOLOR);
 		
 		mainPanel = Static.createPagePanel();
 		JPanel row = Static.createRowPanel();
@@ -57,23 +59,23 @@ public class MethodPanel extends JPanel {
 	// Table on left
 		theTable = new MethodTable();
 		sPane = new JScrollPane(theTable);
-		sPane.setBackground(Globals.BGCOLOR);
-		sPane.getViewport().setBackground(Globals.BGCOLOR);
-		theTable.getTableHeader().setBackground(Globals.BGCOLOR);
+		sPane.setBackground(BGCOLOR);
+		sPane.getViewport().setBackground(BGCOLOR);
+		theTable.getTableHeader().setBackground(BGCOLOR);
 		ScrollBarUI tUI = new BasicScrollBarUI() {
 		    protected JButton createDecreaseButton(int orientation) {
 		        JButton button = super.createDecreaseButton(orientation);
-		        button.setBackground(Globals.BGCOLOR);
+		        button.setBackground(BGCOLOR);
 		        return button;
 		    }
 		    protected JButton createIncreaseButton(int orientation) {
 		        JButton button = super.createIncreaseButton(orientation);
-		        button.setBackground(Globals.BGCOLOR);
+		        button.setBackground(BGCOLOR);
 		        return button;
 		    }
 		};
-		sPane.getHorizontalScrollBar().setBackground(Globals.BGCOLOR);
-		sPane.getVerticalScrollBar().setBackground(Globals.BGCOLOR);
+		sPane.getHorizontalScrollBar().setBackground(BGCOLOR);
+		sPane.getVerticalScrollBar().setBackground(BGCOLOR);
 		sPane.getHorizontalScrollBar().setUI(tUI);
 		sPane.getVerticalScrollBar().setUI(tUI);
 		row.add(sPane);
@@ -81,7 +83,7 @@ public class MethodPanel extends JPanel {
 		
 	// actions on right
 		addActionPanel = Static.createPagePanel();
-		btnAdd = Static.createButton("Add", true, Globals.MENUCOLOR);
+		btnAdd = Static.createButtonPanel("Add", true);
 		btnAdd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				theEditMethodPanel.resetSettings();
@@ -94,7 +96,7 @@ public class MethodPanel extends JPanel {
 		});
 		addActionPanel.add(btnAdd);
 		
-		btnEdit = Static.createButton("Edit", false, Globals.MENUCOLOR);
+		btnEdit = Static.createButtonPanel("Edit", false);
 		btnEdit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				int row = theTable.getSelectedRow();
@@ -118,7 +120,7 @@ public class MethodPanel extends JPanel {
 		addActionPanel.add(Box.createVerticalStrut(3));
 		addActionPanel.add(btnEdit);
 		
-		btnRemove = Static.createButton("Remove", false);
+		btnRemove = Static.createButtonMenu("Remove", false);
 		btnRemove.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				removeMethod();
@@ -147,7 +149,7 @@ public class MethodPanel extends JPanel {
 		
 	// Main function
 		row = Static.createRowPanel();
-		btnAddGroups = Static.createButton("Add New Clusters", true, null);
+		btnAddGroups = Static.createButtonRun("Add New Clusters", true);
 		btnAddGroups.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if(theCompilePanel.dbIsExist()) {
@@ -166,8 +168,7 @@ public class MethodPanel extends JPanel {
 	}
 	private void removeMethod() {
 		try {
-			Object [] optionsLoaded = { "Remove from database", 
-					"Remove from database and table" };
+			Object [] optionsLoaded = { "Remove from database", "Remove from database and table" };
 			
 			int row = theTable.getSelectedRow();
 			if (row<0) return;
@@ -211,6 +212,9 @@ public class MethodPanel extends JPanel {
 			int PMid = rs.getInt(1);
 			rs.close();
 			
+			DBinfo info = theCompilePanel.getDBInfo();
+			info.clearCntKeys(); // CAS340
+			
 			int nSeq = mDB.executeCount("select count(*) from unitrans");
 			Out.PrtSpMsg(2, "Remove column from " + nSeq + " sequence table rows...");
 			mDB.tableCheckDropColumn("unitrans", methodPrefix);
@@ -230,7 +234,6 @@ public class MethodPanel extends JPanel {
 				mDB.executeUpdate("TRUNCATE TABLE pog_groups");
 				mDB.executeUpdate("TRUNCATE TABLE pog_members");
 				mDB.executeUpdate("TRUNCATE TABLE pog_scores"); // CAS326 add
-				Out.PrtSpMsg(2, "Set flags to zero for all pairs...");
 				mDB.executeUpdate("update pairwise set hasGrp=0, hasBBH=0");
 			}
 			else {
@@ -265,6 +268,7 @@ public class MethodPanel extends JPanel {
 				mDB.executeUpdate("ALTER TABLE pog_groups AUTO_INCREMENT = " + (count+1));	
 				
 				new Pairwise(theCompilePanel).fixFlagsPairwise(mDB); 
+				info.updateCntKeys(mDB); // CAS340
 			}
 			
 			new Summary(mDB).removeSummary();

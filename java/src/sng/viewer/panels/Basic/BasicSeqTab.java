@@ -61,13 +61,13 @@ public class BasicSeqTab extends Tab {
 	 * Top button panel
 	 */
 	private void createTopRowPanel() {
-		btnViewSeqs = Static.createButton(Globals.seqTableLabel, false, Globals.FUNCTIONCOLOR);
+		btnViewSeqs = Static.createButtonTab(Globals.seqTableLabel, false);
 		btnViewSeqs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				viewSelectedSeqs();
 			}
 		});
-		btnDetail = Static.createButton(Globals.seqDetailLabel, false, Globals.FUNCTIONCOLOR);
+		btnDetail = Static.createButtonTab(Globals.seqDetailLabel, false);
 		btnDetail.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				viewSelectedDetail();
@@ -159,7 +159,7 @@ public class BasicSeqTab extends Tab {
         });	
 
 		topRowPanel = Static.createRowPanel();
-		topRowPanel.add(new JLabel("Selected:"));	topRowPanel.add(Box.createHorizontalStrut(1));
+		topRowPanel.add(Static.createLabel(Globals.select));	topRowPanel.add(Box.createHorizontalStrut(1));
 		topRowPanel.add(btnViewSeqs);				topRowPanel.add(Box.createHorizontalStrut(1));
 		topRowPanel.add(btnDetail);					topRowPanel.add(Box.createHorizontalStrut(1));
 		topRowPanel.add(btnCopy);					topRowPanel.add(Box.createHorizontalStrut(40));

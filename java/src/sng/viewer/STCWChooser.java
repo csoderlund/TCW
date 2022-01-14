@@ -140,11 +140,8 @@ public class STCWChooser extends JFrame {
 	               (int) dim.getWidth()), Math.max(400, (int) dim.getHeight())));
 	       dbScrollPane.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-	       final JButton btnViewdb = new JButton("Launch");
+	       final JButton btnViewdb = Static.createButtonPopup("Launch", false);
 	       btnViewdb.setAlignmentX(Component.CENTER_ALIGNMENT);
-	       btnViewdb.setBackground(Globalx.LAUNCHCOLOR);
-	       btnViewdb.setEnabled(false);
-
 	       btnViewdb.addActionListener(new ActionListener() {
 	           public void actionPerformed(ActionEvent event) {
 	        	   try {
@@ -157,10 +154,8 @@ public class STCWChooser extends JFrame {
 	           }
 	       });
 	       
-			final JButton btnGetState = new JButton("Overview");
-			btnGetState.setBackground(Globalx.LAUNCHCOLOR);
+			final JButton btnGetState = Static.createButtonPopup("Overview", false);
 			btnGetState.setAlignmentX(Component.LEFT_ALIGNMENT);
-			btnGetState.setEnabled(false);
 			btnGetState.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					try {

@@ -151,32 +151,30 @@ public class FieldPairsTab extends Tab implements ActionListener
 	
    		return subPanel;
 	}
-	
-	
+
 	private JPanel createButtonPanel() {
-		JButton btnExpandAll = new JButton("Expand All");
+		JButton btnExpandAll = Static.createButton("Expand All");
 		btnExpandAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {	
 				expandSections(true);
 			}
 		});
 		
-		JButton btnCollapseAll = new JButton("Collapse All");
+		JButton btnCollapseAll = Static.createButton("Collapse All");
 		btnCollapseAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {	
 				expandSections(false);
 			}
 		});
 		
-		JButton btnRefreshAll = new JButton("Refresh All Existing Filter Tables");
+		JButton btnRefreshAll = Static.createButton("Refresh All Existing Filter Tables");
 		btnRefreshAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {	
 				refreshAll();
 			}
 		});
 		
-		JButton btnHelp = new JButton("Help");
-		btnHelp.setBackground(Globals.HELPCOLOR);
+		JButton btnHelp = Static.createButtonHelp("Help", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(getParentFrame(), 

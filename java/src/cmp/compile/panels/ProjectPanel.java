@@ -44,8 +44,7 @@ public class ProjectPanel extends JPanel {
 		mainPanel = Static.createPagePanel();
 		JPanel row1 = Static.createRowPanel();
 		
-		btnAdd = new JButton("Add Project");
-		btnAdd.setBackground(Globals.PROMPTCOLOR);
+		btnAdd = Static.createButtonMenu("Add Project", true);
 		btnAdd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				theCompilePanel.updateClearInterface();
@@ -55,12 +54,10 @@ public class ProjectPanel extends JPanel {
 				theCompilePanel.mTCWcfgRead();
 			}
 		});
-		btnHelp = new JButton("Help");
-		btnHelp.setBackground(Globals.HELPCOLOR);
+		btnHelp = Static.createButtonHelp("Help", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				UserPrompt.displayHTMLResourceHelp(theCompilePanel.getParentFrame(), 
-						"runMultiTCW", helpHTML);
+				UserPrompt.displayHTMLResourceHelp(theCompilePanel.getParentFrame(), "runMultiTCW", helpHTML);
 			}
 		});
 		row1.add(btnAdd);
@@ -89,8 +86,7 @@ public class ProjectPanel extends JPanel {
 		row2.add(cmbProject);
 		row2.add(Box.createHorizontalStrut(10));
 		
-		btnSave = new JButton("Save");
-		btnSave.setBackground(Globals.BGCOLOR);
+		btnSave = Static.createButton("Save");
 		btnSave.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if(cmbProject.getSelectedIndex() > 0)
@@ -100,8 +96,7 @@ public class ProjectPanel extends JPanel {
 		row2.add(btnSave);
 		row2.add(Box.createHorizontalStrut(10));
 		
-		btnRemove = new JButton("Remove...");
-		btnRemove.setBackground(Globals.PROMPTCOLOR);
+		btnRemove = Static.createButtonMenu("Remove...", true);
 		btnRemove.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		btnRemove.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -112,8 +107,7 @@ public class ProjectPanel extends JPanel {
 		row2.add(btnRemove);
 		row2.add(Box.createHorizontalStrut(10));
 		
-		btnOverview = new JButton("Overview");
-		btnOverview.setBackground(Globals.LAUNCHCOLOR);
+		btnOverview = Static.createButtonPopup("Overview", true);
 		btnOverview.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				dbShowOverview();
@@ -434,24 +428,28 @@ public class ProjectPanel extends JPanel {
     		catch (Exception e){ErrorReport.reportError(e, "Cannot delete database " + getDBName());}
     	}
       
-    	public void removeMethods() { // CAS326 added
+    	public void removeClustAndMethods() { // CAS326 added
     		try {
     			DBinfo info = theCompilePanel.getDBInfo();
     			if (info==null) {
     				Out.PrtWarn("Database does not exist");
     				return;
     			}
-    			boolean ret = UserPrompt.showConfirm("Remove...", 
-    					"Remove all clusters from database");
+    			boolean ret = UserPrompt.showConfirm("Remove...", "Remove all clusters from database");
     			if (!ret) return;
     			
     			Out.PrtSpMsg(0, "Remove clusters from database");
+    			info.clearCntKeys();
+    			
     			DBConn mDB = runMTCWMain.hosts.getDBConn(getDBName());
     			
     			removeClust(mDB, info.getMethodPrefix());
+ 
+    			mDB.executeUpdate("update pairwise set hasGrp=0, hasBBH=0");
     			
-    			mDB.executeUpdate("update pairwise set hasGrp=0, hasBBH=0"); 
-    			mDB.executeUpdate("update info set hasMA=0");// CAS330 add hasMA
+    			info.updateCntKeys(mDB); // removing clusters still leaves PCC and stats
+    			
+    			mDB.close();
     			
     			Out.PrtSpMsg(0, "Finish cluster removal");
     			theCompilePanel.updateAll(); 
@@ -465,12 +463,12 @@ public class ProjectPanel extends JPanel {
     				Out.PrtWarn("Database does not exist");
     				return;
     			}
-    			boolean ret = UserPrompt.showConfirm("Remove...", 
-    					"Remove clusters and pairs from database");
+    			boolean ret = UserPrompt.showConfirm("Remove...", "Remove clusters and pairs from database");
     			if (!ret) return;
     			
     			Out.PrtSpMsg(0,"Remove clusters and pairs from database ");
     			DBConn mDB = runMTCWMain.hosts.getDBConn(getDBName());
+    			
     			
     			// Clusters
     			Out.PrtSpMsg(1, "Remove clusters....");
@@ -485,6 +483,7 @@ public class ProjectPanel extends JPanel {
     			new Summary(mDB).removeSummary();      
     			mDB.executeUpdate("update info set kaksInfo='', pairInfo='', aaInfo='', ntInfo='', "
     					+ "hasMA=0, hasPCC=0"); // CAS310 add these two
+    			info.clearCntKeys(); // CAS340
     			
     			Out.PrtSpMsg(0, "Finish clusters and pairs removal");
     			theCompilePanel.updateAll(); 
@@ -507,9 +506,12 @@ public class ProjectPanel extends JPanel {
     			
     			int nPair = mDB.executeCount("select count(*) from pairwise");
     			Out.PrtSpMsg(1, "Remove method columns from " + nPair + " pair table rows...");
+    			
     			for (String methodPrefix: prefixes) { // truncate pairwise before remove prefix
     				mDB.tableCheckDropColumn("pairwise", methodPrefix);
     			}
+    			
+    			mDB.executeUpdate("update info set hasMA=0");// CAS330 add hasMA
     		}
     		catch(Exception e) {ErrorReport.prtReport(e, "Error removing pairs and methods from database");}
     	}
@@ -582,7 +584,7 @@ public class ProjectPanel extends JPanel {
     			btnBlast.setEnabled(false);
     		}
     		if (btnClust.isSelected()) {
-    			removeMethods();
+    			removeClustAndMethods();
     		}
     		if (btnPair.isSelected()) {
     			removePairsAndMethods();

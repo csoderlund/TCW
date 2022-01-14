@@ -66,7 +66,7 @@ import util.ui.UserPrompt;
  */
 public class QRFrame extends JDialog implements WindowListener {
 	private static final long serialVersionUID = 6227242983434722745L;
-	
+	private static String helpHTML = "html/runDE/QRFrame.html";
 	public static double dispersion = 0.1;
 	
 	public static final String allColsDE = "All DE p-value";
@@ -887,7 +887,7 @@ public class QRFrame extends JDialog implements WindowListener {
 		row.add(txtRfile1);
 		row.add(Box.createHorizontalStrut(1));
 		
-		btnRfile1 = new JButton("...");
+		btnRfile1 = Static.createButtonFile("...", true);
 		btnRfile1.addActionListener(new ActionListener()  {
 			public void actionPerformed(ActionEvent arg0) {
 				FileRead fc = new FileRead(projDirName, FileC.bDoVer, FileC.bDoPrt);
@@ -1112,7 +1112,7 @@ public class QRFrame extends JDialog implements WindowListener {
 		row.add(txtPairsFile);
 		row.add(Box.createHorizontalStrut(1));
 		
-		btnPairsFile = new JButton("...");
+		btnPairsFile = Static.createButtonFile("...", true);
 		btnPairsFile.addActionListener(new ActionListener()  {
 			public void actionPerformed(ActionEvent arg0) {
 				FileRead fc = new FileRead(projDirName, FileC.bDoVer, FileC.bDoPrt);
@@ -1401,10 +1401,10 @@ public class QRFrame extends JDialog implements WindowListener {
 		row.add(Box.createHorizontalStrut(10));
 		row.add(Box.createHorizontalGlue());
 		
-		final JButton btnHelp = Static.createButton("Help", true, Globals.HELPCOLOR);
+		final JButton btnHelp = Static.createButtonHelp("Help", true);
 	       btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				UserPrompt.displayHTMLResourceHelp(getInstance(), "RunDE Help", "html/runDE/QRFrame.html");
+				UserPrompt.displayHTMLResourceHelp(getInstance(), "RunDE Help", helpHTML);
 			}
 	       });
 	    row.add(btnHelp);
@@ -1520,11 +1520,9 @@ public class QRFrame extends JDialog implements WindowListener {
 	               (int) dim.getWidth()), Math.max(400, (int) dim.getHeight())));
 	       assemblyScrollPane.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-	       final JButton btnViewAssembly = new JButton("Launch");
+	       final JButton btnViewAssembly = Static.createButtonPopup("Launch", false);
 	       btnViewAssembly.setAlignmentX(Component.CENTER_ALIGNMENT);
-	       btnViewAssembly.setBackground(Globals.LAUNCHCOLOR);
-	       btnViewAssembly.setEnabled(false);
-
+	     
 	       btnViewAssembly.addActionListener(new ActionListener() {
 	           public void actionPerformed(ActionEvent event) {
 	        	   try {
@@ -1537,10 +1535,8 @@ public class QRFrame extends JDialog implements WindowListener {
 	           }
 	       });
 	       
-			final JButton btnGetState = new JButton("Overview");
-			btnGetState.setBackground(Globals.LAUNCHCOLOR);
+			final JButton btnGetState = Static.createButtonPopup("Overview", false);
 			btnGetState.setAlignmentX(Component.LEFT_ALIGNMENT);
-			btnGetState.setEnabled(false);
 			btnGetState.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					try {

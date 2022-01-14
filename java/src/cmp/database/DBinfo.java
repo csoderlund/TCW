@@ -163,44 +163,87 @@ public class DBinfo {
 		}
 		catch(Exception e) {ErrorReport.prtReport(e, "Error loading taxa");}
 	}
-	
-	public boolean isPairsSet() {
-		return (cntPairGrp>0);
+	/**********************************************************************
+	 * Stats info
+	 */
+	public void clearCntKeys() {// CAS340 - cleared for any changes to pairs or clusters
+		updateInfoKey("stats", ""); 
+		updateInfoKey("multi", "");
+		updateInfoKey("kaks", "");
+		updateInfoKey("pairGrp", "");
 	}
-	public void setPairsEdit(DBConn mDB) {
+
+	public void updateCntKeys(DBConn mDB) { // CAS340 recomputed after any changes to pairs or clusters
 		try {
 			cntStats=cntPCC=cntKaKs=cntPairGrp=cntMulti=0;
-			if (cntPair==0 || cntGrp==0) return;
+			if (cntPair==0) return;
 			
 			setPairs(); // checks are fast; counts can be long if have to check the entire table
-			
-			cntPairGrp = mDB.executeCount("select count(*) from pairwise where hasGrp>0");
-			if (hasStats) 	cntStats =   mDB.executeCount("select count(*) from pairwise where nAlign>0");
-			if (hasKaKs) 	cntKaKs =    mDB.executeCount("select count(*) from pairwise where kaks>=" + Globalx.dNullVal); 
-			if (hasPCC) 	cntPCC =     mDB.executeCount("select count(*) from pairwise where PCC!=" + Globalx.dNoVal);              
-			if (hasMulti) 	cntMulti =   mDB.executeCount("select count(*) from pog_groups where conLen>0");
+		
+			if (cntPairGrp==0) {
+				cntPairGrp = mDB.executeCount("select count(*) from pairwise where hasGrp>0");
+				if (cntPairGrp!=0) updateInfoKey("stats", cntStats+"");
+			}
+			if (hasStats && cntStats==0) 	{
+				cntStats =   mDB.executeCount("select count(*) from pairwise where nAlign>0");
+				if (cntStats!=0) updateInfoKey("stats", cntStats+"");
+			}
+			if (hasKaKs && cntKaKs==0) 	{
+				cntKaKs =    mDB.executeCount("select count(*) from pairwise where kaks>=" + Globalx.dNullVal); 
+				if (cntKaKs!=0) updateInfoKey("kaks", cntKaKs+"");
+			}
+			if (hasPCC && cntPCC==0) 	{
+				cntPCC =     mDB.executeCount("select count(*) from pairwise where PCC!=" + Globalx.dNoVal);
+				if (cntPCC!=0) updateInfoKey("pcc", cntPCC+"");
+			}
+		
+			if (hasMulti && cntMulti==0) 	{
+				cntMulti =   mDB.executeCount("select count(*) from pog_groups where conLen>0");
+				if (cntMulti!=0) updateInfoKey("multi", cntMulti+"");
+			}
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "loading counts");}
 	}
 	
 	// CAS310 this method was counting from pairwise, which took very long
+	// CAS340 was still taking long too, so added keys to infoKeys too
 	private void setPairs() { 
 		try {
-			if (cntPair>0) { 
-				hasPCC =        mDB.executeBoolean("select hasPCC from info"); 
-		
-				hasStats =      hasVal("select pairInfo from info");   
-				hasKaKs =       hasVal("select kaksInfo from info"); 
-				hasNTblast =    hasVal("select ntInfo from info"); 
-				
-				hasMulti = mDB.executeBoolean("select hasMA from info");
-				hasDBalign = hasMulti;
-				
-				String val = infoKeyVal("MSAscore1");
-				msaScore1 = (val!=null) ? val : "Sum-of-pairs";
-				
-				val = infoKeyVal("MSAscore2");
-				msaScore2 = (val!=null) ? val : "Unknown";
+			if (cntPair==0) return;
+			
+			hasPCC =        mDB.executeBoolean("select hasPCC from info"); 
+	
+			hasStats =      hasVal("select pairInfo from info");   
+			hasKaKs =       hasVal("select kaksInfo from info"); 
+			hasNTblast =    hasVal("select ntInfo from info"); 
+			
+			hasMulti = mDB.executeBoolean("select hasMA from info");
+			hasDBalign = hasMulti;
+			
+			String val = getInfoKeyVal("MSAscore1");
+			msaScore1 = (Static.isNotEmpty(val)) ? val : "Sum-of-pairs";
+			
+			val = getInfoKeyVal("MSAscore2");
+			msaScore2 = (val!=null && !val.contentEquals("")) ? val : "Unknown";
+			
+			val = getInfoKeyVal("pairGrp");
+			if (Static.isNotEmpty(val))  cntGrp = Static.getInteger(val);
+			
+			if (hasPCC) {
+				val = getInfoKeyVal("pcc");
+				if (Static.isNotEmpty(val))  cntPCC = Static.getInteger(val);
+			}
+			if (hasStats) {
+				val = getInfoKeyVal("stats");
+				if (Static.isNotEmpty(val)) cntStats = Static.getInteger(val);
+			}
+			if (hasMulti) {
+				val = getInfoKeyVal("multi");
+				if (Static.isNotEmpty(val)) cntMulti = Static.getInteger(val);
+			}
+			if (hasKaKs) {
+				val = getInfoKeyVal("kaks");
+				if (Static.isNotEmpty(val)) cntKaKs = Static.getInteger(val);
 			}
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "setting pair info");}
@@ -213,15 +256,48 @@ public class DBinfo {
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "setting pair info"); return false;}
 	}
-	//------ CAS312 use this to get all values from table -----------//
-	private String infoKeyVal(String key) {
-		String val="";
+	
+	private String getInfoKeyVal(String key) {
 		try {
-			val = mDB.executeString("select iVal from infoKeys where iKey='" + key + "'");
+			String val = mDB.executeString("select iVal from infoKeys where iKey='" + key + "'");
+			if (val!=null) val = val.trim();
+			return val;
 		}
-		catch (Exception e) {ErrorReport.prtReport(e, "Getting value for " + key);}
-		return val;
+		catch (Exception e) {ErrorReport.prtReport(e, "Getting value for " + key); return "";}
 	}
+	//--- CAS312 add key-value pair to infoKey table ---------//
+	public void updateInfoKey(String key, int val) {
+		updateInfoKey(key, val + "");
+	}
+	public void updateInfoKey(String key, String val) {
+		try {
+			// these are valid keys
+			String [] validKey = {"MSAscore1","MSAscore2", "pairGrp", "pcc", "stats", "multi", "kaks"};
+			boolean found=false;
+			for (String x : validKey) {
+				if (x.contentEquals(key)) {
+					found=true;
+					break;
+				}
+			}
+			if (!found) {
+				Out.PrtWarn("No such infoKey keyword: " + key);
+				return;
+			}
+			
+			if (val.contentEquals("0")) val="";
+			
+			String oldVal = getInfoKeyVal(key);
+			String sql;
+			
+			if (oldVal==null) sql = "insert into infoKeys set iKey= '"  + key + "', iVal='" + val + "'";
+			else              sql = "update infoKeys set iVal='" + val + "' where iKey='" + key + "'";
+			
+			mDB.executeUpdate(sql);
+		}
+		catch(Exception e) {ErrorReport.die(e, "Error updating info method");}
+	}
+	
 	/*******************************************************
 	 * XXX Updates from runMultiTCW
 	 */
@@ -263,23 +339,7 @@ public class DBinfo {
 		
 		return "'" + buffer.toString() + "'";
 	}
-	//--- CAS312 add key-value pair to infoKey table ---------//
-	public void updateInfoKey(String key, String val) {
-		try {
-			if (!key.contentEquals("MSAscore1") && !key.contentEquals("MSAscore2")) {
-				Out.PrtWarn("No such infoKey keyword: " + key);
-				return;
-			}
-			String oldVal = infoKeyVal(key);
-			String sql;
-			
-			if (oldVal==null) sql = "insert into infoKeys set iKey= '"  + key + "', iVal='" + val + "'";
-			else              sql = "update infoKeys set iVal='" + val + "' where iKey='" + key + "'";
-			
-			mDB.executeUpdate(sql);
-		}
-		catch(Exception e) {ErrorReport.die(e, "Error updating info method");}
-	}
+	
 	
 	/*********************************************************
 	 * XXX SAMPLEs: Want to show between 20 and 1000 of each
@@ -544,6 +604,8 @@ public class DBinfo {
 	public int getCntGrp()  {return cntGrp;} 
 	public int getCntPair() {return cntPair;} 
 	public int getCntHit()  {return cntHit;} 
+	public boolean isPairsSet() {return (cntPairGrp>0);}
+	
 	// setASM
 	public boolean hasCounts() { return hasCounts;}
 	public int nAAdb() {return cntAAdb;}

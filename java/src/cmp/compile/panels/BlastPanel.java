@@ -43,11 +43,11 @@ public class BlastPanel extends JPanel {
 		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setAlignmentX(Component.LEFT_ALIGNMENT);
-		setBackground(Globals.BGCOLOR);
+		setBackground(Static.BGCOLOR);
 		
 		blastPanel = Static.createPagePanel();
 		
-		blastPanel.add(new JLabel("2. Compare sequences"));
+		blastPanel.add(Static.createLabel("2. Compare sequences"));
 		blastPanel.add(Box.createVerticalStrut(5));
 		
 		JPanel row = Static.createRowPanel();
@@ -58,7 +58,7 @@ public class BlastPanel extends JPanel {
 		blastPanel.add(Box.createVerticalStrut(5));
 		
 		row = Static.createRowPanel();
-		btnRunBlast = new JButton("Run Search");
+		btnRunBlast = Static.createButtonRun("Run Search", true);
 		btnRunBlast.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				runBlast();
@@ -67,7 +67,7 @@ public class BlastPanel extends JPanel {
 		row.add(btnRunBlast);
 		row.add(Box.createHorizontalStrut(10));
 		
-		JLabel lblCPUs = new JLabel("#CPUs");
+		JLabel lblCPUs = Static.createLabel("#CPUs");
 		txtCPUs = new JTextField(3);
 		row.add(lblCPUs);
 		row.add(Box.createHorizontalStrut(5));
@@ -79,7 +79,7 @@ public class BlastPanel extends JPanel {
 		row.add(txtCPUs);
 		row.add(Box.createHorizontalStrut(10));
 		
-		btnBlastSettings = Static.createButton("Settings", true, Globals.MENUCOLOR);
+		btnBlastSettings = Static.createButtonPanel("Settings", true);
 		btnBlastSettings.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				editPanelStartup();
@@ -90,7 +90,7 @@ public class BlastPanel extends JPanel {
 		
 		// pairs
 		row = Static.createRowPanel();
-		btnAddPairs = Static.createButton("Add Pairs from Hits", false);
+		btnAddPairs = Static.createButtonRun("Add Pairs from Hits", false);
 		btnAddPairs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				createPairsFromBlast();
@@ -99,7 +99,7 @@ public class BlastPanel extends JPanel {
 		row.add(btnAddPairs);
 		
 		row.add(Box.createHorizontalStrut(5));
-		lblPairsSummary = new JLabel(" ");
+		lblPairsSummary = Static.createLabel(" ");
 		row.add(lblPairsSummary);
 		
 		blastPanel.add(row);
@@ -112,7 +112,7 @@ public class BlastPanel extends JPanel {
 	/*******************************************************
 	 * Add blast pairs
 	 */
-	private void createPairsFromBlast() {
+	public void createPairsFromBlast() {
 		Out.createLogFile(theCompilePanel.getCurProjAbsDir(), Globals.searchFile);
 	
 		if (theCompilePanel.getDBInfo().getCntPair()>0) {
@@ -136,14 +136,18 @@ public class BlastPanel extends JPanel {
 			}
 			else Out.PrtSpMsg(2, "No NT (nucleotide) results file to load");
 				
-			Out.PrtMsgTimeMem("Complete creating pairs", time);
+			DBConn mDB = theCompilePanel.getDBconn(); // CAS340 add final count
+			int cnt = mDB.executeCount("select count(*) from pairwise");
+			mDB.close();
+			
+			Out.PrtMsgTimeMem("Complete creating " + Static.dFormat(cnt) + " pairs", time); 
 			theCompilePanel.updateAll(); // updates DBinfo, then calls the blast updatedDBexist
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "adding pairs");}
 		Out.close();
 	}
 	
-	private void runBlast() { 
+	public void runBlast() { 
 		Out.createLogFile(theCompilePanel.getCurProjAbsDir(), Globals.searchFile);
 	
 		String blastDir = theCompilePanel.getCurProjAbsDir() +  "/" + Globals.Search.BLASTDIR; 
@@ -187,7 +191,6 @@ public class BlastPanel extends JPanel {
 		theCompilePanel.setMainPanelVisible(false);
 		editPanel.setVisible(true);
 	}
-	
 	
 	public void setBlastSummary() {
 		btnRunBlast.setEnabled(false);

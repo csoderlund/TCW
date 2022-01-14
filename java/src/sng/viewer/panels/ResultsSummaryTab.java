@@ -60,7 +60,7 @@ public class ResultsSummaryTab extends Tab
 				removeAllRows();
 			}
 		});	
-		btnHelp = Static.createButton("Help", true, Globals.HELPCOLOR);
+		btnHelp = Static.createButtonHelp("Help", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(getParentFrame(), title + " Results", helpHTML);

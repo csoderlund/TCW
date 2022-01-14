@@ -44,7 +44,7 @@ public class MultiStats {
 			else             
 				msg = runAlignScoreSave();
 				
-			Out.r("                                                ");
+			Out.rClear();
 			String sum = new Summary(mDB).getMethodScoreTable();
 			Out.prt(sum);
 			Out.PrtMsgTimeMem(msg, startTime);

@@ -222,7 +222,7 @@ public class ManagerFrame extends JFrame {
 		// which gets populated in the updateUI method
 		JPanel tempRow = Static.createRowPanel();
 		
-		btnExecLoadLib = Static.createButton("Step 1. Build Database", true, null);
+		btnExecLoadLib = Static.createButtonRun("Step 1. Build Database", true);
 		btnExecLoadLib.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Thread buildThread = new Thread(new Runnable() {
@@ -265,7 +265,7 @@ public class ManagerFrame extends JFrame {
 			}
 		});
 		
-		btnAssemOptions = Static.createButton("Options", true, Globals.MENUCOLOR);
+		btnAssemOptions = Static.createButtonPanel("Options", true);
 		btnAssemOptions.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				nFrameMode = FRAME_MODE_ASSEM;
@@ -275,7 +275,7 @@ public class ManagerFrame extends JFrame {
 			}
 		});
 		
-		btnExecAssem = Static.createButton("Step 2. Instantiate", true, null);
+		btnExecAssem = Static.createButtonRun("Step 2. Instantiate", true);
 		btnExecAssem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Thread buildThread = new Thread(new Runnable() {
@@ -303,30 +303,26 @@ public class ManagerFrame extends JFrame {
 		mainPanel.add(new JSeparator());
 
 		tempRow = Static.createRowPanel();
-		tempRow.add(new JLabel("AnnoDBs (e.g. UniProt)"));
-		btnCheck = Static.createButton("Check All", true);
+		tempRow.add(Static.createLabel("AnnoDBs (e.g. UniProt)"));
+		btnCheck = Static.createButtonPlain("Check All", true);
 		btnCheck.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				checkAllAnnos();
 			}
 		});
-		btnCheck.setMargin(new Insets(0, 0, 0, 0));
-		btnCheck.setFont(new Font(btnCheck.getFont().getName(),Font.PLAIN,10));
 		tempRow.add(Box.createHorizontalStrut(5));
 		tempRow.add(btnCheck);
 		
-		btnRemove = Static.createButton("Remove All", true);
+		btnRemove = Static.createButtonPlain("Remove All", true);
 		btnRemove.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				removeAllAnnos();
 			}
 		});
-		btnRemove.setMargin(new Insets(0, 0, 0, 0));
-		btnRemove.setFont(new Font(btnRemove.getFont().getName(),Font.PLAIN,10));
 		tempRow.add(Box.createHorizontalStrut(5));
 		tempRow.add(btnRemove);
 		
-		btnImportAnnot = Static.createButton("Import AnnoDBs", true, Globals.PROMPTCOLOR);
+		btnImportAnnot = Static.createButtonPlain("Import AnnoDBs", true);
 		btnImportAnnot.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -339,8 +335,6 @@ public class ManagerFrame extends JFrame {
 				catch(Exception err) {ErrorReport.reportError(err, "Error Import AnnoDBs");}
 			}
 		});
-		btnImportAnnot.setMargin(new Insets(0, 0, 0, 0));
-		btnImportAnnot.setFont(new Font(btnImportAnnot.getFont().getName(),Font.PLAIN,10));
 		tempRow.add(Box.createHorizontalStrut(5));
 		tempRow.add(btnImportAnnot);
 		
@@ -355,7 +349,7 @@ public class ManagerFrame extends JFrame {
 		pnlProject.setMaximumSize(d);
 		
 		tempRow = Static.createRowPanel();
-		btnExecAnno = Static.createButton("Step 3. Annotate", true, null);
+		btnExecAnno = Static.createButtonRun("Step 3. Annotate", true);
 		btnExecAnno.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Thread buildThread = new Thread(new Runnable() {
@@ -380,7 +374,7 @@ public class ManagerFrame extends JFrame {
 		tempRow.add(btnExecAnno);
 		tempRow.add(Box.createHorizontalStrut(5));
 		
-		btnUpdateGO = Static.createButton("GO only", true, null);
+		btnUpdateGO = Static.createButtonRun("GO only", true);
 		btnUpdateGO.addActionListener(new ActionListener() 
 		{
 			public void actionPerformed(ActionEvent arg0) 
@@ -400,7 +394,7 @@ public class ManagerFrame extends JFrame {
 		tempRow.add(btnUpdateGO);
 		tempRow.add(Box.createHorizontalStrut(5));
 		
-		btnUpdateORF = Static.createButton("ORF only", true, null);
+		btnUpdateORF = Static.createButtonRun("ORF only", true);
 		btnUpdateORF.addActionListener(new ActionListener() 
 		{
 			public void actionPerformed(ActionEvent arg0) 
@@ -420,7 +414,7 @@ public class ManagerFrame extends JFrame {
 		tempRow.add(btnUpdateORF);
 		tempRow.add(Box.createHorizontalStrut(5));
 		
-		btnEditAnnoOptions = Static.createButton("Options", true, Globals.MENUCOLOR);
+		btnEditAnnoOptions = Static.createButtonPanel("Options", true);
 		btnEditAnnoOptions.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				nFrameMode = FRAME_MODE_ANNO_DB_OPTIONS;
@@ -439,7 +433,7 @@ public class ManagerFrame extends JFrame {
 		mainPanel.add(new JSeparator());
 		////////////////////////////////////////////////////////
 		tempRow = Static.createRowPanel();
-		btnRunViewTCW = Static.createButton("Launch viewSingleTCW",true, Globals.LAUNCHCOLOR);
+		btnRunViewTCW = Static.createButtonPopup("Launch viewSingleTCW",true);
 		btnRunViewTCW.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				Thread buildThread = new Thread(new Runnable() {
@@ -454,7 +448,7 @@ public class ManagerFrame extends JFrame {
 		tempRow.add(btnRunViewTCW);
 		tempRow.add(Box.createHorizontalStrut(250));
 		
-		btnAddRemark = Static.createButton("Add Remarks or Locations", true, Globals.MENUCOLOR);
+		btnAddRemark = Static.createButtonPanel("Add Remarks or Locations", true);
 		btnAddRemark.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				pnlRemark.reset();
@@ -491,14 +485,14 @@ public class ManagerFrame extends JFrame {
 	private void createFirstTwoRowPanel(String [] projectNames) {
 		pnlProject = Static.createPagePanel();
 		
-		btnAddProject = Static.createButton("Add Project", true, Globals.PROMPTCOLOR);
+		btnAddProject = Static.createButtonMenu("Add Project", true);
 		btnAddProject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				addProject();
 			}
 		});
 
-		btnHelp = Static.createButton("Help", true, Globals.HELPCOLOR);
+		btnHelp = Static.createButtonHelp("Help", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(getInstance(), "runSingleTCW", HTML);
@@ -524,22 +518,21 @@ public class ManagerFrame extends JFrame {
 		});
 		cmbProjects.setMaximumSize(cmbProjects.getPreferredSize());
 		
-		btnSaveProject = Static.createButton("Save", true, Globals.BGCOLOR);
+		btnSaveProject = Static.createButton("Save", true);
 		btnSaveProject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				saveProject();
 			}
 		});
 		
-		btnCopyProject = Static.createButton("Copy", true, Globals.BGCOLOR);
+		btnCopyProject = Static.createButton("Copy", true);
 		btnCopyProject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				copyProject();
 			}
 		});
 		
-		btnRemoveProject = new JButton("Remove...");
-		btnRemoveProject.setBackground(Globals.PROMPTCOLOR);
+		btnRemoveProject = Static.createButtonMenu("Remove...", true);
 		btnRemoveProject.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		btnRemoveProject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -553,7 +546,7 @@ public class ManagerFrame extends JFrame {
 			}
 		});
 		
-		btnGetState = Static.createButton("Overview", true, Globals.LAUNCHCOLOR);
+		btnGetState = Static.createButtonPopup("Overview", true);
 		btnGetState.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				tcwDBselectShowOverview();
@@ -705,8 +698,7 @@ public class ManagerFrame extends JFrame {
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.PAGE_AXIS));
 		buttonPanel.setBackground(Globals.BGCOLOR);
 		
-		btnAddTransLib = new JButton("Add");
-		btnAddTransLib.setBackground(Globals.MENUCOLOR);
+		btnAddTransLib = Static.createButtonPanel("Add", true);
 		btnAddTransLib.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				nFrameMode = FRAME_MODE_TRANS_LIB_EDIT;
@@ -718,8 +710,7 @@ public class ManagerFrame extends JFrame {
 			}
 		});
 		
-		btnEditTransLib = new JButton("Edit");
-		btnEditTransLib.setBackground(Globals.MENUCOLOR);
+		btnEditTransLib = Static.createButtonPanel("Edit", false);
 		btnEditTransLib.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if (isTransSelected()) {
@@ -734,11 +725,8 @@ public class ManagerFrame extends JFrame {
 				}
 			}
 		});
-		btnEditTransLib.setEnabled(false);
 		
-		btnRemoveTransLib = new JButton("Remove");
-		btnRemoveTransLib.setBackground(Globals.BGCOLOR);
-		btnRemoveTransLib.setEnabled(false);
+		btnRemoveTransLib = Static.createButtonMenu("Remove", false);
 		btnRemoveTransLib.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if (isTransSelected()) {
@@ -806,8 +794,7 @@ public class ManagerFrame extends JFrame {
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.PAGE_AXIS));
 		buttonPanel.setBackground(Globals.BGCOLOR);
 		
-		btnDefRep = new JButton("Define Replicates");
-		btnDefRep.setBackground(Globals.MENUCOLOR);
+		btnDefRep = Static.createButtonPanel("Define Replicates", true);
 		btnDefRep.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				pnlGenReps.setRepList(curManData);
@@ -815,8 +802,7 @@ public class ManagerFrame extends JFrame {
 				pnlGenReps.setVisible(true);
 			}
 		});
-		btnEditExpLib = new JButton("Edit Attributes");
-		btnEditExpLib.setBackground(Globals.MENUCOLOR);
+		btnEditExpLib = Static.createButtonPanel("Edit Attributes", false);
 		btnEditExpLib.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if (isCountSelected()) {
@@ -829,7 +815,6 @@ public class ManagerFrame extends JFrame {
 				}
 			}
 		});
-		btnEditExpLib.setEnabled(false);
 		
 		btnEditExpLib.setMinimumSize(btnDefRep.getPreferredSize());
 		btnEditExpLib.setMaximumSize(btnDefRep.getPreferredSize());
@@ -889,8 +874,7 @@ public class ManagerFrame extends JFrame {
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.PAGE_AXIS));
 		buttonPanel.setBackground(Globals.BGCOLOR);
 		
-		btnAddAnnoDB = new JButton("Add");
-		btnAddAnnoDB.setBackground(Globals.MENUCOLOR);
+		btnAddAnnoDB = Static.createButtonPanel("Add", true);
 		btnAddAnnoDB.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				nFrameMode = FRAME_MODE_ANNO_DB_EDIT;
@@ -903,9 +887,7 @@ public class ManagerFrame extends JFrame {
 			}
 		});
 		
-		btnEditAnnoDB = new JButton("Edit");
-		btnEditAnnoDB.setBackground(Globals.MENUCOLOR);
-		btnEditAnnoDB.setEnabled(false);
+		btnEditAnnoDB = Static.createButtonPanel("Edit", false);
 		btnEditAnnoDB.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if (isAnnoDBSelected()) {
@@ -920,9 +902,7 @@ public class ManagerFrame extends JFrame {
 			}
 		});
 		
-		btnRemoveAnnoDB = new JButton("Remove");
-		btnRemoveAnnoDB.setBackground(Globals.BGCOLOR);
-		btnRemoveAnnoDB.setEnabled(false);
+		btnRemoveAnnoDB = Static.createButtonMenu("Remove", false);
 		btnRemoveAnnoDB.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if (isAnnoDBSelected()) {

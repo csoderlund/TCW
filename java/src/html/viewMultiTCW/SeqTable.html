@@ -6,85 +6,21 @@
 This table can be viewed from (1) Sample List "Sequences", (2) Filter "Sequence", or 
 (3) selecting a row in the cluster, pairs or hit table.
 
-<h3>First row of functions at the top</h3>
-The bottom panel can be switch between <b>Table</b> and the results of any of the "Align:" buttons.
+<h3>Row of functions at the top</h3>
 
-<p><b>Aligned (selected):</b> If none are selected, the default selection is all rows.
-<ul>
-<li><u>Pairwise...</u>
-<table border=1 cellpadding=3>
-<tr><td><b>AA for each pair</b> <td><td>Perform pairwise 
-alignment for all pairs of amino acid sequences from the selected sequences. 
-<tr><td><b>NT for each pair</b><td nowrap>NT-mTCW only<td> Perform pairwise 
-alignment for all pairs of nucleotide sequences from the selected sequences. 
-<tr><td><b>AA,NT,CDS for one pair</b> <td>NT-mTCW only 
-<td>Align the selected pair using the amino acid sequence,
-CDS sequence, and nucleotide sequences. The resulting panel will have these 3 alignments.
-<tr><td><b>5UTR, CDS, 3UTR for one pair</b> <td>NT-mTCW only
-<td>Align these three regions separately for the selected pair.
-The resulting panel will have these 3 alignments.
-<tr><td><b>AA to sequence best hit</b><td>
-<td>The best hit for each sequence will be aligned to it.
-<tr><td><b>AA to cluster best hit</b> <td>For Cluster only
-<td>The assigned cluster best hit is aligned to each sequence in the cluster.
-</table>
-
-<br>The Pairwise options can result in many alignments,  e.g. if 20 sequences are selected,
-190 alignments will be computed;  watch progress in lower left corner of viewMultiTCW.
-<br>&nbsp;
-
-<li><u>MSAdb</u> (Cluster set of sequences only) 
-The alignment has been stored in the database, so can be displayed
-without running the program; for a cluster of two, the alignment was computed using the dynamic programming
-algorithm (i.e. <tt>Pairwise...</tt>, <tt>AA for each pair</tt> option); for a cluster &gt; 2, MAFFTA-AA was
-computed.
-<br>&nbsp;
-
-<li><u>MSA...</u> 
-All the following display the alignment and provide the alignment file in the <tt>ResultAlign</tt> directory.
-<p>
-<ul>
-<li><b>MUSCLE-AA</b>: 
-Run MUSCLE to build a multiple alignment 
-for all amino acid sequences in the table or for the selected set. This can be very time consuming
-when run on many sequences. The command executed is:
-<pre>
-/Ext/linux/muscle/muscle -in ResultAlign/inSeq.fa -out ResultAlign/outAln.fa
-</pre>
-
-<li><b>MAFFT-AA</b>: Same as above.
-The command executed is:
-<pre>
-/Ext/linux/mafft/mafft.bat --auto --reorder --thread N ResultAlign/inSeq.fa
-</pre>
-Where N is the number of available threads (processors/CPUs).
-<br><br>
-<li><b>MAFFT-CDS</b>: (NT-mTCW only) Same as above but with the CDS sequences
-<br><br>
-<li><b>MAFFT-NT</b>: (NT-mTCW only) Same as above but with the NT sequences
-
-</ul>
-<p><i>On Mac, replace <tt>Ext/linux</tt> with <tt>Ext/mac</tt></i>.
-</ul>
-
-
-<h3>Second row of functions at the top</h3>
-<ul>
-<li><u>Details</u> For the selected sequence: show counts, TPM values, 
+<u>Details</u> For the selected sequence: show counts, TPM values, 
 and annotations. 
-<br>&nbsp;
-<li><u>Pairs</u> For the selected sequence(s): 
-Show the table of pairs containing at least one of the selected sequences.
-<br>&nbsp;
-<li><u>Clusters</u> For the selected sequence: 
+
+<p><u>Clusters</u> For the selected sequence(s): 
 Show the table of clusters containing the sequence.
-<br>&nbsp;
-<li><u>Copy...</u> For the selected sequence: 
+
+<p><u>Pairs</u> For the selected sequence(s): 
+Show the table of pairs containing at least one of the selected sequences.
+
+<p><u>Copy...</u> For the selected sequence: 
 Copies the seqID, AA, NT or CDS sequence, Best hitID, Best description or Best hit sequence.
-<br>&nbsp;
-<li><u>Clear</u> Clears the selected sequences.
-<br>&nbsp;
-<li><u>Table...</u>
+
+<p><u>Table...</u>
 <ul>
 <li><b>Show Column Stats</b>: Popup a table of statistics for the numeric columns in the table. 
 <br>&nbsp;
@@ -134,9 +70,6 @@ GO-ID	#Seqs	Level	GO	GO-Name
 </ol>
 </ul>
 </ul>
-</ul>
-
-
 
 <h2>Columns</h2>
 <ul> 

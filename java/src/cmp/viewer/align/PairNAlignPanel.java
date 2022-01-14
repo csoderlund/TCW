@@ -1,4 +1,4 @@
-package cmp.viewer.seq.align;
+package cmp.viewer.align;
 
 import java.awt.BasicStroke;
 import java.awt.Color;

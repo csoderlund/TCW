@@ -17,11 +17,12 @@ import javax.swing.JTextField;
 
 
 import sng.database.Globals;
+import util.methods.Static;
 import util.ui.UserPrompt;
 
 public class EditCountPanel extends JPanel {
 	private static final long serialVersionUID = 2806917997839245167L;
-
+	private static String helpHTML = Globals.helpRunDir + "EditExpLibPanel.html";
 	private static final int COLUMN_LABEL_WIDTH = 120;
 	private static final int TEXTFIELD_WIDTH = 30;
 		
@@ -109,11 +110,10 @@ public class EditCountPanel extends JPanel {
 				theParentFrame.setFrameMode(ManagerFrame.FRAME_MODE_MAIN);
 			}
 		});
-		btnHelp = new JButton("Help");
-		btnHelp.setBackground(Globals.HELPCOLOR);
+		btnHelp = Static.createButtonHelp("Help", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(theParentFrame, "Condition Help", "html/runSingleTCW/EditExpLibPanel.html");
+				UserPrompt.displayHTMLResourceHelp(theParentFrame, "Condition Help", helpHTML);
 			}
 		});
 

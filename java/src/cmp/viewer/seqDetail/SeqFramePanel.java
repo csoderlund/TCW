@@ -47,7 +47,7 @@ public class SeqFramePanel extends JPanel {
 		loadData();
 		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-		setBackground(Globals.BGCOLOR);
+		setBackground(Static.BGCOLOR);
 		
 		JPanel page = Static.createPagePanel();
 		createToolPanel();

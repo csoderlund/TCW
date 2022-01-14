@@ -67,21 +67,20 @@ public class SeqsQueryPanel extends JPanel {
 		buttonPanel = Static.createPagePanel();
 		
 		JPanel row = Static.createRowPanel();
-		btnSearch = Static.createButton("View Filtered Sequences", true, Globals.FUNCTIONCOLOR);
+		btnSearch = Static.createButtonTab("View Filtered Sequences", true);
 		btnSearch.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				hasError=false;
 				setSQLwhere();
 				if (!hasError) {
-					SeqsTopRowPanel newPanel = new SeqsTopRowPanel(theViewerFrame, 
+					SeqsTablePanel newPanel = new SeqsTablePanel(theViewerFrame, 
 						tag + theViewerFrame.getNextLabelNum(tag));
 					theViewerFrame.addResultPanel(MTCWFrame.SEQ_PREFIX, newPanel, newPanel.getName(), getQuerySummary());
 				}
 			}
 		});
 		
-		btnExpand = new JButton("Expand All");
-		btnExpand.setBackground(theViewerFrame.getSettings().getFrameSettings().getBGColor());
+		btnExpand = Static.createButton("Expand All");
 		btnExpand.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				for(int x=0; x<nSec; x++)
@@ -89,8 +88,7 @@ public class SeqsQueryPanel extends JPanel {
 			}
 		});
 		
-		btnCollapse = new JButton("Collapse All");
-		btnCollapse.setBackground(theViewerFrame.getSettings().getFrameSettings().getBGColor());
+		btnCollapse = Static.createButton("Collapse All");
 		btnCollapse.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				for(int x=0; x<nSec; x++)
@@ -105,11 +103,10 @@ public class SeqsQueryPanel extends JPanel {
 			}
 		});
 		
-		btnHelp = Static.createButton("Help", true, Globals.HELPCOLOR);
+		btnHelp = Static.createButtonHelp("Help", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(theViewerFrame, 
-						"Sequence Filter Help", helpHTML);
+				UserPrompt.displayHTMLResourceHelp(theViewerFrame, "Sequence Filter Help", helpHTML);
 			}
 		});
 		
@@ -437,7 +434,7 @@ public class SeqsQueryPanel extends JPanel {
 		if (hasError) sqlWhere="";
 		else setSummary();
 	}
-	public String getSQLwhere() { return sqlWhere;}
+	public String getSubQuery() { return sqlWhere;}
 	public String getQuerySummary() { return summary;}
 	private void setSummary() {
 		summary = "";
@@ -608,8 +605,8 @@ public class SeqsQueryPanel extends JPanel {
 			checkValues();
 			if (!checkOn.isSelected()) return "";
 			
-			String min = txtMin.getText(); // check if proper value
-			String max = txtMax.getText();
+			String min = txtMin.getText().trim(); // check if proper value
+			String max = txtMax.getText().trim();
 			
 			if (min.contentEquals("") && max.contentEquals("")) {
 				checkOn.setSelected(false);
@@ -621,10 +618,8 @@ public class SeqsQueryPanel extends JPanel {
 			if (min.contentEquals("")  && !max.contentEquals("")) 
 				return sqlField + "<" + max;
 			
-			if (min.contentEquals("0")  && max.contentEquals("0"))  // CAS330 add
-				return sqlField + "=0";
-			if (min.contentEquals("0.0")  && max.contentEquals("0.0"))  // CAS330 add
-				return sqlField + "=0.0";
+			if (min.contentEquals(max))	// CAS340 (was specifically checking for min=0 and max=0)
+				return sqlField + "=" + max;
 			
 			return "(" + sqlField + ">=" + min + " and " + sqlField + "<" + max + ")";
 		}

@@ -59,13 +59,11 @@ public class PairQueryTab extends Tab
 		txtDesc.setAlignmentX(Component.LEFT_ALIGNMENT);
 		txtDesc.setEditable(false);
 		txtDesc.setMaximumSize(txtDesc.getPreferredSize()); // needed to prevent vertical stretching
-		centerPanel = new JPanel();
 		
-		BoxLayout tempLayout = new BoxLayout ( centerPanel, BoxLayout.Y_AXIS );
-		centerPanel.setLayout(tempLayout);
+		centerPanel = Static.createPagePanel();
 		centerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-		centerPanel.setBackground(Color.WHITE);
 		centerPanel.setAlignmentY(LEFT_ALIGNMENT);
+		
 		centerPanel.add(buttonPanel);
 		centerPanel.add(Box.createVerticalStrut(20));
 		centerPanel.add(lblTitle);
@@ -193,22 +191,21 @@ public class PairQueryTab extends Tab
 	}
 	
 	private JPanel createButtonPanel() {
-		JButton btnExpandAll = new JButton("Expand All");
+		JButton btnExpandAll = Static.createButton("Expand All");
 		btnExpandAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				expandSections(true);
 			}
 		});
 		
-		JButton btnCollapseAll = new JButton("Collapse All");
+		JButton btnCollapseAll = Static.createButton("Collapse All");
 		btnCollapseAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				expandSections(false);
 			}
 		});
 		
-		JButton btnHelp = new JButton("Help");
-		btnHelp.setBackground(Globals.HELPCOLOR);
+		JButton btnHelp = Static.createButtonHelp("Help", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(getParentFrame(), "Pairs Filters", HTML);

@@ -23,6 +23,7 @@ import sng.viewer.panels.align.AlignData;
 import sng.viewer.panels.align.PairViewPanel;
 import util.methods.ErrorReport;
 import util.methods.Out;
+import util.methods.Static;
 import util.ui.MenuMapper;
 import util.database.DBConn;
 
@@ -34,7 +35,6 @@ import util.database.DBConn;
 public class PairTopRowTab extends Tab  implements ClipboardOwner
 {
 	private static final long serialVersionUID = -4644940934101056207L;
-	private Color buttonColor = new Color(230, 230, 255); 
 	
 	public PairTopRowTab ( STCWFrame theFrame,
                 			MultiCtgData listData, Tab parentTab,					
@@ -51,12 +51,9 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 		
 		try {
 			DBConn dbc = theMainFrame.getNewDBC();
-			LoadPairFromDB dbObj = 
-					new LoadPairFromDB(dbc, theFrame.getMetaData());
-			loadedPairObj = 
-					dbObj.loadTwoContigs(pairCtgObj);
-			BlastHitData hitData =  
-					dbObj.loadPairHitData(listData.getCtgIDAt(0), listData.getCtgIDAt(1));
+			LoadPairFromDB dbObj =  new LoadPairFromDB(dbc, theFrame.getMetaData());
+			loadedPairObj = 		dbObj.loadTwoContigs(pairCtgObj);
+			BlastHitData hitData =  dbObj.loadPairHitData(listData.getCtgIDAt(0), listData.getCtgIDAt(1));
 			loadedPairObj.setPairHit(hitData);
 			dbc.close();
 		}
@@ -66,7 +63,7 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 		 *  XXX Create dropdown menu of pairwise display options
 		 */
 		displayDropDown = new JComboBox <MenuMapper>();
-		displayDropDown.setBackground(buttonColor);
+		displayDropDown.setBackground(Color.white);
 		Dimension dim = new Dimension ( 250, (int)displayDropDown.getPreferredSize().getHeight() );
 		displayDropDown.setPreferredSize( dim );
 		displayDropDown.setMaximumSize ( dim );
@@ -87,8 +84,7 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 				displayPair();
 			}
 		});
-		JButton jbView = new JButton(Globals.seqTableLabel);
-		jbView.setBackground(Globals.PROMPTCOLOR);
+		JButton jbView = Static.createButtonTab(Globals.seqTableLabel, true);
 		jbView.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
             		String ctg1 = pairCtgObj.getContigAt(0).getContigID();
@@ -146,15 +142,14 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 				saveTextToClipboard(">" + ctg2 + "\n" + seq);
 			}
 		}));
-		JButton jbCopy = new JButton("Copy...");
-		jbCopy.setBackground(Globals.PROMPTCOLOR);
+		JButton jbCopy = Static.createButtonMenu("Copy...", true);
 		jbCopy.addMouseListener(new MouseAdapter() {
 	            public void mousePressed(MouseEvent e) {
 	                copypopup.show(e.getComponent(), e.getX(), e.getY());
 	            }
 	        });
 		// Create prev and next buttons
-		JButton btnPrev = new JButton("<<Prev");
+		JButton btnPrev = Static.createButton("<<Prev");
 		btnPrev.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {				
 				if(alignPanel != null)
@@ -163,9 +158,8 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 				addPrevNextTab( ((PairTableTab)getParentTab()).getPrevRowNum( nRecordNum ) );
 			}
 		});
-		btnPrev.setBackground(buttonColor);
 
-		JButton btnNext = new JButton("Next>>");
+		JButton btnNext = Static.createButton("Next>>");
 		btnNext.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(alignPanel != null) {
@@ -174,10 +168,8 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 				addPrevNextTab( ((PairTableTab) getParentTab()).getNextRowNum( nRecordNum ) );
 			}
 		});
-		btnNext.setBackground(buttonColor);
 		
-		if (recordNum < 0)
-		{
+		if (recordNum < 0){
 			btnPrev.setEnabled(false);
 			btnNext.setEnabled(false);
 		}
@@ -186,17 +178,15 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 		JPanel topPanel = new JPanel ( );
 		topPanel.setLayout( new BoxLayout ( topPanel, BoxLayout.X_AXIS ) );
 		topPanel.add( Box.createHorizontalStrut(5) );
-		topPanel.add( displayDropDown ); 
-		topPanel.add( Box.createHorizontalStrut(5) );	
-		topPanel.add(jbView);
-		topPanel.add( Box.createHorizontalStrut(5) );	
-		topPanel.add(jbCopy);
-		topPanel.add( Box.createHorizontalStrut(5) );
+		topPanel.add( displayDropDown ); topPanel.add( Box.createHorizontalStrut(10) );	
+			
+		topPanel.add(jbView); topPanel.add( Box.createHorizontalStrut(2) );	
+		topPanel.add(jbCopy); topPanel.add( Box.createHorizontalStrut(2) );
 		
 		topPanel.add( Box.createHorizontalGlue() );
 		topPanel.add( Box.createHorizontalStrut(5) );
 		topPanel.add( btnPrev ); 	
-		topPanel.add( Box.createHorizontalStrut(5) );
+		topPanel.add( Box.createHorizontalStrut(2) );
 		topPanel.add( btnNext ); 	
 		topPanel.add( Box.createHorizontalStrut(5) );
 		

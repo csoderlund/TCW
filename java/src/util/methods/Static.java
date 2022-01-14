@@ -31,16 +31,47 @@ import util.ui.MenuMapper;
 import util.ui.UserPrompt;
 
 public class Static {
-	
+	public static final Color ACTIVECOLOR = Color.LIGHT_GRAY; 			// CAS310, CAS340 button turns active
+	public static final Color BGCOLOR = Color.WHITE;
+	public static final Color TABCOLOR = new Color(215, 229, 243); 		// new tab			light blue
+	public static final Color PANELCOLOR = new Color(229, 245, 237);	// replace panel	light green
+	public static final Color HELPCOLOR = new Color(245, 213, 234);		// help 			rose
+	public static final Color RUNCOLOR = new Color(243, 235, 227);		// run 				beige
+	public static final Color POPUPCOLOR = new Color(200, 200, 240); 	// popup window 	light lavendar
+	public static final Color FILECOLOR = new Color(242, 242, 242); 	// popup file		very light gray
+	public static final Color HIGHCOLOR = new Color(229, 245, 237); 	// light green	
+	/*****************************************************************/	
+	// CAS340 add specific
+	static void activeButton(JButton button) {
+		button.setBackground(ACTIVECOLOR); // only works on linux
+		button.setSelected(true);;	// CAS340 works for mac
+	}
+	static void inactiveButton(JButton button) {
+		button.setBackground(BGCOLOR); // only works on linux
+		button.setSelected(false);			   // CAS340 added for mac
+	}
+	static public JButton createButtonTab(String label, boolean enable) {
+		return createButton(label, enable, TABCOLOR);
+	}
+	static public JButton createButtonPanel(String label, boolean enable) {
+		return createButton(label, enable, PANELCOLOR);
+	}
+	static public JButton createButtonRun(String label, boolean enable) {
+		return createButton(label, enable, RUNCOLOR);
+	}
+	static public JButton createButtonHelp(String label, boolean enable) {
+		return createButton(label, enable, HELPCOLOR);
+	}
+	static public JButton createButtonMenu(String label, boolean enable) { // ...
+		return createButton(label, enable); // no  color
+	}
+	static public JButton createButtonFile(String label, boolean enable) { // ...
+		return createButton(label, enable, FILECOLOR); // no  color
+	}
+	static public JButton createButtonPopup(String label, boolean enable) { // ...
+		return createButton(label, enable, POPUPCOLOR);
+	}
 	/******** Interface ***********/
-	static public void active(JButton button) {
-		button.setBackground(Globalx.FUNCTIONCOLOR); // linux
-		button.setSelected(true);					 // mac
-	}
-	static public void inActive(JButton button) {
-		button.setBackground(Globalx.BGCOLOR);
-		button.setSelected(false);
-	}
 	static public void center(JPanel panel) {
 		panel.setMinimumSize(panel.getPreferredSize());
 		panel.setMaximumSize(panel.getPreferredSize());
@@ -91,7 +122,7 @@ public class Static {
 	static public JPanel createRowCenterPanel() {
 		JPanel row = new JPanel();
 		row.setLayout(new BoxLayout(row, BoxLayout.LINE_AXIS)); // X_AXIS
-		row.setBackground(Globalx.BGCOLOR);
+		row.setBackground(BGCOLOR);
 		row.setAlignmentX(Component.CENTER_ALIGNMENT);
 		row.setAlignmentY(Component.TOP_ALIGNMENT);
 		return row;
@@ -117,10 +148,13 @@ public class Static {
 		tmp.setEnabled(false);
 		return tmp;
 	}
+	
+	
 	static public JButton createButton(String label, boolean enable, Color color) {
 		JButton button = new JButton(label);
 		if (color!=null) {
 			button.setBackground(color); // only works on linux
+			button.setOpaque(true);	// CAS340 added for mac
 		}
 		button.setAlignmentX(Component.LEFT_ALIGNMENT);
 		button.setEnabled(enable);
@@ -131,6 +165,13 @@ public class Static {
 		button.setBackground(Color.white);
 		button.setAlignmentX(Component.LEFT_ALIGNMENT);
 		button.setEnabled(enable);
+		return button;
+	}
+	static public JButton createButton(String label) {
+		JButton button = new JButton(label);
+		button.setBackground(Color.white);
+		button.setAlignmentX(Component.LEFT_ALIGNMENT);
+		button.setEnabled(true);
 		return button;
 	}
 	static public JButton createButtonPlain(String label, boolean enable) {
@@ -255,7 +296,7 @@ public class Static {
 		menuZoom.addItem( new MenuMapper ( "Zoom 1:8", 8 ) );
 		menuZoom.addItem( new MenuMapper ( "Zoom 1:9", 9 ) );
 		menuZoom.addItem( new MenuMapper ( "Zoom 1:10", 10 ) );
-		menuZoom.setBackground(Globalx.BGCOLOR);
+		menuZoom.setBackground(BGCOLOR);
 		menuZoom.setSelectedIndex(0);
 		
 		Dimension dim = new Dimension ( (int)(menuZoom.getPreferredSize().getWidth()), 
@@ -277,7 +318,7 @@ public class Static {
 		menuZoom.addItem( new MenuMapper ( "Zoom 1:3", 3 ) );
 		menuZoom.addItem( new MenuMapper ( "Zoom 1:4", 4 ) );
 		
-		menuZoom.setBackground(Globalx.BGCOLOR);
+		menuZoom.setBackground(BGCOLOR);
 		menuZoom.setSelectedIndex(4); // if change this, Change sng.PairViewPanel
 		
 		Dimension dim = new Dimension ( (int)(menuZoom.getPreferredSize().getWidth()), 
@@ -296,7 +337,7 @@ public class Static {
   }
    static public JComboBox<String> createCombo(String [] labels) {
 	   	JComboBox<String> cbox = new JComboBox<String>();
-	   	cbox.setBackground(Globalx.BGCOLOR);
+	   	cbox.setBackground(BGCOLOR);
 	  
 		for (int i=0; i<labels.length; i++) 
 			cbox.addItem(labels[i]); 

@@ -57,9 +57,8 @@ public class EditSpeciesPanel extends JPanel {
 	private JPanel createEditSpeciesPanel() {
 		JPanel page = Static.createPageCenterPanel();
 
-		lblDatabase = new JLabel("singleTCW");
-		btnSelectDB = new JButton("Select " + Globals.STCW  + " Database");
-		btnSelectDB.setBackground(Globals.MENUCOLOR);
+		lblDatabase = Static.createLabel("singleTCW");
+		btnSelectDB = Static.createButtonPopup("Select " + Globals.STCW  + " Database", true);
 		btnSelectDB.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				mainPanel.setVisible(false);
@@ -76,7 +75,7 @@ public class EditSpeciesPanel extends JPanel {
 		page.add(createSummaryPanel());
 		page.add(Box.createVerticalStrut(10));
 		
-		lblPrefix = new JLabel("Prefix");
+		lblPrefix = Static.createLabel("Prefix");
 		txtPrefix = Static.createTextField("", 4);
 		row = Static.createRowPanel();
 		row.add(lblPrefix);
@@ -87,7 +86,7 @@ public class EditSpeciesPanel extends JPanel {
 		page.add(Box.createVerticalStrut(20));
 	
 	// Remark	
-		lblRemark = new JLabel("Remark");
+		lblRemark = Static.createLabel("Remark");
 		txtRemark = Static.createTextField("", 15);
 		row = Static.createRowPanel();
 		row.add(lblRemark);
@@ -97,23 +96,20 @@ public class EditSpeciesPanel extends JPanel {
 		page.add(Box.createVerticalStrut(10));
 
 	// buttons
-		btnKeep = new JButton("Keep");
-		btnKeep.setBackground(Globals.BGCOLOR);
+		btnKeep = Static.createButton("Keep");
 		btnKeep.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				keep();
 			}
 		});
-		btnDiscard = new JButton("Cancel");
-		btnDiscard.setBackground(Globals.BGCOLOR);
+		btnDiscard = Static.createButton("Cancel");
 		btnDiscard.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				setVisible(false);
 				theCompilePanel.setMainPanelVisible(true);
 			}
 		});
-		btnHelp = new JButton("Help");
-		btnHelp.setBackground(Globals.HELPCOLOR);
+		btnHelp = Static.createButtonHelp("Help", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(theCompilePanel.getParentFrame(), 

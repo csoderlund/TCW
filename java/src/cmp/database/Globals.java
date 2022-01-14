@@ -139,12 +139,13 @@ public final class Globals {
 		}
 	}
 	public static final Color BGCOLOR = Color.WHITE;
-	public static final Color FUNCTIONCOLOR = Globalx.FUNCTIONCOLOR; 
-	public static final Color MENUCOLOR =   Globalx.MENUCOLOR;	// beige
-	public static final Color HELPCOLOR =   Globalx.HELPCOLOR;	// rose
-	public static final Color PROMPTCOLOR = Globalx.PROMPTCOLOR;	// light beige
-	public static final Color LAUNCHCOLOR = Globalx.LAUNCHCOLOR; // light purple
-	public static final Color BUTTONCOLOR = Globalx.BUTTONCOLOR; // light gray CAS310
+	
+	/**********************************************
+	 * viewMulti
+	 */
+	public static final String next = ">>";
+	public static final String prev = "<<";
+	public static final String select = "Selected:";
 	
 	/****************************************
 	 * static methods

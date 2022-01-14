@@ -28,7 +28,7 @@ public class MethodHit {
 	
 	private boolean debug=false;
 	private String groupFile = Globals.Methods.Hit.TYPE_NAME;
-	private String hitName = Globals.Methods.Hit.TYPE_NAME;
+	private String hitName =   Globals.Methods.Hit.TYPE_NAME;
 	private String [] hitTypes = {"HitID", "Description"}; 
 	
 	private final int DES_IDX = 1;
@@ -37,7 +37,7 @@ public class MethodHit {
 	
 	 public boolean run(int idx, DBConn db, CompilePanel panel) {
 		 
-		Out.PrtDateMsg("\nStart execution of " + hitName);
+		Out.PrtDateMsg("\nStart execution of " + groupFile);
 		if (!setParams(idx, db, panel)) return false;
 		
 		long startTime = Out.getTime();
@@ -98,8 +98,8 @@ public class MethodHit {
 		Out.PrtSpMsg(1, "HitType:    " + hitTypes[nHitType]);
 		Out.PrtSpMsg(1, "Coverage:   " + covCutoff);
 		Out.PrtSpMsg(1, "Similarity: " + simCutoff);
-		if (bAllHits) Out.PrtSpMsg(1, "Seqs must pair with all other in cluster");
-		else          Out.PrtSpMsg(1, "Seqs must pair with at least one other in cluster");
+		if (bAllHits) Out.PrtSpMsg(1, "All: Seqs must pair with all other seqs in cluster");
+		else          Out.PrtSpMsg(1, "Any: Seqs must pair with at least one other seq in cluster");
 		Out.PrtSpMsg(1, "");
 		
 		return true;
@@ -157,8 +157,11 @@ public class MethodHit {
 			}
 			grpIdxMap.put(gObj.grpNum, gObj);
 		}
-		Out.PrtSpCntMsgZero(3, cntNoPairs, "Remove sequence from cluster due to no shared pair");
-		Out.PrtSpCntMsgZero(3, grpNum,     "Clusters from best anno hits " + hitTypes[nHitType]);	
+		if (cntNoPairs>0) {
+			if (bAllHits) Out.PrtSpCntMsg(3, cntNoPairs, "Removed seqs for not pairing with all seqs in cluster");
+			else          Out.PrtSpCntMsg(3, cntNoPairs, "Removed seqs for not pairing with at least one seq in cluster");
+		}
+		Out.PrtSpCntMsgZero(3, grpNum,  "Clusters from best anno hits " + hitTypes[nHitType]);	
 	}
 	catch (Exception e) {ErrorReport.die(e, "load Best Hits from DB"); bSuccess=false;}
 	}
@@ -315,8 +318,8 @@ public class MethodHit {
 		if (nHitType==DES_IDX) Out.PrtCntMsg(grpMap.size(), "Unique descriptions from " + hitMap.size() + " hits");
 		else                   Out.PrtCntMsg(hitMap.size(), "Unique hits");
 		
-	/* Create Seq list with at least one hit (was checking nPair, but that only refers to hits with other datasets )*/
-		rs = cmpDBC.executeQuery("select UTid, UTstr, asmID, aaLen,  HITid from unitrans where HITid>0");
+	/* Create Seq list with at least one hit - need len, bestANid  from unitrans table */
+		rs = cmpDBC.executeQuery("select UTid, UTstr, asmID, aaLen, HITid from unitrans where HITid>0");
 		while (rs.next()) {
 			int  seqIdx = rs.getInt(1);
 			String name = rs.getString(2);
@@ -329,20 +332,20 @@ public class MethodHit {
 		}
 		Out.PrtCntMsg(seqMap.size(), "Sequences with at least one hit");
 		
-	/* Add best hit per seq list ordered */
+	/* Add best hit per seq  */
 		int failSim=0, failOlap=0, pass=0;
 		rs = cmpDBC.executeQuery("select UTid, HITid, percent_id, alignment_len, e_value from unitrans_hits "
 				+ " where bestAnno=1");
 		while (rs.next()) {
-			int seqIdx = rs.getInt(1);
-			if (!seqMap.containsKey(seqIdx)) continue; 
+			int seqIdx = 	rs.getInt(1);
+			if (!seqMap.containsKey(seqIdx)) continue; // shouldn't happen
 			
-			int hitIdx = rs.getInt(2);	
+			int hitIdx = 	rs.getInt(2);	
 			if (!hitMap.containsKey(hitIdx)) continue; // shouldn't happen
 			
-			int sim = rs.getInt(3);
-			int alignLen = rs.getInt(4);
-			double eval = rs.getDouble(5);
+			int sim = 		rs.getInt(3);
+			int alignLen = 	rs.getInt(4);
+			double eval = 	rs.getDouble(5);
 			
 			if (sim<simCutoff) {
 				failSim++;
@@ -356,7 +359,7 @@ public class MethodHit {
 			}
 			pass++;
 			Hit hObj = hitMap.get(hitIdx);
-			hObj.addBest(seqIdx,  eval);  // adds to grpMap also
+			hObj.addBest(seqIdx,  eval);  // adds to grpMap also; add to hit and grp counts
 		}
 		Out.PrtCntMsg(failSim,  "Seq-hit fail similarity");
 		Out.PrtCntMsg(failOlap, "Seq-hit fail coverage");

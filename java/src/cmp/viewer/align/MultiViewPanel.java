@@ -1,4 +1,4 @@
-package cmp.viewer.seq.align;
+package cmp.viewer.align;
 
 /*************************************************************
  * Called from SeqsTopRowPanel.opMulti to show a Muscle or Mafft multiple alignment
@@ -12,13 +12,15 @@ import java.awt.event.MouseEvent;
 import java.sql.ResultSet;
 import java.util.Vector;
 
-import javax.swing.BorderFactory;
+import javax.swing.AbstractAction;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JCheckBox;
@@ -34,17 +36,27 @@ import cmp.align.MultiAlignData;
 import cmp.database.Globals;
 import cmp.viewer.MTCWFrame;
 
+
 public class MultiViewPanel extends JPanel {
 	private static final long serialVersionUID = -2090028995232770402L;
 	private static final String help1HTML = Globals.helpDir + "BaseAlign.html";
 	private static final String help2HTML = Globals.helpDir + "MSAScores.html";
+	private static final int INFOSZ = 200;
 	
 	// runs MSA program and displays results
 	public MultiViewPanel(MTCWFrame parentFrame, String [] POGMembers, int alignPgm, int type, String sum) {
 		theMainFrame = parentFrame;
 		isAA = (type==Globals.AA);
 		alignType = type;
-		headerLine = sum;
+		
+		sumLine1 = sum;
+		if (sumLine1.contains("(")) sumLine1 = sumLine1.substring(0, sumLine1.indexOf("(")); // Remove score
+		if (sumLine1.length()>INFOSZ-4)  sumLine1 = sumLine1.substring(0,INFOSZ-4) + "...";
+		
+		pgmType = (alignPgm==Globals.Ext.MUSCLE) ? "MUSCLE" : "MAFFT"; // CAS340 
+		if (type==Globals.AA) 		pgmType += " AA";
+		else if (type==Globals.NT) 	pgmType += " NT";
+		else 						pgmType += " CDS";
 		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setBackground(Globalx.BGCOLOR);
@@ -56,13 +68,21 @@ public class MultiViewPanel extends JPanel {
 		theMainFrame = parentFrame;
 		isAA = true;
 		alignType = Globals.AA;
-		headerLine = sum;
+		
+		sumLine1 = sum;
+		if (sumLine1.contains("(")) {
+			int idx =  sumLine1.indexOf("(");
+			sumLine2 = "Scores: " + sumLine1.substring(idx);
+			sumLine1 = sumLine1.substring(0, idx);
+		}
+		if (sumLine1.length()>INFOSZ-4)  sumLine1 = sumLine1.substring(0,INFOSZ-4) + "...";
 		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setBackground(Globalx.BGCOLOR);
 		
 		buildMSAfromDB(POGMembers, grpid);
 	}
+	
 	private void createButtonPanel() {
 		buttonPanel = Static.createPagePanel();
 		
@@ -86,7 +106,7 @@ public class MultiViewPanel extends JPanel {
 				refreshPanels();
 			}
 		});
-		theRow.add(new JLabel("View:")); theRow.add(Box.createHorizontalStrut(1));
+		theRow.add(Static.createLabel("View:")); theRow.add(Box.createHorizontalStrut(1));
 		theRow.add(btnViewType);         theRow.add(Box.createHorizontalStrut(5));
 		
 		dotBox = Static.createCheckBox("Dot", true); // CAS312 new
@@ -128,31 +148,43 @@ public class MultiViewPanel extends JPanel {
 			theRow.add(Box.createHorizontalStrut(5));
 		}
 		
-		JButton btnHelp1 = Static.createButton("Help1", true, Globals.HELPCOLOR); // CAS312
-		btnHelp1.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				UserPrompt.displayHTMLResourceHelp(theMainFrame, "Alignment...", help1HTML);
-			}
-		});
-		theRow.add(btnHelp1);
-		theRow.add(Box.createHorizontalStrut(10));
 		
-		JButton btnScore = Static.createButton("Scores...", true, Globals.PROMPTCOLOR); // CAS312
+		btnScore = Static.createButtonMenu("Scores...", true); // CAS312
 		btnScore.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				String s1 = theMainFrame.getInfo().getMSA_Score1();
 				String s2 = theMainFrame.getInfo().getMSA_Score2();
-				theAlignPanel.showScores(theMainFrame, s1, s2, headerLine);
+				theAlignPanel.showScores(theMainFrame, s1, s2, sumLine2);
 			}
 		});
-		theRow.add(btnScore); theRow.add(Box.createHorizontalStrut(2));
-		JButton btnHelp2 = Static.createButton("Help2", true, Globals.HELPCOLOR); // CAS312
-		btnHelp2.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				UserPrompt.displayHTMLResourceHelp(theMainFrame, "MSA Scores...", help2HTML);
+		theRow.add(btnScore); theRow.add(Box.createHorizontalStrut(30));
+		theRow.add(Box.createHorizontalGlue());
+		
+		final JPopupMenu popup = new JPopupMenu();
+		
+		popup.add(new JMenuItem(new AbstractAction("Alignment") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theMainFrame, "Alignment", help1HTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error showing help1"); }
 			}
-		});
-		theRow.add(btnHelp2);
+		}));
+		popup.add(new JMenuItem(new AbstractAction("Scores") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theMainFrame, "Scores", help2HTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error showing help2"); }
+			}
+		}));
+		JButton btnHelp = Static.createButtonHelp("Help...", true); // CAS312, CAS340...
+		btnHelp.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                popup.show(e.getComponent(), e.getX(), e.getY());
+            }
+        });
+		theRow.add(btnHelp);
 		
 		theRow.setMaximumSize(theRow.getPreferredSize());
 		
@@ -181,17 +213,24 @@ public class MultiViewPanel extends JPanel {
 	 */
 	private void buildMSAfromDB(String [] POGMembers, int grpid) {
 		try {
-			createButtonPanel();	add(buttonPanel);
-			createInfo();			add(infoText);
 			add(Box.createVerticalStrut(10));
+			
+			createButtonPanel();	
+			add(buttonPanel);
+			add(Box.createVerticalStrut(10));
+			
+			createInfo();			
+			add(textPanel);
+			add(Box.createVerticalStrut(5));
 			
 			loadMultiDB(POGMembers, grpid);
 			
 			createMultiAlignPanels();	
 			
-			createMainPanel();		add(scroller);
+			createMainPanel();		
+			add(scroller);
 			
-			updateInfo("");
+			updateInfo("", "");
 		} 
 		catch (Exception e) {ErrorReport.prtReport(e, "MSA from DB");}
 	}
@@ -203,16 +242,29 @@ public class MultiViewPanel extends JPanel {
 			theThread = new Thread(new Runnable() {
 				public void run() {
 					try {
-						createButtonPanel();	add(buttonPanel);
-						createInfo();			add(infoText);
 						add(Box.createVerticalStrut(10));
+						createButtonPanel();	
+						add(buttonPanel);
+						add(Box.createVerticalStrut(10));
+						
+						createInfo();			
+						add(textPanel);
+						add(Box.createVerticalStrut(5));
 						
 						String scores = loadMultiAndRun(pgm, theMembers);
 						
-						createMainPanel();		add(scroller);
-	
-						updateInfo("Results also in /ResultAlign " + scores);
+						createMainPanel();		
+						add(scroller);
 						
+						if (scores=="") btnScore.setEnabled(false);// CAS340 nt aligns have no scores
+						else 			btnScore.setEnabled(true);
+						
+						if (scores=="") sumLine2 = pgmType; // CAS340
+						else sumLine2 = "Scores: " +  scores + "   " + pgmType; // CAS340
+						
+						updateInfo("", ""); 			 // sets summary as info
+						theMainFrame.setStatus("Results in /ResultAlign");
+	
 					} catch (Exception e) {e.printStackTrace();}
 				}
 			});
@@ -221,9 +273,7 @@ public class MultiViewPanel extends JPanel {
 		}		
 	}
 	private void createMultiAlignPanels() {
-		theAlignPanel = new MultiAlignPanel(getInstance(),
-						isAA, 
-						theMultiAlignData);
+		theAlignPanel = new MultiAlignPanel(getInstance(),isAA, theMultiAlignData);
 		theAlignPanel.setAlignmentY(Component.LEFT_ALIGNMENT);
 	}	
 	private MultiViewPanel getInstance() {return this;}
@@ -275,7 +325,7 @@ public class MultiViewPanel extends JPanel {
 		for(int x=0; x<POGMembers.length; x++) {
 			theMultiAlignData.addSequence(POGMembers[x], POGSeq[x]);
 		}
-		updateInfo("Aligning sequences please wait. Results will be written to the ResultAlign directory");
+		updateInfo("Aligning sequences please wait.", "Results will be written to the /ResultAlign directory");
 		
 		int rc = theMultiAlignData.runAlignPgm(alignPgm, isAA); 
 		String scores = theMultiAlignData.getGlScores();
@@ -340,18 +390,28 @@ public class MultiViewPanel extends JPanel {
 			
 		} catch (Exception e) {ErrorReport.reportError(e);}
 	}
+	/*************************************************************************/
 	private void createInfo() {
-		infoText = new JTextField(100);
-		infoText.setEditable(false);
-		infoText.setMaximumSize(infoText.getPreferredSize());
-		infoText.setBackground(Globalx.BGCOLOR);
-		infoText.setBorder(BorderFactory.createEmptyBorder());
+		textPanel = Static.createPagePanel();
+		
+		infoText1 = Static.createTextFieldNoEdit(INFOSZ);
+		textPanel.add(infoText1); 
+		textPanel.add(Box.createVerticalStrut(5));
+		
+		infoText2 = Static.createTextFieldNoEdit(INFOSZ);
+		textPanel.add(infoText2);
 	}
-	public void updateInfo(String status) { // Called in MultiAlign for column click
+	public void updateInfo(String msg1, String msg2) { 
 		String sp="   ";
-		if (status==null || status=="") infoText.setText(sp + headerLine);
-		else                            infoText.setText(sp + status);
+		
+		if (msg1!=null && msg1!="") infoText1.setText(sp + msg1);
+		else 						infoText1.setText(sp + sumLine1);
+		
+		if (msg2!=null && msg2!="") infoText2.setText(sp + msg2);
+		else 						infoText2.setText(sp + sumLine2);
 	}
+	
+	/********************************************************************/
 	private void handleClick(MouseEvent e) {
 		if(theAlignPanel == null) return;
 		
@@ -368,9 +428,10 @@ public class MultiViewPanel extends JPanel {
 		else {
 			theAlignPanel.selectNoRows();
 			theAlignPanel.selectNoColumns();
-			updateInfo("");
+			updateInfo("", "");
 		}
 	}
+	
 	private int alignType=0;
 	private boolean isAA=true, bAlign=true;
 	private boolean isShowGraphic=true;
@@ -378,16 +439,16 @@ public class MultiViewPanel extends JPanel {
 	private MTCWFrame theMainFrame = null;
 	private JScrollPane scroller = null;
 	
-	private JPanel buttonPanel = null;
-	private JPanel mainPanel = null;
+	private JPanel buttonPanel = null, mainPanel = null, textPanel = null;
+	private JButton btnScore = null;
 
 	private JComboBox <String> menuColor = null;
 	private JComboBox <MenuMapper> menuZoom = null;
 	private JButton btnViewType = null;
 	private JCheckBox dotBox = null, trimBox=null;
 	
-	private JTextField infoText = null;
-	private String headerLine = "";
+	private JTextField infoText1 = null, infoText2 = null;
+	private String sumLine1 = "", sumLine2="", pgmType="";
 	
 	private Thread theThread = null;
 	

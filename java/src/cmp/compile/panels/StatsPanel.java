@@ -40,11 +40,11 @@ public class StatsPanel extends JPanel {
 		
 		statsPanel = Static.createPagePanel();
 		
-		statsPanel.add(new JLabel("4. Statistics"));
+		statsPanel.add(Static.createLabel("4. Statistics"));
 		statsPanel.add(Box.createVerticalStrut(5));
 		
 		JPanel row = Static.createRowPanel();
-		btnRunStats = new JButton("Run Stats"); 
+		btnRunStats = Static.createButtonRun("Run Stats", false); 
 		btnRunStats.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				runStats();
@@ -53,7 +53,7 @@ public class StatsPanel extends JPanel {
 		row.add(btnRunStats);
 		row.add(Box.createHorizontalStrut(5));
 		
-		btnStatsSettings = Static.createButton("Settings", false, Globals.MENUCOLOR); // CAS310 can't see until exists
+		btnStatsSettings = Static.createButtonPanel("Settings", false); // CAS310 can't see until exists
 		btnStatsSettings.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				editPanelStartup();
@@ -62,7 +62,7 @@ public class StatsPanel extends JPanel {
 		row.add(btnStatsSettings);
 		row.add(Box.createHorizontalStrut(5));
 		
-		lblStatsSummary = new JLabel(" ");
+		lblStatsSummary = Static.createLabel(" ");
 		row.add(lblStatsSummary);
 		
 		statsPanel.add(row);
@@ -74,7 +74,7 @@ public class StatsPanel extends JPanel {
 		setStatsSummary();
 	}
 
-	private void runStats() {
+	public void runStats() {
 		if (!editPanel.isFunction()) return;
 		
 		try {
@@ -82,6 +82,8 @@ public class StatsPanel extends JPanel {
 			Out.createLogFile(theCompilePanel.getCurProjAbsDir(), Globals.statsFile);
 	
 			DBinfo info = theCompilePanel.getDBInfo();
+			info.clearCntKeys();
+			
 			Pairwise pairObj = new Pairwise(theCompilePanel);
 			
 			boolean doStats = 		editPanel.isStats();
@@ -160,8 +162,10 @@ public class StatsPanel extends JPanel {
 			}
 			
 			Out.PrtSpMsg(0,"Finishing...");
+			
 			DBConn mDB = theCompilePanel.getDBconn(); // CAS310
-			info.setPairsEdit(mDB);
+			info.updateCntKeys(mDB);
+			
 			Schema.updateVersion(mDB);
 			new Summary(mDB).removeSummary(); // CAS310 
 			mDB.close();

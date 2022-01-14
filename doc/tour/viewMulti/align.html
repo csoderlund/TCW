@@ -10,7 +10,6 @@
 <div style="text-align: center"><big><ttc>Alignment</ttc></big></div>
 <table style="padding: 2;  border-spacing:0; border-collapse:collapse;  margin-left: auto; margin-right: auto;">
 <tr><td style="background-color: #666666; padding-bottom:4px; "> 
-<a href="#table" 	class="white">Sequence Table</a> 	<mark class="white">|</mark>
 <a href="#pair" 	class="white">Pairwise</a> 	<mark class="white">|</mark>
 <a href="#msadb" 	class="white">MSAdb</a> 	<mark class="white">|</mark>
 <a href="#msa" 		class="white">MSA...</a>
@@ -18,19 +17,16 @@
 </table>
 
 <a id=table></a>
-<h3>Sequence Table</h3> 
+<h3>Alignments</h3> 
 
-Alignments are only available from the sequence table. However, every table leads to the sequence table:
-<table class="tablex">
+
+<table>
 <tr>
-	<td class="top"><small>Sequence view</small>
-		<br><a href="img/seqTableTop.png"><img  src="img/seqTableTop.png" alt="" style="border: 1px solid black; width: 420px"></a>
-	<td class="top"><small>Sequence view for clusters</small>
-		<br><a href="img/clusterSeqs.png"><img src="img/clusterSeqs.png" alt="" style="border: 1px solid black; width: 420px"></a>
-<tr><td class="top"><small>Sequence view for pairs</small>
-		<br><a href="img/pairSeqs.png"><img  src="img/pairSeqs.png" alt="" style="border: 1px solid black; width: 420px"></a>
-	<td class="top"><small>Sequence view for hits</small>
-		<br><a href="img/hitSeqs.png"><img  src="img/hitSeqs.png" alt="" style="border: 1px solid black; width: 420px"></a>
+	<td class="top"><small>Cluster table with MSA</small>
+		<br><a href="img/clusterTable.png"><img  src="img/clusterTable.png" alt="" style="border: 1px solid black; width: 450px"></a>
+	<td class="top"><small>Pair table with Pairwise</small>
+		<br><a href="img/pairTable.png"><img src="img/pairTable.png" alt="" style="border: 1px solid black; width: 450px"></a>
+
 </table>
 If there are only protein (AA) sequences in the database, only the AA options described below will be available.
 
@@ -43,8 +39,8 @@ If there are only protein (AA) sequences in the database, only the AA options de
 <table style="width:60%">
 <tr>
 	<td>
-	The <ttc>Pairwise...</ttc> drop-down has the options shown on the righe, where all options use dynamic programming for the selected sequence(s).
-	<p>The "for one pair" options are only enabled if a pair is selected.
+	The <ttc>Pairwise...</ttc> drop-down has the options shown on the right, where all options use dynamic programming for the selected sequence(s).
+	<p>The "for one pair" options are enabled when only one pair is selected.
 	<td><a href="img/pairOpt.png"><img  src="img/pairOpt.png" alt="" style="border: 1px solid black; width: 200px"></a>
 </table>
 
@@ -67,8 +63,7 @@ If there are only protein (AA) sequences in the database, only the AA options de
 <h3>MSAdb</h3> 
 <td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
-This option is only available for <ttc>Sequence view for clusters</ttc>, as the multiple sequence alignment (MSA)
-is computed per cluster when the database is built.
+When the database is built, the cluster  MSA is computed in stored in the database.
 <br><a href="img/MSAdb.png"><img  src="img/MSAdb.png" alt="" style="border: 1px solid black; width: 700px"></a>
 <p><a href="img/MSAzappo.png"><img  src="img/MSAzappo.png" alt="" style="border: 1px solid black; width: 700px"></a>
 

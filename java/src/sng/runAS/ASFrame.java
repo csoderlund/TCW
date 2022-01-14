@@ -134,7 +134,7 @@ public class ASFrame extends JDialog implements WindowListener{
 		txtUPdir.setText(getDir(upDir));
 		row.add(txtUPdir);
 		
-		JButton btnGetFile = new JButton("...");
+		JButton btnGetFile = Static.createButtonFile("...", true);
 		btnGetFile.addActionListener(new ActionListener()  {
 			public void actionPerformed(ActionEvent arg0) {
 				String fname = fileChooser();
@@ -158,7 +158,7 @@ public class ASFrame extends JDialog implements WindowListener{
 		txtGOdir.setText(getDir(goDirOBO));
 		row.add(txtGOdir);
 		
-		JButton btnGetFile2 = new JButton("...");
+		JButton btnGetFile2 = Static.createButtonFile("...", true);
 		btnGetFile2.addActionListener(new ActionListener()  {
 			public void actionPerformed(ActionEvent arg0) {
 				String fname = fileChooser();
@@ -181,11 +181,11 @@ public class ASFrame extends JDialog implements WindowListener{
 		JPanel row;
 		
 		row = Static.createRowPanel();
-		row.add(new JLabel("Taxonomic"));
+		row.add(Static.createLabel("Taxonomic"));
 		leftPanel.add(row);
 		
 		row = Static.createRowPanel();
-		row.add(new JLabel("Swiss  TrEMBL"));
+		row.add(Static.createLabel("Swiss  TrEMBL"));
 		leftPanel.add(row);
 		
 		for (int i=0; i<upTaxo.length; i++) {
@@ -209,7 +209,7 @@ public class ASFrame extends JDialog implements WindowListener{
 		leftPanel.add(Box.createVerticalStrut(10));
 		
 		row = Static.createRowPanel();
-		JButton doUP = new JButton("1. Build Tax");
+		JButton doUP = Static.createButtonRun("1. Build Tax", true);
 		doUP.setEnabled(true);
 		doUP.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -228,7 +228,7 @@ public class ASFrame extends JDialog implements WindowListener{
 		
 		JPanel upPanel = Static.createPagePanel();
 		row = Static.createRowPanel();
-		row.add(new JLabel(" Full UniProt") );
+		row.add(Static.createLabel(" Full UniProt") );
 		upPanel.add(row);
 		
 		row = Static.createRowPanel();
@@ -236,7 +236,7 @@ public class ASFrame extends JDialog implements WindowListener{
 		spFullCheckBox.setOpaque(true);
 		spFullCheckBox.setBackground(Color.white);
 		row.add(spFullCheckBox);
-		row.add(new JLabel("SwissProt"));
+		row.add(Static.createLabel("SwissProt"));
 		upPanel.add(row);
 		
 		row = Static.createRowPanel();
@@ -244,13 +244,13 @@ public class ASFrame extends JDialog implements WindowListener{
 		trFullCheckBox.setOpaque(true);
 		trFullCheckBox.setBackground(Color.white);
 		row.add(trFullCheckBox);
-		row.add(new JLabel("TrEMBL"));
+		row.add(Static.createLabel("TrEMBL"));
 		upPanel.add(row);
 		
 		upPanel.add(Box.createVerticalStrut(10));
 		
 		row = Static.createRowPanel();
-		JButton doUP = new JButton("2. Build Full");
+		JButton doUP = Static.createButtonRun("2. Build Full", true);
 		doUP.setEnabled(true);
 		doUP.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -263,7 +263,7 @@ public class ASFrame extends JDialog implements WindowListener{
 		////////////////////////////
 	    JPanel goPanel = Static.createPagePanel();
 		row = Static.createRowPanel();
-		row.add(new JLabel(" GO (Gene Ontology)") );
+		row.add(Static.createButton(" GO (Gene Ontology)") );
 		goPanel.add(row);
 		
 		row = Static.createRowPanel();
@@ -284,7 +284,7 @@ public class ASFrame extends JDialog implements WindowListener{
 		goPanel.add(Box.createVerticalStrut(10));
 		
 		row = Static.createRowPanel();
-		JButton doGO = new JButton("3. Build GO");
+		JButton doGO = Static.createButtonRun("3. Build GO", true);
 		doGO.setEnabled(true);
 		doGO.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -307,7 +307,7 @@ public class ASFrame extends JDialog implements WindowListener{
 		JPanel panel = Static.createPagePanel();
 		JPanel row = Static.createRowPanel();
 		
-		JButton bc = new JButton("Check");
+		JButton bc = Static.createButton("Check");
 		bc.setBackground(dgColor);
 		bc.setOpaque(true);
 		bc.setEnabled(true);
@@ -321,7 +321,7 @@ public class ASFrame extends JDialog implements WindowListener{
 		
 		row.add(Box.createHorizontalStrut(35));
 		
-		JButton ba = new JButton("AnnoDBs.cfg");
+		JButton ba = Static.createButton("AnnoDBs.cfg");
 		ba.setEnabled(true);
 		ba.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -331,8 +331,7 @@ public class ASFrame extends JDialog implements WindowListener{
 		row.add(ba);
 		row.add(Box.createHorizontalStrut(35));
 		
-		final JButton btnHelp = new JButton("Help");
-	    btnHelp.setBackground(Globalx.HELPCOLOR);
+		final JButton btnHelp = Static.createButtonHelp("Help", true);
 	    btnHelp.setOpaque(true);
 	    btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {

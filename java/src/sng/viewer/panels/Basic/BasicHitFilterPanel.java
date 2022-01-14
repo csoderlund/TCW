@@ -293,12 +293,12 @@ public class BasicHitFilterPanel extends JPanel {
 			allbg.add(radDesc); 
 			
 			
-			lblSubstring = new JLabel("Substring: ");
+			lblSubstring = Static.createLabel("Substring: ");
 			rowSearch.add(lblSubstring);
 			txtField  = Static.createTextField("", 20, false);
 			rowSearch.add(txtField);	rowSearch.add(Box.createHorizontalStrut(4));
 			
-			btnFindFile = Static.createButton("Load File", true);
+			btnFindFile = Static.createButtonFile("Load File", true);
 			btnFindFile.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					try {
@@ -388,8 +388,7 @@ public class BasicHitFilterPanel extends JPanel {
     		});  
 			String label = metaData.getNorm(); // CAS305
 			if (metaData.hasDE()) label += ",DE"; // CAS322
-			btnCount = new JButton(label);
-			btnCount.setBackground(Globals.MENUCOLOR);
+			btnCount = Static.createButtonPanel(label, true);
 			btnCount.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					try {
@@ -423,8 +422,7 @@ public class BasicHitFilterPanel extends JPanel {
 	    			}
 	    		});  
 			rowFilter2.add(chkAnnoDBs);
-			btnAnnoDBs = new JButton("AnnoDBs"); 
-			btnAnnoDBs.setBackground(Globals.MENUCOLOR);
+			btnAnnoDBs = Static.createButtonPanel("AnnoDBs", true); 
 			btnAnnoDBs.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					try {
@@ -445,8 +443,7 @@ public class BasicHitFilterPanel extends JPanel {
 	    			}
 	    		});  
 			rowFilter2.add(chkSpecies);
-			btnSpecies = new JButton("Species"); 
-			btnSpecies.setBackground(Globals.MENUCOLOR);
+			btnSpecies = Static.createButtonPanel("Species", true); 
 			btnSpecies.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					try {
@@ -466,8 +463,7 @@ public class BasicHitFilterPanel extends JPanel {
 					btnGOetc.setEnabled(check);
 	    			}
 	    		});  
-			btnGOetc = new JButton("GO, etc");
-			btnGOetc.setBackground(Globals.MENUCOLOR);
+			btnGOetc = Static.createButtonPanel("GO, etc", true);
 			btnGOetc.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					try {
@@ -484,7 +480,7 @@ public class BasicHitFilterPanel extends JPanel {
 			rowFilter2.add(Box.createHorizontalStrut(2));
 			rowFilter2.add(Box.createHorizontalGlue());
 			
-			JButton clearall = new JButton("Clear All");
+			JButton clearall = Static.createButtonPlain("Clear All", true);
 			clearall.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					try {
@@ -496,8 +492,6 @@ public class BasicHitFilterPanel extends JPanel {
 					}
 					catch(Exception e) {ErrorReport.prtReport(e, "GO etc");}
 			}});
-			clearall.setMargin(new Insets(0, 0, 0, 0));
-			clearall.setFont(new Font(clearall.getFont().getName(),Font.PLAIN,10));
 			clearall.setAlignmentX(RIGHT_ALIGNMENT);
 			rowFilter2.add(clearall);
 			add(rowFilter2);
@@ -508,8 +502,7 @@ public class BasicHitFilterPanel extends JPanel {
 			add(Box.createVerticalStrut(3));	
 			
 			
-			btnBuildTable = new JButton("BUILD");
-			btnBuildTable.setBackground(Globals.FUNCTIONCOLOR);
+			btnBuildTable = Static.createButtonRun("BUILD", true);
 			btnBuildTable.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					if (checkFilters())
@@ -517,8 +510,7 @@ public class BasicHitFilterPanel extends JPanel {
 				}
 			});
 			
-			btnAddTable = new JButton("ADD");
-			btnAddTable.setBackground(Globals.FUNCTIONCOLOR);
+			btnAddTable = Static.createButtonRun("ADD", true);
 			btnAddTable.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					if (checkFilters())
@@ -527,8 +519,7 @@ public class BasicHitFilterPanel extends JPanel {
 			});
 			
 			
-			btnSetColumns = new JButton("Hit Columns");
-			btnSetColumns.setBackground(Globals.MENUCOLOR);
+			btnSetColumns = Static.createButtonPanel("Hit Columns", true);
 			btnSetColumns.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					hideMain();
@@ -537,7 +528,7 @@ public class BasicHitFilterPanel extends JPanel {
 				}
 			});
 			
-			showGrouped = new JCheckBox("Group by Hit ID", true);
+			showGrouped = Static.createCheckBox("Group by Hit ID", true);
 			showGrouped.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					isGrpView = showGrouped.isSelected();
@@ -600,7 +591,7 @@ public class BasicHitFilterPanel extends JPanel {
 			}));
 			
 			
-			btnHelp = Static.createButton("Help...", true, Globalx.HELPCOLOR);
+			btnHelp = Static.createButtonHelp("Help...", true);
 			btnHelp.addMouseListener(new MouseAdapter() {
 	            public void mousePressed(MouseEvent e) {
 	                popup.show(e.getComponent(), e.getX(), e.getY());
@@ -1411,7 +1402,7 @@ public class BasicHitFilterPanel extends JPanel {
 			
 			add(createSelectPanel());
 			
-			btnOK = new JButton("Accept");
+			btnOK = Static.createButton("Accept");
 			btnOK.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					saveSelections();
@@ -1419,7 +1410,7 @@ public class BasicHitFilterPanel extends JPanel {
 					setVisible(false);
 				}
 			});
-			btnCancel = new JButton("Discard");
+			btnCancel = Static.createButton("Discard");
 			btnCancel.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					restoreSelections();
@@ -1427,8 +1418,7 @@ public class BasicHitFilterPanel extends JPanel {
 					setVisible(false);
 				}
 			});
-			JButton btnHelp = new JButton("Help");
-			btnHelp.setBackground(Globals.HELPCOLOR);
+			JButton btnHelp = Static.createButtonHelp("Help", true);
 			btnHelp.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 						UserPrompt.displayHTMLResourceHelp(theMainFrame, 

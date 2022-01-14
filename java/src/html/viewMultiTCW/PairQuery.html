@@ -55,9 +55,9 @@ either an AA or NT hit to be pair.
 <h3>+Statistics - only available if at least two NT datasets are in the mTCWdb</h3>
 Selecting <tt>Has Stats</tt> displays the pairs with the corresponding statistics, which are the 
 pairs that are in at least one cluster. 
-
-<br><br><tt>=0 or blank</tt>: For all queries that have a "&gt;=" and "&lt;", a blank entry will be ignored. 
-If both boxes contain an "0" (or "0.0"), then it computes "=0".
+ 
+<br><br>For <tt>&gt;=N and &lt;M</tt>: If N=M, then the query is on "=N". For example, if both values are 0, then
+the query is for "=0".
 
 <br><br><tt>Has Stats</tt>: All queries correspond to columns of the same name, e.g. "%Cexact" corresponds
 to the column "%Cexact", where putting the mouse over the column name (in the column panel)

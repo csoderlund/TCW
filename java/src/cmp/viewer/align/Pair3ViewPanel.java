@@ -1,4 +1,4 @@
-package cmp.viewer.seq.align;
+package cmp.viewer.align;
 /************************************************************
  * When the members table is displayed for pairs, this is called 
  * to align with PairAlignPanel
@@ -15,9 +15,9 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 
 import util.methods.ErrorReport;
 import util.methods.Out;
@@ -37,14 +37,14 @@ public class Pair3ViewPanel extends JPanel {
 	private static final String help2HTML = Globals.helpDir + "BaseAlign.html";
 	private int viewType=1; // 0=AA,CDS,NT  1=5'UTR,CDS, 3'UTR
 	
-	public Pair3ViewPanel(MTCWFrame parentFrame, String [] members, int [] lens, int type) { 
+	public Pair3ViewPanel(MTCWFrame parentFrame, String [] members,  int type, String sum) { 
 		theParentFrame = parentFrame;
 		thePair = members;
-		theLens = lens;
 		viewType=type;
+		summary=sum;
 		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-		setBackground(Globals.BGCOLOR);
+		setBackground(Static.BGCOLOR);
 	
 		buildAlignments();
 	}
@@ -71,8 +71,8 @@ public class Pair3ViewPanel extends JPanel {
 				refreshPanels();
 			}
 		});
-		theRow.add(new JLabel("View:")); theRow.add(Box.createHorizontalStrut(1));
-		theRow.add(btnShowType);         theRow.add(Box.createHorizontalStrut(5));
+		theRow.add(Static.createLabel("View: ")); 	theRow.add(Box.createHorizontalStrut(1));
+		theRow.add(btnShowType);         		theRow.add(Box.createHorizontalStrut(5));
 		
 		dotBox = Static.createCheckBox("Dot", true);
 		dotBox.addActionListener(new ActionListener() {
@@ -103,11 +103,10 @@ public class Pair3ViewPanel extends JPanel {
 		theRow.add(menuZoom);
 		theRow.add(Box.createHorizontalStrut(5));
 		
-		JButton btnHelp1 = Static.createButton("Help1", true, Globals.HELPCOLOR);
+		JButton btnHelp1 = Static.createButtonHelp("Help1", true);
 		btnHelp1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				UserPrompt.displayHTMLResourceHelp(theParentFrame, 
-						"Alignment...",  help2HTML);
+				UserPrompt.displayHTMLResourceHelp(theParentFrame, "Alignment...",  help2HTML);
 			}
 		});
 		theRow.add(btnHelp1);
@@ -160,7 +159,7 @@ public class Pair3ViewPanel extends JPanel {
 		}
 		theRow2.add(Box.createHorizontalStrut(5));
 	    
-		JButton btnHelp = Static.createButton("Help2", true, Globals.HELPCOLOR);
+		JButton btnHelp = Static.createButtonHelp("Help2", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				UserPrompt.displayHTMLResourceHelp(theParentFrame, "Align: ",  help1HTML);
@@ -175,7 +174,16 @@ public class Pair3ViewPanel extends JPanel {
 		buttonPanel.setMaximumSize(buttonPanel.getPreferredSize()); 
 		buttonPanel.setMinimumSize(buttonPanel.getPreferredSize()); 
 	}
-
+	private void createHeaderPanel() {
+		headerPanel = Static.createRowPanel();
+		alignHeader =  Static.createTextFieldNoEdit(100);
+		alignHeader.setText(summary);
+		headerPanel.add(Box.createHorizontalStrut(5));
+		headerPanel.add(alignHeader);
+		
+		headerPanel.setMaximumSize(headerPanel.getPreferredSize()); 
+		headerPanel.setMinimumSize(headerPanel.getPreferredSize()); 
+	}
 	private void buildAlignments() {
 		if(theThread == null)
 		{
@@ -185,9 +193,16 @@ public class Pair3ViewPanel extends JPanel {
 						if (viewType==0) createAA_CDS_NTPanel();		
 						else createUTR_CDSPanel();
 						
+						add(Box.createVerticalStrut(10));
+						
 						createButtonPanel();
 						add(buttonPanel);
-					
+						add(Box.createVerticalStrut(5));
+						
+						createHeaderPanel();
+						add(headerPanel);
+						add(Box.createVerticalStrut(5));
+						
 						createMainPanel();
 						add(scroller);
 	
@@ -198,44 +213,45 @@ public class Pair3ViewPanel extends JPanel {
 			theThread.start();
 		}		
 	}
-
+	// CAS340 removed len checks (I think they were for ESTscan that did not always produce AA seqs)
 	private void createAA_CDS_NTPanel() {
 	try {
 		DBConn mDB = theParentFrame.getDBConnection();
 		theGraphicPanels = new Pair3AlignPanel[theAlignData.length];
 		
-		if (theLens[0]>0 && theLens[1]>0) { // has AA for both sequences
-			theParentFrame.setStatus("Aligning AA " + thePair[0] + " and " + thePair[1]);
-			theAlignData[0] = new PairAlignData(mDB, thePair, PairAlignData.AlignAA); //  !isNT
-			
-			if (theAlignData[0].getAlignFullSeq1().length()>0 && theAlignData[0].getAlignFullSeq2().length()>0) {
-				theGraphicPanels[0] = new Pair3AlignPanel(theParentFrame, theAlignData[0]); 
-				theGraphicPanels[0].setAlignmentY(Component.LEFT_ALIGNMENT);
-			}
-			else System.err.println("No AA alignment for pair");
-		}	
-		else theGraphicPanels[0]=null;
+		theParentFrame.setStatus("Aligning AA " + thePair[0] + " and " + thePair[1]);
+		theAlignData[0] = new PairAlignData(mDB, thePair, PairAlignData.AlignAA); //  !isNT
 		
-		if (theLens[2]>0 && theLens[3]>0) { // has NT for both sequences; NT and CDS alignment
-			theParentFrame.setStatus("Aligning CDS " + thePair[0] + " and " + thePair[1]);
-			theAlignData[1] = new PairAlignData(mDB, thePair,  PairAlignData.AlignCDS_AA); // isCDS
-			
-			if (theAlignData[1].getAlignFullSeq1().length()>0 && theAlignData[1].getAlignFullSeq2().length()>0) {
-				theGraphicPanels[1] = new Pair3AlignPanel(theParentFrame, theAlignData[1]); 
-				theGraphicPanels[1].setAlignmentY(Component.LEFT_ALIGNMENT);
-			}
-			else System.err.println("No CDS alignment for pair");
-			
-			theParentFrame.setStatus("Aligning NT " + thePair[0] + " and " + thePair[1]);
-			theAlignData[2] = new PairAlignData(mDB, thePair,  PairAlignData.AlignNT); //  isNT
-			
-			if (theAlignData[2].getAlignFullSeq1().length()>0 && theAlignData[2].getAlignFullSeq2().length()>0) {
-				theGraphicPanels[2] = new Pair3AlignPanel(theParentFrame, theAlignData[2]); 
-				theGraphicPanels[2].setAlignmentY(Component.LEFT_ALIGNMENT);
-			}
-			else System.err.println("No NT alignment for pair");
+		if (theAlignData[0].getAlignFullSeq1().length()>0 && theAlignData[0].getAlignFullSeq2().length()>0) {
+			theGraphicPanels[0] = new Pair3AlignPanel(theParentFrame, theAlignData[0]); 
+			theGraphicPanels[0].setAlignmentY(Component.LEFT_ALIGNMENT);
 		}
-		else theGraphicPanels[1]=theGraphicPanels[2]=null;
+		else {
+			Out.PrtWarn("No AA alignment for pair");
+			theGraphicPanels[0]=null;
+		}	
+		
+		theParentFrame.setStatus("Aligning CDS " + thePair[0] + " and " + thePair[1]);
+		theAlignData[1] = new PairAlignData(mDB, thePair,  PairAlignData.AlignCDS_AA); // isCDS
+		
+		if (theAlignData[1].getAlignFullSeq1().length()>0 && theAlignData[1].getAlignFullSeq2().length()>0) {
+			theGraphicPanels[1] = new Pair3AlignPanel(theParentFrame, theAlignData[1]); 
+			theGraphicPanels[1].setAlignmentY(Component.LEFT_ALIGNMENT);
+		}
+		else System.err.println("No CDS alignment for pair");
+		
+		theParentFrame.setStatus("Aligning NT " + thePair[0] + " and " + thePair[1]);
+		theAlignData[2] = new PairAlignData(mDB, thePair,  PairAlignData.AlignNT); //  isNT
+		
+		if (theAlignData[2].getAlignFullSeq1().length()>0 && theAlignData[2].getAlignFullSeq2().length()>0) {
+			theGraphicPanels[2] = new Pair3AlignPanel(theParentFrame, theAlignData[2]); 
+			theGraphicPanels[2].setAlignmentY(Component.LEFT_ALIGNMENT);
+		}
+		else {
+			Out.PrtWarn("No NT alignment for pair");
+			theGraphicPanels[1]=theGraphicPanels[2]=null;
+		}
+		
 		theParentFrame.setStatus("");
 		mDB.close();
 	}
@@ -245,12 +261,6 @@ public class Pair3ViewPanel extends JPanel {
 		try {
 			theGraphicPanels = new Pair3AlignPanel[theAlignData.length];
 			
-			if (theLens[2]<=0 && theLens[3]<=0) {
-				Out.PrtError("Should not happen");
-				theGraphicPanels[1]=theGraphicPanels[2]=null;
-				theParentFrame.setStatus("Major TCW error");
-				return;
-			}
 				
 			DBConn mDB = theParentFrame.getDBConnection();
 			
@@ -378,7 +388,8 @@ public class Pair3ViewPanel extends JPanel {
 	private MTCWFrame theParentFrame = null;
 	private JScrollPane scroller = null;
 	
-	private JPanel buttonPanel = null, mainPanel = null;
+	private JPanel buttonPanel = null, mainPanel = null, headerPanel = null;
+	private JTextField alignHeader = null;
 
 	private JComboBox <MenuMapper> menuZoom = null;
 	private JButton btnShowType = null;
@@ -391,5 +402,5 @@ public class Pair3ViewPanel extends JPanel {
 	private PairAlignData [] theAlignData = new PairAlignData [3];
 	private Pair3AlignPanel [] theGraphicPanels = null;
 	private String [] thePair;
-	private int [] theLens; // 1: ntlen, aaLen; 2: ntLen, aaLen
+	private String summary;
 }

@@ -153,9 +153,9 @@ public class PairViewPanel extends JPanel implements ClipboardOwner
 	{
 		JPanel topPanel = Static.createRowPanel();
 		topPanel.add( Box.createHorizontalStrut(5) );
-		topPanel.add(new JLabel("View: ")); topPanel.add( Box.createHorizontalStrut(1) );
+		topPanel.add(Static.createLabel("View: ")); topPanel.add( Box.createHorizontalStrut(1) );
 		
-		btnViewType = new JButton ("Line"); // CAS310 changed from View Bases. CAS313 further changed...
+		btnViewType = Static.createButton("Line"); // CAS310 changed from View Bases. CAS313 further changed...
 		btnViewType.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				actionChangeView();
@@ -204,16 +204,14 @@ public class PairViewPanel extends JPanel implements ClipboardOwner
 			}
 		});
 		
-		JButton btnHelp = new JButton("Help2");
-		btnHelp.setBackground(Globals.HELPCOLOR);
+		JButton btnHelp = Static.createButtonHelp("Help2", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(getInstance(),"Seq-Hit Alignment", helpHTML);
 			}
 		});
 			
-		btnAlign = new JButton("Align..."); 
-		btnAlign.setBackground(Globals.PROMPTCOLOR);
+		btnAlign = Static.createButtonMenu("Align...", true); 
 		btnAlign.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				actionAlignPopup();
@@ -228,7 +226,7 @@ public class PairViewPanel extends JPanel implements ClipboardOwner
     		topPanel.add( Box.createHorizontalStrut(10) ); 
     		
     		// Align doesn't work for Pairs and AllFrames because only has name, which is not unique (could use #panel)
-            topPanel.add(new JLabel("Selected:"));	topPanel.add( Box.createHorizontalStrut(3) ); 
+            topPanel.add(Static.createLabel(Globals.select));	topPanel.add( Box.createHorizontalStrut(3) ); 
             topPanel.add(btnAlign);					topPanel.add( Box.createHorizontalStrut(15) );
             topPanel.add( Box.createHorizontalGlue() );
             topPanel.add(btnHelp);						topPanel.add( Box.createHorizontalStrut(5) );

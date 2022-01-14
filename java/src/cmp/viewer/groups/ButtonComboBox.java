@@ -10,19 +10,19 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.plaf.basic.BasicArrowButton;
 
-import cmp.database.Globals;
+import util.database.Globalx;
 
 public class ButtonComboBox extends JPanel {
 	private static final long serialVersionUID = -2875371221678221795L;
-
+	
 	public ButtonComboBox() {
-		setBackground(Globals.BGCOLOR);
+		setBackground(Globalx.BGCOLOR);
 		btnSelection = new JButton("");
-		btnSelection.setBackground(Globals.BGCOLOR);
+		btnSelection.setBackground(Globalx.BGCOLOR);
 		theSelections = new Vector<String> ();
 		
 		btnDecrement = new BasicArrowButton(BasicArrowButton.WEST);
-		btnDecrement.setBackground(Globals.BGCOLOR);
+		btnDecrement.setBackground(Globalx.BGCOLOR);
 		btnDecrement.setMaximumSize(btnDecrement.getPreferredSize());
 		btnDecrement.setMinimumSize(btnDecrement.getPreferredSize());
 		btnDecrement.addActionListener(new ActionListener() {
@@ -31,7 +31,7 @@ public class ButtonComboBox extends JPanel {
 			}
 		});
 		btnIncrement = new BasicArrowButton(BasicArrowButton.EAST);
-		btnIncrement.setBackground(Globals.BGCOLOR);
+		btnIncrement.setBackground(Globalx.BGCOLOR);
 		btnIncrement.setMaximumSize(btnIncrement.getPreferredSize());
 		btnIncrement.setMinimumSize(btnIncrement.getPreferredSize());
 		btnIncrement.addActionListener(new ActionListener() {

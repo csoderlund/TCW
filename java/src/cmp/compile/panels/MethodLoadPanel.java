@@ -27,7 +27,7 @@ public class MethodLoadPanel extends JPanel {
 		theParentPanel = parentPanel;
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setAlignmentX(Component.LEFT_ALIGNMENT);
-		setBackground(Globals.BGCOLOR);
+		setBackground(Static.BGCOLOR);
 		int width = 70;
 		add(Box.createVerticalStrut(20));
 	
@@ -48,7 +48,7 @@ public class MethodLoadPanel extends JPanel {
 				
 		// file
 		row = Static.createRowPanel();
-		lblFile = new JLabel("File");
+		lblFile = Static.createLabel("File");
 		row.add(lblFile);
 		row.add(Box.createHorizontalStrut(width - lblFile.getPreferredSize().width));
 		
@@ -56,7 +56,7 @@ public class MethodLoadPanel extends JPanel {
 		row.add(txtFile);		
 		row.add(Box.createHorizontalStrut(5));
 		
-		btnFile = new JButton("...");
+		btnFile = Static.createButtonFile("...", true);
 		btnFile.addActionListener(new ActionListener()  {
 			public void actionPerformed(ActionEvent arg0) {
 				String projName = theParentPanel.getProjectName();

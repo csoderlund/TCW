@@ -20,7 +20,6 @@ import javax.swing.JTextField;
 import cmp.database.Globals;
 import cmp.viewer.MTCWFrame;
 import cmp.viewer.panels.CollapsiblePanel;
-import util.methods.Out;
 import util.methods.Static;
 import util.ui.UserPrompt;
 
@@ -61,7 +60,7 @@ public class HitQueryPanel  extends JPanel {
 		buttonPanel = Static.createPagePanel();
 		
 		JPanel row = Static.createRowPanel();
-		btnSearch = Static.createButton("View Filtered Hits", true, Globals.FUNCTIONCOLOR);
+		btnSearch = Static.createButtonTab("View Filtered Hits", true);
 		btnSearch.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				hasError=false;
@@ -73,16 +72,14 @@ public class HitQueryPanel  extends JPanel {
 			}
 		});
 		
-		btnExpand = new JButton("Expand All");
-		btnExpand.setBackground(theViewerFrame.getSettings().getFrameSettings().getBGColor());
+		btnExpand = Static.createButton("Expand All");
 		btnExpand.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				for(int x=0; x<nSec; x++)theSections[x].expand();
 			}
 		});
 		
-		btnCollapse = new JButton("Collapse All");
-		btnCollapse.setBackground(theViewerFrame.getSettings().getFrameSettings().getBGColor());
+		btnCollapse = Static.createButton("Collapse All");
 		btnCollapse.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				for(int x=0; x<nSec; x++) theSections[x].collapse();
@@ -96,7 +93,7 @@ public class HitQueryPanel  extends JPanel {
 			}
 		});
 		
-		btnHelp = Static.createButton("Help", true, Globals.HELPCOLOR);
+		btnHelp = Static.createButtonHelp("Help", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(theViewerFrame, "Hit Filter Help", helpHTML);
