@@ -397,6 +397,13 @@ public class Static {
 			return Integer.MIN_VALUE;
 		}
 	}
+	static public int getInteger(String val, int def) {
+		try {
+			int i = Integer.parseInt(val);
+			return i;
+		}
+		catch(Exception e) {return def;}
+	}
 	static public double getDouble(String val) {
 		try {
 			double i = Double.parseDouble(val);

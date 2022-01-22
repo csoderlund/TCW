@@ -75,7 +75,7 @@ public class SeqsQueryPanel extends JPanel {
 				if (!hasError) {
 					SeqsTablePanel newPanel = new SeqsTablePanel(theViewerFrame, 
 						tag + theViewerFrame.getNextLabelNum(tag));
-					theViewerFrame.addResultPanel(MTCWFrame.SEQ_PREFIX, newPanel, newPanel.getName(), getQuerySummary());
+					theViewerFrame.addResultPanel(tag, newPanel, newPanel.getName(), getQuerySummary());
 				}
 			}
 		});

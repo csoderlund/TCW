@@ -2,6 +2,7 @@ package cmp.database;
 
 import java.awt.Color;
 
+import cmp.viewer.MTCWFrame;
 import util.database.Globalx;
 
 public final class Globals {
@@ -30,7 +31,7 @@ public final class Globals {
 	public static final String TypeNT = "NT (DNA)";
 	
 	public static final int AA=0, NT=1, CDS=2;
-	public static final int bSEQ=0, bPAIR=1, bGRP=2, bHIT=3;
+	public static final int bSEQ=0, bPAIR=1, bGRP=2, bHIT=3, bDETAIL=4;
 	
 	// Compile and View
 	public static final String PRE_ASM = "A__";  // mTCW asmID
@@ -62,10 +63,10 @@ public final class Globals {
 			
 	// Load: Unique description and No shared description. The specialID makes them sort to bottom
 	public static final String specialID = "*";
-	public static final String uniqueID = specialID + "Novel"; 
+	public static final String uniqueID =   specialID + "Novel"; 
 	public static final String uniqueDesc = specialID + "Novel - No annotation for any sequence";
-	public static final String noneID = specialID + "NoShare";
-	public static final String noneDesc = specialID + "NoShare - No shared annotation for the pair";
+	public static final String noneID =     specialID + "NoShare";
+	public static final String noneDesc =   specialID + "NoShare - No shared annotation for the pair";
 	public static final String GO_FORMAT = Globalx.GO_FORMAT;		
 	
 	// Compile and viw: Cutoff for Pearson's Correlation Coefficient for perPCC
@@ -147,10 +148,41 @@ public final class Globals {
 	public static final String prev = "<<";
 	public static final String select = "Selected:";
 	
+	// buttons at top of tables
+	public static final String FILTER = "Filter: ";   // On each table with summary of filter
+	public static final String GRP_TABLE = 	"Clusters";
+	public static final String SEQ_TABLE = 	"Seqs";
+	public static final String PAIR_TABLE = "Pairs";
+	public static final String SEQ_DETAIL = "Details";
+		
+	// tags on left and summary prefix: do not use the "s" ones ont tags, only summary
+	public static final String tagGRP = 	MTCWFrame.GRP_PREFIX + ": ";
+	public static final String tagGRPs = 	MTCWFrame.GRP_PREFIX + ": "; // no s 
+	public static final String tagPAIR = 	MTCWFrame.PAIR_PREFIX + ": ";
+	public static final String tagPAIRs = 	MTCWFrame.PAIR_PREFIX + "s: ";
+	public static final String tagSEQ = 	MTCWFrame.SEQ_PREFIX + ": ";
+	public static final String tagSEQs = 	MTCWFrame.SEQ_PREFIX + "s: ";
+	public static final String tagHIT =  	MTCWFrame.HIT_PREFIX + ": ";
+	public static final String tagHITs =  	MTCWFrame.HIT_PREFIX + "s: ";
+	public final static String tagPW = 		"PW: ";
+	public final static String tagMxx = 	"MSA: ";
+	public final static String tagDETAIL = 	"DT: ";
+	public final static int trimSUM = 115;
+	
 	/****************************************
 	 * static methods
 	 */
-	public static String getName(String method, String prefix) {
+	public static String makeName(String method, String prefix) { // for runMulti methods
 		return prefix + "_" + method;
+	}
+	
+	public static boolean hasSpecialID(String hitID) {
+		if (hitID.contentEquals(uniqueID) || hitID.contentEquals(noneID)) return true;
+		return false;
+	}
+	public static String trimSum(String sum) {
+    	int x = Globals.trimSUM;
+    	if (sum.length()>x) sum = sum.substring(0, x) + "...";
+    	return sum;
 	}
 }

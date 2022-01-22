@@ -124,7 +124,7 @@ public class MethodHitPanel  extends JPanel {
 		return Globals.Methods.Hit.TYPE_NAME; 
 	}
 	public String getMethodName() { 
-		return Globals.getName(Globals.Methods.Hit.TYPE_NAME, txtPrefix.getText()); 
+		return Globals.makeName(Globals.Methods.Hit.TYPE_NAME, txtPrefix.getText()); 
 	}
 	
 	public String getPrefix() 		 { return txtPrefix.getText(); }

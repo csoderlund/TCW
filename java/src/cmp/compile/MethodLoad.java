@@ -82,7 +82,7 @@ public class MethodLoad {
 		String methodType = methodPanel.getMethodTypeAt(idx);
 		String comment =    methodPanel.getCommentAt(idx);
 		String settings =   methodPanel.getSettingsAt(idx);
-		methodName = Globals.getName(methodType, prefix);
+		methodName = Globals.makeName(methodType, prefix);
 	 
 		Out.PrtSpMsg(1, "Loading cluster file: " + groupFile);
 		

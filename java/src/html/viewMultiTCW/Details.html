@@ -27,14 +27,6 @@ WG  = best hit with GOs
 ALL = EV+AN+WG
 </pre> 
 
-<h4>Selected: Copy...</h4>
-<i>Pairs:</i> The first four options apply to the selection in the Pairs Table; if no
-row is selected, the first row will be used.
-<p><i>Hits:</i> The remaining options apply to the selection in the Hits Table; if no
-row is selected, the Best Hit will be used.
-
-<p><i>Clear</i>: Clear all selected rows.
-
 <h3>Frame Panel</h3>
 This replaces the current sequence panel with a display of the sequence; if it is 
 a nucleotide sequence, then it shows information about the frame and best hit in relation
@@ -51,5 +43,32 @@ If no row in the Hits table is selected, then the best hit is used.
 <tr><td>All GOs for the selected hit (or best)<td>All assigned and inherited GOs for the selected hit are shown.
 If no row in the Hits table is selected, then the best hit is used.
 </table>
+
+<h3>Pairwise...</h3>
+The first 4 options apply to the pair table. The last option applies to the hit table.
+In both cases, (1) if no row is selected, the first row will be used, (2) only one row can be selected. 
+<table border=1 cellpadding=3>
+<tr><td><b>AA to pair seqID</b><td>Perform pairwise 
+alignment of amino acid sequence from the selected pair sequence. 
+<tr><td><b>NT to pair seqID*</b><td> Perform pairwise 
+alignment of the nucleotide sequence to the selected pair sequence. 
+<tr><td><b>AA,NT,CDS to pair seqID*</b> 
+<td>Align the selected pair using the amino acid sequence,
+CDS sequence, and nucleotide sequences. The resulting panel will have these 3 alignments.
+<tr><td><b>5UTR, CDS, 3UTR to pair seqID*</b>
+<td>Align these three regions separately for the selected pair seq.
+The resulting panel will have these 3 alignments.
+<tr><td><b>AA to hitID</b>
+<td>The selected hit is aligned to the sequence.
+</table>
+* NT-mTCW only
+
+<p><u>Copy...</u>
+<br><i>Pairs:</i> The first four options apply to the selection in the Pairs Table; if no
+row is selected, the first row will be used.
+<br><i>Hits:</i> The remaining options apply to the selection in the Hits Table; if no
+row is selected, the Best Hit will be used.
+
+
 </html>
 

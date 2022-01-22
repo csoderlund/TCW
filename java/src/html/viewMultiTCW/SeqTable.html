@@ -17,6 +17,30 @@ Show the table of clusters containing the sequence.
 <p><u>Pairs</u> For the selected sequence(s): 
 Show the table of pairs containing at least one of the selected sequences.
 
+<p><u>MSA...</u> Select a set of sequences followed by this button, which provides a drop-down of actions.
+All the following actions display the alignment as a tab on the left, and provides the alignment file in the <tt>ResultAlign</tt> directory.
+<ul>
+<li><b>MUSCLE-AA</b>: 
+Run MUSCLE to build a multiple alignment 
+for all amino acid sequences from the selected set. This can be very time consuming
+when run on many sequences. The command executed is:
+<pre>
+/Ext/linux/muscle/muscle -in ResultAlign/inSeq.fa -out ResultAlign/outAln.fa
+</pre>
+
+<li><b>MAFFT-AA+hit</b>: Same as above.
+The command executed is:
+<pre>
+/Ext/linux/mafft/mafft.bat --auto --reorder --thread N ResultAlign/inSeq.fa
+</pre>
+Where N is the number of available threads (processors/CPUs).
+<br><br>
+<li><b>MAFFT-CDS</b>: (NT-mTCW only) Same as above but with the CDS sequences.
+<br><br>
+<li><b>MAFFT-NT</b>: (NT-mTCW only) Same as above but with the NT sequences.
+
+</ul>
+
 <p><u>Copy...</u> For the selected sequence: 
 Copies the seqID, AA, NT or CDS sequence, Best hitID, Best description or Best hit sequence.
 

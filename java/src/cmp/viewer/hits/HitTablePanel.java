@@ -40,6 +40,7 @@ import cmp.database.DBinfo;
 import cmp.database.Globals;
 import cmp.viewer.MTCWFrame;
 import cmp.viewer.ViewerSettings;
+import cmp.viewer.align.AlignButtons;
 import cmp.viewer.seq.SeqsTablePanel;
 import cmp.viewer.table.FieldData;
 import cmp.viewer.table.SortTable;
@@ -55,16 +56,12 @@ import util.ui.UserPrompt;
 public class HitTablePanel  extends JPanel {
 	private static final long serialVersionUID = 1L;
 	
-	private static final String TABLE = FieldData.HIT_TABLE;
-	private static final String HITID = FieldData.HITID;
-	private static final String HITDESC = FieldData.HITDESC;
-	private static final String HIT_SQLID = FieldData.HIT_SQLID; // Hidden column containing DB HITid
+	private static final String TABLE = 	FieldData.HIT_TABLE;
+	private static final String HITID = 	FieldData.HITID;
+	private static final String HITDESC = 	FieldData.HITDESC;
+	private static final String HIT_SQLID = FieldData.HIT_SQLID; 
 	private static final String helpHTML = Globals.helpDir + "HitTable.html";
 
-	private final String pSEQ = MTCWFrame.SEQ_PREFIX;
-	private final String pHIT = MTCWFrame.HIT_PREFIX;
-	private final String pHITs = MTCWFrame.HIT_PREFIX + "s";
-	
 	public HitTablePanel(MTCWFrame parentFrame, String tab) {
 		if (tab.startsWith(MTCWFrame.MENU_PREFIX)) isList=true;
 		
@@ -72,38 +69,43 @@ public class HitTablePanel  extends JPanel {
 		
 		HitQueryPanel theQueryPanel = theViewerFrame.getHitQueryPanel();
 		if (theQueryPanel!=null) {
-			strSubQuery =     theQueryPanel.getSQLwhere();
-			strQuerySummary = theQueryPanel.getQuerySummary();
+			strSubQuery =   theQueryPanel.getSQLwhere();
+			strSummary = 	Globals.trimSum(theQueryPanel.getQuerySummary());
 		}
 		else buildShortList();
 		
-		strQuerySummary = MTCWFrame.FILTER + strQuerySummary;
+		strSummary = Globals.FILTER + strSummary;
 		buildQueryThread(); 
 	}
 	
-	/** XXX Buttons for Hit table */
+	/***********************************************
+	 * Buttons for Hit table 
+	 * *********************************************/
     private JPanel createTableButton() {
     	JPanel buttonPanel = Static.createPagePanel();
 	    	
     	JPanel topRow = Static.createRowPanel();
 	    topRow.add(Static.createLabel(Globals.select));
     	   	
-         btnTableSeqs = Static.createButtonTab(MTCWFrame.SEQ_TABLE, false);
+         btnTableSeqs = Static.createButtonTab(Globals.SEQ_TABLE, false);
          btnTableSeqs.addActionListener(new ActionListener() {
  			public void actionPerformed(ActionEvent arg0) {
- 				viewSequences();
+ 				viewSeqs();
  			}
  		});
-        topRow.add(btnTableSeqs);
-        topRow.add(Box.createHorizontalStrut(3));  
+        topRow.add(btnTableSeqs);	topRow.add(Box.createHorizontalStrut(3));  
          	
+        AlignButtons bObj = new AlignButtons(theViewerFrame, getInstance()); // CAS341 new
+        btnPairwise = bObj.createBtnPairAlign();
+        topRow.add(btnPairwise);					topRow.add(Box.createHorizontalStrut(3)); 
+        
         createBtnCopy();
  		topRow.add(btnCopy);
-        topRow.add(Box.createHorizontalStrut(50));  
+        topRow.add(Box.createHorizontalGlue());  
 		
         createBtnTable();
         topRow.add(btnTable);
-        topRow.add(Box.createHorizontalGlue());
+        topRow.add(Box.createHorizontalStrut(3));
         
         btnHelp = Static.createButtonHelp("Help", true);
         btnHelp.addActionListener(new ActionListener() {
@@ -171,7 +173,7 @@ public class HitTablePanel  extends JPanel {
 		popup.add(new JMenuItem(new AbstractAction("Show Column Stats") {
  		   private static final long serialVersionUID = 1L;
  		   public void actionPerformed(ActionEvent e) {
- 			   new TableUtil().statsPopUp("Hits: " + strQuerySummary, theTable);
+ 			   new TableUtil().statsPopUp("Hits: " + strSummary, theTable);
  		   }
 	 	}));
     		  
@@ -205,9 +207,7 @@ public class HitTablePanel  extends JPanel {
 		theViewerFrame = parentFrame;
 		tabName = resultName;
 		
-		hasAAdb = (theViewerFrame.getnAAdb()>0);
 		vSettings = parentFrame.getSettings();
-		hasGOs =    (theViewerFrame.getInfo().getCntGO()>0);
 		totalHits = theViewerFrame.getInfo().getCntHit();
 
 		colSelectChange = new ActionListener() {
@@ -318,17 +318,79 @@ public class HitTablePanel  extends JPanel {
         tableHeader.setText(status);
         
         if(!isList) {
-           theViewerFrame.changePanelName(this, tabName + ": " + nRow, strQuerySummary);
+           theViewerFrame.changePanelName(this, tabName + ": " + nRow, strSummary);
         }
     }
 	private void setTopEnabled() {
 		int selCount = theTable.getSelectedRowCount();
 		int rowCount = theTable.getRowCount();
-		boolean b = (selCount == 1 || rowCount==1) ? true : false;
 		
 		btnTableSeqs.setEnabled(selCount>0); 
+		
+		boolean b = (selCount == 1 || rowCount==1);
+		btnPairwise.setEnabled(b); // only select one row, but align all seqs with hit
 		btnCopy.setEnabled(b);
 	}
+	
+    private JPanel createTableStatusPanel() {
+    	JPanel thePanel = Static.createRowPanel();
+    	tableType = Static.createTextFieldNoEdit(20);
+    	Font f = tableType.getFont();
+    	tableType.setFont(new Font(f.getFontName(),Font.BOLD, f.getSize()));
+    	tableType.setMaximumSize(tableType.getPreferredSize());
+    	tableType.setAlignmentX(LEFT_ALIGNMENT);
+
+    	tableHeader =  Static.createTextFieldNoEdit(30);
+    	thePanel.add(tableType);
+    	thePanel.add(tableHeader);
+    	thePanel.setMaximumSize(thePanel.getPreferredSize());
+    	
+    	return thePanel;
+	}
+    private JPanel createTableSummaryPanel() {
+    	JPanel thePanel = Static.createRowPanel();
+    
+    	lblSummary = Static.createLabel(strSummary, true);
+    	lblSummary.setFont(getFont());
+    	thePanel.add(lblSummary);
+    	
+    	return thePanel;
+	}
+	
+	public String getSummary() { return strSummary; }
+	private HitTablePanel getInstance() { return this; }
+	
+	private String buildQueryStr(DBConn mdb) {
+        try {
+    		FieldData theFields = FieldData.getHitFields();
+        	
+    		String strQuery = "SELECT " + theFields.getDBFieldQueryList() + " FROM " + TABLE + " ";
+        	
+    		strQuery += " WHERE " + strSubQuery;
+    	
+    		int cnt = mdb.executeCount("select count(*) from " + TABLE + " where " + strSubQuery);
+    		String per = Static.perText(cnt, theViewerFrame.getInfo().getCntHit());
+        	loadStatus.setText("Getting " + cnt + " " + per + " filtered Hits from database");
+    	
+    		return strQuery;
+        } catch(Exception e) {ErrorReport.reportError(e, "Error processing query");return null;}
+	}
+	private void buildShortList() {
+		try {
+			DBConn mDB = theViewerFrame.getDBConnection(); // 
+			DBinfo info = theViewerFrame.getInfo();
+			String x = info.getSampleHit(mDB);
+			mDB.close();
+			
+			if (x==null || x=="") return;
+			String [] y = x.split(":");
+			strSubQuery = y[1];
+			strSummary = y[0];
+		 } catch(Exception e) {ErrorReport.reportError(e, "Getting hit sample");}
+	}
+	/*******************************************************
+	 * Columns
+	 */
     private JPanel createFieldSelectPanel() {
     	JPanel page = Static.createPagePanel();
     	
@@ -398,62 +460,6 @@ public class HitTablePanel  extends JPanel {
 	
 	    return page;
 	}
-    private JPanel createTableStatusPanel() {
-    	JPanel thePanel = Static.createRowPanel();
-    	tableType = Static.createTextFieldNoEdit(20);
-    	Font f = tableType.getFont();
-    	tableType.setFont(new Font(f.getFontName(),Font.BOLD, f.getSize()));
-    	tableType.setMaximumSize(tableType.getPreferredSize());
-    	tableType.setAlignmentX(LEFT_ALIGNMENT);
-
-    	tableHeader =  Static.createTextFieldNoEdit(30);
-    	thePanel.add(tableType);
-    	thePanel.add(tableHeader);
-    	thePanel.setMaximumSize(thePanel.getPreferredSize());
-    	
-    	return thePanel;
-	}
-    private JPanel createTableSummaryPanel() {
-    	JPanel thePanel = Static.createRowPanel();
-    
-    	lblSummary = Static.createLabel(strQuerySummary, true);
-    	lblSummary.setFont(getFont());
-    	thePanel.add(lblSummary);
-    	
-    	return thePanel;
-	}
-	
-	public String getSummary() { return strQuerySummary; }
-	private HitTablePanel getInstance() { return this; }
-	
-	private String buildQueryStr(DBConn mdb) {
-        try {
-    		FieldData theFields = FieldData.getHitFields();
-        	
-    		String strQuery = "SELECT " + theFields.getDBFieldQueryList() + " FROM " + TABLE + " ";
-        	
-    		strQuery += " WHERE " + strSubQuery;
-    	
-    		int cnt = mdb.executeCount("select count(*) from " + TABLE + " where " + strSubQuery);
-    		String per = Static.perText(cnt, theViewerFrame.getInfo().getCntHit());
-        	loadStatus.setText("Getting " + cnt + " " + per + " filtered Hits from database");
-    	
-    		return strQuery;
-        } catch(Exception e) {ErrorReport.reportError(e, "Error processing query");return null;}
-	}
-	private void buildShortList() {
-		try {
-			DBConn mDB = theViewerFrame.getDBConnection(); // 
-			DBinfo info = theViewerFrame.getInfo();
-			String x = info.getSampleHit(mDB);
-			mDB.close();
-			
-			if (x==null || x=="") return;
-			String [] y = x.split(":");
-			strSubQuery = y[1];
-			strQuerySummary = y[0];
-		 } catch(Exception e) {ErrorReport.reportError(e, "Getting hit sample");}
-	}
 	private void clearColumns() { 
 		for(int x=0; x<chkFields.length; x++) {
 			chkFields[x].setSelected(false);
@@ -497,78 +503,7 @@ public class HitTablePanel  extends JPanel {
     	return retVal;
     }
    
-    /***********************************************************************
-     * Sequences for selected HITs -- query database for UTid of unitrans_hits for HITid of selected
-     ***********************************************************/
-    private void viewSequences() {
-    	try {						
-			int [] sels = theTable.getSelectedRows();
-			if (sels.length==0) return;
-			
-		// Get hitIDs
-			int hitIdx =  theTableData.getColumnHeaderIndex(HIT_SQLID);
-			int hitNameIdx = theTableData.getColumnHeaderIndex(HITID);
-			
-			String hitlist = "", sum="", tab="";
-			int id1 = (Integer)theTableData.getValueAt(sels[0], hitIdx);
-			
-			if (sels.length==1) {
-				tab = pSEQ  + ":  " + (String)theTableData.getValueAt(sels[0], hitNameIdx);
-				hitlist = "unitrans_hits.HITid = " + id1; // CAS340 add unitrans
-				sum = getSumLine(sels[0]);
-			}
-			else {
-				tab = pSEQ  + ":  " + pHITs + sels.length; // tab on left
-				sum= pHIT + ": HitID=" + (String)theTableData.getValueAt(sels[0], hitNameIdx);
-				hitlist = "unitrans_hits.HITid in (" + id1;
-				
-				for (int i=1; i<sels.length; i++) {
-					int id2 = (Integer)theTableData.getValueAt(sels[i], hitIdx);
-					hitlist += "," + id2;
-					
-					if (i<8) sum += ", " + (String)theTableData.getValueAt(sels[i], hitNameIdx);
-				}
-				hitlist += ")";
-				if (sels.length>=8) sum += "...";
-			}
-			String list="";
-			
-		// Get SEQids for hitids
-			String where = getSeqList(hitlist);
- 	    	
-			int row = (sels.length == 1) ? row = theTable.getSelectedRow() : -1;
-			
-			SeqsTablePanel newPanel = new SeqsTablePanel(theViewerFrame, getInstance(), 
-					where, tab, sum, row);
-			theViewerFrame.addResultPanel(getInstance(), newPanel, newPanel.getName(), sum);
-    	}
-    	catch (Exception e) {ErrorReport.prtReport(e, "View HIT Sequences");}
-    }
-    private String getSeqList(String hitlist) { // CAS340 shared with getNextHitRowForSeq
-    	String seqlist="";
-    	try {
-    		DBConn mDB = theViewerFrame.getDBConnection();
-			ResultSet rs = mDB.executeQuery("select distinct UTid from unitrans_hits where " + hitlist);
-			while (rs.next()) {
-				int id = rs.getInt(1);
-				seqlist += (seqlist=="") ? id : ("," + id);
-			}
-			return " UTid in (" + seqlist + ")";
-    	}
-    	catch (Exception e) {ErrorReport.prtReport(e, "Get SeqIDs for " + hitlist); return "1";}
-    }
-    private String loadSeq(String hitStr) {
-    	try {
-    		DBConn mDB = theViewerFrame.getDBConnection();
-			ResultSet rs = mDB.executeQuery("select sequence from unique_hits where HITstr='" + hitStr + "'");
-			if (rs.next()) return rs.getString(1);
-			else return "Error reading sequence";
-    	}
-    	catch (Exception e) {ErrorReport.prtReport(e, "Load HIT Sequence " + hitStr);}
-    	
-    	Out.prt("Error reading sequence for " + hitStr);
-    	return "Error reading sequence";
-    }
+   
    
     /**********************************************************************************/
   //When the view table gets sorted, sort the master table to match (Called by TableData)
@@ -709,31 +644,168 @@ public class HitTablePanel  extends JPanel {
     	}
     	private boolean [] bColumnAscending = null;
     }
-    /************* Next/Prev from sequence table ***************/
-    // Called from SeqTopRow panel
+    /***********************************************************************/
+ 
+    private String loadSeq(String hitStr) {
+    	try {
+    		DBConn mDB = theViewerFrame.getDBConnection();
+			ResultSet rs = mDB.executeQuery("select sequence from unique_hits where HITstr='" + hitStr + "'");
+			if (rs.next()) return rs.getString(1);
+			else return "Error reading sequence";
+    	}
+    	catch (Exception e) {ErrorReport.prtReport(e, "Load HIT Sequence " + hitStr);}
+    	
+    	Out.prt("Error reading sequence for " + hitStr);
+    	return "Error reading sequence";
+    }
+    /***********************************************************************
+     * view Seqs for hits
+     * where unitrans.HITid = hitid
+     * DB call to unitrans_hits
+     ***********************************************************/
+    private void viewSeqs() {
+    	try {						
+			int [] sels = theTable.getSelectedRows();
+			if (sels.length==0) return;
+			
+		// Get hitIDs
+			int hitIdx =  theTableData.getColumnHeaderIndex(HIT_SQLID);
+			int hitNameIdx = theTableData.getColumnHeaderIndex(HITID);
+			
+			String hitlist = "", sum="", tab="";
+			int hitid = (Integer)theTableData.getValueAt(sels[0], hitIdx);
+			
+			if (sels.length==1) {
+				tab = Globals.tagSEQ + (String)theTableData.getValueAt(sels[0], hitNameIdx);
+				hitlist = " unitrans_hits.HITid = " + hitid; // CAS340 add unitrans
+				sum = getSumLine(sels[0]);
+			}
+			else {
+				tab = Globals.tagSEQ  + "Hits " + sels.length; // tab on left
+				sum = Globals.tagHITs +  (String)theTableData.getValueAt(sels[0], hitNameIdx);
+				hitlist = " unitrans_hits.HITid in (" + hitid;
+				
+				for (int i=1; i<sels.length; i++) {
+					int id2 = (Integer)theTableData.getValueAt(sels[i], hitIdx);
+					hitlist += "," + id2;
+					
+					if (i<4) sum += ", " + (String)theTableData.getValueAt(sels[i], hitNameIdx);
+				}
+				hitlist += ")";
+				if (sels.length>4) sum += "...";
+			}
+			
+		// Get SEQids for hitids
+			String where = loadFromDBSeqList(hitlist);
+ 	    	
+			int row = (sels.length == 1) ? row = theTable.getSelectedRow() : -1;
+			
+			SeqsTablePanel newPanel = new SeqsTablePanel(theViewerFrame, getInstance(), where, tab, sum, row);
+			theViewerFrame.addResultPanel(getInstance(), newPanel, newPanel.getName(), sum);
+    	}
+    	catch (Exception e) {ErrorReport.prtReport(e, "View HIT Sequences");}
+    }
+ // Called from SeqTopRow panel
     public String [] getNextHitRowForSeq(int nextRow) {
     	int row = getTranslatedRow(nextRow);
 		int hitIDX = theTableData.getColumnHeaderIndex(HITID);
-		String name = (String)theTableData.getValueAt(row, hitIDX);
+		String hitName = (String)theTableData.getValueAt(row, hitIDX);
 		
 		int dbIDX = theTableData.getColumnHeaderIndex(HIT_SQLID);
 		int hitID = ((Integer)theTableData.getValueAt(row, dbIDX)); 
 		
 		String [] retVal = new String[4];
-		retVal[0] = getSeqList("HITid = " + hitID);	// query
-		retVal[1] = pSEQ + ": " + name;				// tab
+		retVal[0] = loadFromDBSeqList("HITid = " + hitID);	// query
+		retVal[1] = Globals.tagSEQ + hitName;				// tab
 		retVal[2] = getSumLine(row);				// summary
 		retVal[3] = row +"";						// nParentRow
 		return retVal;
     }
-    private String getSumLine(int row) {
-    	int descIdx = theTableData.getColumnHeaderIndex(HITDESC);
-		String desc =  "  " + (String)theTableData.getValueAt(row, descIdx);
+    private String loadFromDBSeqList(String hitlist) { // CAS340 shared with getNextHitRowForSeq and viewSeq
+    	String seqlist="";
+    	try {
+    		DBConn mDB = theViewerFrame.getDBConnection();
+			ResultSet rs = mDB.executeQuery("select distinct UTid from unitrans_hits where " + hitlist);
+			while (rs.next()) {
+				int id = rs.getInt(1);
+				seqlist += (seqlist=="") ? id : ("," + id);
+			}
+			return " UTid in (" + seqlist + ")";
+    	}
+    	catch (Exception e) {ErrorReport.prtReport(e, "Get SeqIDs for " + hitlist); return "1";}
+    }
+    /***********************************************
+     * Pair align of nSeq or nSeq against hit
+     */
+    public String [] getAlignSeqIDs(int row) { // for pairs next/prev
+    	return getAlignSeqID(row);
+    }
+    public String [] getAlignSeqIDs() {
+    	int [] sels = theTable.getSelectedRows();
+		int row = (sels.length>0) ? sels[0] : 0;
+    	
+		return getAlignSeqID(row);
+    }
+    private String [] getAlignSeqID(int row) { // SeqIDs (names)
+		int hitIdx =  theTableData.getColumnHeaderIndex(HIT_SQLID);
+		
+		int hitid = (Integer)theTableData.getValueAt(row, hitIdx);
+		String hitlist = "unitrans_hits.HITid = " + hitid; // CAS340 add unitrans
+
+		Vector <String> seqID = new Vector<String> (); 
+		
+		try {
+    		DBConn mDB = theViewerFrame.getDBConnection();
+			ResultSet rs = mDB.executeQuery("select distinct UTstr from unitrans_hits where " + hitlist);
+			while (rs.next()) {
+				seqID.add(rs.getString(1));
+			}
+    	}
+    	catch (Exception e) {ErrorReport.prtReport(e, "Get SeqID for " + hitlist); return null;}
+		
+		return seqID.toArray(new String[seqID.size()]);
+    }
+    public String [] getTabSum() {
+    	int [] sels = theTable.getSelectedRows();
+		int row = (sels.length>0) ? sels[0] : 0;
 		
 		int hitNameIdx = theTableData.getColumnHeaderIndex(HITID);
-		String name = (String)theTableData.getValueAt(row, hitNameIdx);
 		
-		return "Row " + (row+1) + "/" + theTable.getRowCount() + "   " +  pHIT + " " + name + desc;	// summary
+    	String [] retVal = new String[3];
+    	
+    	retVal[0] = (String)theTableData.getValueAt(sels[0], hitNameIdx);
+    	retVal[1] = getSumLine(row);
+    	retVal[2] = row+"";
+    	return retVal;
+    }
+    public String getHitStr() {
+    	int [] sels = theTable.getSelectedRows();
+		int row = (sels.length>0) ? sels[0] : 0;
+		int IDidx = theTableData.getColumnHeaderIndex(HITID);
+    	return (String) theTableData.getValueAt(row, IDidx);
+    }
+    public String [] getNextHitForPW(int nextRow) { // CAS341
+    	int row = getTranslatedRow(nextRow);
+    	
+    	String hitID =   ((String) theTableData.getValueAt(row, theTableData.getColumnHeaderIndex(HITID)));
+    	
+		String [] retVal = new String[4];
+		retVal[0] = Globals.tagPW + hitID;		// tab
+		retVal[1] = getSumLine(row);			// summary
+		retVal[2] = row +"";					// nParentRow
+		retVal[3] = hitID;
+		
+		return retVal;
+    }
+    /************* Next/Prev from sequence table ***************/
+    
+    private String getSumLine(int row) {
+		String desc = (String)theTableData.getValueAt(row, theTableData.getColumnHeaderIndex(HITDESC));
+		String name = (String)theTableData.getValueAt(row, theTableData.getColumnHeaderIndex(HITID));
+		
+		String sum = "Row " + (row+1) + "/" + theTable.getRowCount();
+		sum += "   " +  Globals.tagHIT + " " + name + "    " + desc;
+		return sum;
 	}
     private int getTranslatedRow(int row) {
 		if (theTable==null) return 0;
@@ -742,42 +814,34 @@ public class HitTablePanel  extends JPanel {
     	else if (row < 0) 					return theTable.getRowCount()-1; // last row
     	else								return row;
     }
+   
     /****************************************************************/
     private SortTable theTable = null;
     private TableData theTableData = null;
     private JScrollPane sPane = null;
     
-    private JTextField tableHeader = null;
-    private JTextField tableType = null;
-    private JTextField loadStatus = null;
-    private JTextField txtStatus = null;
+    private JPanel tableButtonPanel = null, tableStatusPanel = null, fieldSelectPanel = null, tableSummaryPanel = null;
+	
+    private JTextField tableHeader = null, tableType = null, loadStatus = null, txtStatus = null;
     private JLabel lblSummary = null;
    
     //Function buttons
     private JButton btnCopy = null, btnTable = null, btnHelp = null;
-    private JButton btnTableSeqs = null;
+    private JButton btnTableSeqs = null, btnPairwise = null;
+    private JButton showColumnSelect = null, clearColumn = null;
     
-    private ActionListener dblClick = null;
-    private ActionListener sngClick = null;
+    private JCheckBox [] chkFields = null;
+    
+    private ActionListener dblClick = null, sngClick = null, colSelectChange = null;
     private ListSelectionListener selListener = null;
     private Thread buildThread = null;
     
-    private JCheckBox [] chkFields = null;
-    private ActionListener colSelectChange = null;
-    
-	private JPanel tableButtonPanel = null;
-	private JPanel tableStatusPanel = null;
-	private JPanel fieldSelectPanel = null;
-	private JPanel tableSummaryPanel = null;
-	
-	private JButton showColumnSelect = null;
-	private JButton clearColumn = null;
-	
+    private MTCWFrame theViewerFrame = null;
 	private ViewerSettings vSettings = null;
-	private int totalHits=0;
-	private boolean isList=false, hasAAdb=false, hasGOs=false;
 	
-	String tabName;
-	String strSubQuery=null, strQuerySummary=null;
-	private MTCWFrame theViewerFrame = null;
+	private int totalHits=0;
+	
+	private String tabName;
+	private String strSubQuery=null, strSummary=null;
+	private boolean isList=false;
 }

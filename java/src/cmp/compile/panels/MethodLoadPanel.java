@@ -89,7 +89,7 @@ public class MethodLoadPanel extends JPanel {
 	}
 	
 	public String getMethodName() { 
-		return Globals.getName(Globals.Methods.UserDef.TYPE_NAME, txtPrefix.getText()); 
+		return Globals.makeName(Globals.Methods.UserDef.TYPE_NAME, txtPrefix.getText()); 
 	}
 	
 	public String getPrefix() { return txtPrefix.getText(); }

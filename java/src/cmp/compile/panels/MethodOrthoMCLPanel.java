@@ -70,7 +70,7 @@ public class MethodOrthoMCLPanel extends JPanel {
 	}
 	
 	public String getMethodName() { 
-		return Globals.getName(Globals.Methods.OrthoMCL.TYPE_NAME, txtPrefix.getText()); 
+		return Globals.makeName(Globals.Methods.OrthoMCL.TYPE_NAME, txtPrefix.getText()); 
 	}
 	
 	public String getPrefix() { return txtPrefix.getText(); }

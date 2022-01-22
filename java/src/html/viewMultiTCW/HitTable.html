@@ -10,7 +10,23 @@ This table pertains to the annotation hits that are associated with each sequenc
 the hit(s).
 <p>
 
-<u>Copy...</u> For the selected hit, copy to clipboard a column (HitID or Hit Description).
+<u>Pairwise...</u>  only one row can be selected
+<table border=1 cellpadding=3>
+<tr><td><b>AA for each pair of nSeq</b><td>Perform pairwise 
+amino acid alignment for all nSeq sequences that aligned to the hit. 
+<tr><td><b>NT for each pair of nSeq*</b><td> Perform pairwise 
+nucleotide alignment for all nSeq sequences that aligned to the hit. 
+
+<tr><td><b>AA each nSeq to its best hitID</b>
+<td>For all nSeq sequences, align its best hit to the sequence.
+<tr><td><b>AA each nSeq to the row hitID</b>
+<td>For all nSeq sequences, align the row HitID to each sequence.
+</table>
+* NT-mTCW only
+<br>The Pairwise options can result in many alignments,  e.g. if nSeq is 20,
+190 alignments will be computed;  watch progress in lower left corner of viewMultiTCW.
+
+<p><u>Copy...</u> For the selected hit, copy to clipboard a column (HitID or Hit Description).
 <p>
 
 <u>Table...</u>

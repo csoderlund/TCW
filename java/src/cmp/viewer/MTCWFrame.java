@@ -61,20 +61,13 @@ public class MTCWFrame extends JFrame {
 	public static final int PAIR_MODE = 0;
 	public static final int MULTI_MODE = 1;
 	
-	// this are searched on as name of left hand menu
-	public static final String MENU_PREFIX = ">";
-	public static final String SEQ_PREFIX = "Seq";
-	public static final String GRP_PREFIX = "Clus";
-	public static final String PAIR_PREFIX = "Pair";
-	public static final String HIT_PREFIX = "Hit";
-	public static final String FILTER = "Filter: ";   // On each table with summary of filter
-	   
-	// buttons at top to other pages
-	public static final String GRP_TABLE = "Clusters";
-	public static final String SEQ_TABLE = "Seqs";
-	public static final String SEQ_DETAIL = "Details";
-	public static final String PAIR_TABLE = "Pairs";
-	
+	// this are searched on as name of left hand menu, and the last 4 are prefixes on tabs
+	public static final String MENU_PREFIX = 	">";
+	public static final String SEQ_PREFIX = 	"Seq";
+	public static final String GRP_PREFIX = 	"Clus";
+	public static final String PAIR_PREFIX = 	"Pair";
+	public static final String HIT_PREFIX = 	"Hit";
+		
 	// CAS305 moved Sampled to last section; add Find Hit
 	// CAS310 moved List Results and added Hit stuff
 	// CAS327 add Display Decimal
@@ -421,22 +414,25 @@ public class MTCWFrame extends JFrame {
 
 	public void setStatus(String status) {txtStatus.setText(status);}
 
-	// Called from Tables to add tab beneath current tab
+	/************************************************************
+	 * Tabs on left and in Results
+	 */
+	// Filter panels
+	public void addResultPanel(String type, JPanel newPanel, String name, String summary) {
+		JPanel parent = resultPanel;
+		if (type.equals(GRP_PREFIX)) 		parent = grpQueryPanel;
+		else if (type.equals(PAIR_PREFIX)) 	parent = pairQueryPanel;
+		else if (type.equals(SEQ_PREFIX)) 	parent = seqQueryPanel;
+		else if (type.equals(HIT_PREFIX)) 	parent = hitQueryPanel;
+		mainPanel.add(newPanel);
+		menuPanel.addChildItem(parent, newPanel, name, summary);
+		resultPanel.addResult(null, newPanel, name, summary);
+	}
+	// Add result under filter panel
 	public void addResultPanel(JPanel parentPanel, JPanel newPanel, String name, String summary) {
 		mainPanel.add(newPanel);
 		menuPanel.addChildItem(parentPanel, newPanel, name, summary);
 		resultPanel.addResult(parentPanel, newPanel, name, summary);
-	}
-	// Called from Queries to add tab beneath results
-	public void addResultPanel(String type, JPanel newPanel, String name, String summary) {
-		JPanel parent = resultPanel;
-		if (type.equals(GRP_PREFIX)) parent = grpQueryPanel;
-		else if (type.equals(PAIR_PREFIX)) parent = pairQueryPanel;
-		else if (type.equals(SEQ_PREFIX)) parent = seqQueryPanel;
-		else if (type.equals(HIT_PREFIX)) parent = hitQueryPanel;
-		mainPanel.add(newPanel);
-		menuPanel.addChildItem(parent, newPanel, name, summary);
-		resultPanel.addResult(null, newPanel, name, summary);
 	}
 	public void changePanelName(JPanel sourcePanel, String newName, String summary) {
 		menuPanel.renameMenuItem(sourcePanel, newName);
@@ -456,7 +452,6 @@ public class MTCWFrame extends JFrame {
 	public void removePanelFromMenuOnly(JPanel panel) {
 		menuPanel.removeMenuItem(panel);
 	}
-	
 	
 	/******************************************************************/
 	private class StyleTextPanel extends JPanel
@@ -513,9 +508,9 @@ public class MTCWFrame extends JFrame {
 	private void checkExternal(String filePath) {
 		try {
 			if (!FileHelpers.fileExists(filePath))
-				Out.PrtError("file does not exists: " + filePath);
+				Out.PrtErr("file does not exists: " + filePath);
 			else if (!FileHelpers.fileExec(filePath))
-				Out.PrtError("file is not executable: " + filePath);
+				Out.PrtErr("file is not executable: " + filePath);
 		}
 		catch(Exception e) {System.err.println("Check External"); }
 	}

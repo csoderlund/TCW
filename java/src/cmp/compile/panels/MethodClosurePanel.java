@@ -132,7 +132,7 @@ public class MethodClosurePanel extends JPanel {
 		updateHitType();
 	}
 	public String getMethodName() { 
-		return Globals.getName(Globals.Methods.Closure.TYPE_NAME, txtPrefix.getText()); 
+		return Globals.makeName(Globals.Methods.Closure.TYPE_NAME, txtPrefix.getText()); 
 	}
 	public static String getMethodType() { return Globals.Methods.Closure.TYPE_NAME; }
 	public String getSearchType() {if (aaButton.isSelected()) return abbrev[0]; else return abbrev[1];}

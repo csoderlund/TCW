@@ -12,7 +12,7 @@ import util.methods.Out;
 public class PairAlignData implements Comparable<PairAlignData> {
 	public final static int AlignNT=0;
 	public final static int AlignAA=1;
-	public final static int AlignCDS=2;
+	public final static int AlignCDS_NT=2;
 	public final static int AlignCDS_AA=3;
 	public final static int AlignHIT0_AA=4; // leave at end
 	public final static int AlignHIT1_AA=5;
@@ -54,7 +54,7 @@ public class PairAlignData implements Comparable<PairAlignData> {
 			loadSequencesFromDB(mDB, seqIDs); // nt sequence
 			align(theSeq1, theSeq2);
 			break;
-		case AlignCDS:
+		case AlignCDS_NT:
 			isCDS=true; isNT=true;
 			loadSequencesFromDB(mDB, seqIDs); // nt sequence
 			if (orfStart1==0 || orfEnd1==0) return;
@@ -221,7 +221,7 @@ public class PairAlignData implements Comparable<PairAlignData> {
 	    	switch (alignType) {
 			case AlignAA:     seqField = "aaSeq"; break;
 			case AlignNT:     seqField = "ntSeq"; break;
-			case AlignCDS:    seqField = "ntSeq"; break;
+			case AlignCDS_NT:    seqField = "ntSeq"; break;
 			case AlignCDS_AA: seqField = "aaSeq, ntSeq"; break;
 	    	}
 	    	// 1st sequence
@@ -274,10 +274,10 @@ public class PairAlignData implements Comparable<PairAlignData> {
     		return false;
     	}
 	}
-	private boolean loadHitAndSeqFromDB(DBConn conn, String [] IDs, int type) {
+	private boolean loadHitAndSeqFromDB(DBConn mDB, String [] IDs, int type) {
 		try {
 			// 1st sequence
-    		ResultSet rs = conn.executeQuery("SELECT orf_start, orf_end, aaSeq, HITid " +
+    		ResultSet rs = mDB.executeQuery("SELECT orf_start, orf_end, aaSeq, HITid " +
     					" FROM unitrans WHERE UTstr= '" + IDs[0] + "'");	
     		if (!rs.next()) {
     			rs.close();
@@ -294,28 +294,35 @@ public class PairAlignData implements Comparable<PairAlignData> {
     		boolean isAA=false;
     		// 2nd sequence
     		if (type==0) { // Best hit for sequence
-	    		ResultSet rs1 = conn.executeQuery("Select HITstr, sequence, isProtein from unique_hits where HITid=" + hitid);
+	    		ResultSet rs1 = mDB.executeQuery("Select HITstr, sequence, isProtein from unique_hits where HITid=" + hitid);
 	    		if (!rs1.next()) {
 	    			rs1.close();
-	    			Out.PrtWarn("Error reading database for hit sequence " + hitid);
+	    			Out.PrtWarn("Error1 reading database for " + IDs[0] + " best hitidx=" + hitid);
 	    			return false;
 	    		}
-	    		strID2 = rs1.getString(1);
+	    		strID2 	= rs1.getString(1);
 	    		theSeq2 = rs1.getString(2);
-	    		isAA = rs1.getBoolean(3);
+	    		isAA 	= rs1.getBoolean(3);
 	    		rs1.close();
     		}
     		else {   // Majority hit
-    			ResultSet rs2 =  conn.executeQuery("Select sequence, isProtein from unique_hits where HITstr='" + IDs[1] + "'");
-	    		if (!rs2.next()) {
-	    			rs2.close();
-	    			Out.PrtWarn("Error reading database for hit sequence " + hitid);
-	    			return false;
-	    		}
-	    		strID2 = IDs[1];
-	    		theSeq2 = rs2.getString(1);
-	    		isAA = rs2.getBoolean(2);
-	    		rs2.close();
+    			strID2 = 	IDs[1];
+    			if (Globals.hasSpecialID(IDs[1])) { // can't stop align on next/prev
+    				theSeq2 = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+    				isAA = true;
+    			}
+    			else {
+	    			ResultSet rs2 =  mDB.executeQuery("Select sequence, isProtein from unique_hits where HITstr='" + IDs[1] + "'");
+		    		if (!rs2.next()) {
+		    			rs2.close();
+		    			Out.PrtWarn("No hit sequence for majority hit for " + IDs[1]);
+		    			return false;
+		    		}
+		    		
+		    		theSeq2 = 	rs2.getString(1);
+		    		isAA = 		rs2.getBoolean(2);
+		    		rs2.close();
+    			}
     		}
     		if (!isAA) { // CAS310 - when best hit is NT
     			Out.prt("Translating NT best hit to AA (assuming ORF)");

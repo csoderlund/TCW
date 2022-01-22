@@ -43,22 +43,22 @@ import util.ui.UIHelpers;
 
 public class SeqDetailsPanel extends JPanel {
 	private static final long serialVersionUID = 4196828062981388452L;
-	private  final int NUM_PAIR_ROWS = 8; // not really # rows displayed, just a scale
-	private  final int NUM_HIT_ROWS = 12; // not really # rows displayed, just a scale
+	private  final int NUM_PAIR_ROWS = 8; // not really #rows displayed, just a scale
+	private  final int NUM_HIT_ROWS = 12; // not really #rows displayed, just a scale
 	private  final int MAX_TABLE_WIDTH = 550;
 	private  final int MAX_COL = 180; // maximum size of column, e.g. description and species
 	private  final String HIT_TABLE = FieldData.HIT_TABLE;
 	private  final String PAIR_TABLE = FieldData.PAIR_TABLE;
 	
 	public SeqDetailsPanel(MTCWFrame parentFrame, String name, int seqid) {
-		theParentFrame = parentFrame;
+		theViewerFrame = parentFrame;
 		seqIndex = seqid;
 		
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setBackground(Color.WHITE);
 		
 		try {
-			mDB = theParentFrame.getDBConnection();
+			mDB = theViewerFrame.getDBConnection();
 			loadTextArea();
 			
 			if (loadPairTable()==0) textArea += "\nNo pair data\n";
@@ -142,14 +142,14 @@ public class SeqDetailsPanel extends JPanel {
 		try {
 			if (!mDB.tableExist("pairwise")) return 0;
 			thePairData = new ArrayList<PairListData> ();
-			String methods = theParentFrame.getInfo().getStrMethodPrefix();
+			String methods = theViewerFrame.getInfo().getStrMethodPrefix();
 			if (methods!="") methods = "," + methods;
 			String sql = 
 					"SELECT UTid1, UTstr1, UTstr2, ntEval, aaEval, PCC, HITid, PAIRid " + methods +
 					" from " + PAIR_TABLE + " as p " +
 					" where UTid1=" + seqIndex + " or UTid2=" + seqIndex +
 					" order by aaEval"; 
-			int nMethods = theParentFrame.getInfo().getMethodPrefix().length;
+			int nMethods = theViewerFrame.getInfo().getMethodPrefix().length;
 			ResultSet rs = mDB.executeQuery(sql);
 			while (rs.next()) {
 				int id1= rs.getInt(1); 
@@ -234,6 +234,12 @@ public class SeqDetailsPanel extends JPanel {
 			cnt++;
 		}
 		if (rs!=null) rs.close();
+		
+		if (bestHitGO[0] == null) { // no GOs for sequence
+			bestHitGO[0]=theHitData.get(0).hitName;
+			bestHitGO[1]=theHitData.get(0).desc;
+			bestHitGO[2]=theHitData.get(0).dEVal+"";
+		}
 		return cnt;
 	}
 	catch (Exception e) {ErrorReport.reportError(e, "Creating hit table"); return 0;}
@@ -284,7 +290,7 @@ public class SeqDetailsPanel extends JPanel {
 	}
 	
 	/** 
-	 * hitTable  -- should not need changing 
+	 * hitTable 
 	 ***/
 	private void createHitTablePanel() {
 		theHitTable = new JTable();
@@ -326,8 +332,7 @@ public class SeqDetailsPanel extends JPanel {
 		}
 		public int getColumnCount() { return theLabels.length; }
         public int getRowCount() { return theDisplayValues.size(); }
-        public Object getValueAt(int row, int col) { 
-        	return theDisplayValues.get(row).getValueAt(col); }
+        public Object getValueAt(int row, int col) {return theDisplayValues.get(row).getValueAt(col); }
         public String getColumnName(int col) { return theLabels[col]; }
         
         private ArrayList<HitListData> theDisplayValues = null;
@@ -338,25 +343,25 @@ public class SeqDetailsPanel extends JPanel {
 		    protected JTable table;
 
 		    public ColumnListener(JTable t) {
-		    		table = t;
+		    	table = t;
 		    }
 		    public void mouseClicked(MouseEvent e) {
-			    	TableColumnModel colModel = table.getColumnModel();
-			    	int columnModelIndex = colModel.getColumnIndexAtX(e.getX());
-			    	int modelIndex = colModel.getColumn(columnModelIndex).getModelIndex();
-			    	if (modelIndex < 0) return;
-			    	
-			    	if (sortMode == modelIndex) sortAsc = !sortAsc;
-			    	else sortMode = modelIndex;
-	
-			    	for (int i = 0; i < table.getColumnCount(); i++) { 
-			    		TableColumn column = colModel.getColumn(i);
-			    		column.setHeaderValue(getColumnName(column.getModelIndex()));
-			    	}
-			    	table.getTableHeader().repaint();
-			    	Collections.sort(theDisplayValues, new HitListComparator(sortAsc, sortMode));
-			    	table.tableChanged(new TableModelEvent(HitTableModel.this));
-			    	table.repaint();
+		    	TableColumnModel colModel = table.getColumnModel();
+		    	int columnModelIndex = colModel.getColumnIndexAtX(e.getX());
+		    	int modelIndex = colModel.getColumn(columnModelIndex).getModelIndex();
+		    	if (modelIndex < 0) return;
+		    	
+		    	if (sortMode == modelIndex) sortAsc = !sortAsc;
+		    	else sortMode = modelIndex;
+
+		    	for (int i = 0; i < table.getColumnCount(); i++) { 
+		    		TableColumn column = colModel.getColumn(i);
+		    		column.setHeaderValue(getColumnName(column.getModelIndex()));
+		    	}
+		    	table.getTableHeader().repaint();
+		    	Collections.sort(theDisplayValues, new HitListComparator(sortAsc, sortMode));
+		    	table.tableChanged(new TableModelEvent(HitTableModel.this));
+		    	table.repaint();
 		    }
   	  	}
 	}
@@ -365,8 +370,7 @@ public class SeqDetailsPanel extends JPanel {
 			bSortAsc = sortAsc;
 			nMode = mode;
 		}		
-		public int compare(HitListData obj1, HitListData obj2) { 
-			return obj1.compareTo(obj2, bSortAsc, nMode); }		
+		public int compare(HitListData obj1, HitListData obj2) {return obj1.compareTo(obj2, bSortAsc, nMode); }		
 		private boolean bSortAsc;
 		private int nMode;
 	}	
@@ -402,7 +406,7 @@ public class SeqDetailsPanel extends JPanel {
 	/************  End Hit table code *************************/
 	
 	/** 
-	 * PairTable  -- should not need changing 
+	 * PairTable 
 	 ***/
 	private void createPairTablePanel() {
 		thePairTable = new JTable();
@@ -457,26 +461,26 @@ public class SeqDetailsPanel extends JPanel {
 		    protected JTable table;
 
 		    public ColumnListener(JTable t) {
-		    		table = t;
+		    	table = t;
 		    }
 		    public void mouseClicked(MouseEvent e) {
-			    	TableColumnModel colModel = table.getColumnModel();
-			    	int columnModelIndex = colModel.getColumnIndexAtX(e.getX());
-			    	if (columnModelIndex < 0) return; 
-			    	int modelIndex = colModel.getColumn(columnModelIndex).getModelIndex();
-			    	if (modelIndex < 0) return;
-			    	
-			    	if (sortMode == modelIndex) sortAsc = !sortAsc;
-			    	else sortMode = modelIndex;
-	
-			    	for (int i = 0; i < table.getColumnCount(); i++) { 
-			    		TableColumn column = colModel.getColumn(i);
-			    		column.setHeaderValue(getColumnName(column.getModelIndex()));
-			    	}
-			    	table.getTableHeader().repaint();
-			    	Collections.sort(theDisplayValues, new PairListComparator(sortAsc, sortMode));
-			    	table.tableChanged(new TableModelEvent(PairTableModel.this));
-			    	table.repaint();
+		    	TableColumnModel colModel = table.getColumnModel();
+		    	int columnModelIndex = colModel.getColumnIndexAtX(e.getX());
+		    	if (columnModelIndex < 0) return; 
+		    	int modelIndex = colModel.getColumn(columnModelIndex).getModelIndex();
+		    	if (modelIndex < 0) return;
+		    	
+		    	if (sortMode == modelIndex) sortAsc = !sortAsc;
+		    	else sortMode = modelIndex;
+
+		    	for (int i = 0; i < table.getColumnCount(); i++) { 
+		    		TableColumn column = colModel.getColumn(i);
+		    		column.setHeaderValue(getColumnName(column.getModelIndex()));
+		    	}
+		    	table.getTableHeader().repaint();
+		    	Collections.sort(theDisplayValues, new PairListComparator(sortAsc, sortMode));
+		    	table.tableChanged(new TableModelEvent(PairTableModel.this));
+		    	table.repaint();
 		    }
   	  	}
 	}
@@ -695,9 +699,14 @@ public class SeqDetailsPanel extends JPanel {
 		private String methods = "";
 	} 
 	public boolean isAAonly() { return bAAonly;}
+	public boolean hasPairs() { return (thePairData.size()>0);}
+	public boolean hasHits() { return (theHitData.size()>0);}
 	
 	public String getSelectedSeqID() {
+		if (thePairData.size()==0) return "";
+		
 		int [] selections = thePairTable.getSelectedRows();
+		
 		if (selections.length==0) return thePairData.get(0).seqID;
 		
 		return thePairData.get(selections[0]).seqID;
@@ -707,13 +716,19 @@ public class SeqDetailsPanel extends JPanel {
 		thePairTable.clearSelection();
 	}
 	public String getSelectedHitID() {
+		if (theHitData.size()==0) return "";
+		
 		int [] selections = theHitTable.getSelectedRows();
+		
 		if (selections.length==0) return bestHitGO[0];
 		
 		return theHitData.get(selections[0]).hitName;
 	}
 	public String getSelectedHitDesc() {
 		int [] selections = theHitTable.getSelectedRows();
+		
+		if (theHitData.size()==0) return "";
+		
 		if (selections.length==0) return bestHitGO[1];
 		
 		return theHitData.get(selections[0]).desc;
@@ -752,6 +767,7 @@ public class SeqDetailsPanel extends JPanel {
 		int a = (hitMap.get(hitID).bestAnno) ? 1 : 0;
 		return e+a;
 	}
+	/*************************************************************/
 	private String textArea = "";
 	private HitTableModel theHitModel = null;
 	private ArrayList<HitListData> theHitData = null;
@@ -759,6 +775,7 @@ public class SeqDetailsPanel extends JPanel {
 	
 	private PairTableModel thePairModel = null;
 	private ArrayList<PairListData> thePairData = null;
+	
 	// Views
 	private JPanel mainPanel = null;
 	private JScrollPane mainScroll = null;
@@ -770,17 +787,12 @@ public class SeqDetailsPanel extends JPanel {
 	private JTable thePairTable = null;
 	private JScrollPane pairTableScroll = null;
 	
-	// saved from db load
-	private boolean bAAonly=false;
-	
 	// parameters
-	private MTCWFrame theParentFrame = null;
-	private int seqIndex = -1;
+	private MTCWFrame theViewerFrame = null;
 	private DBConn mDB = null;
 	
+	private int seqIndex = -1, aaLen=0;
 	private String [] bestHitGO = new String [3];
-	private int aaLen=0;
-	
-	// for tag on left panel
-	private String seqName="";
+	private String seqName=""; 
+	private boolean bAAonly=false;
 }

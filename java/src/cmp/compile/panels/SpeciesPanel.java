@@ -95,7 +95,7 @@ public class SpeciesPanel extends JPanel {
 		btnAdd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				theEditSpeciesPanel.clear();
-				theEditSpeciesPanel.enableAll(false);
+				theEditSpeciesPanel.enableAll(false, false); // not loaded, not edit
 				
 				theEditSpeciesPanel.setVisible(true);
 				theCompilePanel.setMainPanelVisible(false);
@@ -116,7 +116,7 @@ public class SpeciesPanel extends JPanel {
 							theTable.getRemarkAt(row),
 							theTable.isAAdb(row),
 							theTable.getTypeAt(row));
-					theEditSpeciesPanel.enableAll(theCompilePanel.dbIsExist());
+					theEditSpeciesPanel.enableAll(theCompilePanel.dbIsExist(), true); // loaded, edit
 					
 					theEditSpeciesPanel.setVisible(true);
 					theCompilePanel.setMainPanelVisible(false);

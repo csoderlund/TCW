@@ -249,7 +249,7 @@ public class MethodBBHPanel extends JPanel {
 	}
 	public static String getMethodType() { return Globals.Methods.BestRecip.TYPE_NAME; }
 	public String getMethodName() { 
-		return Globals.getName(Globals.Methods.BestRecip.TYPE_NAME, txtPrefix.getText()); 
+		return Globals.makeName(Globals.Methods.BestRecip.TYPE_NAME, txtPrefix.getText()); 
 	}
 	public String 	getPrefix() { return txtPrefix.getText(); }
 	public String getComment() {  

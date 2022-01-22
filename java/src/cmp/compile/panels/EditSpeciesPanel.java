@@ -265,15 +265,17 @@ public class EditSpeciesPanel extends JPanel {
 		mainPanel.setVisible(visible);
 	}
 	
-	public void enableAll(boolean loaded) { 
-		lblDatabase.setEnabled(!loaded);
-		btnSelectDB.setEnabled(!loaded);
+	public void enableAll(boolean loaded, boolean isEdit) { // CAS341 add isEdit because messes up if change database
+		boolean b = !loaded && !isEdit;
+		lblDatabase.setEnabled(b);
+		btnSelectDB.setEnabled(b);
 		
-		lblPrefix.setEnabled(!loaded);
+		lblDBname.setEnabled(b);
+		lblDBtype.setEnabled(b);
+		
+		// can always change remark
+		lblPrefix.setEnabled(!loaded); // can change prefix until loaded
 		txtPrefix.setEnabled(!loaded);
-		
-		lblDBname.setEnabled(!loaded);
-		lblDBtype.setEnabled(!loaded);
 	}
 	
 	public void setFromDBselect(String dbName, String id, String prefix, boolean isPep) {
@@ -311,9 +313,7 @@ public class EditSpeciesPanel extends JPanel {
 	private JButton btnSelectDB = null;
 	private DatabaseSelectPanel pnlDBSelect = null;
 	
-	private JButton btnKeep = null;
-	private JButton btnDiscard = null;
-	private JButton btnHelp = null;
+	private JButton btnKeep = null, btnDiscard = null, btnHelp = null;
 	
 	private JLabel lblPrefix = null;
 	private JTextField txtPrefix = null;

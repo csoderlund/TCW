@@ -625,6 +625,7 @@ public class FindHits extends JPanel
 		resultTable.setBorder(BorderFactory.createLineBorder(Color.black));
 		resultTable.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		resultTable.setAutoCreateRowSorter(true);
+		resultTable.setBackground(Color.white); // CAS341
 		resizeColumns(resultTable);
 		
 		resultTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {

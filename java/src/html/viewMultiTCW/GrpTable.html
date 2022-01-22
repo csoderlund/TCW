@@ -18,24 +18,24 @@ requirement.
 <p><u>MSA...</u> Select a cluster followed by this button, which provides a drop-down of actions.
 All the following actions display the alignment as a tab on the left, and provides the alignment file in the <tt>ResultAlign</tt> directory.
 <ul>
-<li><b>MUSCLE-AA</b>: 
+<li><b>MUSCLE-AA+Hit</b>: 
 Run MUSCLE to build a multiple alignment 
-for all amino acid sequences in the table or for the selected set. This can be very time consuming
+for all amino acid sequences in the cluster, plus the Best HitID sequence. This can be very time consuming
 when run on many sequences. The command executed is:
 <pre>
 /Ext/linux/muscle/muscle -in ResultAlign/inSeq.fa -out ResultAlign/outAln.fa
 </pre>
 
-<li><b>MAFFT-AA</b>: Same as above.
+<li><b>MAFFT-AA+hit</b>: Same as above.
 The command executed is:
 <pre>
 /Ext/linux/mafft/mafft.bat --auto --reorder --thread N ResultAlign/inSeq.fa
 </pre>
 Where N is the number of available threads (processors/CPUs).
 <br><br>
-<li><b>MAFFT-CDS</b>: (NT-mTCW only) Same as above but with the CDS sequences
+<li><b>MAFFT-CDS</b>: (NT-mTCW only) Same as above but with the CDS sequences and no hit sequence.
 <br><br>
-<li><b>MAFFT-NT</b>: (NT-mTCW only) Same as above but with the NT sequences
+<li><b>MAFFT-NT</b>: (NT-mTCW only) Same as above but with the NT sequences and no hit sequence.
 
 </ul>
 <p><i>On Mac, replace <tt>Ext/linux</tt> with <tt>Ext/mac</tt></i>.
@@ -129,8 +129,9 @@ more detail explanation.
 <tr><td  valign="top">&nbsp;&nbsp;&nbsp;Score2<td>See the section at the end.
 <tr><td colspan=2><i>Majority Best Anno Hit</i>
 <tr><td  valign="top">&nbsp;&nbsp;&nbsp;HitID<td>The majority hit is 
-computed based on initial substring of all descriptions of all sequences
-in the cluster. The rest of the columns in the section are associated with this HitID.
+computed based on initial substring of all BestAnno descriptions of all sequences
+in the cluster. If none of the sequences have an annotation, the hitID will be "*Novel".
+The rest of the columns in the section are associated with this HitID.
 
 <tr><td  valign="top">&nbsp;&nbsp;&nbsp;%Hit<td>The percent of sequences that
 have the majority annotation description substring in its annotation list.

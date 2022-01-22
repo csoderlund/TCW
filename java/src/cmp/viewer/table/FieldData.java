@@ -37,20 +37,23 @@ public class FieldData {
 	public static final String SEQ_TABLE =    "unitrans";
 	public static final String PAIR_TABLE =   "pairwise";
 	public static final String HIT_TABLE =    "unique_hits";
+	public static final String SEQ_HIT_TABLE = "unitrans_hits"; // hard-coded everywhere
 		
-	// These are not the actual databases IDs, but the hidden column name to access them
-	public static final String SEQ_SQLID = "UTID";  
-	public static final String GRP_SQLID = "POGID"; 	
-	public static final String ID1_SQLID = "UTid1"; 	
-	public static final String ID2_SQLID = "UTid2"; 	
-	public static final String AASEQ_SQL = "aaSeq"; // not used in this file, but since all MySQL is here...
-	public static final String NTSEQ_SQL = "ntSeq"; // not used in this file, but since all MySQL is here...
-	public static final String HIT_SQLID = "HITidx";
-	private static String msaScore1="", msaScore2="";
+	// the hidden column name (and real) to access the SQL index field
+	public static final String SEQ_SQLID = "UTid";  // unitrans.UTid
+	public static final String GRP_SQLID = "PGid"; // POG_groups.POGid
+	public static final String ID1_SQLID = "UTid1"; // pairwise.UTid1
+	public static final String ID2_SQLID = "UTid2"; // pairwise.UTid2
+	public static final String HIT_SQLID = "HITid"; // unique_hits.HITid
+	public static final String AASEQ_SQL = "aaSeq"; // unitrans.aaSeq not used in this file, but since all MySQL is here...
+	public static final String NTSEQ_SQL = "ntSeq"; // unitrans.ntSeq not used in this file, but since all MySQL is here...
 	
+	private static String msaScore1="", msaScore2="";
 	private static DBinfo theInfo;
+	
 	public static boolean hasNTdb=false, hasGO=false, hasPCC=false, hasKaKs=false;
 	public static boolean hasStats=false, hasNTblast=false, hasMultiScore=false, hasOrig=false;
+	
 	public static void setState(DBinfo info) {
 		theInfo = info;
 		hasNTdb=theInfo.nNTdb()>1;

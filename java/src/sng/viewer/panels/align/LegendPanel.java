@@ -43,7 +43,7 @@ public class LegendPanel extends JPanel
 		if (isPair) { // know if db is AA/NT, but not if hit is
 			drawKey(0, g2, Globalx.anyGap, 	"Gap", 		x+20, y+=15);
 			
-			drawKey(0, g2, Globalx.ntMisMatch, "AA " + Globalx.blosumLtEq + " or NT Mismatch ", x+20, y+=15);
+			drawKey(0, g2, Globalx.ntMisMatch, "AA " + Globalx.blosumLt + " or NT Mismatch ", x+20, y+=15);
 			drawKey(0, g2, Globalx.aaEqZero,   "AA " + Globalx.blosumEq, 		x+20, y+=15);
 			drawKey(0, g2, Globalx.aaGtZero,   "AA " + Globalx.blosumGtLegend, x+20, y+=15);
 			drawKey(1, g2, Globalx.aaStop, 	   "AA Stop Codon", 	 x+20, y+=15);

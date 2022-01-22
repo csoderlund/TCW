@@ -18,7 +18,6 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.table.AbstractTableModel;
@@ -30,7 +29,6 @@ import javax.swing.table.TableColumn;
 import util.ui.UserPrompt;
 import util.methods.Static;
 
-import cmp.database.Globals;
 import cmp.viewer.MTCWFrame;
 
 public class ResultPanel extends JPanel {
@@ -48,7 +46,7 @@ public class ResultPanel extends JPanel {
 		theTable.setColumnSelectionAllowed( false );
 		theTable.setCellSelectionEnabled( false );
 		theTable.setRowSelectionAllowed( true );
-		theTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); 
+		// theTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); CAS341
 		theTable.setShowHorizontalLines( false );
 		theTable.setShowVerticalLines( true );	
 		theTable.setIntercellSpacing ( new Dimension ( 1, 0 ) );		
@@ -76,17 +74,17 @@ public class ResultPanel extends JPanel {
 		add(scroll);
 	}
 	private JPanel addButtonPanel() {
-		JPanel thePanel = Static.createRowPanel();
+		JPanel row = Static.createRowPanel();
 		
 		btnRemoveSelectedPanels = Static.createButton("Remove Selected", false);
 		btnRemoveSelectedPanels.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (theTable.getSelectedRowCount()>0)  
-					removeSelectedRow(theTable.getSelectedRows()[0]);
+					removeSelectedRows(theTable.getSelectedRows());
 			}
 		});
-		thePanel.add(btnRemoveSelectedPanels);
-		thePanel.add(Box.createHorizontalStrut(5));
+		row.add(btnRemoveSelectedPanels);
+		row.add(Box.createHorizontalStrut(5));
 		
 		btnRemoveAllPanels = Static.createButton("Remove All", false);
 		btnRemoveAllPanels.addActionListener(new ActionListener() {
@@ -94,8 +92,8 @@ public class ResultPanel extends JPanel {
 				removeAllPanels();
 			}
 		});
-		thePanel.add(btnRemoveAllPanels);
-		thePanel.add(Box.createHorizontalStrut(5));
+		row.add(btnRemoveAllPanels);
+		row.add(Box.createHorizontalGlue());
 		
 		btnHelp = Static.createButtonHelp("Help", true);
 		btnHelp.addActionListener(new ActionListener() {
@@ -103,12 +101,9 @@ public class ResultPanel extends JPanel {
 				UserPrompt.displayHTMLResourceHelp(theParentFrame, "Results Help", helpHTML);
 			}
 		});
-		thePanel.add(btnHelp);
+		row.add(btnHelp);
 		
-		thePanel.setMaximumSize(thePanel.getPreferredSize());
-		thePanel.setAlignmentX(LEFT_ALIGNMENT);
-		
-		return thePanel;
+		return row;
 	}
 	
 	private JPanel addLabelPanel() {
@@ -128,30 +123,37 @@ public class ResultPanel extends JPanel {
 		
 		return thePanel;
 	}
-	// need to make this recursive
-	private void removeSelectedRow(int x) {
-		JPanel rowP = resultVec.get(x).panel;
-		theParentFrame.removePanelFromMenuOnly(rowP);
-		resultVec.remove(x);
+	
+	private void removeSelectedRows(int [] sel) {// CAS341 remove all selected
+		for (int x : sel) removeMark(x);
 		
-		boolean done=false;
-		while (!done) {
-			done=true;
-			for (int i=0; i<resultVec.size(); i++) {
-				if (resultVec.get(i).parent==null) continue;
-				
-				if (resultVec.get(i).parent.equals(rowP)) {
-					removeSelectedRow(i);  // changes the vector, so need to restart
-					done=false;
-					break;
-				}
-			}
+		Vector <ResultData> rebuild = new Vector <ResultData> ();
+		for (int x=0; x<resultVec.size(); x++) {// remove from vector
+			if (resultVec.get(x).remove) 
+				theParentFrame.removePanelFromMenuOnly(resultVec.get(x).panel);
+			else 
+				rebuild.add(resultVec.get(x));
 		}
+		resultVec.clear();
+		for (ResultData rd : rebuild) resultVec.add(rd);
 		
 		theTable.clearSelection();
 		theTable.revalidate();
 		updateButtons();
 	}
+	private void removeMark(int x) {// recursive mark for removal
+		ResultData rd = resultVec.get(x);
+		rd.remove = true;
+		JPanel rowP = rd.panel;
+		
+		for (int i=0; i<resultVec.size(); i++) {
+			ResultData rd1 = resultVec.get(i);
+			if (rd1.parent==null || rd1.remove) continue;
+			
+			if (rd1.parent.equals(rowP)) removeMark(i);  
+		}
+	}
+	
 	private void removeAllPanels () {
 		for(int i=0; i<resultVec.size(); i++) {
 			theParentFrame.removePanelFromMenuOnly(resultVec.get(i).panel);
@@ -279,6 +281,7 @@ public class ResultPanel extends JPanel {
 		int level=1;
 		String label="", summary="";
 		JPanel panel=null, parent=null;
+		boolean remove=false;
 	}
 	
 	//Needed for summary updates
