@@ -235,7 +235,7 @@ public class SeqDetailsPanel extends JPanel {
 		}
 		if (rs!=null) rs.close();
 		
-		if (bestHitGO[0] == null) { // no GOs for sequence
+		if (bestHitGO[0] == null && theHitData.size()>0) { // no GOs for sequence; CAS342 add size check
 			bestHitGO[0]=theHitData.get(0).hitName;
 			bestHitGO[1]=theHitData.get(0).desc;
 			bestHitGO[2]=theHitData.get(0).dEVal+"";

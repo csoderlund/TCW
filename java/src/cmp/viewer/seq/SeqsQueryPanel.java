@@ -2,6 +2,7 @@ package cmp.viewer.seq;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -121,10 +122,9 @@ public class SeqsQueryPanel extends JPanel {
 		
 		row.add(Box.createHorizontalGlue());
 		row.add(btnHelp);
+		row.setMaximumSize(new Dimension(Integer.MAX_VALUE,(int)row.getPreferredSize ().getHeight()));
 		
 		buttonPanel.add(row);
-		buttonPanel.setMaximumSize(buttonPanel.getPreferredSize());
-		buttonPanel.setMinimumSize(buttonPanel.getPreferredSize());
 	}
 	private JPanel createBasicPanel() {
 		JPanel page = Static.createPagePanel();
@@ -257,6 +257,11 @@ public class SeqsQueryPanel extends JPanel {
 		JPanel page = Static.createPagePanel();
 		methods = theViewerFrame.getInfo().getMethodPrefix();
 		nMethods = methods.length;
+		
+		if (nMethods==0) {
+			page.add(new JLabel("No cluster sets"));
+			return page;
+		}
 		
 		JPanel row = Static.createRowPanel();
 		radAnd = Static.createRadioButton("All (&)", true);

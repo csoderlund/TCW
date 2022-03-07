@@ -22,12 +22,19 @@ import util.methods.Out;
 import util.methods.TimeHelpers;
 
 public class Overview {
+	public static final String subSpace="   "; // two subtitle are written in DoORF
+	
 	private final DecimalFormat dff = new DecimalFormat("#,###,###");
 	private final int NSPECIES = 15;
 	private int COVER1 = 50; // percent similarity cutoff and percent hit-align
 	private int COVER2 = 90; // percent similarity cutoff and percent hit-align
+
 	public Overview(DBConn dbC) {
 		mDB = dbC;
+		try { // CAS342 always do full update
+			mDB.executeUpdate("update assem_msg set anno_msg=''");
+		}
+		catch ( Exception err ) {ErrorReport.reportError(err,"Regenerate overview");}
 	}
 	// update overview from execAnno when COVER set (see below for update overview from viewSingle)
 	public Overview(DBConn dbC, int c1, int c2) { 
@@ -276,7 +283,7 @@ public class Overview {
 **/
     private boolean inputSection(Vector<String> lines) {
 	    try {	 
-        	lines.add("INPUT");
+        	lines.add(title("INPUT"));
         
         	if (!inputExp(lines)) return false;
         	if (!inputSeq(lines)) return false;
@@ -295,7 +302,7 @@ public class Overview {
         		"WHERE avglen = 0 && ctglib=0");
     		if (nReadLibs==0) return true;
   
-    		lines.add("   Counts: ");	 
+    		lines.add(subtitle("Counts:"));	 
     		String [] fields = {"SEQID", "ID", "SIZE", "TITLE", "SPECIES", 
     						"CULTIVAR", "STRAIN", "TISSUE", "STAGE", 
     						"TREATMENT", "SOURCE", "YEAR", "#REPS"};     		
@@ -341,7 +348,7 @@ public class Overview {
     		int nSets = mDB.executeCount( "SELECT COUNT(*) FROM library WHERE avglen > 0");
     		if (nSets==0) return true;
         
-    		lines.add("   Sequences: ");
+    		lines.add(subtitle("Sequences:"));
     		String[] fields2 = {"SEQID", "SIZE", "TITLE", "SPECIES", 
         			"CULTIVAR", "STRAIN", "TISSUE", "STAGE", 
         			"TREATMENT", "SOURCE", "YEAR", "AVG-len", 
@@ -381,7 +388,7 @@ public class Overview {
   ******************************************************/
     private boolean annoSection(Vector<String> lines, boolean ask) {
 		if (hasAnno && nUniqueHits>0) { 
-			lines.add( "ANNOTATIONS" ); 
+			lines.add(title("ANNOTATION")); 
 			Out.prtSp(1, "Annotation statistics....");
 			
 			try { 
@@ -430,7 +437,7 @@ public class Overview {
     }
     /* make Annotation stat */
     private boolean annoStats(Vector<String> lines, boolean ask) {     				
-		lines.add("   Hit Statistics:");
+		lines.add(subtitle("Hit statistics:"));
 		 
         try {
 		    int nCtgHits = mDB.executeCount( "SELECT count(*) FROM contig WHERE bestmatchid is not null" );
@@ -488,7 +495,7 @@ public class Overview {
     private boolean annoDatabases(Vector <String> lines) {	  
     	try {    			
 	        Out.prtSp(1, "Processing each annoDB.....");
-	        lines.add("   annoDBs (Annotation databases): " + nAnnoDBs + "   (see Legend below)");
+	        lines.add(subtitle("Annotation databases (annoDBs): " + nAnnoDBs + "   (see Legend below)"));
 	        
 	   /* Loop through seq-hits for each annoDB creating stats */
 	        int nDB = (nAnnoDBs+1);  // 1..nAnnoDB
@@ -520,7 +527,7 @@ public class Overview {
 	     		
      			while (rs.next()) {
      				int i=1;
-	    			int pSim = rs.getInt(i++);
+	    			double pSim = rs.getDouble(i++); // CAS342 was int causing round-off
 	    			int hitCov = rs.getInt(i++); // CAS332 was prot_end-prot_start
 	    			int rank = rs.getInt(i++);
 	    			int idx = rs.getInt(i++);
@@ -536,13 +543,12 @@ public class Overview {
 	    				noHit[idx]=1;
 	    				hitSeq[dbid]++;
 	    				if (pSim>=COVER1 && hitCov>=COVER1) {
-	    					cover1[dbid]++;
-	    					
+	    					cover1[dbid]++;		
 	    					if (pSim>=COVER2 && hitCov>=COVER2) cover2[dbid]++;
 	    				}
-	    				bestSimSum[dbid] += (double) pSim;
+	    				bestSimSum[dbid] += pSim;
 	    			}
-	    			totSimSum[dbid] += (double) pSim;
+	    			totSimSum[dbid] += pSim;
 	    		}
 	    		rs.close();
 	    		if (Globalx.debug) {
@@ -572,14 +578,14 @@ public class Overview {
 	      
 	        	int dbid = rs.getInt(1);
 	        	
-	        	s = rs.getString(2).toUpperCase(); 					  //dbtype
+	        	s = rs.getString(2).toUpperCase(); 				 //dbtype
 	        	s2 = rs.getString(3);	rows[r][c++] = s+"-"+s2; // taxonomy
 	       	   
-	        	j = rs.getInt(5);		rows[r][c++] = Out.kbFText(j);    //nOnlyDB
-	        	j = rs.getInt(6);		rows[r][c++] = Out.kbFText(j);		//nBestHits
-	        	j = rs.getInt(7);		rows[r][c++] = Out.kbFText(j);	   //nOVBesthits
+	        	j = rs.getInt(5);		rows[r][c++] = Out.kbFText(j);  //nOnlyDB
+	        	j = rs.getInt(6);		rows[r][c++] = Out.kbFText(j);	//nBestHits
+	        	j = rs.getInt(7);		rows[r][c++] = Out.kbFText(j);	//nOVBesthits
     	        	
-    	        j = rs.getInt(4);		rows[r][c++] = Out.kbFText(j);    //nUniqueHits
+    	        j = rs.getInt(4);		rows[r][c++] = Out.kbFText(j);  //nUniqueHits
     	        
     	       
     	        int totPairs = rs.getInt(8);	rows[r][c++] = Out.kbFText(totPairs);  //total hit-seq pairs    	        
@@ -613,7 +619,7 @@ public class Overview {
     	    int nSpecies = mDB.executeCount(  "SELECT count(*) FROM pja_db_species "); 
     	    if (nSpecies==0) return true;
     	    
-    	 	lines.add("   Top " + NSPECIES + " species from total: "+ dff.format(nSpecies));
+    	 	lines.add(subtitle("Top " + NSPECIES + " species from total: "+ dff.format(nSpecies)));
     	 	Out.prtSpCnt(1, nSpecies, "Species");
     	 	
     	    String [] sfields = {"SPECIES (25 char)", " BITS", " ANNO", "TOTAL", "","SPECIES", " BITS", " ANNO", "TOTAL"};
@@ -680,11 +686,11 @@ public class Overview {
     private boolean annoGO(Vector <String> lines) {
     	try {	
     	    if (!hasGO) {
-    	    	lines.add("   Gene Ontology Statistics: none");
+    	    	lines.add(subtitle("Gene ontology statistics: none"));
     	    	lines.add("");
     	    	return true;
     	    }
-    		lines.add("   Gene Ontology Statistics:");
+    		lines.add(subtitle("Gene ontology statistics:"));
     		
 		    int nCtgGOs=0, nCtgBestGOs=0, nHitGOs=0, nSlims=0;
 		    String  slimSubset="";
@@ -790,7 +796,7 @@ public class Overview {
   **/
     private boolean expSection(Vector<String> lines) 
     {
-		lines.add( "EXPRESSION" );
+		lines.add(title("EXPRESSION"));
 		if (hasNorm==false) {
 			lines.add("   None");
 			lines.add("");
@@ -824,10 +830,8 @@ public class Overview {
             rset.close();
             strQ += " FROM " + table;
              
-            if (title.equals("GO")) 
-            	lines.add("   Gene ontology enrichment: (% of " + dff.format(nTot) + ")");
-            else 
-            	lines.add("   Differential expression:  (% of " + dff.format(nTot) + ")");
+            String sub = (title.equals("GO")) ? "Gene ontology enrichment:" : "Differential expression:";
+            lines.add(subtitle(sub + "  (% of " + dff.format(nTot) + ")"));
             
             double [] cuts =    {     1e-5,    1e-4,    0.001,   0.01,     0.05};
             String [] dfields = {"", "<1E-5", "<1E-4", "<0.001", "<0.01", "<0.05"};
@@ -928,7 +932,7 @@ public class Overview {
     	if (!hasTranscripts) return true;
     	Out.prtSp(1, "Sequence statistics....");
     	
-		lines.add("SEQUENCES");
+		lines.add(title("SEQUENCES"));
 		
 		if (!hasNoAssembly) seqAssmStats(lines);
 	 
@@ -942,7 +946,7 @@ public class Overview {
     /* Assembly only */
     private void seqAssmStats(Vector<String> lines) throws Exception {
     	
-    	lines.add("   Assembly Statistics:");
+    	lines.add(subtitle("Assembly statistics:"));
     	 
     	int [] djust = {1, 0};
  	    rows = new String[20][2];
@@ -1061,7 +1065,7 @@ public class Overview {
 		    int cntN1000 = mDB.executeCount( "SELECT count(*) FROM contig " +
 		    		"WHERE cnt_ns>1000" );
 		   
-			lines.add("   Quality:");
+			lines.add(subtitle("Quality:"));
 			int [] djust = {1, 0, 1};
     	    rows = new String[20][3];
     	    int r = 0;
@@ -1148,7 +1152,7 @@ public class Overview {
 		    for (int i = 0; i<n; i++) {
 		        rows[0][i] = Out.kbFText(cnt[i]) + Out.perItxtP(cnt[i], numSeqs);;
 		    }
-		    lines.add("   ORF lengths:");
+		    lines.add(subtitle("ORF lengths:"));
 		    makeTable(n, 1, dfields, djust, lines);
 	    }
 	    catch (Exception err) {
@@ -1210,7 +1214,7 @@ public class Overview {
         try {
 	        int nPairs = mDB.executeCount( "SELECT COUNT(*) FROM pja_pairwise");     
 	        
-	        lines.add("   Similar pairs: " + nPairs);
+	        lines.add(subtitle("Similar pairs: " + nPairs));
 	        
         	String msg = mDB.executeString( "SELECT pair_msg from assem_msg"); // CAS314
         	if (msg==null || msg.contentEquals("")) return true; // CAS317
@@ -1263,7 +1267,7 @@ public class Overview {
 			
 			Out.prtSp(1, "Locations....");
 			
-			lines.add("LOCATIONS");
+			lines.add(title("LOCATIONS"));
 			
 			String [] dfields = {"1", "2", "3-4", "5-7", "8-10", "11-20", "21-30", ">30"};
 		    int[] start= {1,2, 3,5,8, 11, 21,31};
@@ -1325,8 +1329,8 @@ public class Overview {
     private boolean finalAnnoDBs(Vector<String> lines) 
     {     
     	lines.add("-------------------------------------------------------------------");
-    	lines.add("PROCESSING INFORMATION:");
-		lines.add("   AnnoDB Files:");
+    	lines.add(title("PROCESSING INFORMATION"));
+		lines.add(subtitle("AnnoDB files:"));
 		 
         try {
     		if (hasDBhitData && hasAnno) {
@@ -1390,12 +1394,12 @@ public class Overview {
     			String go = mDB.executeString( "Select go_msg from assem_msg");
     			if (go!=null && !go.equals("")) {
     				if (go.endsWith(".tar.gz")) go = go.replace(".tar.gz", "");
-    				lines.add("   Gene Ontology: " + go); // CAS318 had 'Over-represented'
+    				lines.add("   Gene ontology: " + go); // CAS318 had 'Over-represented'
     				
     				if (mDB.tableColumnExists("assem_msg", "go_slim")) { 
         				String slim = mDB.executeString( "Select go_slim from assem_msg");
             			if (slim!=null && !slim.equals("")) {
-            				lines.add("   GO Slim: " + slim);
+            				lines.add("   GO slim: " + slim);
             			}
             		}
         			lines.add("");
@@ -1417,7 +1421,7 @@ public class Overview {
 	        
 	        // DE
 	        if (!hasSeqDE) return false;
-    		lines.add("   Differential Expression computation: ");
+    		lines.add(subtitle("Differential expression computation:"));
     		String msg = String.format("      %-12s %-30s %s", "Column",  "Method", "Conditions");
     		lines.add(msg);
     		
@@ -1432,7 +1436,7 @@ public class Overview {
 	        
     		// GO DE
 	        if (!hasGO) return true;
-    		lines.add("   GO enrichment computation: ");
+    		lines.add(subtitle("GO enrichment computation:"));
     		msg = String.format("      %-12s %-30s %-5s", "Column", "Method", "Cutoff");
     		
     		int cnt=0;
@@ -1459,7 +1463,7 @@ public class Overview {
 		if (nUniqueHits==0) return;
     	lines.add("-------------------------------------------------------------------");
     	lines.add("LEGEND:");
-        lines.add("   annoDB:");
+        lines.add("   annoDBs:");
         lines.add("      ANNODB    is DBTYPE-TAXO, which is the DBtype and taxonomy");
         lines.add("      ONLY      #Seqs that hit the annoDB and no others");
         lines.add("      BITS      #Seqs with the overall best bit-score from the annoDB");
@@ -1473,7 +1477,7 @@ public class Overview {
         lines.add("         Cover>=N  Percent of HIT-SEQ where the best hit has similarity>=N% and hit coverage>=N%");
         lines.add("");
         lines.add("   #Seqs is listed at top of overview");
-        lines.add("   Best Annotation:");
+        lines.add("   Best annotation:");
       	lines.add("      Descriptions may not contain words such as 'uncharacterized protein'");
       	try { 
       		boolean subset = mDB.executeBoolean("select spAnno from assem_msg");
@@ -1695,6 +1699,8 @@ public class Overview {
   		
   		return x.substring(0, index) + x.substring(index+sub.length());
     }
+	private String subtitle(String x) {return subSpace + x;} 
+	private String title(String x) {return x.toUpperCase();}
 	
 	private String strDBID = "", strDBname="";
 	private boolean hasAnno = true, hasTranscripts=true;; 

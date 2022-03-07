@@ -18,7 +18,6 @@ import java.util.Vector;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
@@ -34,9 +33,7 @@ import sng.viewer.STCWFrame;
 import util.methods.ErrorReport;
 import util.methods.Static;
 import util.methods.Markov;
-import util.methods.Out;
 import util.ui.UIHelpers;
-import util.ui.UserPrompt;
 import util.align.AAStatistics;
 import util.database.DBConn;
 
@@ -47,7 +44,6 @@ import util.database.DBConn;
 public class SeqFramePanel extends JPanel {
 	private static final long serialVersionUID = 9005938171358335556L;
 	
-	private static final String helpFile = Globals.helpDir + "DetailFramePanel.html";
 	private String HASMARK="'";
 	private int yTop = 10, xLeft = 10, codonCol=20, rowHeight=15, seqNumLength=5, imageHeight=400;
 	private boolean isProtein=false;
@@ -196,19 +192,10 @@ public class SeqFramePanel extends JPanel {
 		toolPanel.add( Box.createHorizontalStrut(20) );
 		toolPanel.add(Box.createHorizontalGlue());
 		
-		JButton btnHelp = Static.createButtonHelp("Help2", true);
-		btnHelp.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(getInstance(),"Sequence Frame", helpFile);
-			}
-		});
-		toolPanel.add(btnHelp);
-		toolPanel.add( Box.createHorizontalStrut(5) );
-		
 		toolPanel.setMaximumSize( new Dimension ( Integer.MAX_VALUE, 
 				(int)toolPanel.getPreferredSize ().getHeight() ) );	
 	}
-	private SeqFramePanel getInstance() {return this;}
+	
 	/*************************************************
 	 * The Coding Sequence (CDS) is the actual region of DNA that is translated to form proteins. 
 	 * While the ORF may contain introns as well, the CDS refers to those nucleotides(concatenated exons) 

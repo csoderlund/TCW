@@ -70,7 +70,10 @@ public class STCWChooser extends JFrame {
 				
 		JPanel selectPanel = createTCWdbSelectionPanel(dbList);
 		
-		try {setTitle(title + " on " + InetAddress.getLocalHost().getHostName());}
+		try {
+			// setTitle(title + " on " + InetAddress.getLocalHost().getHostName()); // CAS342
+			setTitle(title);
+		}
 		catch (Exception e){ setTitle(title);}
 		
 		setResizable(true);

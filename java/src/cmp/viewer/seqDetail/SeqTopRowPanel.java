@@ -39,7 +39,7 @@ public class SeqTopRowPanel extends JPanel {
 	private final String helpHTML = Globals.helpDir + "Details.html"; // CAS305 add
 	
 	private Color panelColor = Static.PANELCOLOR; 
-	private Color activeColor = Static.RUNCOLOR; 
+	private Color activeColor = Static.ACTIVECOLOR; 
 	
 	private static final String SEQID = FieldData.SEQID;
 	

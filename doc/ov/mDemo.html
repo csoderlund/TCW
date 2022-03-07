@@ -1,63 +1,65 @@
 <html><title>mTCW_ex overview</title><body><center>
 <h2>mTCW overview for ex</h2>
-<table width=600 border=1><tr><td><pre>Project: ex  Cluster: 1.1k  Pairs: 985  Seqs: 707  Hits: 4.0k  GOs: 8.0k   PCC Stats KaKs Multi
+<table width=600 border=1><tr><td><pre>Project: ex  Cluster: 1.3k  Pairs: 846  Seqs: 707  Hits: 4.0k   PCC Stats KaKs Multi
 
-Created: 12-Jan-22 v3.4.0     Last Update: 13-Jan-22 v3.4.0
+Created: 28-Feb-22 v3.4.2
 
 DATASETS: 3
            Type  #Seq  #annotated  #annoDB  Created    Remark  
-      bar  NT     250         250        3  17-Oct-21  exBar   
+      bar  NT     250         250        3  25-Feb-22  exBar   
       fly  NT     207         207        3  13-Aug-21  exFly   
       foo  NT     250         250        3  13-Aug-21  exFoo   
                            
-CLUSTER SETS: 5
+CLUSTER SETS: 6
    Statistics
-      Prefix  Method          conLen  sdLen     Score1  SD    Score2  SD    
-      CL      Closure         583.20  59.93       0.48  0.08    0.78  0.15  
-      OM      orthoMCL.OM-40  610.63  86.54       0.45  0.10    0.74  0.17  
-      B12     BBH bar,fly     541.54  60.87       0.50  0.07    0.72  0.17  
-      B13     BBH bar,foo     565.77  38.05       0.53  0.07    0.79  0.15  
-      B23     BBH fly,foo     564.22  71.18       0.47  0.08    0.79  0.21  
+      Prefix  Method         conLen  sdLen     Score1  SD    Score2  SD    
+      CL      Closure        579.80  58.50       0.48  0.08    0.78  0.15  
+      OM      orthoMCL.OM-4  606.37  85.26       0.45  0.10    0.75  0.16  
+      B12     BBH bar,fly    540.22  62.63       0.50  0.07    0.72  0.18  
+      B13     BBH bar,foo    558.75  34.11       0.53  0.07    0.79  0.15  
+      B23     BBH fly,foo    559.57  70.82       0.47  0.08    0.80  0.21  
+      OM2     orthoMCL.OM-4  606.32  85.26       0.45  0.10    0.75  0.16  
 
    Sizes
       Prefix   =2   =3  4-5  6-10  11-15  16-20  21-25  >25  Total  #Seqs  
-      CL       92  151    1     1      0      0      0    0    245  91.7%  
-      OM       51  186    3     3      0      0      0    0    243  98.3%  
+      CL       93  150    1     1      0      0      0    0    245  91.5%  
+      OM       50  186    3     3      0      0      0    0    242  98.0%  
       B12     157    0    0     0      0      0      0    0    157  44.4%  
-      B13     240    0    0     0      0      0      0    0    240  67.9%  
+      B13     239    0    0     0      0      0      0    0    239  67.6%  
       B23     166    0    0     0      0      0      0    0    166  47.0%  
+      OM2      50  186    3     3      0      0      0    0    242  98.0%  
 
-PAIRS: 985
+PAIRS: 846
    Hits
-      AA   Diff 847     Same 105      Similarity 72.7% (70.1%)  Coverage 80.8% (82.2%)
+      AA   Diff 753     Same 60       Similarity 76.4% (77.0%)  Coverage 84.7% (86.6%)
       NT   Diff 663     Same 4        Similarity 86.4% (87.0%)  Coverage 59.4% (63.7%)
 
-   Aligned: 702   CDS: 1.0Mb   5UTR: 58.7kb   3UTR: 96.8kb
-      Codons         312.7k     Amino Acids                Nucleotides         
-      Exact           57.7%     Exact            86.2%     CDS  Diff    25.0%  
-      Synonymous      28.5%     Substitution >0   6.0%          Gaps     7.7%  
-        Fourfold      14.8%     Substitution<=0   7.9%          SNPs    17.3%  
-        Twofold       11.1%                                5UTR Diff    35.6%  
-      Nonsynonymous   13.8%                                3UTR Diff    36.8%  
+   Aligned: 700   CDS: 1.0Mb   5UTR: 61.5kb   3UTR: 96.5kb
+      Codons         311.0k     Amino Acids                Nucleotides         
+      Exact           57.8%     Exact            86.3%     CDS  Diff    24.9%  
+      Synonymous      28.5%     Substitution >0   5.9%          Gaps     7.6%  
+        Fourfold      14.8%     Substitution<=0   7.8%          SNPs    17.3%  
+        Twofold       11.1%                                5UTR Diff    35.4%  
+      Nonsynonymous   13.7%                                3UTR Diff    37.0%  
 
                      Pos1   Pos2   Pos3  Total                   GC  CpG-Nt  CpG-Cd  
-      Transition     9.3%   5.1%  34.9%  49.3%       Both     37.9%    3.9%    2.2%  
-      Transversion  12.1%   8.3%  30.3%  50.7%       Either   54.6%   11.4%    5.8%  
-      ts/tv          0.77   0.62   1.15   0.97       Jaccard   0.69    0.34    0.37  
+      Transition     9.3%   5.1%  35.0%  49.4%       Both     38.0%    3.9%    2.2%  
+      Transversion  12.1%   8.2%  30.2%  50.6%       Either   54.6%   11.4%    5.8%  
+      ts/tv          0.77   0.62   1.16   0.98       Jaccard   0.70    0.35    0.37  
 
-   KaKs method: YN    Pairs: 702
+   KaKs method: YN    Pairs: 700
       Ka/Ks           Quartiles             Average            P-value       
-      NA       16     Q1(Lower)   0.019     Ka       0.103     <1E-100  420  
-      KaKs~1    0     Q2(Median)  0.045     Ks       2.798     <1E-10    85  
-      KaKs<1  677     Q3(Upper)   0.113     P-value  0.035     <0.001    47  
-      KaKs>1    9                                              Other    150  
+      NA       16     Q1(Lower)   0.019     Ka       0.102     <1E-100  419  
+      KaKs~1    0     Q2(Median)  0.044     Ks       2.793     <1E-10    85  
+      KaKs<1  675     Q3(Upper)   0.113     P-value  0.036     <0.001    44  
+      KaKs>1    9                                              Other    152  
 
 SEQUENCES: 707
            Average  Lengths              %GC                     CpG O/E                
               5UTR      CDS   3UTR       5UTR    CDS   3UTR         5UTR    CDS   3UTR  
-      bar    157.1   1625.3  230.3      37.8%  51.0%  38.5%        0.753  0.695  0.733  
-      fly    133.7   1521.7  314.4      36.8%  46.6%  35.5%        0.753  0.693  0.663  
-      foo    184.0   1548.5  337.3      40.2%  47.0%  36.8%        0.779  0.702  0.741  
+      bar    170.1   1612.4  230.2      39.0%  51.0%  38.5%        0.750  0.695  0.733  
+      fly    135.2   1520.2  314.4      36.8%  46.6%  35.5%        0.751  0.693  0.663  
+      foo    193.2   1539.8  336.8      40.5%  47.0%  36.7%        0.779  0.702  0.742  
 
    Counts  
                   C1       C2       C3  
@@ -72,7 +74,7 @@ SEQUENCES: 707
       foo     6    16    18  
 ----------------------------------------------------
 PROCESSING:
-AA: diamond --masking 0 --sensitive --query-cover 25 --subject-cover 25
+AA: diamond --masking 0  --query-cover 25 --subject-cover 25
 NT: blastn -evalue 1e-05 -max_hsps 1  -max_target_seqs 25
 
 MSA: Score1=Sum-of-Pairs    Score2=Wentropy
@@ -80,9 +82,10 @@ MSA: Score1=Sum-of-Pairs    Score2=Wentropy
 Cluster Sets 
       Prefix  Method        Parameters                         
       CL      Closure       Sim 60; Cov 40(Both); AA           
-      OM      User Defined  orthoMCL.OM-40                     
+      OM      User Defined  orthoMCL.OM-4                      
       B12     BBH           Sim 60; Cov 40(Both); AA; bar,fly  
       B13     BBH           Sim 60; Cov 40(Both); AA; bar,foo  
       B23     BBH           Sim 60; Cov 40(Both); AA; fly,foo  
+      OM2     User Defined  orthoMCL.OM-4                      
 
 </pre></table></body></html>

@@ -39,7 +39,6 @@ import sng.util.Tab;
 import sng.viewer.STCWFrame;
 import util.database.Globalx;
 import util.methods.Converters;
-import util.methods.Out;
 import util.methods.Static;
 import util.ui.CollapsiblePanel;
 import util.ui.ToggleTextComboField;
@@ -491,7 +490,7 @@ public class SeqQueryTab extends Tab
 		annoModes.add(chkHasBestDBHit);
 		annoModes.add(Box.createHorizontalStrut(5));
 		
-		chkNoAnno = Static.createRadioButton("No annotation", false);
+		chkNoAnno = Static.createRadioButton("Not annotated", false);
 		chkNoAnno.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent arg0) {
 				setBestHitEnabled(false);
@@ -1309,7 +1308,7 @@ public class SeqQueryTab extends Tab
 		boolean hasNoAnnotation = chkNoAnno.isSelected();
 		if(hasNoAnnotation) {
 			strSQL = appendANDPredicate ( strSQL,"contig.bestmatchid IS NULL ");
-			joinSum("No annotation");
+			joinSum("Not annotated");
 			return strSQL;
 		}
 		if (!hasAnnotation) return strSQL;
@@ -1673,7 +1672,7 @@ public class SeqQueryTab extends Tab
 	private static final String NFOLD_DESCRIPTION = "Filter on log2FC or FC change between two conditions";
 	private static final String PVAL_HEADER = "Differential Expression";
 	private static final String PVAL_DESCRIPTION = "Filter on DE p-value columns";
-	private static final String BEST_DB_HIT_HEADER = "Best Hit";
+	private static final String BEST_DB_HIT_HEADER = "Annotation"; // CAS342 was 'Best Hits'
 	private static final String BEST_DB_HIT_DESCRIPTION = "Search on Best Bits or Best Anno for a sequence (use 'AnnoDB Hits' to search on all hits).";
 	private static final String SNP_ORF_HEADER = "SNPs and ORFs";
 	private static final String SNP_ORF_DESCRIPTION = "Find sequences with SNPs (assembled contigs only) and/or ORF attributes.";

@@ -49,6 +49,7 @@ import java.util.TreeMap;
 import java.util.Collections;
 import java.util.HashMap;
 
+import sng.database.Overview;
 import sng.database.Globals;
 import sng.database.Version;
 import sng.dataholders.SequenceData;
@@ -62,8 +63,7 @@ import util.methods.Static;
 
 public class DoORF {
 	private final String orfDir = Globalx.pORFDIR;
-	private boolean debug = Globalx.debug; // Only works from command line (./execAnno project -r -d)
-	private boolean debug2= false;
+	private boolean debug = Globalx.debug; // command line (./execAnno project -r -d)
 	
 	// Interface parameter defaults, set in Globals (I put values here to remind me)
 	private boolean pbAltStart=false;  	// Use alternative start sites	
@@ -85,13 +85,16 @@ public class DoORF {
 	private String  filterStr="";
 	
 	// Internal parameters
-	private final int START_ATG = 10; // must be at least N codons from last ATG to end of sequence
-	private final int FROM_ATG =  30;  // must be at least N codons from last ATG to use non-ATG
-	private final int EX_hitIn =   5;  // codons - // Look internal if no ATG or Stop external
+	private final int START_ATG = 10; 		// > N codons from last ATG to end of sequence
+	private final int FROM_ATG =  30; 		// > N codons from last ATG to use non-ATG
+	private final int FROM_ATG_STOP = 120; 	// > N Codons from last ATG to non-ATG abutting STOP
+	private final int EX_hitIn =   10;  	// < N codons internal hit ATG (CAS342 changed from 5)
+	private final int SORT_LEN = 100;		// used in OrfData sort (Rule 2A)
+	private final double SORT_MK = 10.0;	// used in OrfData sort (Rule 2B)
 	
 	private final int KMER_wordSize = 5, KMER_perSame=99;// findSimilarKMER
 	private final int MULTI_hitOlap=40, MULTI_seqOlap=40, MULTI_sim=40; // multiframe hit - if fail all, don't use hit		
-		
+	
 	// ORF additional rules
 	private int minLenForSeq=0;
 	private final int     ORF_MIN_LEN =  9; 	 // for very short sequences
@@ -135,6 +138,7 @@ public class DoORF {
 		pdDiffMk = mkLen;
 		piMinSet = trSet;
 		if (isFileName(cdsFile))   pCdsFileName = cdsFile;	
+		if (debug) Out.prt(String.format("Diff len %.3f   Diff Mk %.3f", pdDiffLen, pdDiffMk));
 	}
 	// Run from command line only
 	public void setCmdParam(int type, int trans, int filter, int seqCov, int hitCov) { 
@@ -261,6 +265,7 @@ public class DoORF {
     	 			int seqCov = rs.getInt(6);
 	   				int sim = rs.getInt(7);
 	   				
+	   				// Use the hit for the ORF frame and coordiantes
 	   				boolean isGoodHit = (eval<= pdHitEval || sim >= piHitSim) ? true : false; 
 					
 					if (isGoodHit) { // set Olap>0 with execAnno -r 
@@ -305,7 +310,7 @@ public class DoORF {
 						hasStop=true;
 					}
 							
-    	    	 	// XXX Internal Heuristic for extending ORF
+    	    	 	// XXX Internal Heuristic for sorting for Training set
     	    	 	boolean isGreatHit =  (hitCov >= GT_hitOlap && sim >= GT_hitSim) ? true : false;
     	    	 		  	    	 		
 					seqData[idx].addHit(eval, sim, hitCov, seqCov, start, end, frame, isGoodHit, isGreatHit, hasStop);
@@ -333,7 +338,9 @@ public class DoORF {
 	   		Out.PrtSpCntMsgZero(3, cntNT,   "Ignored NT hit");
 	   		Out.PrtSpCntMsgZero(4, cntAN,   "Used Best Anno (vs Bits) ");
 	   		
-	   		Out.PrtSpCntMsg2(3, cntGoodHit,  "Good hit", cntGreatHit, "Good coverage ");
+	   		String x = String.format("Good hit  (%sSim>=%d || E-value>=%.0E)", "%",piHitSim,  pdHitEval);
+	   		Out.PrtSpCntMsg(3, cntGoodHit,  x); 
+	   		Out.PrtSpCntMsg(3, cntGreatHit, "Great hit (%Sim>=" + GT_hitSim + " && %Hit>=" + GT_hitOlap + ")");
  
     	   	Out.PrtSpCntMsgZero(5, cntScov, "Failed seq coverage " + piSeqOlap);
 	   		Out.PrtSpCntMsgZero(5, cntHcov, "Failed hit coverage " + piHitOlap);
@@ -560,15 +567,20 @@ public class DoORF {
 						else                    o = fromHit(i, seq);
 					}
 					if (o==null) o = fromAllPossibleForFrame(i, seq, false); 
-					if (o==null) o = new OrfData(i, 0, 0, false, false);
+					if (o==null) o = new OrfData(i, 0, 0, false, false, false);
 					
 					bestPerFrameORFs.add(o);
 				}
-				
+			
 				OrfData best=null;
 				try {
 					Collections.sort(bestPerFrameORFs);
 					best = bestPerFrameORFs.get(0);
+					
+					if (debug) {
+						Out.prt(curSeqObj.name);
+						for (OrfData o : bestPerFrameORFs) Out.prt(o.prtLine());
+					}
 				}
 				catch (Exception e) {best = getBest("Final", e);	}
 				
@@ -597,12 +609,12 @@ public class DoORF {
 				String atgStr = orientedSeq.substring(hStart-1, hStart+2);
 				String stopStr = (hEnd+3<=seqLen) ? orientedSeq.substring(hEnd, hEnd+3) : "";
 				if (isCodonATG(atgStr) && isCodonStop(stopStr)) {
-					OrfData o = new OrfData (frame, hStart, hEnd+3, true, true);
+					OrfData o = new OrfData (frame, hStart, hEnd+3, true, true, false);
 					return  o; 
 				}
 				
 			/** 2. Find all possible ORFs around hit region, then sort for best **/
-			// find stop - first downstream
+			// find first downstream stop 
 				boolean hasStop=false, hasATG=false;
 				int nAtg= Math.abs(frame), nStop=seqLen; 
 				String codon;
@@ -616,6 +628,11 @@ public class DoORF {
 					}
 				}
 				
+				if (isCodonATG(atgStr)) { // CAS342 hit has ATG but not stop
+					addORF(frame, hStart, nStop, true, hasStop, false);
+					if (thisFrameORFs.size()==1) return thisFrameORFs.get(0);
+				}
+				
 			// find ATG - ORFs from stop to upstream hit ends
 				int lastStop=-1;
 				for (int i=hStart-1; i>=0; i-=3) { // only go to left
@@ -623,11 +640,11 @@ public class DoORF {
 					if (isCodonATG(codon)) {
 						nAtg = i+1;
 						hasATG=true;
-						addORF(frame, nAtg, nStop, true, hasStop); 
+						addORF(frame, nAtg, nStop, true, hasStop, false); 
 					}
 					else if (isCodonStop(codon)) {
 						lastStop = i+4;
-						addORF(frame, lastStop, nStop, false, hasStop); 
+						addORF(frame, lastStop, nStop, false, hasStop, true); 
 						break;
 					}
 				}
@@ -638,7 +655,7 @@ public class DoORF {
 						if (isCodonATG(codon)) {
 							nAtg = i+1;
 							hasATG=true;
-							addORF(frame, nAtg, nStop, true, hasStop);
+							addORF(frame, nAtg, nStop, true, hasStop, false);
 							break;
 						}
 					}
@@ -646,11 +663,11 @@ public class DoORF {
 			// Finish
 				if (!hasATG && !hasStop) {
 					hasATG = isCodonATG(atgStr);
-					if (isCodonStop(stopStr)) addORF(frame, hStart, hEnd+3, hasATG, true); 
-					else					  addORF(frame, hStart, hEnd,   hasATG, false);
+					if (isCodonStop(stopStr)) addORF(frame, hStart, hEnd+3, hasATG, true, false); 
+					else					  addORF(frame, hStart, hEnd,   hasATG, false, false);
 				}
 				if (lastStop==-1) 
-					addORF(frame, Math.abs(frame), nStop, false, hasStop);
+					addORF(frame, Math.abs(frame), nStop, false, hasStop, false);
 			
 				return finishThisFrame(frame);
 			}
@@ -692,9 +709,9 @@ public class DoORF {
 					if (isCodonStop(codon)) {
 						nStop = i+3;
 						if (nATG != -1) 
-							addORF(frame, nATG, nStop, true, true); 	   // atg to stop
-						if (lastStop != -1 && (lastStop+1)!=nATG) 		   // atg be right after stop
-							addORF(frame, lastStop+1, nStop, false, true); // stop to stop
+							addORF(frame, nATG, nStop, true, true, false); 	   // atg to stop
+						if (lastStop != -1 && (lastStop+1)!=nATG) 		   		// atg be right after stop
+							addORF(frame, lastStop+1, nStop, false, true, true); // stop to stop
 				
 						if (firstStop == -1) firstStop=nStop;
 						lastStop = nStop;
@@ -712,19 +729,19 @@ public class DoORF {
 				
 				if (hasStop) {
 					if (fStart!=firstATG) 
-						addORF(frame, fStart, firstStop, false, true); 	// start to 1st Stop 
+						addORF(frame, fStart, firstStop, false, true, false); 	// start to 1st Stop 
 					if ((lastStop+1)!=nATG)
-						addORF(frame, lastStop+1, fEnd,  false, false); // last Stop to end
+						addORF(frame, lastStop+1, fEnd,  false, false, true); // last Stop to end
 				}
 				if (!hasStop) {
 					if (!hasATG || firstATG>START_ATG)
-						addORF(frame, fStart, fEnd, false, false);	// start to end - no start or stop
+						addORF(frame, fStart, fEnd, false, false, false);	// start to end - no start or stop
 					if (hasATG)
-						addORF(frame, firstATG, fEnd, true, false);	// 1st ATG to end - no  stop
+						addORF(frame, firstATG, fEnd, true, false, false);	// 1st ATG to end - no  stop
 				}
 				if (hasATG && hasStop) {  
 					if (nATG>nStop)    
-						addORF(frame, nATG, fEnd,  true, false); 	 // last ATG to end (if no later stop) 
+						addORF(frame, nATG, fEnd,  true, false, false); 	 // last ATG to end (if no later stop) 
 				}
 				
 				if (hasStops) return null; // it calls finishThisFrame
@@ -733,45 +750,65 @@ public class DoORF {
 			}
 			catch (Exception e) {return getBest("All Possible ", e);	}	
 		}
+		private void addORF(int frame, int start, int end, boolean hasStart, boolean hasEnd, boolean is5Stop) {
+			if (start>curSeqObj.seqLen || end>curSeqObj.seqLen) return;
+			if (start<=0 || end<=0) return;
+			if (start>end) return;
+			
+			int len = end-start+1;
+			if (len>minLenForSeq) 
+				thisFrameORFs.add(new OrfData(frame, start, end, hasStart, hasEnd, is5Stop));
+		}
 		/*******************************************************
-		 * Remove non-ATGs that are close to ATGs
-		 * This do regular sort and return best
+		 * Remove non-ATGs that are close to ATGs (only one ORF if exact hit or hit has ATG)
+		 * This does regular sort and return best
+		 * CAS342 change checks
 		 */
 		private OrfData finishThisFrame(int frame) {
 			try {
-				if (thisFrameORFs.size()==0) return new OrfData(frame, 0, 0, false, false); 
+				if (thisFrameORFs.size()==0) return new OrfData(frame, 0, 0, false, false, false); 
+				if (thisFrameORFs.size()==1) return thisFrameORFs.get(0);
 				
-			// Create temporary list to find removals - i.e. ORFs that are close, want to keep ATG 
+			// Create temporary list to find close starts to remove 
 				ArrayList <OrfTmp> startsObj = new ArrayList <OrfTmp> ();
-				for (OrfData o : thisFrameORFs) startsObj.add(new OrfTmp(o.oStart, o.hasATG, o));
-				
+				for (OrfData o : thisFrameORFs) 
+					startsObj.add(new OrfTmp(o.oStart, o.hasATG, o.has5Stop, o));
 				Collections.sort(startsObj);
 				
-				int cnt=0;
 				OrfTmp last=null;
 				for (OrfTmp ot : startsObj) {
-					if (last!=null && (ot.oStart-last.oStart)<FROM_ATG) {
-						if ((ot.oStart-last.oStart)<FROM_ATG) {
-							if (!last.hasATG) {
-								last.bRm=true;
-								thisFrameORFs.remove(last.od);
-								cnt++;
-							}
-							else if (!ot.hasATG) {
-								ot.bRm=true;
-								thisFrameORFs.remove(ot.od);
-								cnt++;
-							}	
-						} 
+					if (last==null) {
+						last=ot;
+						continue;
+					}
+					int diff = (ot.oStart-last.oStart);
+					if (diff<FROM_ATG_STOP && last.hasATG && ot.has5Stop) { 
+						ot.bRm=true;
+						thisFrameORFs.remove(ot.od);
+					}
+					else if (diff<FROM_ATG_STOP && last.has5Stop && ot.hasATG) {
+						last.bRm=true;
+						thisFrameORFs.remove(last.od);
+					}
+					else if (diff<FROM_ATG) { // FROM_ATG=30 
+						if (last.hasATG && !ot.hasATG) {
+							ot.bRm=true;
+							thisFrameORFs.remove(ot.od);
+						}
+						else if (!last.hasATG && ot.hasATG) {
+							last.bRm=true;
+							thisFrameORFs.remove(last.od);
+						}
+						else if (last.oStart<ot.oStart) {
+							ot.bRm=true;
+							thisFrameORFs.remove(ot.od);
+						}
+						else {
+							last.bRm=true;
+							thisFrameORFs.remove(last.od);
+						}
 					}
 					if (!ot.bRm) last=ot;
-				}
-				if (cnt > 0 && debug2) {
-					Out.prt("FINAL " + curSeqObj.name);
-					for (OrfTmp o : startsObj) {
-						String x = o.bRm ? "  T" : "";
-						Out.prt(o.od.prtLine() + x);
-					}
 				}
 				startsObj.clear();
 				
@@ -804,18 +841,9 @@ public class DoORF {
 				
 				else if (o.oLen>best.oLen) best=o;	
 			}
-			if (debug) Out.prt(msg + " " + curSeqObj.name + " " + thisFrameORFs.get(0).oFrame + " " + best.oLen);
 			return best;
 		}
-		private void addORF(int frame, int start, int end, boolean hasStart, boolean hasEnd) {
-			if (start>curSeqObj.seqLen || end>curSeqObj.seqLen) return;
-			if (start<=0 || end<=0) return;
-			if (start>end) return;
-			
-			int len = end-start+1;
-			if (len>minLenForSeq) 
-				thisFrameORFs.add(new OrfData(frame, start, end, hasStart, hasEnd));
-		}
+		
 	} // end FindORF
 	
 	/************** ORFs to file - is class to collect all the methods **************************/
@@ -836,8 +864,9 @@ public class DoORF {
 		private int cntORFeq=0;
 		private int cntTestORFappr=0, cntTestORFgt=0, cntTestORFeqEnds=0, cntTestORFgtEnds=0, cntTestGoodMK; 
 		private int cntTestHasHit=0, cntTestHitBestMK=0, cntTestHitGoodMK=0, cntTestHitLongest=0, cntTestHitLongBestMK=0, cntTestHitHasEnds=0;
-		private int cntTestGTHit=0, cntTestGTHitBestMK=0, cntTestGTHitGoodMK=0, cntTestGTHitLongest=0, cntTestGTHitLongBestMK=0, cntTestGTHitHasEnds=0;
-		private int cntTestHitneORF=0,  cntTestGThasEnds=0;
+		private int cntTestGTHit=0, cntTestGTHitBestMK=0, cntTestGTHitGoodMK=0, cntTestGTHitLongest=0, cntTestGTHitLongBestMK=0, 
+					cntTestGTHit300=0, cntTestGTHitSim=0;
+		private int cntTestHitneORF=0;
 		
 		private int [] cntFrame = new int[7];
 		
@@ -873,6 +902,7 @@ public class DoORF {
 			}
 			
 			// hit remarks
+			boolean isExact=false;
 			if (curSeqObj.orfHasHit) {
 				cntFrameHasAnno++; // ORF frame == hit frame
 				
@@ -880,8 +910,10 @@ public class DoORF {
 				int oStart = bestORF.oStart, oEnd=bestORF.oEnd;
 				if (hitStart==oStart && (hitEnd == oEnd ||hitEnd == oEnd-3)) {
 					curSeqObj.addRemark(Globals.RMK_ORF_exact);
-					if (bestORF.hasATG && bestORF.hasStop) 
+					if (bestORF.hasATG && bestORF.hasStop) {
 						curSeqObj.appendRemark(Globals.RMK_ORF_exact_END);
+						isExact=true;
+					}
 				}
 				else if (hitStart>=oStart && hitEnd <= oEnd) { 
 					curSeqObj.addRemark(Globals.RMK_ORF_gtHit);
@@ -949,15 +981,13 @@ public class DoORF {
 			if (hitORF.hasATG && hitORF.hasStop) cntTestHitHasEnds++;
 			
 		// Great hit computed earlier
-			if (curSeqObj.isGreatHit) {
+			if (isExact) {
 				cntTestGTHit++;
 				if (hitORF==bestLen)    cntTestGTHitLongest++;
-				if (hitORF.hasATG && hitORF.hasStop) {
-					cntTestGTHitHasEnds++; 
-					if (curSeqObj.remark.contains(Globals.RMK_ORF_exact)) cntTestGThasEnds++;
-				}
+				if (bestORF.oLen>=300)  cntTestGTHit300++;
+				if (curSeqObj.sim>=90)	cntTestGTHitSim++;
 				if (bUseTrain) {
-					if (!bNotMk) cntTestGTHitBestMK++; 
+					if (!bNotMk) 			cntTestGTHitBestMK++; 
 					if (hitORF.nMKscore==3) cntTestGTHitGoodMK++;
 					if (!bNotLg && !bNotMk) cntTestGTHitLongBestMK++;
 				}
@@ -974,13 +1004,12 @@ public class DoORF {
 				return;
 			}
 			// CAS314 there was too much output - reduced it
-			if (debug) Out.PrtSpMsg(2, "----------------------------------------------------------------------");//###
 			Out.logOnly(2, "");
 			 
 			int nCtg = seqData.length;
 		
 			int avg =  (int) (((double) totalLength/(double)cntHasORF)+0.5);
-			String overview = "ORF Stats: " +  "  Average length " +  avg;
+			String overview = "ORF stats: " +  "  Average length " +  avg;
 			Out.PrtSpMsg(2, overview);												// term
 			
 			// table for overview; 3 column, text followed by number
@@ -1014,7 +1043,7 @@ public class DoORF {
 				rows[r][c] = "  "; 				rows[r++][c+1] = "";
 			}
 				
-	        overview = "   " + overview + "\n";
+	        overview = Overview.subSpace + overview + "\n";
 	        String msg = Out.makeTable(nCol, r+1, null, justify, rows);
 	        String [] lines = msg.split("\n");
 			for (int i=0; i<lines.length; i++) {
@@ -1042,19 +1071,19 @@ public class DoORF {
 	        rows[r][c] = "    Both Ends";  			rows[r++][c+1] = perCntText(cntTestHitHasEnds,h);
 	        rows[r][c] = "    Markov Good Frame";  	rows[r++][c+1] = perCntText(cntTestHitGoodMK,h);
 	        rows[r][c] = "    Markov Best Score";  	rows[r++][c+1] = perCntText(cntTestHitBestMK,h);
-	        rows[r][c] = "    Is Longest ORF";  		rows[r++][c+1] = perCntText(cntTestHitLongest,h);
-	        rows[r][c] = "    Longest & Markov";		rows[r++][c+1] = perCntText(cntTestHitLongBestMK,h);
+	        rows[r][c] = "    Is Longest ORF";  	rows[r++][c+1] = perCntText(cntTestHitLongest,h);
+	        rows[r][c] = "    Longest & Markov";	rows[r++][c+1] = perCntText(cntTestHitLongBestMK,h);
 	        rows[r][c] = "    Not hit frame";  	    rows[r++][c+1] = Out.df(cntTestHitneORF);
 	       	        
 	        r=0; c=4;
 	        h=cntTestGTHit;
-	        rows[r][c] = "   Hit w/good coverage";  rows[r++][c+1] = perCntText(h,nCtg);
-	        rows[r][c] = "    Both Ends";	  		rows[r++][c+1] = perCntText(cntTestGTHitHasEnds,h);
+	        rows[r][c] = "   ORF=Hit with Ends";  	rows[r++][c+1] = perCntText(h,nCtg);
+	        rows[r][c] = "    ORF>=300";	  		rows[r++][c+1] = perCntText(cntTestGTHit300,h);
 	        rows[r][c] = "    Markov Good Frame";  	rows[r++][c+1] = perCntText(cntTestGTHitGoodMK,h);
 	        rows[r][c] = "    Markov Best Score";  	rows[r++][c+1] = perCntText(cntTestGTHitBestMK,h);
-	        rows[r][c] = "    Is Longest ORF";  		rows[r++][c+1] = perCntText(cntTestGTHitLongest,h);
-	        rows[r][c] = "    Longest & Markov";		rows[r++][c+1] = perCntText(cntTestGTHitLongBestMK,h);	       
-        	rows[r][c] = "    ORF=Hit with Ends";  	rows[r++][c+1] = perCntText(cntTestGThasEnds,h);
+	        rows[r][c] = "    Is Longest ORF";  	rows[r++][c+1] = perCntText(cntTestGTHitLongest,h);
+	        rows[r][c] = "    Longest & Markov";	rows[r++][c+1] = perCntText(cntTestGTHitLongBestMK,h);	       
+        	rows[r][c] = "    Sim>=90";  			rows[r++][c+1] = perCntText(cntTestGTHitSim,h);
         		        	 
         	//CAS326 removed, CAS327 put back in fixed
 	        msg = Out.makeTable(nCol, r+1, null, justify, rows);
@@ -1076,7 +1105,7 @@ public class DoORF {
 			Out.PrtSpMsg(2,"   Frame:" + x);			//term
 			Out.logOnly(2, "");
 			Out.logOnly(2, "Both Ends:           Has Start and Stop codon");
-			Out.logOnly(2, "Hit w/good coverage: HitCov >= " + GT_hitOlap + " and sim >= " + GT_hitSim);
+			Out.logOnly(2, "ORF=Hit with ends:   ORF coordinates=Hit coordinates with ends");
 		    Out.logOnly(2, "Markov Best Score:   Best score from best ORF for each of 6 frames");
 		    Out.logOnly(2, "Markov Good Frame:   Score>0 and best score from 6 RFs of selected ORF");
 		   
@@ -1324,11 +1353,6 @@ public class DoORF {
 				fileHeader += "### " + msg[i] + "\n";
 				orfOverviewLegend += msg[i] + Globals.tcwDelim;
 			}
-			
-			if (debug) {
-				String tmp = fileHeader.replace("###", "      ###");
-				Out.PrtSpMsg(0, tmp);	//###
-			}
 		}
 	}
 	/**************** Data structure ***********************/
@@ -1432,11 +1456,12 @@ public class DoORF {
 			if (isGreatHit && !x.isGreatHit) return -1;
 			if (x.isGreatHit && !isGreatHit) return 1;
 			
+			if (seqLen>x.seqLen) return -1; // CAS308 put this before eval cmp
+			if (seqLen<x.seqLen) return 1;
+			
 			if (eval<x.eval) return -1;
 			if (eval>x.eval) return 1;
 			
-			if (seqLen>x.seqLen) return -1;
-			if (seqLen<x.seqLen) return 1;
 			return 0;
 		}
 	}
@@ -1455,16 +1480,18 @@ public class DoORF {
 		String strMKscore="";
 		
 		boolean hasATG=false, hasStop=false, hasAnno=false, isFullLen=false, isGoodMarkov=false;
+		boolean has5Stop=false; // CAS342; 5' abutts a Stop codon
 		String remark="";
 		 
 		// coordinates are relative to the strand, i.e. to reversed sequence if frame<0
-		public OrfData (int f, int start, int end, boolean hs, boolean he) {
+		public OrfData (int f, int start, int end, boolean hs, boolean he, boolean atStop) {
 			seqID = curSeqObj.seqID;
 			oFrame=f;
 			oStart=start;
 	        oEnd=end;
 	        hasATG=hs;
 	    	hasStop=he;
+	    	has5Stop=atStop;
     		
 	    	if (end==0) return; // dummy ORF
 	    		
@@ -1538,60 +1565,55 @@ public class DoORF {
 				if (!hasAnno &&  x.hasAnno) return 1;
 			}
 			
-		// Rule 2: Longest ORF if one is significantly longer
-			if (x.oLen!=oLen) {
-				double lnDiff = Math.abs(x.lnlen-lnlen);// lnlen is log of orf length
-				if (lnDiff>pdDiffLen) return diffLen;
-			}
-		
-		// Rule 3: Best Markov score
-			// CAS334 checking isGoodMK was not improvement; changed to using log so not so stringent
+		// Rule 2-3: Good length && Good Markov; CAS342 add first two checks with Len and Mk lower bounds
+			double lnDiff = Math.abs(x.lnlen-lnlen);  // lnlen is log of orf length
 			double mkDiff = Math.abs(x.lnMK-lnMK);
-			if (mkDiff>pdDiffMk) {
-				if (dMKscore>x.dMKscore) return -1; 
-				if (dMKscore<x.dMKscore) return  1;
-			}
+			int diffMk = (int) (x.dMKscore-dMKscore); // CAS334 changed to using log so not so stringent
 			
-		// Rule 4: CAS334 added
-			boolean both =    hasATG &&   hasStop;
-			boolean xboth = x.hasATG && x.hasStop;
+			if ((oLen>SORT_LEN || x.oLen>SORT_LEN) && lnDiff>pdDiffLen) return diffLen;
+			if ((dMKscore>SORT_MK || x.dMKscore>SORT_MK) && mkDiff>pdDiffMk) return diffMk;
+				
+			if (lnDiff>pdDiffLen) return diffLen;
+			if (mkDiff>pdDiffMk)  return diffMk; 
+			
+		// Rule 4: CAS334 added  CAS342 quit checking for one end; add is5endAtStop
+			boolean both =     hasATG  &&   hasStop;
+			boolean xboth =  x.hasATG  && x.hasStop;
 			if ( both  && !xboth) return -1;
 			if (!both &&   xboth) return 1;
 			
-			boolean one =    hasATG ||   hasStop;
-			boolean xone = x.hasATG || x.hasStop;
-			if ( one && !xone) return -1;
-			if (!one &&  xone) return 1;
+			if (hasATG && x.has5Stop) return -1;
+			if (has5Stop && x.hasATG) return 1;
 			
 		// Default rules: if all else fails
 			if ( hasAnno && !x.hasAnno) return -1; // even if not good, its something
 			if (!hasAnno &&  x.hasAnno) return 1;
 			
-			if (diffLen==0) {
-				if (dMKscore>x.dMKscore) return -1; 
-				if (dMKscore<x.dMKscore) return  1;
-			}
+			if (lnDiff<mkDiff) return diffMk;
+				
 			return diffLen; // default to using longest
 		}
+		/************************************************************************/
 		public String prtLine() {
 			String start = (hasATG) ? 	"ATG" : "-";
 			String stop = (hasStop) ? 	"Stop" : "-";
 			String hit = (hasAnno) ? 	"Hit" : "-";
 			String full = (isFullLen) ? "Full" : "-";
-			return String.format("%2d %4d..%4d, %5d (%6.3f)  %4s %4s %4s %4s  %6.2f (%6.3f) %d", 
-					oFrame, oStart, oEnd, oLen, lnlen, start, stop, hit, full, dMKscore, lnMK, nMKscore);
+			return String.format("%2d %4d..%4d, Len %5d (%6.3f) Mk %6.2f (%6.3f) %d   %4s %4s %4s %4s ", 
+					oFrame, oStart, oEnd, oLen, lnlen, dMKscore, lnMK, nMKscore, start, stop, hit, full);
 		}
 	} // end OrfData
 	
 	// Sort for close starts
 	private class OrfTmp implements Comparable<OrfTmp>{
-		private OrfTmp(int oStart, boolean hasATG, OrfData od) {
+		private OrfTmp(int oStart, boolean hasATG, boolean has5Stop, OrfData od) {
 			this.oStart=oStart;
 			this.hasATG=hasATG;
+			this.has5Stop=has5Stop;
 			this.od = od;
 		}
 		int oStart;
-		boolean hasATG, bRm=false;
+		boolean hasATG, has5Stop, bRm=false;
 		OrfData od;
 		
 		public int compareTo(OrfTmp x) {
@@ -1716,9 +1738,9 @@ public class DoORF {
 			r=0; c=9;
 			rows[r++][c] = "3UTR"; rows[r++][c] = utr3Len; 		rows[r++][c] = utr3Avg; 
 			
-			String overview = String.format("GC Content: %.2f%s", total, "%");
+			String overview = String.format("GC content: %.2f%s", total, "%");
 			Out.PrtSpMsg(2, overview);
-			overview = "   " + overview + "\n";
+			overview = Overview.subSpace + overview + "\n";
 			
 			String msg = Out.makeTable(nCol, r+1, null, justify, rows);
 	        
@@ -1873,7 +1895,7 @@ public class DoORF {
 				trainFromHits();
 			}
 			
-			Out.PrtSpCntkMsg(3, trainHex, "Bases used for training"); // CAS314
+			Out.PrtSpCntmMsg(3, trainHex, "Bases used for training"); // CAS314
 			
 			if (totalIgnoreSTOPs>0) {
 				String msg = (bTrainFromFile) ? "Sequences with in-frame Stops" : "Sequences with Stops within hits";
@@ -2227,12 +2249,12 @@ public class DoORF {
 			    
 			    createKmerIndex(arr, 4, KMER_wordSize, 0);
 				
-				Out.PrtSpMsg(3, "Find longest unique sequences");
+				Out.PrtSpMsg(3, "Find longest unique sequences with best hits");
 				
 				Collections.sort(firstSet);
 				
 				ArrayList <SeqData> uniqueSet = new ArrayList <SeqData> ();
-				int cntPass=0, cntAll=0, cntDup=0;
+				int cntPass=0, cntAll=0, cntDup=0, cntGreat=0;
 				long totBases=0;
 				
 				for (SeqData seqObj : firstSet) {
@@ -2240,6 +2262,7 @@ public class DoORF {
 						uniqueSet.add(seqObj);
 						cntPass++;
 						totBases += seqObj.seqLen;
+						if (seqObj.isGreatHit) cntGreat++;
 						if (totBases>=piTrainNbases && cntPass>=piTrainNseq) break;
 					}
 					else cntDup++;
@@ -2247,11 +2270,11 @@ public class DoORF {
 					cntAll++;
 					if (cntAll%100 == 0) Out.r("Pass " + cntPass + " from " + cntAll);
 				}
-				Out.PrtSpCntMsg(3, cntDup, "Non-unique from longest " + cntAll + " sequences");
+				Out.PrtSpCntMsg(3, cntDup, "Non-unique from longest " + cntAll + " sequences ");
 				kmerIdxMap.clear();
 				totalSeqForTrain = uniqueSet.size();
 				filterStr += "(" + totalSeqForTrain + " seqs, " + Out.kMText(totBases) + " bases)";
-				Out.PrtSpMsg(3, "Train with " + uniqueSet.size() + " unique longest sequences");
+				Out.PrtSpMsg(3, "Train with " + uniqueSet.size() + " unique longest sequences (" + cntGreat + ")");
 				
 				return uniqueSet;
 			}

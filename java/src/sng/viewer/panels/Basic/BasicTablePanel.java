@@ -656,7 +656,8 @@ public class BasicTablePanel extends JPanel {
 		
 		int colCnt = theTable.getColumnCount();
 		int rowCnt = theTable.getRowCount();
-		Out.prtSp(0, "Processing " + rowCnt + " rows and " + colCnt + " columns");
+		String msg = (fw.isAppend()) ? "Append " : "Write "; // CAS342
+		Out.prtSp(0, msg + rowCnt + " rows and " + colCnt + " columns to " + fileName);
 		
 		int x, y;
 		

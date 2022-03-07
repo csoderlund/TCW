@@ -180,10 +180,10 @@ public class SeqsTablePanel extends JPanel {
        topRow.add(btnMSA);						topRow.add(Box.createHorizontalStrut(1)); 
        
         createBtnCopy();
- 		topRow.add(btnCopy);					topRow.add(Box.createHorizontalGlue());  
+ 		topRow.add(btnCopy);			topRow.add(Box.createHorizontalStrut(nParentRow>=0 ? 1 : 30));  
 		
         createBtnTable();
-        topRow.add(btnTable);					topRow.add(Box.createHorizontalStrut(1));
+        topRow.add(btnTable);					topRow.add(Box.createHorizontalGlue());
         
         btnHelp = Static.createButtonHelp("Help", true);
         btnHelp.addActionListener(new ActionListener() {
@@ -217,8 +217,7 @@ public class SeqsTablePanel extends JPanel {
         topRow.setAlignmentX(LEFT_ALIGNMENT);
 
         buttonPanel.add(topRow);
-        buttonPanel.add(Box.createVerticalStrut(5));
-        
+      
         return buttonPanel;
     }
     private void createBtnCopy() {
@@ -374,13 +373,12 @@ public class SeqsTablePanel extends JPanel {
 	 			}
 	 		}));
  		}
- 		btnTable = Static.createButtonMenu("Table...", true);
+ 		btnTable = Static.createButtonTable("Table...", true);
 		btnTable.addMouseListener(new MouseAdapter() {
 	          public void mousePressed(MouseEvent e) {
 	              popup.show(e.getComponent(), e.getX(), e.getY());
 	          }
 	    });
- 		
 	}
    
 	/**************************************************************
@@ -803,9 +801,11 @@ public class SeqsTablePanel extends JPanel {
     	if(tableButtonPanel != null) { 	//Is null if a sample table
     		add(tableButtonPanel);
     	}
-    	add(Box.createVerticalStrut(5));
-    	add(tableSummaryPanel); add(Box.createVerticalStrut(5));
+    	add(Box.createVerticalStrut(2));
+    	add(tableSummaryPanel); 
+    	add(Box.createVerticalStrut(10));
     	add(tableStatusPanel);
+    	
     	add(sPane);
     	add(fieldSelectPanel);  add(Box.createVerticalStrut(10));
     
@@ -1112,7 +1112,10 @@ public class SeqsTablePanel extends JPanel {
 	}
 		
  	private String getSumLine(int row,  String name) {
-		return "Row " + (row+1) + "/" + getRowCount() + "   " +  Globals.tagSEQ + name;	// summary
+ 		String sum = "";
+		if (theTable.getRowCount()>1) sum = "Row " + (row+1) + "/" + theTable.getRowCount() + "   ";
+		sum += Globals.tagSEQ + name;
+		return sum;
 	}
  	 /* SeqTopRowPanel next and prev */
     public int getTranslatedRow(int row) {

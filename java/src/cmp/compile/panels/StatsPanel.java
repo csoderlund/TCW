@@ -12,7 +12,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import util.database.DBConn;
-import util.database.Globalx;
 import util.file.FileHelpers;
 import util.methods.ErrorReport;
 import util.methods.Out;
@@ -22,7 +21,6 @@ import util.ui.UserPrompt;
 import cmp.compile.MultiStats;
 import cmp.compile.Pairwise;
 import cmp.compile.Summary;
-import cmp.compile.runMTCWMain;
 import cmp.database.DBinfo;
 import cmp.database.Globals;
 import cmp.database.Schema;
@@ -145,15 +143,9 @@ public class StatsPanel extends JPanel {
 			if (doMulti) {
 				boolean bRedo=false, bSkip=false; // CAS312
 				if (editPanel.isDoneMulti()) {
-					if (UserPrompt.showYesNo("Run Multi Stats", "Multi-align is complete. Redo scores?\n")) {
-						if (runMTCWMain.bRmMSA) {
-							if (UserPrompt.showYesNo("Run Multi Stats", "Remove MSAs first?\n")) rmMSA();
-							else bSkip=true;
-						}
-						else {
-							bRedo=true;
-						}
-					} 
+					
+					if (UserPrompt.showYesNo("Run Multi Stats", "Multi-align is complete. Redo scores?\n")) 
+						 bRedo=true; 
 					else bSkip=true;
 				}
 				
@@ -176,16 +168,7 @@ public class StatsPanel extends JPanel {
 		catch (Exception e) {ErrorReport.prtReport(e, "Running stats");}
 		Out.close();
 	}
-	private void rmMSA() {
-		try {
-			DBConn mDB = theCompilePanel.getDBconn(); // CAS312
-			mDB.executeUpdate("update pog_groups set conLen=0, sdLen=0, "
-					+ "score1=" + Globalx.dNoScore +  ", score2=" + Globalx.dNoVal);
-			mDB.executeUpdate("update pog_members set alignMap=''");
-			mDB.close();
-		}
-		catch (Exception e) {ErrorReport.prtReport(e, "Remove MSA");}
-	}
+	
 	public void setStatsSummary() {
 		if(theCompilePanel.getProjectName() == null) {
 			lblStatsSummary.setText("");
@@ -248,5 +231,4 @@ public class StatsPanel extends JPanel {
 	public EditStatsPanel editPanel = null;
 	private JPanel statsPanel = null;
 	private CompilePanel theCompilePanel = null;
-	
 }

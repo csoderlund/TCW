@@ -30,7 +30,6 @@ import java.util.HashSet;
 
 import util.database.Globalx;
 import util.file.FileHelpers;
-import sng.database.Globals;
 import sng.database.MetaData;
 import sng.dataholders.CodingRegion;
 import sng.dataholders.ContigData;
@@ -51,7 +50,7 @@ import util.database.DBConn;
 
 public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardOwner {
 	private static final long serialVersionUID = 4196828062981388452L;
-	private static final String helpHTML =  Globals.helpDir + "DetailPanel.html";
+	
 	private static final int NUM_DISPLAY_ROWS = 15;
 	private static final int MAX_TABLE_WIDTH = 550;
 	
@@ -213,14 +212,6 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		createCopy();
 		createExport();
 		
-		JButton btnHelp = Static.createButtonHelp("Help2", true);
-		btnHelp.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(getInstance(),"Sequence Details", helpHTML);
-			}
-		});
-			
-		// Top panel with buttons and drop-down		
 		toolPanel = Static.createRowPanel();
 		toolPanel.add( Box.createHorizontalStrut(5) );
 		toolPanel.add(new JLabel(" Display:")); 	toolPanel.add( Box.createHorizontalStrut(3) );
@@ -231,9 +222,6 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 		toolPanel.add( btnShow );				toolPanel.add( Box.createHorizontalStrut(5) );
 		toolPanel.add( btnCopy );				toolPanel.add( Box.createHorizontalStrut(5) );
 		toolPanel.add( btnExport );				toolPanel.add( Box.createHorizontalStrut(20) );
-		
-		toolPanel.add( Box.createHorizontalGlue() );
-		toolPanel.add( btnHelp );				toolPanel.add( Box.createHorizontalStrut(5) );
 		
 		toolPanel.setMaximumSize( new Dimension ( Integer.MAX_VALUE, 
 				(int)toolPanel.getPreferredSize ().getHeight() ) );	
@@ -261,7 +249,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 				}
 			}));
 			
-			btnShow = Static.createButton("Show...", true);
+			btnShow = Static.createButtonPopup("Show...", true);
 			btnShow.addMouseListener(new MouseAdapter() {
 				public void mousePressed(MouseEvent e) {
 				    showpopup.show(e.getComponent(), e.getX(), e.getY());
@@ -406,7 +394,7 @@ public class SeqDetailPanel  extends JPanel implements MouseListener, ClipboardO
 					}
 				}));
 			}
-			btnExport = Static.createButton("Export...", true);
+			btnExport = Static.createButtonFile("Export...", true);
 			btnExport.addMouseListener(new MouseAdapter() {
 	            public void mousePressed(MouseEvent e) {
 	                exportpopup.show(e.getComponent(), e.getX(), e.getY());

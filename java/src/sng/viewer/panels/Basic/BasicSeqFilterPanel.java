@@ -9,8 +9,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.sql.ResultSet;
@@ -18,17 +16,14 @@ import java.util.ArrayList;
 import java.util.Vector;
 import java.util.prefs.Preferences;
 
-import javax.swing.AbstractAction;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
@@ -36,22 +31,15 @@ import javax.swing.JTextField;
 import sng.database.Globals;
 import sng.viewer.STCWFrame;
 import util.database.DBConn;
-import util.database.Globalx;
 import util.file.FileC;
 import util.file.FileRead;
 import util.methods.ErrorReport;
 import util.methods.Out;
 import util.methods.Static;
-import util.ui.UserPrompt;
 
 public class BasicSeqFilterPanel extends JPanel {
 	private static final long serialVersionUID = -434438354961245720L;
 	private static final Color BGCOLOR = Globals.BGCOLOR;
-	
-	private final String topHTML = 		Globals.helpDir + "BasicTopSeq.html";
-	private final String queryHTML = 	Globals.helpDir + "BasicQuerySeq.html";
-	private final String lowerHTML =   	Globals.helpDir + "BasicModify.html"; 
-	private final String remarkHTML =   Globals.helpDir + "TCWremark.html"; 
 	
 	private static final String seqPref= "_seqPrefs"; // save to preferences; same columns for hit&seq
 	
@@ -207,21 +195,17 @@ public class BasicSeqFilterPanel extends JPanel {
 					columnPanel.setVisible(true);
 				}
 			});
-			createHelp();
 			
 			JPanel row3 = Static.createRowPanel(); // CAS336 added glue and dropdown help
 			Box hzBox = Box.createHorizontalBox();
 			
-			 hzBox.add(Static.createLabel("Table", true)); hzBox.add(Box.createHorizontalStrut(5));
-			 hzBox.add(btnBuildTable);					   hzBox.add(Box.createHorizontalStrut(5));
-			 hzBox.add(btnAddTable);
+			hzBox.add(Static.createLabel("Table", true)); hzBox.add(Box.createHorizontalStrut(5));
+			hzBox.add(btnBuildTable);					   hzBox.add(Box.createHorizontalStrut(5));
+			hzBox.add(btnAddTable);					   	hzBox.add(Box.createHorizontalStrut(60));
 			 
-			 hzBox.add(Box.createGlue());
-			 hzBox.add(btnSetColumns);
+			hzBox.add(btnSetColumns);
 			
-			 hzBox.add(Box.createGlue());
-			 hzBox.add(btnHelp);
-			 row3.add(hzBox);
+			row3.add(hzBox);
 			
 			add(row3);
 			
@@ -229,51 +213,7 @@ public class BasicSeqFilterPanel extends JPanel {
 			setMaximumSize(getPreferredSize());
 			setVisible(true);
 		}
-		private void createHelp() {
-			final JPopupMenu popup = new JPopupMenu();
-			
-			popup.add(new JMenuItem(new AbstractAction("Top buttons") {
-				private static final long serialVersionUID = 4692812516440639008L;
-				public void actionPerformed(ActionEvent e) {
-					try {
-						UserPrompt.displayHTMLResourceHelp(theMainFrame, "Top Buttons", topHTML);
-					} catch (Exception er) {ErrorReport.reportError(er, "Error showing buttons"); }
-				}
-			}));
-			popup.add(new JMenuItem(new AbstractAction("Search and Table") {
-				private static final long serialVersionUID = 4692812516440639008L;
-				public void actionPerformed(ActionEvent e) {
-					try {
-						UserPrompt.displayHTMLResourceHelp(theMainFrame, "Search, Filter and Table", queryHTML);
-					} catch (Exception er) {ErrorReport.reportError(er, "Error showing filter"); }
-				}
-			}));
-			popup.add(new JMenuItem(new AbstractAction("Modify Buttons") {
-				private static final long serialVersionUID = 4692812516440639008L;
-				public void actionPerformed(ActionEvent e) {
-					try {
-						UserPrompt.displayHTMLResourceHelp(theMainFrame, "Modify Buttons", lowerHTML);
-					} catch (Exception er) {ErrorReport.reportError(er, "Error showing modify"); }
-				}
-			}));
-			popup.addSeparator();
-			popup.add(new JMenuItem(new AbstractAction("TCW Remark") {
-				private static final long serialVersionUID = 4692812516440639008L;
-				public void actionPerformed(ActionEvent e) {
-					try {
-						UserPrompt.displayHTMLResourceHelp(theMainFrame, "TCW Remark", remarkHTML);
-					} catch (Exception er) {ErrorReport.reportError(er, "Error showing remark"); }
-				}
-			}));
-			
-			btnHelp = Static.createButtonHelp("Help...", true);
-			btnHelp.addMouseListener(new MouseAdapter() {
-	            public void mousePressed(MouseEvent e) {
-	                popup.show(e.getComponent(), e.getX(), e.getY());
-	            }
-	        });
-			btnHelp.setAlignmentX(Component.RIGHT_ALIGNMENT);
-		}
+		
 		private JLabel getRowHeader(String label) {
 			JLabel lblHeader = new JLabel(label);
 			Dimension dim = lblHeader.getPreferredSize();
@@ -364,7 +304,7 @@ public class BasicSeqFilterPanel extends JPanel {
 		
 		// Results
 		private JButton btnBuildTable = null, btnAddTable = null;
-		private JButton btnSetColumns = null, btnHelp = null;
+		private JButton btnSetColumns = null;
 	} // end QueryPanel
 	
 	/*************************************************

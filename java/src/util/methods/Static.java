@@ -31,23 +31,28 @@ import util.ui.MenuMapper;
 import util.ui.UserPrompt;
 
 public class Static {
-	public static final Color ACTIVECOLOR = Color.LIGHT_GRAY; 			// CAS310, CAS340 button turns active
-	public static final Color BGCOLOR = Color.WHITE;
-	public static final Color TABCOLOR = new Color(215, 229, 243); 		// new tab			light blue
-	public static final Color PANELCOLOR = new Color(229, 245, 237);	// replace panel	light green
-	public static final Color HELPCOLOR = new Color(245, 213, 234);		// help 			rose
-	public static final Color RUNCOLOR = new Color(243, 235, 227);		// run 				beige
-	public static final Color POPUPCOLOR = new Color(200, 200, 240); 	// popup window 	light lavendar
-	public static final Color FILECOLOR = new Color(242, 242, 242); 	// popup file		very light gray
-	public static final Color HIGHCOLOR = new Color(229, 245, 237); 	// light green	
+	public static final Color ACTIVECOLOR = new Color(0, 127, 255); // azure,  neon blue (70, 102, 255);
+	public static final Color BGCOLOR = 	Color.WHITE;
+	public static final Color HIGHCOLOR = 	new Color(229, 245, 237); 	// table row		light green
+	
+	public static final Color TABCOLOR = 	new Color(215, 229, 243); 	// new tab			light blue
+	public static final Color PANELCOLOR = 	new Color(229, 245, 237);	// replace panel	light green
+	
+	public static final Color RUNCOLOR = 	new Color(243, 235, 227);	// run 				beige
+	
+	public static final Color HELPCOLOR = 	new Color(245, 213, 234);	// help 			rose
+	
+	public static final Color POPUPCOLOR = 	new Color(226, 226, 255); 	// popup window 	light lavender
+	public static final Color MIXCOLOR = 	new Color(226, 226, 240);   // Table...	
+	public static final Color FILECOLOR = 	new Color(226, 226, 225); 	// file chooser		very light gray
 	/*****************************************************************/	
 	// CAS340 add specific
 	static void activeButton(JButton button) {
-		button.setBackground(ACTIVECOLOR); // only works on linux
-		button.setSelected(true);;	// CAS340 works for mac
+		button.setBackground(ACTIVECOLOR); 	// only works on linux
+		button.setSelected(true);;			// CAS340 works for mac
 	}
 	static void inactiveButton(JButton button) {
-		button.setBackground(BGCOLOR); // only works on linux
+		button.setBackground(BGCOLOR); 			// only works on linux
 		button.setSelected(false);			   // CAS340 added for mac
 	}
 	static public JButton createButtonTab(String label, boolean enable) {
@@ -70,6 +75,41 @@ public class Static {
 	}
 	static public JButton createButtonPopup(String label, boolean enable) { // ...
 		return createButton(label, enable, POPUPCOLOR);
+	}
+	static public JButton createButtonTable(String label, boolean enable) { // ...
+		return createButton(label, enable, MIXCOLOR);
+	}
+	static private JButton createButton(String label, boolean enable, Color color) {
+		JButton button = new JButton(label);
+		if (color!=null) {
+			button.setBackground(color); // only works on linux
+			button.setOpaque(true);	// CAS340 added for mac
+		}
+		button.setAlignmentX(Component.LEFT_ALIGNMENT);
+		button.setEnabled(enable);
+		return button;
+	}
+	// all other buttons are white
+	static public JButton createButton(String label, boolean enable) {
+		JButton button = createButton(label);
+		button.setEnabled(enable);
+		return button;
+	}
+	static public JButton createButton(String label) {
+		JButton button = new JButton(label);
+		button.setBackground(Color.white);
+		button.setAlignmentX(Component.LEFT_ALIGNMENT);
+		button.setEnabled(true);
+		return button;
+	}
+	static public JButton createButtonPlain(String label, boolean enable) {
+		JButton button = new JButton(label);
+		button.setBackground(Color.white);
+		button.setAlignmentX(Component.LEFT_ALIGNMENT);
+		button.setMargin(new Insets(0, 0, 0, 0));
+		button.setFont(new Font(button.getFont().getName(),Font.PLAIN,10));
+		button.setEnabled(enable);
+		return button;
 	}
 	/******** Interface ***********/
 	static public void center(JPanel panel) {
@@ -150,39 +190,6 @@ public class Static {
 	}
 	
 	
-	static public JButton createButton(String label, boolean enable, Color color) {
-		JButton button = new JButton(label);
-		if (color!=null) {
-			button.setBackground(color); // only works on linux
-			button.setOpaque(true);	// CAS340 added for mac
-		}
-		button.setAlignmentX(Component.LEFT_ALIGNMENT);
-		button.setEnabled(enable);
-		return button;
-	}
-	static public JButton createButton(String label, boolean enable) {
-		JButton button = new JButton(label);
-		button.setBackground(Color.white);
-		button.setAlignmentX(Component.LEFT_ALIGNMENT);
-		button.setEnabled(enable);
-		return button;
-	}
-	static public JButton createButton(String label) {
-		JButton button = new JButton(label);
-		button.setBackground(Color.white);
-		button.setAlignmentX(Component.LEFT_ALIGNMENT);
-		button.setEnabled(true);
-		return button;
-	}
-	static public JButton createButtonPlain(String label, boolean enable) {
-		JButton button = new JButton(label);
-		button.setBackground(Color.white);
-		button.setAlignmentX(Component.LEFT_ALIGNMENT);
-		button.setMargin(new Insets(0, 0, 0, 0));
-		button.setFont(new Font(button.getFont().getName(),Font.PLAIN,10));
-		button.setEnabled(enable);
-		return button;
-	}
 	static public JCheckBox createCheckBox(String label) {
 		JCheckBox chkBox = new JCheckBox(label);
 		chkBox.setBackground(Color.white);

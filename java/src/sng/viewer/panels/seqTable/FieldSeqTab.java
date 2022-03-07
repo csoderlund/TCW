@@ -108,7 +108,7 @@ public class FieldSeqTab extends Tab implements ActionListener {
 			}
 			
 			String name = grpNames[i].equals(FieldSeqData.GROUP_NAME_FIRST_BEST) ?
-					"Best Hits" : grpNames[i];
+					"Annotation" : grpNames[i];
 			String desc = grpNames[i].equals(FieldSeqData.GROUP_NAME_FIRST_BEST) ?
 					"BS - Best Bitscore, AN - Best Annotation, WG - Best with GO" : grpDesc[i];
 	        CollapsiblePanel subPanel = new CollapsiblePanel(name, desc);

@@ -149,7 +149,7 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 	            }
 	        });
 		// Create prev and next buttons
-		JButton btnPrev = Static.createButton("<<Prev");
+		JButton btnPrev = Static.createButton("<<");
 		btnPrev.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {				
 				if(alignPanel != null)
@@ -159,7 +159,7 @@ public class PairTopRowTab extends Tab  implements ClipboardOwner
 			}
 		});
 
-		JButton btnNext = Static.createButton("Next>>");
+		JButton btnNext = Static.createButton(">>");
 		btnNext.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(alignPanel != null) {

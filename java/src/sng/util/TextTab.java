@@ -15,7 +15,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 
-import sng.database.Globals;
 import sng.viewer.STCWFrame;
 import util.methods.Static;
 import util.ui.UserPrompt;
@@ -51,8 +50,7 @@ public class TextTab extends /*JPanel*/Tab
 			JButton btnHelp = Static.createButtonHelp("Reproduce", true);
 			btnHelp.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
-					UserPrompt.displayHTMLResourceHelp(null, 
-							"Associated tables of results", htmlHelp);
+					UserPrompt.displayHTMLResourceHelp(null, "Reproduce Overview", htmlHelp);
 				}
 			});
 			row.add(btnHelp);

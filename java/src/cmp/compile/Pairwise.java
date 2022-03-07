@@ -101,7 +101,7 @@ public class Pairwise {
 		 	for(String file : allFiles) {
 		 		if (!file.endsWith(Globals.KaKsInSuffix)) continue;
 		 		String path = dirKaKs + "/" + file;
-		 		Out.PrtSpMsg(1, "Read " + file + "           ");
+		 		Out.prtToErr("   Read " + file + "           ");// CAS342 do not need in log file
 		 		BufferedReader reader = new BufferedReader ( new FileReader ( path ) );
 		 		
 		 		int cntLine=0;
@@ -219,7 +219,7 @@ public class Pairwise {
 	// create map of sequences
 			String sql = "Select ASMid, UTid, UTstr, ntLen, aaLen, nPairs, orf_start, orf_end from unitrans";
 			if (isAA) sql += " where aaLen>0";
-			else sql += " where ntLen>0"; 
+			else      sql += " where ntLen>0"; 
 			ResultSet rs = mDB.executeQuery(sql);
 			while (rs.next()) {
 				int asmID = rs.getInt(1);
@@ -231,7 +231,7 @@ public class Pairwise {
 				int s = rs.getInt(7);
 				int e = rs.getInt(8);
 				
-				int cdsLen = (e>0) ? Math.abs(s-e)+1 : 0;  // CAS305 if NT and AA, the AA cdsLen was 1
+				int cdsLen = (e>0) ? Math.abs(s-e)+1 : len;  // CAS305 made AA=0; CAS342 should be len
 				
 				Seq seq = new Seq(seqName, seqID, asmID, len, nPairs, cdsLen, nAsm);
 				seqNameMap.put(seqName, seq);

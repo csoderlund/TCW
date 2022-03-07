@@ -407,6 +407,7 @@ public class CompilePanel extends JPanel {
 	public boolean mTCWcfgNew() {
 		try {
 			File cfg = mTCWcfgGetFile(false);
+			if (cfg==null) return false; // CAS342
 			
 			PrintWriter out = new PrintWriter(cfg.getAbsoluteFile());
 			out.print("MTCW_db = " + pnlProject.getDBName() + "\n");
@@ -419,6 +420,7 @@ public class CompilePanel extends JPanel {
 	public boolean mTCWcfgSave() {
 		try{
 			File cfg = mTCWcfgGetFile(false);	
+			if (cfg==null) return false; // CAS342
 			
 			PrintWriter out = new PrintWriter(cfg.getAbsoluteFile());
 			out.print("MTCW_db = " + pnlProject.getDBName() + "\n");

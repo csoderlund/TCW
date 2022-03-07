@@ -100,12 +100,11 @@ public class HitTablePanel  extends JPanel {
         topRow.add(btnPairwise);					topRow.add(Box.createHorizontalStrut(3)); 
         
         createBtnCopy();
- 		topRow.add(btnCopy);
-        topRow.add(Box.createHorizontalGlue());  
+ 		topRow.add(btnCopy);						topRow.add(Box.createHorizontalStrut(30));  
 		
         createBtnTable();
         topRow.add(btnTable);
-        topRow.add(Box.createHorizontalStrut(3));
+        topRow.add(Box.createHorizontalGlue());
         
         btnHelp = Static.createButtonHelp("Help", true);
         btnHelp.addActionListener(new ActionListener() {
@@ -118,7 +117,6 @@ public class HitTablePanel  extends JPanel {
         topRow.setAlignmentX(LEFT_ALIGNMENT);
 
         buttonPanel.add(topRow);
-        buttonPanel.add(Box.createVerticalStrut(5));
         
         return buttonPanel;
     }
@@ -196,7 +194,7 @@ public class HitTablePanel  extends JPanel {
  			}
  		}));
  		
- 		btnTable = Static.createButtonMenu("Table...", true);
+ 		btnTable = Static.createButtonTable("Table...", true);
 		btnTable.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 popup.show(e.getComponent(), e.getX(), e.getY());
@@ -554,7 +552,7 @@ public class HitTablePanel  extends JPanel {
     	if(tableButtonPanel != null) { 	//Is null if a sample table 
     		add(tableButtonPanel);
     	}
-    	add(Box.createVerticalStrut(10));
+    	add(Box.createVerticalStrut(2));
     	add(tableSummaryPanel);
     	add(Box.createVerticalStrut(10));
     	add(tableStatusPanel);
@@ -803,8 +801,9 @@ public class HitTablePanel  extends JPanel {
 		String desc = (String)theTableData.getValueAt(row, theTableData.getColumnHeaderIndex(HITDESC));
 		String name = (String)theTableData.getValueAt(row, theTableData.getColumnHeaderIndex(HITID));
 		
-		String sum = "Row " + (row+1) + "/" + theTable.getRowCount();
-		sum += "   " +  Globals.tagHIT + " " + name + "    " + desc;
+		String sum = "";
+		if (theTable.getRowCount()>1) sum = "Row " + (row+1) + "/" + theTable.getRowCount() + "   ";
+		sum += Globals.tagHIT + " " + name + "    " + desc;
 		return sum;
 	}
     private int getTranslatedRow(int row) {

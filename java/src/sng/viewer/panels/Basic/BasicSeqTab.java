@@ -5,6 +5,8 @@ package sng.viewer.panels.Basic;
  *  contains mapping of data (BasicSeqFilterPanel) to table (BasicTablePanel)
  */
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -12,6 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.Vector;
 import java.util.Collections;
@@ -22,7 +25,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -33,11 +35,17 @@ import sng.viewer.STCWFrame;
 import util.methods.ErrorReport;
 import util.methods.Out;
 import util.methods.Static;
+import util.ui.UserPrompt;
 
 public class BasicSeqTab extends Tab {
 	private static final long serialVersionUID = -5515249017308285183L;	
 	private static final Color BGCOLOR = Globals.BGCOLOR;
 
+	private final String topHTML = 		Globals.helpDir + "BasicTopSeq.html";
+	private final String queryHTML = 	Globals.helpDir + "BasicQuerySeq.html";
+	private final String lowerHTML =   	Globals.helpDir + "BasicModify.html"; 
+	private final String remarkHTML =   Globals.helpDir + "TCWremark.html"; 
+	
 	public BasicSeqTab(STCWFrame parentFrame) {
 		super(parentFrame, null);
 		theMainFrame = parentFrame;	
@@ -46,7 +54,7 @@ public class BasicSeqTab extends Tab {
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		
-		createTopRowPanel();
+		createTopButtons();
 		add(topRowPanel);
 		add(Box.createVerticalStrut(6));
 		
@@ -60,7 +68,7 @@ public class BasicSeqTab extends Tab {
 	/******************************************
 	 * Top button panel
 	 */
-	private void createTopRowPanel() {
+	private void createTopButtons() {
 		btnViewSeqs = Static.createButtonTab(Globals.seqTableLabel, false);
 		btnViewSeqs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -73,6 +81,24 @@ public class BasicSeqTab extends Tab {
 				viewSelectedDetail();
 			}
 		});
+		createSelectButton();
+		createTableButton();
+		createHelpButton();
+
+		topRowPanel = Static.createRowPanel();
+		topRowPanel.add(Static.createLabel(Globals.select));	topRowPanel.add(Box.createHorizontalStrut(1));
+		topRowPanel.add(btnViewSeqs);				topRowPanel.add(Box.createHorizontalStrut(1));
+		topRowPanel.add(btnDetail);					topRowPanel.add(Box.createHorizontalStrut(1));
+		
+		topRowPanel.add(btnCopy);					topRowPanel.add(Box.createHorizontalStrut(40));
+		topRowPanel.add(btnTable);					topRowPanel.add(Box.createHorizontalGlue());
+		topRowPanel.add(btnHelp);
+		
+		topRowPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE,(int)topRowPanel.getPreferredSize().getHeight()));		
+		//topRowPanel.setMaximumSize(topRowPanel.getPreferredSize());
+		//topRowPanel.setMinimumSize(topRowPanel.getPreferredSize());
+	}
+	private void createSelectButton() {
 		// Copy
 		final JPopupMenu copypopup = new JPopupMenu();
 		
@@ -127,9 +153,9 @@ public class BasicSeqTab extends Tab {
             public void mousePressed(MouseEvent e) {
                 copypopup.show(e.getComponent(), e.getX(), e.getY());
             }
-        });		
-		
-		// Table
+        });				
+	}
+	private void createTableButton() {
 		final JPopupMenu tablepopup = new JPopupMenu();
 		tablepopup.add(new JMenuItem(new AbstractAction("Copy Table") {
 			private static final long serialVersionUID = 4692812516440639008L;
@@ -151,24 +177,58 @@ public class BasicSeqTab extends Tab {
 				} catch (Exception er) {ErrorReport.reportError(er, "Error export table"); }
 			}
 		}));
-		btnTable = Static.createButton("Table...", false);
+		btnTable = Static.createButtonTable("Table...", false);
 		btnTable.addMouseListener(new MouseAdapter() {
-            public void mousePressed(MouseEvent e) {
-                tablepopup.show(e.getComponent(), e.getX(), e.getY());
-            }
-        });	
-
-		topRowPanel = Static.createRowPanel();
-		topRowPanel.add(Static.createLabel(Globals.select));	topRowPanel.add(Box.createHorizontalStrut(1));
-		topRowPanel.add(btnViewSeqs);				topRowPanel.add(Box.createHorizontalStrut(1));
-		topRowPanel.add(btnDetail);					topRowPanel.add(Box.createHorizontalStrut(1));
-		topRowPanel.add(btnCopy);					topRowPanel.add(Box.createHorizontalStrut(40));
-		topRowPanel.add(btnTable);		
-		
-		topRowPanel.setMaximumSize(topRowPanel.getPreferredSize());
-		topRowPanel.setMinimumSize(topRowPanel.getPreferredSize());
+	        public void mousePressed(MouseEvent e) {
+	            tablepopup.show(e.getComponent(), e.getX(), e.getY());
+	        }
+	    });	
 	}
-	
+	private void createHelpButton() {
+		final JPopupMenu popup = new JPopupMenu();
+		
+		popup.add(new JMenuItem(new AbstractAction("Top buttons") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theMainFrame, "Top Buttons", topHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error showing buttons"); }
+			}
+		}));
+		popup.add(new JMenuItem(new AbstractAction("Search and Table") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theMainFrame, "Search, Filter and Table", queryHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error showing filter"); }
+			}
+		}));
+		popup.add(new JMenuItem(new AbstractAction("Modify Buttons") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theMainFrame, "Modify Buttons", lowerHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error showing modify"); }
+			}
+		}));
+		popup.addSeparator();
+		popup.add(new JMenuItem(new AbstractAction("TCW Remark") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theMainFrame, "TCW Remark", remarkHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error showing remark"); }
+			}
+		}));
+		
+		btnHelp = Static.createButtonHelp("Help...", true);
+		btnHelp.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                popup.show(e.getComponent(), e.getX(), e.getY());
+            }
+        });
+		btnHelp.setAlignmentX(Component.RIGHT_ALIGNMENT);
+	}
 	/********************************************************
 	 * XXX Methods called by BasicSeqFilterPanel
 	 */
@@ -331,16 +391,19 @@ public class BasicSeqTab extends Tab {
 	 public void tableSelect(ArrayList<Object []> results, String summary) {
 		 try {
 			 theTablePanel.setStatus("Selecting " + results.size() + " possible rows. Please Wait..");
-			
+			 
+			// CAS342  add hashset for searching (there was out-of-range error on line 404, this change seemed to fix...
+			 HashSet <String> selIDs = new HashSet <String> (results.size()); 
+			 for (Object [] o : results) {
+				 String seqid = (String) o[0];
+				 selIDs.add(seqid);
+			 }
 			 int cnt=0;
 			 for (int i=0; i<seqObjList.size(); i++) { 
-				 for (Object [] o : results) {
-					 String seqid = (String) o[0];
-					 if (seqObjList.get(i).strSeqID.equals(seqid)) {
-						 theTablePanel.selectRow(i);
-						 cnt++;
-						 break;
-					 }
+				 String seqid = seqObjList.get(i).strSeqID;
+				 if (selIDs.contains(seqid)) {
+					 theTablePanel.selectRow(i);
+					 cnt++;
 				 }
 				 if (i>0 && i%5000==0) 
 					 theTablePanel.setStatus("Selected " + cnt + " from " + i + ". Still working...");
@@ -399,7 +462,8 @@ public class BasicSeqTab extends Tab {
 	private Vector<SeqData> seqObjList = new Vector<SeqData> (); // CAS334 was ArrayList; possible synchronization problem
 	
 	//User interface
-	private JButton btnViewSeqs = null, btnTable = null, btnCopy = null, btnDetail = null;	// CAS334 add detail
+	private JButton btnViewSeqs = null,  btnCopy = null, btnDetail = null;	// CAS334 add detail
+	private JButton btnTable = null, btnHelp = null;
 	
 	private JPanel topRowPanel = null;
 	private BasicSeqFilterPanel theFilterPanel = null;

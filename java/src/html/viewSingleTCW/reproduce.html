@@ -9,7 +9,6 @@
 </head>
 <body style="padding:20px;width:650px;font-family:Times">
 
-
 <h2>Reproduce sTCW overview</h2>
 
 This describes how to obtain the table of results corresponding to statistics
@@ -21,41 +20,39 @@ in the overview. The following short-hand is used:
 </ul>
 <b><i>Always clear filters before setting new ones!</i></b>
 <h3>INPUT</h3>
-Most of the input section is data supplied by the user with runSingleTCW. The following
+Most of the INPUT section is data supplied by the user with runSingleTCW. The following
 are computed:
 <table class=tabley>
 <tr><td colspan=3>Counts:
-<tr><td>SIZE<td>Show All<td>Column:Counts for all conditions: Stats, column:Sum
+<tr><td>SIZE<td>All Seqs<td>Column:Counts for all conditions: Stats, column:Sum
 <tr><td colspan=3>Sequences:
-<tr><td>AVG-len<td>Show All<td>Column:Length; Stats, column:Average
-<tr><td>MED-len<td>Show All<td>Column:Length; Stats, column:Median
-<br>The median in the two cases may be slightly different 
-because they are computed differently.
+<tr><td>AVG-len<td>All Seqs<td>Column:Length; Stats, column:Average
+<tr><td>MED-len<td>All Seqs<td>Column:Length; Stats, column:Median
+<br>The median in the two cases may be slightly different because they are computed differently.
 </table>
  
 <h3>ANNOTATION</h3>
-<h3>Hit Statistics:</h3>
+<h3>Hit statistics:</h3>
 
 <table class=tabley>
 <tr><th>Column<th>Search<th>Obtain number
-<tr><td>Sequences with hits<td>Filters: Annotated<td>Number of rows
+<tr><td>Sequences with hits<td>Filters: Annotation: Annotated<td>Number of rows
 <tr><td>Unique hits<td>AnnoDB Hits: Seq:None(slow)<td>Hits # above table
 <tr><td>Total sequence hits<td>AnnoDB Hits: Seq:None(slow)<td>Pairs # above table
 <tr><td>Bases covered by hit<td>AnnoDB Hits: Seq:Best Bits<td>Unselect "Group by Hit ID""; column:Align; 
 	<br>Stats, column:Sum; for NT, multiply by 3
-<tr><td>Total bases 
-	<br>(residues for AA seqs)
-	<td>Show All<td>Column:Length; Stats, column:Sum
+<tr><td>Total bases for NT-sTCWdbs
+	<br>and residues for AA-sTCWdbs
+	<td>All Seqs<td>Column:Length; Stats, column:Sum
 </table>
 
-<h3>AnnoDBs:</h3>
-
+<h3>Annotation databases:</h3>
+The first column is the DBtype-taxonomy of each annoDB (e.g. SP-plants: SP is SwissProt, plants is the taxonomy).
 <table class=tabley>
 <tr><th>Column<th>Search<th>Obtain number
 <tr><td>ONLY
-	<td>Filters: Annotated, Best Bits, 
-	<br>Enter DBtype and Taxonomy 
-	<br>&nbsp;&nbsp;&nbsp; values for AnnoDB,
+	<td>Filters: Annotation: Annotated, Best Bits, 
+	<br>Enter DBtype and Taxonomy for ANNODB,
 	<br>General &lt;=1 annoDB
  	<td>Number of rows
 <tr><td colspan=3><i>The following all use AnnoDB Hits panel with the correct ANNODB selected from the AnnoDBs panel.
@@ -87,8 +84,8 @@ left and add to the right.
 <li>Use the number listed beside "Pairs".
 </ul>
 
-<h3>Gene Ontology Statistics:</h3>
-
+<h3>Gene ontology statistics:</h3>
+The counts of GO terms include assigned obsolete terms (level=0). 
 <table class=tabley>
 <tr><th>Column<th>Search<th>Obtain number
 <tr><td>Unique GOs
@@ -98,7 +95,7 @@ left and add to the right.
 	<td>AnnoDB Hits: Seqs:None; GO,etc:Has GO
 	<td>Hits number at top of table
 <tr><td>Sequences with GOs
-	<td>Filters: Best Hit: Annotated, Best with GO
+	<td>Filters: Annotation: Annotated, Best with GO
 	<td>Number of rows
 <tr><td>Seq best hit has GOs
 	<td>AnnoDB Hits: Seq:Best Bits; GO,etc:Has GO
@@ -126,16 +123,16 @@ left and add to the right.
 The following sections may not exist if the input had no count files or the DE methods
 were not executed.
 <table class=tabley>
-<tr><td>TPM*
-	<td>Filter: select Condition under Exclude; set "At Most" to 1.99. 
-	<td>This will continue using 4.99, 9.99, etc, where the previous results are
+<tr><td>TPM:*
+	<td>Filters: Counts and TPM: select Condition under Exclude; set "At Most" to 5000. 
+	<td>Continue using 1000, 100, 50, 5, 2 where the previous results are
 subtracted from the current. The results are for intervals &gt;=N to &lt;M.
-<tr><td>Differential Expression
-	<td>Filter: select the condition pair, then enter the number, e.g. 1E-5.
+<tr><td>Differential Expression:
+	<td>Filters:  Differential Expression: select the DE column, then enter the number, e.g. 1E-5.
 	<td>These counts are accumulative.
-<tr><td>GO Enrichment:
-	<td>GO Annotation; select the condition pair using the Enrich panel; enter the threshold,
-	e.g. 0.05.
+<tr><td>GO enrichment:
+	<td>GO Annotation: Enrich: enter the p-value threshold (e.g. 0.05); select green button next to "for" and select the p-value
+	to filter on.
 	<td>These counts are accumulative.
 </table>
 * If "RPKM" is at the top of the Overview instead of "TPM", then RPKM was computed instead of TPM.
@@ -144,22 +141,24 @@ subtracted from the current. The results are for intervals &gt;=N to &lt;M.
 If the sequences (e.g. ESTs) have been assembled, there are statistics on buried,
 mate-pairs, etc. Most of them are columns, so select the column, then use the 
 "Show column stats" to view the sum. The following will only cover the three sections
-that are found in un-assembled sequences.
+that exists for all NT-sTCWdbs.
 <table class=tabley>
 <tr><td>Sequence lengths
-	<td>Filters: General: change &gt;= to &lt;=, 
-	  enter upper limit into Length
+	<td>Filters: General: Length: change &gt;= to &lt;=. 
+	Filter for each cutoff 100, 500, 1000, 2000, 3000, 4000, 5000.
 	<td>The counts of the intervals to the left need to be subtracted from the number of rows.
+
 <tr><td>ORF lengths
-	<td>Filter: SNPs and ORFs; enter lower limit into ORF len
-	<td>Work from right to left, the counts of the intervals to the right need to be subtracted from the number of rows.
+	<td>Filter: SNPs and ORFs: Has ORF &gt;= N. 
+	Filter for each cutoff 5001, 4001, 3001, 2001, 1001, 501, 101.
+	<td>The counts of the intervals to the right need to be subtracted from the number of rows.
 <tr><td>Quality
-	<td>Filters: General: Has Ns: Yes; Column: Ns
-	<td>The resulting rows are the #n&gt;0; sort the rows in descending order and scroll down
-	to the row number that start having #n&gt;10.
+	<td>Filters: General: Has Ns: Yes; Columns: General: Ns
+	<td>The resulting rows are the #n&gt;0; sort the rows in descending order on the Ns column,
+	and scroll down to the row number that starts having #n&gt;10.
 </table>
 
-<h3>ORF Stats:</h3>
+<h3>ORF stats:</h3>
 <table class=tabley>
 <tr><th>Column<th>Search<th>Obtain number
 <tr><td colspan=3><i>The following use the Basic Sequence. Select "TCW" and enter
@@ -169,21 +168,21 @@ the Substring indicated.</i>
 <tr><td>All of the above<td>$<td>Result number
 <tr><td>ORF=Hit<td>ORF=Hit<td>Result number
 <tr><td>ORF=Hit with Ends<td>ORF=Hit+<td>Result number
-<tr><td>Multi-frame<td>Multi-frame<td>Result number
+<tr><td>Multi-frame<td>Multi<td>Result number
 <tr><td>Stops in Hit<td>Stop<td>Result number
-<tr><td>&gt;=9 Ns in ORF<td>9N<td>Result number. 
+<tr><td>&gt;=9 Ns in ORF<td>9N<td>Result number
 
-<tr><td colspan=3><i>The following use the Filters: SNPs and ORFs.</i>
-<tr><td>Both Ends<td>Has Ends (Start&Stop codons)<td>Number of rows
+<tr><td colspan=3><i>The following use the Filters section: SNPs and ORFs.</i>
 <tr><td>Has Hit<td>Protein confirmation<td>Number of rows
-<tr><td>ORF>=300<td>Has ORF >= 300<td>Number of rows
+<tr><td>Both Ends<td>Has Ends (Start&Stop codons)<td>Number of rows
+<tr><td>ORF&gt;=300<td>Has ORF &gt;= 300<td>Number of rows
 
 </table>
-<h3>GC Content:</h3>
+<h3>GC content:</h3>
 The only number reproducible is the GC Content, which is the %GC over the entire sequence. 
 
 <table class=tabley>
-<tr><td>GC Content<td>Show All<td>Column:%GC; Stats, column:Average
+<tr><td>GC content<td>Seq Table<td>Column:%GC; Stats, column:Average
 <br>Note, there will be some slight difference in the number due to round-off error.
 </table>
 

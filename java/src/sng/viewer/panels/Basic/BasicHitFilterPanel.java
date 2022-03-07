@@ -8,8 +8,6 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.sql.ResultSet;
@@ -24,7 +22,6 @@ import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -36,10 +33,8 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
@@ -58,7 +53,6 @@ import sng.viewer.panels.align.AlignData;
 import sng.viewer.panels.align.PairViewPanel;
 import sng.viewer.panels.seqDetail.LoadFromDB;
 import util.database.DBConn;
-import util.database.Globalx;
 import util.file.FileC;
 import util.file.FileRead;
 import util.methods.ErrorReport;
@@ -69,10 +63,6 @@ import util.ui.UserPrompt;
 
 public class BasicHitFilterPanel extends JPanel {
 	private static final long serialVersionUID = 6371517539623729378L;
-	
-	private final String topHTML = 		Globals.helpDir + "BasicTopHit.html";
-	private final String queryHTML = 	Globals.helpDir + "BasicQueryHit.html";
-	private final String lowerHTML =   	Globals.helpDir + "BasicModify.html"; 
 	private final String speciesHTML =	Globals.helpDir + "BasicQueryHitSpecies.html";
 	
 	public static final int VIEW_BY_GRP = 1; 
@@ -341,7 +331,7 @@ public class BasicHitFilterPanel extends JPanel {
 		 	rowFilter1.add(boxBest);
 			rowFilter1.add(Box.createHorizontalStrut(4));
 			
-			boolean isActive=true;
+			boolean isActive=false; // CAS342 was true
 			chkUseEval = Static.createCheckBox("E-val<=", isActive);
 		 	chkUseEval.addActionListener(new ActionListener() {
 	    			public void actionPerformed(ActionEvent e) {
@@ -373,8 +363,8 @@ public class BasicHitFilterPanel extends JPanel {
     			}
     		});   
     		rowFilter1.add(chkUseHitCov);
-			txtAlign = Static.createTextField( DEFAULT_SIM, INT_SIZE,isActive);
-			rowFilter1.add(txtAlign);
+			txtHitCov = Static.createTextField( DEFAULT_SIM, INT_SIZE,isActive);
+			rowFilter1.add(txtHitCov);
 			rowFilter1.add(Box.createHorizontalStrut(4));
 			
 			// RPKM/TPM and DE
@@ -518,7 +508,6 @@ public class BasicHitFilterPanel extends JPanel {
 				}
 			});
 			
-			
 			btnSetColumns = Static.createButtonPanel("Hit Columns", true);
 			btnSetColumns.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -537,7 +526,6 @@ public class BasicHitFilterPanel extends JPanel {
 					theHitTab.tableRefresh(isGrpView);
 				}
 			});
-			createHelp();
 			
 			JPanel rowResults = Static.createRowPanel(); // CAS336 added glue and dropdown help
 			
@@ -547,12 +535,10 @@ public class BasicHitFilterPanel extends JPanel {
 			 hzBox.add(btnBuildTable);					   hzBox.add(Box.createHorizontalStrut(5));
 			 hzBox.add(btnAddTable);
 			 
-			 hzBox.add(Box.createGlue());
+			 hzBox.add(Box.createHorizontalStrut(60));
 			 hzBox.add(btnSetColumns);						hzBox.add(Box.createHorizontalStrut(3));
 			 hzBox.add(showGrouped);
 			
-			 hzBox.add(Box.createGlue());
-			 hzBox.add(btnHelp);
 			 rowResults.add(hzBox);
 			
 			add(rowResults); // CAS313 Occasionally, gets extra lines. Also, Align has extra lines. 
@@ -562,43 +548,7 @@ public class BasicHitFilterPanel extends JPanel {
 			setMaximumSize(getPreferredSize());
 			setVisible(true);
 		}
-		private void createHelp() {
-			final JPopupMenu popup = new JPopupMenu();
-			
-			popup.add(new JMenuItem(new AbstractAction("Top buttons") {
-				private static final long serialVersionUID = 4692812516440639008L;
-				public void actionPerformed(ActionEvent e) {
-					try {
-						UserPrompt.displayHTMLResourceHelp(theMainFrame, "Top Buttons", topHTML);
-					} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
-				}
-			}));
-			popup.add(new JMenuItem(new AbstractAction("Search and Table") {
-				private static final long serialVersionUID = 4692812516440639008L;
-				public void actionPerformed(ActionEvent e) {
-					try {
-						UserPrompt.displayHTMLResourceHelp(theMainFrame, "Search, Filter and Table", queryHTML);
-					} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
-				}
-			}));
-			popup.add(new JMenuItem(new AbstractAction("Modify Buttons") {
-				private static final long serialVersionUID = 4692812516440639008L;
-				public void actionPerformed(ActionEvent e) {
-					try {
-						UserPrompt.displayHTMLResourceHelp(theMainFrame, "Modify Buttons", lowerHTML);
-					} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
-				}
-			}));
-			
-			
-			btnHelp = Static.createButtonHelp("Help...", true);
-			btnHelp.addMouseListener(new MouseAdapter() {
-	            public void mousePressed(MouseEvent e) {
-	                popup.show(e.getComponent(), e.getX(), e.getY());
-	            }
-	        });
-			btnHelp.setAlignmentX(Component.RIGHT_ALIGNMENT);
-		}
+		
 		private JLabel createLabel(String label, int width) {
 			JLabel tmp = new JLabel(label);
 			Dimension dim = tmp.getPreferredSize();
@@ -665,16 +615,7 @@ public class BasicHitFilterPanel extends JPanel {
 		public boolean isLoadFile() {
 			return (loadList!=null);
 		}
-		public int getAlign() {
-			if (!chkUseHitCov.isSelected()) return 0;
-				
-			try {
-				return Integer.parseInt(txtAlign.getText());
-			}
-			catch (Exception e){
-				return 0;
-			}
-		}
+		
 		public String getWhereSearch() {
 			if (!chkUseSearch.isSelected()) return "";
 			
@@ -698,7 +639,7 @@ public class BasicHitFilterPanel extends JPanel {
 			double eVal = getEvalLimit();
 			if(eVal >= 0) strQuery= " AND  tn.e_value <= " + eVal;
 			if (chkUseSim.isSelected()) strQuery  += " AND tn.percent_id>=" + txtSim.getText();
-			// chkUseAlign  filter is in loadFromDatbase
+			if (chkUseHitCov.isSelected()) strQuery  += " AND tn.prot_cov>=" + txtHitCov.getText(); // CAS342 query hitCov directly
 			
 			int x = boxBest.getSelectedIndex();
 			if (x!=0) {
@@ -728,7 +669,7 @@ public class BasicHitFilterPanel extends JPanel {
 			String sim = (chkUseSim.isSelected()) ? txtSim.getText() : "";
 			if (!sim.equals("")) sum = strMerge(sum, "Sim " + sim + "%");
 			
-			String aln = (chkUseHitCov.isSelected()) ? txtAlign.getText() : "";
+			String aln = (chkUseHitCov.isSelected()) ? txtHitCov.getText() : "";
 			if (!aln.equals("")) sum = strMerge(sum, "HitCov " + aln + "%"); // CAS332 was "Align"
 			
 			int x = boxBest.getSelectedIndex();
@@ -753,7 +694,7 @@ public class BasicHitFilterPanel extends JPanel {
 			txtField.setText("");
 			
 			chkUseHitCov.setSelected(false);
-			txtAlign.setText(DEFAULT_SIM); txtAlign.setEnabled(false);
+			txtHitCov.setText(DEFAULT_SIM); txtHitCov.setEnabled(false);
 			
 			chkUseEval.setSelected(false); 
 			txtEval.setText(formatd.format(DEFAULT_EVAL)); txtEval.setEnabled(false); 
@@ -771,7 +712,7 @@ public class BasicHitFilterPanel extends JPanel {
 		private void enableEvalSim() {
 			txtEval.setEnabled(chkUseEval.isSelected());
 			txtSim.setEnabled(chkUseSim.isSelected());
-			txtAlign.setEnabled(chkUseHitCov.isSelected());
+			txtHitCov.setEnabled(chkUseHitCov.isSelected());
 		}
 		private void enableSections() {
 			boolean sec1 = chkUseSearch.isSelected();
@@ -790,7 +731,7 @@ public class BasicHitFilterPanel extends JPanel {
 			boxBest.setEnabled(sec2);    
 			chkCount.setEnabled(sec2);btnCount.setEnabled(sec2);
 			
-			txtEval.setEnabled(sec2);    txtSim.setEnabled(sec2);     txtAlign.setEnabled(sec2);
+			txtEval.setEnabled(sec2);    txtSim.setEnabled(sec2);     txtHitCov.setEnabled(sec2);
 			chkUseEval.setEnabled(sec2); chkUseSim.setEnabled(sec2);  chkUseHitCov.setEnabled(sec2);
 	
 			chkAnnoDBs.setEnabled(sec2); chkSpecies.setEnabled(sec2); chkGOetc.setEnabled(sec2);
@@ -805,7 +746,7 @@ public class BasicHitFilterPanel extends JPanel {
 				
 				if (chkUseEval.isSelected()) 	txtEval.setEnabled(sec2);
 				if (chkUseSim.isSelected())  	txtSim.setEnabled(sec2);
-				if (chkUseHitCov.isSelected())  	txtAlign.setEnabled(sec2);
+				if (chkUseHitCov.isSelected())  	txtHitCov.setEnabled(sec2);
 			}
 		}
 		
@@ -826,7 +767,7 @@ public class BasicHitFilterPanel extends JPanel {
 		
 		// Seq: first filter line
 		private JCheckBox  chkUseEval = null, chkUseSim = null, chkUseHitCov=null;
-		private JTextField txtEval = null,    txtSim = null,    txtAlign=null;
+		private JTextField txtEval = null,    txtSim = null,    txtHitCov=null;
 		
 		private String [] bestOpt = {"None(slow)", "Rank=1", "Best Bits", "Best Anno", 
 				"Bits&Anno", "Bits|Anno"};
@@ -840,7 +781,7 @@ public class BasicHitFilterPanel extends JPanel {
 		private JButton  btnAnnoDBs = null, btnSpecies = null, btnGOetc = null;
 				
 		// Results
-		private JButton btnBuildTable = null, btnAddTable = null, btnSetColumns = null, btnHelp = null;
+		private JButton btnBuildTable = null, btnAddTable = null, btnSetColumns = null;
 		private JCheckBox showGrouped = null;
 	} // end QueryPanel
 	
@@ -2772,8 +2713,8 @@ public class BasicHitFilterPanel extends JPanel {
 	/******************************************************************
 	 * XXX Database calls
 	 */
-	/* the following two are called by BasicHitQueryTab */
-	 public ArrayList<Object []> loadFromDatabase () 
+	/* the following two are called by BasicHitFilterTab */
+	 private ArrayList<Object []> loadFromDatabase () 
 	 {
         ArrayList<Object []> resultList = null;
         try {
@@ -2788,10 +2729,10 @@ public class BasicHitFilterPanel extends JPanel {
             int numSetFields = (libColNames == null) ? 0 : libColNames.length;
             numSetFields    += (pvalColNames==null)  ? 0 : pvalColNames.length;
             
-            int numStaticFields = 18; // read from DB; not same as number of displayed columns
+            int numStaticFields = 16; // read from DB; not same as number of displayed columns
             String fields = 	
             	"tn.contigid, tn.uniprot_id, tn.bit_score, tn.e_value, tn.percent_id, " + // CAS331 add bitscore
-            	"tn.ctg_start,  tn.ctg_end, tn.prot_start, tn.prot_end, tn.alignment_len," +
+            	"tn.ctg_cov, tn.prot_cov, tn.alignment_len," + // CAS342 was getting start-end and compute
             	"tn.filtered, tn.blast_rank, " + 
             	"uq.description, uq.species, uq.dbtype, uq.taxonomy, uq.length, ct.consensus_bases ";
             			
@@ -2828,14 +2769,7 @@ public class BasicHitFilterPanel extends JPanel {
            
 	    	int cnt=0;
             while( rset.next() )
-    		{	
-        		int cutoff = filterPanel.getAlign();
-        		if (cutoff>0) { 
-        			int hlen = rset.getInt(17); // CAS332 didnt fix when added bitscore; fails when Hcov is selected
-        			int halign = Math.abs(rset.getInt(9)-rset.getInt(8)+1);
-        			double align = ((double)halign/(double)hlen)*100.0;   			
-        			if (align < (double) cutoff) continue;
-        		}
+    		{	// CAS342 was computing hitCov, but is in database as prot_cov
     	        Object [] readBuffer = new Object[numStaticFields + numSetFields];
     	        
     	        for (int i=0; i<numStaticFields; i++) {
@@ -2934,17 +2868,10 @@ public class BasicHitFilterPanel extends JPanel {
 	}
 	// End database query
 	
-	// Columns for table
-	private String [] seqStaticColNames = null;
-	private String [] grpStaticColNames = null;
-	private String [] libColNames = null;
-	private String [] pvalColNames = null;
-
-	private boolean isGrpView=true;
-	
-	// main panel
+	/*************************************************************/
 	private FilterPanel filterPanel = null;
 	private JPanel alignPanel = null;
+	private JButton btnFindFile = null;
 	
 	// sub panels
 	private ColumnPanel colSeqPanel = null;
@@ -2955,11 +2882,21 @@ public class BasicHitFilterPanel extends JPanel {
 	private CountPanel countPanel = null;
 
 	private BasicHitTab theHitTab = null;
+	
 	private STCWFrame theMainFrame = null;
 	private MetaData metaData = null;
+	
 	private boolean hasGO=false;
-	private JButton btnFindFile = null;
+	
 	private int totalSeqHitPairs=0;
 	private String filters="";
 	private String norm="RPKM";
+	
+	// Columns for table
+	private String [] seqStaticColNames = null;
+	private String [] grpStaticColNames = null;
+	private String [] libColNames = null;
+	private String [] pvalColNames = null;
+
+	private boolean isGrpView=true;
 }

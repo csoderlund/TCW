@@ -179,7 +179,7 @@ public class AnnoOptionsPanel extends JPanel {
 		
 		// Rule 1
 		row = Static.createRowPanel();		
-		ntJLabel[0] = new JLabel("Rule 1: Use best hit frame if E-value <=");
+		ntJLabel[0] = new JLabel("  Rule 1: Best hit frame if E-value <=");
 		row.add(ntJLabel[0]);
 		row.add(Box.createHorizontalStrut(1));
 		txtHitEval  = Static.createTextField("0", NUM_LG_FIELD_WIDTH);
@@ -195,7 +195,7 @@ public class AnnoOptionsPanel extends JPanel {
 		
 	// Rule 2
 		row = Static.createRowPanel();	
-		ntJLabel[2] = new JLabel("Rule 2: Else use the longest ORF if the log ratio >");
+		ntJLabel[2] = new JLabel("  Rule 2: Longest ORF if the log ratio >");
 		row.add(ntJLabel[2]);	row.add(Box.createHorizontalStrut(1));
 		txtLenDiff = Static.createTextField("0", NUM_SM_FIELD_WIDTH);
 		row.add(txtLenDiff);
@@ -204,7 +204,7 @@ public class AnnoOptionsPanel extends JPanel {
 		
 	// Rule 3 Training
 		row = Static.createRowPanel();
-		ntJLabel[3] = new JLabel("Rule 3: Else use the best Markov score if the log ratio >");
+		ntJLabel[3] = new JLabel("  Rule 3: Best Markov score if the log ratio >");
 		row.add(ntJLabel[3]);	
 		row.add(Box.createHorizontalStrut(1));
 		txtMkDiff = Static.createTextField("0", NUM_SM_FIELD_WIDTH);

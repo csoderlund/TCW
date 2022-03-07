@@ -7,14 +7,12 @@
 package sng.viewer.panels.seqTable;
 
 import java.io.Serializable;
-import java.util.Vector;
 
 import sng.database.Globals;
 import sng.database.MetaData;
 import sng.util.FieldMapper;
 import sng.viewer.STCWFrame;
 import util.database.Globalx;
-import util.methods.Out;
 
 public class FieldSeqData implements Serializable
 {	
@@ -94,25 +92,25 @@ public class FieldSeqData implements Serializable
     public static final int FIRST_BEST_TAXO_FIELD		= 3008;
     public static final int FIRST_BEST_EVALUE_FIELD 	= 3009;
     public static final int FIRST_BEST_BIT_SCORE_FIELD 	= 3010;
-    public static final int FIRST_BEST_PERCENT_IDENT		= 3011;
+    public static final int FIRST_BEST_PERCENT_IDENT	= 3011;
     public static final int FIRST_BEST_ALIGN_LEN_FIELD 	= 3012;
     public static final int FIRST_BEST_CTG_START_FIELD	= 3013;
-    public static final int FIRST_BEST_CTG_END_FIELD		= 3014;
-    public static final int FIRST_BEST_CTG_COV_FIELD		= 3015;
+    public static final int FIRST_BEST_CTG_END_FIELD	= 3014;
+    public static final int FIRST_BEST_CTG_COV_FIELD	= 3015;
     public static final int FIRST_BEST_PRO_START_FIELD	= 3016;
-    public static final int FIRST_BEST_PRO_END_FIELD		= 3017;
-    public static final int FIRST_BEST_PRO_COV_FIELD		= 3018;
-    public static final int FIRST_BEST_KEGG 				= 3019;
-    public static final int FIRST_BEST_PFAM 				= 3020;
+    public static final int FIRST_BEST_PRO_END_FIELD	= 3017;
+    public static final int FIRST_BEST_PRO_COV_FIELD	= 3018;
+    public static final int FIRST_BEST_KEGG 			= 3019;
+    public static final int FIRST_BEST_PFAM 			= 3020;
     public static final int FIRST_BEST_EC 				= 3021;
     public static final int FIRST_BEST_GO 				= 3022;
-    public static final int FIRST_BEST_INTERPRO 			= 3023;
+    public static final int FIRST_BEST_INTERPRO 		= 3023;
     
-    public static final int OVER_BEST_UNIPROT_FIELD 		= 3030;
+    public static final int OVER_BEST_UNIPROT_FIELD 	= 3030;
     public static final int OVER_BEST_DESCRIPTION		= 3031;
     public static final int OVER_BEST_SPECIES			= 3032;
     public static final int OVER_BEST_DBTYPE_FIELD		= 3033;
-    public static final int OVER_BEST_TAXO_FIELD			= 3034;
+    public static final int OVER_BEST_TAXO_FIELD		= 3034;
     public static final int OVER_BEST_EVALUE_FIELD 		= 3035;
     public static final int OVER_BEST_BIT_SCORE_FIELD 	= 3036;
     public static final int OVER_BEST_PERCENT_IDENT		= 3037;
@@ -182,7 +180,7 @@ public class FieldSeqData implements Serializable
     public static final String GROUP_DESC_CNTS 		= "Counts of species, minimal coverage, SwissProt, TrEMBL, NCBI and NT";
     
     // The three BEST are grouped together. So these names are only used for grouping
-    public static final String GROUP_NAME_FIRST_BEST = "Best Hit";
+    public static final String GROUP_NAME_FIRST_BEST = "Annotation";
     public static final String GROUP_DESC_FIRST_BEST = "Best Bit-score, Best Annotation, Best with GO";
     
     public static final String GROUP_NAME_OVER_BEST 	= "Best Annotation";

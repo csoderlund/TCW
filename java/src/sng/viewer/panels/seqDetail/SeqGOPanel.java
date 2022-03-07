@@ -8,7 +8,6 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedWriter;
@@ -28,7 +27,6 @@ import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
@@ -64,15 +62,11 @@ import util.file.FileC;
 import util.file.FileWrite;
 
 /***********************************************
- * From ContigOverviewPanel (Sequence Details), this contains
- * code for GO button in top row
+ * From SeqTopRowTab (Sequence Details), this contains code for GO button in top row
  */
 
 public class SeqGOPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
-	
-	private static final String helpHTML =  	Globals.helpDir + "DetailGoPanel.html";
-	private static final String helpGoHTML =  	Globals.helpDir + "goHelp/index.html";
 	
 	static final private int SHOW_ASSIGNED_GO = SeqTopRowTab.SHOW_ASSIGNED_GO;
 	static final private int SHOW_ALL_GO = 		SeqTopRowTab.SHOW_ALL_GO;
@@ -133,23 +127,6 @@ public class SeqGOPanel extends JPanel {
 		toolPanel.add(btnTableShow);					toolPanel.add(Box.createHorizontalStrut(1));
 		
 		toolPanel.add(btnTableExport);					toolPanel.add(Box.createHorizontalStrut(1));
-
-	/****** Help ***/
-		JButton btnGoHelp = Static.createButtonHelp("GO Help", true);
-		btnGoHelp.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(getInstance(), "GO Help", helpGoHTML);
-			}
-		});
-		toolPanel.add( Box.createHorizontalGlue() );
-		JButton btnHelp = Static.createButtonHelp("Help2", true);
-		btnHelp.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(theParentFrame, "Sequence GO Help", helpHTML);
-			}
-		});
-		toolPanel.add(btnGoHelp);						toolPanel.add(Box.createHorizontalStrut(2));
-		toolPanel.add(btnHelp);							toolPanel.add(Box.createHorizontalStrut(5));
 		
 		toolPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE,(int)toolPanel.getPreferredSize().getHeight()));	
 	}
@@ -229,7 +206,7 @@ public class SeqGOPanel extends JPanel {
 				showExportGOtreeSelected(GOtree.PATHS, GOtree.DO_POPUP, btnSelShow);
 			}
 		}));	
-		btnSelShow = Static.createButton("Show...", false);
+		btnSelShow = Static.createButtonPopup("Show...", false);
 		btnSelShow.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 selPopup.show(e.getComponent(), e.getX(), e.getY());
@@ -281,7 +258,7 @@ public class SeqGOPanel extends JPanel {
 			}
 		}));	
 		
-		btnSelExport = Static.createButton("Export...", false);
+		btnSelExport = Static.createButtonFile("Export...", false);
 		btnSelExport.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 selExport.show(e.getComponent(), e.getX(), e.getY());
@@ -304,7 +281,7 @@ public class SeqGOPanel extends JPanel {
 				}
 			}));
 		}
-		btnTableShow = Static.createButton("Show...", true);
+		btnTableShow = Static.createButtonPopup("Show...", true);
 		btnTableShow.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 tablePopup.show(e.getComponent(), e.getX(), e.getY());
@@ -324,14 +301,14 @@ public class SeqGOPanel extends JPanel {
 				showExportTable(GOtree.DO_EXPORT_GO, btnTableExport);
 			}
 		}));
-		btnTableExport = Static.createButton("Export...", true);
+		btnTableExport = Static.createButtonFile("Export...", true);
 		btnTableExport.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 tableExport.show(e.getComponent(), e.getX(), e.getY());
             }
         });
 	}
-	private SeqGOPanel getInstance() {return this;}
+	
 	/**********************************************************************/
 	private void createMainPanel() {
 		String textArea = makeTextArea();

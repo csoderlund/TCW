@@ -4,6 +4,7 @@ package cmp.viewer.align;
  * to align with PairAlignPanel
  */
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -58,8 +59,12 @@ public class Pair3ViewPanel extends JPanel {
 		
 		add(Box.createVerticalStrut(10));
 		
-		createButtonPanel();
-		add(buttonPanel);
+		JPanel topRow = createTopButton();
+		add(topRow);
+		add(Box.createVerticalStrut(5));
+		
+		JPanel lowRow = createAlignButton();
+		add(lowRow);
 		add(Box.createVerticalStrut(5));
 		
 		createHeaderPanel();
@@ -69,8 +74,7 @@ public class Pair3ViewPanel extends JPanel {
 		createMainPanel();
 		add(scroller);
 	}
-	private void createButtonPanel() {
-		buttonPanel = Static.createPagePanel();
+	private JPanel createTopButton() {
 		JPanel theRow = Static.createRowPanel();
 		
 		btnShowType = Static.createButton("Line", true);
@@ -117,7 +121,7 @@ public class Pair3ViewPanel extends JPanel {
 				refreshPanels();
 			}
 		});	
-		theRow.add(menuZoom);
+		theRow.add(menuZoom);						theRow.add(Box.createHorizontalGlue());
 		
 		// Help
 		final JPopupMenu popup = new JPopupMenu();
@@ -144,12 +148,9 @@ public class Pair3ViewPanel extends JPanel {
                 popup.show(e.getComponent(), e.getX(), e.getY());
             }
         });
-		theRow.add(Box.createHorizontalStrut(180)); // Glue does not work with Preferred size, but expands page w/o it
 		theRow.add(btnHelp);
 		
 		if(nParentRow >= 0) { // CAS341 if -1, showing multiple rows so no Next/Prev
- 	 	   JPanel rowChangePanel = Static.createRowPanel();
- 	 	   
  	 	   btnPrevRow = Static.createButton(Globals.prev, true);
  	 	   btnPrevRow.addActionListener(new ActionListener() {
  	 		   public void actionPerformed(ActionEvent arg0) {
@@ -162,12 +163,13 @@ public class Pair3ViewPanel extends JPanel {
  	 			   getNextRow(nParentRow+1);
  	 		   }
  	 	   });
- 	 	   rowChangePanel.add(btnPrevRow);
- 	 	   rowChangePanel.add(btnNextRow);
- 	 	   
- 	 	   theRow.add(rowChangePanel);
+ 	 	   theRow.add(btnPrevRow);
+ 	 	   theRow.add(btnNextRow);
 		 }
-	// Row2  Align functions
+		theRow.setMaximumSize(new Dimension(Integer.MAX_VALUE,(int)theRow.getPreferredSize ().getHeight()));
+		return theRow;
+	}
+	private JPanel createAlignButton() {
 		JPanel theRow2 = Static.createRowPanel();
 		theRow2.add(Static.createLabel("Align: ", true));
 		theRow2.add(Box.createHorizontalStrut(2));
@@ -212,12 +214,8 @@ public class Pair3ViewPanel extends JPanel {
 			if (utr3_1<=Share.minAlignLen || utr3_2<=Share.minAlignLen)
 				btnNTalign.setEnabled(false);
 		}
-		
-		buttonPanel.add(theRow);
-		buttonPanel.add(theRow2);
-		
-		buttonPanel.setMaximumSize(buttonPanel.getPreferredSize()); 
-		buttonPanel.setMinimumSize(buttonPanel.getPreferredSize()); 
+		theRow2.setMaximumSize(new Dimension(Integer.MAX_VALUE,(int)theRow2.getPreferredSize ().getHeight()));
+		return theRow2;
 	}
 	private void createHeaderPanel() {
 		headerPanel = Static.createRowPanel();
@@ -441,7 +439,7 @@ public class Pair3ViewPanel extends JPanel {
 	}
    
 /********************************************************************/
-    private JPanel buttonPanel = null, mainPanel = null, headerPanel = null;
+    private JPanel mainPanel = null, headerPanel = null;
     
 	private JScrollPane scroller = null;
 	private JTextField alignHeader = null;

@@ -73,7 +73,7 @@ public class ScoreMulti {
 			 int nGap=0;
 			 for (int r=1; r<nRows; r++) {
 				 seqs[r] = alignedSeq[r].toCharArray();
-				 
+				
 				 for (int i=0; i<nCols   && seqs[r][i]==gapCh; i++) seqs[r][i]=BORDER;
 				 for (int i=nCols-1; i>0 && seqs[r][i]==gapCh; i--) seqs[r][i]=BORDER;
 				 
@@ -211,7 +211,7 @@ public class ScoreMulti {
 			 char [] alphabet = aa.toCharArray();
 			 int Kaa = aa.length();
 			 
-			 double [][] p = new double [Lcols][Kaa]; // probablity of each AA per column
+			 double [][] p = new double [Lcols][Kaa]; // probability of each AA per column
 			 for (int c=0; c<Lcols; c++)
 				 for (int a=0; a<Kaa; a++) p[c][a]=0.0;
 			 

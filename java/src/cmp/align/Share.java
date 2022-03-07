@@ -82,7 +82,7 @@ public class Share {
 	 // recreates alignSeq from gapMap and original sequence 
 	public static String uncompress(String gapMap, String seq) {
 		try {
-			if (seq.endsWith(stopStr)) seq = seq.substring(0, seq.length()-1); // CAS313 Remove first, or is shown
+			// CAS342 removed above if (seq.endsWith(stopStr)) seq = seq.substring(0, seq.length()-1); // CAS313 Remove first, or is shown
 			if (gapMap.equals("0") || gapMap.equals("")) return seq;
 			
 			String [] tok = gapMap.split(":");

@@ -47,7 +47,6 @@ public class runMTCWMain {
 	static public int     msaScore1=BI,              msaScore2=BI; // defaults repeated in MultiAlignData
 	static public String  strScore1=Globals.MSA.SoP, strScore2=Globals.MSA.Wep;
 	static public boolean bNSoP=true;   // if true, normalize (default)
-	static public boolean bRmMSA=false; // Remove MSA alignments on ReDo - developer only
 	
 	public static void main(String[] args) {
 		try {
@@ -80,8 +79,6 @@ public class runMTCWMain {
 			System.out.println("  	  -M2 <string>, where <string> is a valid MstatX method.");
 			System.out.println("    MstatX methods: trident, wentropy, mvector, jensen, kabat, gap");
 			System.out.println("      See agcol.arizona.edu/software/TCW/doc/mtcw/UserGuide.html for more info");
-			System.out.println("  Developer only:"); 
-			System.out.println("    -x  when Run Stats with 'Compute MSA and Score' - remove existing MSAs first");
 			System.exit(0);
 		}
 	}
@@ -123,15 +120,10 @@ public class runMTCWMain {
 			System.out.println("MSA score2 with mStatx " + strScore2);
 			isMstatX(strScore2);
 		}
-	/*  CAS313  SoP */		
-	if (hasArg(args, "-nSoP")) {
-		bNSoP=false;
-		System.out.println("Do not normalize SoP scores ");
-	}
-/*  CAS312  developer */		
-		if (hasArg(args, "-x")) {
-			bRmMSA=true;
-			System.out.println("Remove MSA if 'Compute MSA' when MSA exist ");
+		/*  CAS313  SoP */		
+		if (hasArg(args, "-nSoP")) {
+			bNSoP=false;
+			System.out.println("Do not normalize SoP scores ");
 		}
 	}
 	static boolean hasArg(String [] args, String arg) {

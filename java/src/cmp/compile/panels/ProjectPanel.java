@@ -330,8 +330,8 @@ public class ProjectPanel extends JPanel {
     		selectPanel.add(btnClust);
     		selectPanel.add(Box.createVerticalStrut(5));
     		
-    		btnPair = Static.createCheckBox("Clusters and Pairs from database", false, bPairs);
-    		selectPanel.add(btnPair);
+    		btnClustAndPair = Static.createCheckBox("Clusters and Pairs from database", false, bPairs);
+    		selectPanel.add(btnClustAndPair);
     		selectPanel.add(Box.createVerticalStrut(5));
     		
     		btnDB = Static.createCheckBox("mTCW database", false, bDB);
@@ -359,12 +359,12 @@ public class ProjectPanel extends JPanel {
     		selectPanel.add(btnPairDir);
 	        selectPanel.add(Box.createVerticalStrut(5));
 	               
-	        btnBlast = Static.createCheckBox("Hit files from disk (" + blastDir + ")", false, b1);
-            selectPanel.add(btnBlast);
+	        btnHitDir = Static.createCheckBox("Hit files from disk (" + blastDir + ")", false, b1);
+            selectPanel.add(btnHitDir);
     	    selectPanel.add(Box.createVerticalStrut(5));
             	
-        	btnAll = Static.createCheckBox("All files from disk for this mTCW project", false, true);
-        	selectPanel.add(btnAll);		
+        	btnAllDir = Static.createCheckBox("All files from disk for this mTCW project", false, true);
+        	selectPanel.add(btnAllDir);		
          	selectPanel.add(Box.createVerticalStrut(5));
                     		
          	JPanel buttonPanel = Static.createRowPanel();
@@ -428,7 +428,7 @@ public class ProjectPanel extends JPanel {
     		catch (Exception e){ErrorReport.reportError(e, "Cannot delete database " + getDBName());}
     	}
       
-    	public void removeClustAndMethods() { // CAS326 added
+    	public void removeClust() { // CAS326 added
     		try {
     			DBinfo info = theCompilePanel.getDBInfo();
     			if (info==null) {
@@ -443,7 +443,7 @@ public class ProjectPanel extends JPanel {
     			
     			DBConn mDB = runMTCWMain.hosts.getDBConn(getDBName());
     			
-    			removeClust(mDB, info.getMethodPrefix());
+    			removeClust(mDB, info.getMethodPrefix(), true /* delete method from pairwise */);
  
     			mDB.executeUpdate("update pairwise set hasGrp=0, hasBBH=0");
     			
@@ -456,7 +456,7 @@ public class ProjectPanel extends JPanel {
     		}
     		catch (Exception e){ErrorReport.reportError(e, "Cannot remove clusters " + getDBName());}
     	}
-    	public void removePairsAndMethods() {
+    	public void removeClustAndPair() {
     		try {
     			DBinfo info = theCompilePanel.getDBInfo();
     			if (info==null) {
@@ -469,18 +469,16 @@ public class ProjectPanel extends JPanel {
     			Out.PrtSpMsg(0,"Remove clusters and pairs from database ");
     			DBConn mDB = runMTCWMain.hosts.getDBConn(getDBName());
     			
-    			
     			// Clusters
     			Out.PrtSpMsg(1, "Remove clusters....");
-    			removeClust(mDB, info.getMethodPrefix());
+    			removeClust(mDB, info.getMethodPrefix(), false /* do not delete method from pairs*/);
     			
     			// Pairs
     			Out.PrtSpMsg(1, "Remove pairs....");
-    			mDB.executeUpdate("TRUNCATE TABLE pairwise"); 
-    			mDB.executeUpdate("TRUNCATE TABLE pairMap");
+    			mDB.tableDelete("pairwise"); 
+    			mDB.tableDelete("pairMap");
     			mDB.executeUpdate("update unitrans set nPairs=0");  
-    			
-    			new Summary(mDB).removeSummary();      
+    			     
     			mDB.executeUpdate("update info set kaksInfo='', pairInfo='', aaInfo='', ntInfo='', "
     					+ "hasMA=0, hasPCC=0"); // CAS310 add these two
     			info.clearCntKeys(); // CAS340
@@ -491,27 +489,30 @@ public class ProjectPanel extends JPanel {
     		catch(Exception e) {ErrorReport.prtReport(e, "Error removing pairs and methods from database");}
     	}
     	// Cluster removal is also in MethodPanel.removeFromDB
-    	private void removeClust(DBConn mDB, String [] prefixes) {
+    	private void removeClust(DBConn mDB, String [] prefixes, boolean bPairCol) {
     		try {
-    			mDB.executeUpdate("TRUNCATE TABLE pog_method");
-    			mDB.executeUpdate("TRUNCATE TABLE pog_groups");
-    			mDB.executeUpdate("TRUNCATE TABLE pog_members");
-    			mDB.executeUpdate("TRUNCATE TABLE pog_scores");
+    			mDB.tableDelete("pog_method"); // CAS342 use tableDelete
+    			mDB.tableDelete("pog_groups");
+    			mDB.tableDelete("pog_members");
+    			mDB.tableDelete("pog_scores");		
     			
     			int nSeq = mDB.executeCount("select count(*) from unitrans");
     			Out.PrtSpMsg(1, "Remove method columns from " + nSeq + " sequence table rows...");
     			for (String methodPrefix: prefixes) { 
     				mDB.tableCheckDropColumn("unitrans", methodPrefix);
     			}
+    			mDB.executeUpdate("update info set hasMA=0, allMethods='', allTaxa=''");// CAS330 hasMA; CAS342 allMethods..
+    			new Summary(mDB).removeSummary(); 
     			
-    			int nPair = mDB.executeCount("select count(*) from pairwise");
-    			Out.PrtSpMsg(1, "Remove method columns from " + nPair + " pair table rows...");
-    			
-    			for (String methodPrefix: prefixes) { // truncate pairwise before remove prefix
-    				mDB.tableCheckDropColumn("pairwise", methodPrefix);
+    			if (bPairCol) {
+	    			int nPair = mDB.executeCount("select count(*) from pairwise");
+	    			Out.PrtSpMsg(1, "Remove method columns from " + nPair + " pair table rows...");
+	    			
+	    			for (String methodPrefix: prefixes) { // truncate pairwise before remove prefix
+	    				mDB.tableCheckDropColumn("pairwise", methodPrefix);
+	    			}
     			}
     			
-    			mDB.executeUpdate("update info set hasMA=0");// CAS330 add hasMA
     		}
     		catch(Exception e) {ErrorReport.prtReport(e, "Error removing pairs and methods from database");}
     	}
@@ -538,7 +539,7 @@ public class ProjectPanel extends JPanel {
     		}
     		catch(Exception e) {ErrorReport.prtReport(e, "Error removing directories");}
     	}
-    	private void removeBlast() {
+    	private void removeHitDir() {
     		try {
     			boolean ret = UserPrompt.showConfirm("Remove...", 
     					"Remove hit files\n");
@@ -576,28 +577,28 @@ public class ProjectPanel extends JPanel {
     	public void doOp() {
     		if (btnDB.isSelected()) {
     			removeDB();
-    			btnPair.setSelected(false);
+    			btnClustAndPair.setSelected(false);
     		}
-    		if (btnAll.isSelected()) {
+    		if (btnAllDir.isSelected()) {
     			removeProject();
     			btnPairDir.setEnabled(false);
-    			btnBlast.setEnabled(false);
+    			btnHitDir.setEnabled(false);
     		}
     		if (btnClust.isSelected()) {
-    			removeClustAndMethods();
+    			removeClust();
     		}
-    		if (btnPair.isSelected()) {
-    			removePairsAndMethods();
+    		if (btnClustAndPair.isSelected()) {
+    			removeClustAndPair();
     		}
     		if (btnPairDir.isSelected()) {
     			removePairDir();
     		}
-    		if (btnBlast.isSelected()) {
-    			removeBlast();
+    		if (btnHitDir.isSelected()) {
+    			removeHitDir();
     		}		
     	}
-    	JCheckBox btnClust = null, btnPair = null, btnPairDir = null;
-    	JCheckBox btnDB = null, btnBlast = null, btnAll = null;
+    	JCheckBox btnClust = null, btnClustAndPair = null, btnPairDir = null;
+    	JCheckBox btnDB = null, btnHitDir = null, btnAllDir = null;
     	JButton btnOK = null, btnCancel = null;
     	int nMode = -1;
     } // end RemoveType

@@ -289,6 +289,8 @@ public class DBConn
 	   		   rs.close();
 	   		   return;
 	   	   }
+	   	   executeUpdate ("TRUNCATE TABLE " + table); // CAS342 this resets auto-increment
+	   	   /**
 	       executeUpdate ("DELETE FROM " + table);
 	       
 	       rs = executeQuery("SELECT COUNT(*) FROM " + table);
@@ -296,10 +298,11 @@ public class DBConn
 	       int cnt = rs.getInt(1);
 	       rs.close();
 	    
-	       executeUpdate ("ALTER TABLE " + table + " AUTO_INCREMENT = " + cnt+1);   
+	       executeUpdate ("ALTER TABLE " + table + " AUTO_INCREMENT = " + cnt+1); 
+	       **/  
 	    }
 	    catch(Exception e) {
-	    		System.err.println("*** Database is probably corrupted");
+	    	System.err.println("*** Database is probably corrupted");
 	     	System.err.println("*** MySQL finds table but then cannot delete from it.");
 		    ErrorReport.die(e,"Fatal error deleting table " + table);
 		    System.exit(-1);

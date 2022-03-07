@@ -4,7 +4,6 @@ package sng.viewer.panels.align;
  */
 import javax.swing.JOptionPane;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -39,7 +38,6 @@ import sng.database.Globals;
 import util.align.AlignPairAA;
 import util.database.Globalx;
 import util.methods.ErrorReport;
-import util.methods.Out;
 import util.methods.Static;
 import util.ui.MenuMapper;
 import util.ui.UIHelpers;
@@ -49,7 +47,6 @@ public class PairViewPanel extends JPanel implements ClipboardOwner
 {		
 	public static int GAP = 12;
 	public static int EXTEND = 2;
-	private final String helpHTML = Globals.helpDir + "Align.html";
 	
 	public void lostOwnership(Clipboard clipboard, Transferable contents) { }
 	
@@ -203,15 +200,8 @@ public class PairViewPanel extends JPanel implements ClipboardOwner
 				revalidate(); 
 			}
 		});
-		
-		JButton btnHelp = Static.createButtonHelp("Help2", true);
-		btnHelp.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(getInstance(),"Seq-Hit Alignment", helpHTML);
-			}
-		});
-			
-		btnAlign = Static.createButtonMenu("Align...", true); 
+	
+		btnAlign = Static.createButtonPopup("Align...", true); 
 		btnAlign.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				actionAlignPopup();
@@ -229,15 +219,12 @@ public class PairViewPanel extends JPanel implements ClipboardOwner
             topPanel.add(Static.createLabel(Globals.select));	topPanel.add( Box.createHorizontalStrut(3) ); 
             topPanel.add(btnAlign);					topPanel.add( Box.createHorizontalStrut(15) );
             topPanel.add( Box.createHorizontalGlue() );
-            topPanel.add(btnHelp);						topPanel.add( Box.createHorizontalStrut(5) );
         }
 	    topPanel.setMaximumSize( new Dimension ( Integer.MAX_VALUE, (int)topPanel.getPreferredSize().getHeight() ) );
 	    topPanel.setBackground(Color.WHITE);
 	    
 	    return topPanel;
 	}
-	
-	private PairViewPanel getInstance() {return this;}
 	
 	private TreeSet<String> getSelectedSeqIDs ( ) {
 		TreeSet<String> selection = new TreeSet<String> ();
@@ -584,10 +571,8 @@ public class PairViewPanel extends JPanel implements ClipboardOwner
     		btnOK.setMaximumSize(btnCancel.getPreferredSize());
     		btnOK.setMinimumSize(btnCancel.getPreferredSize());
     		
-    	
-            JPanel affinePanel = new JPanel();
-            affinePanel.setLayout(new BoxLayout(affinePanel, BoxLayout.LINE_AXIS));
-            affinePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            JPanel affinePanel = Static.createRowPanel();
+           
             affinePanel.add(Box.createHorizontalStrut(15));
             affinePanel.add(new JLabel("Penalties:")); affinePanel.add(Box.createHorizontalStrut(5));
             affinePanel.add(gapLabel);
@@ -595,9 +580,7 @@ public class PairViewPanel extends JPanel implements ClipboardOwner
             affinePanel.add(extendLabel);
             affinePanel.add(txtExtend);					affinePanel.add(Box.createHorizontalGlue());
 	
-    		JPanel selectPanel = new JPanel();
-    		selectPanel.setLayout(new BoxLayout(selectPanel, BoxLayout.PAGE_AXIS));
-    		selectPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    		JPanel selectPanel = Static.createPagePanel();
     		selectPanel.add(btnOrig);
     		selectPanel.add(new JSeparator());
     		selectPanel.add(Box.createVerticalStrut(5));
@@ -607,15 +590,11 @@ public class PairViewPanel extends JPanel implements ClipboardOwner
 	        selectPanel.add(affinePanel);
 	        selectPanel.add(new JSeparator());
 	        
-    		JPanel buttonPanel = new JPanel();
-    		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
-    		buttonPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    		JPanel buttonPanel = Static.createRowPanel();
     		buttonPanel.add(btnOK);						buttonPanel.add(Box.createHorizontalStrut(20));
     		buttonPanel.add(btnCancel);					buttonPanel.setMaximumSize(buttonPanel.getPreferredSize());
   
-           	JPanel mainPanel = new JPanel();
-    		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
-    		mainPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+           	JPanel mainPanel = Static.createPagePanel();
     		mainPanel.add(selectPanel); 				mainPanel.add(Box.createVerticalStrut(15));
     		mainPanel.add(buttonPanel);
     		

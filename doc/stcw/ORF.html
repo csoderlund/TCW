@@ -35,8 +35,8 @@ every transcript. This document has been updated for v3.3.4.
 		<ttp>runSingleTCW</ttp> has an <ttc>Option</ttc> menu that allows the user to 
 		set the ORF options, which is shown on the right. 
 
-		<p>This ORF finder algorithm was designed to find the 'best' ORF for input into <ttp>runMultiTCW</ttp>. However, a file of all the 'good' ORFs is output
-		(see <a href="#out">Output files</a>).</p>
+		<p>This ORF finder algorithm was designed to find the 'best' ORF for input into <ttp>runMultiTCW</ttp>. 
+		However, a file of all the 'good' ORFs is output (see <a href="#out">Output files</a>).</p>
 
 	<td style="width: 50%">
 		<a href="img/ORFfinderOptions.png">
@@ -65,7 +65,31 @@ When comparing two ORFs, the following rules are applied in order.
 <p>&#9758; <ttl>Rule 1: Use best hit frame if E-value &lt; N or %HitSim&gt;=M.</ttl>
 
 
-<p>&#9758; <ttl>Rule 2: Else use the longest ORF frame if the log ratio &gt; Cutoff</ttl>.
+<p>&#9758; <ttl>Rules 2: Compute lgLen=log ratio of the lengths and 3: lgMk=log ratio of Markov scores. 
+<br>&nbsp;&nbsp;Evaluate the following in order:
+<ol type=A>
+<li><ttl>If (lgLen>len-cutoff && (len1>100 || len2>100)) use ORF with longest length
+<li><ttl>If (lgMK>MK-cutoff && (Mk1>10.0 || Mk2>10.0)) use ORF with best Markov score
+<li><ttl>If (lgLen>len-cutoff) use ORF with longest length
+<li><ttl>If (lgMK>MK-cutoff)  use ORF with best Markov score
+</ol>
+<p>&#9758; <ttl>Rule 4: Use the ORF with start and stop codons</ttl>.
+
+<p>&#9758; <ttl>If all else fails:</ttl> Use a poor hit frame or the longest ORF.
+
+<p>The Markov model is trained using either of following:
+<ul>
+	<li><ttl>Train with Best Hits (E-value &lt;= N or %HitSim &gt;= M). Minimum Set [default 500] </ttl>
+		<br>There must be at least <ttl>Minimum Set</ttl> sequences that pass 
+		the <ttl>E-value</ttl> and <ttl>%Sim</ttl> 
+		cutoffs, otherwise Rule 3 is ignored. The training set is created from the exact nucleotide regions of 
+		hit alignments from the top longest ORFs and best hits.
+	<br>&nbsp;	
+	<li><ttl>Train with CDS file [default none]</ttl>
+		<br>The file name of a FASTA file of nucleotide coding sequences.
+</ul>
+
+<p>Considering log ratio cutoffs using length as an example:
 <table class="tablex">
 <tr>
 	<td>
@@ -87,22 +111,6 @@ When comparing two ORFs, the following rules are applied in order.
 </tr>
 </table>
 
-
-<p>&#9758; <ttl>Rule 3: Else use the best Markov score if the log ratio &gt; Cutoff</ttl> 
-<br>It is trained using either of following:
-<ul>
-	<li><ttl>Train with Best Hits (Rule 1). Minimum Set [default 500] </ttl>
-		<br>There must be at least <ttl>Minimum Set</ttl> sequences that pass 
-		the <ttl>E-value</ttl> and <ttl>%Sim</ttl> 
-		cutoffs, otherwise Rule 3 is ignored. The training set is created from the exact nucleotide regions of hit alignments.
-	<br>&nbsp;	
-	<li><ttl>Train with CDS file [default none]</ttl>
-		<br>The file name of a fasta file of nucleotide coding sequences.
-</ul>
-
-<p>&#9758; <ttl>Rule 4: Else use the ORF with start and stop codons</ttl>.
-
-<p>&#9758; <ttl>If all else fails:</ttl> Use a poor hit frame or the longest ORF.
 
 <h4>Markov training set</h4> 
 The default requires at least 500 sequences (<ttc>Minimum Set</ttc>). The algorithm
@@ -186,26 +194,27 @@ The <ttp>TCW ORF finder</ttp> prints out various summary statistics to the <ttx>
 and the top part of the following is in the <ttl>Overview</ttl>. The results below are from a RNA-seq assembled
 dataset of sequences.
 
-<pre style="font-size: 12px">  
-ORF Stats:   Average length 583
-    Has Hit            36,574  (75.8%)    Both Ends   12,499  (25.9%)
-    Is Longest ORF     28,955  (60.0%)    ORF>=300    23,880  (49.5%)    MultiFrame     6,425  (13.3%)
-    Markov Best Score  34,283  (71.0%)    ORF=Hit     17,700  (36.7%)    Stops in Hit   4,440   (9.2%)
-    All of the above   20,834  (43.2%)     with Ends   3,573   (7.4%)    >=9 Ns in ORF    596   (1.2%)
+<pre style="font-size: 12px"> 
+ORF Stats:   Average length 1272
+	Has Hit            52,854  (99.0%)    Both Ends    40,855  (76.5%)    Multi-frame    12,988  (24.3%)
+	Is Longest ORF     41,639  (78.0%)    ORF>=300     48,891  (91.5%)    Stops in Hit    7,849  (14.7%)
+	Markov Best Score  46,046  (86.2%)    ORF=Hit      32,253  (60.4%)    >=9 Ns in ORF       0     (0%)
+	All of the above   38,628  (72.3%)      with Ends  28,922  (54.2%)
 
-    Additional ORF info                      For seqs with hit  36,580  (75.8%)     Hit w/good coverage  5,560  (11.5%)
-    Markov Good Frame    36,075  (74.7%)     Longest & Markov   20,834  (57.0%)     Longest & Markov     4,220  (75.9%)
-    ORF=Hit              17,700  (36.7%)     Is Longest ORF     23,451  (64.1%)     Is Longest ORF       4,401  (79.2%)
-    ORF>Hit              12,506  (25.9%)     Markov Best Score  28,464  (77.8%)     Markov Best Score    5,105  (91.8%)
-    ORF~Hit               5,571  (11.5%)     Markov Good Frame  30,127  (82.4%)     Markov Good Frame    5,228  (94.0%)
-    ORF>Hit & HasEnds     2,543   (5.3%)     Has Start & Stop    9,376  (25.6%)     Has Start & Stop     4,250  (76.4%)
-    Has Start|Stop       38,822  (80.4%)     Not hit frame                    6     ORF=Hit & HasEnds    3,316  (59.6%)
+  Additional ORF info                      For seqs with hit   52,859  (99.0%)     ORF=Hit with Ends   28,922  (54.2%)
+	One End             52,328  (98.0%)      Both Ends          40,717  (77.0%)      ORF>=300           28,012  (96.9%)
+	Markov Good Frame   47,700  (89.3%)      Markov Good Frame  47,398  (89.7%)      Markov Good Frame  27,792  (96.1%)
+	ORF=Hit             32,253  (60.4%)      Markov Best Score  45,724  (86.5%)      Markov Best Score  27,353  (94.6%)
+	ORF~Hit              7,488  (14.0%)      Is Longest ORF     41,329  (78.2%)      Is Longest ORF     23,328  (80.7%)
+	ORF>Hit             11,827  (22.1%)      Longest & Markov   38,628  (73.1%)      Longest & Markov   22,776  (78.7%)
+	  with Ends          4,878   (9.1%)      Not hit frame                    5      Sim>=90            28,399  (98.2%)
 
-Frame: 3(17.8%)  2(16.8%)  1(17.6%)  -1(16.4%)  -2(15.1%)  -3(16.4%)
+	Frame: 3(30.5%)  2(29.9%)  1(34.3%)  -1( 1.9%)  -2( 1.6%)  -3( 1.9%)
 
-Hit w/good coverage: hitCov >= 95 and sim >= 60
-Markov Best Score:   best score over all 6-frame ORFs
-Markov Good Frame:   score>0 and best over all RFs of selected ORF
+  Both Ends:           Has Start and Stop codon
+  ORF=Hit with ends:   ORF coordinates=Hit coordinates with ends
+  Markov Best Score:   Best score from best ORF for each of 6 frames
+  Markov Good Frame:   Score>0 and best score from 6 RFs of selected ORF
 </pre>
 <!-- ============== View =================== -->
 <a id="view"></a>
@@ -294,7 +303,7 @@ The <ttp>TransDecoder</ttp><sup>2</sup> Perl code for computing the reading fram
 training sets, so their scores tend to be different. They are the same +/-0.02 if either of the following
 is done: (1) Use the TransDecoder <ttx>longest_orfs.cds.top_500_longest</ttx> as the TCW <ttx>CDS file</ttx>
 and run <ttx>./execAnno &lt;project&gt; -f -r</ttx>.
-(2) Use the TCW <ttx>orfFiles/bestORFs.cds.fa</ttx> file is used as input to the TD <ttx>score_CDS_likelihood_all_6_frames.pl</ttx>
+(2) Use the TCW <ttx>orfFiles/bestORFs.cds.fa</ttx> file as input to the TD <ttx>score_CDS_likelihood_all_6_frames.pl</ttx>
 program. In either case, compare the TransDecoder <ttx>longest_orfs.cds.scores</ttx> (.p1 only) with the 
 TCW <ttx>orfFiles/bestORF.scores.txt</ttx> file, for the ORFs where the start and ends are the same.
 For example:

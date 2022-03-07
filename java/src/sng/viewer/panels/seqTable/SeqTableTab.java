@@ -82,7 +82,7 @@ public class SeqTableTab extends Tab
 		scroller.getViewport().setBackground(Color.WHITE);
 		UIHelpers.setScrollIncrements( scroller );
 		
-		JPanel toolBar = createToolbar ( );
+		JPanel toolBar = createTopButtons ( );
 		toolBar.setBackground(Color.WHITE);
 
 		JPanel sumRow = Static.createRowPanel();
@@ -121,7 +121,7 @@ public class SeqTableTab extends Tab
 	public FieldMapper getFieldMapper ( ) { return theFields; }
 	
 	// Setup the Button panel.  (Everything above the table.)	
-	private JPanel createToolbar ( )
+	private JPanel createTopButtons ( )
 	{
 		final JPanel toolbarPanel = Static.createRowPanel();
 		
@@ -137,7 +137,7 @@ public class SeqTableTab extends Tab
 		JButton btnRefresh = Static.createButton("Refresh Columns");
 		btnRefresh.addActionListener(refreshListener);	
 		
-		createToolTable();
+		createTopTable();
 		
 		btnHelp = Static.createButtonHelp("Help", true);
 		btnHelp.addActionListener(new ActionListener() {
@@ -148,19 +148,18 @@ public class SeqTableTab extends Tab
 
 		toolbarPanel.add( Box.createHorizontalStrut(5) );
 		toolbarPanel.add(select); 			toolbarPanel.add( Box.createHorizontalStrut(2) );
-		toolbarPanel.add( btnViewSeq ); 	toolbarPanel.add( Box.createHorizontalStrut(30) );
+		toolbarPanel.add( btnViewSeq ); 	toolbarPanel.add( Box.createHorizontalStrut(40) );
 		toolbarPanel.add(btnRefresh); 		toolbarPanel.add( Box.createHorizontalStrut(5) );
 		toolbarPanel.add(btnTable);			toolbarPanel.add( Box.createHorizontalStrut(5) );
 		
 		toolbarPanel.add( Box.createHorizontalGlue() );
-		toolbarPanel.add( Box.createHorizontalStrut(5) );
 		toolbarPanel.add( btnHelp );
-		toolbarPanel.setMaximumSize( new Dimension ( Integer.MAX_VALUE, 
-				(int)toolbarPanel.getPreferredSize ().getHeight() ) );		
+		toolbarPanel.add( Box.createHorizontalStrut(5) );
+		toolbarPanel.setMaximumSize( new Dimension ( Integer.MAX_VALUE, (int)toolbarPanel.getPreferredSize ().getHeight() ) );		
 		return toolbarPanel;
 	}
 	
-	private void createToolTable() {
+	private void createTopTable() {
 		final JPopupMenu tablepopup = new JPopupMenu();
 		
 		tablepopup.add(new JMenuItem(new AbstractAction("Show Column Stats") {
@@ -244,14 +243,12 @@ public class SeqTableTab extends Tab
 				}
 			}));
 		}
-		btnTable = new JButton("Table...");
-		btnTable.setBackground(Color.WHITE);
+		btnTable = Static.createButtonTable("Table...", true);
 		btnTable.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 tablepopup.show(e.getComponent(), e.getX(), e.getY());
             }
         });
-		btnTable.setEnabled(true);
 	}
 	
 	private void doRefreshColumns() {

@@ -113,8 +113,10 @@ public class MainTable extends MainTableSort {
 					}
 				}
 				// if there is a N-fold value <=-100000, this be wrong
-			 	boolean noDef = (colName.equals("Rstat") || colName.contains("/")  || colName.contains(":"))
-	    				? true : false;
+			 	boolean noDef = 
+			 		(colName.equals("Rstat") || colName.contains("/")  || colName.contains(":")
+			 				|| colName.contains("Markov")) // CAS342 
+	    			? true : false;
 			 	
 				double [] results = Stats.averages(colName, dArr, noDef);
 				

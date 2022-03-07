@@ -13,8 +13,8 @@
 
 There have been many improvements, but the following provides some recent critical points.
 <table>
-<tr><td><a href=#v341>v3.4.1</a><td>22-Jan-22<td><ttp>Assorted<td>More <ttp>viewMultiTCW</ttp> improvements
-<tr><td><a href=#v338>v3.3.9</a><td>27-Dec-21<td><ttp><ttp>runAS</ttp></ttp><td>Improved interface for full subset UniProt; updated Demo.
+<tr><td><a href=#v341>v3.4.2</a><td>08-Mar-22<td><ttp>Assorted<td>Make color of buttons consistent.
+<tr><td><a href=#v339>v3.3.9</a><td>27-Dec-21<td><ttp><ttp>runAS</ttp></ttp><td>Improved interface for full subset UniProt; updated Demo.
 <tr><td><a href=#v335>v3.3.5</a><td>04-Nov-21<td><ttp>viewSingle</ttp><td>log2FC TPM analysis 
 <tr><td><a href=#v334>v3.3.4</a><td>18-Oct-21<td><ttp>runSingle</ttp><td><ttl>ORF finder</ttl> improvements
 <tr><td><a href=#v331>v3.3.1</a><td>01-Sep-21<td><ttp>runSingle</ttp><td> Add Prune Hits algorithm
@@ -26,6 +26,56 @@ There have been many improvements, but the following provides some recent critic
 <tr><td><a href=#v318>v3.1.8</a><td>18-Mar-21<td><ttp>runAS</ttp><td>Changed the source of GO to the go-basic.obo file
 <tr><td><a href=#early>Earlier</a><td>2020<td>&nbsp;<td>&nbsp;
 </table>
+
+<a name=v342>
+<h4>v3.4.2 8-Mar-2022</h4>
+A few improvements and tiny little bug fixes.
+<p>General
+<ul>
+<li>Made all button colors consistent (see <a href=tour/colors.html>Colors<a>). 
+<li>Put all Help buttons on the upper right corner. 
+<li>Updated all documentation snapshots.
+</ul>
+
+<p><ttp>runSingleTCW</ttp>: 
+<ul><li><ttl>ORF Finder</ttl>
+<ul>
+<li>A few adjustments to the heuristics for choosing largest ORF versus best Markov score 
+when there is no good hit. 
+<li>There will be less ORF=Hit and more ORF&gt;Hit; 
+this is because if a hit does not have a Start or Stop codon, more ORFs are being extended then previously. 
+<li>Previously, if a hit ended at a Start codon but did not have a Stop, it would look upstream for the furthest
+5' Start. Now it uses the Start at the 5' end of the Hit.
+<li>A few changes to the ORF summary in <tt>anno.log</tt>.
+</ul>
+<li>Fixed slight round-off error for <ttl>Overview</ttl> ANNODB AVG %SIM.
+<br>To regenerate overview, execute <tt>./viewSingleTCW &lt;project name&gt; -o</tt>.
+</ul>
+
+<p><ttp>viewSingleTCW</ttp>: 
+<ul>
+<li><ttl>Overview</ttl>: Improved the <ttl>Reproduce</ttl> instructions.
+<li><ttl>Seq Table</ttl>: If the <ttl>Markov Score</ttl> column was displayed, the
+<ttl>Show Column Stats</ttl> gave all 0's for its statistics.
+<li><ttl>Seq Details</ttl>: (1) Added Help for the <ttl>Details</ttl> panel. (2) The file append was not working.
+<li><ttl>Basic AnnoDB Hits</ttl>: The %HitCov value was sometimes off by 1.
+<li><ttl>Basic GO Annotation</ttl>: The default minumum level to show was &gt;= 1.
+Level 0 is obsolete terms, which do occur, so the minimum level was changed to 0.
+</ul>
+
+<p><ttp>runMultiTCW</ttp>: 
+<ul>
+<li>Remove '--sensitive' from the DIAMOND default parameters. 
+<br>This makes a slight difference in the orthoMCL results, so <tt>projcmp/ex/orthoMCL.OM-4</tt> is updated.
+<li>The <ttc>Remove</ttc> "Clusters and Pairs" is faster.
+<li>For an AA-mTCW, the pairs AAlen1 and AAlen2 were getting length of 0, and now is the correct length.
+<li>The MSA redo had quite working in v3.1.3 and has been fixed. 
+</ul>
+
+<p><ttp>viewMultiTCW</ttp>: 
+<ul>
+<li>If a sequence had no hits, an error was written to mTCW.error.log (but it worked).
+</ul>
 
 <a name=v341>
 <h4>v3.4.1 22-Jan-2022</h4>

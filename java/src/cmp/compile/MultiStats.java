@@ -194,7 +194,7 @@ public class MultiStats {
 			infoObj.updateInfoKey("MSAscore2", score[1]); 
 			
 			// clear current scores
-			mDB.executeUpdate("TRUNCATE TABLE pog_scores");
+			mDB.tableDelete("pog_scores"); // CAS342 
 			mDB.executeUpdate("update pog_groups set score1=" + Globalx.dNoVal + ", score2=" + Globalx.dNoVal);
 			
 			PreparedStatement psG = mDB.prepareStatement(

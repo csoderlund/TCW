@@ -5,6 +5,7 @@ package cmp.viewer.groups;
  */
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -133,10 +134,9 @@ public class GrpQueryPanel extends JPanel {
 		
 		row.add(Box.createHorizontalGlue());
 		row.add(btnHelp);
+		row.setMaximumSize(new Dimension(Integer.MAX_VALUE,(int)row.getPreferredSize ().getHeight()));
 		
 		buttonPanel.add(row);
-		buttonPanel.setMaximumSize(buttonPanel.getPreferredSize());
-		buttonPanel.setMinimumSize(buttonPanel.getPreferredSize());
 	}
 	private void createSections() {
 		int num = SECTIONS.length;

@@ -166,8 +166,13 @@ public class FileWrite {
 		try {
 			File f = run(c, title, defFile, fileType, wrType);
 			if (f==null) return;
-			Out.prt("Write to " + f.getPath());
-			PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(f)));
+			
+			String msg = (bAppend) ? "Append to " : "Write to ";
+			Out.prt(msg + f.getPath());
+			
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f, bAppend)); // CAS342 was not appending
+			PrintWriter pw = new PrintWriter(bw);
+			
     		pw.print(lines);
     		pw.close();
 		}

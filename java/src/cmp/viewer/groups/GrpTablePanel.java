@@ -143,10 +143,10 @@ public class GrpTablePanel extends JPanel {
         }  
         
         createBtnCopy();
- 		topRow.add(btnCopy);					topRow.add(Box.createHorizontalGlue());
+ 		topRow.add(btnCopy);			topRow.add(Box.createHorizontalStrut(nParentRow>=0 ? 5 : 30));
  		
         createBtnTable();
-        topRow.add(btnTable);					topRow.add(Box.createHorizontalStrut(1));
+        topRow.add(btnTable);					topRow.add(Box.createHorizontalGlue());
         
         btnHelp = Static.createButtonHelp("Help", true);
         btnHelp.addActionListener(new ActionListener() {
@@ -176,8 +176,7 @@ public class GrpTablePanel extends JPanel {
         topRow.setAlignmentX(LEFT_ALIGNMENT);
 
         buttonPanel.add(topRow);
-        buttonPanel.add(Box.createVerticalStrut(5));
-        
+       
         return buttonPanel;
     }
    
@@ -286,7 +285,7 @@ public class GrpTablePanel extends JPanel {
 	  			}
 	  		}));
   		}
-  		btnTable = Static.createButtonMenu("Table...", true);
+  		btnTable = Static.createButtonTable("Table...", true);
  		btnTable.addMouseListener(new MouseAdapter() {
  	         public void mousePressed(MouseEvent e) {
  	              popup.show(e.getComponent(), e.getX(), e.getY());
@@ -663,10 +662,11 @@ public class GrpTablePanel extends JPanel {
     	if(tableButtonPanel != null) { 	//Is null if a sample table 
     		add(tableButtonPanel);
     	}
-    	add(Box.createVerticalStrut(10));
+    	add(Box.createVerticalStrut(2));
     	add(tableSummaryPanel);
     	add(Box.createVerticalStrut(10));
     	add(tableStatusPanel);
+    	
     	add(sPane);
     	add(fieldSelectPanel);
     	add(Box.createVerticalStrut(10));
@@ -1000,9 +1000,11 @@ public class GrpTablePanel extends JPanel {
 			float s2 = (Float)theTableData.getValueAt(row, score2);
 			scores = String.format("   (%.3f, %.3f)", s1, s2); 
 		}
-		String summary =  name + "   " + desc + scores;
+		String sum = "";
+		if (theTable.getRowCount()>1) sum = "Row " + (row+1) + "/" + theTable.getRowCount() + "   ";
+		sum +=  Globals.tagGRP + name + "   " + desc + scores;
     	
-		return  "Row " + (row+1) + "/" + theTable.getRowCount() + "   " + Globals.tagGRP + " " + summary;	// summary
+		return  sum;
 	}
     /**************************************************
      * Cluster calls Next/Prev for next sequence or pair row

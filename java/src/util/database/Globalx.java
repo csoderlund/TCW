@@ -10,17 +10,17 @@ import util.methods.Static;
 public class Globalx {
 	public static boolean debug = false; // changed in STCWMain or MTCWMain from command line 
 	
-	public static final String strRelDate = "(22-Jan-22)"; 
-	public static final String strTCWver = "3.4.1";  //  3.4.1 must be 3 digits
-	public static final String URL = "http://www.agcol.arizona.edu ";
+	public static final String strRelDate = "(8-Mar-22)"; 
+	public static final String strTCWver = "3.4.2";  //  3.4.2 must be 3 digits
+	public static final String URL =     "http://www.agcol.arizona.edu ";
 	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate;
 	public static final String sTCWver = "sTCW v" + strTCWver;
 	public static final String mTCWver = "mTCW v" + strTCWver;
 	public static final String error="***";
 	
-	public final static String extDir = "Ext"; // CAS303 changed from external and external_osx
+	public final static String extDir =   "Ext"; // CAS303 changed from external and external_osx
 	public final static String lintelDir = extDir + "/linux";
-	public final static String macDir = extDir + "/mac";
+	public final static String macDir =    extDir + "/mac";
 	
 	public final static String diamondSuffix = ".dmnd";
 	
@@ -117,8 +117,8 @@ public class Globalx {
 	static public final String [] GO_TERM_LIST = {"biological_process","cellular_component","molecular_function"};
 	static public final String [] GO_TERM_ABBR = {"BP", "CC", "MF"};
 	static public final String goFullOnt = "Ontology";
-	static public final String goOnt = "Ont"; // CAS322 there is no consensus for what to call this
-	static public final String goID = "GO ID";
+	static public final String goOnt =  "Ont"; // CAS322 there is no consensus for what to call this
+	static public final String goID =   "GO ID";
 	static public final String goTerm = "GO Name";
 	static public final String evCode = "EvC";
 	
@@ -154,7 +154,7 @@ public class Globalx {
 	
 	static public final int OVERHANG=5; // overhang for trim
 		
-	// General
+	// General - button colors are in Static.java
 	public static final Color BGCOLOR = Color.WHITE;
 	public static final Color HIGHCOLOR = Static.HIGHCOLOR; 	// CAS336
 	public static final Color altRowColor = new Color(0xEEF2FF);
@@ -164,7 +164,7 @@ public class Globalx {
 	public static final Color componentBGColor = Color.white;
 	
 	// common button names
-	public static String keepBtn = "Keep";
-	public static String cancelBtn = "Cancel";
+	public static String keepBtn    = "Keep";
+	public static String cancelBtn  = "Cancel";
 	public static String defaultBtn = "Defaults";
 }

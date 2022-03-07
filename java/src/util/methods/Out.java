@@ -140,7 +140,7 @@ public class Out {
 		if (cnt==0) return;
 		PrtSpMsg(sp, String.format("%7s %s", df.format(cnt), msg));
 	}
-	static public void PrtSpCntkMsg(int sp, long cnt, String msg) {
+	static public void PrtSpCntmkMsg(int sp, long cnt, String msg) {
 		String x=" ";
 		if (cnt>1000000) {
 			x = "M";
@@ -150,7 +150,15 @@ public class Out {
 			x = "k";
 			cnt /= 1000;
 		}
-		PrtSpMsg(sp, String.format("%6d%s %s", cnt, x, msg));
+		PrtSpMsg(sp, String.format("%,6d%s %s", cnt, x, msg));
+	 }
+	static public void PrtSpCntmMsg(int sp, long cnt, String msg) {
+		String x="";
+		if (cnt>1000000) {
+			x = "M";
+			cnt /= 1000000;
+		}
+		PrtSpMsg(sp, String.format("%,6d%s %s", cnt, x, msg));
 	 }
 	 
 	// No Space argument
@@ -294,7 +302,7 @@ public class Out {
 		System.out.println(msg);
 	}
 	static public void r(String msg) {
-		System.err.print("  " + msg + "...\r");
+		System.err.print("  " + msg + "...                  \r");
 	}
 	static public void rClear() {
 		System.err.print("                                                        \r");
@@ -304,11 +312,11 @@ public class Out {
 	}
 	static public void rp(String msg, int cnt, int tot) {
 		int per = (int) (  ((double)cnt/(double)tot)  * 100.0);
-		System.err.print("  " + msg + " " + cnt + "(" + per + "%) ...\r");
+		System.err.print("  " + msg + " " + cnt + "(" + per + "%) ...           \r");
 	}
 	static public void rp(String msg, long cnt, int tot) {
 		int per = (int) (  ((double)cnt/(double)tot)  * 100.0);
-		System.err.print("  " + msg + " "  + cnt + "(" + per + "%) ...\r");
+		System.err.print("  " + msg + " "  + cnt + "(" + per + "%) ...          \r");
 	}
 	
 	public static boolean yesNo(String question)

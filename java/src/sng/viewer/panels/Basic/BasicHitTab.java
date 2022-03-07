@@ -6,6 +6,8 @@ package sng.viewer.panels.Basic;
  *  contains mapping of data (BasicHitFilterPanel) to table (BasicTablePanel)
  */
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -25,7 +27,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -45,10 +46,14 @@ import util.ui.UserPrompt;
 public class BasicHitTab extends Tab {
 	private static final long serialVersionUID = -5515249017308285183L;	
 	private static final Color BGCOLOR = Globals.BGCOLOR;
+
+	private final String topHTML = 		Globals.helpDir + "BasicTopHit.html";
+	private final String queryHTML = 	Globals.helpDir + "BasicQueryHit.html";
+	private final String lowerHTML =   	Globals.helpDir + "BasicModify.html"; 
 	
 	public BasicHitTab(STCWFrame parentFrame) {
 		super(parentFrame, null);
-		theParentFrame = parentFrame;
+		theMainFrame = parentFrame;
 		metaData = parentFrame.getMetaData();
 		hasGO = metaData.hasGOs();
 		if (metaData.hasExpLevels()) numLibs = metaData.getLibNames().length;
@@ -58,15 +63,15 @@ public class BasicHitTab extends Tab {
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // top, left, bottom, right
 		
-		createTopRowPanel();
+		createTopButtons();
 		add(topRowPanel);
 		add(Box.createVerticalStrut(6));
 		
-		theFilterPanel = new BasicHitFilterPanel(theParentFrame, this);
+		theFilterPanel = new BasicHitFilterPanel(theMainFrame, this);
 		add(theFilterPanel);
 		add(Box.createVerticalStrut(6));
 		
-		theTablePanel = new BasicTablePanel(theParentFrame, this, 
+		theTablePanel = new BasicTablePanel(theMainFrame, this, 
 				theFilterPanel.getColNames(), theFilterPanel.getColSelect(), 
 				theFilterPanel.getPvalColNames()); // CAS322 add last arg for highlights
 		add(theTablePanel);
@@ -74,7 +79,7 @@ public class BasicHitTab extends Tab {
 	/******************************************
 	 * Top button panel
 	 */
-	private void createTopRowPanel() {
+	private void createTopButtons() {
 		btnViewSeqs = Static.createButtonTab(Globals.seqTableLabel, true);
 		btnViewSeqs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -91,7 +96,32 @@ public class BasicHitTab extends Tab {
 		});
 		btnAlignSeqs.setEnabled(false);
 		
-// Copy
+		createSelectButton();
+		createTableButton();
+		createHelpButton();
+		
+		
+		topRowPanel = Static.createRowPanel();
+		topRowPanel.add(Static.createLabel(Globals.select));	topRowPanel.add(Box.createHorizontalStrut(2));
+		topRowPanel.add(btnViewSeqs);				topRowPanel.add(Box.createHorizontalStrut(2));
+		topRowPanel.add(btnAlignSeqs);				topRowPanel.add(Box.createHorizontalStrut(2));
+		topRowPanel.add(btnCopy);					topRowPanel.add(Box.createHorizontalStrut(2));
+		topRowPanel.add(btnShow);
+		if (metaData.hasGOs()) {
+			topRowPanel.add(Box.createHorizontalStrut(2));
+			topRowPanel.add(btnExport);
+		}
+		
+		topRowPanel.add(Box.createHorizontalStrut(40));
+		topRowPanel.add(btnTable);
+		
+		topRowPanel.add(Box.createHorizontalGlue());
+		topRowPanel.add(btnHelp);
+		
+		topRowPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE,(int)topRowPanel.getPreferredSize().getHeight()));		
+	}
+	private void createSelectButton() {
+		// Copy
 		final JPopupMenu copypopup = new JPopupMenu();
 		copypopup.add(new JMenuItem(new AbstractAction("Hit ID") {
 			private static final long serialVersionUID = 4692812516440639008L;
@@ -139,8 +169,8 @@ public class BasicHitTab extends Tab {
                 copypopup.show(e.getComponent(), e.getX(), e.getY());
             }
         });
-				
-//Show
+		
+		//Show
 		final JPopupMenu selPopup = new JPopupMenu();
 		if (metaData.hasGOs()) {
 			selPopup.add(new JMenuItem(new AbstractAction("Assigned GOs for hit") {
@@ -162,14 +192,14 @@ public class BasicHitTab extends Tab {
 				showInfoForSelected();
 			}
 		}));
-		btnShow = Static.createButton("Show...", false);
+		btnShow = Static.createButtonPopup("Show...", false);
 		btnShow.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 selPopup.show(e.getComponent(), e.getX(), e.getY());
             }
         });
-	
-// Export
+		
+		// Export
 		final JPopupMenu selExport = new JPopupMenu();
 		if (metaData.hasGOs()) {
 			selExport.add(new JMenuItem(new AbstractAction("Assigned GOs for hit*") {
@@ -185,14 +215,14 @@ public class BasicHitTab extends Tab {
 				}
 			}));
 		}
-		btnExport = Static.createButton("Export...", false);
+		btnExport = Static.createButtonFile("Export...", false);
 		btnExport.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 selExport.show(e.getComponent(), e.getX(), e.getY());
             }
         });
-		
-		// Table
+	}
+	private void createTableButton() {
 		final JPopupMenu tablepopup = new JPopupMenu();
 		tablepopup.add(new JMenuItem(new AbstractAction("Show column stats") {
 			private static final long serialVersionUID = 4692812516440639008L;
@@ -229,39 +259,57 @@ public class BasicHitTab extends Tab {
 				} catch (Error er) {ErrorReport.reportFatalError(er, "Fatal error copying table", null);}
 			}
 		}));
-		btnTable = Static.createButton("Table...", false);
+		btnTable = Static.createButtonTable("Table...", false);
 		btnTable.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 tablepopup.show(e.getComponent(), e.getX(), e.getY());
             }
         });
-		
-		topRowPanel = Static.createRowPanel();
-		topRowPanel.add(Static.createLabel(Globals.select));	topRowPanel.add(Box.createHorizontalStrut(2));
-		topRowPanel.add(btnViewSeqs);				topRowPanel.add(Box.createHorizontalStrut(2));
-		topRowPanel.add(btnAlignSeqs);				topRowPanel.add(Box.createHorizontalStrut(2));
-		topRowPanel.add(btnCopy);					topRowPanel.add(Box.createHorizontalStrut(2));
-		topRowPanel.add(btnShow);
-		if (metaData.hasGOs()) {
-			topRowPanel.add(Box.createHorizontalStrut(2));
-			topRowPanel.add(btnExport);
-		}
-		
-		topRowPanel.add(Box.createHorizontalStrut(25));
-		topRowPanel.add(btnTable);
-		
-		// the Glue does not work with these on Mac
-		topRowPanel.setMaximumSize(topRowPanel.getPreferredSize());
-		topRowPanel.setMinimumSize(topRowPanel.getPreferredSize());
 	}
-	
+	private void createHelpButton() {
+		final JPopupMenu popup = new JPopupMenu();
+		
+		popup.add(new JMenuItem(new AbstractAction("Top buttons") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theMainFrame, "Top Buttons", topHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
+			}
+		}));
+		popup.add(new JMenuItem(new AbstractAction("Search and Table") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theMainFrame, "Search, Filter and Table", queryHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
+			}
+		}));
+		popup.add(new JMenuItem(new AbstractAction("Modify Buttons") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theMainFrame, "Modify Buttons", lowerHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
+			}
+		}));
+		
+		
+		btnHelp = Static.createButtonHelp("Help...", true);
+		btnHelp.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                popup.show(e.getComponent(), e.getX(), e.getY());
+            }
+        });
+		btnHelp.setAlignmentX(Component.RIGHT_ALIGNMENT);
+	}
 	/********************************************************
 	 * Methods called by BasicHitFilterPanel
 	 */
 	public void hideAll() {
 		topRowPanel.setVisible(false);
 		theTablePanel.setVisible(false);
-		theParentFrame.setButtonsVisible(false);
+		theMainFrame.setButtonsVisible(false);
 	}
 	public void showAll() {
 		topRowPanel.setVisible(true);
@@ -294,7 +342,7 @@ public class BasicHitTab extends Tab {
 			else tag = rows.length + " Hits";
 		}
 		
-		theParentFrame.loadContigs(tag, seqIDs, STCWFrame.BASIC_QUERY_MODE_HIT );
+		theMainFrame.loadContigs(tag, seqIDs, STCWFrame.BASIC_QUERY_MODE_HIT );
 	}
 	private void viewAlignSeqs() {
 		int [] rows = theTablePanel.getSelectedRows();
@@ -406,7 +454,7 @@ public class BasicHitTab extends Tab {
 				JOptionPane.showMessageDialog(null, "No selected row ");
 				return;
 			}
-			new GOtree(theParentFrame).computeSelected(hitID, desc, actionType, outType, btnShow);
+			new GOtree(theMainFrame).computeSelected(hitID, desc, actionType, outType, btnShow);
 		}
 		catch (Exception e) {
 			JOptionPane.showMessageDialog(null, "Query failed");
@@ -450,7 +498,7 @@ public class BasicHitTab extends Tab {
 			}
 			String [] alines = new String [lines.size()];
 			lines.toArray(alines);
-			UserPrompt.displayInfoMonoSpace(theParentFrame, "Info for " + id, alines);
+			UserPrompt.displayInfoMonoSpace(theMainFrame, "Info for " + id, alines);
 		}
 		catch (Exception e) {
 			JOptionPane.showMessageDialog(null, "Query failed");
@@ -486,10 +534,8 @@ public class BasicHitTab extends Tab {
 			bitscore = 		Double.parseDouble((String) values[nCol++]); // CAS331
 			evalue = 		Double.parseDouble((String) values[nCol++]);
 			sim = 			Double.parseDouble((String) values[nCol++]);
-			int sstart = 	Integer.parseInt((String) values[nCol++]);
-			int send   = 	Integer.parseInt((String) values[nCol++]);
-			int hstart = 	Integer.parseInt((String) values[nCol++]);
-			int hend = 		Integer.parseInt((String) values[nCol++]);
+			seqAlign	= 	Integer.parseInt((String) values[nCol++]); // CAS342 quit computing from start-end
+			hitAlign = 		Integer.parseInt((String) values[nCol++]);
 			align = 		Integer.parseInt((String) values[nCol++]);
 			
 			String f = 		(String) values[nCol++];
@@ -508,8 +554,6 @@ public class BasicHitTab extends Tab {
 			
 			hd.hitLen = 	Integer.parseInt((String) values[nCol++]);
 			seqLen = 		Integer.parseInt((String) values[nCol++]);
-			seqAlign = 		Static.percent(Math.abs(sstart-send)+1,seqLen);
-			hitAlign = 		Static.percent(Math.abs(hstart-hend)+1,hd.hitLen);
 			
 			if (hasGO) {
 				String strGoBrief = (String) values[nCol++];
@@ -1110,7 +1154,7 @@ public class BasicHitTab extends Tab {
 		ArrayList<Object []> results = new ArrayList <Object[]> ();
 		tableBuild(results, "Executing search....");
 	}
-	
+	/**************************************************************************/
 	//Table panel
 	private BasicTablePanel theTablePanel = null;
 	
@@ -1120,11 +1164,11 @@ public class BasicHitTab extends Tab {
 	
 	//User interface
 	private JButton btnViewSeqs = null, btnAlignSeqs = null, btnShow = null;
-	private JButton btnTable = null, btnCopy = null, btnExport = null;
+	private JButton btnTable = null, btnCopy = null, btnExport = null, btnHelp = null;
 	
 	private JPanel topRowPanel = null;
 	private BasicHitFilterPanel theFilterPanel = null;
-	private STCWFrame theParentFrame=null;
+	private STCWFrame theMainFrame=null;
 	private MetaData metaData = null;
 	
 	private boolean hasGO=true;

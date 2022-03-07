@@ -899,7 +899,10 @@ public class QRProcess {
     	}
     	else Out.Print("R-script does not start with 'goSeq', so assumes no 'pwf' variable");
     	
-    	goEnrichSummary += String.format("%s%.6f%s%.6f", space, avg, space, std);
+    	if (avg>1) // CAS342 happens on Mac with exBar. 
+    		goEnrichSummary += String.format("%s%8.1f%s%8.1f", space, avg, space, std);
+    	else 
+    		goEnrichSummary += String.format("%s%.6f%s%.6f", space, avg, space, std);
     	
     	Out.Print("R-script done");
     	return true;

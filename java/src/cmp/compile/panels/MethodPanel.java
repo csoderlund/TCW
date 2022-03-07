@@ -229,12 +229,12 @@ public class MethodPanel extends JPanel {
 			// alignments would have been done for all clusters pairs.
 			// PairMap will still the alignments, which is okay....
 			if (count==1) { 
-				Out.PrtSpMsg(2, "Truncate method, group, member tables...");
-				mDB.executeUpdate("TRUNCATE TABLE pog_method");
-				mDB.executeUpdate("TRUNCATE TABLE pog_groups");
-				mDB.executeUpdate("TRUNCATE TABLE pog_members");
-				mDB.executeUpdate("TRUNCATE TABLE pog_scores"); // CAS326 add
-				mDB.executeUpdate("update pairwise set hasGrp=0, hasBBH=0");
+				Out.PrtSpMsg(2, "Remove method, group, member tables...");
+				mDB.tableDelete("pog_method"); // CAS342 use tableDelete
+				mDB.tableDelete("pog_groups");
+				mDB.tableDelete("pog_members");
+				mDB.tableDelete("pog_scores"); // CAS326 add
+				mDB.tableDelete("update pairwise set hasGrp=0, hasBBH=0");
 			}
 			else {
 				Out.PrtSpMsg(2, "Remove method...");
@@ -270,7 +270,7 @@ public class MethodPanel extends JPanel {
 				new Pairwise(theCompilePanel).fixFlagsPairwise(mDB); 
 				info.updateCntKeys(mDB); // CAS340
 			}
-			
+			info.updateMethod(); // CAS342
 			new Summary(mDB).removeSummary();
 			mDB.close();
 		} catch (Exception e) {ErrorReport.die(e, "removing method");}

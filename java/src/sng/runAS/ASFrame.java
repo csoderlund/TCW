@@ -263,7 +263,7 @@ public class ASFrame extends JDialog implements WindowListener{
 		////////////////////////////
 	    JPanel goPanel = Static.createPagePanel();
 		row = Static.createRowPanel();
-		row.add(Static.createButton(" GO (Gene Ontology)") );
+		row.add(Static.createLabel(" GO (Gene Ontology)") );
 		goPanel.add(row);
 		
 		row = Static.createRowPanel();

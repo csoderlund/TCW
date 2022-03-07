@@ -1005,10 +1005,10 @@ public class QRFrame extends JDialog implements WindowListener {
 			"P-values from File"
 		};
 		JPanel row = Static.createRowPanel();
-		btnGrp1All 	= 		new JButton(labels[0]);
-		btnGrp1Grp2 = 		new JButton(labels[1]);
-		btnPairFile  = 		new JButton(labels[2]);
-		btnLoadPvalFile = 	new JButton(labels[3]);
+		btnGrp1All 	= 		Static.createButtonRun(labels[0], true);
+		btnGrp1Grp2 = 		Static.createButtonRun(labels[1], true);
+		btnPairFile  = 		Static.createButtonRun(labels[2], true);
+		btnLoadPvalFile = 	Static.createButtonRun(labels[3], true);
 		int width =  btnGrp1All.getPreferredSize().width;
 		int height = btnGrp1All.getPreferredSize().height;
 		Dimension dim = new Dimension(width, height);
@@ -1150,7 +1150,7 @@ public class QRFrame extends JDialog implements WindowListener {
 		row.add(txtPvalFile);
 		row.add(Box.createHorizontalStrut(1));
 		
-		btnPvalFile = new JButton("...");
+		btnPvalFile = Static.createButtonFile("...", true);
 		btnPvalFile.addActionListener(new ActionListener()  {
 			public void actionPerformed(ActionEvent arg0) {
 				FileRead fc = new FileRead(projDirName, FileC.bDoVer, FileC.bDoPrt);
@@ -1172,7 +1172,7 @@ public class QRFrame extends JDialog implements WindowListener {
 		
 		row = Static.createRowPanel();
 		row.add(Box.createHorizontalStrut(5));
-		btnRmColDE = Static.createButton("Remove", false, null);
+		btnRmColDE = Static.createButton("Remove", false);
 		btnRmColDE.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {		
@@ -1205,7 +1205,7 @@ public class QRFrame extends JDialog implements WindowListener {
 		
 		/***********************************************************/
 		
-		btnRmColGO = Static.createButton("Remove", false, null);
+		btnRmColGO = Static.createButton("Remove", false);
 		btnRmColGO.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {		
@@ -1320,7 +1320,7 @@ public class QRFrame extends JDialog implements WindowListener {
 		
 		row = Static.createRowPanel();
 		row.add(Box.createHorizontalStrut(5));
-		btnAddColGO = Static.createButton("Execute", false, null);
+		btnAddColGO = Static.createButtonRun("Execute", false);
 		btnAddColGO.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				exGoSeq();
@@ -1364,7 +1364,7 @@ public class QRFrame extends JDialog implements WindowListener {
 
 	private void createExitPanel() {
 		JPanel row = Static.createRowPanel();
-		JButton btnFinishExit = Static.createButton("Update Overview", true, null);
+		JButton btnFinishExit = Static.createButtonPopup("Update Overview", true);
 		btnFinishExit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				dbOverview(dbObj.getdbName(), mDB);

@@ -101,7 +101,7 @@ public class PairTableTab extends Tab
 		scroller.getViewport().setBackground(Color.WHITE);
 		UIHelpers.setScrollIncrements( scroller );
 		
-		JPanel toolPanel = createToolbar ( );
+		JPanel toolPanel = createTopButtons ( );
 		
 		JPanel sumRow = Static.createRowPanel();
 		if (summary==null || summary=="") summary = "";
@@ -121,7 +121,7 @@ public class PairTableTab extends Tab
 		add ( Box.createVerticalStrut(5) );
 		add ( scroller );
 	}
-	private JPanel createToolbar ( )
+	private JPanel createTopButtons ( )
 	{
 		final JPanel topPanel = Static.createRowPanel();
 		
@@ -133,7 +133,6 @@ public class PairTableTab extends Tab
 				addPairAlignTab();
 			}
 		});
-		
 		btnViewSeqs = Static.createButtonTab(Globals.seqTableLabel, false);
 		btnViewSeqs.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
@@ -144,9 +143,9 @@ public class PairTableTab extends Tab
 		JButton btnRefresh = Static.createButton("Refresh Columns");
 		btnRefresh.addActionListener(refreshListener);
 
-		createToolTable(); // defines btnTable
+		createTopTable(); // defines btnTable
 		
-		JButton btnHelp = Static.createButton("Help", true);
+		JButton btnHelp = Static.createButtonHelp("Help", true);
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserPrompt.displayHTMLResourceHelp(getParentFrame(), "Pairs Table", helpDir); 
@@ -155,7 +154,7 @@ public class PairTableTab extends Tab
 		topPanel.add( Box.createHorizontalStrut(5) );
 		topPanel.add(select);			topPanel.add( Box.createHorizontalStrut(2) );
 		topPanel.add( btnViewAlign ); 	topPanel.add( Box.createHorizontalStrut(2) );
-		topPanel.add( btnViewSeqs );	topPanel.add( Box.createHorizontalStrut(30) );
+		topPanel.add( btnViewSeqs );	topPanel.add( Box.createHorizontalStrut(40) );
 		
 		topPanel.add(btnRefresh);		topPanel.add( Box.createHorizontalStrut(5) );
 		
@@ -165,11 +164,10 @@ public class PairTableTab extends Tab
 		
 		topPanel.add(btnHelp);
 		topPanel.add( Box.createHorizontalStrut(5) );
-		topPanel.setMaximumSize( new Dimension ( Integer.MAX_VALUE, 
-				(int)topPanel.getPreferredSize ().getHeight() ) );
+		topPanel.setMaximumSize( new Dimension ( Integer.MAX_VALUE, (int)topPanel.getPreferredSize ().getHeight() ) );
 		return topPanel;
 	}
-	private void createToolTable() { //CAS314 added
+	private void createTopTable() { //CAS314 added
 		final JPopupMenu tablepopup = new JPopupMenu();
 		
 		tablepopup.add(new JMenuItem(new AbstractAction("Show Column Stats") {
@@ -208,15 +206,12 @@ public class PairTableTab extends Tab
 			}
 		}));
 		
-		
-		btnTable = new JButton("Table...");
-		btnTable.setBackground(Color.WHITE);
+		btnTable = Static.createButtonTable("Table...", true);
 		btnTable.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 tablepopup.show(e.getComponent(), e.getX(), e.getY());
             }
         });
-		btnTable.setEnabled(true);
 	}
 	
 	private ActionListener refreshListener = new ActionListener() {

@@ -4,6 +4,7 @@ package cmp.viewer.align;
  * Called from AlignButtons for MSA - used by GrpTablePanel and SeqTablePanel
  */
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -136,7 +137,7 @@ public class MultiViewPanel extends JPanel {
 				refreshPanels();
 			}
 		});	
-		theRow.add(menuZoom);	theRow.add(Box.createHorizontalStrut(2));
+		theRow.add(menuZoom);	theRow.add(Box.createHorizontalStrut(1));
 
 		menuColor = Static.createCombo(BaseAlignPanel.colorSchemes); // CAS312 add
 		menuColor.addActionListener(new ActionListener() {
@@ -145,7 +146,7 @@ public class MultiViewPanel extends JPanel {
 			}
 		});
 		if (isAA) {
-			theRow.add(menuColor);			theRow.add(Box.createHorizontalStrut(5));
+			theRow.add(menuColor);			theRow.add(Box.createHorizontalStrut(2));
 		}
 		else 								theRow.add(Box.createHorizontalStrut(50));
 		
@@ -157,7 +158,9 @@ public class MultiViewPanel extends JPanel {
 				theAlignPanel.showScores(theViewerFrame, s1, s2, sumLine2);
 			}
 		});
-		theRow.add(btnScore); 
+		if (isAA) theRow.add(btnScore); 				
+		
+		theRow.add(Box.createHorizontalGlue());
 		
 		// Help
 		final JPopupMenu popup = new JPopupMenu();
@@ -183,10 +186,9 @@ public class MultiViewPanel extends JPanel {
                 popup.show(e.getComponent(), e.getX(), e.getY());
             }
         });
+		theRow.add(btnHelp);							theRow.add(Box.createHorizontalStrut(1));
 		
 		if(nParentRow >= 0) { // if -1, then showing members from multiple clusters, and no Next/Prev
- 	 	   JPanel rowChangePanel = Static.createRowPanel();
- 	 	   
  	 	   btnPrevRow = Static.createButton(Globals.prev, true);
  	 	   btnPrevRow.addActionListener(new ActionListener() {
  	 		   public void actionPerformed(ActionEvent arg0) {
@@ -199,22 +201,11 @@ public class MultiViewPanel extends JPanel {
  	 			   getNextRow(nParentRow+1);
  	 		   }
  	 	   });
- 	 	 
- 	 	   rowChangePanel.add(btnHelp);
- 	 	   rowChangePanel.add(btnPrevRow);
- 	 	   rowChangePanel.add(btnNextRow);
- 	 	   
- 	 	   theRow.add(Box.createHorizontalStrut(5));
- 	 	   theRow.add(rowChangePanel);
+ 	 	   theRow.add(btnPrevRow);
+ 	 	   theRow.add(btnNextRow); 
 	 	}
-		else {
-			theRow.add(Box.createHorizontalStrut(40));
-			theRow.add(btnHelp);
-		}
+		theRow.setMaximumSize(new Dimension(Integer.MAX_VALUE,(int)theRow.getPreferredSize ().getHeight()));
 		buttonPanel.add(theRow);
-		
-		buttonPanel.setMaximumSize(buttonPanel.getPreferredSize()); 
-		buttonPanel.setMinimumSize(buttonPanel.getPreferredSize()); 
 	}
 	
 	/*************************************************************************/
@@ -298,12 +289,13 @@ public class MultiViewPanel extends JPanel {
 		final String [] theMembers = members;
 		final String theHitid = hitid;
 		
+		createViewTop();
+		updateInfo("Aligning sequences please wait.", "Results will be written to the /ResultAlign directory");
+		
 		if(theThread == null) {
 			theThread = new Thread(new Runnable() {
 				public void run() {
 					try {
-						createViewTop();
-						
 						theMultiAlignData = new MultiAlignData(theViewerFrame.getInfo());
 						
 						if (isAA && theHitid!=null && !Globals.hasSpecialID(theHitid)) {
@@ -314,8 +306,6 @@ public class MultiViewPanel extends JPanel {
 						String [] memSeq = loadSequencesFromDB(theMembers, isAA);
 						for(int x=0; x<theMembers.length; x++) 
 							theMultiAlignData.addSequence(theMembers[x], memSeq[x]);
-						
-						updateInfo("Aligning sequences please wait.", "Results will be written to the /ResultAlign directory");
 						
 						int rc =  theMultiAlignData.runAlignPgm(alignPgm, isAA); 
 						

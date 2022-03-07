@@ -49,8 +49,8 @@ public class BlastArgs {
     // CAS314 removed diamond parameters, CAS330 put back in, 
     // CAS331 remove --max-hsps 1 (it is default) --top 20 missed good ones with descriptions
     private static final String diamondOpt =   "--masking 0"; 
-    // used for MTCW comparing ORFs and STCW self comparing ORFS
-    private static final String diamondOptORF = "--masking 0 --sensitive --query-cover 25 --subject-cover 25";
+    // used for MTCW comparing ORFs and STCW self comparing ORFS; CAS342 remove --sensitive
+    private static final String diamondOptORF = "--masking 0 --query-cover 25 --subject-cover 25";
     // CAS330 add for Find Hits
     private static final String diamondOptHit =   "--masking 0"; 
     

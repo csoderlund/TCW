@@ -6,6 +6,7 @@ package cmp.viewer.align;
  * and it calls AlignPairNPanel as the display is a bit different.
  */
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -73,28 +74,34 @@ public class PairNViewPanel extends JPanel {
 		buildAlignments(members);
 	}
 	/***********************************************************************/
-	private void createPairPanel() {
+	private void createTopPanel() {
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setBackground(Globals.BGCOLOR);
 		
 		add(Box.createVerticalStrut(10));
 		
-		createButtonPanel();
-		add(buttonPanel);
+		JPanel topRow = createTopButton();
+		add(topRow);
+		add(Box.createVerticalStrut(5));
+		
+		JPanel lowRow = createAlignButton();
+		add(lowRow);
 		add(Box.createVerticalStrut(5));
 		
 		createHeaderPanel();
 		add(headerPanel);
 		add(Box.createVerticalStrut(5));
-		
+	}
+	private void createPairPanel() {
 		createMainPanel();
 		
 		add(scroller);
 		setButtonsEnabled();
+		alignHeader.setText(strSummary);
 	}
-	private void createButtonPanel() {
-		buttonPanel = Static.createPagePanel();
-		JPanel theRow = Static.createRowPanel();
+	
+	private JPanel createTopButton() {
+		JPanel theTopRow = Static.createRowPanel();
 		
 		btnViewType = Static.createButton("Line", true);
 		btnViewType.addActionListener(new ActionListener() {
@@ -115,8 +122,8 @@ public class PairNViewPanel extends JPanel {
 				refreshPanels();
 			}
 		});
-		theRow.add(Static.createLabel("View: ")); 	theRow.add(Box.createHorizontalStrut(1));
-		theRow.add(btnViewType);         			theRow.add(Box.createHorizontalStrut(5));
+		theTopRow.add(Static.createLabel("View: ")); 	theTopRow.add(Box.createHorizontalStrut(1));
+		theTopRow.add(btnViewType);         			theTopRow.add(Box.createHorizontalStrut(5));
 		
 		dotBox = Static.createCheckBox("Dot", false); // CAS312 new
 		dotBox.addActionListener(new ActionListener() {
@@ -125,7 +132,7 @@ public class PairNViewPanel extends JPanel {
 			}
 		});
 		dotBox.setEnabled(false);
-		theRow.add(dotBox);							theRow.add(Box.createHorizontalStrut(5));
+		theTopRow.add(dotBox);							theTopRow.add(Box.createHorizontalStrut(5));
 		
 		trimBox = Static.createCheckBox("Trim", false); // CAS313 new
 		trimBox.addActionListener(new ActionListener() {
@@ -133,7 +140,7 @@ public class PairNViewPanel extends JPanel {
 				refreshPanels();
 			}
 		});
-		theRow.add(trimBox);						theRow.add(Box.createHorizontalStrut(5));
+		theTopRow.add(trimBox);						theTopRow.add(Box.createHorizontalStrut(5));
 		
 		menuZoom = Static.createZoom2();	// CAS312 Zoom2 allows increase size
 		menuZoom.addActionListener(new ActionListener() {
@@ -141,7 +148,7 @@ public class PairNViewPanel extends JPanel {
 					refreshPanels();
 			}
 		});	
-		theRow.add(menuZoom); 						
+		theTopRow.add(menuZoom); 						
 		
 		menuColor = Static.createCombo(BaseAlignPanel.colorSchemes); // CAS312 new
 		menuColor.addActionListener(new ActionListener() {
@@ -150,12 +157,10 @@ public class PairNViewPanel extends JPanel {
 			}
 		});
 		if (!isNT) {
-			theRow.add(Box.createHorizontalStrut(5));
-			theRow.add(menuColor); 
-			theRow.add(Box.createHorizontalStrut(70)); 
+			theTopRow.add(Box.createHorizontalStrut(5));
+			theTopRow.add(menuColor); 
 		}
-		else theRow.add(Box.createHorizontalStrut(150)); 
-		
+		theTopRow.add(Box.createHorizontalGlue()); 
 		
 		// Help
 		final JPopupMenu popup = new JPopupMenu();
@@ -182,7 +187,7 @@ public class PairNViewPanel extends JPanel {
                 popup.show(e.getComponent(), e.getX(), e.getY());
             }
         });
-		theRow.add(btnHelp); theRow.add(Box.createHorizontalStrut(1));
+		theTopRow.add(btnHelp); theTopRow.add(Box.createHorizontalStrut(1));
 		
 		if(nParentRow >= 0) { // CAS341 if -1, then not from a single row
  	 	   btnPrevRow = Static.createButton(Globals.prev, true);
@@ -197,13 +202,15 @@ public class PairNViewPanel extends JPanel {
  	 			   getNextRow(nParentRow+1);
  	 		   }
  	 	   });
- 	 	   theRow.add(btnPrevRow);
- 	 	   theRow.add(btnNextRow);
+ 	 	   theTopRow.add(btnPrevRow);
+ 	 	   theTopRow.add(btnNextRow);
 		}
-		buttonPanel.add(theRow); 
-		buttonPanel.add(Box.createVerticalStrut(5));
-		
-	// row2 pairwise specific
+		theTopRow.setMaximumSize(new Dimension(Integer.MAX_VALUE,(int)theTopRow.getPreferredSize ().getHeight()));
+		return theTopRow;
+	}
+	/************************ row2 pairwise specific *********************************/
+	private JPanel createAlignButton() {
+		JPanel theRow2 = Static.createRowPanel();
 		btnAlign = Static.createButtonPopup("Align...", false); 
 		btnAlign.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
@@ -228,7 +235,6 @@ public class PairNViewPanel extends JPanel {
 			}
 		});
 		
-		JPanel theRow2 = Static.createRowPanel();
 		theRow2.add(Static.createLabel(Globals.select)); theRow2.add(Box.createHorizontalStrut(2));
 		theRow2.add(btnAlign); 							 theRow2.add(Box.createHorizontalStrut(2)); 
 		
@@ -236,11 +242,8 @@ public class PairNViewPanel extends JPanel {
 			theRow2.add(btnShowAllPairs);					 theRow2.add(Box.createHorizontalStrut(5));
 			theRow2.add(btnShowAll);				
 		}
-		
-		buttonPanel.add(theRow2);
-		
-		buttonPanel.setMaximumSize(buttonPanel.getPreferredSize()); 
-		buttonPanel.setMinimumSize(buttonPanel.getPreferredSize()); 
+		theRow2.setMaximumSize(new Dimension(Integer.MAX_VALUE,(int)theRow2.getPreferredSize ().getHeight()));
+		return theRow2;
 	}
 	private void createMainPanel() {
 		scroller = new JScrollPane ( );
@@ -257,7 +260,6 @@ public class PairNViewPanel extends JPanel {
 		
 		refreshPanels();
 	}
-	
 	private void createHeaderPanel() {
 		headerPanel = Static.createRowPanel();
 		
@@ -270,6 +272,11 @@ public class PairNViewPanel extends JPanel {
 	}
 	/*********************************************************************/
 	private void buildAlignments(String [] members) {
+		createTopPanel();
+		int cnt = members.length;
+		int num = (alignType>=PairAlignData.AlignHIT0_AA) ? cnt : (cnt*(cnt-1))/2;
+		alignHeader.setText("Computing " + num + " pairwise alignments. Please wait.");
+		
 		final String [] theMembers = members;
 		if(theThread == null)
 		{
@@ -541,7 +548,7 @@ public class PairNViewPanel extends JPanel {
 	}
 	
 	/********************************************************************/
-	private JPanel buttonPanel = null, mainPanel = null, headerPanel = null;
+	private JPanel mainPanel = null, headerPanel = null;
 	
 	private JScrollPane scroller = null;
 	private JTextField alignHeader = null;

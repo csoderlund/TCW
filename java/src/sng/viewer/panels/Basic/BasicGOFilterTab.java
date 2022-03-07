@@ -73,8 +73,8 @@ public class BasicGOFilterTab extends Tab {
 	private static final String pvalColLabel = "Select";
 	private static final String DEF_EVAL = "1E-40";
 	private static final String DEF_PVAL = "0.05";
-	private static final int MIN_LEVEL = 1;
-	private static int MAX_LEVEL = 16;
+	private static final int MIN_LEVEL = 0; // CAS342 was 1 so obsolete would not be shown, but then confusing
+	private static int MAX_LEVEL = 16; // gets set to the highest level for dataset
 	
 	public BasicGOFilterTab(STCWFrame parentFrame) {
 		super(parentFrame, null);
@@ -110,7 +110,7 @@ public class BasicGOFilterTab extends Tab {
 	 *  MAIN
 	 */
 	private void createMainPanel() {
-		createTopRowPanel();
+		createTopButtons();
 		createFilterPanel();
 		createStatusBar();
 		
@@ -142,7 +142,7 @@ public class BasicGOFilterTab extends Tab {
 	/**********************************
 	 *  XXX TOP BUTTONS
 	 */
-	private void createTopRowPanel() {
+	private void createTopButtons() {
 		topRowPanel = Static.createRowPanel();
 		
 		btnViewSeqs = Static.createButtonTab(Globals.seqTableLabel, true);
@@ -156,6 +156,7 @@ public class BasicGOFilterTab extends Tab {
         createTopCopy();
         createTopSelected();
 	    createTopTable();
+	    createHelp();
 		
 		topRowPanel.add(Static.createLabel(Globals.select)); topRowPanel.add(Box.createHorizontalStrut(1));
 		topRowPanel.add(btnViewSeqs);				topRowPanel.add(Box.createHorizontalStrut(1));
@@ -167,8 +168,10 @@ public class BasicGOFilterTab extends Tab {
 		topRowPanel.add(btnTableShow);				topRowPanel.add(Box.createHorizontalStrut(1));
 		topRowPanel.add(btnTableExport);			topRowPanel.add(Box.createHorizontalStrut(5));
 		
-		topRowPanel.setMaximumSize(topRowPanel.getPreferredSize());
-		topRowPanel.setMinimumSize(topRowPanel.getPreferredSize());
+		topRowPanel.add(Box.createHorizontalGlue());
+		topRowPanel.add(btnHelp);
+		
+		topRowPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE,(int)topRowPanel.getPreferredSize().getHeight()));		
 	}
 	/**************************************************************/
 	private void createTopCopy() {
@@ -339,7 +342,7 @@ public class BasicGOFilterTab extends Tab {
 			}
 		}));		
 		
-		btnSelExport = Static.createButton("Export...", false);
+		btnSelExport = Static.createButtonFile("Export...", false);
 		btnSelExport.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 selExport.show(e.getComponent(), e.getX(), e.getY());
@@ -445,7 +448,7 @@ public class BasicGOFilterTab extends Tab {
 			}
 		}));
 		
-		btnTableShow = Static.createButton("Show...", false);
+		btnTableShow = Static.createButtonPopup("Show...", false);
 		btnTableShow.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 tablePopup.show(e.getComponent(), e.getX(), e.getY());
@@ -609,12 +612,66 @@ public class BasicGOFilterTab extends Tab {
 			}
 		}));
 		
-		btnTableExport = Static.createButton("Export...", false);
+		btnTableExport = Static.createButtonFile("Export...", false);
 		btnTableExport.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 tableExport.show(e.getComponent(), e.getX(), e.getY());
             }
         });
+	}
+	/* CAS336 put all information under one Help button */
+	private void createHelp() {
+		final JPopupMenu popup = new JPopupMenu();
+		
+		popup.add(new JMenuItem(new AbstractAction("Top buttons") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theParentFrame, "Top Buttons", topHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
+			}
+		}));
+		popup.add(new JMenuItem(new AbstractAction("Search, Filter and Table") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theParentFrame, "Search, Filter and Table", queryHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
+			}
+		}));
+		popup.add(new JMenuItem(new AbstractAction("Modify Buttons") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theParentFrame, "Modify Buttons", lowerHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
+			}
+		}));
+		popup.addSeparator();
+		popup.add(new JMenuItem(new AbstractAction("Evidence information") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theParentFrame, "Evidence Information", goEvCHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
+			}
+		}));
+		popup.add(new JMenuItem(new AbstractAction("GO information") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theParentFrame, "GO Information", goHelpHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
+			}
+		}));
+		
+		btnHelp = Static.createButtonHelp("Help...", true);
+		btnHelp.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                popup.show(e.getComponent(), e.getX(), e.getY());
+            }
+        });
+		btnHelp.setAlignmentX(Component.RIGHT_ALIGNMENT);
 	}
 	 /*****************************
      *  CONTROL panel -- filters
@@ -972,78 +1029,20 @@ public class BasicGOFilterTab extends Tab {
 			}
 		});
 		
-		createHelp();
-		
 		 JPanel row5 = Static.createRowPanel(); // CAS336 added glue and dropdown help
 		 Box hzBox = Box.createHorizontalBox();
 		
 		 hzBox.add(Static.createLabel("Table", true)); hzBox.add(Box.createHorizontalStrut(5));
 		 hzBox.add(btnBuildTable);					   hzBox.add(Box.createHorizontalStrut(5));
-		 hzBox.add(btnAddTable);
+		 hzBox.add(btnAddTable);						hzBox.add(Box.createHorizontalStrut(60));
 		 
-		 hzBox.add(Box.createGlue());
 		 hzBox.add(btnSelectColumns);
 		
-		 hzBox.add(Box.createGlue());
-		 hzBox.add(btnHelp);
 		 row5.add(hzBox);
 	   
 		filterPanel.add(row5);
 	}
-	/* CAS336 put all information under one Help button */
-	private void createHelp() {
-		final JPopupMenu popup = new JPopupMenu();
-		
-		popup.add(new JMenuItem(new AbstractAction("Top buttons") {
-			private static final long serialVersionUID = 4692812516440639008L;
-			public void actionPerformed(ActionEvent e) {
-				try {
-					UserPrompt.displayHTMLResourceHelp(theParentFrame, "Top Buttons", topHTML);
-				} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
-			}
-		}));
-		popup.add(new JMenuItem(new AbstractAction("Search, Filter and Table") {
-			private static final long serialVersionUID = 4692812516440639008L;
-			public void actionPerformed(ActionEvent e) {
-				try {
-					UserPrompt.displayHTMLResourceHelp(theParentFrame, "Search, Filter and Table", queryHTML);
-				} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
-			}
-		}));
-		popup.add(new JMenuItem(new AbstractAction("Modify Buttons") {
-			private static final long serialVersionUID = 4692812516440639008L;
-			public void actionPerformed(ActionEvent e) {
-				try {
-					UserPrompt.displayHTMLResourceHelp(theParentFrame, "Modify Buttons", lowerHTML);
-				} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
-			}
-		}));
-		popup.addSeparator();
-		popup.add(new JMenuItem(new AbstractAction("Evidence information") {
-			private static final long serialVersionUID = 4692812516440639008L;
-			public void actionPerformed(ActionEvent e) {
-				try {
-					UserPrompt.displayHTMLResourceHelp(theParentFrame, "Evidence Information", goEvCHTML);
-				} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
-			}
-		}));
-		popup.add(new JMenuItem(new AbstractAction("GO information") {
-			private static final long serialVersionUID = 4692812516440639008L;
-			public void actionPerformed(ActionEvent e) {
-				try {
-					UserPrompt.displayHTMLResourceHelp(theParentFrame, "GO Information", goHelpHTML);
-				} catch (Exception er) {ErrorReport.reportError(er, "Error copying gonum"); }
-			}
-		}));
-		
-		btnHelp = Static.createButtonHelp("Help...", true);
-		btnHelp.addMouseListener(new MouseAdapter() {
-            public void mousePressed(MouseEvent e) {
-                popup.show(e.getComponent(), e.getX(), e.getY());
-            }
-        });
-		btnHelp.setAlignmentX(Component.RIGHT_ALIGNMENT);
-	}
+	
 	private void createPvalColPanel() { 
 		pvalColumnsPanel = Static.createPageCenterPanel();
 		
@@ -1506,14 +1505,11 @@ public class BasicGOFilterTab extends Tab {
 				theWhereStr = strAndMerge(theWhereStr, tmp);
 				theFilterStr = strMerge(theFilterStr, "Level=" + txtLevelSpecific.getText());
 			}
-			else {
+			else { // CAS342 did have 'else  (go_info.level >= 1)'; 
 				if (nLevelMin>MIN_LEVEL || nLevelMax<MAX_LEVEL) {
 					tmp = "(go_info.level >= " + nLevelMin + " and go_info.level <= " + nLevelMax + ")";
 					theWhereStr = strAndMerge(theWhereStr, tmp);
 					theFilterStr = strMerge(theFilterStr, "Level [" + nLevelMin + "," + nLevelMax + "]");
-				}
-				else { // CAS336 obsolete is level 0
-					theWhereStr = strAndMerge(theWhereStr, "(go_info.level >= 1)");
 				}
 			}
 			if (chkSlims.isSelected()) {

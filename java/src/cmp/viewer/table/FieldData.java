@@ -288,8 +288,9 @@ public class FieldData {
 		addPair(c++, SEQID1, String.class, PAIR_TABLE, "UTstr1", "Name of 1st sequence of pair", true);
 		addPair(c++, SEQID2, String.class, PAIR_TABLE, "UTstr2",  "Name of 2nd sequence of pair", true);
 		String seqType = (hasNTdb) ? "CDS" : "AA";
-		addPair(c++, seqType+"len1", Integer.class, PAIR_TABLE, "CDSlen1", "Length of CDS in bases for SeqID1", false);
-		addPair(c++, seqType+"len2", Integer.class, PAIR_TABLE,"CDSlen2",  "Length of CDS in bases for SeqID2", false);
+		String desc = (hasNTdb) ? "Length of CDS in bases for" : "Length of translated ORF in amino acids"; // CAS342
+		addPair(c++, seqType+"len1", Integer.class, PAIR_TABLE, "CDSlen1", desc + " SeqID1", false);
+		addPair(c++, seqType+"len2", Integer.class, PAIR_TABLE,"CDSlen2",  desc + " SeqID2", false);
 		if (hasPCC)
 		   addPair(c++, "PCC",  Float.class, PAIR_TABLE,"PCC", "Pearson Correlation Coefficient of RPKM values",false);
 		
@@ -309,8 +310,11 @@ public class FieldData {
 		addPair(c++,"AAeval", Double.class, PAIR_TABLE, "aaEval",   "Hit E-value for protein alignment",  false);
 		addPair(c++,"%AAsim", Float.class, PAIR_TABLE, "aaSim",     "Hit %Similarity (%Identity) for protein alignment", false);
 		addPair(c++, "AAalign",Integer.class, PAIR_TABLE,"aaAlign", "Hit protein alignment length - includes gaps", false);
-		addPair(c++, "%AAcov1",Float.class, PAIR_TABLE, "aaOlap1",  "Hit protein percent coverage for SeqID1 (aaAlign/(CDSlen1/3))", false);
-		addPair(c++, "%AAcov2", Float.class, PAIR_TABLE,"aaOlap2",  "Hit protein percent coverage for SeqID2 (aaAlign/(CDSlen2/3))", false);
+		
+		desc = (hasNTdb) ? "(AAalign/(CDSlen1/3)" : "(AAalign/AAlen1)"; // CAS342
+		addPair(c++, "%AAcov1",Float.class, PAIR_TABLE, "aaOlap1",  "Hit protein percent coverage for SeqID1 " + desc, false);
+		desc = (hasNTdb) ? "(AAalign/(CDSlen2/3)" : "(AAalign/AAlen2)"; // CAS342
+		addPair(c++, "%AAcov2", Float.class, PAIR_TABLE,"aaOlap2",  "Hit protein percent coverage for SeqID2 " + desc, false);
 		addPair(c++, "AAgap", Integer.class, PAIR_TABLE, "aaGap",   "Hit #Gap Open for protein alignment", false);
 		addPair(c++, "AAbit", Integer.class, PAIR_TABLE, "aaBit",   "Hit bit-score for protein alignment",  false);
 		addPair(c++, "AAbest",  Integer.class, PAIR_TABLE,"aaBest", 

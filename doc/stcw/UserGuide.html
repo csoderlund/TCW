@@ -36,7 +36,7 @@ sequences.
 			<li><a href="#cnt">Defining count data</a>
 			<ul>
 					<li><a href="#rep">Biological replicates</a>
-					<li><a href="#bcf">The combined count file</a>
+					<li><a href="#bcf">The count file</a>
 			</ul>	
 		</ul>
 		<br>
@@ -137,7 +137,7 @@ if the <ttx>GO database</ttx> has not been built yet (see Step 5), the following
 	--Please confirm above parameters. Continue with annotation?  (y/n)?
 </pre>
 Answer 'y' to continue.
-<p>The output to the terminal and to the file <ttx>projects/demoTra/logs/anno.log</ttx> will look something like 
+<p>&#x2192<b><i>Log file</i></b>: The output to the terminal and to the file <ttx>projects/demoTra/logs/anno.log</ttx> will look something like 
 <a href=anno.log.html class="ext" target="_blank">this log</a> (this includes the GO annotation).
 				
 <p>4. Click the <ttc>Add Remarks or Location</ttc> button (bottom of window), a window will popup (not shown).
@@ -163,7 +163,7 @@ The <a href="DiffExp.html" class="ext" target="_blank">DE Guide</a> describes ho
 packages, and how to add DE p-values to the TCW database. If Step 5 has been run, then you can also add
 the p-values for the GO.
 
-<p>See <a href="../ov/sDemo.html" class="ext" target="_blank">overview</a> for the final demoTra overview from the above 6 steps.
+<p>&#x2192<b><i>Overview</i></b>: See <a href="../ov/sDemo.html" class="ext" target="_blank">overview</a> for the final demoTra overview from the above 6 steps.
 
 <a id=demoNonUP></a>		
 <p>7. (Optional) Add non-UniProt annoDBs
@@ -209,7 +209,7 @@ When you select "OK", the following occurs:
 <li>The <ttx>project/&lt;name&gt;</ttx> directory will be created with files <ttx>LIB.cfg</ttx> and <ttx>sTCW.cfg</ttx>. These maintain all information you enter.
 </ol>
 For example, if you enter the name "example", the ID will be "example" and the database will be "sTCW_example".
-You may want to shorten the <ttx>singleTCW ID</ttx>, for example, to "ex" as shown. 
+Shorten the <ttx>singleTCW ID</ttx>, for example, to "ex" as shown. 
 
 <td>
 <a href="img/runSingleAddProject.png">
@@ -218,7 +218,7 @@ You may want to shorten the <ttx>singleTCW ID</ttx>, for example, to "ex" as sho
 <a href="img/runSingleAddProject2.png">
 <img src="img/runSingleAddProject2.png"  alt="" style="border: 1px solid black; width: 450px"></a>
 </table>
-<p><ttc>singleTCW ID</ttc>: This should be a short descriptive name (2-5 characters, e.g. "ex"). It is used for the
+<p><u><ttx>singleTCW ID</ttx></u>: This should be a short descriptive name (2-5 characters, e.g. "ex"). It is used for the
 following:
 <ol><li>This can be used as a command line parameter to <ttp>runDE</ttp> and <ttp>viewSingleTCW</ttp>, e.g. "viewSingleTCW ex". 
 <li>If TCW generates the sequence names (if <ttc>Use Sequence Names from File</ttc> is not checked), 
@@ -239,7 +239,7 @@ will see your project (the project pulldown lists all directories under <ttx>/pr
 There are three possible scenarios:
 
 <h4>1. Sequence and count files</h4>
-The typical input is a file of transcripts and associated read counts. The transcript file is a fasta file,
+The typical input is a file of transcripts and associated read counts. The transcript file is a FASTA file,
 where the sequence name must be under 30 characters, using only letters, numbers, and underscores.
 <p>
 The sequence names in the count file must match the sequence names in the sequence file. The count file
@@ -278,13 +278,13 @@ shown on the lower right.
 <tr><td>
 <ttc>SeqID</ttc>: Enter the dataset name (a brief identifier) in the first box; it should be a short (3-5 characters) name.
 <p>
-<ttc>Sequence File:</ttc> Click the browse button labeled "..." to select the fasta file of sequences.
+<ttc>Sequence File:</ttc> Click the browse button labeled "..." to select the FASTA file of sequences.
 <p>
 Additional information:
 <ol>
 <li><ttc>Count File:</ttc> For already assembled transcripts (e.g. Illumina) or protein sequences, there may be associated count files.
 Adding them is covered below in <a href="#cnt">Defining count data</a>.
-<li><ttc>Quality File:</ttc> For Sanger ESTs or 454 data, there may be a quality file (standard Phred quality scores in fasta format).
+<li><ttc>Quality File:</ttc> For Sanger ESTs or 454 data, there may be a quality file (standard Phred quality scores in FASTA format).
 <li><ttc>Sanger ESTs:</ttc> TCW assumes the 5' ESTs have the ".f" suffix and the 3' ESTs have the ".r" suffix. If there
 are different from this, enter the correct ones.
 <li><ttc>ATTRIBUTES:</ttc> Enter any additional information
@@ -324,7 +324,7 @@ for the sequences. 	Alternatively, you can build the combined count file from mu
 
 <td>
 <a href="img/runSingleAddSeq2.png">
-<img src="img/runSingleAddSeq2.png" alt="" style="border: 1px solid black; width: 450px"></a>
+<img src="img/runSingleAddSeq2.png" alt="" style="border: 1px solid black; width: 500px"></a>
 
 <tr><td class="top">
 The panel shown on the right is part of the main panel. The
@@ -336,7 +336,7 @@ After defining the replicates, use <ttc>Edit Attributes</ttc> to add information
 conditions, which will be shown on the <ttp>viewSingleTCW</ttp> overview.
 <td>
 <a href="img/runSingleAddSeqKeep.png">
-<img src="img/runSingleAddSeqKeep.png" alt="" style="border: 1px solid black; width: 450px"></a>
+<img src="img/runSingleAddSeqKeep.png" alt="" style="border: 1px solid black; width: 500px"></a>
 </table>
 
 <a id=rep></a>
@@ -396,7 +396,7 @@ conditions, which will be shown on the <ttp>viewSingleTCW</ttp> overview.
 				
 <a id=bcf></a>
 <table style="width: 100%"><tr><td style="text-align: left">	
-<h4>Build the combined count file</h4>
+<h4>The count file</h4>
 <td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
 	
@@ -510,7 +510,7 @@ from UniProt, add the associated GO annotations.
 
 <a id=dbs></a>
 <h3>AnnoDBs and UniProt</h3>
-The term "AnnoDB" refers to a fasta file of nucleotide or protein sequences, 
+The term "AnnoDB" refers to a FASTA file of nucleotide or protein sequences, 
 where the TCW sequences (transcript or protein) will be searched against the annoDBs for functional annotation.
 Read <a href=AnnoDBs.html class="ext" target="_blank">Annotation Setup</a> for obtaining UniProt and other annotation databases. 
 
@@ -552,7 +552,7 @@ which can be changed.
 <p><a href="../img/bullet2.gif"><img src="../img/bullet2.gif" alt="bullet" style="border: 0px; width: 20px"></a>
 <ttl>Use Existing Hit Tabular File</ttl>:
 <p class=lrpad>You can supply your own hit results file (must be in tabular format). 
-You must still provide the annoDB fasta file as
+You must still provide the annoDB FASTA file as
 it extracts the description and species from it.
 
 <!--  ======== Option =================== -->

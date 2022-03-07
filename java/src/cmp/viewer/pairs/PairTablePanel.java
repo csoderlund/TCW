@@ -141,10 +141,10 @@ public class PairTablePanel extends JPanel {
        topRow.add(btnPairwise);					topRow.add(Box.createHorizontalStrut(2)); 
          	
         createBtnCopy();
- 		topRow.add(btnCopy);					topRow.add(Box.createHorizontalGlue());  
+ 		topRow.add(btnCopy);			topRow.add(Box.createHorizontalStrut(nParentRow>=0 ? 5 : 30));  
 		
         createBtnTable();
-        topRow.add(btnTable);					topRow.add(Box.createHorizontalStrut(2));
+        topRow.add(btnTable);					topRow.add(Box.createHorizontalGlue());
         
         btnHelp = Static.createButtonHelp("Help", true);
         btnHelp.addActionListener(new ActionListener() {
@@ -178,8 +178,7 @@ public class PairTablePanel extends JPanel {
         topRow.setAlignmentX(LEFT_ALIGNMENT);
 
         buttonPanel.add(topRow);
-        buttonPanel.add(Box.createVerticalStrut(5));
-        
+       
         return buttonPanel;
     }
     
@@ -317,7 +316,7 @@ public class PairTablePanel extends JPanel {
 	 		}));
  		}
  	
- 		btnTable = Static.createButtonMenu("Table...", true);
+ 		btnTable = Static.createButtonTable("Table...", true);
 		btnTable.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 popup.show(e.getComponent(), e.getX(), e.getY());
@@ -700,10 +699,11 @@ public class PairTablePanel extends JPanel {
     	if(tableButtonPanel != null) { 	//Is null if a sample table 
     		add(tableButtonPanel);
     	}
-    	add(Box.createVerticalStrut(10));
+    	add(Box.createVerticalStrut(2));
     	add(tableSummaryPanel);
     	add(Box.createVerticalStrut(10));
     	add(tableStatusPanel);
+    	
     	add(sPane);
     	add(fieldSelectPanel);
     	add(Box.createVerticalStrut(10));
@@ -1090,10 +1090,10 @@ public class PairTablePanel extends JPanel {
     		desc = (String)theTableData.getValueAt(row, theTableData.getColumnHeaderIndex(HITID));
     		desc +=  " (no hit sequence)";
     	}
-    	
-    	String sum =  "Row " + (row+1) + "/" + theTable.getRowCount();
-    	sum += "   " + Globals.tagPAIR +  " #" +   name + "  " + id1 + " " + id2;
-    	sum += "   " + Globals.tagHIT +  desc;	
+    	String sum="";
+    	if (theTable.getRowCount()>1)  sum =  "Row " + (row+1) + "/" + theTable.getRowCount() + "   ";
+    	sum += Globals.tagPAIR +  " #" +   name + "  " + id1 + " " + id2 + "   ";
+    	sum += Globals.tagHIT +  desc;	
    
     	return sum;
     }

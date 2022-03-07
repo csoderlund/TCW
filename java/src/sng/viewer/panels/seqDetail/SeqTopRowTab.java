@@ -10,6 +10,7 @@ package sng.viewer.panels.seqDetail;
  */
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,6 +19,7 @@ import java.awt.event.MouseEvent;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -39,6 +41,7 @@ import sng.viewer.panels.align.PairViewPanel;
 import sng.viewer.panels.align.ContigViewPanel;
 import sng.viewer.panels.seqTable.SeqTableTab;
 import util.methods.Static;
+import util.methods.ErrorReport;
 import util.methods.Out;
 import util.ui.UserPrompt;
 import util.database.DBConn;
@@ -46,10 +49,15 @@ import util.database.DBConn;
 public class SeqTopRowTab extends Tab {
 	private static final long serialVersionUID = -6991503611757134213L;
 	
-	private static final String helpHTML =  Globals.helpDir + "DetailTopRow.html";
-	
+	private static final String tophelpHTML =  Globals.helpDir + "DetailTopRow.html";
+	private static final String detailhelpHTML = Globals.helpDir + "DetailPanel.html";
+	private static final String framehelpHTML = Globals.helpDir + "DetailFramePanel.html";
+	private static final String alignhelpHTML = Globals.helpDir + "Align.html";
+	private static final String gohelpHTML =  	Globals.helpDir + "DetailGoPanel.html";
+	private static final String go2helpHTML =  	Globals.helpDir + "goHelp/index.html";
+
 	private Color panelColor = Static.PANELCOLOR; 
-	private Color activeColor = Static.RUNCOLOR;  
+	private Color activeColor = Static.ACTIVECOLOR;  
 	private short parent;
 	private short seqTab = 1;
 	private short capTab = 2;
@@ -69,17 +77,52 @@ public class SeqTopRowTab extends Tab {
            int recordNum)
 	{
 		super(theFrame, parentTab);
+		super.setBackground(Color.white);
+		
 		theMainFrame = theFrame;
 		metaData = theFrame.getMetaData();
-		nRecordNum = recordNum; 								
+		nParentRow = recordNum; 								
 		ctgNameData = listData;
 			
-		if (parentTab == null) parent = capTab;
-		else 	parent=seqTab;
-	
-		/********************************************
-		 *  XXX Create dropdown menu of contig
-		 */
+		setBackground(Color.white);
+		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+		setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+		
+		if (parentTab == null) 	{ // assembled contig with cap
+			parent = capTab;
+			createCapButton();
+		}
+		else {
+			parent = seqTab;
+			createTopButtons();
+		}
+		
+		add ( Box.createVerticalStrut(5) );
+		add ( topRowPanel );
+		
+		bottomPanel = Static.createPagePanel();
+		add ( Box.createVerticalStrut(5) );
+		add ( bottomPanel );	
+		
+		setInActive(rbDetails);
+		
+		if (parent==capTab) opFirstCAP3(listData);
+		else 				opFirst(); 
+	}
+	private void createCapButton() {
+		topRowPanel = Static.createRowPanel();
+		rbContig = Static.createButtonPanel("Contig", true); 
+		rbContig.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				setInActive(rbContig);
+				opContig();
+			}
+		});
+		topRowPanel.setMaximumSize( new Dimension ( Integer.MAX_VALUE, (int)topRowPanel.getPreferredSize ().getHeight() ) );
+	}
+	private void createTopButtons() {
+		topRowPanel = Static.createRowPanel();		topRowPanel.add(Box.createHorizontalStrut(5));
+		
 		rbDetails = Static.createButtonPanel("Details", true); 
 		rbDetails.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -87,6 +130,8 @@ public class SeqTopRowTab extends Tab {
 				opDetails();
 			}
 		});
+		topRowPanel.add(rbDetails); 				topRowPanel.add( Box.createHorizontalStrut(5) );
+		
 		rbFrame = Static.createButtonPanel("Frame", true); 
 		rbFrame.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -94,6 +139,8 @@ public class SeqTopRowTab extends Tab {
 				opFrame();
 			}
 		});
+		topRowPanel.add( rbFrame );				topRowPanel.add( Box.createHorizontalStrut(5) );
+		
 		// if assembled
 		rbContig = Static.createButtonPanel("Contig", true); 
 		rbContig.addActionListener(new ActionListener() {
@@ -109,7 +156,51 @@ public class SeqTopRowTab extends Tab {
 				opSNPs();
 			}
 		});
-		// GO options
+		if (metaData.hasAssembly()) {
+			topRowPanel.add( rbContig ); 		topRowPanel.add( Box.createHorizontalStrut(5) );
+			topRowPanel.add( rbSNP );			topRowPanel.add( Box.createHorizontalStrut(5) );
+		}	
+		
+		createAlignButton();
+		topRowPanel.add( rbAlign ); 			
+		
+		createGObutton();
+		if (metaData.hasGOs()) {
+			topRowPanel.add( Box.createHorizontalStrut(5) );
+			topRowPanel.add( rbGO );	
+		}
+		
+		topRowPanel.add( Box.createHorizontalGlue() );
+		createHelp();
+		topRowPanel.add( btnHelp ); 			topRowPanel.add( Box.createHorizontalStrut(5) );
+		
+		// Create prev and next buttons
+		if (nParentRow>=0) {
+			JButton btnPrev = Static.createButton("<<", true);
+			btnPrev.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {				
+					if (getParentTab() instanceof SeqTableTab) {
+						addPrevNextTab( ((SeqTableTab)getParentTab()).getPrevRowNum( nParentRow ) );
+					}
+					else Out.PrtErr("<< Prev TCW error"); 
+				}
+			});
+			JButton btnNext = Static.createButton(">>", true);
+			btnNext.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					if (getParentTab() instanceof SeqTableTab) { 
+						addPrevNextTab( ((SeqTableTab) getParentTab()).getNextRowNum( nParentRow ) );
+					}
+					else Out.PrtErr("Next >> TCW error"); 
+				}
+			});
+			topRowPanel.add( btnPrev ); 			topRowPanel.add( Box.createHorizontalStrut(1) );
+			topRowPanel.add( btnNext ); 			topRowPanel.add( Box.createHorizontalStrut(5) );	
+		}
+		topRowPanel.setMaximumSize( new Dimension ( Integer.MAX_VALUE, (int)topRowPanel.getPreferredSize ().getHeight() ) );
+		
+	}
+	private void createGObutton() {
 		final JPopupMenu gopopup = new JPopupMenu();
 		gopopup.add(new JMenuItem(new AbstractAction("Assigned GOs for all hits") {
 			private static final long serialVersionUID = 4692812516440639008L;
@@ -146,8 +237,8 @@ public class SeqTopRowTab extends Tab {
         		gopopup.show(e.getComponent(), e.getX(), e.getY());
             }
         });
-		
-		/*  Align */
+	}
+	private void createAlignButton() {
 		final JPopupMenu alignpopup = new JPopupMenu();
 		alignpopup.add(new JMenuItem(new AbstractAction("Best Hits") {
 			private static final long serialVersionUID = 4692812516440639008L;
@@ -177,95 +268,69 @@ public class SeqTopRowTab extends Tab {
             public void mousePressed(MouseEvent e) {// CAS337 moved setInActive to Items      		
         		alignpopup.show(e.getComponent(), e.getX(), e.getY());
             }
+        });	
+	}
+	private void createHelp() {
+		final JPopupMenu popup = new JPopupMenu();
+		
+		popup.add(new JMenuItem(new AbstractAction("Top buttons") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theMainFrame, "Top Buttons", tophelpHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error showing buttons"); }
+			}
+		}));
+		popup.add(new JMenuItem(new AbstractAction("Details") { // CAS342 left this off
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theMainFrame, "Details", detailhelpHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error showing detail"); }
+			}
+		}));
+		popup.add(new JMenuItem(new AbstractAction("Frame") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theMainFrame, "Frame", framehelpHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error showing frame"); }
+			}
+		}));
+		popup.add(new JMenuItem(new AbstractAction("Align Hits...") {
+			private static final long serialVersionUID = 4692812516440639008L;
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UserPrompt.displayHTMLResourceHelp(theMainFrame, "Align Hits...", alignhelpHTML);
+				} catch (Exception er) {ErrorReport.reportError(er, "Error showing remark"); }
+			}
+		}));
+		if (metaData.hasGOs()) {
+			popup.add(new JMenuItem(new AbstractAction("GO...") {
+				private static final long serialVersionUID = 4692812516440639008L;
+				public void actionPerformed(ActionEvent e) {
+					try {
+						UserPrompt.displayHTMLResourceHelp(theMainFrame, "GO...", gohelpHTML);
+					} catch (Exception er) {ErrorReport.reportError(er, "Error showing go"); }
+				}
+			}));
+			popup.add(new JMenuItem(new AbstractAction("GO Info") {
+				private static final long serialVersionUID = 4692812516440639008L;
+				public void actionPerformed(ActionEvent e) {
+					try {
+						UserPrompt.displayHTMLResourceHelp(theMainFrame, "GO Info", go2helpHTML);
+					} catch (Exception er) {ErrorReport.reportError(er, "Error showing go info"); }
+				}
+			}));
+		}
+		
+		btnHelp = Static.createButtonHelp("Help...", true);
+		btnHelp.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                popup.show(e.getComponent(), e.getX(), e.getY());
+            }
         });
-		
-		// Create prev and next buttons
-		JButton btnPrev = Static.createButton("<<Prev", true);
-		btnPrev.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {				
-				if (getParentTab() instanceof SeqTableTab) {
-					addPrevNextTab( ((SeqTableTab)getParentTab()).getPrevRowNum( nRecordNum ) );
-				}
-				else Out.PrtErr("<< Prev TCW error"); 
-			}
-		});
-
-		JButton btnNext = Static.createButton("Next>>", true);
-		btnNext.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				//if(displayedJPanel != null) {
-				//	setPrevDisplaySettings(((PairViewPanel)displayedJPanel).getDisplaySettings());
-				//}
-				if (getParentTab() instanceof SeqTableTab) { 
-					addPrevNextTab( ((SeqTableTab) getParentTab()).getNextRowNum( nRecordNum ) );
-				}
-				else Out.PrtErr("Next >> TCW error"); 
-			}
-		});
-		if (recordNum < 0){
-			btnPrev.setEnabled(false);
-			btnNext.setEnabled(false);
-		}
-		
-		JButton btnHelp = Static.createButtonHelp("Help1", true);
-		btnHelp.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				UserPrompt.displayHTMLResourceHelp(theMainFrame,"Sequence Options", helpHTML);
-			}
-		});
-		
-		// Top panel with buttons and drop-down		 
-		JPanel topPanel = new JPanel ( );
-		topPanel.setLayout( new BoxLayout ( topPanel, BoxLayout.X_AXIS ) );
-		topPanel.add( Box.createHorizontalStrut(5) );
-		topPanel.add( rbDetails ); 
-		topPanel.add( Box.createHorizontalStrut(5) );
-		
-		if (parent == capTab) {
-			topPanel.add( rbContig ); 
-		}
-		else {	
-			if (metaData.hasAssembly()) {
-				topPanel.add( rbContig ); 
-				topPanel.add( Box.createHorizontalStrut(5) );
-				topPanel.add( rbSNP );
-				topPanel.add( Box.createHorizontalStrut(5) );
-			}		
-			topPanel.add( rbFrame );
-			topPanel.add( Box.createHorizontalStrut(5) );
-			
-			if (metaData.hasGOs()) {
-				topPanel.add( rbGO );
-				topPanel.add( Box.createHorizontalStrut(5) );
-			}
-			topPanel.add( rbAlign ); 
-			
-			topPanel.add( Box.createHorizontalGlue() );
-			
-			topPanel.add( btnPrev ); 	
-			topPanel.add( Box.createHorizontalStrut(1) );
-			topPanel.add( btnNext ); 	
-			int x = (metaData.hasAssembly()) ? 5 : 20;
-			topPanel.add( Box.createHorizontalStrut(x) );
-			topPanel.add( btnHelp ); 	
-			topPanel.add( Box.createHorizontalStrut(5) );
-		}
-		topPanel.setMaximumSize( new Dimension ( Integer.MAX_VALUE, 
-				(int)topPanel.getPreferredSize ().getHeight() ) );
-		topPanel.setBackground(Color.white);
-		super.setBackground(Color.white);
-			
-		bottomPanel = new JPanel ();
-		setLayout( new BoxLayout ( this, BoxLayout.Y_AXIS ) );
-		add ( Box.createVerticalStrut(5) );
-		add ( topPanel );
-		add ( Box.createVerticalStrut(5) );
-		add ( bottomPanel );	
-		
-		setInActive(rbDetails);
-		
-		if (parent==capTab) opFirstCAP3(listData);
-		else opFirst(); 
+		btnHelp.setAlignmentX(Component.RIGHT_ALIGNMENT);
 	}
 	private void setInActive(JButton button) {
 		// this works on mac but not linux
@@ -551,7 +616,7 @@ public class SeqTopRowTab extends Tab {
 			public void run() throws Throwable {
 				ContigViewPanel ctgPanel = 
 					ContigViewPanel.createESTPanel( metaData.hasCAP3(),
-							ctgFullData, nRecordNum, getID());
+							ctgFullData, nParentRow, getID());
 				
 				installContigPanel ( ctgPanel );
 				
@@ -618,7 +683,7 @@ public class SeqTopRowTab extends Tab {
 	private PairViewPanel hitAllFramePanel = null;	
 	
 	/*******************************************************/
-	private int nRecordNum;	
+	private int nParentRow;	
 
 	private STCWFrame theMainFrame = null;
 	private MetaData metaData = null;
@@ -626,8 +691,9 @@ public class SeqTopRowTab extends Tab {
 	private JButton rbDetails = null, rbFrame = null;
 	private JButton rbGO = null, rbAlign = null;
 	private JButton rbContig = null, rbSNP = null;
+	private JButton btnHelp = null;
 	
-	private JPanel bottomPanel = null;
+	private JPanel topRowPanel, bottomPanel = null;
 	private PairViewPanel pairAlignPanel = null;
 	private ContigViewPanel ctgAlignPanel=null;
 	
