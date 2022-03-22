@@ -29,7 +29,7 @@ See <a href="../../stcw/UserGuide.html" class="ext" target="_blank">sTCW UserGui
 	1. <ttc>Build Database</ttc>
 	<ol type="a">
 		<li>The input may be transcripts with optional read counts, proteins with optional spectral counts, 
-		or sequences to be assembled such as  Sanger ESTs, 454 reads, and/or transcript libraries. 
+		or sequences to be assembled.  
 		<li>The <ttc>Add</ttc> window allows you to specify the sequence dataset (fasta file) 
 		along with its conditions (e.g. tissue, treatment, etc),
 		which will be listed under <ttc>Associated Counts</ttc> on the main window. 
@@ -39,15 +39,16 @@ See <a href="../../stcw/UserGuide.html" class="ext" target="_blank">sTCW UserGui
 	2. <ttc>Instantiate</ttc>
 	<ol type="a">
 		<li><ttc>Skip Assembly</ttc> - the sequences can be instantiated with no assembly.
-		<li>Assembly - the sequences can be assembled. If Read sequences (i.e. ESTs) are mixed with
-		transcripts that have read counts, the EST dataset 'counts' for the contig will be the number
-		of ESTs in the given contig, and the transcripts will retain their counts from the input.
+		<li>Assembly - the sequences, such as  Sanger ESTs, 454 reads, and/or transcript,
+		can be assembled.
 	</ol>
 
 	3. <ttc>Annotate</ttc> 
 	<ol type="a">
-		<li>Use <a href="../runAS" class="ext" target="_blank">runAS</a> to download and format UniProts and the GO databases; these are input to (b) and (c).
-		<li>Add one or more databases to search against, which can be protein or nucleotide.
+		<li>Use <a href="../runAS" class="ext" target="_blank">runAS</a> 
+		to download and format UniProts and the GO databases for input into this step.
+		<li>Search against one or more protein (e.g. UniProt) or nucleotide databases,
+		referred toa "annoDBs".
 		<li>In the <ttc>Options</ttc> window, define the GO database 
 	</ol>
 
@@ -72,14 +73,15 @@ See <a href="../../stcw/UserGuide.html" class="ext" target="_blank">sTCW UserGui
 <tr>
 	<td class=top>
 		<ttl>Sequence Datasets</ttl>
-		<p><ttc>Add/Edit</ttc>:  Selecting <ttc>Add</ttc> shows this window. Selecting <ttc>Edit</ttc> shows
-		a similar window, but only the Attribute values can be changed after the database has been created. 
+		<p><ttc>Add/Edit</ttc>:  Selecting <ttc>Add</ttc> shows this window. 
+		Selecting <ttc>Edit</ttc> shows
+		a similar window, but only the ATTRIBUTES values can be changed after the database has been created. 
 		The counts can be in one file or generated with the <ttc>Build combined count file</ttc> option. 
 		On <ttc>Save</ttc>, the condition names will be written in the <ttc>Associated Counts</ttc> table on the 
 		main window.
 		<p><ttc>Build combined count file file</ttc>:  (window not shown) If the counts are in multiple files, this button opens up a 
 		window in which a directory of count files, or individual count files, can be entered. 
-		It will generate a file called <tt>Combined_read_count.csv</tt> 
+		It will generate a file called <tt>Combined_read_count.tsv</tt> 
 		where the columns are conditions with their respective counts.
 	</td>
 	<td>

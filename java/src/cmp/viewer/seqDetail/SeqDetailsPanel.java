@@ -701,6 +701,7 @@ public class SeqDetailsPanel extends JPanel {
 	public boolean isAAonly() { return bAAonly;}
 	public boolean hasPairs() { return (thePairData.size()>0);}
 	public boolean hasHits() { return (theHitData.size()>0);}
+	public String getSeqID() { return seqName;} // CAS343
 	
 	public String getSelectedSeqID() {
 		if (thePairData.size()==0) return "";

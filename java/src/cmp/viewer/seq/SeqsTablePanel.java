@@ -131,6 +131,8 @@ public class SeqsTablePanel extends JPanel {
 		theViewerFrame = parentFrame;
 		vSettings = parentFrame.getSettings();
 		totalSeq = theViewerFrame.getInfo().getCntSeq();
+		hasNTdbOnly = theViewerFrame.getInfo().isNTonly(); // CAS343 add
+		hasGOs = theViewerFrame.getInfo().hasGOs();        // CAS343 add
 
 		tabName = tab;
 		nParentRow = row;
@@ -188,7 +190,7 @@ public class SeqsTablePanel extends JPanel {
         btnHelp = Static.createButtonHelp("Help", true);
         btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				UserPrompt.displayHTMLResourceHelp(theViewerFrame, "Pair table",  helpHTML);
+				UserPrompt.displayHTMLResourceHelp(theViewerFrame, "Sequence table",  helpHTML);
 			}
 		});
         topRow.add(btnHelp);					topRow.add(Box.createHorizontalStrut(1)); 

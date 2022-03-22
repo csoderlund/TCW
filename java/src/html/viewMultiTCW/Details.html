@@ -6,17 +6,18 @@
 <h3>Details Panel</h3>
 
 This is viewed from the Sequence table and provides information about the sequence.
-It contains following two sortable tables:
+It contains the following two sortable tables:
 
 <p><i>Pairs</i>:
 This lists all seqIDs that have a hit with the sequence, along with any  shared clusters.
 <p><i>Hits</i>:
-The top first hits from each type are loaded into the database when it is built, and listed here.
+The top hits from each annoDB are loaded into the database when it is built, and listed here.
 The only columns that need explanation are the following: 
 <pre>
 aaCov =  (Align/length of AA sequence)*100.0
 hitCov = (Align/length of hit sequence)*100.0
 </pre> 
+Where <tt>align</tt> is from the Blast/Diamond hit file. 
 The values can be &gt;100 when there are gaps in the alignment.
 <br><br>
 The <tt>Best</tt> column has:
@@ -36,11 +37,12 @@ to the sequence.
 This will only be available if GOs were added to the database when it was built with <tt>runMultiTCW</tt>.
 <p>There are four options, where selecting one will replace the current sequence panel with a GO panel.
 <table border=1 cellspacing=3>
-<tr><td>Assigned GOs for hits<td>GOs that have been directly assigned to at least one of the hits.
+<tr><td>Assigned GOs for hits<td>GOs that have been directly assigned to at least one hit.
 <tr><td>All GOs for hits<td>Both assigned and inherited GOs for all hits.
-<tr><td>Assigned GOs for the selected hit (or best)<td>All assigned GOs for the selected hit are shown.
+<tr><td>Assigned GOs for the selected hit (or best)<td>All assigned GOs for the selected hit.
 If no row in the Hits table is selected, then the best hit is used.
-<tr><td>All GOs for the selected hit (or best)<td>All assigned and inherited GOs for the selected hit are shown.
+<tr><td>All GOs for the selected hit (or best)<td>
+All assigned and inherited GOs for the selected hits.
 If no row in the Hits table is selected, then the best hit is used.
 </table>
 
@@ -48,9 +50,9 @@ If no row in the Hits table is selected, then the best hit is used.
 The first 4 options apply to the pair table. The last option applies to the hit table.
 In both cases, (1) if no row is selected, the first row will be used, (2) only one row can be selected. 
 <table border=1 cellpadding=3>
-<tr><td><b>AA to pair seqID</b><td>Perform pairwise 
+<tr><td><b>AA to pair seqID</b><td>Pairwise 
 alignment of amino acid sequence from the selected pair sequence. 
-<tr><td><b>NT to pair seqID*</b><td> Perform pairwise 
+<tr><td><b>NT to pair seqID*</b><td> Pairwise 
 alignment of the nucleotide sequence to the selected pair sequence. 
 <tr><td><b>AA,NT,CDS to pair seqID*</b> 
 <td>Align the selected pair using the amino acid sequence,
@@ -64,10 +66,15 @@ The resulting panel will have these 3 alignments.
 * NT-mTCW only
 
 <p><u>Copy...</u>
-<br><i>Pairs:</i> The first four options apply to the selection in the Pairs Table; if no
+<ol>
+<li><b>Detailed sequence</b>: The first 3 options are for this.
+<li><b>Pairs:</b> The next 4 options apply to the selection in the sequence Pairs Table; if no
 row is selected, the first row will be used.
-<br><i>Hits:</i> The remaining options apply to the selection in the Hits Table; if no
+<li><b>Hits:</b> The remaining options apply to the selection in the sequence Hits Table; if no
 row is selected, the Best Hit will be used.
+</ol>
+If there are AA-sTCWdbs in the mTCW, 
+the <u>Copy NT sequence</u> and <u>Copy CDS sequence</u> options will not be available.
 
 
 </html>

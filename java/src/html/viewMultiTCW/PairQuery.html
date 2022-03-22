@@ -2,14 +2,15 @@
 <body style="padding:20px;width:650px;">
 <title>Filter Pairs</title>
 <h2>Filter Pairs</h2>
-There is a pair for two sequences if they have a hit, where the hits are computed when
-the database is created. This was accomplished by searching a file of all sequences
+There is a pair for two sequences if they have a AA or NT hit. 
+The pair hits were computed by searching a file of all sequences
 in the database against itself using a heuristic search program
 such as <tt>Diamond</tt> or <tt>Blast</tt>. 
 
 <p>
 A pair must pass ALL filters. The filters selected will be shown at the top
-of the resulting filtered Pairs table. Beware:
+of the resulting filtered Pairs table. 
+<br>Beware:
 <ul>
 <li>It is easy to forget to unset a filter, so execute "Clear"
 to clear all filters in order to start a brand new filter. 
@@ -20,17 +21,16 @@ set and may take awhile to display.
 <h3>+Basic</h3>
 Click the check box and enter the search value.
 <table border=1 cellpadding=3>
-<tr><td><tt>Pair #</tt><td> Search for the number shown in the <tt>Pair #</tt> column. This results in only
-one pair being displayed.
-<tr><td><tt>SeqID</tt><td>If the <tt>Seq ID</tt> of either sequence in the pair contains the given substring, the
-resulting pair will be displayed. 
-<tr><td><tt>Shared HitID</tt><td>If the assigned <tt>HitID</tt> of a pair contains the given substring, the
-resulting pair will be displayed. 
+<tr><td><tt>Pair #</tt><td> Search for the number shown in the <tt>Pair #</tt> column. 
+<tr><td><tt>SeqID</tt><td>If the <tt>SeqID</tt> of either sequence in the pair contains 
+the given substring, the resulting pair will be displayed. 
+<tr><td><tt>Shared HitID</tt><td>If the assigned <tt>HitID</tt> of a pair contains the given substring, 
+the resulting pair will be displayed. 
 <br>The <tt>HitID</tt> "*NoShare" indicates the pair does not share any description.
 <br>The <tt>HitID</tt> "*Novel" indicates that neither sequence of the pair has any annotation.
 <br>See the <a href=http://www.agcol.arizona.edu/software/tcw/doc/mtcw/UserGuide.html#pairs>online documentation</a>
 for a detailed description of how the <tt>Shared Hit</tt> is computed.
-<tr><td><tt>Shared Descript</tt><td>Displays all pairs that have the substring in the  description column. 
+<tr><td><tt>Shared Descript</tt><td>Displays all pairs that have the substring in the <tt>Descript</tt> column. 
 <tr><td><tt>PCC</tt><td> This is only relevant if there are TPM values in the database. The Pearson
 Correlation Coefficient (PCC) is computed for all pairs to determine their correlation. 
 </table>

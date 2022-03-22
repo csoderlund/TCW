@@ -3,8 +3,8 @@
 <title>Sequence Table</title>
 <h2>Sequence Table</h2>
 
-This table can be viewed from (1) Sample List "Sequences", (2) Filter "Sequence", or 
-(3) selecting a row in the cluster, pairs or hit table.
+This table can be viewed from <b>Samples Sequences</b> or <b>Filters Sequence</b>, or 
+selecting a row in the cluster, pairs or hit table.
 
 <h3>Row of functions at the top</h3>
 
@@ -28,7 +28,7 @@ when run on many sequences. The command executed is:
 /Ext/linux/muscle/muscle -in ResultAlign/inSeq.fa -out ResultAlign/outAln.fa
 </pre>
 
-<li><b>MAFFT-AA+hit</b>: Same as above.
+<li><b>MAFFT-AA</b>: Same as above.
 The command executed is:
 <pre>
 /Ext/linux/mafft/mafft.bat --auto --reorder --thread N ResultAlign/inSeq.fa
@@ -49,19 +49,19 @@ Copies the seqID, AA, NT or CDS sequence, Best hitID, Best description or Best h
 <li><b>Show Column Stats</b>: Popup a table of statistics for the numeric columns in the table. 
 <br>&nbsp;
 
-<li><b>Copy Table</b>: Copies the table to the clipboard either the entire table. 
+<li><b>Copy Table</b>: Copies the table to the clipboard. 
 <br>&nbsp;
 
-<li><b>Export Table</b>: Exports the table to file in tab delimited file. 
+<li><b>Export Table (.tsv)</b>: Exports the table to file in tab delimited file. 
 <br>&nbsp;
 
-<li><b>Export AA sequences</b>: Export the translated CDS sequences..
+<li><b>Export AA sequences (.fa)</b>: Export the translated CDS sequences..
 <br>&nbsp;
 
-<li><b>Export CDS sequences</b>: Export the CDS sequences.
+<li><b>Export CDS sequences (.fa)</b>: (NT-mTCW only) Export the CDS sequences.
 <br>&nbsp;
 
-<li><b>Export NT sequences</b>: Export the full nucleotide sequences.
+<li><b>Export NT sequences (.fa)</b>: (NT-mTCW only) Export the full nucleotide sequences.
 <br>&nbsp;
 
 <li><b>Export all GOs</b> (If GOs are in the database): Output all assigned and inherited GOs for all seq-hit pairs 
@@ -85,9 +85,9 @@ the sequence must have at least one seq-hit with E-value&le; this value.
 
 <li><i>File Columns</i>:
 <ol type='a'>
-<li>Verbose: outputs columns (GO is the column for the ontology abbreviation)
+<li>Verbose: outputs columns
 <tt>
-GO-ID	#Seqs	Level	GO	GO-Name
+GO-ID	#Seqs	Level	Ont	GO-Name
 </tt>
 <li>Count only: only outputs the <tt>GO-ID</tt> and <tt>#Seqs</tt>. 
 <br>This can be used as input to input to REVIGO (http://revigo.irb.hr)

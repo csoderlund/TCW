@@ -52,7 +52,7 @@ public class ScoreCDS
 	final private int IDX_nSNPs	= 11; // differences no gaps (SNPs)
 	
 	// compute in Diff class
-	final private int IDX_nCDSlenNoHang    = 26; // len with gaps
+	final private int IDX_nCDSlenNoHang    = 26; // len with gaps; CROP
 	final private int IDX_n5UTRlenNoHang   = 27; 
 	final private int IDX_n3UTRlenNoHang   = 28; 
 	
@@ -552,15 +552,15 @@ public class ScoreCDS
 		String r2c2 = String.format("%-11s %5d %4s",   "GC Either: ", curScore[IDX_GC_E], "");
 		String r3c2 = String.format("%-11s %5.3f %4s", "GC Jaccard:",    xJI(curScore[IDX_GC_B], curScore[IDX_GC_E]), "");
 		
-		String r0c3 = String.format("%-12s %5s %4s",   "All CpG","", "");
-		String r1c3 = String.format("%-12s %5d %4s",   "CpG Both:   ",    curScore[IDX_CpGn_B], "");
+		String r0c3 = String.format("%-12s %5s %4s",   "CpG-Nt","", "");
+		String r1c3 = String.format("%-12s %5d %4s",   "CpG Both:   ",  curScore[IDX_CpGn_B], "");
 		String r2c3 = String.format("%-12s %5d %4s",   "CpG Either: ",  curScore[IDX_CpGn_E],"");
 		String r3c3 = String.format("%-12s %5.3f %4s", "CpG Jaccard:",     xJI(curScore[IDX_CpGn_B], curScore[IDX_CpGn_E]), "");
 		
-		String r0c4 = String.format("%-12s %5s %4s",   "By Codon",     "",  "");
-		String r1c4 = String.format("%-12s %5d %4s",   "CpG Both:   ",     curScore[IDX_CpGc_B], "");
+		String r0c4 = String.format("%-12s %5s %4s",   "CpG-Codon",     "",  "");
+		String r1c4 = String.format("%-12s %5d %4s",   "CpG Both:   ",   curScore[IDX_CpGc_B], "");
 		String r2c4 = String.format("%-12s %5d %4s",   "CpG Either: ",   curScore[IDX_CpGc_E], "");
-		String r3c4 = String.format("%-12s %5.3f %4s", "CpG Jaccard:",      xJI(curScore[IDX_CpGc_B], curScore[IDX_CpGc_E]), "");
+		String r3c4 = String.format("%-12s %5.3f %4s", "CpG Jaccard:",   xJI(curScore[IDX_CpGc_B], curScore[IDX_CpGc_E]), "");
 		
 		lines.add(r0c1+r0c2+r0c3+r0c4);
 		lines.add(r1c1+r1c2+r1c3+r1c4);
@@ -671,7 +671,7 @@ public class ScoreCDS
 			lines.add("LEGEND: ");
 			lines.add("        " + Share.CpG12 + " = both codons have CpG");
 			lines.add("        " + Share.CpG1  + " = only one codon has CpG");
-			lines.add("Note: CpG crossing codon boundaries are not shown.");
+			lines.add("Note: CpG-Nt crosses codon boundaries, which are not marked.");
 		}
 	}
 	/*****************************************

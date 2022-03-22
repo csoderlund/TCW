@@ -3,12 +3,13 @@
 <title>Filter Clusters</title>
 <h2>Filter Clusters</h2>
 A cluster must pass ALL filters. The filters selected will be shown at the top
-of the resulting filtered Cluster table. Beware:
+of the resulting filtered Cluster table. 
+<br>Beware:
 <ul>
 <li>It is easy to forget to unset a filter, so execute "Clear"
 to clear all filters in order to start a brand new filter. 
 <li>If NO filters are set, all clusters will be displayed -- this can be a big
-set and may take wait time to display.
+set and may take time to display.
 </ul>
 <h3>+Basic</h3>
 <ul>
@@ -21,8 +22,8 @@ them; if <tt>Not</tt> is selected, show all clusters that do NOT have the substr
 if the substring "uncharacterized" is entered for <tt>Description</tt> along with the <tt>Not</tt>,
 only clusters without the substring "uncharacterized" in the description will be shown.
 </ul>
-<li>See the <a href=http://www.agcol.arizona.edu/software/tcw/doc/mtcw/UserGuide.html#best>online documentation</a>
-for details on how the <tt>Majority Hit</tt> is computed.
+<li>For <tt>Majority Hit</tt>, see the <a href=http://www.agcol.arizona.edu/software/tcw/doc/mtcw/UserGuide.html#best>online documentation</a>
+for details on how this is computed.
 <br>A <tt>Majority HitID</tt> of "*Novel" indicates none of the sequences in the cluster has
 annotation.
 <br><br>
@@ -31,9 +32,8 @@ annotation.
 
 
 <h3>+Dataset</h3>
-The multiTCW database was created from one or more singleTCW databases, where each
-one is referred to as a dataset. Hence, each cluster contains sequences from one
-or more dataset.
+The multiTCW database was created from one or more singleTCW databases (referred to as "dataset" here"). 
+Hence, each cluster contains sequences from one or more dataset.
 <ul>
 <li>
 Select the datasets to <tt>Include</tt>, 
@@ -57,10 +57,9 @@ indicator of the composition of the cluster, where Mx1 means it contains
 M different datasets with exactly one member from each, while MxN means
 there are M different datasets, and one or more datasets has more than one
 sequence. 
-<li>Filter on method, which is the name of the clustering method (more than one
-group of clusters can exist in the database, where each cluster set was built with
-a given 'Method'). The method is not a column, but the <tt>Overview</tt> has a table of cluster
-prefixes with their method.
+<li>Filter on a selected cluster set by selecting its prefix. 
+A cluster set is computed with clustering 'method', which is not a column, 
+but the <tt>Overview</tt> has a table of cluster prefixes with their methods.
 </ul>
 
 </html>

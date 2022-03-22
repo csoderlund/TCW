@@ -53,12 +53,11 @@ public class PairSumStats {
 	 * viewMulti: Create both coding and kaks summary of input pairs
 	 */
 	public void fromView(final Vector <Integer> pairs, final String summary) {
-		if (pairs.size()>1000) {
-			if (!UserPrompt.showContinue("Table stats", "This is slow for over 1000 pairs."))
-					return;
+		final boolean bPrt=(pairs.size()>1000);
+		if (bPrt) {
+			if (!UserPrompt.showContinue("Table stats", "This is slow for over 1000 pairs.")) return;
 			Out.PrtSpMsg(1, "Start table stats, this will take a few minutes......");
 		}
-		else Out.PrtSpMsg(1, "Start table stats.....");
 		
 		Thread thread = new Thread(new Runnable() {
 			public void run() {
@@ -67,11 +66,11 @@ public class PairSumStats {
 					CompressFromDB cObj = new CompressFromDB ();
 					if (cObj.loadFromDB(pairs)) {
 						if (cObj.processCompressedFromDB()) {
-							Out.PrtSpMsg(1, "Start KaKs stats.....");
+							if (bPrt) Out.PrtSpMsg(1, "Start KaKs stats.....");
 							KaKs kObj = new KaKs();
 							kObj.loadFromDB(pairs);
 							kObj.createSummary("");
-							Out.PrtSpMsg(1, "Complete KaKs stats                ");
+							if (bPrt) Out.PrtSpMsg(1, "Complete KaKs stats                ");
 						}
 						else success=false;
 					}
@@ -83,7 +82,7 @@ public class PairSumStats {
 								"Only pairs that are in clusters will have alignments in the database.\n" +
 								"None of the " + pairs.size() + " pairs have alignments.";
 					}
-					pairInfoStr = summary + "\n" + pairInfoStr;
+					pairInfoStr = summary + "\n\n" + pairInfoStr;
 					UserPrompt.displayInfoMonoSpace(null, summary, pairInfoStr);
 					mDB.close(); // close here because can get closed before used
 					
@@ -188,9 +187,10 @@ public class PairSumStats {
 		  
 		    // CAS327 changed order of columns
 		    rows[r][c] = "NA ";   rows[r++][c+1] = String.format("%,d",kcnt[0]); // CAS327 was Zero
-		    rows[r][c] = "KaKs~1";   rows[r++][c+1] = String.format("%,d",kcnt[1]);
 		    rows[r][c] = "KaKs<1";   rows[r++][c+1] = String.format("%,d",kcnt[2]); 
+		    rows[r][c] = "KaKs~1";   rows[r++][c+1] = String.format("%,d",kcnt[1]);
 		    rows[r][c] = "KaKs>1";   rows[r++][c+1] = String.format("%,d",kcnt[3]);
+		   
 		    
 		    r=0; c=2;
 		    rows[r][c] = "   Q1(Lower)"; rows[r++][c+1] =  formatDouble(qrt[0]);
@@ -205,10 +205,11 @@ public class PairSumStats {
 		    rows[r][c] = "";        rows[r++][c+1] = "";
 		    
 		    r=0; c=6;
+		    rows[r][c] = "   NA";    rows[r++][c+1] =  String.format("%,d",pcnt[3]); // CAS342
 		    rows[r][c] = "   <1E-100"; rows[r++][c+1] = String.format("%,d",pcnt[0]);
 		    rows[r][c] = "   <1E-10";  rows[r++][c+1] = String.format("%,d",pcnt[1]);
-		    rows[r][c] = "   <0.001";  rows[r++][c+1] = String.format("%,d",pcnt[2]);
-		    rows[r][c] = "   Other";    rows[r++][c+1] =  String.format("%,d",pcnt[3]);
+		    rows[r][c] = "   <1.0";    rows[r++][c+1] = String.format("%,d",pcnt[2]);
+		    
 		  
 		    int npair = kcnt[0]+kcnt[1]+kcnt[2]+kcnt[3];
 		    String sz = String.format("%,d",npair);
@@ -281,11 +282,12 @@ public class PairSumStats {
 					else if (kaks>=0 && kaks<1.0)   kcnt[2]++; // CAS327 was >0
 					else if (kaks>1.0)    			kcnt[3]++; 
 				}
-				if (pval<0)           pcnt[3]++;
-				else if (pval<1e-100) pcnt[0]++;
-				else if (pval<1e-10)  pcnt[1]++;
-				else if (pval<0.001)  pcnt[2]++;
-				else                  pcnt[3]++;
+				if (pval>Globalx.dNoVal) {
+					if (pval==Globalx.dNullVal) pcnt[3]++; // CAS343 removed check for zero and added explicit check
+					else if (pval<1e-100) 	  pcnt[0]++; 
+					else if (pval<1e-10)  pcnt[1]++;
+					else if (pval<1)  	  pcnt[2]++; // CAS343 changed from 0.001 to <1
+				}
 			}
 			catch(Exception e) {ErrorReport.prtReport(e, "KaKs resultset");}
 		}

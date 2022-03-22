@@ -126,19 +126,19 @@ public class Pair3ViewPanel extends JPanel {
 		// Help
 		final JPopupMenu popup = new JPopupMenu();
 		
-		popup.add(new JMenuItem(new AbstractAction("Alignment") {
+		popup.add(new JMenuItem(new AbstractAction("View: graphical align") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
 				try {
-					UserPrompt.displayHTMLResourceHelp(theViewerFrame, "Alignment", help1HTML);
+					UserPrompt.displayHTMLResourceHelp(theViewerFrame, "View: graphical align", help1HTML);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error showing help1"); }
 			}
 		}));
-		popup.add(new JMenuItem(new AbstractAction("Multi-line") {
+		popup.add(new JMenuItem(new AbstractAction("Align: multi-line") {
 			private static final long serialVersionUID = 4692812516440639008L;
 			public void actionPerformed(ActionEvent e) {
 				try {
-					UserPrompt.displayHTMLResourceHelp(theViewerFrame, "Multi-line align", help2HTML);
+					UserPrompt.displayHTMLResourceHelp(theViewerFrame, "Selected: multi-line", help2HTML);
 				} catch (Exception er) {ErrorReport.reportError(er, "Error showing help2"); }
 			}
 		}));

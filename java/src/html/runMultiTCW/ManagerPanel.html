@@ -3,7 +3,7 @@
 <body style="padding:20px;width:650px;font-family:Times">
 <h2>Build a multiTCW database (runMultiTCW)</h2>
 
-The multiTCW manager allows to perform clustering of multi-species sequences. 
+The multiTCW manager perform clustering and analysis of multi-species sequences. 
 A multiTCW database is built by combining 
 one or more existing annotated singleTCW databases (sTCWdb). 
 The sTCWdbs could have been built with nucleotide sequences (transcripts or
@@ -40,17 +40,16 @@ This extracts the necessary sTCWdb data and enters it into the mTCWdb.
 If the sTCWdbs have GOs, they will be added to the mTCWdb, which are useful
 in <b>viewMultiTCW</b> for downloading tables of GOs. This step takes the longest. 
 It can be done at any time after the <b>Build Database</b>, i.e. GOs are not used
-for clustering or statistics, so can be added after everything else is added.
+for clustering or statistics.
 
 <h2>2. Compare Sequences</h2>
-To cluster the sequences,  the database sequences needs to be searched against itself
+To cluster the sequences,  the database sequences needs to be searched against themselves
 to see what pairs are similar. 
 Use the <b>Settings</b> button to set the search program and parameters;
 this opens a new panel which has further <b>Help</b>. 
 <p>
 Press <b>Run Search</b> to run the search. If this button is disabled, it means
-the file exists. 
-If you want to run the search again, you must remove the current file, which can be done with the 
+the files exist. If you want to run the search again, you must remove the current file, which can be done with the 
 <b>Remove...</b> button at the top. Alternatively, you may rename the file <tt>hitsAA.fa</tt> or <tt>hitsNT.fa</tt>
 file under the directory <tt>projcmp/&lt;project-name&gt;/hitResults</tt>.
 <p>
@@ -61,8 +60,7 @@ hit file(s) to the database.
 
 To create clusters (e.g. putative ortholog sets), click <b>Add</b>, which brings
 up a new panel with its own <b>Help</b>. After adding one or more cluster methods, 
-click <b>Add New Clusters</b> to run the calculations for each
-new method and store the clusters to the database. 
+click <b>Add New Clusters</b> to build and store the clusters to the database. 
 
 <p>Cluster sets that have been created and added to the database are listed in <i>italics</i>. 
 You can add new clusters or remove existing clusters.
@@ -84,9 +82,10 @@ all conditions that are shared between the two sequences of a pair.
 <td>Computes coding and nucleotide statistics for each pair.
 <br>Compute summary statistics.
 <tr><td nowrap>KaKs write
-<td>Write the CDS alignments to file for input to the <tt>KaKs_calculator</tt>.
-<br>Use the command 'sh runKaKs' in the project's KaKs directory to
-run the <tt>KaKs_calculator</tt>, which must be in the 'projcmp' directory.
+<td>Write the CDS alignments to files for input to the <tt>KaKs_calculator</tt>.
+<br>The files are written to <tt>/projcmp/&lt;project name&gt;/KaKs</tt>; change to this
+directory and  execute '<tt>sh runKaKs</tt>' in the project's KaKs directory to
+run the <tt>KaKs_calculator</tt> (which is in the <tt>/projcmp/</tt>).
 
 <tr><td colspan=2><i>After running <tt>KaKs_Calculator</tt></i>
 <tr><td nowrap>KaKs read
@@ -95,8 +94,8 @@ run the <tt>KaKs_calculator</tt>, which must be in the 'projcmp' directory.
 <tr><td colspan=2><i>3. Multiple alignment of cluster</tt></i>
 <tr><td nowrap>MSA Score
 <td>The dynamic programming algorithm is run on clusters of size 2.
-The <tt>MAFFT</tt> program is run on clusters of size &gt;2. In both cases, the resulting AA alignment is scored,
-and the results entered into the database. 
+The <tt>MAFFT</tt> program is run on clusters of size &gt;2. In both cases, 
+the resulting AA alignment is scored, and the results entered into the database. 
 </table> 
 <br>
 
@@ -113,7 +112,7 @@ again so it will update the <tt>Overview</tt> statistics with just those pairs i
 
 <tr><td nowrap>2. Clusters and Pairs from database<td>
 This removes all pairs and clusters from the database, which allows you to start
-over at the 'Add Pairs from Hits' step.
+over at the <b>Add Pairs from Hits</b> step.
 
 
 <tr><td nowrap>3. mTCW database<td>

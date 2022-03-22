@@ -342,14 +342,14 @@ public class Pairwise {
 				Seq seq1 =  seqNameMap.get(name1);
 				Seq seq2 =  seqNameMap.get(name2);
 				
-				double dsim = 	Double.parseDouble(tokens[2]);
-				int align = 	Integer.parseInt(tokens[3]);
-				int gap = 		Integer.parseInt(tokens[5]);
-				double eval = 	Double.parseDouble(tokens[10]);
-				int bit = (int) (Double.parseDouble(tokens[11])+0.5);
+				double hsim = 	Double.parseDouble(tokens[2]);
+				int halign = 	Integer.parseInt(tokens[3]);
+				int hgap = 		Integer.parseInt(tokens[5]);
+				double heval = 	Double.parseDouble(tokens[10]);
+				int hbit 	= ( int) (Double.parseDouble(tokens[11])+0.5); // loaded into integer
 	
-				double olap1= ((double)align/(double) seq1.seqLen)*100.0;
-				double olap2= ((double)align/(double) seq2.seqLen)*100.0;
+				double olap1= ((double)halign/(double) seq1.seqLen)*100.0;
+				double olap2= ((double)halign/(double) seq2.seqLen)*100.0;
 				//if (olap1>100.0) olap1=100.0; Let go over 100, happens with gaps
 				//if (olap2>100.0) olap2=100.0;
 				
@@ -371,13 +371,13 @@ public class Pairwise {
 					psI.setInt(4, seq2.seqID);
 					psI.setString(5, name1);
 					psI.setString(6, name2);
-					psI.setDouble(7, eval);
-					psI.setDouble(8, dsim);
-					psI.setDouble(9, align);
-					psI.setInt(10, gap);
+					psI.setDouble(7, heval);
+					psI.setDouble(8, hsim);
+					psI.setDouble(9, halign);
+					psI.setInt(10, hgap);
 					psI.setDouble(11, olap1);
 					psI.setDouble(12, olap2);
-					psI.setInt(13, bit);
+					psI.setInt(13, hbit);
 					psI.setInt(14, best);
 					psI.setString(15, hitID);
 					psI.setString(16, hitStr);
@@ -393,13 +393,13 @@ public class Pairwise {
 					pairMap.put(key, true);
 				}
 				else { // previously added with AA hit file; update with NT
-					psU.setDouble(1, eval);
-					psU.setDouble(2, dsim);
-					psU.setInt(3, 	align);
-					psU.setInt(4, 	gap);
+					psU.setDouble(1, heval);
+					psU.setDouble(2, hsim);
+					psU.setInt(3, 	halign);
+					psU.setInt(4, 	hgap);
 					psU.setDouble(5, olap1);
 					psU.setDouble(6, olap2);
-					psU.setInt(7, 	bit);
+					psU.setInt(7, 	hbit);
 					psU.setInt(8, 	best);
 					psU.setInt(9, 	seq1.seqID);
 					psU.setInt(10, 	seq2.seqID);
@@ -417,12 +417,12 @@ public class Pairwise {
 				
 				// CAS310 compute %sim over all aligned and average sim; same for olap
 				sumLen += (seq1.seqLen + seq2.seqLen);
-				double id = align*(dsim/100.0);
+				double id = halign*(hsim/100.0);
 				sumID += (int) (id+0.5);
-				sumAlign += align;
+				sumAlign += halign;
 				
 				avgOlap += (olap1+olap2);
-				avgSim += dsim;
+				avgSim += hsim;
 				cntTotal++; cntPrt++;
 				
 				if (cntPrt==1000) {
@@ -538,8 +538,8 @@ public class Pairwise {
 			double sumOlap = ((sumAlign*2.0)/sumLen)*100.0;
 			double sumSim =  (sumID  / sumAlign)    *100.0;
 			
-			sql = String.format("Diff %-7s Same %-7s  Similarity %3.1f%s (%3.1f%s)  Coverage %3.1f%s (%3.1f%s)", 
-					Out.kMText(cntDiff), Out.kMText(cntSame), sumSim, "%", avgSim, "%", sumOlap, "%", avgOlap, "%");
+			sql = String.format("Diff %-7s Same %-7s  Similarity %3.1f%s   Coverage %3.1f%s ", 
+					Out.kMText(cntDiff), Out.kMText(cntSame), sumSim, "%", sumOlap, "%"); // CAS343 removed Avg %Sim
 			
 			if (isAA) mDB.executeUpdate("update info set aaInfo='" + "AA   " + sql + "'");
 			else      mDB.executeUpdate("update info set ntInfo='" + "NT   " + sql + "'");

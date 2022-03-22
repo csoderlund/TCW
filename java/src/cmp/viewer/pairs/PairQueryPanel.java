@@ -216,14 +216,14 @@ public class PairQueryPanel extends JPanel {
 		row.add(rgStatCexact);
 		row.add(Box.createHorizontalStrut(5));
 		
-		rgStatCnonsyn = new Range("%CnonSyn", "0.0", "", "pCnonsyn", "Percent of codons that are nonsynonymous (different codon, different Amino Acid)");
+		rgStatCnonsyn = new Range("%CnonSyn", "0.0", "", "pCnonsyn", "Percent of codons that are nonsynonymous (different codon, different amino acid)");
 		row.add(rgStatCnonsyn);
 		page.add(row);
 		page.add(Box.createVerticalStrut(rsep));
 		
 		//
 		row = Static.createRowPanel();
-		rgStatCsyn = new Range("%Csyn", "0.0", "", "pCsyn", "Percent of codons that are synonymous (different codon, same Amino Acid)");
+		rgStatCsyn = new Range("%Csyn", "0.0", "", "pCsyn", "Percent of codons that are synonymous (different codon, same amino acid)");
 		row.add(rgStatCsyn);
 		row.add(Box.createHorizontalStrut(5));
 		
@@ -566,8 +566,9 @@ public class PairQueryPanel extends JPanel {
 			
 			String sub=""; // CAS327
 			String kk = rgKaKs.getSQL();
+			if (kk!="" && !kk.contains(">=")) kk = "(kaks>=0.0 && " + kk + ")"; // CAS343 -2.0(-) and -1.5(NA) should never show from this
 			String na = "";
-			if (naCheck.isSelected())      na = "pairwise.kaks=" + Globalx.dNullVal;
+			if (naCheck.isSelected()) na = "pairwise.kaks=" + Globalx.dNullVal; 
 			if (kk!="" && na !="") 	sub = "( " + Static.combineBool(kk, na, false) + ")"; // >=0.0 or =-1.5
 			else if (kk!="") 		sub = kk;
 			else if (na!="") 		sub = na;
@@ -596,25 +597,27 @@ public class PairQueryPanel extends JPanel {
 			query = Static.combineBool(query, tmp, true);
 		}
 		// clusters
-		boolean isAnd = (radAnd.isSelected());
-		String subquery = "";
-		for (int i=0; i<nMethods; i++) {
-			if (radClSetHas[i].isSelected()) 
-				subquery = Static.combineBool(subquery, "pairwise." + methods[i] + " is not null", isAnd);
-			else if (radClSetNot[i].isSelected()) 
-				subquery = Static.combineBool(subquery, "pairwise." + methods[i] + " is null", isAnd);
-		}
-		if (subquery!="") {
-			subquery = "(" + subquery + ")";
-			query = Static.combineBool(query, subquery);
-		}
-		if (query==null || query.equals("")) {
-			if (theViewerFrame.getInfo().getCntPair()>100000) {
-				if (UserPrompt.showContinue("Slow query", 
-						"There is more than 100,000 pairs.\nThis will be slow.")) {
-					summary="All sequences";
+		if (radAnd!=null) { // CAS343 otherwise, no clusters
+			boolean isAnd = (radAnd.isSelected());
+			String subquery = "";
+			for (int i=0; i<nMethods; i++) {
+				if (radClSetHas[i].isSelected()) 
+					subquery = Static.combineBool(subquery, "pairwise." + methods[i] + " is not null", isAnd);
+				else if (radClSetNot[i].isSelected()) 
+					subquery = Static.combineBool(subquery, "pairwise." + methods[i] + " is null", isAnd);
+			}
+			if (subquery!="") {
+				subquery = "(" + subquery + ")";
+				query = Static.combineBool(query, subquery);
+			}
+			if (query==null || query.equals("")) {
+				if (theViewerFrame.getInfo().getCntPair()>100000) {
+					if (UserPrompt.showContinue("Slow query", 
+							"There is more than 100,000 pairs.\nThis will be slow.")) {
+						summary="All sequences";
+					}
+					else hasError=true;
 				}
-				else hasError=true;
 			}
 		}
 		if (hasError) query=" 1 ";
@@ -688,25 +691,26 @@ public class PairQueryPanel extends JPanel {
 		}	
 		
 		// Methods
-		String op = (radAnd.isSelected()) ? "&" : "|";
-		String in="", out="";
-		for (int i=0; i<nMethods; i++) {
-			if (radClSetHas[i].isSelected()) {
-				if (in=="") in = methods[i];
-				else in += op + methods[i];
+		if (radAnd!=null) { // CAS343 pairs&clusters added, clusters removed, this crashes
+			String op = (radAnd.isSelected()) ? "&" : "|";
+			String in="", out="";
+			for (int i=0; i<nMethods; i++) {
+				if (radClSetHas[i].isSelected()) {
+					if (in=="") in = methods[i];
+					else in += op + methods[i];
+				}
+				else if (radClSetNot[i].isSelected()) {
+					if (out=="") out = methods[i];
+					else out += op + methods[i];
+				}
 			}
-			else if (radClSetNot[i].isSelected()) {
-				if (out=="") out = methods[i];
-				else out += op + methods[i];
+			if (!in.equals("") || !out.equals("")) {
+				if (!in.equals("")) in = "In(" + in + ")";
+				if (!out.equals("")) out = "Not(" + out + ")";
+				String tmp = Static.combineBool(in, out, radAnd.isSelected());
+				summary = Static.combineBool(summary, tmp);
 			}
 		}
-		if (!in.equals("") || !out.equals("")) {
-			if (!in.equals("")) in = "In(" + in + ")";
-			if (!out.equals("")) out = "Not(" + out + ")";
-			String tmp = Static.combineBool(in, out, radAnd.isSelected());
-			summary = Static.combineBool(summary, tmp);
-		}
-		
 		if (summary==null || summary.equals("")) summary="Show All";
 	}
 	public String getQuerySummary() { return summary;}

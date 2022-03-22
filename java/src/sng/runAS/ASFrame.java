@@ -85,7 +85,7 @@ public class ASFrame extends JDialog implements WindowListener{
 		
 		upObj = new DoUP(this);
 		oboObj = new DoOBO(this);
-		runCheck();
+		runCheck(false);
 	}
 	private void createMainPanel() {	
 		mainPanel = Static.createPagePanel();
@@ -140,7 +140,7 @@ public class ASFrame extends JDialog implements WindowListener{
 				String fname = fileChooser();
 				if (fname!=null && fname!="") {
 					txtUPdir.setText(fname);
-					runCheck();
+					runCheck(false);
 				}
 			}
 		});
@@ -164,7 +164,7 @@ public class ASFrame extends JDialog implements WindowListener{
 				String fname = fileChooser();
 				if (fname!=null && fname!="") {
 					txtGOdir.setText(fname);
-					runCheck();
+					runCheck(false);
 				}
 			}
 		});
@@ -275,7 +275,7 @@ public class ASFrame extends JDialog implements WindowListener{
 		txtGOdb.setText(getGOdb());
 		txtGOdb.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				runCheck();
+				runCheck(false);
 			}
 		});
 		row.add(txtGOdb);
@@ -313,7 +313,7 @@ public class ASFrame extends JDialog implements WindowListener{
 		bc.setEnabled(true);
 		bc.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				runCheck();
+				runCheck(true);
 			}
 		});
 		row.add(bc);
@@ -351,7 +351,7 @@ public class ASFrame extends JDialog implements WindowListener{
 	 * XXX Actions
 	 */
 	private void buildTax() {
-		runCheck(); // make sure spDat/trDat is current
+		runCheck(false); // make sure spDat/trDat is current
 		String upPath = txtUPdir.getText();
 		if (upPath.equals("")) {
 			UserPrompt.showMsg(this,"UniProt directory is blank" +
@@ -412,12 +412,12 @@ public class ASFrame extends JDialog implements WindowListener{
 		
 		upObj.xTaxo(spTaxo, trTaxo, spHasDat, trHasDat, upPath);
 		
-		runCheck();
+		runCheck(false);
 	}
 	/******************************************************************/
 	private void buildFull() {
 	// Check
-		runCheck();
+		runCheck(false);
 		String upPath = txtUPdir.getText();
 		if (upPath.equals("")) {
 			UserPrompt.showMsg(this,"UniProt directory is blank" +
@@ -486,7 +486,7 @@ public class ASFrame extends JDialog implements WindowListener{
 			
 	// Create Fasta file
 		upObj.xFullFasta(spSuffix, spTaxoSet, trSuffix, trTaxoSet, upPath);
-		runCheck();
+		runCheck(false);
 	}
 	private class TaxoType extends JDialog {
 		private static final long serialVersionUID = 1L;
@@ -566,7 +566,7 @@ public class ASFrame extends JDialog implements WindowListener{
 	}
 	/******************************************************************/
 	private void buildGO() {
-		runCheck();
+		runCheck(false);
 		String goPath = txtGOdir.getText();
 		if (goPath.equals("")) {
 			UserPrompt.showMsg(this,"GO directory is blank" +
@@ -609,13 +609,13 @@ public class ASFrame extends JDialog implements WindowListener{
 		
 		oboObj.run(txtUPdir.getText(), goPath, txtGOdb.getText(), hasGOfile);
 		
-		runCheck();
+		runCheck(false);
 	}
 	/******************************************************************/
 	// Write Anno_Update_date.cfg
 	private void runWriteAnno() {
 		try {
-			runCheck();
+			runCheck(false);
 			String upDir = txtUPdir.getText();
 			
 			String file = cfgPrefix + upDir.substring(upDir.lastIndexOf("/")+1) + cfgSuffix; 
@@ -696,7 +696,7 @@ public class ASFrame extends JDialog implements WindowListener{
 	 * Figures out what resources exist, 
 	 * set data structures used by other 'run' methods, and highlights the interface
 	 */
-	private void runCheck() {
+	private void runCheck(boolean checkGO_UP) {
 		lblUPdir.setBackground(Color.white); lblGOdir.setBackground(Color.white); lblGOdb.setBackground(Color.white);
 		spFullCheckBox.setBackground(Color.white);
 		trFullCheckBox.setBackground(Color.white);
@@ -721,7 +721,11 @@ public class ASFrame extends JDialog implements WindowListener{
 				} 
 			}
 			// GOdb exists? (should if OBO downloaded)
-			int rc = oboObj.goDBcheck(txtGOdb.getText());
+			int rc;
+			if (checkGO_UP) 
+				rc = oboObj.goDBcheckPrtUPs(txtGOdb.getText()); // CAS343 prints UniProt in goDB
+			else
+				rc = oboObj.goDBcheck(txtGOdb.getText());
 			if (rc>0) {
 				if (rc==2) 		lblGOdb.setBackground(fastaColor);
 				else if (rc==1) lblGOdb.setBackground(Color.pink);

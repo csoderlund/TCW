@@ -292,7 +292,7 @@ public class FieldData {
 		addPair(c++, seqType+"len1", Integer.class, PAIR_TABLE, "CDSlen1", desc + " SeqID1", false);
 		addPair(c++, seqType+"len2", Integer.class, PAIR_TABLE,"CDSlen2",  desc + " SeqID2", false);
 		if (hasPCC)
-		   addPair(c++, "PCC",  Float.class, PAIR_TABLE,"PCC", "Pearson Correlation Coefficient of RPKM values",false);
+		   addPair(c++, "PCC",  Float.class, PAIR_TABLE,"PCC", "Pearson Correlation Coefficient of TPM values",false);
 		
 		mkSection.add(c);
 		
@@ -346,8 +346,8 @@ public class FieldData {
 			mkBreak.add(c);
 			addPair(c++, "Calign", Float.class, PAIR_TABLE, "Calign",   "Number of aligned codons - excludes codons with gaps",   false);
 			addPair(c++, "%Cexact", Float.class, PAIR_TABLE, "pCmatch",   "Percent of codons (Calign) that are exact matches",   false);		
-			addPair(c++, "%Csyn",Float.class, PAIR_TABLE, "pCsyn",        "Percent of codons (Calign) that are synonymous (different codon, same Amino Acid)",   false);
-			addPair(c++, "%CnonSyn", Float.class, PAIR_TABLE, "pCnonSyn", "Percent of codons (Calign) that are nonsynonymous (different codon, different Amino Acid)",  false);
+			addPair(c++, "%Csyn",Float.class, PAIR_TABLE, "pCsyn",        "Percent of codons (Calign) that are synonymous (different codon, same amino acid)",   false);
+			addPair(c++, "%CnonSyn", Float.class, PAIR_TABLE, "pCnonSyn", "Percent of codons (Calign) that are nonsynonymous (different codon, different amino acid)",  false);
 			addPair(c++, "%C4d", Float.class, PAIR_TABLE, "pC4d",         "Percent of codons (Calign) that are 4-fold degenerate (synonymous: four possible bases in ith position)",  false);
 			addPair(c++, "%C2d", Float.class, PAIR_TABLE, "pC2d",         "Percent of codons (Calign) that are 2-fold degenerate (synonymous: two possible bases in ith position)",  false);
 			

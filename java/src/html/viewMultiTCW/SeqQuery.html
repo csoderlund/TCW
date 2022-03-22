@@ -3,7 +3,8 @@
 <title>Sequence Filter Help</title>
 <h2>Filter Sequences</h2>
 A sequence must pass ALL filters. The filters selected will be shown at the top
-of the resulting filtered Sequence table. Beware:
+of the resulting filtered Sequence table. 
+<br>Beware:
 <ul>
 <li>It is easy to forget to unset a filter, so execute "Clear"
 to clear all filters in order to start a brand new filter. 
@@ -13,23 +14,23 @@ set and may take wait time to display.
 
 <h3>+Basic</h3>
 <table border=1>
-<tr><td>SeqID<td>This is useful to find all sequences with a given prefix, or can
+<tr><td>SeqID<td>This is useful to find all sequences with a given substring, or can
 be used to find a given sequence. 
-<tr><td>Best Hit ID<td>Find all sequences with the given <tt>HitID</tt>, which is its
+<tr><td>Best HitID<td>Find all sequences with the given <tt>HitID</tt>, which is its
 best annotation hit.
 <tr><td>Best Descript<td>Find all sequences with the given <tt>Descript</tt>, which is its
 best annotation hit description.  
 <tr><td>Hits to different dataset<td>This lists the sequences that have 
-a hit to a different dataset. Note: the "Best Hit" refers to the annotation hit, whereas
+a pair hit to a different dataset. Note: the "Best Hit" refers to the annotation hit, whereas
 this refers to the sequence pair hits.
 <tr><td>Has Annotation<td>Has at least one annotation hit.
 <tr><td>Has GO<td>Has at least one GO assignment.
 </table>
-<p>Substring queries (<tt>Seq ID</tt>, <tt>Best Hit ID</tt>, <tt>Best Descript</tt>):
+<p>Substring queries (<tt>SeqID</tt>, <tt>Best HitID</tt>, <tt>Best Descript</tt>):
 The search is not case-sensitive and will find the substring anywhere in the ID or description.
 
 <h3>+Cluster Sets</h3>
-The names of all computed cluster sets will be listed. 
+The prefixes of all computed cluster sets will be listed. 
 If you select <tt>In</tt> for one of the them,
 all sequences that are in a corresponding cluster of that method type will be listed.
 If you select <tt>Not in</tt>, then all sequences that are not in a cluster of that

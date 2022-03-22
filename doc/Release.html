@@ -13,7 +13,7 @@
 
 There have been many improvements, but the following provides some recent critical points.
 <table>
-<tr><td><a href=#v341>v3.4.2</a><td>08-Mar-22<td><ttp>Assorted<td>Make color of buttons consistent.
+<tr><td><a href=#v343>v4.0.0</a><td>22-Mar-22<td><ttp>Assorted<td>Tidy up somethings in order to start v4.
 <tr><td><a href=#v339>v3.3.9</a><td>27-Dec-21<td><ttp><ttp>runAS</ttp></ttp><td>Improved interface for full subset UniProt; updated Demo.
 <tr><td><a href=#v335>v3.3.5</a><td>04-Nov-21<td><ttp>viewSingle</ttp><td>log2FC TPM analysis 
 <tr><td><a href=#v334>v3.3.4</a><td>18-Oct-21<td><ttp>runSingle</ttp><td><ttl>ORF finder</ttl> improvements
@@ -26,6 +26,33 @@ There have been many improvements, but the following provides some recent critic
 <tr><td><a href=#v318>v3.1.8</a><td>18-Mar-21<td><ttp>runAS</ttp><td>Changed the source of GO to the go-basic.obo file
 <tr><td><a href=#early>Earlier</a><td>2020<td>&nbsp;<td>&nbsp;
 </table>
+
+<a name=v343>
+<h4>v4.0.0 22-Mar-2022</h4>
+
+<p>General
+<ul>
+<li>Documentation and Help updates - mostly for mTCW. 
+</ul>
+
+<p><ttp>runAS</ttp>
+<ul>
+<li>The <ttc>Check</ttc> function will write to the terminal the UniProts added to an existing goDB.
+For existing goDBs, they will be updated on first <ttc>Check</ttc>  and stored in the goDB.
+</ul>
+
+<p><ttp>viewMultiTCW</ttp>
+<ul>
+<li><ttc>Explain</ttc> on <ttc>Overview</ttc>: rewrote much of it for clarity.
+<li>A lot of little tidy up things. 
+(1) <ttc>Overview</ttc>: removed "(Avg %Sim)" on AA and NT pairs. Slight change to KaKs counts.
+(2) <ttc>Pair Filter</ttc>: If KaKs set to be at least &gt;=0.0, got 
+Kaks with no values or NA. If pairs&clusters removed, pairs added but no clusters, the
+pairs filter crashed. 
+(3) <ttc>Sequence Table</ttc>: check to see if it is !NTonly database, if so, do
+not give options of Export CDS/NT sequence. If !GO, do not give option of exports GOs.
+<li><ttc>Details</ttc>: Add <ttc>Copy...</ttc> option to copy the displayed Detail sequence.
+</ul>
 
 <a name=v342>
 <h4>v3.4.2 8-Mar-2022</h4>

@@ -2,21 +2,25 @@
 <body style="padding:20px;width:650px;">
 <title>viewMultiTCW</title>
 <h2>Instructions</h2>
-The multiTCW database is created from two or more singleTCW databases (datasets). 
-A dataset may have both nucleotide (NT) sequences and amino acid (AA) sequences, or only 
-AA sequences. If the database contains both NT and AA sequences, then the AA sequences
-are the translated ORFs of the NT sequences.
+The multiTCW database is created from two or more singleTCW databases. 
+<ol>
+<li>A dataset from a NT-sTCWdb will have both nucleotide (NT) sequences and amino acid (AA) sequences from
+the translated ORFs. 
+<li>A dataset from an AA-sTCWdb will have only amino acid sequences. 
+<li>If an mTCWdb is created from a mix of NT-sTCWdb and AA-sTCWdb, it will generally be treated like 
+an AA-mTCWdb in this interface.
+</ol>
 
-<br><br><b>Clusters</b>: There can be one or more clusters of type 
+<b>Clusters</b>: There can be one or more clusters of type 
 BBH (bi-directional best hit), Closure, BestHit (best annotation), orthoMCL
 or user-defined.
 
 <br><br><b>Pairs</b>: 
-There is a pair for two sequences if they have a AA or NT hit, where the hits are computed when
+There is a pair for two sequences if they have a AA or NT hit (<i>pair hit</i>), where the hits are computed when
 the database is created by searching a file of all sequences
 in the database against itself using a heuristic search program
 (<tt>Diamond</tt> or <tt>Blast</tt>). 
-A NT-only databases will have additional information for NT pairs in a cluster, 
+A NT-only database will have additional information for NT pairs in a cluster, 
 such as number of synonymous, nonsynonymous codons.
 
 <hr>

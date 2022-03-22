@@ -21,6 +21,7 @@ import util.database.Globalx;
 import util.database.HostsCfg;
 import util.file.FileHelpers;
 import util.methods.TimeHelpers;
+import util.ui.UserPrompt;
 import util.methods.ErrorReport;
 import util.methods.Out;
 
@@ -117,6 +118,38 @@ public class DoOBO {
 			if (!goDB.tableExists(goUpTable)) x=1; // gets added in modfiyGOdb
 			else x=2; 
 			
+			goDB.close();
+			return x;
+		}
+		catch(Exception e) {Out.PrtErr("Could not check GO database " + goDBname);}
+		return 0;
+	}
+	public int goDBcheckPrtUPs(String goname)
+	{	int x = 0;
+		try {
+			boolean rc = DBConn.checkMysqlDB("", hostObj.host(), goname, hostObj.user(), hostObj.pass());
+			if (!rc) return 0; 
+			
+			goDB = new DBConn(hostObj.host(), goname, hostObj.user(), hostObj.pass());
+			if (!goDB.tableExists(goUpTable)) x=1; // gets added in modfiyGOdb
+			else x=2; 
+			
+			if (x==2) { // CAS343
+				if (goDB.tableColumnExists("TCW_metadata", "upDBs")) {
+					String dbs = goDB.executeString("select upDBs from TCW_metadata");
+					Out.prt("UniProts: " + dbs);
+				}
+				else {
+					if (UserPrompt.showYesNo("Show UniProts", 
+							"Would you like to see the UniProts in " + goname)) {
+						Out.prt("+++ This will take a minute, but will be saved in the database for next time");
+						Out.prt("    If your goDB is very large, it can take a few minutes. No output to terminal.");
+						
+						String msg = computeUPdbs(); 
+						if (msg!=null) Out.prt(msg);
+					}
+				}
+			}
 			goDB.close();
 			return x;
 		}
@@ -227,7 +260,8 @@ public class DoOBO {
 				// filename: mysql create date; OBO "data-version: releases/2021-02-01"
 			goDB.executeUpdate("CREATE TABLE " + goMetaTable + " (" +
 					" filename text null, " + 
-					" isOBO tinyint default 1 "	+ // only exists if from OBO file
+					" isOBO tinyint default 1, "	+ // only exists if from OBO file
+					" upDBs text" +
 					" ) ENGINE=MyISAM;");
 			
 			goDB.executeUpdate("CREATE TABLE " + goUpTable + " (" +
@@ -600,13 +634,30 @@ public class DoOBO {
 			for (String file : fullSet) { // CAS339 do fulls last since they contain taxos
 				if (!datObj.dat2godb(upDir, file,  goDB, goSet, obsSet)) return false; 
 			}
+			computeUPdbs();
 			
 			return datObj.prtTotals();
 		}
 		catch (Exception e) {ErrorReport.prtReport(e,  action);}
 		return false;
 	}
-	
+	private String computeUPdbs() { // CAS343
+		try {
+			String up = goDB.executeString("select acc from " + goUpTable +" limit 1");
+			if (!up.startsWith("sp_") && !up.startsWith("tr_")) {
+				return "+++ Cannot determine UPs from this goDB as pre-v339";
+			}
+			ResultSet rs = goDB.executeQuery("select distinct(acc) from " + goUpTable);
+			String dbs="";
+			while (rs.next()) {
+				dbs += "\n   " + rs.getString(1);
+			}
+			goDB.tableCheckAddColumn("TCW_metadata", "upDBs", "text", null);
+			goDB.executeUpdate("update TCW_metadata set upDBs='" + dbs + "'");
+			return dbs;
+		}
+		catch (Exception e) {ErrorReport.prtReport(e,  "Compute UPdbs"); return "error";}
+	}
 	/***********************************************************
 	 * Levels added to term table - these are not technically valid, but an easy way to browse
 	 */

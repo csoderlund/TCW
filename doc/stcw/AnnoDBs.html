@@ -106,7 +106,7 @@ TCW will be searched against all AnnoDB databases and the hits stored in the sin
 		<td class="top"> The TCW package provides subsets of UniProt for annotating the demo. 
 		In order to add GO annotations, a local GO mySQL 'demo' database needs to be created. 
 		<ol type="A">
-			<li>From the TCW_3 directory, execute:
+			<li>From the TCW_4 directory, execute:
 			<br><ttx>./runAS -d</ttx>		
 			<br>The "-d" will cause it to enter the demo parameters, as shown on the right. 
 			The highlighted entries already exist. Its only necessary to build the GO database. 
@@ -168,11 +168,10 @@ Typically, all you need to do is make sure you have an internet connection open 
 			that contains all the information downloaded; this can be used as input to <ttp>runSingleTCW</ttp> 
 			(see <a href="#runstcw">Import AnnoDBs</a>). <br>
 			&nbsp; 
-			<li><ttc>Check</ttc>: Selecting this button highlights everything that has been done. 
-			For example, the figure on the right shows that fungi and plant SwissProt have been downloaded and processed.
-			If <ttc>Build Tax</ttc> is run again, 3 more SwissProt and plant TrEMBL will be downloaded and processed.
-			The Full SwissProt and the GOdb have not been done. 
-			The <ttc>Check</ttc> automatically runs on startup. 
+			<li><ttc>Check</ttc>: The Check function automatically runs on startup and after any Build.
+			It highlights everything that has been done. 
+			For example, the figure on the right shows that fungi and plant SwissProt have been downloaded and processed. 
+			<i>To force a check, or to view the UniProts in an existing goDB,  select this button.</i>
 		</ol>
 		<td><a href="img/runAS.png"><img src="img/runAS.png" alt="runAS" style="border: 1px solid black; width: 350px"></a>
 	</tr>

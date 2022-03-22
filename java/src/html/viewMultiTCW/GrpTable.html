@@ -2,21 +2,22 @@
 <body style="padding:20px;width:650px;">
 <title>Cluster Table</title>
 <h2>Cluster Table</h2>
-
+The "(if available)" indicates that the results needed to be computed when the database was built.
 
 <h3>Functions at the top</h3>
 <u>Seqs</u>:
 Select one or more clusters followed by this button to view the sequence table 
 of the members of the cluster(s). 
 
-<p><u>Pair</u> Select one or more clusters followed by this button to view all pairs
-that have a pair hit, which are computed when the database is created. 
+<p><u>Pairs</u> Select one or more clusters followed by this button to view all pairs
+that have a AA or NT pair hit. 
 The BBH, Closure and Hit clusters are guaranteed to have a
 hit for all possible pairs in the cluster, however, orthoMCL clusters do not have this
 requirement.
 
 <p><u>MSA...</u> Select a cluster followed by this button, which provides a drop-down of actions.
-All the following actions display the alignment as a tab on the left, and provides the alignment file in the <tt>ResultAlign</tt> directory.
+All the following actions display the alignment as a tab on the left, 
+and provides the alignment file in the <tt>ResultAlign</tt> directory.
 <ul>
 <li><b>MUSCLE-AA+Hit</b>: 
 Run MUSCLE to build a multiple alignment 
@@ -40,9 +41,8 @@ Where N is the number of available threads (processors/CPUs).
 </ul>
 <p><i>On Mac, replace <tt>Ext/linux</tt> with <tt>Ext/mac</tt></i>.
 
-<p><u>MSAdb</u> The alignment has been stored in the database, so can be displayed
-without running the program. (If the alignments were not computed, this button
-will not be available).
+<p><u>MSAdb</u> (if available) The alignment has been stored in the database, so can be displayed
+without running the program. 
 
 <p><u>Copy...</u> Copy to the clipboard the 
 Cluster ID, Hit ID or Hit Description.
@@ -55,17 +55,17 @@ Cluster ID, Hit ID or Hit Description.
 <li><b>Copy Table</b>: Copies the entire table to the clipboard. 
 <br>&nbsp;
 
-<li><b>Export Table</b>: Exports the table to a tab delimited file. 
+<li><b>Export Table (.tsv)</b>: Exports the table to a tab delimited file. 
 <br>&nbsp;
 
-<li><b>Export all cluster AA sequences</b>: Exports the AA sequences from all clusters in the table to a fasta formatted file. 
+<li><b>Export all cluster AA sequences (.fa)</b>: Exports the AA sequences from all clusters in the table to a fasta formatted file. 
 The description line for each sequence provides the sequence and cluster name. 
 <br>&nbsp;
 
-<li><b>Export all cluster NT sequences</b>: Same as above but output NT sequences.
+<li><b>Export all cluster NT sequences (.fa)</b>: Same as above but output NT sequences.
 <br>&nbsp;
 
-<li><b>Export Cluster GOs:</b> List GOs associated with the cluster sequences in the table. 
+<li><b>Export Cluster GOs (.tsv):</b> (if available) List GOs associated with the cluster sequences in the table. 
 If any
 sequence in a cluster has a hit with a GO that passes the below filters, the cluster is
 counted as having the GO. NOTE: it does NOT use the Cluster "Best Anno Hit". The first three are filters:
@@ -87,24 +87,23 @@ at least one sequence in the cluster must have a seq-hit E-value&le; this value.
 
 <li><i>File Columns</i>:
 <ol type='a'>
-<li>Verbose: outputs columns (GO is the column for the ontology abbreviation)
+<li>Verbose: outputs columns
 <tt>
-GO-ID	#Cluster	Level	GO	GO-Name
+GO-ID	#Cluster	Level	Ont	GO-Name
 </tt>
 <li>Count only: only outputs the <tt>GO-ID</tt> and <tt>#Cluster</tt>. 
 <br>This can be used as input to REVIGO (http://revigo.irb.hr)
 </ol>
 </ol>
 <br>
-<li><b>Export cluster counts (.tvf)</b>: For all sequences in all clusters, output the clusterID, seqID and counts.
+<li><b>Export cluster counts (.tsv)</b>: For all sequences in all clusters, output the clusterID, seqID and counts.
 <br>&nbsp;
-<li><b>Export cluster TPM (.tvf)</b>:  For all sequences in all clusters, output the clusterID, seqID and TPM values.
-(See TPM NOTE at end).
+<li><b>Export cluster TPM (.tsv)</b>:  For all sequences in all clusters, output the clusterID, seqID and TPM values.
 </ul>
 <br>
-The <b>Export</b> options will only be visible if the associated data in the database.
+The <b>Export</b> options will only be visible if the associated data is in the database.
 </ul>
-
+<!----------------------------------------------------------------->
 <h2>Columns</h2>
 <ul> 
 <li>Columns can be added/removed using the <b>Select Columns</b> button below the table. 
@@ -122,11 +121,11 @@ the mouse over that is shown in the lower left corner.
 <tr><td  valign="top">&nbsp;&nbsp;&nbsp;Taxa<td> Notation "nxN" where n is the number of distinct datasets included in the cluster,
 where N=1 if all the species are represented by single sequences and N="N" if any of the
 datasets have more than 1 member in the cluster.
-<tr><td  valign="top">&nbsp;&nbsp;&nbsp;perPCC<td> If the Pearson Correlation Coefficient of the TPM values
+<tr><td  valign="top">&nbsp;&nbsp;&nbsp;perPCC<td> (if available) If the Pearson Correlation Coefficient of the TPM values
 was computed during the database build, then this column contains the percentage that are >=0.8. See below for
 more detail explanation.
-<tr><td  valign="top">&nbsp;&nbsp;&nbsp;Score1<td>See the section at the end.
-<tr><td  valign="top">&nbsp;&nbsp;&nbsp;Score2<td>See the section at the end.
+<tr><td  valign="top">&nbsp;&nbsp;&nbsp;Score1<td>(if available) See the <b>MSA Scores</b> section at the end.
+<tr><td  valign="top">&nbsp;&nbsp;&nbsp;Score2<td>(if available) See the <b>MSA Scores</b> section at the end.
 <tr><td colspan=2><i>Majority Best Anno Hit</i>
 <tr><td  valign="top">&nbsp;&nbsp;&nbsp;HitID<td>The majority hit is 
 computed based on initial substring of all BestAnno descriptions of all sequences
@@ -141,26 +140,26 @@ for details on how the <tt>Majority Hit</tt> is computed.
 
 
 <p>
-<i>Percent pairs with PCC>=0.8</i>
+<i>Percent pairs with PCC&gt;=0.8</i>
 <br>
 For each pair that has a hit, 
 the Pearson's Correlation Coefficient is computed from the
 TPM values of the conditions shared between the two sequences, where conditions are 'shared' if
-they have the same name. The column perPCC is the percent of pairs that have PCC>=0.8. 
+they have the same name. The column perPCC is the percent of pairs that have PCC&gt;=0.8. 
 For example, if a cluster has 4 sequences,
-it has (4*3)/2 = 6 pairs. If two of them have PCC>=0.8, then the perPCC will be 33%. A perPCC of
+it has (4*3)/2 = 6 pairs. If two of them have PCC&gt;=0.8, then the perPCC will be 33%. A perPCC of
 100% means that their expression profiles on their shared conditions are highly correlated. 
 Select "Pairs" for a cluster to see the actual PCC values and "Sequences" to view the TPM values.
 
 <h3>MSA Scores</h3>
-By default, <tt>Score1</tt> is the Sum-of-Pairs.The Sum-of-pairs score compares each two characters in the column, where there are 22 possible characters (20 amino acids,
+By default, <tt>Score1</tt> is the Sum-of-Pairs. The Sum-of-pairs score compares each two characters in the column, where there are 22 possible characters (20 amino acids,
 gap '-', and leading/trailing space ' '). The comparison scores are: (aa,aa) is the BLOSUM68 score, (aa,'-') is -4, (aa,' ') is -1,
 ('-','-') is 0, (' ',' ') is 0. A score of 1 indicates the highest similarity.
 <p>By default, <tt>Score2</tt> is Wentropy, as discussed in
 the MstatX documentation (//github.com/gcollet/MstatX) and reviewed in Valdir 2002 "Scoring Residue Conservation"". 
 A score of 1 is the most conserved.
 <p>When the database is built, these defaults can be replaced with other methods from the MstatX package.
-If this occurs, the explanation of the column in the lower left corner will tell what method was used.
+If this occurs, the column explanation in the lower left corner will tell what method was used.
 <p>In all cases, the score is computed per column, and the values shown for <tt>Score1</tt> and <tt>Score2</tt>
 are the average.
 </body>

@@ -12,15 +12,15 @@ may only exist for certain cluster sets).
 <h3>Functions at the top</h3>
 
 <u>Seqs</u> Select a pair followed by this function to view the two sequences
-in the sequence table, where the alignment can be viewed.
+in the sequence table.
 <p>
 <u>Clusters</u> Select a pair followed by this function to view the clusters for the two sequences.
 <p>
 <u>Pairwise...</u>
 <table border=1 cellpadding=3>
-<tr><td><b>AA for each pair</b> <td><td>Perform pairwise 
+<tr><td><b>AA for each pair</b> <td><td>Pairwise 
 alignment for all pairs of amino acid sequences from the selected sequences. 
-<tr><td><b>NT for each pair</b><td nowrap>NT-mTCW only<td> Perform pairwise 
+<tr><td><b>NT for each pair</b><td nowrap>NT-mTCW only<td> Pairwise 
 alignment for all pairs of nucleotide sequences from the selected sequences. 
 <tr><td><b>AA,NT,CDS for one pair</b> <td>NT-mTCW only<br>1 pair selected 
 <td>Align the selected pair using the amino acid sequence,
@@ -46,16 +46,16 @@ The resulting panel will have these 3 alignments.
 <li><b>Show Table Stats:</b> (NT-mTCW only) Popup a table of the coding and KaKs statistics for the pairs in the
 table. <i>This only works for pairs that have coding sequence statistics.</i>
 <br>&nbsp;
-<li><b>Copy Table</b>: Copies the table to the clipboard either the entire table. 
+<li><b>Copy Table</b>: Copies the table to the clipboard. 
 <br>&nbsp;
-<li><b>Export Table</b>: Exports the table to file. 
+<li><b>Export Table (.tsv)</b>: Exports the table to file. 
 <br>&nbsp;
-<li><b>Export both AA/NT sequences</b>: Exports both AA (amino acid) or NT (nucleotide) sequences for all pairs in the table.
+<li><b>Export both AA/NT sequences (.fa)</b>: Exports both AA (amino acid) or NT (nucleotide) sequences for all pairs in the table.
 <br>&nbsp;
-<li><b>Export 1st AA/NT sequences</b>: Exports the 1st AA or NT sequence of the pair for all pairs in the table.
+<li><b>Export 1st AA/NT sequences (.fa)</b>: Exports the 1st AA or NT sequence of the pair for all pairs in the table.
 <br>&nbsp;
 
-<li><b>Export Pair GOs:</b> list GOs associated with the pair sequences in the table. 
+<li><b>Export Pair GOs (.tsv):</b> list GOs associated with the pair sequences in the table. 
 If either
 sequence in the pair has a hit with a GO the passes the below filters, the pair is
 counted as having the GO. NOTE: it does NOT use the Pair "Best Anno Hit". The first three are filters::
@@ -79,9 +79,9 @@ at least one sequence in the cluster must have a seq-hit E-value&le; this value.
 it is not written to file.
 <li><i>File Columns</i>:
 	<ol type='a'>
-	<li>Verbose: outputs columns (GO is the column for the ontology abbreviation)
+	<li>Verbose: outputs columns 
 	<tt>
-	GO-ID	#Pair	Level	GO	GO-Name
+	GO-ID	#Pair	Level	Ont	GO-Name
 	</tt>
 	<li>Desc/Count: outputs the name and count by ontology.
 	<br>This can be used in Excel to create graphs.
@@ -118,15 +118,15 @@ found in the description list of the other seqID of the pair.
 <tr><td valign="top">&nbsp;&nbsp;PCC<td>Pearson Correlation Coefficient of the TPM values.
 This only has values>0 if the datasets have matching condition names.
 
-<tr><td valign="top"><b>Hit</b><td>Results from protein and DNA sequence self-blast (if available). All
-columns are directly from <tt>Blast</tt> or <tt>Diamond</tt> output except the 'cov' columns. 
+<tr><td valign="top"><b>Pair Hit</b><td>Results from AA and NT sequence self-blast. All
+columns are directly from the <tt>Blast</tt> or <tt>Diamond</tt> output except the 'cov' columns. 
 
 <tr><td valign="top" nowrap>&nbsp;&nbsp;Cov1, Cov2<td>The percent coverage, which is computed from the
 'align' divided by sequence length. <i>The Cov (percent coverage) can be &gt;1;</i> this happens when
 the alignment covers the whole sequence with gaps.
 
 <tr><td valign="top"><b>KaKs</b><td> (NT-mTCW only)
-Ka is the synonymous substitution rate. Ks is the nonsynonymous
+Ka is the synonymous substitution rate. Ks is the non-synonymous
 substitution rate. KaKs is Ka/Ks. The p-value applies to the KaKs value. 
 
 </table>

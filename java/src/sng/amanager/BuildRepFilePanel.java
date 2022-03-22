@@ -41,7 +41,7 @@ import util.ui.UserPrompt;
 
 public class BuildRepFilePanel extends JPanel {
 	private static final long serialVersionUID = 7368072364188049095L;
-	private static final String DEFAULT_COMBINED_FILE = "Combined_read_counts.csv";
+	private static final String DEFAULT_COMBINED_FILE = "Combined_read_counts.tsv";
 	private final String LIBDIR = Globalx.PROJDIR + "/";
 	private final String HTML = "html/runSingleTCW/EditExpLibPanelGenCounts.html";
 	
