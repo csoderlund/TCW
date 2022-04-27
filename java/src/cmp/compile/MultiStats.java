@@ -194,8 +194,8 @@ public class MultiStats {
 			infoObj.updateInfoKey("MSAscore2", score[1]); 
 			
 			// clear current scores
-			mDB.tableDelete("pog_scores"); // CAS342 
-			mDB.executeUpdate("update pog_groups set score1=" + Globalx.dNoVal + ", score2=" + Globalx.dNoVal);
+			mDB.tableDelete("pog_scores"); // CAS342; CAS401 change dNoVal to dNoScore
+			mDB.executeUpdate("update pog_groups set score1=" + Globalx.dNoScore + ", score2=" + Globalx.dNoScore);
 			
 			PreparedStatement psG = mDB.prepareStatement(
 					"update pog_groups set score1=?, score2=? where PGid=?");
@@ -240,7 +240,7 @@ public class MultiStats {
 			Out.PrtSpCntMsgNz(1, cntBad, "Too many gaps - no SoP score");
 			return "Complete scoring of " + cnt + " clusters";
 		 }
-		 catch(Exception e) {ErrorReport.die(e, "run align");}
+		 catch(Exception e) {ErrorReport.die(e, "redo align ");}
 		 return "Error";
 	 }
 	 private boolean saveScores(int grpid, MultiAlignData multiObj) {
@@ -252,7 +252,8 @@ public class MultiStats {
 					", score1='" + strScore1 + "', score2='" + strScore2 + "'");
 			 return true;
 		 }
-		 catch(Exception e) {ErrorReport.die(e, "run align"); return false;}
+		 catch(Exception e) {ErrorReport.die(e, "run align save " + multiObj.getColScores1()
+		 + " for " + grpid); return false;}
 	 }
 	 /*********************************************************/
 	 //-- load group sequences --/

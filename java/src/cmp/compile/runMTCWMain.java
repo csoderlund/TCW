@@ -46,7 +46,7 @@ public class runMTCWMain {
 	static public int BI = Globals.MSA.BUILTIN_SCORE;
 	static public int     msaScore1=BI,              msaScore2=BI; // defaults repeated in MultiAlignData
 	static public String  strScore1=Globals.MSA.SoP, strScore2=Globals.MSA.Wep;
-	static public boolean bNSoP=true;   // if true, normalize (default)
+	static public boolean bNSoP=false;   // if true, normalize (default); CAS401 change to F
 	
 	public static void main(String[] args) {
 		try {
@@ -69,9 +69,8 @@ public class runMTCWMain {
 			System.out.println("  The 'Closure' seeding with BBH algorithm can be replaced with:");
 			System.out.println("  	-BHwop  #Use Bron_Kerbosch Without Pivot");
 			System.out.println("  	-BHwp   #Use Bron_Kerbosch With Pivot");
-			//This is not fully supported, so only for testing
-			//System.out.println("  Sum-of-Pairs:"); // CAS313 add
-			//System.out.println("  	-nSoP Do not normalize SoP scores (default Score1).");
+			//System.out.println("  Sum-of-Pairs:"); // CAS313 add - my use only
+			//System.out.println("  	-sp use #columns for average instead of #comparisons");
 			System.out.println("  MSA options:");
 			System.out.println("    The MSA score1 of built-in Sum-of-Pairs can be replaced with:"); // CAS312 add
 			System.out.println("  	  -M1 <string>, where <string> is a valid MstatX method.");
@@ -79,6 +78,7 @@ public class runMTCWMain {
 			System.out.println("  	  -M2 <string>, where <string> is a valid MstatX method.");
 			System.out.println("    MstatX methods: trident, wentropy, mvector, jensen, kabat, gap");
 			System.out.println("      See agcol.arizona.edu/software/TCW/doc/mtcw/UserGuide.html for more info");
+			System.out.println("    If score1 is Sum-of-pairs:");
 			System.exit(0);
 		}
 	}
@@ -121,9 +121,9 @@ public class runMTCWMain {
 			isMstatX(strScore2);
 		}
 		/*  CAS313  SoP */		
-		if (hasArg(args, "-nSoP")) {
-			bNSoP=false;
-			System.out.println("Do not normalize SoP scores ");
+		if (hasArg(args, "-sp")) {
+			bNSoP=true;
+			System.out.println("Use #columns for average SoP scores instead of the number of comparisons ");
 		}
 	}
 	static boolean hasArg(String [] args, String arg) {

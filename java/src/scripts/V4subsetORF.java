@@ -1,22 +1,23 @@
 package scripts;
 
 /*************************************************
- * sTCW_pl_Osj and sTCW_pl_NnR annotated with UniProt Dec2021
+ * V4 create subset of sTCW annotated with UniProt Dec2021
  * 
  *  Set1
  *  viewSingleTCW:
- *  	Basic Hit Filter: Rank=1, SP-plants, 1E-30, %Sim>50, %Hit>50 (make sure have SP-plant hits)
+ *  	Basic Hit Filter: Rank=1, SP-plants, 1E-30, %Sim>=50, %Hit>=50
  *  	Create Seq Table and output columns
  *  This Filter:  Not Multi; not ORF=Hit+; Not TR-plants; Sim>=100 HitCov>=100
  *  
  *  Set2 (Osj) & Set3 (NnR)
  *  viewSingleTCW:
- *  	Seq Filter: BestBits, TR-plants, %Sim>=100, %Hit>=100%  (no check for SP-plants)
- *  	Create Seq Table and output columns
+ *  	Seq Filter: BestBits, TR-plants, %Sim>=100, %Hit>=100% 
+ *  	Seq Table: Osj reverse order
+ *  	Create Seq Table and output columns 
  *  This Filter: Not Multi; not ORF=Hit+; 
  *  
  *  Seq Table Columns:
- #		Seq-ID TCW-Remarks     #SwissProt  BS-Hit-ID   BS-DB-type   BS-Taxo BS-%Sim BS-%HitCov
+ *    #Seq-ID TCW-Remarks  #SwissProt BS-Hit-ID  BS-DB-type BS-Taxo BS-%Sim BS-%HitCov
  */
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
@@ -25,9 +26,9 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class ORFsubset {
+public class V4subsetORF {
 
-public static void main(String[] args) {new ORFsubset();}
+public static void main(String[] args) {new V4subsetORF();}
 	int SET=3; 
 	
 	String dir = 	  "paper/ORF/Subset/set";
@@ -54,7 +55,7 @@ public static void main(String[] args) {new ORFsubset();}
 			
 		prt(dir + ": " + maxSeqs + " seqs; " + maxNoSP + " sp=0");
 	}
-	public ORFsubset() {
+	public V4subsetORF() {
 		try {	
 			init();
 			readColumns();			// seqHitMap, seqRmkMap, hitCntMap

@@ -154,14 +154,14 @@ Select "Pairs" for a cluster to see the actual PCC values and "Sequences" to vie
 <h3>MSA Scores</h3>
 By default, <tt>Score1</tt> is the Sum-of-Pairs. The Sum-of-pairs score compares each two characters in the column, where there are 22 possible characters (20 amino acids,
 gap '-', and leading/trailing space ' '). The comparison scores are: (aa,aa) is the BLOSUM68 score, (aa,'-') is -4, (aa,' ') is -1,
-('-','-') is 0, (' ',' ') is 0. A score of 1 indicates the highest similarity.
+('-','-') is 0, (' ',' ') is 0. A higher score is better; note, for publication, use Wentropy or some other 
+statistician approved score. 
 <p>By default, <tt>Score2</tt> is Wentropy, as discussed in
-the MstatX documentation (//github.com/gcollet/MstatX) and reviewed in Valdir 2002 "Scoring Residue Conservation"". 
-A score of 1 is the most conserved.
+the MstatX documentation (//github.com/gcollet/MstatX) and reviewed in Valdir 2002 "Scoring Residue Conservation". 
+A score of 1 is the most conserved. The cluster score is the average of the columns.
 <p>When the database is built, these defaults can be replaced with other methods from the MstatX package.
 If this occurs, the column explanation in the lower left corner will tell what method was used.
-<p>In all cases, the score is computed per column, and the values shown for <tt>Score1</tt> and <tt>Score2</tt>
-are the average.
+
 </body>
 </html>
 

@@ -22,7 +22,7 @@ import util.methods.ErrorReport;
 import util.methods.Out;
 
 public class DoUniPrune {
-	private final double useGO1 = 0.7, useGO2 = 0.9; // 1. No GO vs GOs  2. nGO>nGO
+	private final double useGO = 0.7; // No GO vs GOs 
 	
 	private String godbName=null;
 	private boolean isAAstcwDB=true, bUseSP=false;
@@ -31,7 +31,8 @@ public class DoUniPrune {
 	private int pruneType=0; // 0 none 1 alignment 2 description
 	private int prtPrune=0;
 	private boolean bRestore=false; // command line only. if exists restore, else save.
-
+	private boolean bSort1=true;
+	
 	public static String tmp_seq="save_unitrans_hits", tmp_hit="save_unique_hits";
 	
 	public DoUniPrune(DBConn m, String godbName, boolean isAAstcwDB, boolean bUseSP, 
@@ -84,7 +85,7 @@ public class DoUniPrune {
 		try {
 			long time = Out.getTime();
 			loadDataFromDB();	if (!bRC) return;
-			if (pruneType==0) return; // must read data first so can do Step2
+			if (pruneType==0)   return; // must read data first so can do Step2
 			
 			// Loop through anno
 			for (int dbIdx : dbIdxMap.keySet()) {
@@ -124,15 +125,25 @@ public class DoUniPrune {
 	 * Prune based on alignment   - HitList order bitscore, eval, sim, align, GOs
 	 * Hence, not by rank.
 	 * 	After delete all, sort ArrayList by Rank. If no #1, make first #1 and update.
+	 * 
+	 * CAS401 if {} not removed, do not get best bitscore
+     *    tra_095 best is bHLH family protein {OPUNC07G16850.2} 625.00
+     * 			          bHLH family protein {Do020719.1}		448.00
+     *    the second would be first because sorted first on description
 	 */
 	private void findSeqDup(int dbIdx, int seqID) {
 		try {
 			ArrayList <HitData> hitList = loadHitDataForSeq(dbIdx, seqID);
+			
 			if (hitList==null || hitList.size()==0) return;
+			
+			bSort1=true;
+			Collections.sort(hitList); // see CAS401 note above
 			
 			HashSet <Integer> delSeqHitSet =  new HashSet <Integer> (); // seqHitIdx (pja_db_unitrans_hits.PID)
 			HitData lastHD=null;
 			
+			// loop through descriptions/alignments for this seqID/dbIdx
 			for (HitData hd : hitList) { 
 				if (lastHD==null || !isSame(lastHD, hd)) {
 					lastHD = hd;
@@ -160,8 +171,10 @@ public class DoUniPrune {
 				}
 			}
 			
-			// CAS332 may be removing rank=1
+			// CAS332 may be removing rank=1, so if no 1, set first >1 to 1
+			bSort1=false;
 			Collections.sort(hitList);
+			
 			for (HitData hd : hitList) {
 				if (hd.rank==1 && !hd.bDelete) break;
 				if (hd.rank!=1 && !hd.bDelete) {
@@ -181,8 +194,8 @@ public class DoUniPrune {
 		catch(Exception e) {ErrorReport.prtReport(e, "Find duplicate hits"); bRC=false;}
 	}
 	private boolean isSame(HitData lastHD, HitData hd) {
-		if (pruneType==1) return lastHD.isSame(hd);
-		else return lastHD.desc.contentEquals(hd.desc);
+		if (pruneType==1) 	return lastHD.isSameCoords(hd);
+		else 				return lastHD.desc.contentEquals(hd.desc);
 	}
 	
 	/************************************************
@@ -333,7 +346,7 @@ public class DoUniPrune {
                 hit.hitID = 	rset.getString(i++);
                 hit.desc = 		rset.getString(i++).trim().toLowerCase();
                 if (hit.desc.contains("{") && hit.desc.endsWith("}")) // e.g. ZF-HD family protein {ORGLA09G0180300.1} 
-                	hit.desc = hit.desc.substring(0, hit.desc.indexOf("{"));
+                	hit.desc = hit.desc.substring(0, hit.desc.indexOf("{")).trim();
                 hit.length = 	rset.getInt(i++);
                 
                 String goBrief = rset.getString(i++);
@@ -364,6 +377,7 @@ public class DoUniPrune {
 	    	}
             if ( rset != null ) rset.close();
             
+          
 	    	return hitList;
         }
         catch(Exception e) {ErrorReport.die(e, "Reading database for hit data");}	
@@ -452,11 +466,25 @@ public class DoUniPrune {
   		boolean isGood, bDelete=false;
   		
   		public int compareTo(HitData x) {
+  			if (bSort1) { // CAS401 see note in findSeqDup
+  				int c = desc.compareTo(x.desc);
+  				if (c==0) {
+  					if (bitScore>x.bitScore) return -1;
+  					if (bitScore<x.bitScore) return  1;
+  					if (eVal < x.eVal) 		 return -1;
+  					if (eVal > x.eVal) 		 return  1;
+  					if (sim > x.sim) 		 return -1;
+  					if (sim < x.sim) 		 return  1;
+  					if (rank<x.rank) 		 return -1;
+  		  			if (rank>x.rank) 		 return  1;
+  				}
+  				else return c;
+  			}
   			if (rank<x.rank) return -1;
   			if (rank>x.rank) return  1;
   			return 0;
 		}
-  		boolean isSame(HitData hd) { // GOs, Desc, Species can be different when everything else is the same
+  		boolean isSameCoords(HitData hd) { // GOs, Desc, Species can be different when everything else is the same
   			if (hd.bitScore!=bitScore) 	return false;
   			if (hd.eVal!=eVal) 			return false;
   			if (hd.sim!=sim) 			return false;
@@ -476,15 +504,14 @@ public class DoUniPrune {
   			if (hd.isGood && !isGood) return false; // XX
   			
   			if (hd.nGO>0 && nGO==0) {
-    			double aDiff = bitScore * useGO1; 
+    			double aDiff = bitScore * useGO; 
     			
     			if (hd.bitScore >= aDiff) return false;
 			}
-  			else if (hd.nGO>nGO+1) {
-  				double aDiff = bitScore * useGO2; 
-    			
-    			if (hd.bitScore >= aDiff) return false;
+  			else if (hd.nGO>nGO) {	/* CAS401 - change */
+    			if (hd.bitScore >= bitScore) return false;
   			}
+  	
   			return true;
   		}
   		void prt(int seqID, HitData lasthd) {

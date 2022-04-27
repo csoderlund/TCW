@@ -245,8 +245,8 @@ public class Schema {
 					"conLen		int default 0, " + // consensus length
 					"sdLen		float default " +   Globalx.dNoVal + ", " +// stddev from conLen
 					// dNoVal is -2
-					"score1		float default " +   Globalx.dNoVal + ", " + // sum of sum of pairs CAS313 0-1 
-					"score2		float default " +   Globalx.dNoVal +  ", " +  // trident -1 to 1
+					"score1		float default " +   Globalx.dNoScore + ", " + // CAS401 any value
+					"score2		float default " +   Globalx.dNoScore +  ", " + // -100000 
 					
 					// dynamic summed counts for each sTCWdb is added 
 					"index idx1(PGstr)," +

@@ -583,11 +583,16 @@ select <ttl>Read KaKs files</ttl> and <ttc>Keep</ttc>. Now <ttc>Run Stats</ttc>.
 
 <a id=msa></a>
 <h4>Details on MSA score and using <ttp>MstatX</ttp></h4>
-The default <u>Score1</u> and <u>Score2</u> are built-in methods. Score1 is Sum-of-Pairs, 
-which are normalized between 0-1, where 1 is the best score. 
-Score2 is "Wentropy", which is copied
+
+By default, Score1 is the Sum-of-Pairs. The Sum-of-pairs score compares each two characters in the column, 
+where there are 22 possible characters (20 amino acids, gap '-', and leading/trailing space ' '). 
+The comparison scores are: (aa,aa) is the BLOSUM68 score, (aa,'-') is -4, (aa,' ') is -1, ('-','-') is 0, (' ',' ') is 0.
+The cluster value is the sum-of-pairs/#comparisons, where a higer score is a better score. (see note below). 
+
+<p> Score2 is "Wentropy", which is copied
 directly from the <ttp>MstatX</ttp><sup>4</sup> with the exception that the scores are (1-score) so that
 1 is the best score. 
+
 <p>The <ttp>MstatX</ttp> executable is in the <ttx>/Ext</ttx> directory and can be used for computing the scores.
 From the appropriate <ttx>/Ext</ttx> sub-directory, run <ttx>./mstatx -h</ttx> to view the scoring methods available.
 The method used by <ttp>runMultiTCW</ttp> can be changed from the command line, as follows:
@@ -606,6 +611,9 @@ Check <ttl>Compute MSA and scores</ttl> and execute
 be updated with the new scores.
 <p>For developers: you can add your own method to the <ttp>MstatX</ttp> program and use it in <ttp>mTCW</ttp>.
 
+<p><font color=red>NOTE: </font> The Wentropy or one of the other mStatX statistics should be valid to use in a
+publication. Do not use the Sum-of-Pairs score in publication unless cleared with a statistician. The Sum-of-pairs
+score is useful on the MSA display in <ttp>viewMultiTCW</ttp> when viewing column scores.
 <!-- ========== Details ============= -->
 <a id=details></a>
 <table style="width: 100%"><tr><td style="text-align: left">

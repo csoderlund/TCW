@@ -9,8 +9,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.Vector;
 import java.util.HashSet;
-import java.util.HashMap;
-import java.util.TreeSet;
 
 import cmp.compile.runMTCWMain;
 import cmp.database.Globals;
@@ -22,12 +20,11 @@ import util.methods.ErrorReport;
 import util.methods.Out;
 import util.methods.RunCmd;
 import util.methods.Static;
-import util.methods.Stats;
 import util.methods.TCWprops;
 
 public class ScoreMulti {
 	public boolean bTest = false;
-	public boolean SoP_NORM = runMTCWMain.bNSoP;  // CAS313 default true
+	public boolean SoP_NORM = runMTCWMain.bNSoP;  // CAS313; CAS401 makes average /nCols (was doing min-max normalization)
 	
 	private final int  bothGAP =  0;
 	private final int  hangGAP =  0;
@@ -44,17 +41,16 @@ public class ScoreMulti {
 	} 
 	
 	 /**************************************************************
-	  * Avg of columns sum of Sum of Pairs
+	  * Sum of Sum of Pairs
 	 // www.info.univ-angers.fr/~gh/Idas/Wphylog/guidetree.pdf
 	 // Its averaged by the number of columns, otherwise, bigger clusters will likely have bigger scores
 	 *****************************************************************/
 	 private final char BORDER=Globalx.hangCh; // leading or trailing gap
-	 public double scoreSumOfPairs(String grpID, String [] alignedSeq, boolean isRun) {
+	 public double scoreSumOfPairs(String grpID, String [] alignedSeq) {
 		 try {
 			 int nRows = alignedSeq.length; 
 			 int nCols = alignedSeq[0].length();
 			 dScores = new double [nCols];
-			 String [] comp = new String [nCols];
 			 strScores = null;
 		
 			 if (nRows>maxRow) {
@@ -85,60 +81,24 @@ public class ScoreMulti {
 			 }
 			
 			 for (int c=0; c<nCols; c++) {
-				int col_stat =  0; 
+				 dScores[c] =  0; 
 				
 				for (int r=1; r<nRows-1; r++) { // first is consensus 
 					char a = seqs[r][c];
 					
 					for (int x=r+1; x<nRows; x++) 
-						col_stat += scoreCh(a, seqs[x][c]);
-				}
-				dScores[c] = col_stat;
-				
-				if (!isRun) { // duplicate of what is in MultiAlignPanel - write to text file
-					HashMap <Character, Integer> aaMap = new  HashMap <Character, Integer> ();
-					TreeSet <String> prtSet = new TreeSet <String> ();
-					
-					for (int r=1; r<nRows; r++) {
-						char a = seqs[r][c];
-						if (aaMap.containsKey(a)) aaMap.put(a, aaMap.get(a)+1);
-						else aaMap.put(a, 1);
-					}
-					
-					for (char a : aaMap.keySet()) 
-						prtSet.add(String.format("%02d:%c", aaMap.get(a), a)); // leading zero makes it sort right
-					
-					comp[c] = null;
-					for (String info : prtSet) {
-						if (info.startsWith("0")) info = info.substring(1);
-						if (comp[c]==null) comp[c] = info;
-						else               comp[c] = info + ", " + comp[c];
-					}
-				}
-			}
-			if (SoP_NORM) {
-				double [] tScore = dScores.clone();
-				scoreSoP_norm(grpID);
-				
-				if (!isRun) {
-					strScores = new String [tScore.length+2];
-					for (int i=0; i<tScore.length; i++) {
-						String x=" ";
-						if (tScore[i]<q1x) x="<";
-						else if (tScore[i]>q3x) x=">";
-						strScores[i] = String.format("%3d. %.3f		%3d%s      %s", 
-								i, dScores[i], (int) tScore[i], x, comp[i]);
-					}
-					strScores[tScore.length] = "";
-					strScores[tScore.length+1] = String.format("Q1 Box %.1f  Q3 Box %.1f", q1x, q3x);
+						dScores[c] += scoreCh(a, seqs[x][c]);
 				}
 			}
 			
-			// Though there are (nRows*(nRows-1)/2) * nCols comparisons
-			// The average is on the nCols since its the column sum that is relevant
-			double sum=0;
-			for (double d : dScores) sum+= d; 
-			double score = (sum!=0) ? (Math.abs(sum)/(double)nCols) : 0; // CAS312 
+			// #cmp = (nRows*(nRows-1)/2) * nCols
+			// CAS401 -- was a pseudo min-max normalization, changed to /#cmp
+			 nRows--;
+			double n = (SoP_NORM) ? nCols : ((nRows*(nRows-1)/2) * nCols);
+			double sum = 0.0;
+			for (double x : dScores) sum += x;
+			
+			double score = (sum!=0) ? (Math.abs(sum)/n) : 0; // CAS312 
 			if (sum<0) score = -score;
 			
 			return score;
@@ -146,41 +106,6 @@ public class ScoreMulti {
 		 catch(Exception e) {ErrorReport.reportError(e, "scoreAvgSumOfPairs " + grpID);}
 		 return Globalx.dNoScore;
 	 }
-	// Min-max Normalization of column scores: 
-	// 	Find the largest positive and smallest negative number. 
-	// 	Add the absolute value of the smallest to each number
-	// 	Divide the result by max-min
-	// 	Z - X-min(X)/max(X)-min(X) 
-	// 	Check for outliers 
-	private void scoreSoP_norm(String grpID) {
-	try {
-		double [] qrt = Stats.setQuartiles(dScores);
-		double q1 =  qrt[0];
-		double q3 =  qrt[2];
-		double iqr = (q3-q1)*1.5;
-		double min = qrt[3];
-		double max = qrt[4];
-		
-		double diff = max-min;
-		
-		q1x = q1-iqr;
-		q3x = q3+iqr;
-		
-		// get rid of outliers
-		int cntL=0, cntH=0;
-		for (int i=0; i<dScores.length; i++) {
-			double d = dScores[i];
-			if (d<q1x) cntL++;
-			if (d>q3x) cntH++;
-			dScores[i] = (d-min)/diff;
-		}
-		if (bTest && cntL+cntH>0) {
-			Out.PrtSpCntMsgNz(1, cntL, "Low  outlier for " + grpID + String.format(" (q1 %5.1f, Box %5.1f) Col %d", q1, q1x, dScores.length));
-			Out.PrtSpCntMsgNz(1, cntH, "High outlier for " + grpID + String.format(" (q3 %5.1f, Box %5.1f) Col %d", q3, q3x, dScores.length));
-		}
-	}
-	catch(Exception e) {ErrorReport.reportError(e, "normalize SoP ");}
-	}
 	
 	private double scoreCh(char c1, char c2) {
 		if (c1==Share.gapCh && c2==Share.gapCh) return bothGAP;
@@ -403,5 +328,4 @@ public class ScoreMulti {
 	
 	private double [] dScores;
 	private String [] strScores;
-	private double q1x=0.0, q3x=0.0;
 }

@@ -21,7 +21,7 @@ package scripts;
  * 		For computing BBH: set Coverage 50 and Similarity 70 (same as galaxy)
  * 		viewMultiTCW: 
  * 			View Pairs from different datasets. Set Columns. SORT on Bit-score. Export Table.
- * 		cp PairTable.tsv and SeqTable.tsv to paper/BBH
+ * 	
  * 4. Run this script. 
  * 		
  * PairTable.tsv - all pairs read from blast file, plus column indicating if BBH
@@ -42,7 +42,7 @@ import java.util.HashMap;
 import java.util.Vector;
 import java.util.Arrays;
 
-public class BBHcmpV4 {
+public class V4cmpBBH {
 	String dir =     "paper/BBH/";
 	String idir = 	 dir + "input/";
 	
@@ -52,7 +52,7 @@ public class BBHcmpV4 {
 	String inGx1 =   idir+"A_vs_B.tabular";  // Search output from Galaxy
 	String inGx2 =   idir+"B_vs_A.tabular";
 	
-	String outFile = dir+"diffv4.xls";
+	String outFile = dir+"diffv4.txt";
 	PrintWriter outFH;
 	double simCutoff=70, covCutoff=50, noVal=-2.0;
 	
@@ -61,9 +61,9 @@ public class BBHcmpV4 {
 	String state="!G";
 	
 	public static void main(String[] args) {
-		new BBHcmpV4();
+		new V4cmpBBH();
 	}
-	private BBHcmpV4 ()  {
+	private V4cmpBBH ()  {
 		try {
 			outFH = new PrintWriter(new FileOutputStream(outFile, false)); 
 		
@@ -441,15 +441,6 @@ public class BBHcmpV4 {
 			String list="";
 			for (int i=0; i<tPairSet.size(); i++) {
 				Pair pObj = tPairSet.get(i);
-				if (list!="") list += "\n";
-				list += pObj.tinfoStr();
-			}
-			return list;
-		}
-		String getGseq() {
-			String list="";
-			for (int i=0; i<gPairSet.size(); i++) {
-				Pair pObj = gPairSet.get(i);
 				if (list!="") list += "\n";
 				list += pObj.tinfoStr();
 			}

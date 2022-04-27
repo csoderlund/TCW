@@ -292,7 +292,7 @@ public class MultiAlignData {
 				glScore1 = smObj.scoreMstatX(msaScoreName1, outAlgnFile, resultFile);
 			}
 			else 
-				glScore1 = smObj.scoreSumOfPairs(grpName, alignSeq, isRun);
+				glScore1 = smObj.scoreSumOfPairs(grpName, alignSeq);
 			
 			double [] score1 = smObj.getScores();
 			String [] tScore1 = smObj.getStrSc();
@@ -316,14 +316,25 @@ public class MultiAlignData {
 			}
 			
 		/** Comma delimited list for saving and for MSA View **/
+			// CAS401 remove space after comma, check for >65000
 			strColScores1=strColScores2=null;
 			for (double d : score1) {
 				if (strColScores1==null)  	strColScores1 =  String.format("%.3f", d);
-				else 						strColScores1 += String.format(", %.3f", d);
+				else 						strColScores1 += String.format(",%.3f", d);
 			}
 			for (double d : score2) {
 				if (strColScores2==null)  	strColScores2 =  String.format("%.3f", d);
-				else 						strColScores2 += String.format(", %.3f", d);
+				else 						strColScores2 += String.format(",%.3f", d);
+			}
+			if (strColScores1.length()>=65000) {
+				Out.PrtErr("TCW error: too many columns to store score1 for " 
+							+ grpName + "(" + strColScores1.length() + ")");
+				strColScores1 = "error";
+			}
+			if (strColScores2.length()>=65000) {
+				Out.PrtErr("TCW error: too many columns to store score2 for " 
+							+ grpName + "(" + strColScores2.length() + ")");
+				strColScores2 = "error";
 			}
 		} 
 		catch(Exception e) {ErrorReport.reportError(e, "Write Scores");}

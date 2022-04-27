@@ -314,6 +314,9 @@ public class MultiAlignPanel extends BaseAlignPanel {
 	}
 	catch (Exception e) {Out.prt("MultiAlign");ErrorReport.reportError(e);}
 	}
+	/************************************************************
+	 * Display for Score popup
+	 */
 	private void initColInfo() {
 	try {
 		int c,r;
@@ -353,11 +356,11 @@ public class MultiAlignPanel extends BaseAlignPanel {
 			}
 			
 		// create info string
-			String col = "#" + c;
+			String col = "#" + (c+1); // CAS401 start column count at 1
 			if (score1!=null && c<score1.length)  {
 				String s1 = score1[c].trim().replace(".000","    ");
 				String s2 = score2[c].trim().replace(".000","    ");
-				colInfo[c] = String.format("%-6s  %7s %7s     %s", col, s1, s2, colCh);
+				colInfo[c] = String.format("%-6s   %7s %7s     %s", col, s1, s2, colCh);
 			}
 			else 
 				colInfo[c] = String.format("-%6s   %s", col,  colCh);

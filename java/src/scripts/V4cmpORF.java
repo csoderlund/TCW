@@ -1,16 +1,16 @@
 package scripts;
 
 /*****************************************************************
-* Compares TCW and TransDecoder ORFs.
+* V4 Compares TCW and TransDecoder ORFs.
 * 
-* To produce test set:
-* 	viewSingleTCW pl_Osj created test sets along with SubsetOsjForORF2
+* To produce test set: see V4subsetORF.java (N=1,2,3)
+* trFullOsj.tsv and trFullNnR.tsv are references as trFull.tsv below.
 * 
 * To produce TCW: Create with ORIGINAL names
-* 	Build sTCW_setn with setn sequences, search with defaults against SP_plants.
+* 	Build sTCW_setN with setN sequences, search with defaults against SP_plants.
 * 	Produce:
-*   tcwSet.tsv: #Seq-ID #SwissProt      ORF-Frame       ORF-Start       ORF-End
-*	trFull.tsv: #Seq-ID Length          ORF-Frame       ORF-Start       ORF-End
+*     tcwSet.tsv: #Seq-ID #SwissProt      ORF-Frame       ORF-Start       ORF-End
+*	  trFull.tsv: #Seq-ID Length          ORF-Frame       ORF-Start       ORF-End
 *   
 * To produce the TD results, the following commands were executed:
 *   >./TransDecoder.LongOrfs -t set1.fa
@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ORFcmp {
+public class V4cmpORF {
 	static int SET = 3;
 
 	static String chkFile = 	"paper/ORF/trFullOsj.tsv";  // File2 - TCW TR annotated for correct

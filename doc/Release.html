@@ -13,7 +13,7 @@
 
 There have been many improvements, but the following provides some recent critical points.
 <table>
-<tr><td><a href=#v343>v4.0.0</a><td>22-Mar-22<td><ttp>Assorted<td>Tidy up somethings in order to start v4.
+<tr><td><a href=#v343>v4.0.1</a><td>27-Apr-22<td><ttp>Random<td>Small improvements
 <tr><td><a href=#v339>v3.3.9</a><td>27-Dec-21<td><ttp><ttp>runAS</ttp></ttp><td>Improved interface for full subset UniProt; updated Demo.
 <tr><td><a href=#v335>v3.3.5</a><td>04-Nov-21<td><ttp>viewSingle</ttp><td>log2FC TPM analysis 
 <tr><td><a href=#v334>v3.3.4</a><td>18-Oct-21<td><ttp>runSingle</ttp><td><ttl>ORF finder</ttl> improvements
@@ -26,6 +26,33 @@ There have been many improvements, but the following provides some recent critic
 <tr><td><a href=#v318>v3.1.8</a><td>18-Mar-21<td><ttp>runAS</ttp><td>Changed the source of GO to the go-basic.obo file
 <tr><td><a href=#early>Earlier</a><td>2020<td>&nbsp;<td>&nbsp;
 </table>
+
+<a name=v400>
+<h4>v4.0.1 27-Apr-2022</h4>
+
+<ttp>runMultiTCW</ttp>
+<ul>
+<li>The cluster score for a Sum-of-Pairs has been changed to the sum-of-comparisons/#comparisons,
+where the #comparisons = (nSeqs*(nSeqs-1)/2) * nCols
+<li>Fixed a potential bug: if the MSA consensus sequence was very long, a MySQL error would occur.
+</ul>
+<ttp>viewMultiTCW</ttp>
+<ul>
+<li>Fixed a potential bug: the pre-computed MSAdb would not display if score1&lt;0.
+</ul>
+<ttp>runSingleTCW</ttp>
+<ul>
+<li>Description prune update: (1) Was taking the one with the most GOs, even if the bitScore was
+less; now only takes the one with GOs if the other has none and bitscores are close.
+(2) If there was a "{...}" at end of description,
+it was not being removed before finding unique descriptions.
+</ul>
+
+<p>Scripts
+<ul>
+<li>Added/changed a few scripts that are used for results in the next version of the 
+BioRxiv publication 
+</ul>
 
 <a name=v343>
 <h4>v4.0.0 22-Mar-2022</h4>

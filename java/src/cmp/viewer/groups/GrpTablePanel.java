@@ -954,7 +954,7 @@ public class GrpTablePanel extends JPanel {
 		int row = (sels.length>0) ? sels[0] : 0;
     	int IDidx = theTableData.getColumnHeaderIndex(SCORE1);
     	float score = ((float)theTableData.getValueAt(row, IDidx));
-    	if (score<0) return false;
+    	if (score<=Globalx.dNoScore) return false; // CAS401 was <0
     	return true;
     }
     /* MSA... and MSAdb Next/Prev */
