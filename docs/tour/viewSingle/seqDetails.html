@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Tour Seq Details</title>
+<style>
+	a:link {text-decoration: none;color:#6666CC;}
+	a.current {font-family:verdana; font-size:12px; color:white; text-decoration: none;}
+	a.white {font-family:verdana; font-size:12px; color:white; text-decoration: underline;}
+	a.ext {font-weight: bold;}
+	mark.white {font-family:verdana; font-size:12px; color:white;background:none;}
+	ttp  {font-family: 'Lucida Console', monospace; font-size: 16px; font-weight: 400; font-variant: small-caps;}
+	ttl  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 600; color: DarkSlateGrey;}
+	ttc  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 700; color: DarkSlateGrey;}
+	tt {font-size:13px}
+	pre {font-size:13px}
+	.top {vertical-align: top;}
+	body {font-family:  Verdana, Arial, Helvetica, sans-serif;  font-size: 14px; }
+</style>
+</head>
+
+<body>
+<a id="top"></a>
+<table style="width: 800px; border: 2px solid #999999; padding: 0; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
+	<tr><td>
+		<table style="width: 100%; border: 0px; padding: 0;  border-collapse:collapse;">
+			<tr>
+				<td style="text-align: left; vertical-align: top; padding: 0">
+					<a href="http://www.agcol.arizona.edu">
+						<img src="../../img/agcol_logo.gif" alt="AGCoL" style="width: 180px; border:1px solid black"></a>
+				</td>
+				<td style="padding-bottom:5px; padding-left:40px; text-align: left;  font-family: Verdana, Arial;  font-weight: bold;color:MidnightBlue">
+					<font style="font-size: 20px;">Tour <font style="font-variant:small-caps;">viewSingleTCW</font></font> -
+					<font style="font-size: 15px;">Sequence Details</font>
+				</td>
+
+				<td style="text-align: right; vertical-align: top; padding: 0">
+					<a href="http://www.arizona.edu">
+						<img src="../../img/UA.gif" alt="UA" title="University of Arizona"  style="width: 40px; border:1px solid black"></a>
+					<br>
+					<a href="http://www.bio5.org">
+						<img src="../../img/bio5.gif" alt="BIO5" title="BIO5"  style="width: 40px; border:1px solid black"></a>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" style="text-align: left; vertical-align: top; padding: 0">
+				<table style="width: 100%; padding: 0;  border-spacing:0; border-collapse:collapse;">
+					<tr>
+						<td style="background-color: #666666; padding-bottom:4px;">
+						<a href="https://csoderlund.github.io/TCW" class="white">TCW Home</a> <mark class="white">|</mark>
+						<a href="https://github.com/csoderlund/TCW/releases" class="white">Download</a> <mark class="white">|</mark>
+						<a href="../../Docs.html" class="white">Docs</a> <mark class="white">|</mark>
+						<a href=".." class="white">Tour</a>
+					</tr>
+				</table>
+				</td>
+			</tr>
+		</table>
+	</td></tr>
+
+	<tr><td style='vertical-align: top; text-align: left; padding:15px;'>
+	<!---- START BODY -->
+<div style="text-align: center"><big><ttp>viewSingleTCW</ttp></big> - View and Query Single Species</div>
+
+<table style="padding: 2;  border-spacing:0; border-collapse:collapse;  margin-left: auto; margin-right: auto;">
+<tr><td style="background-color: #666666; padding-bottom:4px; ">
+<a href="index.html" class="white">Start</a> <mark class="white">|</mark>
+<a href="seqTable.html" class="white">Sequence Table</a> <mark class="white">|</mark>
+<a href="seqDetails.html"  class="current">Sequence Detail</a> <mark class="white">|</mark>
+<a href=seqQuery.html class="white">Basic Sequence</a>  <mark class="white">|</mark>
+<a href=hitQuery.html class="white">AnnoDB Hits</a>  <mark class="white">|</mark>
+<a href=goQuery.html class="white" >GO Annotations</a>  <mark class="white">|</mark>
+<a href=pairTable.html class="white">Pairs</a>
+</td></tr>
+</table>
+
+<p>
+<div style="text-align: center"><big><ttc>Sequence Details</ttc></big></div>
+<table style="padding: 2; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
+<tr><td style="background-color: #666666; padding-bottom:4px; ">
+<a href="#details" 	class="white">Details</a>  	<mark class="white">|</mark>
+<a href="#frame" 	class="white">Frame</a>  	<mark class="white">|</mark>
+<a href="#align"  	class="white" >Align</a>  	<mark class="white">|</mark>
+<a href="#goterm"  	class="white">GO</a>
+</td></tr>
+</table>
+
+<a id=details></a>
+<p>
+The <tt>Sequence Detail</tt> view can be displayed from the <tt>Seq Table</tt> by selecting a sequence followed by
+<ttc>View Selected Sequence</ttc>.
+
+<h3>Details</h3>
+The following image is an example of the detail page.
+<br><a href="img/seqDetail.png"><img src="img/seqDetail.png" alt="" style="border: 1px solid black; width: 850px"></a>
+
+<table style="width:80%">
+<tr><td class=top>
+	Second row of options:
+	<ul>
+	<li>The <ttc>Counts</ttc> pull-down  can change
+	the <ttc>Counts</ttc> to <ttx>TPM</ttx> or <ttx>Replicates</ttx>.
+	<li>The <ttc>All hits</ttc> can be changed to display only <ttx>Best Hit, Best per AnnoDB,
+	Unique Species, Distinct Regions</ttx>.
+	<li>The  <ttc>Copy...</ttc> and <ttc>Export...</ttc> options are shown on the right.
+	</ul>
+
+	<td  class=top><ttc>Copy...</ttc>
+	<br><img src="img/seqCopy.png" alt="" style="border: 1px solid black; width: 200px">
+
+	<td  class=top><ttc>Export...</ttc>
+	<br><img src="img/seqExport.png" alt="" style="border: 1px solid black; width: 150px">
+</tr>
+</table>
+
+<a id=frame></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Frame</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<table>
+<tr><td class="top">
+	The Start and Stop are highlighted in Green. The location of the best
+	hit is shown in italics, where it forms a perfect ORF in this example.
+	<p>By default, the assigned "Best ORF" will be shown, but can be changed with the <ttc>Frame</ttc> pull-down.
+
+	<p>The TCW algorithm uses hit information, 5th-order Markov score, and start/stop codons to compute the best frame.
+	<td><a href="img/seqFrame.png"><img src="img/seqFrame.png" alt="" style="border: 1px solid black; width: 600px"></a>
+</tr>
+</table>
+
+<a id=align></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Align Hits...</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<table>
+<tr><td class="top">
+	<p>There are options to show:
+	<ul>
+		<li><ttc>Best Hits</ttc>
+		<li><ttc>DB Hits: Selected Hits </ttc>
+		<li><ttc>DB Hits: Selected hits in all frames</ttc>
+	</ul>
+	<p>Dynamic programming is used to compute the alignment. The <tt>Hit:</tt> numbers are
+	from the search program (<ttp>BLAST</ttp> or <ttp>DIAMOND</ttp>), along with
+	the blue highlighted region. The yellow highlight is the UTRs computed by TCW.
+
+	<p>Selecting a hit followed by <ttc>Align...</ttc> shows a multi-line sequence view.
+	</td>
+	<td  class="top"><a href="img/seqAlign.png"><img src="img/seqAlign.png" alt="" style="border: 1px solid black; width: 600px"></a>
+</table>
+
+<a id=goterm></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>GO...</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<table>
+<tr>
+	<td  class="top">The
+	image on the right shows the union of the GO terms for sequence tra_027.
+	<p>Most of the columns are obvious, except the following two:
+	<p><ttc>Level</ttc>: A GO term can be at multiple levels in the tree. This number is its maximum level.
+	<p><ttc>#:EvC</ttc>: This shows evidence code for the protein being assigned the GO term. The number before an Evidence code is the number of hits that were assigned to the GO with the corresponding evidence.
+	</td>
+	<td  class="top"><a href="img/seqGoAll.png"><img src="img/seqGoAll.png" alt="" style="border: 1px solid black; width: 600px"></a>
+</table>
+
+<table>
+<tr>
+	<td class="top">Selecting a GO term followed by <ttc>Show... Seq Hits - Assigned</ttc> provides details of the hits that are assigned the GO.
+	<td><a href="img/seqGoHit.png"><img src="img/seqGoHit.png" alt="" style="border: 1px solid black; width: 500px"></a>
+</tr>
+<tr>
+	<td class="top">Selecting a GO term followed by <ttc>Show... GO - Neighbors</ttc>
+	provides the list of the GO's parent and children.
+	<td  class="top"><a href="img/seqGoNeigh.png"><img src="img/seqGoNeigh.png" alt="" style="border: 1px solid black; width: 450px"></a>
+</table>
+
+<table style="width: 100%"><tr><td style="text-align: left">
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+	<!---- END BODY -->
+	</td></tr>
+	<tr><td style="background-color: #DDDDDD; text-align: center; padding: 0; font-family: Verdana, Arial; font-size: 12px;">
+                        Email Comments To: <a href="mailto:tcw@agcol.arizona.edu">tcw@agcol.arizona.edu</a>
+
+</td></tr>
+</table>
+</body>
+</html>
+
+

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Tour Sequence Table</title>
+<style>
+	a:link {text-decoration: none;color:#6666CC;}
+	a.current {font-family:verdana; font-size:12px; color:white; text-decoration: none;}
+	a.white {font-family:verdana; font-size:12px; color:white; text-decoration: underline;}
+	a.ext {font-weight: bold;}
+	mark.white {font-family:verdana; font-size:12px; color:white;background:none;}
+	ttp  {font-family: 'Lucida Console', monospace; font-size: 16px; font-weight: 400; font-variant: small-caps;}
+	ttl  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 600; color: DarkSlateGrey;}
+	ttc  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 700; color: DarkSlateGrey;}
+	.top {vertical-align: top;}
+	tt {font-size:13px}
+	pre {font-size:13px}
+	body {font-family:  Verdana, Arial, Helvetica, sans-serif;  font-size: 14px; }
+</style>
+</head>
+
+<body>
+<a id="top"></a>
+<table style="width: 800px; border: 2px solid #999999; padding: 0; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
+	<tr><td>
+		<table style="width: 100%; border: 0px; padding: 0;  border-collapse:collapse;">
+			<tr>
+				<td style="text-align: left; vertical-align: top; padding: 0">
+					<a href="http://www.agcol.arizona.edu">
+						<img src="../../img/agcol_logo.gif" alt="AGCoL" style="width: 180px; border:1px solid black"></a>
+				</td>
+				<td style="padding-bottom:5px; padding-left:40px; text-align: left;  font-family: Verdana, Arial;  font-weight: bold;color:MidnightBlue">
+					<font style="font-size: 20px;">Tour <font style="font-variant:small-caps;">viewSingleTCW</font></font> -
+					<font style="font-size: 15px;">Sequence Table</font>
+				</td>
+
+				<td style="text-align: right; vertical-align: top; padding: 0">
+					<a href="http://www.arizona.edu">
+						<img src="../../img/UA.gif" alt="UA" title="University of Arizona"  style="width: 40px; border:1px solid black"></a>
+					<br>
+					<a href="http://www.bio5.org">
+						<img src="../../img/bio5.gif" alt="BIO5" title="BIO5"  style="width: 40px; border:1px solid black"></a>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" style="text-align: left; vertical-align: top; padding: 0">
+				<table style="width: 100%; padding: 0;  border-spacing:0; border-collapse:collapse;">
+					<tr>
+						<td style="background-color: #666666; padding-bottom:4px;">
+						<a href="https://csoderlund.github.io/TCW" class="white">TCW Home</a> <mark class="white">|</mark>
+						<a href="https://github.com/csoderlund/TCW/releases" class="white">Download</a> <mark class="white">|</mark>
+						<a href="../../Docs.html" class="white">Docs</a> <mark class="white">|</mark>
+						<a href=".." class="white">Tour</a>
+					</tr>
+				</table>
+				</td>
+			</tr>
+		</table>
+	</td></tr>
+
+	<tr><td style='vertical-align: top; text-align: left; padding:15px;'>
+	<!---- START BODY -->
+
+<div style="text-align: center"><big><ttp>viewSingleTCW</ttp></big> - View and Query Single Species</div>
+
+<table style="padding: 2;  border-spacing:0; border-collapse:collapse;  margin-left: auto; margin-right: auto;">
+<tr><td style="background-color: #666666; padding-bottom:4px; ">
+<a href="index.html" class="white">Start</a> <mark class="white">|</mark>
+<a href="seqTable.html" class="current">Sequence Table</a> <mark class="white">|</mark>
+<a href="seqDetails.html"  class="white">Sequence Detail</a> <mark class="white">|</mark>
+<a href=seqQuery.html class="white">Basic Sequence</a>  <mark class="white">|</mark>
+<a href=hitQuery.html class="white">AnnoDB Hits</a>  <mark class="white">|</mark>
+<a href=goQuery.html class="white" >GO Annotations</a>  <mark class="white">|</mark>
+<a href=pairTable.html class="white">Pairs</a>
+</td></tr>
+</table>
+
+<p>
+
+<div style="text-align: center"><big><ttc>Sequence Table</ttc></big></div>
+<table style="padding: 2;  border-spacing:0; border-collapse:collapse;  margin-left: auto; margin-right: auto;">
+<tr><td style="background-color: #666666; padding-bottom:4px; ">
+<a href="#tab" class="white">Table</a> <mark class="white">|</mark>
+<a href="#col" class="white">Columns</a> <mark class="white">|</mark>
+<a href="#filter" class="white">Filters</a>
+</td></tr>
+</table>
+
+<a id=tab></a>
+<p>The items under <ttc>Seq Table</ttc> produce the main table of sequences.
+Selecting <ttc>All Seqs</ttc> shows all sequences with whatever columns are set in
+<ttc>Columns</ttc>.
+<p>The table below was produced by filtering for all sequences that
+are differentially expressed (p-value&lt;0.05) with log2FC&lt;=1 for stem compared to root or leaf.
+
+<p><a href="img/mainTable.png">
+<img src="img/mainTable.png" alt="" style="border: 1px solid black; width: 850px"></a>
+
+<p>The columns can be sorted and moved around.
+The decimal number display can be changed with <a href="index.html#decimal" class=ext target="_blank">Decimal Display</a>
+(the above display uses color scheme #4 for the p-values).
+A row can be selected to view the <a href=seqDetails.html class=ext target="_blank">Sequence Detail</a>.
+
+<table>
+<tr>
+	<td>The <ttc>Table...</ttc> allows the options show below.
+	<td>The <ttc>Show Column Stats</ttc> results in a pop-up window of statistics for all numeric columns,as shown below.
+</tr>
+<tr>
+	<td><a href="img/exportTable.png"><img src="img/exportTable.png" alt="" style="border: 1px solid black;"></a>
+	<td class="top"><a href="img/stats.png"><img src="img/stats.png" alt="" style="border: 1px solid black; width: 90%"></a>
+</tr>
+</table>
+
+<a id=col></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Set Columns</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<table>
+<tr><td class="top">
+	Select the <ttc>Columns</ttc> label on the left to changed columns.
+	<p>
+	Click <a href="img/collapseColumns.png">here</a> to see all column sections.
+	The columns shown on the right are the ones selected for the table shown above.
+
+	<p>There are three best hits for each sequence that has annotation:
+	<ol>
+		<li><ttl>Best Bitscore</ttl>: the one with the best bitscore, and if tied, best E-value.
+		<p>
+		<li><ttl>Best anno</ttl>: the best bitscore hit may have a description that is not informative.
+		TCW tries to find a hit with almost as good of bitscore
+		but a more informative description. It does this be ignoring hits with descriptions containing
+		phrases like "uncharacterized protein".
+		<p>
+		<li><ttl>Best with GO</ttl>: Hit IDs from UniProt are often assigned GO terms, but not all Hit IDs have GO terms.
+		This is the hit with the best bitscore that has at least one assigned GO term.
+	</ol>
+	All three groups of <ttc>Best Hits</ttc> have the same set of columns available for display.
+	</td>
+	<td><a href="img/seqColumns.png"><img src="img/seqColumns.png" alt="" style="border: 1px solid black; width: 500px"></a>
+	</td>
+</tr>
+</table>
+
+<a id=filter></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Set Filters</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<table>
+<tr><td class="top" >
+	Select the <ttc>Filters</ttc> label to changed columns.
+	<p>
+	Click <a href="img/collapseFilters.png">here</a> to see all filter sections, which
+	applies one or more filters to the sequences shown in the <ttx>Sequence Table</ttx>.
+	The following filters were set to obtain the <ttx>Sequence Table</ttx> shown about.
+	<p>The <ttc>Differential Expression</ttc> filters allow finding sequences that are up or down regulated
+	in respect to the selected conditions.
+	<p>The <ttc>Best Hits</ttc> filters allows querying on the three types of best hits described
+	in <a href="#col">Columns</a> above. More extensive queries are provided in <ttc>Basic Query annoDB Hits</ttc>,
+	but this set of filters can be used with other filters on this panel.
+	</td>
+	<td><a href="img/seqFilters.png"><img src="img/seqFilters.png" alt="" style="border: 1px solid black; width: 500px"></a>
+</td></tr>
+</table>
+
+<table style="width: 100%"><tr><td style="text-align: left">
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+	<!---- END BODY -->
+	</td></tr>
+	<tr><td style="background-color: #DDDDDD; text-align: center; padding: 0; font-family: Verdana, Arial; font-size: 12px;">
+                        Email Comments To: <a href="mailto:tcw@agcol.arizona.edu">tcw@agcol.arizona.edu</a>
+
+</td></tr>
+</table>
+</body>
+</html>

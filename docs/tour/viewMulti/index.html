@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Tour viewMultiTCW</title>
+<style>
+	a:link {text-decoration: none;color:#6666CC;}
+	a.current {font-family:verdana; font-size:12px; color:white; text-decoration: none;}
+	a.white {font-family:verdana; font-size:12px; color:white; text-decoration: underline;}
+	a.ext {font-weight: bold;}
+	mark.white {font-family:verdana; font-size:12px; color:white;background:none;}
+	ttp  {font-family: 'Lucida Console', monospace; font-size: 16px; font-weight: 400; font-variant: small-caps;}
+	ttl  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 600; color: DarkSlateGrey;}
+	ttc  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 700; color: DarkSlateGrey;}
+	.top {vertical-align: top;}
+	.hang  {margin-left:15px; text-indent:-15px; margin-top:5px;}
+	.tx    {border: 0px; padding: 5px; border-spacing: 5px; }
+	.tx td,th {border: 0px; padding: 5px; border-spacing: 5px}
+	.ty    {border: 1px  solid black; border-spacing: 0px;  border-collapse: collapse;}
+	.ty td, th {border: 1px  solid black; padding: 3px; }
+	tt {font-size:13px}
+	pre {font-size:13px}
+	body {font-family:  Verdana, Arial, Helvetica, sans-serif;  font-size: 14px; }
+</style>
+</head>
+
+<body>
+<a id="top"></a>
+<table style="width: 800px; border: 2px solid #999999; padding: 0; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
+	<tr><td>
+		<table style="width: 100%; border: 0px; padding: 0;  border-collapse:collapse;">
+			<tr>
+				<td style="text-align: left; vertical-align: top; padding: 0">
+					<a href="http://www.agcol.arizona.edu">
+						<img src="../../img/agcol_logo.gif" alt="AGCoL" style="width: 180px; border:1px solid black"></a>
+				</td>
+				<td style="padding-bottom:5px; padding-left:40px; text-align: left;  font-family: Verdana, Arial;  font-weight: bold;color:MidnightBlue">
+					<font style="font-size: 20px;">Tour <font style="font-variant:small-caps;">viewMultiTCW</font></font> -
+					<font style="font-size: 15px;">View Comparison Database</font>
+				</td>
+
+				<td style="text-align: right; vertical-align: top; padding: 0">
+					<a href="http://www.arizona.edu">
+						<img src="../../img/UA.gif" alt="UA" title="University of Arizona"  style="width: 40px; border:1px solid black"></a>
+					<br>
+					<a href="http://www.bio5.org">
+						<img src="../../img/bio5.gif" alt="BIO5" title="BIO5"  style="width: 40px; border:1px solid black"></a>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" style="text-align: left; vertical-align: top; padding: 0">
+				<table style="width: 100%; padding: 0;  border-spacing:0; border-collapse:collapse;">
+					<tr>
+						<td style="background-color: #666666; padding-bottom:4px;">
+						<a href="https://csoderlund.github.io/TCW" class="white">TCW Home</a> <mark class="white">|</mark>
+						<a href="https://github.com/csoderlund/TCW/releases" class="white">Download</a> <mark class="white">|</mark>
+						<a href="../../Docs.html" class="white">Docs</a> <mark class="white">|</mark>
+						<a href=".." class="white">Tour</a>
+					</tr>
+				</table>
+				</td>
+			</tr>
+		</table>
+	</td></tr>
+
+	<tr><td style='vertical-align: top; text-align: left; padding:15px;'>
+	<!---- START BODY -->
+<div style="text-align: center"><big><ttp>viewMultiTCW</ttp></big> - View and Query Multiple Species</div>
+
+<table style="padding: 2;  border-spacing:0; border-collapse:collapse;  margin-left: auto; margin-right: auto;">
+<tr><td style="background-color: #666666; padding-bottom:4px; ">
+<a href="index.html" class="current" >Start</a> 	<mark class="white">|</mark>
+<a href="cluster.html" class="white">Clusters</a> <mark class="white">|</mark>
+<a href="pairs.html" class="white">Pairs</a> <mark class="white">|</mark>
+<a href="seq.html"  class="white">Sequences</a> <mark class="white">|</mark>
+<a href="align.html"  class="white">Alignment</a> <mark class="white">|</mark>
+<a href="seqDetail.html"  class="white">Sequence Details</a> <mark class="white">|</mark>
+<a href=hit.html class="white">Annotation Hits</a>
+
+</td></tr>
+</table>
+
+<div style="text-align: center"><big><ttc>Start</ttc></big></div>
+<table  class="tx" style="margin-left: auto;margin-right: auto;">
+<tr><td class="white" style="text-align:left; background-color:#666666; padding-bottom:4px;">
+<a href="#decimal" class="white">Decimal Display</a>  <mark class="white">|</mark>
+<a href="#hits" class="white">Find Hits</a>  <mark class="white">|</mark>
+<a href="#list" class="white">List Results</a>  <mark class="white">|</mark>
+<a href="#table" class="white">Table Features</a>
+</td></tr>
+</table>
+
+<p><ttp>viewMultiTCW</ttp> displays information from a multiTCW (mTCW) database, which was created
+by one or more singleTCW (sTCW) databases with <a href="../runMulti" class="ext" target="_blank">runMultiTCW</a>.
+
+<table class="tx">
+<tr><td class="top">
+<ttc><big>General</big></ttc>
+<p>&#10148;<ttc>Overview</ttc>: The top part of the Overview is shown on the right and can be scrolled
+to view the entire page.
+<p><a href="explain.html" class="ext" target="_blank">Explain</a> describes how the statistics were computed
+and <a href="../../ov/mDemo.html" class="ext" target="_blank">Overview</a> shows the HTML of the overview on the right.
+
+<td><a  href="img/viewMulti.png"><img src="img/viewMulti.png" alt="" style="border: 1px solid black; width: 650px"></a>
+</table>
+
+<p>&#10148;<ttc>Decimal Display</ttc> allows the formatting of decimal numbers to be changed (<a href="#decimal">View</a>).
+
+<p>&#10148;<ttc>Find Hits</ttc> allows a sequence to be searched against the
+mTCWdb sequences or a selected database (<a href="#hits">View</a>).
+
+<p>&#10148;<ttc>List Results</ttc> provides a table of all results along with the query
+(<a href="#list">View</a>).
+
+
+<p><ttc><big>Filters</big></ttc><br>Provides filters for the four types of tables: clusters, pairs, sequences and hits.
+The <a href="#table">Table Features</a> shows some general features.
+
+<p><ttc><big>Samples</big></ttc><br> The tables can be very big, so the bottom four tabs provide <tt>Sample</tt> tables
+of just a few 1000 entries.
+
+<!-------------------------------------------------------------->
+<a id=decimal></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Decimal Display</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+<a  href="img/decimal.png"><img src="img/decimal.png" alt="" style="border: 1px solid black; width: 650px"></a>
+
+<!-------------------------------------------------------------->
+<a id=hits></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Find Hits</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+<a  href="img/find.png"><img src="img/find.png" alt="" style="border: 1px solid black; width: 650px"></a>
+
+<!-------------------------------------------------------------->
+<a id=list></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>List Results</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+<a  href="img/list.png"><img src="img/list.png" alt="" style="border: 1px solid black; width: 650px"></a>
+
+<!-------------------------------------------------------------->
+<a id=table></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Table Features</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+All four tables (Clusters, Pairs, Sequences, Hits) have the following options at the top of their panel:
+<table>
+<tr>
+	<td>The <ttc>Table...</ttc> drop-down allows exporting the table, the sequence of the table, etc.
+	<p>The <ttc>Show Column Stats</ttc> option to display summary
+	statistics for the rows and numeric columns of the displayed table, as illustrated on the right for the Pairs table.
+
+	<td><a  href="img/showColumns.png"><img src="img/showColumns.png" alt="" style="border: 1px solid black; width: 450px"></a>
+</tr>
+</table>
+
+All four tables have the following at the bottom of their table:
+<br><a  href="img/colSelect.png"><img src="img/colSelect.png" alt="" style="border: 1px solid black; width: 250px"></a>
+<ol>
+	<li>The <ttc>Select Column</ttc> panel displays all possible columns.
+	<li>Mousing over a column name describes it in the lower left corner.
+	<li>Selecting or deselecting a column name immediately shows or removes the column from the table.
+	<li>The  columns can be sorted and moved around.
+</ol>
+
+
+<table style="width: 100%"><tr><td style="text-align: left">
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+	<!---- END BODY -->
+	</td></tr>
+	<tr><td style="background-color: #DDDDDD; text-align: center; padding: 0; font-family: Verdana, Arial; font-size: 12px;">
+                        Email Comments To: <a href="mailto:tcw@agcol.arizona.edu">tcw@agcol.arizona.edu</a>
+
+</td></tr>
+</table>
+</body>
+</html>

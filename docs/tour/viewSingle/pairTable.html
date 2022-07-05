@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Tour Pairs</title>
+<style>
+	a:link {text-decoration: none;color:#6666CC;}
+	a.current {font-family:verdana; font-size:12px; color:white; text-decoration: none;}
+	a.white {font-family:verdana; font-size:12px; color:white; text-decoration: underline;}
+	a.ext {font-weight: bold;}
+	a.extp {font-weight: bold; font-variant: small-caps;}
+	mark.white {font-family:verdana; font-size:12px; color:white;background:none;}
+	ttp  {font-family: 'Lucida Console', monospace; font-size: 16px; font-weight: 400; font-variant: small-caps;}
+	ttl  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 600; color: DarkSlateGrey;}
+	ttc  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 700; color: DarkSlateGrey;}
+	body {font-family:  Verdana, Arial, Helvetica, sans-serif;  font-size: 14px; }
+</style>
+</head>
+
+<body>
+<a id="top"></a>
+<table style="width: 800px; border: 2px solid #999999; padding: 0; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
+	<tr><td>
+		<table style="width: 100%; border: 0px; padding: 0;  border-collapse:collapse;">
+			<tr>
+				<td style="text-align: left; vertical-align: top; padding: 0">
+					<a href="http://www.agcol.arizona.edu">
+						<img src="../../img/agcol_logo.gif" alt="AGCoL" style="width: 180px; border:1px solid black"></a>
+				</td>
+				<td style="padding-bottom:5px; padding-left:40px; text-align: left;  font-family: Verdana, Arial;  font-weight: bold;color:MidnightBlue">
+					<font style="font-size: 20px;">Tour <font style="font-variant:small-caps;">viewSingleTCW</font></font> -
+					<font style="font-size: 15px;">Pairs Table</font>
+				</td>
+
+				<td style="text-align: right; vertical-align: top; padding: 0">
+					<a href="http://www.arizona.edu">
+						<img src="../../img/UA.gif" alt="UA" title="University of Arizona"  style="width: 40px; border:1px solid black"></a>
+					<br>
+					<a href="http://www.bio5.org">
+						<img src="../../img/bio5.gif" alt="BIO5" title="BIO5"  style="width: 40px; border:1px solid black"></a>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" style="text-align: left; vertical-align: top; padding: 0">
+				<table style="width: 100%; padding: 0;  border-spacing:0; border-collapse:collapse;">
+					<tr>
+						<td style="background-color: #666666; padding-bottom:4px;">
+						<a href="https://csoderlund.github.io/TCW" class="white">TCW Home</a> <mark class="white">|</mark>
+						<a href="https://github.com/csoderlund/TCW/releases" class="white">Download</a> <mark class="white">|</mark>
+						<a href="../../Docs.html" class="white">Docs</a> <mark class="white">|</mark>
+						<a href=".." class="white">Tour</a>
+					</tr>
+				</table>
+				</td>
+			</tr>
+		</table>
+	</td></tr>
+
+	<tr><td style='vertical-align: top; text-align: left; padding:15px;'>
+	<!---- START BODY -->
+<div style="text-align: center"><big><ttp>viewSingleTCW</ttp></big> - View and Query Single Species</div>
+
+<table style="padding: 2;  border-spacing:0; border-collapse:collapse;  margin-left: auto; margin-right: auto;">
+<tr><td style="background-color: #666666; padding-bottom:4px; ">
+<a href="index.html" class="white">Start</a> <mark class="white">|</mark>
+<a href="seqTable.html" class="white">Sequence Table</a> <mark class="white">|</mark>
+<a href="seqDetails.html"  class="white">Sequence Detail</a> <mark class="white">|</mark>
+<a href=seqQuery.html class="white">Basic Sequence</a>  <mark class="white">|</mark>
+<a href=hitQuery.html class="white">AnnoDB Hits</a>  <mark class="white">|</mark>
+<a href=goQuery.html class="white" >GO Annotations</a>  <mark class="white">|</mark>
+<a href=pairTable.html class="current">Pairs</a>
+</td></tr>
+</table>
+
+
+<div style="text-align: center"><big><ttc>Similar Sequence Pairs</ttc></big></div>
+In <ttp>runSingleTCW</ttp>, there is an annotation option to compare all sequences.
+If this has been run, then there will be a <ttl>Pair Table</ttl> section.
+
+<p><a href="img/pairTable.png"><img src="img/pairTable.png" alt="" style="border: 1px solid black; width: 800px"></a>
+
+<p>The <tt>Hit E-value</tt> and <tt>Hit %Sim</tt> are from the <ttc>blast</ttc> (or <ttc>diamond</ttc>) hit file,
+the rest of the numeric columns are from dynamic programming
+alignment of the pair.
+
+<p>&nbsp;
+<p>Select a row followed by <ttc>Align Pair</ttc> to view the nucleotide and amino acid alignment using
+the best frame.
+
+<br><a href="img/pairAlign.png"><img src="img/pairAlign.png" alt="" style="border: 1px solid black; width: 800px"></a>
+
+<p>&nbsp;
+<p>Select a row followed by <ttc>Seq Table</ttc> and the sequences will be shown in the main
+<ttc>Sequence Table</ttc> as shown below.
+
+<br><a href="img/pairSeq.png"><img src="img/pairSeq.png" alt="" style="border: 1px solid black; width: 800px"></a>
+
+<table style="width: 100%"><tr><td style="text-align: left">
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+	<!---- END BODY -->
+	</td></tr>
+	<tr><td style="background-color: #DDDDDD; text-align: center; padding: 0; font-family: Verdana, Arial; font-size: 12px;">
+                        Email Comments To: <a href="mailto:tcw@agcol.arizona.edu">tcw@agcol.arizona.edu</a>
+
+</td></tr>
+</table>
+</body>
+</html>

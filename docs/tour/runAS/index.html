@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Tour runAS</title>
+<style>
+	a:link {text-decoration: none;color:#6666CC;}
+	a.white {font-family:verdana; font-size:12px; color:white; text-decoration: underline;}
+	a.ext {font-weight: bold;}
+	a.extp {font-weight: bold; small-caps;}
+	mark.white {font-family:verdana; font-size:12px; color:white;background:none;}
+	ttp  {font-family: 'Lucida Console', monospace; font-size: 16px; font-weight: 400; font-variant: small-caps;}
+	ttl  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 600; color: DarkSlateGrey;}
+	ttc  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 700; color: DarkSlateGrey;}
+	.top {vertical-align: top;}
+	.tx    {border: 0px; padding: 5px; border-spacing: 5px; }
+	.tx td,th {border: 0px; padding: 5px; border-spacing: 5px}
+	.ty    {border: 1px  solid black; border-spacing: 0px;  border-collapse: collapse;}
+	.ty td, th {border: 1px  solid black; padding: 3px; }
+	cap {font-variant:small-caps;}
+	tt {font-size:13px}
+	pre {font-size:13px}
+	body {font-family:  Verdana, Arial, Helvetica, sans-serif;  font-size: 14px; }
+</style>
+</head>
+
+<body>
+<a id="top"></a>
+<table style="width: 800px; border: 2px solid #999999; padding: 0; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
+	<tr><td>
+		<table style="width: 100%; border: 0px; padding: 0;  border-collapse:collapse;">
+			<tr>
+				<td style="text-align: left; vertical-align: top; padding: 0">
+					<a href="http://www.agcol.arizona.edu">
+						<img src="../../img/agcol_logo.gif" alt="AGCoL" style="width: 180px; border:1px solid black"></a>
+				</td>
+				<td style="padding-bottom:5px; padding-left:40px; text-align: left;  font-family: Verdana, Arial;  font-weight: bold;color:MidnightBlue">
+					<font style="font-size: 20px;">Tour <cap>runAS</cap></font> -
+					<font style="font-size: 15px;">Annotation Setup</font>
+				</td>
+
+				<td style="text-align: right; vertical-align: top; padding: 0">
+					<a href="http://www.arizona.edu">
+						<img src="../../img/UA.gif" alt="UA" title="University of Arizona"  style="width: 40px; border:1px solid black"></a>
+					<br>
+					<a href="http://www.bio5.org">
+						<img src="../../img/bio5.gif" alt="BIO5" title="BIO5"  style="width: 40px; border:1px solid black"></a>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" style="text-align: left; vertical-align: top; padding: 0">
+				<table style="width: 100%; padding: 0;  border-spacing:0; border-collapse:collapse;">
+					<tr>
+						<td style="background-color: #666666; padding-bottom:4px;">
+						<a href="https://csoderlund.github.io/TCW" class="white">TCW Home</a> <mark class="white">|</mark>
+						<a href="https://github.com/csoderlund/TCW/releases" class="white">Download</a> <mark class="white">|</mark>
+						<a href="../../Docs.html" class="white">Docs</a> <mark class="white">|</mark>
+						<a href=".." class="white">Tour</a>
+					</tr>
+				</table>
+				</td>
+			</tr>
+		</table>
+	</td></tr>
+
+	<tr><td style='vertical-align: top; text-align: left; padding:15px;'>
+	<!---- START BODY -->
+
+<div style="text-align: center"><big><ttp>runAS</ttp></big> - Annotation Setup</div>
+
+<p><ttp>runAS</ttp> downloads UniProt files and formats them for input to sTCW, and download the
+GO database
+to build a local GO database for input into sTCW.
+See <a href="../../stcw/AnnoDBs.html" class="ext" target="_blank">Annotation Setup</a> for details.
+
+<table>
+<tr><td class="top">
+<br>&nbsp;<br>&nbsp;
+<br><ttp>runAS</ttp> performs the following:
+<ol>
+	<li>Downloads one or more UniProt Taxonomic .dat files and creates FASTA files from them.
+	<li>Downloads the full SwissProt or TrEMBL, creates subset files by removing entries from the taxonomic
+	downloads, and creates a FASTA file of the remaining entries.
+	<li>Download the GO <tt>go-basic.obo</tt> file, and creates a GO mySQL database
+	with the mapping of UniProt IDs to the GO, KEGG, EC, Pfam and InterPro.
+</ol>These are used for annotating a TCW database with
+<a href="../runSingle" class="extp" target="_blank">runSingleTCW</a>.
+
+<p>The highlighted entries in the figure indicate what has been created, i.e. the plant and fungi SwissProt.
+When <ttc>Build Tax</ttc> is executed again, the 4 checked entries will be processed.
+
+<p>Other databases, such as Genbank nr, can also be used in <ttp>runSingleTCW</ttp> for annotation,
+but the user must download and format them as FASTA files.
+<td>
+
+<a id="Fig1"></a>
+<a  href="img/runAS.png"><img src="img/runAS.png" alt="" style="border: 1px solid black; width: 400px"></a>
+</table>
+
+
+	<!---- END BODY -->
+	</td></tr>
+	<tr><td style="background-color: #DDDDDD; text-align: center; padding: 0; font-family: Verdana, Arial; font-size: 12px;">
+                        Email Comments To: <a href="mailto:tcw@agcol.arizona.edu">tcw@agcol.arizona.edu</a>
+
+</td></tr>
+</table>
+</body>
+</html>
+

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>TCW Trouble</title>
+<style>
+	a:link {text-decoration: none;color:#6666CC;}
+	a.white {font-family:verdana; font-size:12px; color:white; text-decoration: underline;}
+	a.ext {font-weight: bold;}
+	mark.white {font-family:verdana; font-size:12px; color:white;background:none;}
+	ttp  {font-family: 'Lucida Console', monospace; font-size: 16px; font-weight: 400; font-variant: small-caps;}
+	.top {vertical-align: top;}
+	.ty    {border: 1px  solid black; border-spacing: 0px;  border-collapse: collapse;}
+	.ty td, th {border: 1px  solid black; padding: 3px; }
+	tt {font-size:13px}
+	pre {font-size:13px}
+	body {font-family:  Verdana, Arial, Helvetica, sans-serif;  font-size: 14px; }
+</style>
+</head>
+
+<body>
+<a id="top"></a>
+<table style="width: 800px; border: 2px solid #999999; padding: 0; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
+	<tr><td>
+		<table style="width: 100%; border: 0px; padding: 0;  border-collapse:collapse;">
+			<tr>
+				<td style="text-align: left; vertical-align: top; padding: 0">
+					<a href="http://www.agcol.arizona.edu">
+						<img src="./img/agcol_logo.gif" alt="AGCoL" style="width: 180px; border:1px solid black"></a>
+				</td>
+				<td style="padding-bottom:5px; padding-left:40px; text-align: left;  font-family: Verdana, Arial; font-size: 20px; font-weight: bold;color:MidnightBlue">
+					TCW Trouble Shooting
+				</td>
+				<td style="text-align: right; vertical-align: top; padding: 0">
+					<a href="http://www.arizona.edu">
+						<img src="./img/UA.gif" alt="UA" title="University of Arizona"  style="width: 40px; border:1px solid black"></a>
+					<br>
+					<a href="http://www.bio5.org">
+						<img src="./img/bio5.gif" alt="BIO5" title="BIO5"  style="width: 40px; border:1px solid black"></a>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" style="text-align: left; vertical-align: top; padding: 0">
+				<table style="width: 100%; padding: 0;  border-spacing:0; border-collapse:collapse;">
+					<tr>
+						<td style="background-color: #666666; padding-bottom:4px;">
+						<a href="https://csoderlund.github.io/TCW" class="white">TCW Home</a> <mark class="white">|</mark>
+						<a href="https://github.com/csoderlund/TCW/releases" class="white">Download</a> <mark class="white">|</mark>
+						<a href="./Docs.html" class="white">Docs</a> <mark class="white">|</mark>
+						<a href="./tour" class="white">Tour</a>
+					</tr>
+				</table>
+				</td>
+			</tr>
+		</table>
+	</td></tr>
+
+	<tr><td style='vertical-align: top; text-align: left; padding:15px;'>
+	<!---- START BODY -->
+
+<u>Content:</u>
+<ul>
+<li><a href="#mysql">MySQL suggested settings</a>
+<li><a href="#db">MySQL connection errors</a>
+<li><a href="#mem">Out of memory</a>
+<li><a href="#ext">External executable problems</a>
+<li><a href="#run">Error Reports</a>
+</ul>
+
+<hr>
+<a id="mysql"></a>
+<h2>MySQL suggested settings</h2>
+<table class="ty">
+	<tr>
+		<td class="top"><tt>max_allowed_packet</tt></td>
+		<td>This should be at least 500M if possible (the units are bytes). </td>
+	</tr>
+
+</table>
+
+<br>For all TCW software, the mySQL variable <tt>max_allowed_packet</tt> must be a reasonable
+size. To check the value, either:
+<pre>	./runSingle -v</pre>
+or, start mysql and type:
+<pre>	show variables like "max_allowed_packet"; </pre>
+To change this variable, start mysql and type:
+<pre>	set global max_allowed_packet=1073741824;</pre>
+
+Testing on:
+<table class="ty">
+	<tr>
+		<td class="top">MacOS Catalina with MySQL v8.0.17</td>
+		<td>the above variable seems to be the only important one. </td>
+	</tr>
+	<tr>
+		<td class="top">Linux x86.64 (Centos 7) with MariaDB v10.4.12</td>
+		<td>two more variable are important for assembly, as discussed in the next section. </td>
+	</tr>
+</table>
+
+<h3>MariaDB</h3>
+Two MySQL settings are especially important for assembly performance (and generally for InnoDB table
+performance).
+<p>
+<table class="ty">
+	<tr>
+		<td class="top"><tt>innodb_buffer_pool_size</tt></td>
+		<td>The default is too low for most purposes. You should set this to around 1Gb if possible (note that
+			the units are bytes). </td>
+	</tr>
+	<tr>
+		<td class="top"><tt>innodb_flush_log_at_trx_commit</tt></td>
+		<td>The default setting is 1, which results in very slow uploading of data.
+		</td>
+	</tr>
+</table>
+<p>
+To check the values, start mysql and type:
+<pre>
+	show variables like "innodb_buffer_pool_size";
+	show variables like "innodb_flush_log_at_trx_commit";
+</pre>
+To change the variables, then type:
+<pre>
+	set global innodb_buffer_pool_size=1073741824;
+	set global innodb_flush_log_at_trx_commit=0;
+</pre>
+Alternatively, You can set these in the MySQL configuration file <tt>my.cnf</tt> and restart MySQL.
+Note that <tt>my.cnf</tt> is typically located at <tt>/etc/my.cnf</tt>, on both Linux and Mac.
+
+<a id=db></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>MySQL connection errors</h2></td>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+If TCW cannot connect to the database, generally the problem is the access privileges of the DB_user
+ in the <tt>HOSTS.cfg</tt> (firewalls are another common problem - talk to your system administrator).
+
+<p>MySQL privileges are very specific and must exactly match the hostname in HOSTS.cfg.
+<br> For example, if DB_host = localhost, DB_user=user, then privileges must be granted to 'user@localhost'.
+Sometimes you may need equivalent variants, e.g. if localhost has IP 74.125.239.17
+and domain my.domain.org, you may also need 'user@74.125.239.17' and 'user@my.domain.org'.
+<p>
+Privilege problems are easiest to debug by running the 'mysql' command line client.
+Run:
+<pre>
+	mysql -u &lt;DB_user&gt; -p -h &lt;DB_host&gt;
+</pre>
+and enter the DB_password when prompted. If this fails, then the user/password privileges have
+to be corrected. If it succeeds, then try to add and drop a test database:
+<pre>
+	>create database TCW_PRIVTEST;
+	>drop database TCW_PRIVTEST;
+</pre>
+If this fails you can still run TCW, but you will need an administrator to create
+the TCW database since <tt>runSingleTCW</tt> cannot do it.
+
+<a id=mem></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>Out of memory</h2>
+</td><td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+Java applications must specify their memory usage in advance, so it is very
+important to set it high enough.
+The setting is adjusted by editing the appropriate launch script,
+by increasing the "-Xmx" parameter value on the java command line.
+
+<p>
+If you run out during initial project loading, edit the <tt>execLoadLib</tt> script to increase
+the numeric value of "-Xmx8192m", and load using <tt>./execLoadLib &lt;project&gt;</tt>.
+ <p>
+If you run out during instantiation/assembly, edit the <tt>execAssm</tt> script to increase
+the numeric value of "-Xmx8192m" , and run the instantiation using <tt>./execAssm &lt;project&gt;</tt>.
+<p>
+If you run out of memory while annotating, edit the <tt>execAnno</tt> script to increase
+the numeric value of "-Xmx8192m", and add your annotation using <tt>./execAnno &lt;project&gt;</tt>.
+
+<p>
+If you run out of memory with
+<tt>runDE</tt>, <tt>viewSingleTCW</tt>,  <tt>runMultiTCW</tt>, or <tt>viewMultiTCW</tt>,
+edit the respective script to increase
+the numeric value of "-Xmx8192m" and re-run.
+
+<a id=ext></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>External executable problems</h2>
+</td><td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+These program are in the TCW subdirectories <tt>/Ext/linux</tt> and <tt>/Ext/mac</tt>.
+
+<h3>Not executable</h3>
+If on startup, you get a message like:
+<pre>
+	***Error: file is not executable: ext/mac/mafft/mafft.bat
+</pre>
+
+From the <tt>/Ext</tt> directory, <tt>chmod -R 775 mafft</tt> to give all necessary
+executables and scripts in the directory permission to execute.
+
+<p>NOTE: MacOS 10.15 (Catalina) does not allow downloaded programs to execute. Running through TCW,
+you will either get popup that states "xxx cannot be opened because developer cannot be verified", or
+the program will just fail. See <a href="./Mac-OSX.html#ext" class="ext" target="_blank">MacOS</a>.
+
+<h3>External program fails</h3>
+Generally, the command is written to the terminal by TCW. Copy and paste it at the command line. By executing it like
+this, you will see all the external programs messages, which generally elucidates the
+problem.
+<p>If this does not work, try executing it in the <tt>/Ext</tt> directory,
+which may indicate the problem.
+<p>It may be necessary to compile the program for your machine and replace the existing
+executable, in which case, see <a href="./Install.html#replace"  class="ext" target="_blank">Install Replace Executable</a>.
+
+<a id=run></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>Errors reports</h2>
+</td><td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<table class="ty">
+<tr><th>Program<th>Error file<th>Log file
+<tr><td colspan=3><ttp>RunSingleTCW</ttp>
+<tr><td>&nbsp;&nbsp;&nbsp;Build Database<td>sTCW.error1.log<td>projects/&lt;name&gt;/logs/load.log
+<tr><td>&nbsp;&nbsp;&nbsp;Instantiate<td>sTCW.error1.log<td>projects/&lt;name&gt;/logs/inst.log
+<tr><td>&nbsp;&nbsp;&nbsp;Annotate<td>sTCW.error.log<td>projects/&lt;name&gt;/logs/anno.log
+<tr><td colspan=3>Everything else
+<tr><td><ttp>runAS</ttp><td>sTCW.error.log<td>projects/DBfasta/logs
+<tr><td><ttp>runDE</ttp><td>sTCW.error.log<td>-
+<tr><td><ttp>viewSingleTCW</ttp><td>sTCW.error.log<td>-
+<tr><td><ttp>runMultiTCW</ttp><td>mTCW.error.log<td>projcmp/&lt;name&gt;/logs
+<tr><td><ttp>viewMultiTCW</ttp><td>mTCW.error.log<td>-
+</table>
+<p>
+The error log file may indicate the problem, otherwise,
+email it to <tt>tcw at agcol.arizona.edu</tt>.
+	<!---- END BODY -->
+<p><a href="#top">Go to top</a>
+	</td></tr>
+	<tr><td style="background-color: #DDDDDD; text-align: center; padding: 0; font-family: Verdana, Arial; font-size: 12px;">
+                        Email Comments To: <a href="mailto:tcw@agcol.arizona.edu">tcw@agcol.arizona.edu</a>
+
+</td></tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Tour Basic Hit</title>
+<style>
+	a:link {text-decoration: none;color:#6666CC;}
+	a.current {font-family:verdana; font-size:12px; color:white; text-decoration: none;}
+	a.white {font-family:verdana; font-size:12px; color:white; text-decoration: underline;}
+	a.ext {font-weight: bold;}
+	mark.white {font-family:verdana; font-size:12px; color:white;background:none;}
+	ttp  {font-family: 'Lucida Console', monospace; font-size: 16px; font-weight: 400; font-variant: small-caps;}
+	ttl  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 600; color: DarkSlateGrey;}
+	ttc  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 700; color: DarkSlateGrey;}
+	.top {vertical-align: top;}
+	body {font-family:  Verdana, Arial, Helvetica, sans-serif;  font-size: 14px; }
+</style>
+</head>
+
+<body>
+<a id="top"></a>
+<table style="width: 800px; border: 2px solid #999999; padding: 0; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
+	<tr><td>
+		<table style="width: 100%; border: 0px; padding: 0;  border-collapse:collapse;">
+			<tr>
+				<td style="text-align: left; vertical-align: top; padding: 0">
+					<a href="http://www.agcol.arizona.edu">
+						<img src="../../img/agcol_logo.gif" alt="AGCoL" style="width: 180px; border:1px solid black"></a>
+				</td>
+				<td style="padding-bottom:5px; padding-left:40px; text-align: left;  font-family: Verdana, Arial;  font-weight: bold;color:MidnightBlue">
+					<font style="font-size: 20px;">Tour <font style="font-variant:small-caps;">viewSingleTCW</font></font> -
+					<font style="font-size: 15px;">Basic AnnoDB Hit Filters</font>
+				</td>
+
+				<td style="text-align: right; vertical-align: top; padding: 0">
+					<a href="http://www.arizona.edu">
+						<img src="../../img/UA.gif" alt="UA" title="University of Arizona"  style="width: 40px; border:1px solid black"></a>
+					<br>
+					<a href="http://www.bio5.org">
+						<img src="../../img/bio5.gif" alt="BIO5" title="BIO5"  style="width: 40px; border:1px solid black"></a>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" style="text-align: left; vertical-align: top; padding: 0">
+				<table style="width: 100%; padding: 0;  border-spacing:0; border-collapse:collapse;">
+					<tr>
+						<td style="background-color: #666666; padding-bottom:4px;">
+						<a href="https://csoderlund.github.io/TCW" class="white">TCW Home</a> <mark class="white">|</mark>
+						<a href="https://github.com/csoderlund/TCW/releases" class="white">Download</a> <mark class="white">|</mark>
+						<a href="../../Docs.html" class="white">Docs</a> <mark class="white">|</mark>
+						<a href=".." class="white">Tour</a>
+					</tr>
+				</table>
+				</td>
+			</tr>
+		</table>
+	</td></tr>
+
+	<tr><td style='vertical-align: top; text-align: left; padding:15px;'>
+	<!---- START BODY -->
+<div style="text-align: center"><big><ttp>viewSingleTCW</ttp></big> - View and Query Single Species</div>
+
+<table style="padding: 2;  border-spacing:0; border-collapse:collapse;  margin-left: auto; margin-right: auto;">
+<tr><td style="background-color: #666666; padding-bottom:4px; ">
+<a href="index.html" class="white">Start</a> <mark class="white">|</mark>
+<a href="seqTable.html" class="white">Sequence Table</a> <mark class="white">|</mark>
+<a href="seqDetails.html"  class="white">Sequence Detail</a> <mark class="white">|</mark>
+<a href=seqQuery.html class="white">Basic Sequence</a>  <mark class="white">|</mark>
+<a href=hitQuery.html class="current">AnnoDB Hits</a>  <mark class="white">|</mark>
+<a href=goQuery.html class="white" >GO Annotations</a>  <mark class="white">|</mark>
+<a href=pairTable.html class="white">Pairs</a>
+</td></tr>
+</table>
+
+<div style="text-align: center"><big><ttc>AnnoDB Hit Filters</ttc></big></div>
+
+<table style="padding: 2;  border-spacing:0; border-collapse:collapse;  margin-left: auto; margin-right: auto;">
+<tr><td style="background-color: #666666; padding-bottom:4px; ">
+<a href="#tab" class="white">Table</a> <mark class="white">|</mark>
+<a href="#ali" class="white">Align</a> <mark class="white">|</mark>
+<a href="#fil" class="white">Filters</a> <mark class="white">|</mark>
+<a href="#col" class="white">Columns</a> <mark class="white">|</mark>
+<a href="#show" class="white">Show and Export</a>
+</td></tr>
+</table>
+
+<a id=tab></a>
+<p>The  <ttc>AnnoDB Hits</ttc>  option under  <ttc>Basic Filters</ttc>  searches by <ttl>Hit ID</ttl>, <ttl>Description</ttl> and/or filters.
+<ul>
+<li>Select the <ttc>Search</ttc> checkbox to enter a substring for searching.
+<li>Select the <ttc>Filters</ttc> checkbox to set one or more associated filters.
+<li>The text above the table (i.e. <ttl>Filters:</ttl> shows the filters applied.
+<li>Select a hit followed by  <ttc>Seq Table</ttc>  will show all the associated sequences in the <ttc>Sequence Table</ttc>.
+</ul>
+<p><a href="img/hitQuery.png">
+<img src="img/hitQuery.png" alt="" style="border: 1px solid black; width: 800px"></a>
+<br>The decimal number display can be changed with <a href="index.html#decimal" class=ext target="_blank">Decimal Display</a>.
+
+<p>Uncheck the <ttc>Group by Hit ID</ttc> to view the sequences.
+<br><a href="img/hitQuerySeq.png">
+<img  src="img/hitQuerySeq.png" alt="" style="border: 1px solid black; width: 800px"></a>
+
+<!----------------------------------Align --------------------------------------------------->
+<a id=ali></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Align</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+The <ttc>Align</ttc> option shows the alignment of all sequences that have been assigned to a hit. The alignment shown below uses dynamic programming.
+<br><a href="img/hitAlign.png">
+<img  src="img/hitAlign.png" alt="" style="border: 1px solid black; width: 700px"></a>
+
+<!--------------------------------Filters ----------------------------------------------------->
+<a id=fil></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Filters</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<a href="img/hitFilters.png"><img  src="img/hitFilters.png" alt="" style="border: 1px solid black; width: 800px"></a>
+<p>
+
+<table>
+<tr><td class="top">
+<ttc>Filters Seq</ttc>: This row of options apply to the sequences that align to the annoDB hit (generally protein, but can be nucleotide).
+<ul><li>Selecting <ttc>TPM</ttc> brings up the window on the right. By selecting "RoSt", which is the p-value for the
+counts of Root compared to Stem, the result would be all annoDB hits that have at least one sequence
+with RoSt&lt;0.05.
+</ul>
+<td class="top"><a href="img/hitCount.png"><img  src="img/hitCount.png" alt="" style="border: 1px solid black; width: 450px"></a>
+
+<tr><td class="top">
+	<ttc>Filters Hit</ttc>: This row of options apply to the annotation assigned to the annoDB hit.
+	<ul><li>Selecting <ttc>AnnoDBs</ttc> brings up a window of all available annoDBs, e.g. "sp -- plants", where one or more
+	of these may be selected. By default, they are all selected.
+	<li>Selecting <ttc>Species</ttc> brings up a window of all available species (shown on the right), where one or more may be selected. By default,
+	they are all selected.
+	<li>Selecting <ttc>GO, etc</ttc> brings up the window shown below.
+	</ul>
+	<a href="img/hitGOFilter.png"><img  src="img/hitGOFilter.png" alt="" style="border: 1px solid black; width: 300px"></a>
+
+	<td class="top"><a href="img/hitSpecies.png">
+	<img src="img/hitSpecies.png" alt="" style="border: 1px solid black; width: 450px"></a>
+</table>
+
+<!------------------------------------------------------------------------------------->
+<a id=col></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Columns</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+The windows below are the available columns for the hit table and sequence table. These can be changed without running <ttc>BUILD TABLE</ttc> again.
+<table>
+<tr>
+<td class="top"><a href="img/hitColumns.png">
+	<img  src="img/hitColumns.png" alt="" style="border: 1px solid black; width: 460px"></a>
+<td class="top"><a href="img/hitSeqColumns.png">
+	<img  src="img/hitSeqColumns.png" alt="" style="border: 1px solid black; width: 450px"></a>
+</table>
+
+
+<a id=show></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Show and Export</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+<a href="img/hitTopButtons.png"><img  src="img/hitTopButtons.png" alt="" style="border: 1px solid black; width: 800px"></a>
+<table>
+<tr><td>
+<p><b>Selected:</b>
+<ul>
+<li><ttc>Copy...</ttc> provides copying to clipboard the <ttl>Hit ID</ttl>, <ttl>Description</ttl> or <ttl>Hit Sequence</ttl> of the selected
+sequence.
+<li><ttc>Show...</ttc> is shown above, with a <ttl>Assigned GO for hit</ttl> example on the right.
+<li><ttc>Export...</ttc> has the same first two items as  <ttc>Show...</ttc>,
+but writes to file the <ttl>GO info</ttl> or <ttl>GO IDs</ttl>; the GO IDs can be loaded in the <ttc>GO Basic</ttc> panel
+with its <ttc>Load File</ttc>.
+</ul>
+<td><a href="img/hitAssignedGO.png"><img  src="img/hitAssignedGO.png" alt="" style="border: 1px solid black; width: 340px"></a>
+</table>
+<p><ttc>Table...</ttc> has <ttl>Show column stats</ttl>, <ttl>Copy table</ttl> and <ttl>Export table</ttl>.
+
+
+<table style="width: 100%"><tr><td style="text-align: left">
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+	<!---- END BODY -->
+	</td></tr>
+	<tr><td style="background-color: #DDDDDD; text-align: center; padding: 0; font-family: Verdana, Arial; font-size: 12px;">
+                        Email Comments To: <a href="mailto:tcw@agcol.arizona.edu">tcw@agcol.arizona.edu</a>
+
+</td></tr>
+</table>
+</body>
+</html>

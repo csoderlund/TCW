@@ -1,15 +1,16 @@
-**Download TCW package:** [from this site](https://github.com/csoderlund/TCW/releases) or www.agcol.arizona.edu/software/tcw, 
-where the AGCoL site may have a more recent version (see [Release Notes](http://www.agcol.arizona.edu/software/tcw/doc/Release.html)).
+**Description:** For single-species (singleTCW) - similarity search against annotation databases, GO annotation, 
+ORF finding and differential analysis. For multi-species (multiTCW) - compute similar pairs, provide statistics for pairs, compute clusters, provide statistics for clusters. 
+Both singleTCW and multiTCW provide graphical interfaces for extensive query and display of the results.
 
-**Documentation:** www.agcol.arizona.edu/software/tcw
+**Download TCW tarball:** https://github.com/csoderlund/TCW/releases.
+The TCW tarball contains the executable jar files, external packages and demo files.
 
-**Reference:** C. Soderlund (2019) Transcriptome computational workbench (TCW): analysis of single and comparative transcriptomes. Published at [BioRxiv](https://www.biorxiv.org/content/10.1101/733311v1).
+**Documentation:**  https://csoderlund.github.io/TCW
 
-**Description:** For single-transcriptome (singleTCW) - similarity search against annotation databases, GO annotation, ORF finding and differential analysis. For multi-transcriptome (multiTCW) - compute similar pairs, provide statistics for pairs, compute clusters, provide statistics for clusters. Both singleTCW and multiTCW provide graphical interfaces for extensive query and display of the results.
+**Requirements:** Java and MySQL to build the database and view the results. R for differential analysis.  
+All other external software used by TCW is contained in the package tar file. TCW has been tested on Linux and MacOS.
 
-**Requirements:** Java and MySQL to build the database and view the results. R for differential analysis.  All other external software used by TCW is contained in the package tar file. 
+**TCW github code:** To build, see TCW/java/README.
 
-**TCW package:** To use TCW, download the TCW package from the link at the top. The tar file contains all necessary jar files, R scripts and demo files. Follow the instructions at http://www.agcol.arizona.edu/software/tcw/doc/. 
-
-**TCW github code:** This site does not include the external packages; you will need to extract them from the TCW package or provide them yourself. The necessary Java classes are provided, see TCW/java/README.
-
+**Reference:** C. Soderlund (2019) Transcriptome computational workbench (TCW): analysis of single and comparative transcriptomes. 
+Published at [BioRxiv](https://www.biorxiv.org/content/10.1101/733311v1).

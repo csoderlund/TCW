@@ -1,0 +1,92 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>GO:0000794 Relations</title>
+<style>
+.tablex    		{border: 0px; border-spacing: 0px;  border-collapse: collapse;}
+.tablex caption {padding-bottom: 0.5em; font-family: Helvetica, verdana;}
+.tablex th 		{padding: 3px; }
+.tablex td 		{padding: 3px;}
+.top {vertical-align: top;}
+body {font-family:  Verdana, Arial, Helvetica, sans-serif;  font-size: 14px; }
+</style>
+</head>
+<body>
+<table style="width: 800px; padding: 0; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
+<tr><td>
+<h1>GO:0000794 Relations in TCW Views</h1>
+
+<table class=tablex>
+<tr>
+<td colspan=2><b><big>Basic GO views</big></b>
+<tr>
+<td><img src="img/neigh.png"  alt="" style="border: 1px solid black; width: 350px">
+<td class="top"><b>Fig 1. Neighborhood</b>
+<p>GO:0000794 has an edge (direct link) to two parents and one child.
+</tr>
+<tr>
+<td><img src="img/anc.png"  alt="" style="border: 1px solid black; width: 400px">
+<td class="top"><b>Fig 2. Ancestors</b>
+<p>The ancestor <tt>condensed chromosome</tt> and <tt>nuclear chromosome</tt> are the parents of GO:0000794;
+however, that is not obvious from this view.
+This is why levels can only be used as an approximate location of a GO in the
+DAG (directed acyclic graph). See Fig 9  below for further explanation.
+<tr>
+<td><img src="img/desc.png"  alt="" style="border: 1px solid black; width: 400px">
+<td class="top"><b>Fig 3. Descendants</b>
+<p>GO:0099086 is a child of GO:0000794.
+<br>GO:0000795 is a child of GO:0099096, hence, a descendant of GO:0000794.
+<tr>
+<td><img src="img/hitAsn.png"  alt="" style="border: 1px solid black; width: 450px">
+<td class="top"><b>Fig 4. Hits with assigned GO</b>
+<p>The UniProt .dat file provides these assignments and can be found
+at <tt>Amigo</tt> in gene products:
+<br><img src="img/gene.png"  alt="" style="border: 1px solid black; width: 370px">
+<tr>
+<td><img src="img/hitInh.png"  alt="" style="border: 1px solid black; width: 450px">
+<td class="top"><b>Fig 5. Hits with inherited GO</b>
+<p>Fig 3 and Fig 10b show why these hits inherit the GO, i.e.
+GO:0000795 is a descendant of GO:0000794.
+<tr>
+<td><img src="img/seq.png"  alt="" style="border: 1px solid black; width: 450px">
+<td class="top"><b>Fig 6. Sequences with hit with GO</b>
+<p>Each sequence may have many hits with this GO; only the one with the best e-value is shown.
+<tr>
+<td colspan=2><b><big>Sequence Detail GO views</big></b>
+<tr>
+<td><img src="img/seqHits.png"   alt="" style="border: 1px solid black; width: 450px">
+<td class="top"><b>Fig 7. Sequence detail of tra_010</b>
+
+<p>Part of the list of hits for sequence tra_010, where the image
+on the left shows all three hits listed in Fig 5.
+<p>Fig 6 lists tra_010 as a sequence of GO:0000794.
+<tr>
+<td><img src="img/seqHitGO.png"   alt="" style="border: 1px solid black; width: 400px">
+<td class="top"><b>Fig 8. GOs for tra_001</b>
+<p>TOP_YEAST has 21 GOs assigned
+to it so the list is way too long to show here.
+All hits shown in Fig 3 are in the full list (scrollable in TCW).
+<tr>
+<td colspan=2><b><big>Path views</big></b>
+<tr>
+<td><img src="img/quickGO.png"   alt="" style="border: 1px solid black; width: 430px">
+<td class="top"><b>Fig 9. Quick GO</b>
+<p>Black edge: is_a; Blue edge: part_of
+
+<p>The graph on the left shows why both <tt>nuclear lumen</tt> and <tt>condensed chromosome</tt> are assigned
+level 7; that is, they can be traced from the top node down 6 edges for the longest path.
+Fig 11 makes the connection between levels and the graph easier to understand (but is not as
+concise as the QuickGO graph).
+<p><b>Fig 10a. Child of GO:000794</b>
+<br><img src="img/child.png"   alt="" style="border: 1px solid black; width: 200px">
+<p><b>Fig 10b. Child of GO:0099086</b>
+<br><img src="img/child2.png"   alt="" style="border: 1px solid black; width: 200px">
+<tr>
+<td colspan=2><b>Fig 11. TCW paths</b> - click to enlarge image
+<tr>
+<td colspan=2><a href="img/pathTable.png"><img src="img/pathTable.png"  alt="" style="border: 1px solid black; width: 800px"></a>
+</table>
+
+</table>
+</body>
+</html>

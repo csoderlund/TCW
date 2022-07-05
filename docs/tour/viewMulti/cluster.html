@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Tour Clusters</title>
+<style>
+	a:link {text-decoration: none;color:#6666CC;}
+	a.current {font-family:verdana; font-size:12px; color:white; text-decoration: none;}
+	a.white {font-family:verdana; font-size:12px; color:white; text-decoration: underline;}
+	a.ext {font-weight: bold;}
+	mark.white {font-family:verdana; font-size:12px; color:white;background:none;}
+	ttp  {font-family: 'Lucida Console', monospace; font-size: 16px; font-weight: 400; font-variant: small-caps;}
+	ttl  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 600; color: DarkSlateGrey;}
+	ttc  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 700; color: DarkSlateGrey;}
+	.top {vertical-align: top;}
+	.hang  {margin-left:15px; text-indent:-15px; margin-top:5px;}
+	.tx    {border: 0px; padding: 5px; border-spacing: 5px; }
+	.tx td,th {border: 0px; padding: 5px; border-spacing: 5px}
+	.ty    {border: 1px  solid black; border-spacing: 0px;  border-collapse: collapse;}
+	.ty td, th {border: 1px  solid black; padding: 3px; }
+	tt {font-size:13px}
+	pre {font-size:13px}
+	body {font-family:  Verdana, Arial, Helvetica, sans-serif;  font-size: 14px; }
+</style>
+</head>
+
+<body>
+<a id="top"></a>
+<table style="width: 800px; border: 2px solid #999999; padding: 0; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
+	<tr><td>
+		<table style="width: 100%; border: 0px; padding: 0;  border-collapse:collapse;">
+			<tr>
+				<td style="text-align: left; vertical-align: top; padding: 0">
+					<a href="http://www.agcol.arizona.edu">
+						<img src="../../img/agcol_logo.gif" alt="AGCoL" style="width: 180px; border:1px solid black"></a>
+				</td>
+				<td style="padding-bottom:5px; padding-left:40px; text-align: left;  font-family: Verdana, Arial;  font-weight: bold;color:MidnightBlue">
+					<font style="font-size: 20px;">Tour <font style="font-variant:small-caps;">viewMultiTCW</font></font> -
+					<font style="font-size: 15px;">Clusters</font>
+				</td>
+
+				<td style="text-align: right; vertical-align: top; padding: 0">
+					<a href="http://www.arizona.edu">
+						<img src="../../img/UA.gif" alt="UA" title="University of Arizona"  style="width: 40px; border:1px solid black"></a>
+					<br>
+					<a href="http://www.bio5.org">
+						<img src="../../img/bio5.gif" alt="BIO5" title="BIO5"  style="width: 40px; border:1px solid black"></a>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" style="text-align: left; vertical-align: top; padding: 0">
+				<table style="width: 100%; padding: 0;  border-spacing:0; border-collapse:collapse;">
+					<tr>
+						<td style="background-color: #666666; padding-bottom:4px;">
+						<a href="https://csoderlund.github.io/TCW" class="white">TCW Home</a> <mark class="white">|</mark>
+						<a href="https://github.com/csoderlund/TCW/releases" class="white">Download</a> <mark class="white">|</mark>
+						<a href="../../Docs.html" class="white">Docs</a> <mark class="white">|</mark>
+						<a href=".." class="white">Tour</a>
+					</tr>
+				</table>
+				</td>
+			</tr>
+		</table>
+	</td></tr>
+
+	<tr><td style='vertical-align: top; text-align: left; padding:15px;'>
+	<!---- START BODY -->
+<div style="text-align: center"><big><ttp>viewMultiTCW</ttp></big> - View and Query Multiple Species</div>
+
+<table style="padding: 2;  border-spacing:0; border-collapse:collapse;  margin-left: auto; margin-right: auto;">
+<tr><td style="background-color: #666666; padding-bottom:4px; ">
+<a href="index.html" class="white" >Start</a> 	<mark class="white">|</mark>
+<a href="cluster.html" class="current">Clusters</a> <mark class="white">|</mark>
+<a href="pairs.html" class="white">Pairs</a> <mark class="white">|</mark>
+<a href="seq.html"  class="white">Sequences</a> <mark class="white">|</mark>
+<a href="align.html"  class="white">Alignment</a> <mark class="white">|</mark>
+<a href="seqDetail.html"  class="white">Sequence Details</a> <mark class="white">|</mark>
+<a href=hit.html class="white">Annotation Hits</a>
+
+</td></tr>
+</table>
+<div style="text-align: center"><big><ttc>Clusters</ttc></big></div>
+<table style="padding: 2;  border-spacing:0; border-collapse:collapse;  margin-left: auto; margin-right: auto;">
+<tr><td style="background-color: #666666; padding-bottom:4px; ">
+<a href="#clusterTable" class="white">Table</a> <mark class="white">|</mark>
+<a href="#filter" class="white">Filters</a> <mark class="white">|</mark>
+<a href="#col" class="white">Columns</a>
+</td></tr>
+</table>
+
+<a id=clusterTable></a>
+<h3>Cluster Table</h3>
+
+The table below was created with the filter to show the clusters of method 'CL-Closure' with at least one
+sequence for each dataset.
+<table>
+<tr><td class="top">
+Select a row followed by:
+
+	<p>&rarr; <ttc>Seqs</ttc>: the table of sequences for the cluster will
+	be shown (see lower left image).
+	<p>&rarr;><ttc>Pairs</ttc>: the table of pairs for the cluster will be shown (see lower right image).
+
+	<p>&rarr;><ttc>MSAdb</ttc>: the alignment of the sequences in the cluster will be shown (see lowest right image).
+<td><a href="img/clusterTable.png"><img  src="img/clusterTable.png" alt="" style="border: 1px solid black; width: 650px"></a>
+</table>
+
+<p>
+<table>
+<tr><td class="top">
+	<small>Sequences in selected cluster</small>
+	<a href="img/clusterSeqs.png"><img  src="img/clusterSeqs.png" alt="" style="border: 1px solid black; width: 450px"></a>
+<td>
+	<small>Pairs in selected cluster</small>
+	<br><a href="img/clusterPairs.png"><img  src="img/clusterPairs.png" alt="" style="border: 1px solid black; width: 450px"></a>
+</tr>
+<tr><td class="top">
+	<small>Multiple sequence alignment for cluster</small>
+	<a href="img/MSAdb.png"><img  src="img/MSAdb.png" alt="" style="border: 1px solid black; width: 450px"></a>
+<td>&nbsp;
+</table>
+
+<!---------------------------------------------------------------------------->
+<a id=filter></a>
+<h3>Cluster Filters</h3>
+
+The following filters were selected for the above Cluster table.
+<br><a href="img/clusterFilter.png"><img src="img/clusterFilter.png" alt="" style="border: 1px solid black; width: 450px"></a>
+
+<a id=col></a>
+<h3>Cluster Columns</h3>
+The following columns were selected for the above Cluster table. The rules for columns are listed in
+<a href="index.html#table">Start</a>.
+<br><a href="img/clusterColumn.png"><img  src="img/clusterColumn.png" alt="" style="border: 1px solid black; width: 450px"></a>
+
+<table style="width: 100%"><tr><td style="text-align: left">
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+	<!---- END BODY -->
+	</td></tr>
+	<tr><td style="background-color: #DDDDDD; text-align: center; padding: 0; font-family: Verdana, Arial; font-size: 12px;">
+                        Email Comments To: <a href="mailto:tcw@agcol.arizona.edu">tcw@agcol.arizona.edu</a>
+
+</td></tr>
+</table>
+</body>
+</html>

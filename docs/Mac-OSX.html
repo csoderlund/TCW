@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>TCW on Mac</title>
+<style>
+	a:link {text-decoration: none;color:#6666CC;}
+	a.white {font-family:verdana; font-size:12px; color:white; text-decoration: underline;}
+	a.ext {font-weight: bold;}
+	mark.white {font-family:verdana; font-size:12px; color:white;background:none;}
+	ttp  {font-family: 'Lucida Console', monospace; font-size: 16px; font-weight: 400; font-variant: small-caps;}
+	tt {font-size:13px}
+	pre {font-size:13px}
+	body {font-family:  Verdana, Arial, Helvetica, sans-serif;  font-size: 14px; }
+</style>
+</head>
+
+<body>
+<a id="top"></a>
+<table style="width: 800px; border: 2px solid #999999; padding: 0; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
+	<tr><td>
+		<table style="width: 100%; border: 0px; padding: 0;  border-collapse:collapse;">
+			<tr>
+				<td style="text-align: left; vertical-align: top; padding: 0">
+					<a href="http://www.agcol.arizona.edu">
+						<img src="./img/agcol_logo.gif" alt="AGCoL" style="width: 180px; border:1px solid black"></a>
+				</td>
+				<td style="padding-bottom:5px; padding-left:40px; text-align: left;  font-family: Verdana, Arial; font-size: 20px; font-weight: bold;color:MidnightBlue">
+					Running TCW on MacOS
+				</td>
+				<td style="text-align: right; vertical-align: top; padding: 0">
+					<a href="http://www.arizona.edu">
+						<img src="./img/UA.gif" alt="UA" title="University of Arizona"  style="width: 40px; border:1px solid black"></a>
+					<br>
+					<a href="http://www.bio5.org">
+						<img src="./img/bio5.gif" alt="BIO5" title="BIO5"  style="width: 40px; border:1px solid black"></a>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" style="text-align: left; vertical-align: top; padding: 0">
+				<table style="width: 100%; padding: 0;  border-spacing:0; border-collapse:collapse;">
+					<tr>
+						<td style="background-color: #666666; padding-bottom:4px;">
+						<a href="https://csoderlund.github.io/TCW" class="white">TCW Home</a> <mark class="white">|</mark>
+						<a href="https://github.com/csoderlund/TCW/releases" class="white">Download</a> <mark class="white">|</mark>
+						<a href="./Docs.html" class="white">Docs</a> <mark class="white">|</mark>
+						<a href="./tour" class="white">Tour</a>
+					</tr>
+				</table>
+				</td>
+			</tr>
+		</table>
+	</td></tr>
+
+	<tr><td style='vertical-align: top; text-align: left; padding:15px;'>
+	<!---- START BODY -->
+
+
+The following includes:
+<ul>
+<li><a href="#prob">Problems on Mac</a>
+<li><a href="#cat1">Installation on MacOS 10.15.4</a> (May2020)
+<li><a href="#ext">Running /Ext/mac external programs</a>
+</ul>
+
+<a id=prob></a>
+<h3>Problems on Mac</h3>
+
+I've run TCW extensively on my Mac, and found a few slight Java problems:
+<ul>
+<li>In <ttp>runSingleTCW</ttp> and <ttp>runMultiTCW</ttp>, the interface does not always automatically update until I click in the window.
+<li>Pop-up windows can get hidden behind the main window, and it makes TCW appear to be frozen -- move the main TCW window to find the
+hidden window.
+<li>The buttons are all white.
+<li>The UniProt search links do not work; hence, is not provided on Mac.
+</ul>
+
+
+
+<a id=cat1></a>
+<h3>
+		Installation on MacOS 10.5.4 (Catalina)
+</h3>
+	Here are my notes from my installation on my personal Mac v10.15 with Java v14.0.1 (May 2020). It is necessary
+	to use TCW v5.0.3 or higher with MySQL v8.
+	<h4>
+		MySQL
+	</h4>
+	<ol>
+		<li>Download from <a href="http://dev.mysql.com" class="ext" target="_blank">
+		dev.mysql.com</a> mysql-8.0.17-macos10.14-x86_64.dmg.
+		Click the '.dmg' file and follow the instructions.
+		<p>
+		<li>
+		There will be a mySQL icon on your System Preferences, where you can start/stop the MySQL server.
+		<br>&nbsp;
+		<li>Test: I use tcsh, so I enter the following into the .tcshrc file:
+		<pre>
+	alias mys '/usr/local/mysql/bin/mysql -u root -p[password]'
+		</pre>
+		From the command line, I execute <ttx>source .tcshrc</ttx>. If you are using zch or bash, you will need to use their equivalent commands.
+		<p>
+			From the command line, enter 'mys', and then at the prompt: <pre>
+        >create database mytest;
+        >drop database mytest;
+			</pre>
+			<li>In the HOSTS.cfg of the TCW package, set DB_user=[mysql userid], DB_password=[mysql password]
+	</ol>
+	<p>
+		At this point,  can build databases and view them.
+		However, you will not be able to run DE calculations without installing R, or <ttp>OrthoMCL</ttp>
+		without installing the Perl-mysql interface.
+
+	<h4>
+		R and R-Java interface
+	</h4>
+		<ol>
+		<li>Download from <a href="//cran.r-project.org/bin/macosx>cran.r-project.org/bin/macosx"></a> the
+		file R-4.0.0.pkg. Click to install.
+		<p>
+		<li>Type 'R' at the terminal prompt, then the following:
+<pre>
+>install.packages("rJava")
+>if (!requireNamespace("biocManager", quietly=TRUE))
+>install.packages("BiocManager")
+>BiocManager::install(version = "3.11")
+>BiocManager::install("edgeR")
+>BiocManager::install("goseq")
+>BiocManager::install("DESeq2")
+</pre>
+<li>Set your $R_HOME:
+<pre>
+setenv R_HOME /Library/Frameworks/R.framework/Resources  # tcsh
+export R_HOME=/Library/Frameworks/R.framework/Resources  # zcsh
+</pre>
+<li>Make sure <ttp>runDE</ttp> has the following:
+<pre>
+-Djava.library.path=/Library/Frameworks/R.Framework/Resources/library/rJava/jri
+</pre>
+		</ol>
+		<h4>
+			Perl-mySQL interface
+		</h4>
+	<font color=red>I could not get this working on Catalina.</font>
+
+<p>The following instructions are from an earlier version of this document (for MacOS 10.9.5):
+<pre>
+ # added 'set $path=($path /usr/local/perl/bin)' to my .tcshrc
+
+ cpan install DBD::mysql
+
+ cd .cpan/build/DBD-mysql-4.029-[a unique string will end this directory name]
+ sudo ln -s /usr/local/mysql/lib/*.dylib
+ perl Makefile.PL --testuser=[mysql userid] --testpassword=[mysql password]
+ make
+ make test
+ sudo make install
+ sudo ln -s /usr/local/mysql/lib/libmysqlclient.18.dylib /usr/lib/libmysqlclient.18.dylib
+</pre>
+
+<a id=ext></a>
+<h3>
+	Running /Ext/mac external programs
+</h3>
+<font color=red>MacOS 10.15 has made it difficult to run programs downloaded from the web unless its been
+authenticated by Apple.</font> Running external programs from TCW,
+you will either get popup that states "xxx cannot be opened because developer cannot be verified", or
+the program will just fail. Do the following:
+<ol>
+<li>Using the Finder, select the program and Open With "Terminal" or "iTerm".
+<li>You will get a pop-up, select "Open".
+<li>After that, you will be able to run it via TCW.
+</ol>
+I did not have to do this for <ttp>Blast</ttp>, but I did need to do it for the other <ttx>/Ext/mac</ttx> programs.
+All were straight-forward except for <ttp>mafft</ttp>; I had to authenticate all the following in the <ttx>mafftdir</ttx>
+directory:
+<pre>
+  bin/
+  mafft
+  libexec/
+    version
+    countlen
+    splittbfast
+    tbfast
+    disttbfast
+    dvtditr
+    f2cl
+</pre>
+There is a way to allow any downloaded program to execute by using:
+<pre>
+	sudo spctl --master-disable
+</pre>
+Then in Preferences, Security&amp;Privacy, General, select 'anywhere'. I did not try this.
+
+	<!---- END BODY -->
+<p><a href="#top">Go to top</a>
+	</td></tr>
+	<tr><td style="background-color: #DDDDDD; text-align: center; padding: 0; font-family: Verdana, Arial; font-size: 12px;">
+                        Email Comments To: <a href="mailto:tcw@agcol.arizona.edu">tcw@agcol.arizona.edu</a>
+
+</td></tr>
+</table>
+</body>
+</html>

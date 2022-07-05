@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>TCW Summary</title>
+<style>
+	a:link {text-decoration: none;color:#6666CC;}
+	a.white {font-family:verdana; font-size:12px; color:white; text-decoration: underline;}
+	a.ext {font-weight: bold;}
+	mark.white {font-family:verdana; font-size:12px; color:white;background:none;}
+	ttp  {font-family: 'Lucida Console', monospace; font-size: 16px; font-weight: 400; font-variant: small-caps;}
+	.top {vertical-align: top;}
+	.hang  {margin-left:15px; text-indent:-15px; margin-top:5px;}
+	.tx    {border: 0px; padding: 5px; border-spacing: 5px; }
+	.tx td,th {border: 0px; padding: 5px; border-spacing: 5px}
+	.ty    {border: 1px  solid black; border-spacing: 0px;  border-collapse: collapse;}
+	.ty td, th {border: 1px  solid black; padding: 3px; }
+	tt {font-size:13px}
+	pre {font-size:13px}
+	body {font-family:  Verdana, Arial, Helvetica, sans-serif;  font-size: 14px; }
+</style>
+</head>
+
+<body>
+<a id="top"></a>
+<table style="width: 800px; border: 2px solid #999999; padding: 0; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
+	<tr><td>
+		<table style="width: 100%; border: 0px; padding: 0;  border-collapse:collapse;">
+			<tr>
+				<td style="text-align: left; vertical-align: top; padding: 0">
+					<a href="http://www.agcol.arizona.edu">
+						<img src="./img/agcol_logo.gif" alt="AGCoL" style="width: 180px; border:1px solid black"></a>
+				</td>
+				<td style="padding-bottom:5px; padding-left:40px; text-align: left;  font-family: Verdana, Arial; font-size: 20px; font-weight: bold;color:MidnightBlue">
+					TCW Summary
+				</td>
+				<td style="text-align: right; vertical-align: top; padding: 0">
+					<a href="http://www.arizona.edu">
+						<img src="./img/UA.gif" alt="UA" title="University of Arizona"  style="width: 40px; border:1px solid black"></a>
+					<br>
+					<a href="http://www.bio5.org">
+						<img src="./img/bio5.gif" alt="BIO5" title="BIO5"  style="width: 40px; border:1px solid black"></a>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" style="text-align: left; vertical-align: top; padding: 0">
+				<table style="width: 100%; padding: 0;  border-spacing:0; border-collapse:collapse;">
+					<tr>
+						<td style="background-color: #666666; padding-bottom:4px;">
+						<a href="https://csoderlund.github.io/TCW" class="white">TCW Home</a> <mark class="white">|</mark>
+						<a href="https://github.com/csoderlund/TCW/releases" class="white">Download</a> <mark class="white">|</mark>
+						<a href="./Docs.html" class="white">Docs</a> <mark class="white">|</mark>
+						<a href="./tour" class="white">Tour</a>
+					</tr>
+				</table>
+				</td>
+			</tr>
+		</table>
+	</td></tr>
+
+	<tr><td style='vertical-align: top; text-align: left; padding:15px;'>
+	<!---- START BODY -->
+
+TCW provides two sets of programs: <ttp>singleTCW</ttp> for annotating and viewing
+single species transcriptions, and <ttp>multiTCW</ttp> for
+annotating and viewing comparative transcripts.
+<p>
+<table style="width:100%">
+<tr>
+<td><b>Contents:</b>
+<td>1. <a href="#task">Programs</a>
+<td>2. <a href="#mach">Test-Machines</a>
+<td>3. <a href="#time">Timings</a>
+<td>4. <a href="#ref">References</a>
+<td style="text-align: right;"><small>Click image to enlarge</small>
+</table>
+
+<a id=task></a>
+<h2>Programs</h2>
+<b><i><u>singleTCW contains four major programs:</u></i></b>
+<table class="tx">
+ <tr>
+ 	<td class="top">
+	1. <a href="./stcw/AnnoDBs.html" class="ext" target="_blank"><ttp>runAS</ttp></a> -- annotation setup for input to <ttp>runSingleTCW</ttp>
+	<ul>
+		<li>Downloads the UniProt taxonomic and/or full SwissProt and TrEMBL .dat files
+		<li>Create fasta files from .dat files for searching against TCW sequences
+		<li>Download the GO <tt>go-basic.obo</tt> file, creates a mySQL GO database from its contents,
+		 and augments the database with UniProt information about GO, KEGG, Pfam, and InterPro
+	</ul>
+	Note: <ttp>runSingleTCW</ttp> can take as input other databases such as Genbank nr,
+	but these results will not have associated GO annotations.
+	<td  class="top">
+	<a href="./tour/runAS/img/runAS.png">
+	<img src="./tour/runAS/img/runAS.png" alt="runAS" style="border: 1px solid black; width: 100px"></a>
+</table>
+
+<table class="tx">
+ <tr><td class="top">
+	2. <a href="./stcw/UserGuide.html" class="ext" target="_blank"><ttp>runSingleTCW</ttp></a> -- builds a single-species TCW database (sTCWdb)
+	<ul>
+	   <li> Input: sequences and optional counts, where <i><b>any</b></i> of the following are valid (
+	   the first three are NT-sTCWdbs and the last is a AA-sTCWdb):
+		<ol>
+		<li>Load RNA-seq transcripts and count data with optional replicates.
+		<li>Load sequences with location information (e.g. predicted genes).
+		<li>Assemble up to ~1M sequences, such as: transcript sets,
+		paired-end Sanger ESTs, or a mix of transcripts and ESTs.
+		<li>Load protein sequences and spectra (count) data with optional replicates.
+		</ol>
+	   <li> Annotation:
+		<ol>
+		<li>Annotate sequences with one or more nucleotide or protein databases (called <u>annoDBs</u>).
+		UniProt should be downloaded with the <ttp>runAS</ttp> program. The searching may be done with
+		the super-fast
+		<ttp>DIAMOND</ttp> or the standard <ttp>BLAST</ttp>.
+		<li>If UniProt is used, GO annotations along with EC, KEGG and Pfam identifiers are extracted
+		from the GO database and entered into the sTCWdb (The GO database is set up with the <ttp>runAS</ttp>).
+		<li>Compute ORFS and GC content.
+		</ol>
+	   <li> All data and results are stored in a MySQL database.
+	</ul>
+	<td  class="top"><a href="./tour/runSingle/img/runSingle.png"><img src="./tour/runSingle/img/runSingle.png" alt="" style="border: 1px solid black; width: 100px"></a>
+</table>
+
+<table class="tx">
+ <tr><td class="top">
+	3. <a href="./stcw/DiffExp.html" class="ext" target="_blank"><ttp>runDE</ttp></a> -- add DE to a sTCWdb created with <ttp>runSingleTCW</ttp>
+	<ul>
+		<li>An interface to several R packages (<ttp>EdgeR, DESeq</ttp>) for calculating differential
+			of sequences. Additionally, it can execute a user-provided R script for DE calculation.
+		<li>If the sTCWdb contains GOs, the <ttp>GOseq</ttp> R program can be used to compute differential GO terms.
+	</ul>
+	<td  class="top"><a href="./tour/runDE/img/runDE.png"><img src="./tour/runDE/img/runDE.png" alt="" style="border: 1px solid black; width: 100px"></a>
+</table>
+
+<table class="tx">
+ <tr><td class="top">
+	4. <a href="./tour/viewSingle" class="ext" target="_blank"><ttp>viewSingleTCW</ttp></a> -- view an sTCWdb created by <ttp>runSingleTCW</ttp>
+	<ul>
+		<li>Query and view the results. There are various filters, for example,
+	   	filters are provided specific to taxonomic databases, trimmed GOs, filter by annotation, etc.
+	   	<li>The initial view is the <a href="./ov/sDemo.html" class="ext" target="_blank">Overview</a>, which summarizes the results.
+	</ul>
+	<td  class="top"><a href="./tour/viewSingle/img/mainTable.png"><img src="./tour/viewSingle/img/mainTable.png" alt="" style="border: 1px solid black; width: 100px"></a>
+</table>
+
+<b><i><u>multiTCW contains two major programs</u></i></b>:
+<table class="tx">
+ <tr><td class="top">
+	1. <a href="./mtcw/UserGuide.html" class="ext" target="_blank"><ttp>runMultiTCW</ttp></a> -- builds a multi-species comparison TCW database (mTCWdb)
+	<ul><li>Builds a database from multiple sTCWdbs, which can be NT-sTCWdbs, AA-sTCWdbs
+		or a mix. This has been tested with up to 5 input sTCWdbs.
+		<li>Runs <ttp>DIAMOND</ttp> or <ttp>BLAST</ttp> to compare the sequences from the input TCWs. Add the resulting pairs to the database.
+	 	<li>Clusters the pairs into ortholog groups. They can be clustered with
+	 	TCW Closure, TCW BBH (best bi-directional), TCW shared hit, <ttp>OrthoMCL</ttp>, and/or user-supplied clusters can be uploaded.
+		Multiple ortholog clustering can be in the database for query.
+		<li>If the input is from two or more NT-sTCWdbs, coding statistics are calculated. Additionally,
+		alignment files are output for input to <ttp>KaKs_calculator</ttp>, and the results of running
+		the KaKs_calculator are input to <ttp>runMultiTCW</ttp>.
+		<li>MSA (multiple sequence alignments) are computed for each cluster and scored.
+	 </ul>
+<td  class="top"><a href="./tour/runMulti/img/runMultiTCW.png"><img src="./tour/runMulti/img/runMultiTCW.png" alt="" style="border: 1px solid black; width: 100px"></a>
+</table>
+
+<table class="tx">
+ <tr><td class="top">
+	2. <a href="./tour/viewMultiTCW" class="ext" target="_blank"><ttp>viewMultiTCW</ttp></a> -- view an mTCWdb created by <ttp>runMultiTCW</ttp>
+	 	<ul><li>Query and view the results. The results can be filtered on various attributes. A cluster
+	 	can be viewed graphically with the results of <ttp>MAFFT</ttp> or <ttp>MUSCLE</ttp>
+	 	MSA or pairwise alignment
+	 	(e.g. see graphical views <a href="./tour/viewMulti/img/MSAdb.png">MSA</a> and <a href="./tour/viewMulti/img/MSAdb.png">Pair</a>, respectively).
+	 	<li>	The initial view is the <a href="./ov/mDemo.html" class="ext" target="_blank">Overview</a>, which summarizes the results.
+	 	</ul>
+	<td  class="top"><a href="./tour/viewMulti/img/pairTable.png"><img src="./tour/viewMulti/img/pairTable.png" alt="" style="border: 1px solid black; width: 100px"></a>
+</table>
+
+<hr>
+<a id=mach></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>Machines tested on</h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<font size="2">
+<table class="ty">
+<tr><th><th>OS<th>Architecture<th>Purchased<th>Database<th>Java<th>Test
+<tr><td>1.<td>Linux x86.64 (Centos 7) <td>3.2 Ghz AMD 24-Core, 128Gb<td style="text-align:center">2011<td>MariaDB v10.4.12<td>v1.8<td>Build and View
+<tr><td>2.<td>Linux x86.64 (Centos 7)  <td>2.0 Ghz AMD 4-Core, 20Gb<td style="text-align:center">2008<td>MariaDB v5.5.60<td>v1.7<td>View
+<tr><td>3.<td>MacOS (Catalina 10.15.4)<td>3.2 GHz Intel 6-Core i7, 64Gb<td style="text-align:center">2020<td>MySQL v8.0.17<td>v14.0<td>Build and View
+<tr><td>4.<td>MacOS (Maverick 10.9.5) <td>2.4 Ghz Intel 2-Core i5, 16Gb<td style="text-align:center">2012<td>MySQL v5.6.21<td>v1.7<td>View
+</table>
+</font>
+
+<a id=time></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>Timings</h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<h3>singleTCW</h3>
+The timings were run on the Linux and MacOS of the above machine table (row #1 and #3, respectively).
+The "Mb" numbers are maximum memory (when available), and are approximate.
+<font size="2">
+<table class="ty">
+	<tr><th>Task<th>Count<th colspan=2>&nbsp;&nbsp;&nbsp;&nbsp;MacOS 6-Core&nbsp;&nbsp;&nbsp;&nbsp;
+	                     <th colspan=2>&nbsp;&nbsp;&nbsp;&nbsp;Linux 24-Core&nbsp;&nbsp;&nbsp;&nbsp;
+	<tr><td>Load<td>64,930 seqs
+		<td style="text-align:right">1m:26s
+		<td style="text-align:right">20Mb
+		<td style="text-align:right">2m:17s
+		<td style="text-align:right">19Mb
+	<tr><td>Instantiate<td>64,930 seqs
+		<td style="text-align:right">47s
+		<td style="text-align:right">4Mb
+		<td style="text-align:right">1m:16s
+		<td style="text-align:right">1Mb
+	<tr><td><ttp>Diamond</ttp><sup>1</sup><td>5G-6G file size
+		<td style="text-align:right">12m:09s
+		<td style="text-align:right">---
+		<td style="text-align:right">11m:54s
+		<td style="text-align:right">---
+	<tr><td>Annotate<sup>2</sup><td>461,118 unique hits
+		<td style="text-align:right">18m:14s
+		<td style="text-align:right">2374Mb
+		<td style="text-align:right">56m:7s
+		<td style="text-align:right">2384Mb
+	<tr><td>ORF<td>64,930 ORFs
+		<td style="text-align:right">3m:54s
+		<td style="text-align:right">150Mb
+		<td style="text-align:right">9m:36s
+		<td style="text-align:right">246Mb
+	<tr><td>GO<td>10,724 GOs
+		<td style="text-align:right">28m:42s
+		<td style="text-align:right">1030Mb
+		<td style="text-align:right">52m:04s
+		<td style="text-align:right">1350Mb
+	</table>
+</font>
+	<small>
+	<sup>1</sup>Search against TR-plants; The May2020 file (5G) was used on Mac,
+	and the Oct2020 file (6G) was used on Linux, which influenced the increased times on Linux.
+	<br><sup>2</sup>Add results from SP-plants, TR-plants, and SP-full; times do not include Diamond. Linux had 462,883 unique hits.
+	</small>
+
+	<h3>multiTCW</h3>
+	Using the same two computers as above, the mTCW database was built from two sTCWdbs, one with
+	28,392 and the other with  26,685 sequences. Both datasets were annotated with SP-plants, TR-plants, and SP-full,
+	where the Mac versions were downloaded May2020 and the Linux on Oct2020.
+<font size="2">
+<table class="ty">
+	<tr><th>Task<th>Count<th colspan=2>&nbsp;&nbsp;&nbsp;&nbsp;MacOS 6-Core&nbsp;&nbsp;&nbsp;&nbsp;
+	                     <th colspan=2>&nbsp;&nbsp;&nbsp;&nbsp;Linux 24-Core&nbsp;&nbsp;&nbsp;&nbsp;
+	<tr><td>Build Database<td>55,077 seq and 595,698 unique hits<sup>1</sup>
+	     <td style="text-align:right">&nbsp;6m:28s
+	     <td style="text-align:right">150Mb
+	     <td style="text-align:right">9m:31s
+	     <td style="text-align:right">152Mb
+	<tr><td>Add GO<td>21,693 GOs
+	    <td style="text-align:right">16m:48s
+	    <td style="text-align:right">11Mb
+	    <td style="text-align:right">30m:26s
+	    <td style="text-align:right">506Mb
+	<tr><td>Add Pairs with Hits<td>392,919 AA and 43,485 NT pairs
+	    <td style="text-align:right">5m:03s
+	    <td style="text-align:right">61Mb
+	    <td style="text-align:right">15m:54s
+	    <td style="text-align:right">68Mb
+	<tr><td>Add 3 cluster sets<sup>2</sup><td>22,376 total clusters
+		<td style="text-align:right">2m:56s
+		<td style="text-align:right">33Mb
+		<td style="text-align:right">8m:10s
+		<td style="text-align:right">31Mb
+	<tr><td colspan=6><b>Run Stats</b>
+	<tr><td>PCC<td>410,401 Pairs
+		<td style="text-align:right">1m:32s
+		<td style="text-align:right">68Mb
+		<td style="text-align:right">2m:16s
+		<td style="text-align:right">63Mb
+	<tr><td>Pair Stats<td>95,628 Pairs to align
+		<td style="text-align:right">44m:33s
+		<td style="text-align:right">624Mb
+		<td style="text-align:right">2h:5m:19s
+		<td style="text-align:right">661Mb
+	<tr><td>MSA<sup>3</sup> Stats<td>22,376 clusters
+		<td style="text-align:right">1h:20m:11s
+		<td style="text-align:right">---
+		<td style="text-align:right">4h:34m:23s
+		<td style="text-align:right">---
+	</table>
+</font>
+	<small>
+	<sup>1</sup>The Linux database had 606,845 unique hits.
+	<br><sup>2</sup>The methods added were BBH, Closure and BestHit. Closure used the most memory.
+	<br><sup>3</sup>This step uses the external program MAFFT.
+	</small>
+	<p>The Linux times are much slower than the Mac, even though they comparable architectures; the Linux
+	may not be optimized well and is a much older machine. It is important with MariaDB to make sure
+	the variables are set right; execute
+	<tt>
+	./runSingleTCW -v
+	</tt>
+	to print out some variables that seem to effect performance with MariaDB on Linux.
+
+	<a id=ref></a>
+	<table style="width: 100%"><tr><td style="text-align: left">
+	<h2>References</h2>
+	<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+	<p class=hang>C. Soderlund (2022) Transcriptome computational workbench (TCW):
+			analysis of single and comparative transcriptomes.
+			<br><a href="https://doi.org/10.1101/733311" class="ext" target="_blank">BioRxiv</a>
+			<br><i>Describes the TCW v4 package.</i>
+	</p>
+
+	<p  class=hang>C. Soderlund, W. Nelson, M. Willer and D. Gang (2013) TCW: Transcriptome Computational Workbench.
+		<br><a href="http://dx.plos.org/10.1371/journal.pone.0069401" class="ext" target="_blank">PLOS ONE</a>
+		<br><i>Describes the TCW v1 package.</i>
+	</p>
+
+	<p  class=hang>C. Soderlund, E. Johnson, M. Bomhoff, and A. Descour (2009)
+				PAVE: Program for Assembling and Viewing ESTs.
+		<br><a href="http://www.biomedcentral.com/1471-2164/10/400" class="ext" target="_blank">BMC Genomics</a>
+		<br><i>Describes the assembly algorithm.</i>
+	</p>
+
+	<!---- END BODY -->
+	</td></tr>
+	<tr><td style="background-color: #DDDDDD; text-align: center; padding: 0; font-family: Verdana, Arial; font-size: 12px;">
+                        Email Comments To: <a href="mailto:tcw@agcol.arizona.edu">tcw@agcol.arizona.edu</a>
+
+</td></tr>
+</table>
+</body>
+</html>
+

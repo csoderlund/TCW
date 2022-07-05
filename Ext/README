@@ -1,11 +1,7 @@
-The files in this directory can be obtained from the TCW_3.tar.gz download.
-Found at www.agcol.arizona.edu/software/TCW or https://github.com/csoderlund/TCW/releases
+The software described in this document can be obtained from the TCW_4.tar.gz download.
+All external software used by TCW have open source licenses.
 
-/Ext/README (See www.agcol.arizona.edu/software/TCW/doc/Install.html)
-
-All programs in this directory are downloaded from external sites that have open source licenses.
-This contains all external programs used by TCW.
-
+Contents of the TCW_4.tar.gz /Ext directory:
 The /linux directory are either downloaded as a linux executable or compiled on a linux x86_63.
 The /mac directory are either downloaded as a MacOS executable or compiled on a version 10.15 (Catalina). 
 The /mac0 directory contain executables that run on a MacOS 10.9 (Maverick); if you need to use these, see Trouble.html#ext.
@@ -33,11 +29,13 @@ https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
 
 OrthoMCL/
 Used by runMultiTCW to create clusters.
-orthomclSoftware-v2.0.9
 mcl-14-137 
-https://orthomcl.org/common/downloads/software/v2.0/
 http://www.micans.org/mcl/src/mcl-latest.tar.gz
-Note: this requires the Perl-MySQL module
+orthomclSoftware-v2.0.9
+https://orthomcl.org/common/downloads/software/v2.0/
+Note: this requires the Perl-MySQL module. The following changes were made:
+-It did not work with MariaDB v10.4.12. It was fixed by editing the orthoLoadBlast script to set the MySQL local_infile from within the script.
+-Also, orthoBlastParser was edited to accept ".fa" suffixes
 
 mafft/
 Used by multiTCW to align clusters.
@@ -50,7 +48,7 @@ MUSCLE v3.8.31 (added Aug 2015)
 https://www.drive5.com/muscle/
 
 mstatX/
-Used by multiTCW to score clusters.
+Optionally used by runMultiTCW to score clusters.
 Downloaded Nov 2018
 If the mstatx executable does not work, see /Ext/linux/mstatX/README.TCW for instructions.
 https://github.com/gcollet/MstatX

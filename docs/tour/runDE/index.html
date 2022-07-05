@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Tour runDE</title>
+<style>
+	a:link {text-decoration: none;color:#6666CC;}
+	a.white {font-family:verdana; font-size:12px; color:white; text-decoration: underline;}
+	a.ext {font-weight: bold;}
+	mark.white {font-family:verdana; font-size:12px; color:white;background:none;}
+	ttp  {font-family: 'Lucida Console', monospace; font-size: 16px; font-weight: 400; font-variant: small-caps;}
+	ttl  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 600; color: DarkSlateGrey;}
+	ttc  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 700; color: DarkSlateGrey;}
+	.top {vertical-align: top;}
+	.hang  {margin-left:15px; text-indent:-15px; margin-top:5px;}
+	.tx    {border: 0px; padding: 5px; border-spacing: 5px; }
+	.tx td,th {border: 0px; padding: 5px; border-spacing: 5px}
+	.ty    {border: 1px  solid black; border-spacing: 0px;  border-collapse: collapse;}
+	.ty td, th {border: 1px  solid black; padding: 3px; }
+	tt {font-size:13px}
+	pre {font-size:13px}
+	body {font-family:  Verdana, Arial, Helvetica, sans-serif;  font-size: 14px; }
+</style>
+</head>
+
+<body>
+<a id="top"></a>
+<table style="width: 800px; border: 2px solid #999999; padding: 0; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
+	<tr><td>
+		<table style="width: 100%; border: 0px; padding: 0;  border-collapse:collapse;">
+			<tr>
+				<td style="text-align: left; vertical-align: top; padding: 0">
+					<a href="http://www.agcol.arizona.edu">
+						<img src="../../img/agcol_logo.gif" alt="AGCoL" style="width: 180px; border:1px solid black"></a>
+				</td>
+				<td style="padding-bottom:5px; padding-left:40px; text-align: left;  font-family: Verdana, Arial;  font-weight: bold;color:MidnightBlue">
+					<font style="font-size: 20px;">Tour <cap>runDE</cap></font> -
+					<font style="font-size: 15px;">Differential Expression</font>
+				</td>
+				<td style="text-align: right; vertical-align: top; padding: 0">
+					<a href="http://www.arizona.edu">
+						<img src="../../img/UA.gif" alt="UA" title="University of Arizona"  style="width: 40px; border:1px solid black"></a>
+					<br>
+					<a href="http://www.bio5.org">
+						<img src="../../img/bio5.gif" alt="BIO5" title="BIO5"  style="width: 40px; border:1px solid black"></a>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" style="text-align: left; vertical-align: top; padding: 0">
+				<table style="width: 100%; padding: 0;  border-spacing:0; border-collapse:collapse;">
+					<tr>
+						<td style="background-color: #666666; padding-bottom:4px;">
+						<a href="https://csoderlund.github.io/TCW" class="white">TCW Home</a> <mark class="white">|</mark>
+						<a href="https://github.com/csoderlund/TCW/releases" class="white">Download</a> <mark class="white">|</mark>
+						<a href="../../Docs.html" class="white">Docs</a> <mark class="white">|</mark>
+						<a href=".." class="white">Tour</a>
+					</tr>
+				</table>
+				</td>
+			</tr>
+		</table>
+	</td></tr>
+
+	<tr><td style='vertical-align: top; text-align: left; padding:15px;'>
+	<!---- START BODY -->
+
+
+<div style="text-align: center"><big><ttp>runDE</ttp></big> - Differential Expression</div>
+<table  class="tx" style="margin-left: auto;margin-right: auto;">
+<tr><td class="white" style="text-align:left; background-color:#666666; padding-bottom:4px;">
+<a href="#main" class="white">runDE</a> <mark class="white">|</mark>
+<a href="#batch" class="white">Execute</a> <mark class="white">|</mark>
+<a href="#R" class="white">R-scripts</a> <mark class="white">|</mark>
+<a href="#refs"  class="white" >References</a>
+</td></tr>
+</table>
+<a id=main></a>
+<p><ttp>runDE</ttp> adds differential expression (DE) to a singleTCW database.
+It uses JRI (Java-R interface) to R methods.
+TCW supplies R-scripts for <ttp>edgeR<sup>1</sup></ttp>, <ttp>DEseq2<sup>2</sup></ttp> and <ttp>GOseq<sup>3</sup></ttp>.
+See <a href="../../stcw/DiffExp.html" class="ext" target="_blank">Differential Expression Guide</a> for details.
+
+<table class="tx">
+<tr>
+	<td class=top>
+	1. Select one condition from group 1 and another from group 2.
+	<p>2. Select the R-script.
+	<p>3. Only select <ttc>Fixed Dispersion</ttc> if no replicates.
+	<p>4. See <a href="#batch">Execute Options</a> below for ways to add DE. The following uses the 2nd options:
+	<ol type=A>
+	<li>Click <ttc>Save results in p-value column</ttc> to save the results in the database. If the two conditions
+	have been selected, it will provide a default name (that can be over-written).
+	<li><ttc>Group 1 - Group 2</ttc> will run the DE method and (if Save selected) add the results to the database.
+	</ol>
+	<p>5. When all columns have been added, select <ttc>Execute</ttc> below the <ttl>GO enrichment</ttl> label.
+	<p><p>On the terminal window, it will be left in R so that you can execute
+	R commands.
+	</td>
+	<td  class=top>
+		<a id="Fig1"></a>
+		<a  href="img/runDE.png">
+		<img src="img/runDE.png" alt="" style="border: 1px solid black; width: 450px"></a>
+	</td>
+</tr>
+</table>
+
+<a id=batch></a>
+<h4>Execute options</h4>
+
+<ttc>All Pairs for Group 1</ttc>: All conditions in Group 1 will be paired for DE analysis. For example, if Rhiz, Root, and Stem are selected, then DE columns RhRo, RhSt and RoSt will be computed.
+
+<p><ttc>Group 1 - Group 2</ttc>: shown above.
+<p><ttc>All Pairs from File</ttc>: A file will be read where the first column is Group 1, the second is Group 2 and the third is the column name. All entries will be computed and added to the database.
+<p><ttc>P-values from File</ttc>: If your desired method to compute p-value is not written in R, then you can compute them
+outside of the TCW environment and import them with this option.
+<a id=R></a>
+<h4>R-scripts</h4>
+A script of R commands can be provided, which uses the variables created by
+<ttp>runDE</ttp> to compute DE and GO enrichment. <ttp>RunDE</ttp>
+writes the data into the R environment (e.g. the count data is written to a matrix called
+<ttx>countData</ttx>), executes the R script using the <ttx>source</ttx> command, and
+reads the results from the variable called <ttx>results</ttx>.
+
+<p>The <tt>edgeRglm.R</tt> and
+<tt>goSeqBH.R</tt> scripts are supplied as example. For GO enrichment, the <tt>goSeqBH.R</tt> script
+is provided; for the demo only, the <tt>goSeqNoFDR.R</tt> if provided.
+<p>
+
+<a id=refs></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>References</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<ol>
+<li><ttp>edgeR</ttp> - Robinson MD, McCarthy DJ, Smyth GK (2010) edgeR: a Bioconductor package for differential expression analysis of digital gene expression data. Bioinformatics 26: 139-140.
+<li><ttp>DESeq2</ttp> - Love MI, Huber W and Anders S (2014) Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2. Genome Biology 15:550.
+<li><ttp>GOSeq</ttp> - Young MD, Wakefield MJ, Smyth GK, Oshlack A (2010) Gene ontology analysis for RNA-seq: accounting for selection bias. Genome Biology 11: R14.
+</ol>
+	<!---- END BODY -->
+
+	</td></tr>
+	<tr><td style="background-color: #DDDDDD; text-align: center; padding: 0; font-family: Verdana, Arial; font-size: 12px;">
+                        Email Comments To: <a href="mailto:tcw@agcol.arizona.edu">tcw@agcol.arizona.edu</a>
+
+</td></tr>
+</table>
+</body>
+</html>

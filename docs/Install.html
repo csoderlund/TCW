@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>TCW Install</title>
+<style>
+	a:link {text-decoration: none;color:#6666CC;}
+	a.white {font-family:verdana; font-size:12px; color:white; text-decoration: underline;}
+	a.ext {font-weight: bold;}
+	mark.white {font-family:verdana; font-size:12px; color:white;background:none;}
+	.ty    {border: 1px  solid black; border-spacing: 0px;  border-collapse: collapse;}
+	.ty caption {padding-bottom: 0.5em;}
+	.ty th {border: 1px  solid black; padding: 3px; }
+	.ty td {border: 1px  solid black; padding: 3px; }
+	ttp  {font-family: 'Lucida Console', monospace; font-size: 16px; font-weight: 400; font-variant: small-caps;}
+	tt {font-size:13px}
+	pre {font-size:13px}
+	body {font-family:  Verdana, Arial, Helvetica, sans-serif;  font-size: 14px; }
+</style>
+</head>
+
+<body>
+<a id="top"></a>
+<table style="width: 800px; border: 2px solid #999999; padding: 0; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
+	<tr><td>
+		<table style="width: 100%; border: 0px; padding: 0;  border-collapse:collapse;">
+			<tr>
+				<td style="text-align: left; vertical-align: top; padding: 0">
+					<a href="http://www.agcol.arizona.edu">
+						<img src="./img/agcol_logo.gif" alt="AGCoL" style="width: 180px; border:1px solid black"></a>
+				</td>
+				<td style="padding-bottom:5px; padding-left:40px; text-align: left;  font-family: Verdana, Arial; font-size: 20px; font-weight: bold;color:MidnightBlue">
+					TCW Installation
+				</td>
+				<td style="text-align: right; vertical-align: top; padding: 0">
+					<a href="http://www.arizona.edu">
+						<img src="./img/UA.gif" alt="UA" title="University of Arizona"  style="width: 40px; border:1px solid black"></a>
+					<br>
+					<a href="http://www.bio5.org">
+						<img src="./img/bio5.gif" alt="BIO5" title="BIO5"  style="width: 40px; border:1px solid black"></a>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" style="text-align: left; vertical-align: top; padding: 0">
+				<table style="width: 100%; padding: 0;  border-spacing:0; border-collapse:collapse;">
+					<tr>
+						<td style="background-color: #666666; padding-bottom:4px;">
+						<a href="https://csoderlund.github.io/TCW" class="white">TCW Home</a> <mark class="white">|</mark>
+						<a href="https://github.com/csoderlund/TCW/releases" class="white">Download</a> <mark class="white">|</mark>
+						<a href="./Docs.html" class="white">Docs</a> <mark class="white">|</mark>
+						<a href="./tour" class="white">Tour</a>
+					</tr>
+				</table>
+				</td>
+			</tr>
+		</table>
+	</td></tr>
+
+	<tr><td style='vertical-align: top; text-align: left; padding:15px;'>
+	<!---- START BODY -->
+
+<b>Contents:</b>
+<ul>
+<li><a href="#soft1">Software requirements</a>
+<li><a href="#install">Installation</a>
+<li><a href="#soft2">Optional software</a>
+<li><a href="#soft3">Supplied external software</a>
+<li><a href="#replace">Replacing external software</a>
+</ul>
+
+<a id=soft1></a>
+<h2>Software Requirements</h2>
+
+		<ttp>TCW</ttp> is written in Java and was developed under Linux and Mac
+		(see <a href=Mac-OSX.html class="ext" target="_blank">Mac Installation</a>).
+		A 64-bit multi-processor is needed to build the TCW database(s).
+		<ttp>TCW</ttp> was compiled into a jar file using Java version 1.8,
+		so should work on any subsequent Java release.
+<p>
+Required:
+<p>
+	<table class="ty">
+	<tr><td><i>Software</i></td> <td><i>Version</i></td> <td><i>Source</i></td> <td><i>Additional info</i></td></tr>
+	<tr>
+
+	<td>MySQL</td><td>5.0 or later</td>
+	<td><a href="http://www.mysql.com" class="ext" target="_blank">www.mysql.com</a></td>
+	<td>MariaDB also works.
+	</td>
+
+	<tr>
+	<td>Java</td>
+	<td>1.8 or later</td>
+	<td><a href="http://adoptopenjdk.net" class="ext" target="_blank">OpenJDK Java</a>
+	<br><a href="http://www.java.com/en/download/" class="ext" target="_blank">Oracle Java</a>
+	<td>Get the Java JRE or JDK</td>
+	</tr>
+	</table>
+
+<p>It has been tested on:
+<table class="ty" style="font-size: 12px;">
+<tr><th>OS<th>Architecture<th>Purchased<th>Database<th>Java<th>Test
+<tr><td>Linux x86.64 (Centos 7) <td>3.2 Ghz AMD 24-Core, 128Gb<td style="text-align: center">2011<td>MariaDB v10.4.12<td>v1.8<td>Build and View
+<tr><td>Linux x86.64 (Centos 7)  <td>2.0 Ghz AMD 4-Core, 20Gb<td style="text-align: center">2008<td>MariaDB v5.5.60<td>v1.7<td>View
+<tr><td>MacOS (Catalina 10.15.4)<td>3.2 GHz Intel 6-Core i7, 64Gb<td style="text-align: center">2020<td>MySQL v8.0.17<td>v14.0<td>Build and View
+<tr><td>MacOS (Maverick 10.9.5) <td>2.4 Ghz Intel 2-Core i5, 16Gb<td style="text-align: center">2012<td>MySQL v5.6.21<td>v1.7<td>View
+</table>
+<br>See <a href="Summary.html#time" class="ext" target="_blank">Summary</a> for timings.
+
+<a id="install"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>Installation</h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<i><b><u>Step 1:</u></b></i> Decide where you want the main TCW directory to go, and untar the package in that location.
+<pre>
+   tar -xvf TCW_4.tar.gz
+</pre>
+The untar will create a <ttp>TCW_4</ttp> directory, with the following content:
+	<pre>
+   Executables:
+       execLoadLib     execAssm        execAnno
+       runAS           runDE           runSingleTCW    runMultiTCW
+       viewSingleTCW   viewSingleTCW
+   Directories:
+       java/jars     Ext/mac    Ext/linux     doc
+       R-scripts     scripts    projects
+   Text files:
+       HOSTS.cfg     README     LICENSE
+	</pre>
+
+<u><i><b>Step 2:</b></i></u> MySQL must be installed and running with <b>read AND write</b> access.
+To verify, type:
+<pre>
+   mysql -u &lt;username&gt; -p
+</pre>
+The program should prompt you for the password, and then
+display the "mysql>" prompt. Type "exit" to return to the shell command line.
+	<p>Note:
+	<ul>
+	<li>The user must have sufficient privileges to create a new database.
+	<li>If you will be using the optional <a href="stcw/AssemGuide.html" class="ext" target="_blank">assembly feature</a>, Innodb table must be enabled.
+	<li>Execute "<tt>./runSingletTCW -v</tt>", which will check some variable that can influence execution times.
+		<br>Also see <a href="Trouble.html#mysql" class="ext" target="_blank">Trouble MySQL</a>.
+	</ul>
+
+<p><u><i><b>Step 3:</b></i></u> Open the <tt>HOSTS.cfg</tt> file in an editor.
+	<pre>
+   DB_host=localhost
+   DB_user=
+   DB_password=
+	</pre>
+Add your database username and password to the two lines <tt>DB_user</tt> and <tt>DB_password</tt>
+
+<p><u><i><b>Step 4:</b></i></u> Test external programs
+Check that the external programs have executable permissions. On linux, check <tt>Ext/linux</tt>; on MacOS, check <tt>Ext/mac</tt>.
+You may want to run the compiled programs at the command line to see if they execute, e.g.
+<pre>
+   ./diamond
+   Error: Syntax: diamond COMMAND [OPTIONS]. To print help message: diamond help
+</pre>
+
+The diamond error indicates it ran. If are running on MacOS 10.15,
+see <a href="./Mac-OSX.html#ext"  class="ext" target="_blank">MacOS - External</a>.
+<p>Please read the section below on "Supplied external software.
+
+<p><u><i><b>Step 5:</b></i></u> Run <ttp>runAS</ttp> (see <a href="./stcw/AnnoDBs.html" class="ext" target="_blank">Annotation Setup</a>) to obtain UniProt files and GO database.
+
+Other annotation databases can also be used, but TCW provides GO support with UniProt.
+
+<!--  ================================================= -->
+<a id="soft2"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>Optional software</h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<table class="ty">
+	<tr><td><i>Software</i></td> <td><i>Source</i></td> <td><i>Additional info</i></td></tr>
+
+	<tr><td>R</td><td><a href="http://www.r-project.org/" class="ext" target="_blank">R Project</a></td>
+		<td>Used for the TCW <ttp>runDE</ttp> to compute differential expression (DE).
+		</td>
+	</tr>
+
+	<tr><td >Perl and DBD::mysql</td>
+		<td><a href="https://metacpan.org/pod/DBD::mysql::INSTALL" class="ext" target="_blank">Meta::cpan</a></td>
+		<td>Necessary to run <ttp>orthoMCL</ttp> within <ttp>runMultiTCW</ttp>. Perl is typically on all Linux and MacOS
+		machines, but the DBD::mysql (Perl-MySQL interface) is not.
+	</tr>
+
+	</table>
+<a id="R"></a>
+<h4>RJava for DE</h4>
+<u>Step 1.</u> TCW runs R using the RJava (jri) package, which is provided in the <tt>/Ext</tt> directory. However, the <tt>/Ext/.../jri</tt> does not
+work on all machines.
+If the supplied jri package does not work when running <ttp>runDE</ttp>, start R and type:
+<pre>
+   >install.packages("rJava")
+</pre>
+<u>Step 2.</u> Edit the <tt>runDE</tt> script, uncomment the correct path or change to the correct path:
+<pre>
+   #JPATH=/usr/lib64/R/library/rJava/jri
+   #JPATH=Ext/linux/jri
+   #echo Using Linux path
+
+   #JPATH=Ext/mac/jri
+   #JPATH=/Library/Frameworks/R.framework/Resources/library/rJava/jri
+   #echo Using MAC-OS path
+</pre>
+If using your installed rJava, confirm the path is correct.
+
+<p><u>Step 3.</u> You must set the R_HOME environment variable (confirm the path on your machine):
+<pre>
+   setenv R_HOME /usr/lib64/R                              # for Linux using tcsh
+   setenv R_HOME /Library/Frameworks/R.framework/Resources # for MacOS using tcsh
+</pre>
+The above commands use <tt>tcsh</tt>, adjust if your using a different Unix shell.
+<h4>R packages for DE</h4>
+In order to use <ttp>edgeR</ttp>, <ttp>DEseq2</ttp> and <ttp>GOseq</ttp>, start R and type:
+<pre>
+   >if (!requireNamespace("biocManager", quietly=TRUE))
+   >install.packages("BiocManager")
+   >BiocManager::install(version = "3.11")
+   >BiocManager::install("edgeR")
+   >BiocManager::install("goseq")
+   >BiocManager::install("DESeq2")
+</pre>
+As R changes, there may be changes to the above: see <a href="https://www.bioconductor.org/install/" class="ext" target="_blank">Bioconductor</a> for the latest instructions.
+
+<a id="soft3"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>Suppled external software</h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+You do not need to do anything to use the supplied packages. They are in the release directories
+<tt>/Ext/linux</tt> and <tt>/Ext/mac</tt>; TCW determines which to use.
+
+	<table class="ty">
+		<tr><td><i>Software</i></td><td><i>Version</i></td><td><i>Source</i></td><td><i>Used For</i></td></tr>
+
+		<tr><td colspan=4><i>Supplied packages for singleTCW and multiTCW</i></td>
+		<tr><td><ttp>BLAST</ttp></td><td>2.10</td>
+			<td><a href="http://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download" class="ext" target="_blank">
+			blast.ncbi.nlm.nih.gov/</a></td>
+			<td><ttp>runSingleTCW</ttp>: Assembly and annotation.
+				<br><ttp>viewSingleTCW</ttp>: Comparing a sequence against others.
+				<br><ttp>runMultiTCW</ttp>: Comparing all sequences against themselves.
+				<br><ttp>viewMultiTCW</ttp>: Comparing a sequence against others.
+			</td></tr>
+			<tr><td><ttp>DIAMOND</ttp></td>
+			<td>v2.0.11.149</td>
+			<td><a href="https://github.com/bbuchfink/diamond" class="ext" target="_blank">github.com/bbuchfink/diamond</a>
+			<td><ttp>runSingleTCW</ttp>: Annotation.
+				<br><ttp>viewSingleTCW</ttp>: Comparing a sequence against AA sequences.
+				<br><ttp>runMultiTCW</ttp>: Comparing all AA sequences against themselves.
+				<br><ttp>viewMultiTCW</ttp>: Comparing a sequence against AA sequences.
+			</td></tr>
+		<tr><td colspan=4><i>Supplied packages for singleTCW</i></td>
+		<tr>
+			<td>rJava</td><td>0.9-4</td>
+			<td><a href="http://www.rforge.net/JRI/" class="ext" target="_blank">www.rforge.net/JRI</a></td>
+         	<td><ttp>runDE</ttp>: Provides the Java interface to R.  Discussed above.</td>
+		</tr>
+         <tr><td><ttp>CAP3</ttp></td><td>2007 </td>
+			<td><a href="http://seq.cs.iastate.edu/cap3.html" class="ext" target="_blank">
+				seq.cs.iastate.edu/cap3.html</a></td>
+         	<td><ttp>runSingleTCW</ttp>: Optional assembly. </td>
+		</tr>
+
+	<tr><td colspan=4><i>Supplied packages for multiTCW</i></td>
+
+         <tr>
+			<td><ttp>OrthoMCL</ttp><sup>1</sup></td><td>2.0.3</td>
+			<td><a href="http://orthomcl.org" class="ext" target="_blank">
+			orthomcl.org</a></td>
+         	<td>One of four available methods for clustering</td>
+		</tr>
+         <tr>
+			<td><ttp>MCL</ttp></td><td>10-201</td>
+			<td><a href="http://micans.org/mcl/" class="ext" target="_blank">
+			micans.org/mcl</a></td>
+         	<td>Used by <ttp>OrthoMCL</ttp></td>
+		</tr>
+         <tr>
+			<td><ttp>MAFFT</ttp></td><td>v7.407</td>
+			<td><a href="https://mafft.cbrc.jp/alignment/software/" class="ext" target="_blank">
+			mafft.cbrc.jp/alignment/software/</a></td>
+         	<td>Computing multiple alignment of clusters for scoring and viewing</td>
+		</tr>
+		<tr>
+			<td><ttp>MUSCLE</ttp><sup>2</sup></td><td>3.8.31</td>
+			<td><a href="http://www.drive5.com/muscle" class="ext" target="_blank">
+			www.drive5.com/muscle</a></td>
+         	<td>Computing multiple alignment of clusters for scoring and viewing</td>
+		</tr>
+		 <tr>
+			<td><ttp>MstatX</ttp></td><td>11-Nov-18</td>
+			<td><a href="https://github.com/gcollet/MstatX" class="ext" target="_blank">
+			github.com/gcollet/MstatX</a></td>
+         	<td>Scoring multiple alignment of clusters</td>
+		</tr>
+
+        <tr><td><ttp>KaKs_Calculator</ttp><sup>2</sup></td>
+        	<td>v.1.2
+			<td><a href="http://bigd.big.ac.cn/tools/kaks/download" class="ext" target="_blank">
+		    bigd.big.ac.cn/tools/<br>kaks/download</a></td>
+			<td>KaKs analysis in <ttp>runMultiTCW</ttp>.</td>
+		</tr>
+		</table>
+<sup>1</sup> <ttp>OrthoMCL</ttp>:
+<ul>
+<li>It did not work with MariaDB v10.4.12. It was fixed by editing the orthoLoadBlast script to set the MySQL local_infile from within the script.
+Also, orthoBlastParser was edited to accept ".fa" suffixes
+<li>It works on MacOS 10.9, but has not been tested on MacOS 10.15 (problems with installing DBI:MySQL).
+<li>If <ttp>OrthoMCL</ttp> does not work on your machine and
+you want an alternative to the TCW supplied clustering algorithms, you may download and run a ortholog computing program
+and then import the clusters using the <ttp>runMultiTCW</ttp> "User Supplied" option.
+</ul>
+
+<p><sup>2</sup> <ttp>MUSCLE</ttp> and <ttp>KaKs_Calculator</ttp>
+in the <tt>/Ext/mac</tt> directory work for MacOS 10.15, but not for MacOS 10.9. For
+10.9, move the <ttp>MUSCLE</ttp> and <ttp>KaKS_Calculator</ttp> from <tt>/Ext/mac0</tt> to <tt>/Ext/mac</tt>,
+as these work. If your using MacOS 10.10 to 10.14, try them from the command line to see what works.
+
+<p><font color=red>MacOS Verify</font> Catalina and later versions require verification of external software. See
+(see <a href="Mac-OSX.html#ext" class="ext" target="_blank">Running Ext/mac external programs</a>).
+<p>The references for all TCW external software are provided in <a href=External.html class="ext" target="_blank">external references</a>
+
+<a id="replace"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>Replacing external software</h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<font color=green>If any of the supplied executables do not work</font>, you will need to download the
+software and compile them on your own machine.
+You will need to replace the existing executables in the <tt>/Ext/linux</tt> or <tt>/Ext/mac</tt> directory.
+
+<p>The only external source code supplied is <ttp>MstatX</ttp> and <ttp>OrthoMCL</ttp> because files had to be changed for it to work.
+
+<h4>Blast and Diamond</h4>
+There are three options for the search programs, where the following are ordered according to precedence:
+
+<ol>
+<li>You can define where the executables are in the <tt>HOSTS.cfg</tt> file
+using the <tt>blast_path</tt> and <tt>diamond_path</tt> parameters, e.g.
+<pre>
+   blast_path = /Users/cari/Workspace/bin/blast
+   diamond_path = /Users/cari/Workspace/bin/diamond
+</pre>
+
+<li>Use the default ones in <tt>/Ext</tt>.
+<p>
+<li>If you have <ttp>Blast</ttp> and/or <ttp>Diamond</ttp> in a <tt>bin</tt> that is accessed by your PATH environmental variable, and want to use them, just remove
+the existing directory from <tt>/Ext/linux</tt> or <tt>/Ext/mac</tt>.
+</ol>
+If you are going to use the <ttp>runSingleTCW</ttp> assembler,
+you MUST specify the full path of where the <ttp>Blast</ttp> executables reside,
+even if your going to use the default executables, e.g
+<pre>
+   blast_path = /Users/cari/Workspace/TCW_4/Ext/mac/blast
+</pre>
+To verify what <ttp>Diamond</ttp> and <ttp>Blast</ttp> paths are being used, run
+<pre>
+   ./runSingleTCW -v
+</pre>
+
+<!---- END BODY -->
+	</td></tr>
+	<tr><td style="background-color: #DDDDDD; text-align: center; padding: 0; font-family: Verdana, Arial; font-size: 12px;">
+                        Email Comments To: <a href="mailto:tcw@agcol.arizona.edu">tcw@agcol.arizona.edu</a>
+
+</td></tr>
+</table>
+</body>
+</html>
+

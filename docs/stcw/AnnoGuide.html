@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>TCW Anno Details</title>
+<style>
+	a:link {text-decoration: none;color:#6666CC;}
+	a.white {font-family:verdana; font-size:12px; color:white; text-decoration: underline;}
+	a.ext {font-weight: bold;}
+	mark.white {font-family:verdana; font-size:12px; color:white;background:none;}
+	ttp  {font-family: 'Lucida Console', monospace; font-size: 16px; font-weight: 400; font-variant: small-caps;}
+	ttl  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 600; color: DarkSlateGrey;}
+	ttc  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 700; color: DarkSlateGrey;}
+	.top {vertical-align: top;}
+	.tx    {border: 0px; padding: 5px; border-spacing: 5px; }
+	.tx td,th {border: 0px; padding: 5px; border-spacing: 5px}
+	.ty    {border: 1px  solid black; border-spacing: 0px;  border-collapse: collapse;}
+	.ty td, th {border: 1px  solid black; padding: 3px; }
+	tt {font-size:13px}
+	pre {font-size:13px}
+	body {font-family:  Verdana, Arial, Helvetica, sans-serif;  font-size: 14px; }
+</style>
+</head>
+
+<body>
+<a id="top"></a>
+<table style="width: 800px; border: 2px solid #999999; padding: 0; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
+	<tr><td>
+		<table style="width: 100%; border: 0px; padding: 0;  border-collapse:collapse;">
+			<tr>
+				<td style="text-align: left; vertical-align: top; padding: 0">
+					<a href="http://www.agcol.arizona.edu">
+						<img src="../img/agcol_logo.gif" alt="AGCoL" style="width: 180px; border:1px solid black"></a>
+				</td>
+				<td style="padding-bottom:5px; padding-left:40px; text-align: left;  font-family: Verdana, Arial;  font-weight: bold;color:MidnightBlue">
+					<font style="font-size: 20px;font-variant:small-caps;">runSingleTCW</font> -
+					<font style="font-size: 15px;">Annotation Details</font>
+				</td>
+
+				<td style="text-align: right; vertical-align: top; padding: 0">
+					<a href="http://www.arizona.edu">
+						<img src="../img/UA.gif" alt="UA" title="University of Arizona"  style="width: 40px; border:1px solid black"></a>
+					<br>
+					<a href="http://www.bio5.org">
+						<img src="../img/bio5.gif" alt="BIO5" title="BIO5"  style="width: 40px; border:1px solid black"></a>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" style="text-align: left; vertical-align: top; padding: 0">
+				<table style="width: 100%; padding: 0;  border-spacing:0; border-collapse:collapse;">
+					<tr>
+						<td style="background-color: #666666; padding-bottom:4px;">
+						<a href="https://csoderlund.github.io/TCW" class="white">TCW Home</a> <mark class="white">|</mark>
+						<a href="https://github.com/csoderlund/TCW/releases" class="white">Download</a> <mark class="white">|</mark>
+						<a href="../Docs.html" class="white">Docs</a> <mark class="white">|</mark>
+						<a href="../tour" class="white">Tour</a>
+					</tr>
+				</table>
+				</td>
+			</tr>
+		</table>
+	</td></tr>
+
+	<tr><td style='vertical-align: top; text-align: left; padding:15px;'>
+	<!---- START BODY -->
+
+Though the options for the annotation should be set in the <ttp>runSingleTCW</ttp> interface,
+they can be <ttc>Save</ttc> and then the annotation run from the command line with:
+<pre>
+  ./execAnno &lt;project&gt;
+</pre>
+
+<h2>Contents</h2>
+<ul>
+	<li><a href="#update">Updating or redoing annotation</a>
+	<br>&nbsp;
+	<li><a href="#prune">Prune hits</a>
+	<ul>
+	<li><a href="#prune">Three methods</a>
+	<li><a href="#go">Use of GOs in pruning</a>
+	<li><a href="#ex">Command line options for pruning</a>
+	<li><a href="#cmp">Comparison of prune results</a>
+	</ul>
+	<br>
+	<li><a href="#save">Save Database</a>
+</ul>
+
+<a id=update></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>Updating or redoing annotation</h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+You may wish to re-run annotation steps for following reasons:
+<ol>
+<li>Update to a newer AnnoDB (e.g. more recent UniProt release): In this case,
+you would delete existing annotation and all existing hit (tab) files.
+<li>Add a new AnnoDB: In this case, make sure to uncheck all annoDBs in the
+<ttp>runSingleTCW</ttp> interface that are already in the database.
+<li>Remove an annoDB: In this case, you will need to delete the existing annotation
+and reload all annoDBs that you want to keep. The original hit files can be reused.
+<li>Add additional similar pairs. In this case, turn off all other options and run <ttc>Annotate</ttc>;
+additional pairs will be added with the existing hit files.
+</ol>
+
+<table style="width: 450px">
+<tr><td class="top">The image on the right shows what can be removed. Select the top option for
+#1 and #3. Select the third item for the #1.
+<td><a href="img/remove.png"><img src="img/remove.png" alt="" style="border: 1px solid black; width: 250px"></a>
+</table>
+
+Changes can be accomplished by editing the AnnoDB list in <ttp>runSingleTCW</ttp>, then
+re-running <ttc>Annotate</ttc>, and responding to the yes/no prompts
+which will appear on the console, as follows (note, at any point during these
+question, you can Ctrl-C to stop the process):
+<pre>
+  ?--Annotation exists in database. Enter [a/d/e]
+   Add to existing annotation [a], Delete annotation [d], Exit [e]:
+</pre>
+Answer 'a' to add to the existing annotation.
+<br>Answer 'd' to replace all annotation. Note that this
+does NOT delete hit files from disk, and they may be loaded again if desired.
+<br>Answer 'e' to exit.
+
+<p>The following is a flow for adding annotation from existing files.
+<pre>
+  Checking annoDB fasta
+    DB#1 diamond SP AA: projects/DBfasta/UniProt_demo/sp_plants/uniprot_sprot_plants.fasta
+    DB#2 blast SP AA: projects/DBfasta/UniProt_demo/sp_fullSubset/uniprot_sprot_fullSubset.fasta
+    DB#3. blastn GB NT: projects/DBfasta/NT/dcitri.fa
+    Pairs blastn: /projects/demoTra/hitResults/tra_seqNT.fa
+    Pairs tblastx: /projects/demoTra/hitResults/tra_seqNT.fa
+    Pairs diamond: /projects/demoTra/hitResults/tra_orfSeqAA.fa
+ Checking for existing tab files
+
+  ?--At least one hit tab file exists for selected set.
+    Use current tab files [u], prompt on each tab file [p], exit[e]:  p
+
+    DB#1 uniprot_sprot_plants.fasta
+       Output exists: /projects/demoTra/hitResults/tra_SPpla.dmnd.tab; Date: Sun Jan 7 1:37:16 MST 2021
+  ?--Load this existing file [y] or perform new search [n]  [y/n]:
+</pre>
+A 'y' will use the existing file and not redo the search.
+
+<p>
+If you get the prompt:
+<pre>
+  ?--DB#1 The annoDB projects/DBfasta/UniProt_demo/sp_plants/uniprot_sprot_plants.fasta
+     has been processed previously. Continue? (y/n)?
+</pre>
+This means you have already added an annoDB with the exact same path name.
+
+
+<!------------------------------------------------------>
+<a id=prune></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>Prune hits</h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<table class="tx">
+<tr><td>The default for this option is <ttl>None</ttl>, though the database queries are faster
+if pruning has been performed. If there is no reason to need all the hits, it is strongly recommended
+that you use the stringent <ttl>Description</ttl> option.
+<td><a href="img/PruneOptions.png"><img src="img/PruneOptions.png" alt="" style="border: 1px solid black; width: 450px"></a>
+</table>
+
+
+<h3>Prune: None</h3>
+This option keeps all hits found using the search parameters provided on the <ttc>Add or Edit AnnoDB</ttc> panel.
+The following shows the hits for <tt>tra_018</tt>, where the two highlighted hits have the same alignment values.
+<br>
+<a href="img/PruneNone.png"><img src="img/PruneNone.png" alt="" style="border: 1px solid black; width: 750px"></a>
+
+<h3>Prune: Alignment</h3>
+If all alignment columns in the <ttp>Blast</ttp> or <ttp>DIAMOND</ttp> file are the same between two hits
+for a sequence along with the hit sequence length and description, the best one is retained. For example,
+the following are from the output of DIAMOND showing all alignment values:
+<pre>
+tra_018  tr|A0A1S3CH76|A0A1S3CH76_CUCME  79.2  72..15..0..2..217..80..151..6.41e-33..117
+tra_018  tr|A0A5A7SKQ5|A0A5A7SKQ5_CUCME  79.2  72..15..0..2..217..80..151..6.41e-33..117
+</pre>
+
+The descriptions are compared using the same rules
+as discussed below for <ttl>Prune: Description</ttl>. <i>The actual hit sequences are NOT compared.</i>
+
+<p>The following is the results for <tt>tra_018</tt>.
+<br>
+<a href="img/PruneAlign.png"><img src="img/PruneAlign.png" alt="" style="border: 1px solid black; width: 750px"></a>
+
+
+<p>Sometimes two hits can look identical from the <ttl>Sequence Detail Hit Table</ttl>,
+but the <ttc>Show..</ttc>
+button shows all columns and will elucidate the differences (see <a href="img/Show.png">Show A0A5A7SKQ5_CUCME</a>).
+The hit start or hit end may be different, or the hit sequence lengths.
+
+
+<h3>Prune: Description</h3>
+
+The best hit for each 'description' for each annoDB is retained.
+The full description must be the same except that the comparison
+is case-insensitive and any description ending with "{...}" has the ending removed.
+For example, the following three are the same:
+<pre>
+  ZF-HD family protein {ORGLA09G0180300.1}
+  ZF-HD family protein {ORGLA09G0074600.1}
+  ZF-HD Family Protein
+</pre>
+The following shows the results for <tt>tra_018</tt>. Note that both both TRpla and TRinv have
+a description "Pyruvate kinase" as the pruning is by annoDB.
+<br>
+<a href="img/PruneDesc.png"><img src="img/PruneDesc.png" alt="" style="border: 1px solid black; width: 750px"></a>
+
+<a id=go></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Use of GOs in pruning</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+First define the GO database and select <ttl>Ignore on Annotate</ttl>. The GOs should not be computed until after
+the hits are finalized. However, the pruning algorithm will use the #GOs in determining the best hit,
+which is why you need to define the GO database (built with <ttp>runAS</ttp>). If you do not plan on creating
+a GO database, than this section can be ignored.
+
+<p>For both the <ttl>Description</ttl> and <ttl>Alignment</ttl> pruning:
+<br>&nbsp;&nbsp; if two hits are being compared and found to be the same,
+<br>&nbsp;&nbsp; if the GO database is defined and if two bit-scores are close,
+<br>&nbsp;&nbsp; then the hit with the most GOs is saved.
+<p>
+For example, the
+following shows the top hits for tra_011, where <ttl>Description</ttl> pruning only keeps A0A0J8CG74_BETVU
+since its bit-score is just a little lower than A0A022Q8Q6_ERYGU
+and it has 2 GOs.
+<br>
+<a href="img/PruneNoneAN.png"><img src="img/PruneNoneAN.png" alt="" style="border: 1px solid black; width: 750px"></a>
+<p>
+If it is desired to always use the best bit-score,
+do not define the GO database until after <ttc>Annotate</ttc> is run, then define the database and run
+<ttc>GO only</ttc>.
+
+<!------------------------------------------------------>
+<a id=ex></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Command line options for pruning</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+
+Command line options:
+<pre>
+ -p Prune redundant hits  (annotation must already be done)
+    -pt &lt;integer&gt; 1 Alignment  2 Descriptions   (this overrides what is set in Options)
+    -pp &lt;integer&gt; Print first n pruned seq-hits per annoDB
+    -pr Save/restore hit tables before processing
+</pre>
+
+The following allows you to experiment with the pruning. However, it is not guaranteed to
+leave your database in a perfect state, so you may want to re-<ttc>Annotate</ttc>
+once you figure out what pruning scheme you want.
+
+<ol>
+<li>Using <ttp>runSingleTCW</ttp>, set the Prune option to <ttl>None</ttl> and check <ttl>Ignore on Annotate</ttl>.
+Run <ttc>Annotate</ttc> and exit.
+<li>View your database with all hits.
+<li>Run from the command line:
+<pre>
+  ./execAnno demoTra -p -pt 1 -pp 4 -pr
+</pre>
+&rarr; The "-pr" options save the hits to two tables in the database prefixed with "save". It will then create the hits tables
+with pruning option of "Alignment".
+<br>&rarr; The "-pp 4" option will print to the terminal the first 4 pruned hits per annoDB.
+<li>View your database with all the identical alignments per annoDB removed.
+<li>Run from the command line:
+<pre>
+  ./execAnno demoTra -p -pt 2 -pp 4 -pr
+</pre>
+&rarr; The "-pr" option will notice that the saved tables exist and will restore them before continuing.
+<li>View your database with all the identical descriptions per annoDB removed.
+<li>The saved hit tables are still in the database; they will be removed when you remove annotation to re-annotate using
+<ttp>runSingleTCW</ttp>,
+or you can drop them using the mysql commands:
+<pre>
+  drop table save_unique_hits;
+  drop table save_unitrans_hits;
+</pre>
+</ol>
+<!------------------------------------------------------>
+<a id=cmp></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Comparison of prune results</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+The following table shows the reduction in hits for the two prune types from <tt>demoTra</tt> and <i>Oryza sativa</i>.
+
+<font size="2">
+<table class=ty>
+<tr><th>&nbsp;<th colspan=4  style="text-align:center">DemoTra<th colspan=4 style="text-align:center">Oryza sativa
+<tr><th>Prune Type<th>Unique Hits<th style="text-align:center">Reduce<th>Seq-hit pairs<th style="text-align:center">Reduce
+					<th>Unique Hits<th style="text-align:center">Reduce<th>Seq-hit pairs<th style="text-align:center">Reduce
+<tr><td>None       <td style="text-align:right">12,472<td style="text-align:right">0
+				   <td style="text-align:right">18,442<td style="text-align:right">0
+				   <td style="text-align:right">1,340,909<td  style="text-align:right">0
+				   <td style="text-align:right">4,376,663<td  style="text-align:right">0
+<tr><td>Alignment  <td style="text-align:right">11,300<td  style="text-align:right">9.4%
+				   <td style="text-align:right">16,660<td  style="text-align:right">9.7%
+				   <td style="text-align:right">1,221,375<td  style="text-align:right">8.9%
+				   <td style="text-align:right">4,065,913<td  style="text-align:right">7.1%
+<tr><td>Description<td style="text-align:right">4,378<td style="text-align:right">64.9%
+				   <td style="text-align:right">7,112<td style="text-align:right">61.4%
+				   <td style="text-align:right">340,909<td style="text-align:right">74.7%
+					<td style="text-align:right">1,514,641<td style="text-align:right">65.4%
+</table>
+</font>
+
+<h4>Further comparisons for <i>Oryza sativa</i></h4>
+<table class=tx>
+<tr><td class="top">
+
+<p>&rarr;All terms are described on
+the <ttl>Overview</ttl> <ttc>Reproduce</ttc> popup, but briefly: <ttl>Bits</ttl> is the hit with the
+best bit-score for a sequence. <ttl>Anno</ttl> is the hit with the
+best annotation for a sequence. <ttl>Rank=1</ttl> is the best hit for a sequence for an annoDB, e.g. if there
+are 6 annoDBs, a sequence has 6 <ttl>Rank=1</ttl>.
+
+<p>&rarr;
+The <ttl>Only</ttl>, <ttl>Bits</ttl>, and <ttl>Anno</ttl> are
+about the same between the no pruning and description pruning. The <ttl>Unique</ttl> and <ttl>Total</ttl> are greatly reduced for the description pruning.
+
+<p>&rarr;
+Right of <ttl>Rank=1</ttl> refer to the Rank=1 hits. All numbers are just
+about the same between the no pruning and description pruning.
+
+<p>&rarr;
+The high hitting species stay about the same for <ttl>Bits</ttl> and <ttl>Anno</ttl>, but the lower hitting
+species vary.
+
+<p>&rarr;The <ttl>Sequences with GOs</ttl>
+reduced from 89% to 86%, but the <ttl>Best hit with GOs</ttl> (Best Bits) increased from 62.6% to 66.5%.
+
+
+<td>
+<b>Overview with no pruning</b>
+<br><a href="img/PruneNoneOsj.png"><img src="img/PruneNoneOsj.png" alt="" style="border: 1px solid black; width: 500px"></a>
+
+<p><b>Overview with description pruning</b>
+<br><a href="img/PruneDescOsj.png"><img src="img/PruneDescOsj.png" alt="" style="border: 1px solid black; width: 500px"></a>
+</table>
+
+<!------------------------------------------------------>
+<a id=save></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>Save database</h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+To save an existing annotated database, use:
+<pre>
+  mysqldump -u &lt;user&gt; -p &lt;database_name&gt; &gt; &lt;dump_file_name&gt;
+</pre>
+
+	<!---- END BODY -->
+	</td></tr>
+	<tr><td style="background-color: #DDDDDD; text-align: center; padding: 0; font-family: Verdana, Arial; font-size: 12px;">
+                        Email Comments To: <a href="mailto:tcw@agcol.arizona.edu">tcw@agcol.arizona.edu</a>
+
+</td></tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Tour runSingleTCW</title>
+<style>
+	a:link {text-decoration: none;color:#6666CC;}
+	a.white {font-family:verdana; font-size:12px; color:white; text-decoration: underline;}
+	a.ext {font-weight: bold;}
+	a.extp {font-weight: bold; small-caps;}
+	mark.white {font-family:verdana; font-size:12px; color:white;background:none;}
+	ttp  {font-family: 'Lucida Console', monospace; font-size: 16px; font-weight: 400; font-variant: small-caps;}
+	ttl  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 600; color: DarkSlateGrey;}
+	ttc  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 700; color: DarkSlateGrey;}
+	.top {vertical-align: top;}
+	.hang  {margin-left:15px; text-indent:-15px; margin-top:5px;}
+	.tx    {border: 0px; padding: 5px; border-spacing: 5px; }
+	.tx td,th {border: 0px; padding: 5px; border-spacing: 5px}
+	.ty    {border: 1px  solid black; border-spacing: 0px;  border-collapse: collapse;}
+	.ty td, th {border: 1px  solid black; padding: 3px; }
+	cap {font-variant:small-caps;}
+	tt {font-size:13px}
+	pre {font-size:13px}
+	body {font-family:  Verdana, Arial, Helvetica, sans-serif;  font-size: 14px; }
+</style>
+</head>
+
+<body>
+<a id="top"></a>
+<table style="width: 800px; border: 2px solid #999999; padding: 0; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
+	<tr><td>
+		<table style="width: 100%; border: 0px; padding: 0;  border-collapse:collapse;">
+			<tr>
+				<td style="text-align: left; vertical-align: top; padding: 0">
+					<a href="http://www.agcol.arizona.edu">
+						<img src="../../img/agcol_logo.gif" alt="AGCoL" style="width: 180px; border:1px solid black"></a>
+				</td>
+				<td style="padding-bottom:5px; padding-left:40px; text-align: left;  font-family: Verdana, Arial;  font-weight: bold;color:MidnightBlue">
+					<font style="font-size: 20px;">Tour <cap>runSingleTCW</cap></font> -
+					<font style="font-size: 15px;">Build Annotated Database</font>
+				</td>
+				<td style="text-align: right; vertical-align: top; padding: 0">
+					<a href="http://www.arizona.edu">
+						<img src="../../img/UA.gif" alt="UA" title="University of Arizona"  style="width: 40px; border:1px solid black"></a>
+					<br>
+					<a href="http://www.bio5.org">
+						<img src="../../img/bio5.gif" alt="BIO5" title="BIO5"  style="width: 40px; border:1px solid black"></a>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" style="text-align: left; vertical-align: top; padding: 0">
+				<table style="width: 100%; padding: 0;  border-spacing:0; border-collapse:collapse;">
+					<tr>
+						<td style="background-color: #666666; padding-bottom:4px;">
+						<a href="https://csoderlund.github.io/TCW" class="white">TCW Home</a> <mark class="white">|</mark>
+						<a href="https://github.com/csoderlund/TCW/releases" class="white">Download</a> <mark class="white">|</mark>
+						<a href="../../Docs.html" class="white">Docs</a> <mark class="white">|</mark>
+						<a href=".." class="white">Tour</a>
+					</tr>
+				</table>
+				</td>
+			</tr>
+		</table>
+	</td></tr>
+
+	<tr><td style='vertical-align: top; text-align: left; padding:15px;'>
+	<!---- START BODY -->
+<div style="text-align: center"><big><ttp>runSingleTCW</ttp></big> - Build Annotated Database of Single Species</div>
+<p>
+<table  class="tablex" style="margin-left: auto;margin-right: auto;">
+<tr><td class="white" style="text-align:left; background-color:#666666; padding-bottom:4px;">
+<a href="#main" 	class="white">Main panel</a> 		<mark class="white">|</mark>
+<a href="#build" 	class="white">Build panels</a> <mark class="white">|</mark>
+<a href="#anno" 	class="white">Annotate panels</a> <mark class="white">|</mark>
+<a href="#refs" 	class="white" >References</a>
+</td></tr>
+</table>
+
+<p><ttp>runSingleTCW</ttp> takes as input transcriptome and expression level files, builds a
+database, and annotates the transcriptomes.
+See <a href="../../stcw/UserGuide.html" class="ext" target="_blank">sTCW UserGuide</a> for details.
+
+<a id=main></a>
+<h3>Main panel</h3>
+
+<table class="tx">
+<tr>
+	<td class="top">
+	&rarr; 1. <ttc>Build Database</ttc>
+	<p>The input may be transcripts with optional read counts, proteins with optional spectral counts,
+		or sequences to be assembled.
+		<p>The <ttc>Add</ttc> panel allows you to specify the sequence dataset (fasta file)
+		along with its conditions (e.g. tissue, treatment, etc),
+		which will be listed under <ttc>Associated Counts</ttc> on the main panel.
+		<p>If there are replicates, you may define them with the <ttc>Define Replicates</ttc> panel.
+	<p>
+	&rarr; 2. <ttc>Instantiate</ttc>
+		<p><ttc>Skip Assembly</ttc> - the sequences can be instantiated with no assembly.
+		<p>Assembly - the sequences, such as  Sanger ESTs, 454 reads, and/or transcript,
+		can be assembled.
+<td class="top">
+		<a id="Fig1"></a>
+		<a  href="img/runSingle.png">
+		<img src="img/runSingle.png" alt="" style="border: 1px solid black; width: 500px"></a>
+	</td>
+	</tr>
+</table>
+
+
+
+	&rarr; 3. <ttc>Annotate</ttc>
+
+		<p>Use <a href="../runAS" class="extp" target="_blank">runAS</a>
+		to download and format UniProts and the GO databases for input into this step.
+		<p>Search against one or more protein (e.g. UniProt) or nucleotide databases,
+		referred toa "annoDBs".
+		<p>In the <ttc>Options</ttc> panel, define the GO database.
+
+<p>
+	&rarr; 4. <ttc>Add Remarks and Locations</ttc>
+	<p> Remarks and Locations (i.e. chromosome, start, end, strand) can be added to sequences and queried in the viewSingleTCW.
+
+
+
+<!--     Add          -->
+<a id=build></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Build panels</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<table class="tx">
+<tr>
+	<td class=top>
+		<ttl><big>Sequence Datasets</big></ttl>
+		<p><ttc>Add/Edit</ttc>:  Selecting <ttc>Add</ttc> shows this panel.
+		Selecting <ttc>Edit</ttc> shows
+		a similar panel, but only the ATTRIBUTES values can be changed after the database has been created.
+		The counts can be in one file or generated with the <ttc>Build combined count file</ttc> option.
+		On <ttc>Save</ttc>, the condition names will be written in the <ttc>Associated Counts</ttc> table on the
+		main panel.
+		<p><ttc>Build combined count file file</ttc>:  (panel not shown) If the counts are in multiple files, this button opens up a
+		panel in which a directory of count files, or individual count files, can be entered.
+		It will generate a file called <tt>Combined_read_count.tsv</tt>
+		where the columns are conditions with their respective counts.
+	</td>
+	<td>
+		<a  href="img/runSingleLib.png"> <img src="img/runSingleLib.png" alt="" style="border: 1px solid black; width: 450px"></a>
+	</td>
+<tr>
+	<td class="top">
+		<ttc><big>Associated Counts</big></ttc>
+		<p><ttc>Define Replicates</ttc>: If the <ttc>Associated Counts</ttc> table has replicates,
+		they can be defined in this panel, which will update the table as shown above in the Main panel.
+		<p><ttc>Edit Attributes</ttc>: (panel not shown) This panel has the same attributes fields as the
+		<ttc>Add or Edit a Sequence Dataset</ttc>, but will be applied to the selected condition. These can
+		be edited after the database has been created.
+	</td>
+	<td>
+		<a href="img/runSingleRep.png"><img src="img/runSingleRep.png" alt="" style="border: 1px solid black; width: 450px"></a>
+</table>
+
+
+<a id=anno></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Annotate panels</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<table class="tx">
+<tr>
+	<td class="top">
+	<ttl><big>AnnoDBs</big></ttl>
+	<p><ttc>Add/Edit</ttc>: Databases to search against are referred to as "annoDBs".
+	Any FASTA file can be used an annoDB, though TCW gives special support to using UniProt taxonomic
+	databases; besides allowing taxonomic specific querying in viewSingleTCW,
+	the UniProt .dat file is used to extract GO, KEGG, EC and PFam information.
+	The <a href="../runAS" class="extp" target="_blank">runAS</a>
+	program provides this functionality.
+	<p>
+	As the UniProt TrEMBL databases increase in size, it has
+	become impractical to search these with BLAST<sup>1</sup>. Fortunately, the
+	<a href="http://ab.inf.uni-tuebingen.de/software/diamond" class="extp" target="_blank">diamond</a><sup>2</sup>
+	programs provide super fast results.
+	</td>
+	<td>
+	<a  href="img/runSingleAnno.png"><img src="img/runSingleAnno.png" alt="" style="border: 1px solid black; width: 450px"></a>
+
+<tr>
+	<td class="top">
+	<ttl><big>AnnoDB Options</big></ttl>
+	<p><ttc>ANNOTATIONS</ttc>: An option of special interest is the <ttl>Prune</ttl> option. The results of the
+	search against annoDBs can result in many hits, where some have the exact same alignment values and many have
+	the very similar descriptions. The <ttl>Alignment</ttl> option removes all but the best hit with the same
+	alignment and description values, and the <ttl>Description</ttl> option removes all but the best hit with
+	same description values.
+	<p><ttc>ORF FINDER</ttc>:The ORF Finder uses the seq-hit frame to determine the best open reading frame. If
+	a sequence has no hits or hits to multiple frame, it decides the best frame using the ORF length and the
+	Markov score. The Markov scores are trained using the best hits over all sequences.
+	<p><ttc>SIMILAR PAIRS</ttc>: This is useful to determine how similar the input sequences are.
+	</td>
+	<td>
+	<a  href="img/runSingleOptions.png"><img src="img/runSingleOptions.png" alt="" style="border: 1px solid black; width: 450px"></a>
+</table>
+
+<!-- REFS -->
+<a id=refs></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>References</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<ol>
+<li><ttp>BLAST</ttp> is used for assembly, annotation and interactive searching in viewSingleTCW.
+<br>Altschul SF, Madden TL, Schaffer AA, Zhang J, Zhang Z, et al. (1997) Gapped BLAST and PSI-BLAST: a new generation of protein database search programs. Nucleic Acids Res 25: 3389-3402.
+<li><ttp>Diamond</ttp> can be used for annotation of blastx and blastp searches.
+<br>Buchfink B, Xie C, Huson D (2015) Fast and Sensitive Protein Alignment
+using DIAMOND, Nature Methods, 12, 59-60 doi:10.1038/nmeth.3176.
+
+<li><ttp>CAP3</ttp> is used for assembly.
+<br>Huang X, Madan A (1999) CAP3: A DNA sequence assembly program. Genome Res 9: 868-877.
+<li><ttp>UniProt</ttp> is recommended for protein annotation as the GO and other information can
+be extracted by the TCW and added to the database.
+<br>Dimmer EC, Huntley RP, Alam-Faruque Y, Sawford T, O'Donovan C, et al. (2012) The UniProt-GO Annotation database in 2011. Nucleic Acids Res 40: D565-570.
+<li><ttp>Gene Ontology</ttp> mySQL database is used for levels and descriptions.
+<br>GO Consortium (2012) The Gene Ontology: enhancements for 2011. Nucleic Acids Res 40: D559-564.
+</ol>
+
+	<!---- END BODY -->
+	</td></tr>
+	<tr><td style="background-color: #DDDDDD; text-align: center; padding: 0; font-family: Verdana, Arial; font-size: 12px;">
+                        Email Comments To: <a href="mailto:tcw@agcol.arizona.edu">tcw@agcol.arizona.edu</a>
+
+</td></tr>
+</table>
+</body>
+</html>
+

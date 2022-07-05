@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Tour align</title>
+<style>
+	a:link {text-decoration: none;color:#6666CC;}
+	a.current {font-family:verdana; font-size:12px; color:white; text-decoration: none;}
+	a.white {font-family:verdana; font-size:12px; color:white; text-decoration: underline;}
+	a.ext {font-weight: bold;}
+	mark.white {font-family:verdana; font-size:12px; color:white;background:none;}
+	ttp  {font-family: 'Lucida Console', monospace; font-size: 16px; font-weight: 400; font-variant: small-caps;}
+	ttl  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 600; color: DarkSlateGrey;}
+	ttc  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 700; color: DarkSlateGrey;}
+	.top {vertical-align: top;}
+	.hang  {margin-left:15px; text-indent:-15px; margin-top:5px;}
+	.tx    {border: 0px; padding: 5px; border-spacing: 5px; }
+	.tx td,th {border: 0px; padding: 5px; border-spacing: 5px}
+	.ty    {border: 1px  solid black; border-spacing: 0px;  border-collapse: collapse;}
+	.ty td, th {border: 1px  solid black; padding: 3px; }
+	tt {font-size:13px}
+	pre {font-size:13px}
+	body {font-family:  Verdana, Arial, Helvetica, sans-serif;  font-size: 14px; }
+</style>
+</head>
+
+<body>
+<a id="top"></a>
+<table style="width: 800px; border: 2px solid #999999; padding: 0; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
+	<tr><td>
+		<table style="width: 100%; border: 0px; padding: 0;  border-collapse:collapse;">
+			<tr>
+				<td style="text-align: left; vertical-align: top; padding: 0">
+					<a href="http://www.agcol.arizona.edu">
+						<img src="../../img/agcol_logo.gif" alt="AGCoL" style="width: 180px; border:1px solid black"></a>
+				</td>
+				<td style="padding-bottom:5px; padding-left:40px; text-align: left;  font-family: Verdana, Arial;  font-weight: bold;color:MidnightBlue">
+					<font style="font-size: 20px;">Tour <font style="font-variant:small-caps;">viewMultiTCW</font></font> -
+					<font style="font-size: 15px;">Pair and MSA Alignments</font>
+				</td>
+
+				<td style="text-align: right; vertical-align: top; padding: 0">
+					<a href="http://www.arizona.edu">
+						<img src="../../img/UA.gif" alt="UA" title="University of Arizona"  style="width: 40px; border:1px solid black"></a>
+					<br>
+					<a href="http://www.bio5.org">
+						<img src="../../img/bio5.gif" alt="BIO5" title="BIO5"  style="width: 40px; border:1px solid black"></a>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" style="text-align: left; vertical-align: top; padding: 0">
+				<table style="width: 100%; padding: 0;  border-spacing:0; border-collapse:collapse;">
+					<tr>
+						<td style="background-color: #666666; padding-bottom:4px;">
+						<a href="https://csoderlund.github.io/TCW" class="white">TCW Home</a> <mark class="white">|</mark>
+						<a href="https://github.com/csoderlund/TCW/releases" class="white">Download</a> <mark class="white">|</mark>
+						<a href="../../Docs.html" class="white">Docs</a> <mark class="white">|</mark>
+						<a href=".." class="white">Tour</a>
+					</tr>
+				</table>
+				</td>
+			</tr>
+		</table>
+	</td></tr>
+
+	<tr><td style='vertical-align: top; text-align: left; padding:15px;'>
+	<!---- START BODY -->
+<div style="text-align: center"><big><ttp>viewMultiTCW</ttp></big> - View and Query Multiple Species</div>
+
+<table style="padding: 2;  border-spacing:0; border-collapse:collapse;  margin-left: auto; margin-right: auto;">
+<tr><td style="background-color: #666666; padding-bottom:4px; ">
+<a href="index.html" class="white" >Start</a> 	<mark class="white">|</mark>
+<a href="cluster.html" class="white">Clusters</a> <mark class="white">|</mark>
+<a href="pairs.html" class="white">Pairs</a> <mark class="white">|</mark>
+<a href="seq.html"  class="white">Sequences</a> <mark class="white">|</mark>
+<a href="align.html"  class="current">Alignment</a> <mark class="white">|</mark>
+<a href="seqDetail.html"  class="white">Sequence Details</a> <mark class="white">|</mark>
+<a href=hit.html class="white">Annotation Hits</a>
+</td></tr>
+</table>
+
+<div style="text-align: center"><big><ttc>Pair and MSA Alignments</ttc></big></div>
+<table style="padding: 2;  border-spacing:0; border-collapse:collapse;  margin-left: auto; margin-right: auto;">
+<tr><td style="background-color: #666666; padding-bottom:4px; ">
+<a href="#pair" 	class="white">Pairwise</a> 	<mark class="white">|</mark>
+<a href="#msadb" 	class="white">MSAdb</a> 	<mark class="white">|</mark>
+<a href="#msa" 		class="white">MSA...</a>
+</td></tr>
+</table>
+
+<a id=table></a>
+<h3>Alignments</h3>
+
+
+<table>
+<tr>
+	<td class="top"><small>Cluster table with MSA</small>
+		<br><a href="img/clusterTable.png"><img  src="img/clusterTable.png" alt="" style="border: 1px solid black; width: 450px"></a>
+	<td class="top"><small>Pair table with Pairwise</small>
+		<br><a href="img/pairTable.png"><img src="img/pairTable.png" alt="" style="border: 1px solid black; width: 450px"></a>
+
+</table>
+The <ttc>Hit Table</ttc> and <ttc>Sequence Details</ttc> also have the <ttc>Pairwise...</ttc> option, and the <ttc>Sequence Table</ttc>
+has the <ttc>MSA...</ttc> option.
+<p>If there are only protein (AA) sequences in the database, only the AA options described below will be available.
+
+<a id=pair></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Pairwise...</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+
+<table style="width:60%">
+<tr>
+	<td>
+	The <ttc>Pairwise...</ttc> drop-down has the options shown on the right, where all options use dynamic programming for the selected sequence(s).
+	<p>The "for one pair" options are enabled when only one pair is selected.
+	<td><a href="img/pairOpt.png"><img  src="img/pairOpt.png" alt="" style="border: 1px solid black; width: 200px"></a>
+</table>
+
+<br>AA, CDS and NT alignments of a pair. The text alignment can be viewed by clicking the AA, CDS or NT buttons.
+<br><a href="img/pairAlign.png"><img  src="img/pairAlign.png" alt="" style="border: 1px solid black; width: 700px"></a>
+<br><br>
+
+<table>
+<tr><td>
+	Menu for the CDS text alignment:
+	<br><a href="img/alignMenu.png"><img  src="img/alignMenu.png" alt="" style="border: 1px solid black; width: 300px"></a>
+	<td class=top>
+	Text alignment of the CDS showing matches.
+	<br>The '|' are mutations in synonymous codons, the '*' mutations in nonsynonymous codons.
+	<br><a href="img/alignText.png"><img src="img/alignText.png" alt="" style="border: 1px solid black; width: 600px"></a>
+</table>
+
+<a id=msadb></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>MSAdb</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+When the database is built, the cluster  MSA is computed in stored in the database.
+<br><a href="img/MSAdb.png"><img  src="img/MSAdb.png" alt="" style="border: 1px solid black; width: 700px"></a>
+<p><a href="img/MSAzappo.png"><img  src="img/MSAzappo.png" alt="" style="border: 1px solid black; width: 700px"></a>
+
+<a id=msa></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>MSA...</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+
+<table style="width: 70%">
+<tr>
+	<td>The <ttc>MSA...</ttc> drop-down has the options shown on the right, where all options execute the MSA program for the set of selected sequences.
+	<p>AA is the translated ORF, CDS is the un-translated ORF, and NT is the entire transcript.
+	<td><a href="img/msaOpt.png"><img src="img/msaOpt.png" alt="" style="border: 1px solid black; width: 120px"></a>
+</table>
+The display is the same as shown above for MSAdb.
+
+<table style="width: 100%"><tr><td style="text-align: left">
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+	<!---- END BODY -->
+	</td></tr>
+	<tr><td style="background-color: #DDDDDD; text-align: center; padding: 0; font-family: Verdana, Arial; font-size: 12px;">
+                        Email Comments To: <a href="mailto:tcw@agcol.arizona.edu">tcw@agcol.arizona.edu</a>
+
+</td></tr>
+</table>
+</body>
+</html>

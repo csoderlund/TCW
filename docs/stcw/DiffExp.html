@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>TCW runDE</title>
+<style>
+	a:link {text-decoration: none;color:#6666CC;}
+	a.current {font-family:verdana; font-size:12px; color:white; text-decoration: none;}
+	a.white {font-family:verdana; font-size:12px; color:white; text-decoration: underline;}
+	a.ext {font-weight: bold;}
+	mark.white {font-family:verdana; font-size:12px; color:white;background:none;}
+	ttp  {font-family: 'Lucida Console', monospace; font-size: 16px; font-weight: 400; font-variant: small-caps;}
+	ttl  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 600; color: DarkSlateGrey;}
+	ttc  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 700; color: DarkSlateGrey;}
+	.top {vertical-align: top;}
+	.hang  {margin-left:15px; text-indent:-15px; margin-top:5px;}
+	.tx    {border: 0px; padding: 5px; border-spacing: 5px; }
+	.tx td,th {border: 0px; padding: 5px; border-spacing: 5px}
+	.ty    {border: 1px  solid black; border-spacing: 0px;  border-collapse: collapse;}
+	.ty td, th {border: 1px  solid black; padding: 3px; }
+	tt {font-size:13px}
+	pre {font-size:13px}
+	body {font-family:  Verdana, Arial, Helvetica, sans-serif;  font-size: 14px; }
+</style>
+</head>
+
+<body>
+<a id="top"></a>
+<table style="width: 800px; border: 2px solid #999999; padding: 0; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
+	<tr><td>
+		<table style="width: 100%; border: 0px; padding: 0;  border-collapse:collapse;">
+			<tr>
+				<td style="text-align: left; vertical-align: top; padding: 0">
+					<a href="http://www.agcol.arizona.edu">
+						<img src="../img/agcol_logo.gif" alt="AGCoL" style="width: 180px; border:1px solid black"></a>
+				</td>
+				<td style="padding-bottom:5px; padding-left:40px; text-align: left;  font-family: Verdana, Arial;  font-weight: bold;color:MidnightBlue">
+					<font style="font-size: 20px;font-variant:small-caps;">runDE</font> -
+					<font style="font-size: 15px;">Differential Expression Guide</font>
+				</td>
+
+				<td style="text-align: right; vertical-align: top; padding: 0">
+					<a href="http://www.arizona.edu">
+						<img src="../img/UA.gif" alt="UA" title="University of Arizona"  style="width: 40px; border:1px solid black"></a>
+					<br>
+					<a href="http://www.bio5.org">
+						<img src="../img/bio5.gif" alt="BIO5" title="BIO5"  style="width: 40px; border:1px solid black"></a>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" style="text-align: left; vertical-align: top; padding: 0">
+				<table style="width: 100%; padding: 0;  border-spacing:0; border-collapse:collapse;">
+					<tr>
+						<td style="background-color: #666666; padding-bottom:4px;">
+						<a href="https://csoderlund.github.io/TCW" class="white">TCW Home</a> <mark class="white">|</mark>
+						<a href="https://github.com/csoderlund/TCW/releases" class="white">Download</a> <mark class="white">|</mark>
+						<a href="../Docs.html" class="white">Docs</a> <mark class="white">|</mark>
+						<a href="../tour" class="white">Tour</a>
+					</tr>
+				</table>
+				</td>
+			</tr>
+		</table>
+	</td></tr>
+
+	<tr><td style='vertical-align: top; text-align: left; padding:15px;'>
+	<!---- START BODY -->
+
+<ttp>RunDE</ttp> computes differential expression (DE) between conditions for an existing singleTCW database,
+as follows:
+<ol>
+<li>DE per sequence: R-scripts for <ttp>EdgeR</ttp>, <ttp>DESeq2</ttp>.
+<ul>
+<li>It is <i>important</i> that you study the documentation for the respective DE method to determine the
+best approach for your data. You may either use one of the existing scripts,
+customize an existing script, or create a new one.
+<li>The <a href="#DEscripts">R-scripts for DE</a> sections explains how <ttp>runDE</ttp> writes the data to R variables,
+executes the R-script, then reads the results into sTCWdb.
+</ul>
+
+<li>GO enhancement: R-script for <ttp>GOseq</ttp>.
+<ul>
+<li>Same comments above. See <a href="#GOscripts">R-scripts for GO</a>.
+</ul>
+</ol>
+This document uses the "<tt>demoTra</tt>" project as an example. The
+<a href="UserGuide.html" class="ext" target="_blank">User Guide</a> explains how to built it.
+
+<p><b>Contents:</b>
+
+<ol type="1">
+    <li><a href="#install">Installing R and packages</a>
+    <li><a href="#demo">Running the demo</a> - <font color=green>Highly recommended to do this first</font>
+    	<ul>
+		<li><a href="#execDE">Execute DE output</a>
+		<li><a href="#execGO">Execute GO output</a>
+		<li><a href="#view">View Results</a>
+		</ul>
+    <li><a href="#libDE">DE between conditions</a>
+	<ol type="A">
+	<li><a href="#methods">Methods and Options</a>
+		<ul>
+		<li><a href="#methods">R-script</a>
+		<li><a href="#filter">Pre-filtering</a>
+		<li><a href="#disp">Fixed dispersion</a>
+		</ul>
+	<li><a href="#exec">Execute</a>
+		<ul>
+		<li><a href="#all">All Pairs for Group 1</a>
+		<li><a href="#groups">Group 1 - Group 2</a>
+		<li><a href="#file">All Pairs from File</a>
+		<li><a href="#pfile">P-values from File</a>
+		</ul>
+	</ol>
+    <li><a href="#go">GO enhancement</a>
+
+    <li><a href="#rm">Remove</a>
+
+    <li><a href="#Rscripts">R-scripts</a>
+     <ul>
+     <li><a href="#DEscripts">R-scripts for DE</a>
+    <li><a href="#GOscripts">R-scripts for GO</a>
+    <li><a href="#fname">Naming R-scripts</a>
+    </ul>
+    <li><a href="#Rperms">R directory permissions</a>
+</ol>
+
+<a id="install"></a>
+<h2>1. Installing R and packages</h2>
+
+<h4>Installing R</h4>
+<ul>
+<li>See <a href="https://www.r-project.org" class="ext" target="_blank">R Project</a> for the latest instructions on installing R.
+<li>See <a href="../Mac-OSX.html" class="ext" target="_blank">MacOS</a> for installation that worked on MacOS 10.15.
+<li>See <a href="#Rperms">R directory permissions</a> for some permission suggestions.
+</ul>
+
+<h4>Installing rJava and R packages</h4>
+<ul>
+<li>See <a href="../Install.html#R" class="ext" target="_blank">rJava and R packages</a>.
+</ul>
+
+<a id="demo"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>2. Example: demoTra</h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+From the command line, type:
+	<pre>
+    >runDE tra
+	</pre>
+	Or, if you type  <ttp>runDE</ttp> with no arguments, the sTCW graphical chooser will appear
+	with all sTCW databases listed; select the <tt>demoTra</tt> database.
+	Either way, this brings up the <ttp>runDE</ttp> interface shown below.
+
+<table class="tx">
+<tr>
+	<td class="top" >
+	Define a pairwise comparison by selecting "Stem" for <ttl>Group 1</ttl> and "Root" for <ttl>Group 2</ttl>, as shown.
+	<p>
+	Check the box <ttl>Save results in p-value column</ttl>; the text box will display the column name "StRo", which can be changed.
+	<p>
+	Assuming you have installed <ttp>edgeR</ttp>, leave the
+	<ttl>Differential Expression R-script</ttl> as <ttl>edgeRglm.R</ttl> .
+	<p>
+	Execute <ttc>Group 1 - Group 2</ttc>. See <a href="#execDE">Execute DE</a> for the output.
+
+	<p>The <ttl>GO enrichment R-script</ttl> will be <ttc>goSeqBH.R</ttc> by default, which
+	performs BH multiple hypothesis testing correction. However,
+	this results in 0 p-value&lt;0.05 for the demo,
+	hence, <i>for the demo only</i>, change this to <ttc>goSeqNoFDR.R</ttc>. Then select
+	<ttc>Execute</ttc>. See <a href="#execGO">Execute GO output</a>.
+
+</td>
+	<td class="top">
+		<a href="img/DErun.png"><img src="img/DErun.png" alt="" style="border: 1px solid black; width: 480px"></a>
+	</td>
+</tr>
+</table>
+
+<a id="execDE"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Execute DE output</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<pre>
+> ****************************************************************
+******** Start DE execution for column: StRo *********
+****************************************************************
+Replicates:
+      5 Stem
+      5 Root
+Collecting count data (may take several minutes)
+Using CPM filter > 1 for >= 2
+      1 filtered sequences
+Assigning R variables
+   gc: GC values of sequences
+   rowNames: sequences (row) names
+   grpNames: group (column) names
+   repNames: replicate names
+   counts: counts of sequences
+   countData &lt;- array(counts,dim=c(210,10))
+   rm(counts)
+   rownames(countData) &lt;- rowNames
+   nGroup1 &lt;- 5
+   nGroup2 &lt;- 5
+
+Start R-script
+   source('R-scripts/edgeRglm.R')
+Loading required package: limma
+Using traditional glm (quasi-likelihood F-tests)
+   results
+   rowNames
+R-script done
+
+Number of DE results:
+   &lt;1e-5 &lt;1e-4 &lt;0.001 &lt;0.01 &lt;0.05
+       6    17    32    65    97
+
+Saving 210 scores for StRo
+   Adding column to database...
+                            .
+Finished DE execution for StRo             0m:0s  (8Mb)
+Complete all Group1-Group2 for tra
+The console is in R, you may run R commands -- q() or Cntl-C when done, or perform another Execute.
+</pre>
+<p>The R console remains open and you can now manually explore the data using R, if desired. However, it easiest to explore it be
+selecting "Close" on <ttp>runDE</ttp>, which closed the java program but not R. Then do the following:
+<pre>
+   >q()
+   Save workspace image? [y/n/c]: y
+   R
+</pre>
+This saves all variables written by <ttp>runDE</ttp> and the scripts (in this case <ttp>edgeRglm.R</ttp>). By restarting R, you can now
+explore the data, e.g.
+<pre>
+   > library(edgeR)
+   > plotBCV(y)
+   > plotMDS(y, labels=grpNames)
+</pre>
+
+<a id="execGO"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Execute GO output</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<pre>
+Trace output to stderr and Log file (append): projects/DElogs/tra.log   Size: 11.0kb
+****************************************************************
+******** 1/1. GO enrichment for column: RoOl *********
+****************************************************************
+Assigning R variables
+  6,651 Numbers GOs
+    208 Sequences with GOs from 211 (98.6%)
+   seqNames: sequence names
+   seqLens:  sequence lengths
+   nSeqs &lt;- 211
+   seqDEs: DE binary vector (110 p-value &lt; 0.05)
+   names(seqDEs) &lt;- seqNames
+   seqGOs &lt;- vector("list",nSeqs)
+   For all n: seqGOs[[n]] &lt;- c(gonum list)
+   names( seqGOs) =  seqNames                       ...
+
+Start R-script
+   source('R-scripts/goSeqNoFDR.R')
+Using manually entered categories.
+Calculating the p-values...
+   oResults
+   goNums
+R-script done
+
+Saving 6,651 values to database
+    172 GO p-values &lt; 0.05
+Finished GO enrichment for RoOl                                          0m:1s
+Summary:
+   ColName       #DEseq (%)   DEseq%GO   DEavgLen   DEstdLen     avgPWF     stdPWF     #&lt;0.05
+      RoOl      110 (52.9%)      82.3%    1073.89     679.84   0.528607   0.073576        172
+Complete GO enrichment for tra
+The console is in R, you may run R commands -- q() or Cntl-C when done, or perform another Execute.
+</pre>
+
+<p>The R console remains open and you can now manually explore the data using R, if desired.
+However, it easiest to explore it be selecting <ttc>Close</ttc> on <ttp>runDE</ttp>, which closed the java program but not R.
+Then do the following:
+<pre>
+   >q()
+   Save workspace image? [y/n/c]: y
+   R
+</pre>
+This saves all variables written by runDE and the script. By restarting R, you can now explore the data for the
+last enrichment computation, e.g.
+<pre>
+   > library(goseq)
+   > plotPWF(pwf)
+</pre>
+<h4>GO output summary</h4>
+At the end of execution, a summary will be printed to the terminal and log file. For example, if
+all enrichment p-values are computed for <tt>demoTra</tt>, the following will be output:
+<pre>
+Summary:
+   ColName       #DEseq (%)   DEseq%GO   DEavgLen   DEstdLen     avgPWF     stdPWF     #&lt;0.05
+      StRo       97 (46.6%)      80.7%    1075.12     703.22   0.464116   0.000063        311
+      StOl      100 (48.1%)      79.5%     991.49     595.44   0.480768   0.065060         48
+      RoOl      110 (52.9%)      82.3%    1073.89     679.84   0.528607   0.073576        172
+</pre>
+<table class="ty" style="font-size: 13px">
+<tr><td>ColName</td><td>The DE column used as input for the GO enrichment.
+<tr><td style="white-space: nowrap; vertical-align: text-top;">#DEseq (%)</td><td>The number of DE sequences for the DE column, where a sequence is DE based on the value
+supplied (<ttl>Top</ttl> or <ttl>p-value</ttl>).
+<tr><td>DEseq%GO</td><td>The percent of unique direct or inherited GOs for the set of DE sequences. Due to inheritance,
+this tends to be a high percentage.
+<tr><td>DEavgLen</td><td>The average length of the DE sequences.
+<tr><td>DEstdLen</td><td>The standard deviation of the length of the DE sequences.
+<tr><td>avgPWF</td><td>The average of the PWF (<u>P</u>robability <u>W</u>eighting <u>F</u>unction).
+<tr><td>stdPWF</td><td>The standard deviation of the PWF.
+<tr><td>#&lt;0.05</td><td>The number of GOs that have a enrichment p-value &lt;0.05.
+</table>
+Note the low <tt>stdPWF</tt> for <ttl>StRo</ttl> indicating the values are very close;
+the <ttp>plotPWF</ttp> for it is non-existent. This may be too small of a sample size.
+
+
+<a id="view"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>View Results</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<h4>View DE Results</h4>
+<table class="tx">
+<tr>
+	<td>
+	To view the resulting p-values, run '<tt>viewSingleTCW tra</tt>' from the command line,
+	and click <ttc>&gt;&gt; Columns</ttc>. The column options has a section
+	<tt>Differential Expression</tt> with the DE columns listed, e.g. the DE columns for
+	<tt>demoTra</tt> are shown on the right. There is also
+	a section for <tt>Conditions</tt>, which has the "Stem", "Root, and "Oleaf" column options.
+	Select the desired columns (e.g. "Stem", "Root", "StRo"); you may then select a filter
+	(e.g. all sequences that have an absolute p-value &lt; 0.05).
+
+	Note in the below figure that if Stem &lt; Root, the p-value StRo is negative, else it is positive.
+	<td>
+		<ttp>viewSingleTCW</ttp> DE section with all pairs computed.
+		<a href="img/DEcolumn.png"><img src="img/DEcolumn.png" alt="" style="border: 1px solid black; width: 250px;"></a>
+</table>
+
+
+<br><a href="./img/DEtable.png"><img src="./img/DEtable.png" alt="" style="border: 1px solid black; width: 700px;"></a>
+
+<br>The highlighting and significant digits can be changed by the
+<a href="../tour/viewSingle/decimal.html" class=ext target="_blank">Decimal Display</a> panel.
+
+
+<h4>View GO Enhancement Results</h4>
+<a href="img/GOtable.png"><img src="img/GOtable.png" alt="" style="border: 1px solid black; width: 700px;"></a>
+
+<!--  ========= DE  ==============   -->
+<a id="libDE"></a>
+<h2>3. DE between conditions</h2>
+
+<a id="methods"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Methods & Options</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<a id="script1"></a>
+<h4>R-script</h4>
+The default R-script is <ttc>edgeR.R</ttc>, however, there are other scripts in the <tt>R-script</tt> directory, or the
+user can supply there own (see <a href="#DEscripts">R-script for DE</a>).
+
+<a id="filter"></a>
+<h4>Pre-filter</h4>
+This example uses a database with 48k sequences and 5 replicates for root and stem.
+The three filtering options were run with defaults (table on lower left)
+before input to <ttp>edgeR</ttp> (results in figure on lower right).
+The first option filtered 7,333 sequences and the second option filtered 1,290;
+with <ttp>edgeR</ttp>, the number of analyzed sequences effects the resulting DE value.
+
+<table>
+<tr>
+	<td style="width: 45%; vertical-align: top;">
+		<table class="ty">
+			<tr><td><i>Filter</i><td><i>Description</i><td><i>Column</i><sup>1</sup>
+			</tr>
+			<tr><td class="nw">CPM<sup>2</sup> >=[n] for >[m]
+				<td>Filter all sequences that do not have more than m replicates with CPM >= n (used m=2 and n=1)
+				<td>RoSt
+			</tr>
+			<tr><td>Count >[n]
+				<td>Filter all sequences that do not have any replicates with a count &gt; n (used n=10)
+				<td>RoSt1
+			</tr>
+			<tr><td>None<td> No filtering <td>RoSt2
+			</tr>
+		</table>
+		<small>
+		<sup>1</sup> Column in table on right.
+		<br><sup>2</sup> CPM (Counts per million) = (count/library size)*1M.
+		</small>
+	<td style="vertical-align: top; padding-left:10px;">
+		<a href="img/DEfilter.png"><img src="img/DEfilter.png" alt="" style="width:450px; border: 1px solid black; "></a>
+		<small>
+		<br>The DE value (RoSt) is set to negative if Root&lt;Stem.
+		<br>The columns prefixed with '#' are the counts, which are used by the filters.
+		<br>The columns with no prefix, Root and Stem, are the TPM values.
+		</small>
+</table>
+
+In the figure on the right:
+<ol>
+	<li>DE value 3.00: the filtered sequences.
+	<li>DE value 2.00: assigned an NA from the DE computation.
+</ol>
+
+<p>
+To view the first 50 filtered sequences that do not have 'all' zero count values,
+execute <tt>runDE</tt> with the ID or database name and a -v,
+<br>e.g. <tt>runDE OlR -v</tt>.
+<p>Using CPM filter > 1 for >= 2, the following shows the first few filtered sequences:
+<pre>
+Rep Names       Root1    Root2    Root3    Root4    Root5    Stem1    Stem2    Stem3    Stem4    Stem5
+Lib Sizes    25267201 26691329 20806376 24815333 29748103 36131457 25997359 21874134 25691566 31637621
+SeqID                                             Counts : CpM
+OlR_000003       41   2  16   8   8   7   7   7   4   6  : 1.6 0.1 0.8 0.3 0.3 0.2 0.3 0.3 0.2 0.2
+OlR_000016       23   5  37  21  17  26  16  12  13  23  : 0.9 0.2 1.8 0.8 0.6 0.7 0.6 0.5 0.5 0.7
+OlR_000053       17  12  10  26  18  30  12  15  25  27  : 0.7 0.4 0.5 1.0 0.6 0.8 0.5 0.7 1.0 0.9
+OlR_000063       18   4  21  15  10  24  20  19  24  26  : 0.7 0.1 1.0 0.6 0.3 0.7 0.8 0.9 0.9 0.8
+OlR_000066        8   3   1   0   0  20  15  13  34  28  : 0.3 0.1 0.0 0.0 0.0 0.6 0.6 0.6 1.3 0.9
+OlR_000083       11  12  13  22  12  11  15   2   3   6  : 0.4 0.4 0.6 0.9 0.4 0.3 0.6 0.1 0.1 0.2
+OlR_000100       14   6  21  15  12   7  10   8   2   8  : 0.6 0.2 1.0 0.6 0.4 0.2 0.4 0.4 0.1 0.3
+OlR_000162       11  10   7  17   5   8  15   7  18  10  : 0.4 0.4 0.3 0.7 0.2 0.2 0.6 0.3 0.7 0.3
+OlR_000181       25   1  24  10   7   6  13   3   4   7  : 1.0 0.0 1.2 0.4 0.2 0.2 0.5 0.1 0.2 0.2
+</pre>
+
+Using Count > 10, the following shows the first few filtered sequences.
+<pre>
+SeqID           Root1 Root2 Root3 Root4 Root5 Stem1 Stem2 Stem3 Stem4 Stem5
+OlR_000238        4   1   4   1   4   0   0   0   0   0
+OlR_000264        8   2   5   2   7   1   0   0   0   1
+OlR_000489        0   0   3   0   2   2   1   2   0   1
+OlR_000519        0   0   2   0   0   0   0   0   0   0
+OlR_000625        5   0   3   2   1   0   1   1   0   1
+OlR_000642        7   3   6   4   9   5   4   1   9   8
+</pre>
+
+
+<a id="disp"></a>
+<h4>Fixed dispersion</h4>
+If there are not biological replicates, then it is necessary to set the dispersion. If it is not set, TCW will use 0.1 by default.
+
+<a id="exec"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Execute</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+The most meaningful DE comparison is between exactly two conditions, as illustrated in the example above.
+Groups of more than one condition may also be selected, however
+the conditions in each group will be treated as replicates, leading (probably) to an overestimation
+of biological variability and underestimation of DE.
+<p>
+If multi-condition testing is desired, e.g. to find sequences reduced in condition A compared to
+any or all of conditions B,C,D, then the recommended process is to compute the individual
+pair DEs A-B, A-C, A-D, and then use filter options in <ttp>viewSingleTCW</ttp>
+to perform the screen.
+
+<p>There are four options to add DE values to the sTCW database, as explained in the following four sections.
+<p><i>The DE p-value columns will be displayed in <ttp>viewSingleTCW</ttp> in the order created.</i>
+<a id="groups"></a>
+
+<a id="all"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h4>All Pairs for Group 1</h4>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<ul>
+	<li>Only check conditions in Group 1.
+	<li>Results will be saved in the database with auto-generated column names.
+	<li>Execute: Each condition selected in group 1 will be pairwise compared; any selections
+	in Group 2 are ignored.
+</ul>
+For example, if all three conditions (Stem, Root, Oleaf) were selected, then it would
+compute:
+<pre>
+   Stem  Root   StRo
+   Stem  Oleaf  StOl
+   Root  Oleaf  RoOl
+</pre>
+where the last column is the generated column name.
+
+<h4>Group 1 - Group 2</h4>
+<ul>
+	<li>Select at least one condition from each group.
+	<li>If you want to store the results in the database, check <ttl>Save results in P-value column</ttl>.
+	If the groups have been selected, a column name will be auto-generated which you can change.
+	When you change the groups for a subsequent execution, uncheck-then-check the column box
+	to auto-generated a name for the new groups.
+	<li>Execute: The condition(s) in Group 1 will be compared with the condition(s) in group 2.
+</ul>
+
+<a id="file"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h4>All Pairs from File</h4>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<ul>
+	<li>Any checked conditions in <ttl>Group 1</ttl> and <ttl>Group 2</ttl> are ignored; the conditions to
+	compare are specified in the file.
+	<li>Results will be saved in the database with the provided column names.
+	<li>Execute: All pairs from the file will be compared with the selected method
+	and options.
+</ul>
+
+<i>File format:</i> Each line has 3 columns which represent Group 1, Group 2 and the column name to use, respectively.
+For example:
+<pre>
+   Root     Stem  RoSt
+   Root     Oleaf RoOl
+   Stem     Oleaf StmLea
+   Root:Stem Oleaf RoSt_Ol
+</pre>
+The last row shows how to select two or more from Group 1; no spaces are allowed between the ":".
+Group 2 can only have one condition.
+<p>
+Keep the column names short but meaningful. A file similar to the above is in the <tt>projects/demoTra</tt> directory,
+filename <tt>traDE.tsv</tt> to allow user to try this option.
+
+<a id="pfile"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h4>P-values from File</h4>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+The first line defines the two groups and the p-value column name,
+using the same format as the "Get Pairs from File". All remaining lines have a sequence name followed by the p-value. For example,
+<pre>
+   #Example p-value file
+   Root Stem RoSt
+   tra_001	0.14
+   tra_002	0.14
+   tra_003	0.65
+</pre>
+The p-values are read as absolute values since runDE makes values negative if Cond1&lt;Cont2.
+
+<!-- ========== GO ==================== -->
+<a id="go"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>4. GO enrichment (over-represented categories)</h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+If GO annotations are loaded (see <a href="UserGuide.html#anno" class="ext" target="_blank">User Guide</a>), you can
+compute p-values for enrichment of DE in GO categories (terms/IDs).
+<ul>
+<li><ttl>R-script</ttl>: Use the default <ttp>goSeqBH.R</ttp> or supply your own.
+<li><ttl>P-value columns</ttl>: If one or more DE p-values have been added to the database,
+the &lt;---&gt; box will say <ttl>All p-values</ttl>;
+this can be changed to compute GO enrichment for just one p-value column.
+<li><ttl>P-value cutoff</ttl>: A <ttl>p-value</ttl> of 0.05 is the default; this applies to the DE p-value so that
+all sequences with a p-value&lt;0.05 will be considered DE (which assumes FDR correction was applied).
+Since the DE p-values still contain considerable
+uncertainty as absolute measures of probability, there is an option to defined DE
+in terms of ranking, i.e., top 10% (the ranking is ordered by the p-values).
+</ul>
+
+<p>
+The result is a p-value column for the GOs, having
+the same names as the corresponding sequence DE columns, accessible through the <ttc>Basic Filters GO Annotation</ttc> function of
+<ttp>viewSingleTCW</ttp>.
+
+
+<a id="rm"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>5. Remove</h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+When a DE p-value column is removed, the corresponding GO p-value column will be removed.
+Removing a GO p-value column does not effect the corresponding DE column.
+In both cases, either all columns can be removed or a selected column.
+
+<!-- ============= R-scripts ============== -->
+<a id="Rscripts"></a>
+<h2>6. R-scripts</h2>
+
+<a id="DEscripts"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>R-scripts for DE</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+When the <b>Execute</b> is selected, TCW performs the following:
+<ol>
+<li>Writes the necessary information to the R environment based on the options selected.
+<li>Runs the R-script using the <tt>source</tt> command.
+<li>Reads the <u><tt>results</tt></u> variable from the R environment, which should contain the p-values.
+</ol>
+TCW writes the following variables to the R environment (the following assignments are from the above demo example):
+<pre>
+   > gc: GC values of sequences
+     rowNames: sequences (row) names
+     grpNames: group (column) names
+     repNames: replicate names
+     counts: counts of sequences
+     countData &lt;- array(counts,dim=c(210,10))
+     rm(counts)
+     rownames(countData) &lt;- rowNames
+     nGroup1 &lt;- 5
+     nGroup2 &lt;- 5
+</pre>
+The variables displayed with a ":" after them are assigned with the <tt>assign</tt> function, whereas the others are the exact assignment.
+The most important variables are <tt>countData</tt> and <tt>grpNames</tt>, e.g.
+<pre>
+   > head(countData)
+             [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
+     tra_001 1017  594 1222 1209 1315  378 1002 1649  826  1195
+     tra_002  272  239  431  400  368  101  206  151  109   185
+     tra_003 3830 5185 4847 4857 5451 1859 2506 1334 1541  2307
+     tra_004 1707 1088 2429 2210 2334  529  919 1103  810  1427
+     tra_005  479  369  439  444  565  114  192  151  232   351
+     tra_006 1122  923 1381 1320 1482  632  839  905  670   823
+   > grpNames
+     [1] "Stem" "Stem" "Stem" "Stem" "Stem" "Root" "Root" "Root" "Root" "Root"
+</pre>
+The R-script should put the p-values in the <u><tt>results</tt></u> variable, e.g.
+<pre>
+   > head(results)
+     [1] 1.537634e-07 1.695981e-07 2.478791e-07 2.478791e-07 4.026519e-06
+     [6] 4.600047e-06
+</pre>
+The order should correspond to the input order; if changed, then change the order in <u><tt>rowNames</tt></u> to correspond.
+<p>An example script is:
+<pre>
+   # edgeR glm method unless no replicates
+   library(edgeR)
+   y &lt;- DGEList(counts=countData,group=grpNames)
+   y &lt;- calcNormFactors(y)
+   if (nGroup1==1 &amp;&amp; nGroup2==1) {
+      writeLines("Using classic with fixed dispersion")
+      et &lt;- exactTest(y, dispersion=disp)
+      res &lt;- topTags(et, n=nrow(et), adjust.method="BH")
+   } else {
+      writeLines("Using traditional glm")
+      design &lt;- model.matrix(~grpNames)
+      y &lt;- estimateDisp(y, design)
+      fit &lt;- glmQLFit(y,design)
+      qlf &lt;- glmQLFTest(fit,coef=2)
+      res &lt;- topTags(qlf, n=nrow(qlf), adjust.method="BH")
+   }
+   # Columns are:  logFC    logCPM        F       PValue          FDR
+   results &lt;- res$table$FDR
+   rowNames &lt;- rownames(res)
+</pre>
+
+<a id="GOscripts"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>R-scripts for GO</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+This works like the <a href="#DEscripts">R-scripts for DE</a>, with the variables shown below in the GO enrichment
+example output:
+<pre>
+Assigning R variables
+  6,651 Numbers GOs
+    208 Sequences with GOs from 211 (98.6%)
+   seqNames: sequence names
+   seqLens:  sequence lengths
+   nSeqs &lt;- 211
+   seqDEs: DE binary vector (97 p-value &lt; 0.05)
+   names(seqDEs) &lt;- seqNames
+   seqGOs &lt;- vector("list",nSeqs)
+   For all n: seqGOs[[n]] &lt;- c(gonum list)
+   names( seqGOs) =  seqNames
+</pre>
+The GOs assigned to each sequence are both the direct and indirect.
+<p>
+The p-values to be loaded must be in <u><tt>oResults</tt></u> and
+the associated GO numbers are in <u><tt>goNums</tt></u> (note that TCW removes the "GO:" prefix and just used the number).
+If the R-script file name contains "goseq" (case-insensitive) , it expects the variable <u><tt>pwf</tt></u> (case-sensitive) to exist.
+<p>The following is the <ttp>goSeqBH.R</ttp> script:
+<pre>
+# goSeq with Benjamini and Hochberg FDR
+
+suppressPackageStartupMessages(library(goseq))
+pwf &lt;- nullp(seqDEs,'','',seqLens,FALSE)
+GO.wall &lt;- goseq(pwf,'','',seqGOs)
+goNums  &lt;- GO.wall$category
+oResults &lt;- p.adjust(GO.wall$over_represented_pvalue, method="BH")
+</pre>
+
+<h4>FDR</h4>
+According to the GOseq Manual: "Having performed the GO analysis, you may now wish to
+interpret the results. If you wish to identify categories significantly enriched/unenriched
+below some p-value cutoff, it is necessary to first apply some kind of multiple hypothesis
+testing correction. For example, GO categories over enriched using a .05 FDR cutoff
+[Benjamini and Hochberg, 1995] are:"
+<pre>
+> enriched.GO=GO.wall$category[p.adjust(GO.wall$over_represented_pvalue, + method="BH")&lt;.05]
+</pre>
+Hence, the values loaded into "oResults" for the TCW supplied <tt>goSeqBH.R</tt>:
+<pre>
+oResults &lt;- p.adjust(GO.wall$over_represented_pvalue, method="BH")
+</pre>
+The p.adjust methods are: c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY",  "fdr", "none")
+<p>
+<u>demoTra</u>: The TCW supplied demo result in 0 p-values&lt;0.05.
+In order to view some p-values&lt;0.05 results
+for the demo, use <tt>goSeqNoFDR.R</tt>, which has no multiple testing correction.
+
+<a id="fname"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Naming R-scripts and Overview</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+If you use your own R-script, make sure the name reflects its function. The R-script names are
+shown in the TCW <ttc>Overview</ttc>, as illustrated below:
+<pre>
+   DE (Differential Expression) computation:
+      Column       Method               Conditions
+      StRo         edgeRglm.R           Stem : Root
+      StOl         edgeRglm.R           Stem : Oleaf
+      RoOl         edgeRglm.R           Root : Oleaf
+
+   GO enrichment computation:
+      Column       Method               Cutoff
+      StRo         goSeqNoFDR.R         0.0500
+      StOl         goSeqNoFDR.R         0.0500
+      RoOl         goSeqNoFDR.R         0.0500
+</pre>
+
+<a id="Rperms"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>7. R Directory Permissions</h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+The following was written in 2014, so may be dated.
+
+<p>Unless you plan to run as root (not recommended),
+or will be the only one running <ttp>runDE</ttp>, you will also want to set up R so that one user
+can install packages to be used by all users. Note: you
+do NOT need R to view the DE results with <ttp>viewSingleTCW</ttp>.
+
+<p>When you install an R package, it can go either to a shared location or to a user-specific location.
+Installing to the shared location is better, as others can then use the package, however in the default
+installation of R the shared directories are owned by the root user and their permissions must be
+changed to allow ordinary users to install shared packages. This is done as follows (unless you have
+<tt>sudo</tt> access, you will need an administrator to do this):
+<ol>
+	<li> Run R (by typing "R")
+	<li> In R, use <tt>Sys.getenv("R_HOME")</tt> to find the R installation directory (usually /usr/lib64/R)
+	<li> Exit from R with command "q()"
+	<li> <tt>ls /usr/lib64/R</tt> (or wherever the R_HOME was)
+	<li> The directory listing should have a <tt>library</tt> subdirectory; if not, R is not installed right
+	<li> Change permissions on the <tt>library</tt> directory
+		(and everything under it) such that ordinary users can write to it.
+		Ideally there is an appropriate user group and you can use <tt>chgrp -R &lt;group&gt; library</tt>
+		and <tt>chmod -R g+w library</tt> to give this group write permissions. Otherwise,
+		<tt>chmod -R 777 library</tt> will be necessary.
+</ol>
+
+Also, you can check the <tt>R-devel</tt> installation using <tt>ls &lt;R_HOME&gt;/etc</tt>. There
+should be a file <tt>Renviron</tt> in this <tt>etc</tt> directory; if not, or if <tt>etc</tt> is
+not there, then <tt>R-devel</tt> was not installed.
+
+	<!---- END BODY -->
+
+	</td></tr>
+	<tr><td style="background-color: #DDDDDD; text-align: center; padding: 0; font-family: Verdana, Arial; font-size: 12px;">
+                        Email Comments To: <a href="mailto:tcw@agcol.arizona.edu">tcw@agcol.arizona.edu</a>
+
+</td></tr>
+</table>
+</body>
+</html>

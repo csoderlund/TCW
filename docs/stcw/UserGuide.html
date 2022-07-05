@@ -1,0 +1,907 @@
+<!-- from tcw directory -->
+<!DOCTYPE html>
+<html>
+<head>
+<title>runSingleTCW</title>
+<style>
+	a:link {text-decoration: none;color:#6666CC;}
+	a.white {font-family:verdana; font-size:12px; color:white; text-decoration: underline;}
+	a.ext {font-weight: bold;}
+	a.extp {font-weight: bold; font-variant:small-caps;}
+	mark.green {color:green;background: none;}
+	mark.white {font-family:verdana; font-size:12px; color:white;background:none;}
+	ttp  {font-family: 'Lucida Console', monospace; font-size: 16px; font-weight: 400; font-variant: small-caps;}
+	ttl  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 600; color: DarkSlateGrey;}
+	ttc  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 700; color: DarkSlateGrey;}
+	.top {vertical-align: top;}
+	.tx    {border: 0px; padding: 5px; border-spacing: 5px; }
+	.tx td,th {border: 0px; padding: 5px; border-spacing: 5px}
+	.ty    {border: 1px  solid black; border-spacing: 0px;  border-collapse: collapse;}
+	.ty td, th {border: 1px  solid black; padding: 3px; }
+	tt {font-size:13px}
+	pre {font-size:13px}
+	.lrpad {padding-left:20px; padding-right:20px;}
+	body {font-family:  Verdana, Arial, Helvetica, sans-serif;  font-size: 14px; }
+</style>
+</head>
+
+<body>
+<a id="top"></a>
+<table style="width: 800px; border: 2px solid #999999; padding: 0; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
+	<tr><td>
+		<table style="width: 100%; border: 0px; padding: 0;  border-collapse:collapse;">
+			<tr>
+				<td style="text-align: left; vertical-align: top; padding: 0">
+					<a href="http://www.agcol.arizona.edu">
+						<img src="../img/agcol_logo.gif" alt="AGCoL" style="width: 180px; border:1px solid black"></a>
+				</td>
+				<td style="padding-bottom:5px; padding-left:40px; text-align: left;  font-family: Verdana, Arial;  font-weight: bold;color:MidnightBlue">
+					<font style="font-size: 20px;font-variant:small-caps;">runSingleTCW</font> -
+					<font style="font-size: 15px;">Build Annotated Database Guide</font>
+				</td>
+
+				<td style="text-align: right; vertical-align: top; padding: 0">
+					<a href="http://www.arizona.edu">
+						<img src="../img/UA.gif" alt="UA" title="University of Arizona"  style="width: 40px; border:1px solid black"></a>
+					<br>
+					<a href="http://www.bio5.org">
+						<img src="../img/bio5.gif" alt="BIO5" title="BIO5"  style="width: 40px; border:1px solid black"></a>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" style="text-align: left; vertical-align: top; padding: 0">
+				<table style="width: 100%; padding: 0;  border-spacing:0; border-collapse:collapse;">
+					<tr>
+						<td style="background-color: #666666; padding-bottom:4px;">
+						<a href="https://csoderlund.github.io/TCW" class="white">TCW Home</a> <mark class="white">|</mark>
+						<a href="https://github.com/csoderlund/TCW/releases" class="white">Download</a> <mark class="white">|</mark>
+						<a href="../Docs.html" class="white">Docs</a> <mark class="white">|</mark>
+						<a href="../tour" class="white">Tour</a>
+					</tr>
+				</table>
+				</td>
+			</tr>
+		</table>
+	</td></tr>
+
+	<tr><td style='vertical-align: top; text-align: left; padding:15px;'>
+	<!---- START BODY -->
+
+
+This document covers building a TCW database for a single species. Terminology:
+<ul>
+<li><i>Dataset</i> is one of the following:
+(1) A file of sequences with optional count data from conditions, where the sequences can be nucleotide or amino acid.
+(2) A set of sequences to assemble, with optional quality data.
+<li><i>Conditions</i> may be tissues, treatments, etc that are to be compared, with optional replicates.
+<li><i>AnnoDBs</i> are FASTA files of sequences (nucleotide or amino acid) to compare the dataset sequences
+against for annotation. TCW provides special support for UniProt, but can use any file of sequences (e.g. Genbank nr),
+see <a href=AnnoDBs.html class="extp" target="_blank">runAS</a> for obtaining and formatting the files.
+<li>NT-sTCWdb is a database built with nucleotide sequences. AA-sTCWdb is a database built with amino acid
+sequences.
+</ul>
+
+<a id=contents></a>
+<h2>Contents</h2>
+<ul>
+	<li><a href="#demo">Running the demo</a> -- <font color=green>Highly recommended to do this first</font>
+	<br>&nbsp;
+	<li><a href="#new">Creating a new project</a>
+	<ol>
+		<li><a href="#build">Build Database</a>
+		<ul>
+			<li><a href="#input">Input files</a>
+			<li><a href="#seqdata">Entering sequence dataset</a>
+			<li><a href="#attr">Updating attributes</a>
+
+			<li><a href="#cntdef">Defining count data</a>
+			<ul>
+					<li><a href="#rep">Biological replicates</a>
+					<li><a href="#cntfile">The count file</a>
+			</ul>
+		</ul>
+		<br>
+		<li><a href="#asse">Instantiate (optional Assembly)</a>
+		<br>&nbsp;
+		<li><a href="#anno">Annotation</a>
+		<ul>
+			<li><a href="#dbs">AnnoDBs and UniProt</a>
+				<ul>
+				<li><a href="#opt">Options panel</a>
+				</ul>
+			<li><a href="#go">GO annotation (also InterPro, EC, Pfam, KEGG) </a>
+			<li><a href="#orf">ORF finder</a>
+			<li><a href="#sim">Similar pairs</a>
+			<li><a href="#add">Adding to annotation</a>
+			<li><a href="#loc">Adding remarks and locations</a>
+			<li><a href="#remove">Remove...</a>
+				<li><a href="#trouble">Trouble shooting</a>
+		</ul>
+		<br>
+		<li><a href="#DiffExp">Differential Expression</a>
+	</ol>
+
+	<br>
+	<li><a href="#details">Important details</a>
+	<ul>
+
+		<li><a href="#cfg">Directory structure and configuration files</a>
+		<li><a href="#batch">Batch processing</a>
+	</ul>
+	<br>
+	<li><a href="#view">View/Query (<ttp>viewSingleTCW</ttp>)</a>
+</ul>
+
+<p>
+<a id=demo></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>Running the demo</h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+Before starting the demo, follow steps for <a href="../Install.html" class="ext" target="_blank">Installation</a>.
+Make sure your <tt>HOSTS.cfg</tt> is correct.
+<p>The following three demos are supplied with the package to test  <ttp>runSingleTCW</ttp>:
+	<table class="ty">
+		<tr><th>Demo<th>Description<th>Documentation
+		<tr><td>demoTra<td>Transcripts with counts, locations, remarks<td>This section
+		<tr><td>demoAsm<td>Assemble transcripts and ESTs<td><a href="AssemGuide.html" class="ext" target="_blank">Assembly Guide</a>
+		<tr><td>demoPro<td>Protein sequences with counts<td>Same steps as for demoTra
+	</table>
+
+<p>At the command line, type
+<pre>   ./runSingleTCW</pre>
+
+<table class="tx"><tr><td class="top">
+
+The window shown on the right will be launched.
+Select <tt>demoTra</tt> from the <ttc>Project</ttc> drop-down list.
+
+<p>&rarr;A command button will turn inactive while it is
+		executing, and there will be output to the terminal with any errors, warning and the state of execution.
+<p>&rarr;A command button will be inactive when it is not valid to run, e.g.
+		the <ttc>Instantiate</ttc> command inactive since the datasets have not been loaded.
+
+<td>
+<a id="Fig1"></a>
+<a  href="img/runSingleTCW.png">
+<img src="img/runSingleTCW.png" alt="" style="border: 1px solid black; width: 600px"></a>
+</table>
+
+<a id="step1demo"></a>
+<p>1. Click the <ttc>Step 1. Build Database</ttc> button.
+	<br>This loads the datasets in this section; there is one
+	dataset of transcripts  with count data for three
+	conditions ("Stem","Root","OLeaf"), with five replicates each.
+
+<p>2. Click the <ttc>Step 2. Instantiate</ttc> button.
+	<ul>
+	<li>The <ttc>Skip Assembly</ttc> was checked so the transcripts will simply be loaded, without
+		assembly.
+	<li>The <ttl>Use Sequence Names From File</ttl> is not checked, meaning that the TCW will assign new,
+	sequentially-numbered names prefixed by the <tt>singleTCW ID</tt>.
+	</ul>
+<p>From this point on, you may <ttc>Launch viewSingleTCW</ttc> or select the <ttc>Overview</ttc> button to check status.
+
+<a id="step3demo"></a>
+<p>3. Click the <ttc>Step 3. Annotate</ttc> button.
+<br>This searches against several UniProt partial databases which have been provided as part of the package.
+<p>There may be one or more prompts for you to answer at the
+terminal; <mark class="green">keep an eye on the terminal until it says "Start annotating sequences"</mark>,
+at which point, it will run without any further prompts. For example,
+if the <tt>GO database</tt> has not been built yet (see Step 5), the following will be written to the terminal:
+<pre>
+   +++Warning: GO_tree go_demo is missing; ignoring GO step
+   --Please confirm above parameters. Continue with annotation?  (y/n)?
+</pre>
+Answer 'y' to continue.
+<p><img src="../img/bullet_blue_small.gif" alt="bullet" style="border: 0px; width: 20px">
+<b><i>Log file</i></b>: The output to the terminal and to the file <tt>projects/demoTra/logs/anno.log</tt> will look something like
+<a href=anno.log.html class="ext" target="_blank">this log</a> (this includes the GO annotation).
+
+<p>4. Click the <ttc>Add Remarks or Location</ttc> button (bottom of window), a window will popup (not shown).
+	<ol><li>Select the "..." on the same line as the label <ttc>Location file:</ttc>, select the file "traLocations.txt",
+	then select the button <ttc>Add</ttc> on the same line.
+	<li>Select the "..." on the same line as the label <ttc>Remark file:</ttc>, select the file "traRemarks.txt",
+	then select the button <ttc>Add</ttc> on the same line.
+	</ol>
+
+<p>5. To build the GO database, see <a href="AnnoDBs.html#demo" class="ext" target="_blank">
+	Demo annotation setup</a>. Then execute <ttc>GO Only</ttc>.
+
+<p><mark class="green">Time for adding the GOs</mark>:
+This take longer than the other TCW steps, where it can takes around 2 to 5 minutes for this demo.
+If it takes a lot longer than 4 minutes for this step,
+check your <tt>max_allows_packet</tt> (see <a href="../Trouble.html" class="ext" target="_blank">Trouble shooting</a>).
+
+<p>6. To compute differential expression (DE), install R and the respective packages. From the command line, execute
+<pre>
+   ./runDE tra
+</pre>
+The <a href="DiffExp.html" class="ext" target="_blank">DE Guide</a> describes how to install the necessary
+packages, and how to add DE p-values to the TCW database. If Step 5 has been run, then you can also add
+the p-values for the GO.
+
+<p><img src="../img/bullet_blue_small.gif" alt="bullet" style="border: 0px; width: 20px"><b><i>Overview</i></b>: See <a href="../ov/sDemo.html" class="ext" target="_blank">overview</a> for the final demoTra overview from the above 6 steps.
+
+<a id=demoNonUP></a>
+<p>7. (Optional) Add non-UniProt annoDBs
+<table class="tx">
+<tr><td>
+<ul>
+	<li>Back on the main window, select <ttc>Check All</ttc> then <ttc>UnCheck All</ttc>,
+	which unchecks all current annoDB entries.
+	<li>Select <ttc>Import AnnoDBs</ttc>, then select file <tt>AnnoDBs_other.cfg</tt>.
+	The AnnoDB table will look like the figure below.
+</ul>
+<td>
+  	<a  href="img/anno_other.png">
+		<img src="img/anno_other.png" alt="" style="border: 1px solid black; width: 400px"></a>
+</table>
+<ul>
+	<li>GOs: If you add more UniProt databases, you will want to redo GO.
+	But since none of these annoDBs have GOs, the GO computation does not need to be redone;
+	on the <ttc>Options</ttc> panel, select <ttl>Ignore on Annotate</ttl>
+	(the "<tt>GO: go_demo (Ign)</tt>" text in the image above indicates
+	this has been set).
+	<li>Pairs: if you had previously computed pairs, go to <ttl>Options</ttl> and unselect this option.
+	<li>Select <ttc>Annotate</ttc>.
+</ul>
+On <ttc>Annotate</ttc>, you may either select "Use Defaults" on the
+  		popup, where the default is to add to the existing annotation, or select "Answer", where you will
+  		see at the terminal (enter "a"):
+<pre>
+   ?--Annotation exists in database. Enter [a/d/e]
+    Add to existing annotation [a], Delete annotation [d], Exit [e]: a
+</pre>
+Read <a href="AnnoDBs.html#nr" class="ext" target="_blank">Creating AnnoDBs from other databases</a>
+to see how these were formatted.
+
+<!-----------------  ===== Create new project ===== --------------------->
+<a id=new></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>CREATING A NEW PROJECT</h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<p>Before starting, follow the steps of <a href="../Install.html" class="ext" target="_blank">Installation</a>.
+Make sure your <tt>HOSTS.cfg</tt> is correct.
+<table class="tx">
+<tr><td>To create a new project, press the <ttc>Add Project</ttc> button at the top of the <ttp>runSingleTCW</ttp> interface.
+You will be prompted for a project name; enter a name using letters, numbers, or underscores (no spaces).
+When you select "OK", the following occurs:
+<ol>
+<li>The "name" will be entered for <ttc>singleTCW ID</ttc> and "sTCW_&lt;name&gt;"  will be entered for the <ttc>Database</ttc>.
+<li>The <tt>project/&lt;name&gt;</tt> directory will be created with files <tt>LIB.cfg</tt> and <tt>sTCW.cfg</tt>. These maintain all information you enter.
+</ol>
+
+<td>
+<a href="img/runSingleAddProject.png">
+<img src="img/runSingleAddProject.png" alt="" style="border: 1px solid black; width: 450px"></a>
+<p>
+<a href="img/runSingleAddProject2.png">
+<img src="img/runSingleAddProject2.png"  alt="" style="border: 1px solid black; width: 450px"></a>
+</table>
+For example, if you enter the name "example", the ID will be "example" and the database will be "sTCW_example".
+Shorten the <tt>singleTCW ID</tt>, for example, to "ex" as shown.
+
+<p><u><tt>singleTCW ID</tt></u>: This should be a short descriptive name (2-5 characters, e.g. "ex"). It is used for the
+following:
+<ol><li>This can be used as a command line parameter to <ttp>runDE</ttp> and <ttp>viewSingleTCW</ttp>, e.g. "viewSingleTCW ex".
+<li>If TCW generates the sequence names (if <ttc>Use Sequence Names from File</ttc> is not checked),
+the <tt>singleTCW ID</tt> followed by sequential
+numbers will be used, e.g. ex_00001, ex_00002, etc.
+</ol>
+<p>Instead of using the <ttc>Add Projects</ttc>, you may create a directory under <tt>/projects</tt> and put your sequence files along
+with any other optional files (i.e. quality and count); when you select the project pulldown, you
+will see your project (the project pulldown lists all directories under <tt>/projects</tt>).
+
+<a id=build></a>
+<a id=input></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>Build Database</h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<h3>Input files</h3>
+There are three possible scenarios:
+
+<h4>1. Sequence and count files</h4>
+The typical input is a file of transcripts and associated read counts. The transcript file is a FASTA file,
+where the sequence name must be under 30 characters, using only letters, numbers, and underscores.
+<p>
+The sequence names in the count file must match the sequence names in the sequence file. The count file
+is a tab or space delimited file. The first line of
+the count file is the heading "SeqID" (or any label) followed by the replicate names.
+The replicate names should end in the replicate number, e.g.
+<pre>
+   SeqID	Leaf1	Leaf2	Leaf3	Root1	Root2	Root3
+</pre>
+This defines two conditions with three replicates each. The remaining rows must have the exact same number of
+columns. More information is provided in <a href="#cntdef">Defining count data</a>.
+<p><i>The conditions will be displayed in <ttp>viewSingleTCW</ttp> in the same order as the input.</i>
+
+<h4>2. Sequence and quality files</h4>
+TCW supports assembly of Sanger ESTs, 454 reads, or a mix of these datasets with transcripts. See
+<a href="./AssemGuide.html#names" class="ext" target="_blank">Assembly names</a> for more information on this data.
+
+<h4>3. Multiple sequence files</h4>
+You may enter multiple sequence and condition files, which may or may not be assembled. You must make sure
+that all "Condition" and sequence names are unique.
+
+<a id="seqdata"></a>
+<h3>Entering a sequence dataset</h3>
+
+<p>
+<table class="tx">
+<tr><td>
+
+A TCW project must have at least one sequence dataset, which is a FASTA file of sequences.
+Select <ttc>Add</ttc> beside the <ttc>Sequence Datasets</ttc> and the panel will be replaced with the one
+shown on the lower right.
+<td class="top">
+<a href="img/runSingleSeqTab.png">
+<img  src="img/runSingleSeqTab.png" alt="" style="border: 1px solid black; width: 450px"></a>
+
+<tr><td  class="top">
+<ttc>SeqID</ttc>: Enter the dataset name (a brief identifier) in the first box; it should be a short (3-5 characters) name.
+<i>(This <ttc>SeqID</ttc> is not dependent on the sequence names in the input files)</i>.
+<p>
+<ttc>Sequence File:</ttc> Click the browse button labeled "..." to select the FASTA file of sequences.
+<p>
+Additional information:
+<ul>
+<li><ttc>Count File:</ttc> For already assembled transcripts (e.g. Illumina) or protein sequences, there may be associated count files.
+Adding them is covered below in <a href="#cntdef">Defining count data</a>.
+<br>&nbsp;
+<li><ttc>ATTRIBUTES:</ttc> Enter any additional information
+as desired in this section. This information is <i>very important</i> as it provides a description of the data
+that is stored in the database and shown on the <ttc>Overview</ttc> panel of <ttp>viewSingleTCW</ttp>.
+</ul>
+<td class="top">
+<a href="img/runSingleAddSeq.png">
+<img src="img/runSingleAddSeq.png"  alt="" style="border: 1px solid black; width: 450px"></a>
+</table>
+The following are rarely used anymore:
+<ul>
+<li><ttc>Quality File:</ttc> For Sanger ESTs or 454 data, there may be a quality file (standard Phred quality scores in FASTA format).
+<li><ttc>Sanger ESTs:</ttc> TCW assumes the 5' ESTs have the ".f" suffix and the 3' ESTs have the ".r" suffix. If there
+are different from this, enter the correct ones.
+
+</ul>
+<p>After entering the files and attributes, select <ttc>Keep</ttc>.
+The main panel will reappear with the <tt>SeqID</tt> and <tt>Title</tt> added to
+the <tt>Sequence Datasets</tt> table. Additionally, the information will be written in
+<tt>projects/&lt;name&gt;/LIB.cfg</tt>.
+
+<p>Define all datasets, then select <ttc>Build Database</ttc> to load the data into the database.
+Datasets cannot be added to an existing database.
+<a id=attr></a>
+<h4>Updating attributes</h4>
+The attribute information can be added or changed after the database is created by
+using the <ttc>Edit</ttc> button on the main panel;
+note, the <tt>projects/&lt;name&gt;/LIB.cfg</tt> file has to be accessible to change attributes.
+
+<a id=cntdef></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Defining count data</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+The file format is described below in <a href="#cntfile">The count file</a>.
+<table class="tx">
+<tr><td class="top">
+<ttc>Count File:</ttc> Click the browse button labeled "..." to select the file containing the table of counts
+for the sequences. 	Alternatively, you can build the combined count file from multiple files, as described in
+<a href="#bcf">Build from multiple count files</a>.
+<p>When <ttc>Keep</ttc> is selected at the bottom of this window (not shown), the dataset panel disappears and the main panel returns.
+
+<td class="top">
+<a href="img/runSingleAddSeq2.png">
+<img src="img/runSingleAddSeq2.png" alt="" style="border: 1px solid black; width: 450px"></a>
+
+<tr><td class="top">
+The panel shown on the right is part of the main panel. The
+sequence dataset will be shown in the first table, while the conditions (column headings from the count file)
+will be listed in the second table.
+<p>
+Use <ttc>Define Replicates</ttc> to group replicates, as discussed in the next section.
+After defining the replicates, use <ttc>Edit Attributes</ttc> to add information for the
+conditions, which will be shown on the <ttp>viewSingleTCW</ttp> overview.
+<td class="top">
+<a href="img/runSingleAddSeqKeep.png">
+<img src="img/runSingleAddSeqKeep.png" alt="" style="border: 1px solid black; width: 450px"></a>
+</table>
+
+<a id=rep></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h4>Biological replicates</h4>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<table class="tx">
+	<tr>
+		<td  class="top">
+
+		If you have biological replicates, you now need to click <ttc>Define Replicates</ttc> to define them.
+			This brings up the panel shown on the right (example data from "demoTra").
+		<p>
+			The first column shows the sequence <tt>SeqID</tt>, which you entered when creating the sequence dataset.
+			The second column shows the "Column name from file", which are the column headers
+			in the count file <a href="#cntfile">(see example below)</a>.  The third column
+			shows the "Condition", which groups the replicates into a single condition.
+		<p>
+
+			If the replicates names in the count file are  named with the format
+			"condition name + replicate number" (e.g. Root1),
+			then <ttp>TCW</ttp> can automatically group them correctly.
+
+		</td>
+			<td  class="top">
+				<a href="img/runSingleRep.png">
+				<img src="img/runSingleRep.png" alt="" style="border: 1px solid black; width: 450px"></a>
+			</td>
+		</tr>
+</table>
+			<p>
+			Otherwise, you will need to edit the
+			"Condition" column to map your replicate names to their condition. To edit a "Condition", highlight the
+			row, then click on the appropriate cell (it is a little finicky, you may need to click at the beginning or end or double click...);
+			it will turn white indicating you can edit the cell.
+
+<table class="tx">
+	<tr>
+	<td  class="top">
+		On <ttc>Keep</ttc>, the <tt>Associated Counts</tt> table on the main panel will be updated, showing
+		the correct condition list and number of replicates for each (as shown on the right).
+		In order to add metadata (e.g. title), select a row followed by <ttc>Edit</ttc>.
+	</td>
+		<td class="top">
+			<a href="img/runSingleDataSet.png">
+			<img src="img/runSingleDataSet.png"  alt="" style="border: 1px solid black; width: 450px"></a>
+		</td>
+	</tr>
+</table>
+<p><i>Naming rules:</i>
+	<ol>
+	<li>There must not be any duplicate names between the <ttl>SeqID</ttl> column of the first table and
+	the <ttl>Condition</ttl> of
+	the second table, e.g. there may not be a <ttl>SeqID</ttl> of "Root" in this example.
+	<li>There can be NO duplicate replicate or condition names between Sequence Datasets.
+	</ol>
+
+<a id="cntfile"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h4>The count file</h4>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+The <ttc>Count File</ttc> is a
+tab or space delimited file where the first line contains
+the word "SeqID" (or any label) followed by the condition column headings. If your
+file is comma-delimited, they can be replaced with <tt>sed -i"" 's/,/" "/g' filename</tt>
+<p>
+<ttc>Example Count File:</ttc> The following is the demoTra count file, showing the first 4 transcripts and
+counts for three conditions, where there is 3 conditions(tissues) with 5 replicates each.
+TCW determines the condition names and replicate numbers are from the column headers.
+The sequence names must correspond to those in the sequence file.
+<pre style="font-size: 10px">
+  SeqID    Stem1   Stem2  Stem3  Stem4  Stem5  Root1  Root2  Root3  Root4  Root5  Oleaf1 Oleaf2 Oleaf3 Oleaf4 Oleaf5
+  tZoR_002048  556   572    766    770    777    294    361    291    300    399    264    173    162    407    382
+  tZoR_147465  1172  1965   1009   1110   2245   10     425    593    251    347    1542   880    1648   3043   1024
+  tZoR_108557  51    52     73     41     49     2      131    64     70     108    0      10     5      5      10
+  tZoR_118798  52    51     35     37     33     1      69     138    61     134    8      9      7      21     6
+</pre>
+The count values can have decimal points, but the numbers will be rounded.
+
+<a id=bcf></a>
+<h4>Build from multiple count files</h4>
+It is common to have separate count files for each sample, in which case,
+you can use the <ttc>Build from multiple count files</ttc> to generate the combined
+count file. This explanation will continue using the "demoTra" example.
+
+<p>The easiest way to handle many sample files is to put them in one directory. Name each
+file with the "condition name + replicate number"; TCW parses up to the first "." to determine the condition
+and replicate number (the suffix can be whatever you want).
+
+For example, in the directory <ttc>projects/demoTra/counts</ttc> are the files:
+<pre  style="font-size: 12px">
+   Root1.cnt   Root2.cnt   Root3.cnt   Root4.cnt   Root5.cnt
+   Tip1.cnt    Zone1.cnt
+</pre>
+Note, this is a different set of conditions then shown in the <ttc>Example Count File</ttc> above.
+<p><p>To build the file, select <ttc>Build from multiple count file</ttc> from the <ttc>Add or Edit a Sequence Dataset</ttc> panel.
+<table class="tx">
+<tr><td class="top">
+From the resulting panel, elect <ttc>Add Directory of Files</ttc>, which brings up a file chooser window; select the directory containing
+the files (e.g. "count") and it loads all files from the selected directory, as shown on the right.
+<p>The file prefix (e.g. Root1) is shown in the  "Rep name" column,
+and is used as the column heading in the combined file. Furthermore, the
+replicates for a condition will be grouped together by the text up to the number
+(as shown previously in <a href="#rep">Define biological replicates</a>).
+<p>Select <ttc>Generate File</ttc> to build the file called <tt>Combined_read_counts.csv</tt>. Control will return to
+the Sequence Dataset panel, and this filename will be automatically entered into the "Count File:" entry box.
+</td>
+<td class="top">
+<a href="img/runSingleSample.png"><img src="img/runSingleSample.png" alt="" style="border: 1px solid black; width: 450px"></a>
+</td>
+</tr>
+</table>
+
+<p>If your files are not in one directory, or not named correctly, you will need to add them individually
+using the <ttc>Add Rep File</ttc>. You probably will need to edit the "Rep name" column; to edit the name,
+highlight the row then click the mouse at the right edge of the entry box (if that doesn't work, trying clicking
+at the beginning).
+<p>
+As <a href="#rep">already described</a>, the replicates are grouped by clicking the <ttc>Define Replicates</ttc> button on
+the main window.
+
+<p>
+<a id=asse></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>Instantiation (with optional assembly)</h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<p><ttc>Skip Assembly</ttc>:
+If the input is already assembled transcript sequences, or protein sequences, or gene sequences,
+check this option.
+If the datasets are ESTs, or multiple transcript datasets that you want to assemble together,
+do not select this option and see <a href="./AssemGuide.html"  class="ext" target="_blank">Assembly Guide</a>.
+
+<p>Press <ttc>Instantiate</ttc> to either assemble or finalize the sequences in the database.
+
+<p><ttc>Use Sequence Names from File</ttc>: If the sequences are NOT going to be assembled, then this checkbox is relevant, as follows:
+If you want TCW to name the sequences, do not check this option;
+TCW will rename the sequences using the <ttc>SingleTCW ID</ttc> followed by sequential numbers.
+If you want to use the original names from file, check this option; note the following restrictions:
+		<ul><li>Characters other than letters, numbers, or underscores
+		will be replaced by underscores.
+<li>The names must be under 25 characters. Note that the names supplied by
+		sequencers are often longer than allowed, which will make this fail.
+</ul>
+For instantiation without assembly, this step does the following: (1) the transcripts are loaded, (2) the replicates
+are loaded, and the sum of the replicates for each condition are used to compute the TPM (transcripts per million).
+
+<!------------ Annotation ------------------------>
+
+<a id=anno></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>Annotation</h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+Three types of computation are performed:
+<ol>
+
+    <li>Compares one or more protein and/or nucleotide databases ("annoDBs") to each sequence in the database. If the annoDBs are
+from UniProt, add the associated GO annotations.
+	<li>Compute GC content and ORFs, where the ORF computation uses the functional annotation.
+    <li>Compute pairs of similar sequences within the input set.
+</ol>
+
+<!------------ AnnoDBs and UniProt  -------------------------->
+<a id=dbs></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>AnnoDBs and UniProt</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+The term "AnnoDB" refers to a FASTA file of nucleotide or protein sequences,
+where the sequences input to TCW will be searched against the annoDBs for functional annotation.
+Read <a href=AnnoDBs.html class="ext" target="_blank">Annotation Setup (<ttp>runAS</ttp>)</a> for obtaining UniProt (using <ttp>runAS</ttp>) and other annotation databases.
+For non-UniProt databases, read <a href="AnnoDBs.html#other" class="ext" target="_blank">Creating AnnoDBs from other databases</a> to see how these were formatted.
+Also, see the Demo  <a href="#demoNonUP">Add non-UniProt annoDBs</a>.
+
+<p>The <ttc>Import AnnoDBs</ttc> button (shown below) provides a way to enter all UniProt databases at once.
+If you used <ttp>runAS</ttp> for the annotation setup,
+make sure the last step was to select the <ttc>AnnoDBs.cfg</ttc> button, which creates a file of UniProt databases.
+<table class="tx">
+<tr><td class="top">
+Select <ttc>Import AnnoDBs</ttc>, which pops up a
+file chooser, then select the file <tt>projects/AnnoDBs_UniProt_&lt;date&gt;</tt> (or <tt>sTCW.cfg</tt> of another project);
+all your UniProts will be added at once.
+<td class="top">
+<a href="img/runSingleStep3.png"><img src="img/runSingleStep3.png"  alt="" style="border: 1px solid black; width: 500px"></a>
+</table>
+
+Any additional databases (e.g. Genbank nr) need to
+be added one by one. To add an annotation database,
+press the <ttc>Add</ttc> button next to the AnnoDB table. This brings
+up the panel below.
+<table class="tx">
+<tr><td class="top">
+
+<p><ttc>Taxonomy</ttc>: This does not need to be unique, but the <ttc>Annodb ID</ttc> must be.
+<p><ttc>Annodb ID</ttc> is DBtype+taxonomy. The DBtype is read from the file
+(see <a href="AnnoDBs.html#other" class="ext" target="_blank">Creating AnnoDBs</a>).
+<p>For example, if the DBtype is 'sp' (SwissProt) and the taxonomy is 'plants',
+the <ttc>AnnoDB ID</ttc> will be "SPpla".
+The <ttc>AnnoDB ID</ttc> is
+shown in various tables of <ttp>viewSingleTCW</ttp> to indicate the origin of the hit.
+
+<td  class="top"><a href="img/runSingleEditAnno.png"><img src="img/runSingleEditAnno.png" alt="" style="border: 1px solid black; width: 500px"></a>
+</table>
+
+<p><a href="../img/bullet_blue_small.gif"><img src="../img/bullet_blue_small.gif" alt="bullet" style="border: 0px; width: 20px"></a>
+<ttl>Generate Hit Tabular File</ttl>:
+<p class=lrpad><ttl>Search Program</ttl>: Select <ttp>DIAMOND</ttp> or <ttp>BLAST</ttp>.
+<p class=lrpad><ttl>Parameters</ttl>: Defaults will be provided based on the search program selected,
+which can be changed.
+
+<p><a href="../img/bullet_blue_small.gif"><img src="../img/bullet_blue_small.gif" alt="bullet" style="border: 0px; width: 20px"></a>
+<ttl>Use Existing Hit Tabular File</ttl>:
+<p class=lrpad>You can supply your own hit results file (must be in tabular format).
+You must still provide the annoDB FASTA file as
+it extracts the description and species from it.
+
+
+<!--  ======== Option =================== -->
+<a id=opt></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Options panel</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<table class=tx>
+<tr><td class="top">
+The <ttc>Options</ttc> button below the AnnoDBs table provides additional options, as shown in the panel
+on the right. There are sections for ANNOTATION, ORF FINDER, and SIMILAR PAIRS.
+<p>The second option and part of the third are not available for TCW database created from protein sequences.
+ <td class="top"><a href="img/annoDBoptions.png">
+  <img src="img/annoDBoptions.png" alt="" style="border: 1px solid black; width: 500px"></a>
+</tr>
+</table>
+
+<h4>ANNOTATIONS:</h4>
+<ttl>Best Anno -- SwissProt preference</ttl>: A SwissProt hit will be assigned Best Anno over a non-SwissProt hit
+if its bit-score &gt; 0.7 * highest bit-score.
+
+<p><ttl>Remove {ECO...} from UniProt descripts</ttl>: Most UniProt descriptions have {ECO...} text, e.g.
+<pre>
+<small>
+   &gt;sp|A0A096SRM5|708A6_MAIZE UDP-glycosyltransferase 708A6 {ECO:0000303|PubMed:24045947}
+</small></pre>
+Selecting this option will remove the {ECO..} portion, e.g. remove {ECO:0000303|PubMed:24045947}.
+
+<p><ttl>Prune hits</ttl>: See the Annotation Guide <a href="AnnoGuide.html#prune" class="ext" target="_blank">Prune Hits</a> section
+for a details discussion. The options are:
+
+
+<table class=tx>
+<tr><td class="top"><ttc>None</ttc><td>Keep all hits found using the search parameters provided on the <ttc>Add or Edit AnnoDB</ttc> panel.
+<tr><td class="top"><ttc>Alignment</ttc><td>If all alignment columns (e.g. bit-score, E-value, %similarity, etc)
+are the same between two hits for a sequence, only keep the first.
+<tr><td class="top"><ttc>Description</ttc><td>For each annoDB, if two descriptions are the same
+the best hit will be retained. The descriptions are compared after removing any trailing "{...}" text and using case-insensitive.
+</table>
+
+
+The <ttc>Alignment</ttc> and <ttc>Description</ttc> optionally use the number of GOs per hit to aid in determining the
+best hit to keep. Hence, you will want to enter the <ttl>GO database</ttl> name before running <ttc>Annotate</ttc>.
+
+<a id="go"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h4>GO annotations (GO, KEGG, EC, InterPro, Pfam annotations)</h4>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+See <a href=AnnoDBs.html class="ext" target="_blank">Annotation Setup</a> for creating the GO database.
+
+<table class=tx>
+<tr><td style="white-space: nowrap; vertical-align: text-top;"><ttl>GO Database</ttl>
+<td>Once the GO database is created, it can be selected in this drop-down.
+
+<tr><td style="white-space: nowrap; vertical-align: text-top;"><ttl>GO Slim</ttl>
+<td>Once the GO database is selected, it will display
+the available <ttl>GO Slim</ttl> categories in this drop-down; alternatively, a OBO formatted file may be entered.
+
+<tr><td style="white-space: nowrap; vertical-align: text-top;"><ttl>Ignore on Annotate</ttl>
+<td>If you do not want <ttc>Annotate</ttc> to perform the GO annotation, select <ttl>Ignore on Annotate</ttl>.
+The GO annotation can later be added with the <ttc>GO Only</ttc> button.
+</table>
+
+<a id="orf"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h4>ORF FINDER:</h4>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+See the <a href=ORF.html class="ext" target="_blank">ORF</a> document for a description of the ORF finding options and
+details on how it works.
+
+<p>GC content and ORF finding is always performed when <ttc>Annotate</ttc> is performed.
+The ORF finder uses the annoDB hits to aid in determining the best open reading frame.
+
+<a id="sim"></a>
+<h4>SIMILAR PAIRS:</h4>
+All three (<ttp>BlastN</ttp>, <ttp>Tblastx</ttp>, <ttp>Blastp</ttp>) can be selected, in which case, all three
+searches are performed; or, one or two options can be selected. Only the <ttp>Blastp</ttp> option works for AA-STCWdbs.
+The pairs in the output file(s) are read,
+and the first N pairs are analyzed using dynamic programming and the results entered into
+the database. Their alignments can be viewed in <ttp>viewSingleTCW</ttp>.
+
+<p>More information is provided in the <font color=red>Help</font> page of the <ttc>Options</ttc> panel.
+
+<a id=add></a>
+<h3>Adding to annotation</h3>
+Additional annotation can be added at a later time;
+see <a href="AnnoGuide.html#update" class="ext" target="_blank">Update and Redo annotation</a>
+in the Annotate Details Guide.
+
+<a id="loc"></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>Adding remarks and locations</h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<table>
+<tr><td class=top>
+Select the <ttc>Add Remarks or Locations</ttc> button at the
+bottom of the <ttp>runSingleTCW</ttp> panel; the panel on the right will replace the main panel.
+Details of each function is provided below.
+<p>Both the locations and remarks can be search and viewed in <ttp>viewSingleTCW</ttp>. Remarks
+are a very good way to add additional information to the sequences.
+<td>
+<a href="img/addRmkLoc.png"><img src="img/addRmkLoc.png" alt="" style="border: 1px solid black; width: 450px"></a>
+</table>
+
+<h4>Add Location File</h4>
+Select the "..." on the <ttl>Location File</ttl> row, select a location file, and press <ttc>Add</ttc> on the same row.
+
+<p>The file is a set of rows where the first word of each row is the sequence name and the rest of the row is the format:
+<pre>
+   group:start-end(strand), e.g. SC_1:392-496(-)
+</pre>
+The "group" would be the supercontig, scaffold, chromosome, linkage, etc.
+If TCW can extract numbers/X/Y from the end of the group (e.g. chr1, chrX),
+it adds a column containing just the "Group" number that can be sorted numerically in <ttp>viewSingleTCW</ttp>.
+The sequence ID must match a sequence name in the database,
+		so you probably will want to "Instantiate" the sequences using "Use Sequence Names from File".
+<p>
+A script is available, <tt>scripts/extractCodingLoc.pl</tt>, to generate the transcript sequence file from a
+genome sequence and GFF3 file. It also generates the location file in the format needed by TCW. It only works with
+a subset of the GFF3 files, so probably needs to be modified for your GFF3 or GTF file. It uses BioPerl.
+
+<p>The group name, start, end and strand are columns in the TCW database that can be viewed in <ttp>viewSingleTCW</ttp>
+by selecting the "Columns" tab on the left, then checking the columns under "General".
+
+
+<h4>Add Remark File</h4>
+Select the "..." on the <ttl>Remark File</ttl> row, select the file of remarks,
+and press <ttc>Add</ttc> on the same row.
+<p>The file is a set of rows where the first word of each row is the sequence name and the rest of the row is the Remark.
+<ul>
+<li>Single and double quotes will be changed to spaces.
+<li>Semi-colon will be changed to a colon.
+</ul>
+<p>
+In <ttp>viewSingleTCW</ttp>, the <ttl>User Remark</ttl> can be viewed by selecting the <ttc>Columns</ttc> tab,
+then checking the <ttl>User Remark</ttl> column under <ttl>General</ttl>.
+The remark can also be search on in the <ttl>Basic Filters Sequence</ttl>; this is a great way to add
+additional information about your sequences.
+<mark class=green><i>If you make the remarks "keyword=value", you can then search on the keyword
+		to get a specific group of sequences.</i></mark>
+
+<h4>Remove Remarks</h4>
+Selecting this button will remove all user remarks. There are also "TCW Remarks" that are added during ORF finding; these
+are not removed.
+
+<a id=remove></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Remove...</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+
+<table style="width: 500px">
+<tr><td class="top">The image on the right shows what can be removed. The checked
+items are useful for redoing parts of the annotation, as discussed in Annotate Guide
+<a href="AnnoGuide.html#update" class="ext" target="_blank">Update and Redo annotation</a> section.
+<td><a href="img/remove.png"><img src="img/remove.png" alt="" style="border: 1px solid black; width: 200px"></a>
+</table>
+
+<a id=trouble></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Trouble shooting</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+If errors occur, a message is written to the terminal
+and the Java stack-trace is written to the file <tt>sTCW.error.log</tt>. This can
+be sent to us so we can help you trouble shoot the problem, that is, if the
+message to the terminal is not sufficient to indicate how to fix the problem. NOTE:
+errors are appended to this file, so if an error keeps re-occurring without getting
+fixed, the file can get quite large.
+
+<p>If the information on the <ttp>runSingleTCW</ttp> panel does not look right, remove
+<tt>/projects/&lt;project&gt;/LIB.cfg</tt> to start over. You can try fixing the problem
+by editing this file, but it is important to format it correctly.
+If that does not work, email <tt>tcw@agcol.arizona.edu</tt> and we will guide you on how to enter the information.
+
+<p>If you have many sequences (e.g. transcripts) in the database and/or many annoDBs,
+this can take a lot of memory. Running <ttc>Annotate</ttc> sets the memory to 8192, which may not be
+enough; in this case, once <ttp>runSingleTCW</ttp> is ready to annotate your database, exit and run from the command line:
+<pre>
+   ./execAnno &lt;project&gt;
+</pre>
+You can increase the memory size in the <ttp>execAnno</ttp> script.
+<p>
+Also see <a href="../Trouble.html" class="ext" target="_blank">Trouble shooting</a>.
+
+
+<a id=DiffExp></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>Differential Expression</h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+If counts have accompanied the sequences as input, the differential expression may be computed, in which case,
+the results will be added to the sTCWdb for query.
+<p>
+For full details on the DE computation, see the <a href="DiffExp.html" class="ext" target="_blank">Differential Expression Guide</a>.
+
+
+<a id=details></a>
+<h2>IMPORTANT DETAILS</h2>
+
+<a id=cfg></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>Directory structure and configuration files</h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+Users do not ordinarily need to look at the underlying directories and files used by TCW, however they are described
+here since it may be helpful at times.
+<p>
+When a project is added with <ttc>Add Project</ttc>, <ttp>runSingleTCW</ttp>
+creates a directory under <tt>/projects</tt> with the user supplied name
+(referred to here as <tt>&lt;project&gt;</tt>).
+The <tt>projects/&lt;project&gt;</tt> directory has a
+<tt>LIB.cfg</tt> file where <ttp>runSingleTCW</ttp> saves all the library information and
+a <tt>sTCW.cfg</tt> file where <ttp>runSingleTCW</ttp> saves all the assembly and annotation information.
+
+<p>Though you can put your data files anywhere that <ttp>runSingleTCW</ttp> can access,
+you may want to put your data
+files in the <tt>projects/&lt;project&gt;</tt> directory in order to keep everything in one place.
+Also, the <tt>/DBfasta</tt> directory contains a subset of the UniProt files for the demo; this is
+a good location to put all annoDB files.
+
+<p>The three major steps write to the <tt>projects/&lt;project&gt;</tt> directory. The <ttc>Annotate</ttc>
+step puts all hit results in <tt>hitResults</tt> subdirectory. Hit files are NOT removed as they may be reused.
+
+
+<a id=batch></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>Batch Processing</h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+As mentioned above, <ttp>runSingleTCW</ttp> creates <tt>LIB.cfg</tt> and <tt>sTCW.cfg</tt> files under
+the <tt>/projects/&lt;project&gt;</tt> directory. Once created, you can run the three steps from the
+command line instead of through the interface.
+<table class="ty">
+<tr><td><i>Action</i><td><i>Executable</i><td><i>Configuration</i>
+<tr><td>Build Database<td><ttp>execLoadLib</ttp><td><tt>LIB.cfg</tt>
+<tr><td>Instantiate<td><ttp>execAssm</ttp><td><tt>sTCW.cfg</tt>
+<tr><td>Annotate<td><ttp>execAnno</ttp><td><tt>sTCW.cfg</tt>
+</table>
+
+<br>The <tt>LIB.cfg</tt> and <tt>sTCW.cfg</tt> files can be edited with a text editor, but be careful as
+<ttp>runSingleTCW</ttp> and the executables expects the syntax to be exactly as it writes the file.
+
+<p>Each command line script takes as input the &lt;project&gt; name, along with some optional flags; execute
+the script followed by -h to see the flags (e.g. <tt>./execAnno -h</tt>). All three take as input
+the "-n", which suppresses any prompts and uses defaults (as described by -h); this is good for batch processing.
+<p>The instantiation (or assembly) computed TPM (transcripts per kilobase per million); in order to compute the
+RPKM instead, execute:
+<pre>
+   ./execAssm &lt;project&gt; -r
+</pre>
+
+<a id=view></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h2>VIEW/QUERY (<ttp>viewSingleTCW</ttp>)</h2>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+Once a project is created, it is viewed and queried using <ttp>viewSingleTCW</ttp>.
+This program is launched either:
+<ol><li>From the command line (<tt>./viewSingleTCW</tt>), which
+brings up a panel of mySQL databases with the <tt>sTCW_</tt> prefix, where databases can be selected to view.
+<li>From the command line using the <ttl>singleTCW ID</ttl> or <ttl>sTCW Database</ttl>
+as a parameter (e.g. <tt>viewSingleTCW tra</tt>).
+<li>Through the button at the bottom of the Manager interface (<a href="#Fig1">Fig. 1</a>).
+</ol>
+The <a href="../tour" class="ext" target="_blank">TCW Tour</a> shows the various displays.
+
+	<!---- END BODY -->
+
+	</td></tr>
+	<tr><td style="background-color: #DDDDDD; text-align: center; padding: 0; font-family: Verdana, Arial; font-size: 12px;">
+                        Email Comments To: <a href="mailto:tcw@agcol.arizona.edu">tcw@agcol.arizona.edu</a>
+
+</td></tr>
+</table>
+</body>
+</html>

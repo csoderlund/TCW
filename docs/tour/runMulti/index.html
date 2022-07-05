@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Tour runMultiTCW</title>
+<style>
+	a:link {text-decoration: none;color:#6666CC;}
+	a.white {font-family:verdana; font-size:12px; color:white; text-decoration: underline;}
+	a.ext {font-weight: bold;}
+	mark.white {font-family:verdana; font-size:12px; color:white;background:none;}
+	ttp  {font-family: 'Lucida Console', monospace; font-size: 16px; font-weight: 400; font-variant: small-caps;}
+	ttl  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 600; color: DarkSlateGrey;}
+	ttc  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 700; color: DarkSlateGrey;}
+	.top {vertical-align: top;}
+	.hang  {margin-left:15px; text-indent:-15px; margin-top:5px;}
+	.tx    {border: 0px; padding: 5px; border-spacing: 5px; }
+	.tx td,th {border: 0px; padding: 5px; border-spacing: 5px}
+	.ty    {border: 1px  solid black; border-spacing: 0px;  border-collapse: collapse;}
+	.ty td, th {border: 1px  solid black; padding: 3px; }
+	tt {font-size:13px}
+	pre {font-size:13px}
+	body {font-family:  Verdana, Arial, Helvetica, sans-serif;  font-size: 14px; }
+</style>
+</head>
+
+<body>
+<a id="top"></a>
+<table style="width: 800px; border: 2px solid #999999; padding: 0; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
+	<tr><td>
+		<table style="width: 100%; border: 0px; padding: 0;  border-collapse:collapse;">
+			<tr>
+				<td style="text-align: left; vertical-align: top; padding: 0">
+					<a href="http://www.agcol.arizona.edu">
+						<img src="../../img/agcol_logo.gif" alt="AGCoL" style="width: 180px; border:1px solid black"></a>
+				</td>
+				<td style="padding-bottom:5px; padding-left:40px; text-align: left;  font-family: Verdana, Arial;  font-weight: bold;color:MidnightBlue">
+					<font style="font-size: 20px;">Tour <font style="font-variant:small-caps;">runMultiTCW</font></font> -
+					<font style="font-size: 15px;">Build Comparison Database</font>
+				</td>
+
+				<td style="text-align: right; vertical-align: top; padding: 0">
+					<a href="http://www.arizona.edu">
+						<img src="../../img/UA.gif" alt="UA" title="University of Arizona"  style="width: 40px; border:1px solid black"></a>
+					<br>
+					<a href="http://www.bio5.org">
+						<img src="../../img/bio5.gif" alt="BIO5" title="BIO5"  style="width: 40px; border:1px solid black"></a>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" style="text-align: left; vertical-align: top; padding: 0">
+				<table style="width: 100%; padding: 0;  border-spacing:0; border-collapse:collapse;">
+					<tr>
+						<td style="background-color: #666666; padding-bottom:4px;">
+						<a href="https://csoderlund.github.io/TCW" class="white">TCW Home</a> <mark class="white">|</mark>
+						<a href="https://github.com/csoderlund/TCW/releases" class="white">Download</a> <mark class="white">|</mark>
+						<a href="../../Docs.html" class="white">Docs</a> <mark class="white">|</mark>
+						<a href=".." class="white">Tour</a>
+					</tr>
+				</table>
+				</td>
+			</tr>
+		</table>
+	</td></tr>
+
+	<tr><td style='vertical-align: top; text-align: left; padding:15px;'>
+	<!---- START BODY -->
+
+
+<div style="text-align: center"><big><tt>runMultiTCW</tt></big> - Build Comparison Database from Multiple sTCWdbs</div>
+
+<table  class="tx" style="margin-left: auto;margin-right: auto;">
+<tr><td class="white" style="text-align:left; background-color:#666666; padding-bottom:4px;">
+<a href="#main" class="white">Main panel</a> <mark class="white">|</mark>
+<a href="#add" class="white">Additional panel</a> <mark class="white">|</mark>
+<a href="#refs"  class="white" >References</a>
+</td></tr>
+</table>
+
+<p><tt>runMultiTCW</tt> takes as input two or more singleTCW (sTCW) databases
+and builds a multiTCW (mTCW) database of clustered sequences.
+See <a href="../../mtcw/UserGuide.html" class="ext" target="_blank">mTCW UserGuide</a> for details
+and <a href="../../ov/mDemo.html" class="ext" target="_blank">Overview</a> for example mTCWdb summary.
+
+<a id=main></a>
+<h3>Main panel</h3>
+
+<table class="tx">
+<tr><td class=top>
+
+&rarr; <ttl>1. sTCWdbs (single TCW databases)</ttl>.
+
+<p><ttx>Add/Edit</ttx>: Define the input sTCW databases
+(see <a href="#add">panel #1</a>), which can be created from
+nucleotide sequences (NT-sTCW) and/or protein sequences (AA-sTCW).
+For NT-sTCW, the nucleotide sequences and translated ORFs will be loaded.
+
+<p><ttc>Build database</ttc>: Builds a database of all sequences, TPM, DE, annotations and GOs.
+
+<p>
+&rarr; <ttl>2. Compare sequences</ttl>
+
+<p><ttc>Run Search</ttc>: This creates a file of all sequences and performs a heuristic search<sup>1</sup> against itself
+to determine similar sequences. The search program and parameters can be changed (see <a href="#add">panel #2</a>).
+<p>
+<ttc>Add Pair from Hits</ttc>: All pairs from the Hit file are entered into the database.
+
+
+<p>
+&rarr; <ttl>3. Cluster Sets</ttl>.
+
+<p><ttc>Add/Edit</ttc>: Add a cluster type to be computed (see <a href="#add">panel #3</a>), and the list of methods below.
+
+<p><ttc>Add New Cluster</ttc>: The clusters defined in the table will be computed and added to the database.
+</td>
+
+<td class="top">
+<a  href="img/runMultiTCW.png">
+<img src="img/runMultiTCW.png" alt="" style="border: 1px solid black; width: 450px"></a>
+</td> </tr>
+</table>
+&nbsp;&nbsp;&nbsp;The methods are:
+<ul>
+<li>BBH - TCW algorithm  for Bi-directional Best Hit between N sTCWdbs, where each resulting cluster has N sequences and all pairs are BBH.
+<li>Closure - TCW algorithm for determining clusters, where each sequence in a cluster has
+a hit, good similarity and good overlap with all other sequences in the cluster.
+<li>Best Hit - TCW algorithm for clustering on Hit ID or Hit Descriptions.
+<li><ttp>OrthoMCL</ttp><sup>3</sup> - <tt>runMultiTCW</tt> executes the
+<ttp>orthoMCL</ttp> scripts and then loads the results into the mTCW database.
+<li>User Defined - load a file of clusters where the file format is the orthoMCL format.
+</ul>
+
+
+<p>
+&rarr; <ttl>4. Statistics</ttl>
+<p><ttc>Add Stats</ttc>: Add statistics (see <a href="#add">panel #4</a>), as follows.
+<ol>
+<li>PCC (Pearson Correlation Coefficient): This is only relevant if there are shared conditions,
+as it is used to determine how similar the TPM values of the conditions are.
+It is run on all pairs in the database.
+<br><br>
+<li>The following is only relevant for mTCW databases that are built with
+only NT-sTCW databases, as it is based on the aligned nucleotide coding regions.
+<ol type='a'>
+<li>Each pair that has a hit and is in a cluster is pair-wise aligned.
+<ol type='i'>
+<li>Statistics are computed from the alignment, such as synonymous and nonsynonymous codons, TS/TV, etc
+ (as summarized on <a href="../../ov/mDemo.html" class="ext" target="_blank">Overview</a>).
+<li>The KaKs files are written from the alignments for input to
+the <tt>KaKs_calculator</tt><sup>4</sup> along with a script to run from the terminal.
+</ol>
+<li>Read KaKs files: This is only relevant if the <tt>KaKs_calculator</tt> has been
+executed on the KaKs files.  It reads the results into the database.
+</ol>
+<br>
+<li>Compute the MSA for all clusters and score them. The MAFFT<sup>4</sup> program is used; it occasionally
+fails on a cluster, in which case MUSCLE<sup>5</sup>  is used.
+</ol>
+
+<a id=add></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Additional panels</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+
+<table class="tx">
+<tr><td class=top>
+1. Add single TCW database
+<br><a  href="img/addSingle.png"><img src="img/addSingle.png" alt="" style="border: 1px solid black; width: 360px"></a>
+</td>
+
+<td class=top>
+2. Run Search
+<br><a  href="img/hitSettings.png"><img src="img/hitSettings.png" alt="" style="border: 1px solid black; width: 440px"></a>
+</td>
+
+<tr>
+<td class=top>
+3. Add a cluster method
+<br><a  href="img/method.png"><img src="img/method.png" alt="" style="border: 1px solid black; width: 360px"></a>
+</td>
+
+<td class=top>
+4. Add statistics. The counts on the bottom are updated after <ttc>Run Stats</ttc> is executed.
+<br><a  href="img/stats.png"><img src="img/stats.png" alt="" style="border: 1px solid black; width: 320px"></a>
+</td>
+</table>
+
+
+<a id=refs></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>References</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+
+<ol>
+<li>Supported search programs: any of the following programs can be used for the AA search, and blastn is used for the NT search.
+
+<ul>
+<li><tt>BLAST</tt>:
+Altschul SF, Madden TL, Schaffer AA, Zhang J, Zhang Z, et al. (1997) Gapped BLAST and PSI-BLAST: a new generation of protein database search programs. Nucleic Acids Res 25: 3389-3402.
+<li><tt>Diamond</tt>:
+Buchfink B, Xie C, Huson D (2015) Fast and Sensitive Protein Alignment
+using DIAMOND, Nature Methods, 12, 59-60 doi:10.1038/nmeth.3176.
+</ul>
+
+<li>Li L, Stoeckert CJ, Jr., Roos DS (2003) OrthoMCL: identification of ortholog groups for eukaryotic genomes. Genome Res 13: 2178-2189.
+
+<li>Zhang Z, Li J, Xiao-Qian Z, Wang J, Wong, G, Yu J (2006) KaKs_Calculator: Calculating Ka and Ks through model selection and model averaging. Geno. Prot. Bioinfo. Vol 4 No 4. 259-263.
+<li>Katoh K, Standley DM (2013) MAFFT Multiple Sequence Alignment Software Version 7: Improvements in Performance and Usability. Molecular Biology and Evolution Vol 30, Issue 4 772:780
+<li>Edgar RC (2004) MUSCLE: multiple sequence alignment with high accuracy and high throughput. Nucleic Acids Res 32: 1792-1797.
+</ol>
+
+<!---- END BODY -->
+	</td></tr>
+	<tr><td style="background-color: #DDDDDD; text-align: center; padding: 0; font-family: Verdana, Arial; font-size: 12px;">
+                        Email Comments To: <a href="mailto:tcw@agcol.arizona.edu">tcw@agcol.arizona.edu</a>
+
+</td></tr>
+</table>
+</body>
+</html>

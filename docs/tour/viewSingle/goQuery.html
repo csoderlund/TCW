@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Tour Basic GO</title>
+<style>
+	a:link {text-decoration: none;color:#6666CC;}
+	a.current {font-family:verdana; font-size:12px; color:white; text-decoration: none;}
+	a.white {font-family:verdana; font-size:12px; color:white; text-decoration: underline;}
+	a.ext {font-weight: bold;}
+	a.extp {font-weight: bold; font-variant: small-caps;}
+	.top {vertical-align: top;}
+	mark.white {font-family:verdana; font-size:12px; color:white;background:none;}
+	ttp  {font-family: 'Lucida Console', monospace; font-size: 16px; font-weight: 400; font-variant: small-caps;}
+	ttl  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 600; color: DarkSlateGrey;}
+	ttc  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 700; color: DarkSlateGrey;}
+	body {font-family:  Verdana, Arial, Helvetica, sans-serif;  font-size: 14px; }
+</style>
+</head>
+
+<body>
+<a id="top"></a>
+<table style="width: 800px; border: 2px solid #999999; padding: 0; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
+	<tr><td>
+		<table style="width: 100%; border: 0px; padding: 0;  border-collapse:collapse;">
+			<tr>
+				<td style="text-align: left; vertical-align: top; padding: 0">
+					<a href="http://www.agcol.arizona.edu">
+						<img src="../../img/agcol_logo.gif" alt="AGCoL" style="width: 180px; border:1px solid black"></a>
+				</td>
+				<td style="padding-bottom:5px; padding-left:40px; text-align: left;  font-family: Verdana, Arial;  font-weight: bold;color:MidnightBlue">
+					<font style="font-size: 20px;">Tour <font style="font-variant:small-caps;">viewSingleTCW</font></font> -
+					<font style="font-size: 15px;">Basic GO Annotation Filters</font>
+				</td>
+
+				<td style="text-align: right; vertical-align: top; padding: 0">
+					<a href="http://www.arizona.edu">
+						<img src="../../img/UA.gif" alt="UA" title="University of Arizona"  style="width: 40px; border:1px solid black"></a>
+					<br>
+					<a href="http://www.bio5.org">
+						<img src="../../img/bio5.gif" alt="BIO5" title="BIO5"  style="width: 40px; border:1px solid black"></a>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" style="text-align: left; vertical-align: top; padding: 0">
+				<table style="width: 100%; padding: 0;  border-spacing:0; border-collapse:collapse;">
+					<tr>
+						<td style="background-color: #666666; padding-bottom:4px;">
+						<a href="https://csoderlund.github.io/TCW" class="white">TCW Home</a> <mark class="white">|</mark>
+						<a href="https://github.com/csoderlund/TCW/releases" class="white">Download</a> <mark class="white">|</mark>
+						<a href="../../Docs.html" class="white">Docs</a> <mark class="white">|</mark>
+						<a href=".." class="white">Tour</a>
+					</tr>
+				</table>
+				</td>
+			</tr>
+		</table>
+	</td></tr>
+
+	<tr><td style='vertical-align: top; text-align: left; padding:15px;'>
+	<!---- START BODY -->
+<div style="text-align: center"><big><ttp>viewSingleTCW</ttp></big> - View and Query Single Species</div>
+
+<table style="padding: 2;  border-spacing:0; border-collapse:collapse;  margin-left: auto; margin-right: auto;">
+<tr><td style="background-color: #666666; padding-bottom:4px; ">
+<a href="index.html" class="white">Start</a> <mark class="white">|</mark>
+<a href="seqTable.html" class="white">Sequence Table</a> <mark class="white">|</mark>
+<a href="seqDetails.html"  class="white">Sequence Detail</a> <mark class="white">|</mark>
+<a href=seqQuery.html class="white">Basic Sequence</a>  <mark class="white">|</mark>
+<a href=hitQuery.html class="white">AnnoDB Hits</a>  <mark class="white">|</mark>
+<a href=goQuery.html class="current" >GO Annotations</a>  <mark class="white">|</mark>
+<a href=pairTable.html class="white">Pairs</a>
+</td></tr>
+</table>
+
+<div style="text-align: center"><big><ttc>GO Annotations Filters</ttc></big></div>
+<table style="padding: 2;  border-spacing:0; border-collapse:collapse;  margin-left: auto; margin-right: auto;">
+<tr><td style="background-color: #666666; padding-bottom:4px; ">
+<a href="#tab" class="white">Table</a> <mark class="white">|</mark>
+<a href="#col" class="white">Columns</a> <mark class="white">|</mark>
+<a href="#show" class="white">Show and Export</a>
+</td></tr>
+</table>
+
+<a id=tab></a>
+<p>
+The contents of this panel will depend on how the database was built with <ttp>runSingleTCW</ttp>:
+<ul>
+<li>This panel will exist only if UniProt databases were used in annotation.
+<li>The <ttc>Slim</ttc> option will exist only if a GO_slim set was selected when the database was built with <ttp>runSingleTCW</ttp>.
+<li>The <ttc>Enrich:</ttc> row of options will exist only if <ttp>GOseq</ttp>
+has been been run (see <a href="../runDE/index.html" class="extp" target="_blank">runDE</a>).
+</ul>
+<p>GO Terms may be assigned to a hit ID, or it may inherit a hit ID;
+see <a href="goHelp" class=ext target="_blank">GO Help</a> for explanation.
+<br>See <a href="goHelp/go794.html" class=ext target="_blank">All GO Views</a>  for TCW views of GO relations.
+
+<p>In following image shows the enriched GOs for Ro (Root) compared to Stem (St) and Old leaf (Ol)
+at a p-value of 0.05.
+The #Seqs are the counts of DE (p-value&lt;0.05) sequences for the respective GO.
+<p><a  href="img/goQuery.png">
+<img src="img/goQuery.png" alt="" style="border: 1px solid black; width: 850px"></a>
+<br>The decimal number display can be changed with <a href="index.html#decimal" class=ext target="_blank">Decimal Display</a>
+(the above display uses color scheme #1 for the p-values).
+
+<a id=col></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Columns</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<table>
+<tr>
+<td class="top">The 27 evidence codes are groups into 6 <ttl>>Evidence categories</ttl>, which
+are defined on the <ttl>Evidence Information</ttl> option of the <ttc>Help...</ttc>.
+They can be filtered on by setting them in the <ttc>Evidence</ttc> panel.
+
+<td><a href="img/goColumns.png">
+	<img  src="img/goColumns.png" alt="" style="border: 1px solid black; width: 440px"></a>
+</table>
+
+<a id=show></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h3>Show and Export</h3>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+<table class="tablex" style="width:100%">
+<tr><td class="top">
+<ttc>Show...</ttc> has multiple options as shown on the right. Below are some examples.
+<p>The <ttc>Export...</ttc>
+has the exact same option, where the results will be written to file, with a choice
+of <ttl>All info</ttl> or <ttl>IDs only</ttl>.
+<td class="top">
+<a  href="img/goShow.png"><img src="img/goShow.png" alt="" style="border: 1px solid black; width: 200px"></a>
+<td class="top">
+<ttc>Table...</ttc> has multiple options as shown on the right.
+<td class="top">
+<a  href="img/goTable.png"><img src="img/goTable.png" alt="" style="border: 1px solid black; width: 250px"></a>
+</table>
+
+<p>
+<table>
+<tr>
+<td class="top"><a  href="img/goAncOrdered.png"><img src="img/goAncOrdered.png" alt="" style="border: 1px solid black; width: 430px"></a>
+
+<td class="top"><a  href="img/goAncPaths.png"><img  src="img/goAncPaths.png" alt="" style="border: 1px solid black; width: 380px"></a>
+<tr>
+<td class="top"><a  href="img/goNeighbors.png"><img  src="img/goNeighbors.png" alt="" style="border: 1px solid black; width: 430px"></a>
+<td class="top"><a  href="img/goAssignedHits.png"><img  src="img/goAssignedHits.png" alt="" style="border: 1px solid black; width: 460px"></a>
+
+
+</table>
+
+<table style="width: 100%"><tr><td style="text-align: left">
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+
+	<!---- END BODY -->
+	</td></tr>
+	<tr><td style="background-color: #DDDDDD; text-align: center; padding: 0; font-family: Verdana, Arial; font-size: 12px;">
+                        Email Comments To: <a href="mailto:tcw@agcol.arizona.edu">tcw@agcol.arizona.edu</a>
+
+</td></tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>TCW Docs</title>
+<style>
+	a:link {text-decoration: none;color:#6666CC;}
+	a.current {font-family:verdana; font-size:12px; color:white; text-decoration: none;}
+	a.white {font-family:verdana; font-size:12px; color:white; text-decoration: underline;}
+	a.ext {font-weight: bold;}
+	mark.white {font-family:verdana; font-size:12px; color:white;background:none;}
+	ttp  {font-family: 'Lucida Console', monospace; font-size: 16px; font-weight: 400; font-variant: small-caps;}
+	top {vertical-align: text-top;}
+	.tx    {border: 0px; padding: 5px; border-spacing: 5px; width: 85%}
+	.tx tr {height: 20px;}
+	body {font-family: Arial, sans-serif;  font-size: 14px; }
+</style>
+</head>
+
+<body>
+<a id="top"></a>
+<table style="width: 800px; border: 2px solid #999999; padding: 0; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
+	<tr><td>
+		<table style="width: 100%; border: 0px; padding: 0;  border-collapse:collapse;">
+			<tr>
+				<td style="text-align: left; vertical-align: top; padding: 0">
+					<a href="http://www.agcol.arizona.edu">
+						<img src="./img/agcol_logo.gif" alt="AGCoL" style="width: 180px; border:1px solid black"></a>
+				</td>
+				<td style="padding-bottom:5px; padding-left:40px; text-align: left;  font-family: Verdana, Arial; font-size: 20px; font-weight: bold;color:MidnightBlue">
+					TCW Documentation
+				</td>
+				<td style="text-align: right; vertical-align: top; padding: 0">
+					<a href="http://www.arizona.edu">
+						<img src="./img/UA.gif" alt="UA" title="University of Arizona"  style="width: 40px; border:1px solid black"></a>
+					<br>
+					<a href="http://www.bio5.org">
+						<img src="./img/bio5.gif" alt="BIO5" title="BIO5"  style="width: 40px; border:1px solid black"></a>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" style="text-align: left; vertical-align: top; padding: 0">
+				<table style="width: 100%; padding: 0;  border-spacing:0; border-collapse:collapse;">
+					<tr>
+						<td style="background-color: #666666; padding-bottom:4px;">
+						<a href="https://csoderlund.github.io/TCW" class="white">TCW Home</a> <mark class="white">|</mark>
+						<a href="https://github.com/csoderlund/TCW/releases" class="white">Download</a> <mark class="white">|</mark>
+						<a href="./Docs.html" class="current">Docs</a> <mark class="white">|</mark>
+						<a href="./tour" class="white">Tour</a>
+					</tr>
+				</table>
+				</td>
+			</tr>
+		</table>
+	</td></tr>
+
+	<tr><td style='vertical-align: top; text-align: left; padding:15px;'>
+	<!---- START BODY -->
+<center>
+<table class="tx">
+
+<tr><td colspan=3><img src="./img/bullet_blue_small.gif" alt="bullet" style="border: 0px; width: 20px">
+<i>Getting started</i></td></tr>
+
+<tr>	<td>&nbsp;&nbsp;<td><a href="./Summary.html">Summary</a>
+		<td>A summary of the input, processing and suite of programs.
+<tr>	<td>&nbsp;&nbsp;<td><a href="./tour">TCW Tour</a> </td>
+		<td>Snapshots of different TCW screens.</td></tr>
+<tr>	<td>&nbsp;&nbsp;<td><a href="Install.html">Installation</a><td>Installing TCW and other necessary and optional software.
+
+
+<tr><td>
+<img src="./img/bullet_blue_small.gif" alt="bullet" style="border: 0px; width: 20px">
+<td colspan=2 style="height: 30px;"><i>Major documents with step-by-step details using the Demo dataset</i></td></tr>
+<tr>	<td>&nbsp;&nbsp;<td><a href="stcw/AnnoDBs.html"><ttp>runAS</ttp></a></td>
+			<td>Annotation Setup<sup>1</sup> - Getting UniProt, GO, nr, etc for use with <ttp>runSingleTCW</ttp></td></tr>
+
+<tr>	<td>&nbsp;&nbsp;<td><a href="stcw/UserGuide.html"><ttp>runSingleTCW</ttp></a></td>
+			<td>Single species - Building a single species annotated TCW database
+
+<tr>	<td>&nbsp;&nbsp;<td class="top"><a href="stcw/DiffExp.html"><ttp>runDE</ttp></a></td>
+			<td>Differential Expression - Add DE to the singleTCW database
+			</td></tr>
+<tr>	<td>&nbsp;&nbsp;<td><a href="mtcw/UserGuide.html"><ttp>runMultiTCW</ttp></a></td>
+			<td>Multiple species - Building a comparison database from single TCW databases
+
+<tr><td><img src="./img/bullet_blue_small.gif" alt="bullet" style="border: 0px; width: 20px">
+<td colspan=2  style="height: 30px;"><i>Processing Details</i></td></tr>
+<tr>	<td>&nbsp;&nbsp;<td><a href="stcw/AnnoGuide.html">Annotate Details</a></td>
+			<td>Removing, adding, updating annotation; pruning hits</td></tr>
+		<tr>	<td>&nbsp;&nbsp;<td><a href="stcw/ORF.html">ORF finder</a></td>
+			<td>Description of options, algorithm, outputs, and results. </td></tr>
+<tr>	<td>&nbsp;&nbsp;<td><a href="stcw/AssemGuide.html">Assembly Details</a></td>
+			<td>Not typically necessary<sup>2</sup></td> </tr>
+
+
+<tr><td><img src="./img/bullet_blue_small.gif" alt="bullet" style="border: 0px; width: 20px">
+<td colspan=2  style="height: 30px;"><i>Other documentation</i></td></tr>
+<tr>	<td>&nbsp;&nbsp;<td><a href="External.html">External</a></td><td>External packages used by TCW</td></tr>
+
+<tr>	<td>&nbsp;&nbsp;<td><a href="Mac-OSX.html">MacOS</a></td>	<td>Installing MySQL, etc on MacOS</td></tr>
+<tr>	<td>&nbsp;&nbsp;<td><a href="./Trouble.html">Trouble Shooting</a></td>
+			<td>Potential technical difficulties.</td></tr>
+<tr>	<td>&nbsp;&nbsp;<td><a href="./Release.html">
+				Release Notes</a></td><td>Release detail since v1.0</td></tr>
+<tr>	<td>&nbsp;&nbsp;<td><font color=red>Help</font></td><td>All TCW programs have Help pop-ups on every display.
+
+<tr>	<td>&nbsp;&nbsp;<td><a href="./index.html">Main Page</a> <td>TCW home page
+
+<tr><td colspan=3><sup>1</sup><font size="2">The sequences that are loaded into TCW (e.g. transcripts, proteins) are searched against one or more databases for annotation;
+these annotation databases are referred to as "AnnoDBs". When UniProt is used for annotation, TCW provides GO, KEGG,
+EC, Interpro and Pfam annotations.</font></td>
+
+<tr><td colspan=3><sup>2</sup><font size="2">TCW can be used with already assembled transcripts, proteins or mRNA (e.g. predicted genes with introns removed),
+i.e. the assembly is not usually necessary now.
+The TCW assembly does not work for high-throughput sequencing reads, but is still occasionally useful for Sanger
+ESTs or assembling multiple sets of transcripts.</font></td>
+</table>
+</center>
+
+	<!---- END BODY -->
+	</td></tr>
+	<tr><td style="background-color: #DDDDDD; text-align: center; padding: 0; font-family: Verdana, Arial; font-size: 12px;">
+                        Email Comments To: <a href="mailto:tcw@agcol.arizona.edu">tcw@agcol.arizona.edu</a>
+
+</td></tr>
+</table>
+</body>
+</html>
+
+

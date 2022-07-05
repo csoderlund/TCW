@@ -1,104 +1,234 @@
 <!DOCTYPE html>
 <html>
 <head>
+<title>TCW</title>
 <style>
-		body {font-family: Arial, sans-serif;  font-size: 14px; }
-		a.white {font-family:verdana; font-size:12px; color:white; text-decoration: underline;}	
-		mark.white {color:white;background: none;}
+	a:link {text-decoration: none;color:#6666CC;}
+	a.current {font-family:verdana; font-size:12px; color:white; text-decoration: none;}
+	a.white {font-family:verdana; font-size:12px; color:white; text-decoration: underline;}
+	a.ext {font-weight: bold;}
+	mark.white {font-family:verdana; font-size:12px; color:white;background:none;}
+	td {font-size:13px; padding:2px;}
+	.top {vertical-align: top;}
+	ttp  {font-family: 'Lucida Console', monospace; font-size: 16px; font-weight: 400; font-variant: small-caps;}
+	body {font-family:  Verdana, Arial, Helvetica,  sans-serif;  font-size: 14px; }
 </style>
 </head>
-<table style="width: 850px; border: 2px solid #999999; padding: 0; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
-	<tr>
-		<td> 
+
+<body>
+<a id="top"></a>
+<table style="width: 800px; border: 2px solid #999999; padding: 0; border-spacing:0; border-collapse:collapse; margin-left: auto; margin-right: auto;">
+	<tr><td>
 		<table style="width: 100%; border: 0px; padding: 0;  border-collapse:collapse;">
 			<tr>
-				<td style="text-align: left; vertical-align: top; padding: 0"> 
-					<img alt="" title="AGCoL" src="./img/agcol_logo.gif" style="width: 180px; border:1px solid black"> 
+				<td style="text-align: left; vertical-align: top; padding: 0">
+					<a href="http://www.agcol.arizona.edu">
+						<img src="./img/agcol_logo.gif" alt="AGCoL" style="width: 180px; border:1px solid black"></a>
 				</td>
-				<td style="padding-bottom:5px; padding-left:80px; text-align: left;  font-family: Verdana, Arial; font-size: 24px; font-weight: bold;color:MidnightBlue">   
-					TCW: Transcriptome Computational Workbench
+				<td style="padding-bottom:5px; padding-left:40px; text-align: left;  font-family: Verdana, Arial; font-size: 18px; font-weight: bold;color:MidnightBlue">
+
+					TCW - Transcriptome Computational Workbench
 				</td>
-				<td style="text-align: right; vertical-align: top; padding: 0"> 
-					<img alt="" title="UA" src="./img/UA.gif" style="width: 40px; border:1px solid black">
-					<br><img alt="" title="BIO5" src="./img/bio5.gif" style="width: 40px; border:1px solid black"> 
+				<td style="text-align: right; vertical-align: top; padding: 0">
+					<a href="http://www.arizona.edu">
+						<img src="./img/UA.gif" alt="UA" title="University of Arizona"  style="width: 40px; border:1px solid black"></a>
+					<br>
+					<a href="http://www.bio5.org">
+						<img src="./img/bio5.gif" alt="BIO5" title="BIO5"  style="width: 40px; border:1px solid black"></a>
 				</td>
 			</tr>
 			<tr>
-				<td colspan="3" style="text-align: left; vertical-align: top; padding: 0"> 
+				<td colspan="3" style="text-align: left; vertical-align: top; padding: 0">
 				<table style="width: 100%; padding: 0;  border-spacing:0; border-collapse:collapse;">
 					<tr>
-						<td style="background-color: #666666; padding-bottom:4px; "> 
-						<mark class="white">TCW Home</mark> <mark class="white">|</mark> 
-						<a href="./External.html" class="white">External</a><mark class="white">|</mark> 
-						<a href="https://github.com/csoderlund/TCW/releases" class="white">Download</a> <mark class="white">|</mark> 
-						<a href="https://github.com/csoderlund/TCW" class="white">Source</a>
+						<td style="background-color: #666666; padding-bottom:4px;">
+						<a href="https://csoderlund.github.io/TCW" class="current">TCW Home</a> <mark class="white">|</mark>
+						<a href="https://github.com/csoderlund/TCW/releases" class="white">Download</a> <mark class="white">|</mark>
+						<a href="./Docs.html" class="white">Docs</a> <mark class="white">|</mark>
+						<a href="./tour" class="white">Tour</a>
 					</tr>
 				</table>
 				</td>
 			</tr>
 		</table>
-		
-		</td>
-	</tr>
-	<tr>
-		<td style='vertical-align: top; text-align: left; padding:15px;'> 
-		
+	</td></tr>
 
-TCW provides analysis and query for sequences (transcriptome, proteome), and comparison of species sequences. 
-TCW uses Java, mySQL, optionally R, and various <a href="./External.html">External</a> packages. 
-It has been tested on Linux and Mac. 
+	<tr><td style='vertical-align: top; text-align: left; padding:15px;'>
+	<!---- START BODY -->
 
-<p>Reference: C. Soderlund (2022) Transcriptome computational workbench (TCW): analysis of single and comparative transcriptomes 
-<a href="https://doi.org/10.1101/733311" class="ext" target="_blank">BioRxiv</a>.
+TCW provides analysis and query for sequences (transcriptome, proteome), and comparison of species sequences.
+TCW uses Java, mySQL, optionally R, and various <a href="./External.html">External</a> packages.
+It has been tested on Linux and Mac.
+<ul>
+	<li>Last release: TCW v4.0.1 (27-Apr-21). See <a href="./Release.html">Release Notes</a>.
+	Published in <a href="https://doi.org/10.1101/733311" class="ext" target="_blank">BioRxiv</a> (02-May-2022).
 
-<p><center><big><font color=green>This site is under construction.
-Use <a href="http://www.agcol.arizona.edu/software/tcw">AGCoL-UA</a> for the documentation.
-</font></big></center>
 
-<table align="center">
-	<tr><td>
-	
-	</td>
-	</tr>	
-	<tr><td>&nbsp;</td></tr>
-	<tr>
-		<td valign="top">
-		<font face="Verdana, Arial, Helvetica, sans-serif" size="2"><ttp>viewSingleTCW</ttp> Result of a query on DE values. 
-		<br><a href="img/viewSingleTable.png"> 
-			<img src="img/viewSingleTable.png" alt="Single Table of Sequences" style="width: 400px; border:1px solid black"></a> 
-		</td>
-		
-		<td>
-		<font face="Verdana, Arial, Helvetica, sans-serif" size="2"><ttp>viewSingleTCW</ttp> Computed ORF.
-		<br><a href="img/viewSingleFrame.png"> 
-			<img src="img/viewSingleFrame.png" alt="Sequence frame view"  style="width: 380px; border:1px solid black"></a> 
-		</td>
-	</tr>
-	<tr>
-		<td valign="top"> 
-		<font face="Verdana, Arial, Helvetica, sans-serif" size="2"><ttp>viewMultiTCW</ttp> MAFFT multiple sequence alignment.
-		<br><a href="img/viewMultiAlign.png">
-			 <img src="img/viewMultiAlign.png" alt="Multiple sequence alignment"  style="width: 400px; border:1px solid black"></a> 
-		</td>
-		<td>
-		<font face="Verdana, Arial, Helvetica, sans-serif" size="2"><ttp>viewMultiTCW</ttp> DP alignment of the AA, CDS, NT sequences.
-		<br><a href="img/viewPairAlign.png"> 
-			<img src="img/viewPairAlign.png" alt="Alignment of two sequences"  style="width: 380px; border:1px solid black"></a> 
-		</td>
-	</tr>
-	<tr><td colspan=2>&nbsp;</td></tr>
-	<tr><td colspan=2 align="center">Select image to view closeup</td></tr>
+</ul>
+<table  style="vertical-align: top; padding: 0; border: 0">
+<tr>
+	<td colspan="2"> <b>Download</b> </td>
+</tr>
+<tr>
+	<td>&nbsp;&nbsp;</td>
+	<td><a href="https://github.com/csoderlund/TCW/releases" class="ext" target="_blank">TCW_4.tar.gz</a>
+	&nbsp;&nbsp;&nbsp;Executables, demos, external packages, R scripts </td>
+</tr>
+<tr><td>&nbsp;<td>&nbsp;
 </table>
-	
-	<table style="margin-top:20px; width: 100%; text-align: center; border-spacing:0; border-collapse:collapse">
-		<tr>
-			<td style="background-color: #DDDDDD; text-align: center; padding: 0; font-family: Verdana, Arial; font-size: 14px;">
-       			Email Comments To: <a href="mailto:tcw@agcol.arizona.edu">tcw@agcol.arizona.edu</a></td>
-		</tr>
-	</table>
-  </td></tr>
-</table>	
-	
+<table style="vertical-align: top; padding: 0; border: 0">
+	<tr>
+<!-- ===== left side ==== -->
+		<td style="vertical-align: top;">
+		<table style="vertical-align: top; padding: 0; border: 0">
+
+			<tr>
+				<td colspan="2"> <b>Documentation</b> </td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+				<td>
+				<table>
+					<tr>
+						<td><a href="./Summary.html" class="top"> Summary</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </td>
+						<td>Inputs, outputs and processing </td>
+					</tr>
+					<tr>
+						<td> <a href="Docs.html" class="top"> Docs</a> </td>
+						<td>Documentation pages </td>
+					</tr>
+				</table>
+				</td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td><td>&nbsp;</td>
+			</tr>
+			<tr>
+				<td colspan="2"> <b>Tour</b></td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+				<td>
+				<table>
+					<tr>
+						<td class="top"><a href="./tour/runAS"><ttp>runAS</ttp></a>
+						<td>Obtain UniProt and GO for input to <ttp>runSingleTCW</ttp> </td>
+					</tr>
+					<tr>
+						<td class="top"> <a href="./tour/runSingle/"><ttp>runSingleTCW</ttp></a>
+						<td>Build single species annotated database </td>
+					</tr>
+					<tr>
+						<td class="top"> <a href="./tour/runDE/"><ttp>runDE</ttp></a>
+						<td>Add differential expression </td>
+					</tr>
+					<tr>
+						<td class="top"><a href="./tour/viewSingle/"><ttp>viewSingleTCW</ttp></a>
+						<td>Query results of a single species database </td>
+					</tr>
+					<tr>
+						<td class="top"> <a href="./tour/runMulti/"><ttp>runMultiTCW</ttp></a>
+						<td>Build multi-species comparison database </td>
+					</tr>
+					<tr>
+						<td class="top"> <a href="./tour/viewMulti/"><ttp>viewMultiTCW</ttp></a>
+						<td>Query results of multi-species database</td>
+					</tr>
+				</table>
+				</td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr>
+				<td colspan="2"> <b>Features</b> </td>
+			</tr>
+			<tr>
+				<td class="top">&nbsp;</td>
+				<td>
+				<table>
+				<tr>
+						<td style="vertical-align: text-top;"><a href="https://github.com/bbuchfink/diamond/wiki" class="ext" target="_blank">DIAMOND</a></td>
+						<td>Integration of DIAMOND for fast annotation. </td>
+					</tr>
+
+					<tr>
+						<td style="vertical-align: text-top;"><a href="./stcw/ORF.html">ORF finder</a> </td>
+						<td>The algorithm uses hit information and on-the-fly training for a 5th-order Markov score. </td>
+					</tr>
+					<tr>
+						<td style="vertical-align: text-top;"><a href="./stcw/DiffExp.html">Differential Expression</a> </td>
+						<td>Users can supply a file of R commands for DE computation, or use built-in computations. </td>
+					</tr>
+
+				</table>
+				</td>
+			</tr>
+			<tr>
+				<td>&nbsp; </td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr>
+				<td colspan="2"> <b>Reference</b></td>
+			</tr>
+			<tr >
+				<td>&nbsp; </td>
+				<td>C. Soderlund (2022) Transcriptome computational workbench (TCW): analysis of single and comparative transcriptomes. <a href="https://www.biorxiv.org/content/10.1101/733311v1" class="ext" target="_blank">BioRxiv</a> </td>
+			</tr>
+
+			<tr  style="height: 50px">
+				<td>&nbsp; </td>
+				<td>C. Soderlund, W. Nelson, M. Willer and D. Gang. (2013) TCW: Transcriptome Computational Workbench. <a href="http://dx.plos.org/10.1371/journal.pone.0069401" class="ext" target="_blank">PLoS ONE</a> </td>
+			</tr>
+			<tr>
+				<td>&nbsp; </td>
+				<td>&nbsp;</td>
+			</tr>
+
+		</table>
+		</td>
+<!-- ======== right side ========= -->
+		<td class="top">
+		<table>
+			<tr>
+				<td><a href="img/viewSingleTable.png">
+				<img src="img/viewSingleTable.png" alt="Single Table of Sequences" style="width: 380px; border:1px solid black"></a>
+				<br>
+				Figure 1: <ttp>viewSingleTCW</ttp> - result of a query on DE values. </td>
+			</tr>
+			<tr>
+				<td><a href="img/viewSingleFrame.png">
+				<img src="img/viewSingleFrame.png" alt="Sequence frame view"  style="width: 380px; border:1px solid black"></a>
+				<br>
+				Figure 2: Computed ORF using hit coordinates as a guide. </td>
+			</tr>
+			<tr>
+				<td><a href="img/viewMultiAlign.png">
+				<img src="img/viewMultiAlign.png" alt="Alignment of two sequences"  style="width: 380px; border:1px solid black"></a>
+				<br>
+				Figure 3: <ttp>viewMultiTCW</ttp> - dynamic programming alignment of a BBH cluster.</td>
+			</tr>
+		</table>
+		</td>
+	</tr>
+ </table>
+
+<b>Funding</b>
+<p>All upgrades starting with TCW v1.3 have been developed by CAS without funding.
+<p>This project was funded in part by National Science Foundation grant <a href="http://www.nsf.gov/awardsearch/showAward.do?AwardNumber=1044821" class="ext" target="_blank">IOS-1044821</a>.
+
+<p><font face="Verdana, Arial, Helvetica, sans-serif" size="2">NSF Disclaimer:
+Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s)
+and do not necessarily reflect the views of the National Science Foundation.</font>
+
+	<!---- END BODY -->
+
+	<tr><td style="background-color: #DDDDDD; text-align: center; padding: 0; font-family: Verdana, Arial; font-size: 12px;">
+                        Email Comments To: <a href="mailto:tcw@agcol.arizona.edu">tcw@agcol.arizona.edu</a>
+
+	</td></tr>
 </table>
 </body>
 </html>
+

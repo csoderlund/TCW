@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>mTCW Explain</title>
+<style>
+.nw {vertical-align: top; white-space: nowrap;}
+.top {vertical-align: top; }
+table.y, .y td, th { border: 1px solid black; border-collapse: collapse; border-spacing: 5px;}
+th, td {padding: 5px;}
+</style>
+</head>
+
+<body style="font-family: Arial, sans-serif;  font-size: 14px;">
+<table style="width:70%; margin-left: auto; margin-right: auto;">
+<tr><td>&nbsp;
+<tr><td>&nbsp;
+<tr><td>
+<h2>Explain mTCW overview</h2>
+
+<ul>
+<li>The top line may have any of the labels <tt>PCC Stats Multi KaKs</tt>;
+these indicate that the database has the corresponding information. The <tt>GOs:</tt> label indicates
+that GOs are in the database.
+<li><tt>col:x</tt> notation: column x should be selected for viewing in the respective <b>Cluster, Pair, Sequence</b> table.
+<li><tt>Stats: Avg(col:x)</tt> notation: use the <b>Table...</b> option <u>Show Column Stats</u> and take the
+<tt>Avg</tt> column for the resulting table for col:x. Same for <tt>Sum</tt> and <tt>StdDev</tt>.
+</ul>
+
+<h3>DATASETS</h3>
+This first section describes the data imported from the sTCWdbs.
+
+<h3>CLUSTER SETS</h3>
+The database will contain one or more cluster sets.
+The columns are from the <b>Cluster</b> table.
+<table class="y">
+<tr><th>Label<th>Description<th>Compute
+
+<tr><td colspan=3><i>Statistics</i>
+<tr><td>&nbsp;&nbsp;Prefix<td>The cluster is referred to by this prefix in the various <b>Filters</b>
+and <b>Columns</b>.<td>---
+<tr><td>&nbsp;&nbsp;Method<td>The method used to compute the cluster.<td>See PROCESSING at end of Overview
+<tr><td>&nbsp;&nbsp;conLen<td>Average consensus length of the cluster.<td>Stats: Avg(col:conLen)
+<tr><td>&nbsp;&nbsp;sdLen<td>Average standard deviation of the sequence lengths (AA Len) in each
+cluster.<td>Stats: Avg(col:sdLen)
+<tr><td>&nbsp;&nbsp;Score1<td>Average of Score1.
+See PROCESSING for the MSA score1 method. Default: Sum-of-pairs
+ <td>Stats: Avg(col:Score1)
+<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;SD<td>Standard deviation of Score1
+<td>Stats: StdDev(col:Score1)
+<tr><td>&nbsp;&nbsp;Score2<td>Average of Score2.
+See PROCESSING for the MSA score2 method. Default: Wentropy
+<td>Stats: Avg(col:Score2)
+<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;SD<td>Standard deviation of Score2
+<td>Stats: StdDev(col:Score2)
+
+<tr><td style="white-space: nowrap; vertical-align: text-top;"  colspan=3><i>Sizes</i>
+<tr><td>&nbsp;&nbsp;[Range]
+<td>Range of cluster sizes per cluster set
+<td>Calculate by sorting on the col:Count
+</table>
+
+<!---------------------------------------------------------------->
+<h3>PAIRS</h3>
+Similar pairs were identified from the comparing the
+sequences using a search program (BLAST or DIAMOND),
+where AA is from the amino acid search and NT is from the nucleotide search (NT may not exist).
+Use Pairs <b>Filters</b> to produce the pairs table.
+
+<br><br>The <b>Overview</b> shows the <i>overall percentage</i>. In the table below, any <b>Compute</b> cell
+with superscript<sup>1</sup> computes <i>Average of percentages</i>, which is a usually close,
+but not the same.
+<br>Any <b>Compute</b> cell with superscript<sup>2</sup> can only be
+calculated by viewing the <b>Pairwise...</b> of each pair and manually computing.
+<table class="y">
+<tr><th>Label<th>Description<th>Compute
+
+<tr><td style="white-space: nowrap; vertical-align: text-top;"  colspan=3><i><b>Hits:</b></i> (from hit file);
+for the NT statistics, replace AA with NT.
+
+<tr><td style="white-space: nowrap; vertical-align: text-top;" >&nbsp;&nbsp;Diff
+	<td>The number of hits from different datasets.
+	<td> Filter: Hits: AA pairs;
+	<br>Datasets: Different sets
+<tr><td style="white-space: nowrap; vertical-align: text-top;" >&nbsp;&nbsp;Same
+	<td>The number of hits from the same dataset.
+	<td>Filter: Hits: AA pairs;
+	<br>Datasets: Same sets
+<tr><td style="white-space: nowrap; vertical-align: text-top;">&nbsp;&nbsp;Similarity
+	<td>Average percent similarity.
+	<td>Filter: Hits: AA pairs; Stats: Avg(col:%AAsim)<sup>1</sup>
+
+<tr><td style="white-space: nowrap; vertical-align: text-top;">&nbsp;&nbsp;Coverage
+	<td>Average percent coverage.
+	<td>Filter: Hits: AA pairs; Stats: (Avg(col:%AAcov1) + Avg(col:%AAcov2))/2)<sup>1</sup>
+
+<tr><td style="white-space: nowrap; vertical-align: text-top;"  colspan=3><i><b>Aligned:</b></i>
+ <b>Filter: Statistics: Has Stats</b> (aligned using dynamic programming)
+
+<tr><td>&nbsp;&nbsp;CDS:
+	<td>Number of aligned CDS bases including gaps but not overhangs.
+	<td>Stats: Sum(col:Align)
+<tr><td>&nbsp;&nbsp;5UTR:
+	<td>Number of aligned 5'UTR bases including gaps but not overhangs.
+	<td>View values; see<sup>2</sup>
+<tr><td>&nbsp;&nbsp;3UTR:
+	<td>Number of aligned 3'UTR bases including gaps but not overhangs.
+	<td>View values; see<sup>2</sup>
+
+<tr><td colspan=3><i>Codon column</i>
+<tr><td style="white-space: nowrap; vertical-align: text-top;">&nbsp;&nbsp;Codons
+    <td>Number of aligned codons excluding gaps.
+	<td>Stats: Sum(col:Calign)
+
+<tr><td style="white-space: nowrap; vertical-align: text-top;">&nbsp;&nbsp;Exact
+    <td>Percent codons that are exactly the same.
+	<td>Stats: Avg(col:%Cexact)<sup>1</sup>
+
+<tr><td style="white-space: nowrap; vertical-align: text-top;">&nbsp;&nbsp;Synonymous
+    <td>Percent codons that are synonymous (different codon, same amino acid).
+    <td>Stats: Avg(col:%Csyn)<sup>1</sup>
+
+<tr><td style="white-space: nowrap; vertical-align: text-top;">&nbsp;&nbsp;&nbsp;&nbsp;Fourfold
+    <td>Percent codons that are fourfold (4d) (synonymous codons
+    where the ith position allows any of the 4 bases).
+    <td>Stats: Avg(col:%C4d)<sup>1</sup>
+
+<tr><td style="white-space: nowrap; vertical-align: text-top;">&nbsp;&nbsp;&nbsp;&nbsp;Twofold
+    <td>Percent codons that are twofold (2d) (synonymous codons
+    where the ith position allows any of the 2 bases).
+    <td>Stats: Avg(col:%C2d)<sup>1</sup>
+
+<tr><td style="white-space: nowrap; vertical-align: text-top;">&nbsp;&nbsp;Nonsynonymous
+    <td>Percent codons that are nonsynonynous (different amino acid).
+    <td>Stats: Avg(col:%nonSyn)<sup>1</sup>
+
+<tr><td colspan=3><i>Amino acid column</i>
+
+<tr><td style="white-space: nowrap; vertical-align: text-top;">&nbsp;&nbsp;Exact
+    <td>Percent amino acid that are the same.
+    <td>Stats: Avg(col:%Aexact)<sup>1</sup>
+
+<tr><td style="white-space: nowrap; vertical-align: text-top;">&nbsp;&nbsp;Substitution&gt;0
+    <td>Percent amino acids that are substitutions with BLOSUM62&gt;0.
+    <td>Stats: Avg(col:%Apos)<sup>1</sup>
+
+<tr><td style="white-space: nowrap; vertical-align: text-top;">&nbsp;&nbsp;Substitution&lt;=0
+    <td>Percent amino acids that are substitution with BLOSUM62&lt;=0.
+	<td>Stats: Avg(col:%Aneg)<sup>1</sup>
+
+<tr><td style="white-space: nowrap; vertical-align: text-top;" colspan=3><i>Nucleotides columns </i>
+
+<tr><td style="white-space: nowrap; vertical-align: text-top;">&nbsp;&nbsp;CDS Diff
+    <td>Percent CDS bases that are different, i.e. ((Gap+SNP)/Align)%.
+       <td>Stats: ((sum(col:gap) + sum(col:SNP)) / sum(col:align)) x 100.0
+
+  <tr><td style="white-space: nowrap; vertical-align: text-top;">&nbsp;&nbsp;&nbsp;&nbsp;Gaps
+    <td>Percent CDS bases that are Gaps, i.e. (Gaps/Align)%.
+    <td>Stats: (sum(col:gap) / sum(col:align)) x 100.0
+
+   <tr><td style="white-space: nowrap; vertical-align: text-top;">&nbsp;&nbsp;&nbsp;&nbsp;SNPs
+    <td>Percent CDS bases that are SNPs, i.e (SNP/Align)%.
+    <td>Stats: (sum(col:SNP) / sum(col:align)) x 100.0
+
+<tr><td style="white-space: nowrap; vertical-align: text-top;">&nbsp;&nbsp;5UTR Diff
+    <td>Percent 5'UTR bases that are different.
+       <td>Stats: Avg(col:%5diff)<sup>1</sup>
+
+<tr><td style="white-space: nowrap; vertical-align: text-top;">&nbsp;&nbsp;3UTR Diff
+    <td>Percent 3'UTR bases that are different.
+    <td>Stats: Avg(col:%3diff)<sup>1</sup>
+
+<tr><td colspan=3><i>Columns:</i> <tt>Pos1   Pos2   Pos3  Total</tt>
+<tr><td style="white-space: nowrap; vertical-align: text-top;">&nbsp;&nbsp;Transition (ts)
+    <td>Percent SNPs that are transitions in each of the 3 codon positions.
+    <td>View values; see<sup>2</sup>
+
+<tr><td style="white-space: nowrap; vertical-align: text-top;">&nbsp;&nbsp;Transversion (tv)
+    <td>Percent SNPs that are transversion in each of the 3 codon positions.
+       <td>View values; see<sup>2</sup>
+<tr><td style="white-space: nowrap; vertical-align: text-top;">&nbsp;&nbsp;ts/tv
+    <td>The total number of transitions divided the total number of transversions
+    <td>View values;  see<sup>2</sup>
+
+<tr><td colspan=3><i>Columns: </i><tt>GC  CpG-Nt  CpG-Cd </tt>
+	<br>CpG-Nt (nucleotide) and CpG-Cd (codon, CpG does not cross codon boundaries).
+<tr><td style="white-space: nowrap; vertical-align: text-top;">&nbsp;&nbsp;Both
+    <td>Percent CDS bases where both (union) sequences have a GC base.
+    Same for the CpG sites.
+    <td>View values; see<sup>2</sup>
+ <tr><td style="white-space: nowrap; vertical-align: text-top;">&nbsp;&nbsp;Either
+    <td>Percent CDS bases where either or both (intersection) sequences have a GC base.
+    Same for the CpG sites.
+    <td>View values; see<sup>2</sup>
+
+  <tr><td style="white-space: nowrap; vertical-align: text-top;">&nbsp;&nbsp;Jaccard
+    <td>The total number of 'both' divided by the total number of 'either'.
+    <td>View values; see<sup>2</sup>
+
+<tr><td style="white-space: nowrap; vertical-align: text-top;"colspan=3><i><b>KaKs method:</b></i><sup>3</sup>
+<tr><td>KaKs
+<td>It is rare for Ka/Ks to be exactly 1, so the following fudge factors are used:
+<table class="y">
+<tr><td>&nbsp;<i>Rule</i><td>&nbsp;<i>Fudge factor</i><td>&nbsp;<i>Strength</i>
+<tr><td>&nbsp;KaKs&gt;1<td>&nbsp;&gt;= 1.006<td>&nbsp;positive (driving change)
+<tr><td>&nbsp;KaKs=1<td>&nbsp;&gt;= 0.995 and &lt; 1.006<td>&nbsp;neutral
+<tr><td>&nbsp;KaKs&lt;1<td>&nbsp;&lt;  0.995<td>&nbsp;purifying (against change)
+</table>
+<td>Set Pair Filters according to fudge factors on the left.
+<br><br>For NA, Filters: uncheck KaKs and check KaKs=NA
+
+<tr><td><i>Quartiles</i><td>Applies to the KaKs values. It uses the method of splitting the list in half;
+Q1 is the median of the lower half and Q3 is the median of the upper half.
+
+<td>Q2: Stats: Median(col:KaKs)
+
+<tr><td style="white-space: nowrap; vertical-align: text-top;" colspan=3><i>Average</i>
+<tr><td>&nbsp;&nbsp;Ka<td>Nonsynonymous substitution rate.<td>Stats: Avg(col:Ka)
+<tr><td>&nbsp;&nbsp;Ks<td>Synonymous substitution rate.<td>Stats: Avg(col:Ks)
+<tr><td>&nbsp;&nbsp;P-value<td>KaKs p-value.<td>Stats: Avg(col:p-value)
+
+<tr><td><i>P-value</i>
+<td>Counts of p-value in 4 ranges. <td>Sort on col:p-value. Round-off error occurs (see Display Decimal Help).
+</table>
+<!------------------------------------------------------->
+<h3>SEQUENCES</h3>
+
+The columns are in the <b>Sequence</b> table; use Sequence Filters to select a dataset
+to view its corresponding results.
+
+<table class="y">
+<tr><th>Label<th>Description<th>Compute
+
+<tr><td><i>Average Lengths</i>
+<td>The ORFs were computed for the sTCWdbs and imported along with their translated sequence.
+<td>Stats: Avg(5UTR Len), Avg(3UTR Len), Avg(CDS Len)
+
+<tr><td><i>%GC</i>
+<td>The average percent of GC for 5'UTR, CDS and 3'UTR.
+<td>--
+
+<tr><td><i>CpG O/E</i>
+<td>The CpG observed/expected for the 5'UTR, CDS and 3'UTR [(#CpG/(#G*#C))*Len].
+
+<td>--
+
+<tr><td><i>Counts</i>
+<td colspan=2>The total raw counts from each dataset. These can be verified from the singleTCWs.
+
+
+<tr><td><i>Differential Expression</i>
+<td  colspan=2>The total DE from each dataset. These can be verified from the singleTCWs.
+
+</table>
+<!------------ footnotes ------------------------------------------->
+<h4><sup>1</sup>Percents</h4>
+<ul>
+<li><b>Overview</b> percents  are computed by summing the numerator and denominator then dividing.
+<li><tt>Stats: Avg(col:X)</tt>: The <b>Table...</b> option <u>Show Column Stats</u> is taking the
+average of the percentages.
+
+<li>For example, in the mTCW_ex demo (created 20-Mar-22),
+<ul>
+<li>Overall %Exact: sum(exact codons)/sum(total codons) = 57.8%.
+<li>Average of %Exact: sum(%Exact)/number pairs = 59.39%.
+</ul>
+<li>The actual counts are only available in the <b>Pairwise...</b> view, as described below<sup>2</sup>.
+<li>However, the <b>Aligned</b> and <b>KsKs</b> values can be computed for any <b>Pair Table</b>
+by selecting the <b>Table...</b> option <u>Show Table Stats</u>.
+</ul>
+
+<h4><sup>2</sup>Counts associated with percents</h4>
+The only way to view most counts is through the
+<b>Pair Table</b>, as follows:
+<ul>
+<li>Select <b>Pairwise...</b>, select <u>5UTR, CDS, 3UTR</u>.
+<li>In the alignment panel, select the button specified in the <b>Align</b> column below.
+<li>This will pop-up a window where you select the <b>Option</b> as specified below.
+<li>The resulting pop-up window will have columns of counts at the top, followed by
+the text alignment with indications of the requested <b>Options</b> information.
+<li>Relevant numbers;
+<ul>
+<li><u>Calign</u>: The codon length with overhang and gap codons removed.
+<li><u>CROP</u>: The nucleotide length with the overhang removed.
+<li><u>SNPs</u>: The number of nucleotide differences ignoring gaps.
+</ul>
+</ul>
+<table class="y">
+<tr><th>Variables<th>Align<th>Option<th>Count
+<tr>
+<td>Codon Exact, Non/Synonymous
+	<td>Align CDS... <td> Match <td>These counts are at the top. Divide by Calign.
+
+<tr><td>Fourfold (4d), twofold (2d)
+	<td>Align CDS... <td>Degenerate<td>These counts are at the top. Divide by Calign.
+
+<tr><td>AA Exact, Substitution
+	<td>Align CDS... <td>Amino acid<td>These counts are at the top. Divide by Calign.
+
+
+<tr><td>ts, tv, ts/tv
+	<td>Align CDS...<td> ts/tv<td>These counts are at the top. Divide by SNPs.
+
+<tr><td>GC, CpG-Nt, CpG-Cd
+	<td> Align CDS...<td>CpG <td> These counts are at the top. Divide by CROP.
+	<br>The CpG percents are 2x since they involve two nucleotides.
+
+<tr><td>5'UTR Diff
+	<td>Align 5UTR... <td> --- <td>NT-Diff is at the top. Divide by CROP.
+<tr><td>3'UTR Diff
+	<td>Align 3UTR... <td> --- <td>NT-Diff is at the top. Divide by CROP.
+
+</table>
+
+<h4><sup>3</sup> The KaKs_calculator</h4>
+The KaKs_calculator (Zhang et al. 2006) will typically be used to
+compute the KaKs values, where the method used is shown on the "KaKs Method" line.
+</table>
+</body>
+</html>
