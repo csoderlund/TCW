@@ -22,11 +22,11 @@ its TCW-assembled, differential expression was computed, annotation was performe
 <p>Both <b>All Seqs</b> and <b>Filters</b> use these column setting for the
  respective table. To change the columns in a given
  table, change them on this panel, display the table and then use <b>Refresh Columns</b>.
- 
+
 <h2>General</h2>
 General sequence attributes: ID, length, total reads, etc. The columns available
 depend on the attributes of the database, e.g. if it is an assembled set, it
-will have the column <u>#buried</u>. 
+will have the column <u>#buried</u>.
 <br><br>The <u>User Remark</u> column has user-supplied information added with
 <tt>runSingleTCW</tt>. The <u>TCW Remark</u> has information added by the TCW <tt>ORF finder</tt> during annotation
 (See <b>Basic Sequence Help</b> for the <u>TCW Remark</u> Legend).
@@ -38,7 +38,7 @@ i.e. the combined replicates of the experimental conditions (tissue, treatment, 
 NOTE: If RPKM was computed instead of TPM, then the <b>Column</b> panel will say RPKM instead of TPM.
 
 <h2>N Fold and R Statistic</h2>
-N Fold - Select pairs of conditions to show their fold-change as a column. 
+N Fold - Select pairs of conditions to show their fold-change as a column.
 The fold change is calculated with TPM values using either of the following:
 <table>
 <tr><td><i>Log2</i>&nbsp;<td><td><i>Compute<sup>1</sup></i>&nbsp;<td><td><i>Display</i>
@@ -48,22 +48,22 @@ The fold change is calculated with TPM values using either of the following:
 <sup>1</sup>0.1 is added to both A and B before Log2FC or FC is computed in order to avoid problems with zero.
 
 <p>Check or un-checking <ttc>Log2</tt> will immediately change all selected pairs by replacing the "/" with ":" or vice versa.
-However, existing tables must be refreshed to change the column. 
+However, existing tables must be refreshed to change the column.
 <p>The <b>Filter</b> has a <b>N-fold</b> filter,
 which is separate from the column, e.g. the column can be Log2FC but the filter can be using FC, so make sure
 both the filter and column contain either ":" for Log2FC or "/" for FC.
 <p>
-R Statistic<sup>1</sup> - is a quick way to look for differential expression 
+R Statistic<sup>1</sup> - is a quick way to look for differential expression
 among all conditions at once.
 
 
 <h2>Differential Expression</h2>
-If your project has differential expression results added using 
-the <tt>runDE</tt> TCW program, then you can 
+If your project has differential expression results added using
+the <tt>runDE</tt> TCW program, then you can
 select those columns here. In order to indicate up/down regulation,
-up-regulated p-values are positive, down-regulated are negative. 
+up-regulated p-values are positive, down-regulated are negative.
 The DE column in the sequence table sorts without regard to the sign.
-<p><b>Note</b>: a "-" indicates the sequence was filtered out before DE analysis and a "NA" indicates that 
+<p><b>Note</b>: a "-" indicates the sequence was filtered out before DE analysis and a "NA" indicates that
 the DE computation returned an NA. The "-" and "NA" will always sort to the bottom of the table.
 
 <h2>Best Hits</h2>
@@ -80,22 +80,22 @@ The best hit with at least one assigned GO ID.
 
 <h2>SNPs and ORFs</h2>
 
-Note that SNPs are only available if the  assembly was performed within TCW. 
+Note that SNPs are only available if the  assembly was performed within TCW.
 
-<P>ORFs is the best "Open Reading Frame"". The best ORF is determined using 
-the best hit, longest open reading frame, and 5th-order Markov score. 
-For details, see the online <a href="http://www.agcol.arizona.edu/software/tcw/doc/stcw/ORF.html">ORF Finder</a>.
+<P>ORFs is the best "Open Reading Frame"". The best ORF is determined using
+the best hit, longest open reading frame, and 5th-order Markov score.
+For details, see the online <a href="https://csoderlund.github.io/TCW/stcw/ORF.html">ORF Finder</a>.
 <p>
 <hr>
 <p>
-<sup>1</sup>Stekel, D.J., Git, Y. and Falciani, F. (2000) 
+<sup>1</sup>Stekel, D.J., Git, Y. and Falciani, F. (2000)
 <br>
 The comparison of gene expression from multiple cDNA conditions. Genome Res, 10, 2055-2061.
 <p>
 Note that the R-statistic is a Poisson-based test not accounting for over-dispersion, hence
-can produce false-positives on RNA-seq data, especially at low fold change. Results should 
+can produce false-positives on RNA-seq data, especially at low fold change. Results should
 be verified by a more rigorous method (e.g., EdgeR, DESeq), but note that the latter methods
-work only on pairwise condition comparisons, and require replicates to work accurately.  
+work only on pairwise condition comparisons, and require replicates to work accurately.
 
 </body>
 </html>

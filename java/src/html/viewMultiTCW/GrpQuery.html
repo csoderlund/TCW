@@ -3,17 +3,17 @@
 <title>Filter Clusters</title>
 <h2>Filter Clusters</h2>
 A cluster must pass ALL filters. The filters selected will be shown at the top
-of the resulting filtered Cluster table. 
+of the resulting filtered Cluster table.
 <br>Beware:
 <ul>
 <li>It is easy to forget to unset a filter, so execute "Clear"
-to clear all filters in order to start a brand new filter. 
+to clear all filters in order to start a brand new filter.
 <li>If NO filters are set, all clusters will be displayed -- this can be a big
 set and may take time to display.
 </ul>
 <h3>+Basic</h3>
 <ul>
-<li>Filter on <tt>ClusterID</tt>, <tt>Majority HitID</tt> or <tt>Majority Description</tt>.  
+<li>Filter on <tt>ClusterID</tt>, <tt>Majority HitID</tt> or <tt>Majority Description</tt>.
 <ul>
 <li>The substring will only be searched if the box is checked.
 <li>The search is not case-sensitive and will find the substring anywhere in the ID or description.
@@ -22,7 +22,7 @@ them; if <tt>Not</tt> is selected, show all clusters that do NOT have the substr
 if the substring "uncharacterized" is entered for <tt>Description</tt> along with the <tt>Not</tt>,
 only clusters without the substring "uncharacterized" in the description will be shown.
 </ul>
-<li>For <tt>Majority Hit</tt>, see the <a href=http://www.agcol.arizona.edu/software/tcw/doc/mtcw/UserGuide.html#best>online documentation</a>
+<li>For <tt>Majority Hit</tt>, see the <a href="https://csoderlund.github.io/TCW/mtcw/UserGuide.html#best">online documentation</a>
 for details on how this is computed.
 <br>A <tt>Majority HitID</tt> of "*Novel" indicates none of the sequences in the cluster has
 annotation.
@@ -32,22 +32,22 @@ annotation.
 
 
 <h3>+Dataset</h3>
-The multiTCW database was created from one or more singleTCW databases (referred to as "dataset" here"). 
+The multiTCW database was created from one or more singleTCW databases (referred to as "dataset" here").
 Hence, each cluster contains sequences from one or more dataset.
 <ul>
 <li>
-Select the datasets to <tt>Include</tt>, 
-along with setting the minimum number sequences from each selected dataset. 
-If desired, select the datasets to <tt>Exclude</tt>, 
+Select the datasets to <tt>Include</tt>,
+along with setting the minimum number sequences from each selected dataset.
+If desired, select the datasets to <tt>Exclude</tt>,
 along with setting the maximum number of sequences from each selected dataset.
 
 <li>
-For both the include and exclude filters, you can choose to apply the sequence limit to 
- <tt>All Datasets</tt> selected, or to <tt>Any Dataset</tt> selected; in the latter case 
+For both the include and exclude filters, you can choose to apply the sequence limit to
+ <tt>All Datasets</tt> selected, or to <tt>Any Dataset</tt> selected; in the latter case
 the cluster will be shown if it passes the filter for at least one of the selected dataset.
 </ul>
-<p><i>Example: </i> Include dataset X and dataset Y, exclude all other dataset, 
-and select Taxa type 2x1. The results will show only clusters 
+<p><i>Example: </i> Include dataset X and dataset Y, exclude all other dataset,
+and select Taxa type 2x1. The results will show only clusters
 with two sequences, one from X and one from Y.
 
 <h3>+Cluster Sets</h3>
@@ -56,9 +56,9 @@ with two sequences, one from X and one from Y.
 indicator of the composition of the cluster, where Mx1 means it contains
 M different datasets with exactly one member from each, while MxN means
 there are M different datasets, and one or more datasets has more than one
-sequence. 
-<li>Filter on a selected cluster set by selecting its prefix. 
-A cluster set is computed with clustering 'method', which is not a column, 
+sequence.
+<li>Filter on a selected cluster set by selecting its prefix.
+A cluster set is computed with clustering 'method', which is not a column,
 but the <tt>Overview</tt> has a table of cluster prefixes with their methods.
 </ul>
 

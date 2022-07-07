@@ -2,18 +2,18 @@
 <body style="padding:20px;width:650px;">
 <title>Filter Pairs</title>
 <h2>Filter Pairs</h2>
-There is a pair for two sequences if they have a AA or NT hit. 
+There is a pair for two sequences if they have a AA or NT hit.
 The pair hits were computed by searching a file of all sequences
 in the database against itself using a heuristic search program
-such as <tt>Diamond</tt> or <tt>Blast</tt>. 
+such as <tt>Diamond</tt> or <tt>Blast</tt>.
 
 <p>
 A pair must pass ALL filters. The filters selected will be shown at the top
-of the resulting filtered Pairs table. 
+of the resulting filtered Pairs table.
 <br>Beware:
 <ul>
 <li>It is easy to forget to unset a filter, so execute "Clear"
-to clear all filters in order to start a brand new filter. 
+to clear all filters in order to start a brand new filter.
 <li>If NO filters are set, all pairs will be displayed -- this can be a big
 set and may take awhile to display.
 </ul>
@@ -21,24 +21,24 @@ set and may take awhile to display.
 <h3>+Basic</h3>
 Click the check box and enter the search value.
 <table border=1 cellpadding=3>
-<tr><td><tt>Pair #</tt><td> Search for the number shown in the <tt>Pair #</tt> column. 
-<tr><td><tt>SeqID</tt><td>If the <tt>SeqID</tt> of either sequence in the pair contains 
-the given substring, the resulting pair will be displayed. 
-<tr><td><tt>Shared HitID</tt><td>If the assigned <tt>HitID</tt> of a pair contains the given substring, 
-the resulting pair will be displayed. 
+<tr><td><tt>Pair #</tt><td> Search for the number shown in the <tt>Pair #</tt> column.
+<tr><td><tt>SeqID</tt><td>If the <tt>SeqID</tt> of either sequence in the pair contains
+the given substring, the resulting pair will be displayed.
+<tr><td><tt>Shared HitID</tt><td>If the assigned <tt>HitID</tt> of a pair contains the given substring,
+the resulting pair will be displayed.
 <br>The <tt>HitID</tt> "*NoShare" indicates the pair does not share any description.
 <br>The <tt>HitID</tt> "*Novel" indicates that neither sequence of the pair has any annotation.
-<br>See the <a href=http://www.agcol.arizona.edu/software/tcw/doc/mtcw/UserGuide.html#pairs>online documentation</a>
+<br>See the <a href="https://csoderlund.github.io/TCW/mtcw/UserGuide.html#pairs">online documentation</a>
 for a detailed description of how the <tt>Shared Hit</tt> is computed.
-<tr><td><tt>Shared Descript</tt><td>Displays all pairs that have the substring in the <tt>Descript</tt> column. 
+<tr><td><tt>Shared Descript</tt><td>Displays all pairs that have the substring in the <tt>Descript</tt> column.
 <tr><td><tt>PCC</tt><td> This is only relevant if there are TPM values in the database. The Pearson
-Correlation Coefficient (PCC) is computed for all pairs to determine their correlation. 
+Correlation Coefficient (PCC) is computed for all pairs to determine their correlation.
 </table>
 <p>Substring queries (<tt>SeqID</tt>, <tt>Shared HitID</tt>, <tt>Shared Descript</tt>):
 <ul>
 <li>The search is not case-sensitive and will find the substring anywhere in the ID or description.
 <li>The second two options have a <tt>Has</tt> and <tt>Not</tt> choice beside
-them; if <tt>Not</tt> is selected, show all pairs that do NOT have the substring. 
+them; if <tt>Not</tt> is selected, show all pairs that do NOT have the substring.
 </ul>
 
 <h3>+Hit</h3>
@@ -53,9 +53,9 @@ them; if <tt>Not</tt> is selected, show all pairs that do NOT have the substring
 either an AA or NT hit to be pair.
 
 <h3>+Statistics - only available if at least two NT datasets are in the mTCWdb</h3>
-Selecting <tt>Has Stats</tt> displays the pairs with the corresponding statistics, which are the 
-pairs that are in at least one cluster. 
- 
+Selecting <tt>Has Stats</tt> displays the pairs with the corresponding statistics, which are the
+pairs that are in at least one cluster.
+
 <br><br>For <tt>&gt;=N and &lt;M</tt>: If N=M, then the query is on "=N". For example, if both values are 0, then
 the query is for "=0".
 
@@ -65,7 +65,7 @@ defines it in the lower left hand corner as "Percent of codons that have an exac
 
 <br><br><tt>KaKs</tt>: This is the synonymous substitution rate (Ka) divided by the nonsynonymous
 substitution rate (Ks). KaKs&lt;1 is considered purifying selection and KaKs&gt;1
-is considered positive selection. If Kaks='-' then the overlap was too short to compute KaKs. 
+is considered positive selection. If Kaks='-' then the overlap was too short to compute KaKs.
 If <tt>KaKs=NA</tt> is selected and <tt>KaKs</tt> value(s) are entered, the query is on either condition.
 
 <h3>+Datasets</h3>
@@ -73,10 +73,10 @@ Select <tt>Different sets</tt> to only show pairs that are from different datase
 and <tt>Same sets</tt> to only show pairs from same sets.
 <p><tt>Pairs</tt>: If the mTCW database contains more than two datasets, then all pairs
 of datasets are shown. If a pair is selected, then it will only search for pairs
-that contain sequences from the two dataset. 
+that contain sequences from the two dataset.
 
 <h3>+Clusters</h3>
 One or more clusters sets will be in the database. They will all be listed here
 with an <tt>In</tt> to show pairs that are in the respective cluster, and <tt>Not in</tt>
-to only show pairs that are not in the respective cluster. 
+to only show pairs that are not in the respective cluster.
 </html>

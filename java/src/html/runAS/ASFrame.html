@@ -1,30 +1,32 @@
 <html>
+<head>
 <title>runAS</title>
+</head>
 <body style="padding:20px;width:650px;font-family:Times">
 <h1>Annotation Setup</h1>
 <code>RunAS</code> downloads the UniProt databases, creates FASTA files and creates a GO database.
-The UniProt FASTA files and GO database will be used in <code>runSingleTCW</code> to 
-annotate the sequences. 
+The UniProt FASTA files and GO database will be used in <code>runSingleTCW</code> to
+annotate the sequences.
 
-<p>It is <i><b>very important</i></b> to read the online
-<a href=http://www.agcol.arizona.edu/software/tcw/doc/stcw/AnnoDBs.html>AnnoDB documentation</a>.
+<p>It is <i><b>very important</b></i> to read the online
+<a href="https://csoderlund.github.io/TCW/stcw/AnnoDBs.html">AnnoDB documentation</a>.
 It provides details along with time and memory considerations.
 
-<p>Other databases (e.g. NCBI nr) can also be used in <code>runSingleTCW</code> for annotation, 
-but will not have GO support, and need to be downloaded manually 
-(see the online <a href=http://www.agcol.arizona.edu/software/tcw/doc/stcw/AnnoDBs.html#other>Other AnnoDBs</a>.).
+<p>Other databases (e.g. NCBI nr) can also be used in <code>runSingleTCW</code> for annotation,
+but will not have GO support, and need to be downloaded manually
+(see the online <a href="https://csoderlund.github.io/TCW/stcw/AnnoDBs.html#other">Other AnnoDBs</a>.).
 
 <h2>Requirements</h2>
 <ul>
-<li><code>runAS</code> uses <code>curl</code> for downloading annoDBs and the GO database; it 
+<li><code>runAS</code> uses <code>curl</code> for downloading annoDBs and the GO database; it
 will work without <code>curl</code>, but is not as reliable.
-<li>See the online <a href=http://www.agcol.arizona.edu/software/tcw/doc/stcw/AnnoDBs.html#over>Requirements</a>
+<li>See the online <a href="https://csoderlund.github.io/TCW/stcw/AnnoDBs.html#over">Requirements</a>
 for more information.
 </ul>
 
 <h2>Demo</h2>
 From the command line, run "<tt>./runAS -d</tt>" and the correct values for the demo will be entered. It is only necessary
-to run <b>Build GO</b>, as the rest of the necessary files are in the TCW package, i.e. 
+to run <b>Build GO</b>, as the rest of the necessary files are in the TCW package, i.e.
 under <tt>DBfasta/UniProt_demo</tt>.
 
 <h2>Processing steps</h2>
@@ -34,28 +36,28 @@ All files are created in the "UniProt" directory, default <tt>projects/DBfasta/U
 <br>This will download each selected UniProt .dat file(s) and create .fasta files from them.
 <br>&nbsp;
 <li>Select the "SwissProt" under "Full UniProt", followed by <b>Build Full</b>.
-<br>This will download the full SwissProt .dat file, and then create the .fasta file 
+<br>This will download the full SwissProt .dat file, and then create the .fasta file
 minus the sequences from the selected downloaded taxonomic databases.
-See the online <a href=http://www.agcol.arizona.edu/software/tcw/doc/stcw/AnnoDBs.html#full>Full Subsets</a>
+See the online <a href="https://csoderlund.github.io/TCW/stcw/AnnoDBs.html#full">Full Subsets</a>
 for detailed information.
 <br>&nbsp;
 <li>Create the GO database with <b>Build GO</b>.
 <br>This will download the GO database, creates a local mySQL GO database from the go-basic.obo file,
-and then add information from the downloaded taxonomic UniProt .dat files. 
-This uses the information in HOSTS.cfg for creating the mySQL database. 
+and then add information from the downloaded taxonomic UniProt .dat files.
+This uses the information in HOSTS.cfg for creating the mySQL database.
 </ol>
 
 <h2>Suggestions</h2>
 <ul>
-<li>Download all relevant SwissProt files and the Full SwissProt UniProt. 
+<li>Download all relevant SwissProt files and the Full SwissProt UniProt.
 <li>Download only the most relevant TrEMBL files. Do not download the Full TrEMBL UniProt unless absolutely necessary.
-<li>See the online <a href=http://www.agcol.arizona.edu/software/tcw/doc/stcw/AnnoDBs.html#mem>Memory and time</a>
-and <a href=http://www.agcol.arizona.edu/software/tcw/doc/stcw/AnnoDBs.html#best>What AnnoDBs to use</a>.
+<li>See the online <a href="https://csoderlund.github.io/TCW/stcw/AnnoDBs.html#mem">Memory and time</a>
+and <a href="https://csoderlund.github.io/TCW/stcw/AnnoDBs.html#best">What AnnoDBs to use</a>.
 <li>Download all desired taxonomic UniProt files and build the GO database in the same day to make sure they
 are consistent.
 </ul>
 
-<h2>Check</h2> 
+<h2>Check</h2>
 If a label is highlighted in blue, the directory exists.
 <br>If a checkbox is highlighted in pink, the .dat file is downloaded but the .fasta file does not exist.
 <br>If a checkbox is highlighted in blue, both the .dat file and .fasta file exists.
@@ -64,7 +66,7 @@ If a label is highlighted in blue, the directory exists.
 
 <p>To view the list of UniProts in an existing GOdb, or force a check, select <b>Check</b>.
 
-<p><b><i>Downloads are never re-downloaded</b></i>: 
+<p><b><i>Downloads are never re-downloaded</i></b>:
 If you re-run a "Build" when the corresponding labels are highlighted, new files will
 not be downloaded but the the appropriate files (e.g. .fasta) will be recreated. If you want to download new files,
 you must manually remove the corresponding directory.
@@ -82,13 +84,13 @@ ALL processing is complete:
 <li>All "dat.gz" files in the UniProt directories, as the information has
 been transferred to the FASTA files and GO database, which is what <tt>runSingleTCW</tt>
 uses.
-<li>The GO directory, as the information has been transferred to the GO database. 
+<li>The GO directory, as the information has been transferred to the GO database.
 </ul>
-However, if you do not have a space problem, keep them just for insurance. 
+However, if you do not have a space problem, keep them just for insurance.
 When UniProt does the monthly update, your downloaded files will no longer be available
-on their site. 
+on their site.
 
 <p>If you are going to use <code>DIAMOND</code> for the searches, you may gzip the .fasta
 files.
-
+</body>
 </html>

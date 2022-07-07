@@ -947,7 +947,7 @@ public class ManagerData {
 					for (int i=0; i< sObj.repArray.length; i++) {
 						String repName = sObj.repArray[i];
 						if (!repMap.containsKey(repName)) {
-							Out.PrtWarn("column " + repName + " not in LIB.cfg");
+							Out.PrtWarn("condition " + repName + " not in LIB.cfg");
 							cntErrors++;
 						}
 						if (sObj!=null) {

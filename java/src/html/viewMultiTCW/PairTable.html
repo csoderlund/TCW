@@ -4,7 +4,7 @@
 
 <h2>Pair Table</h2>
 There is a pair for a given two sequences if they have a NT (nucleotide)
-of AA (amino acid) hit, which are computed when the mTCWdb is created. 
+of AA (amino acid) hit, which are computed when the mTCWdb is created.
 There are only coding statistics and KaKs values
 for pairs in clusters (it depends how the database was built -- these values
 may only exist for certain cluster sets).
@@ -18,11 +18,11 @@ in the sequence table.
 <p>
 <u>Pairwise...</u>
 <table border=1 cellpadding=3>
-<tr><td><b>AA for each pair</b> <td><td>Pairwise 
-alignment for all pairs of amino acid sequences from the selected sequences. 
-<tr><td><b>NT for each pair</b><td nowrap>NT-mTCW only<td> Pairwise 
-alignment for all pairs of nucleotide sequences from the selected sequences. 
-<tr><td><b>AA,NT,CDS for one pair</b> <td>NT-mTCW only<br>1 pair selected 
+<tr><td><b>AA for each pair</b> <td><td>Pairwise
+alignment for all pairs of amino acid sequences from the selected sequences.
+<tr><td><b>NT for each pair</b><td nowrap>NT-mTCW only<td> Pairwise
+alignment for all pairs of nucleotide sequences from the selected sequences.
+<tr><td><b>AA,NT,CDS for one pair</b> <td>NT-mTCW only<br>1 pair selected
 <td>Align the selected pair using the amino acid sequence,
 CDS sequence, and nucleotide sequences. The resulting panel will have these 3 alignments.
 <tr><td><b>5UTR, CDS, 3UTR for one pair</b> <td>NT-mTCW only<br>1 pair selected
@@ -41,35 +41,35 @@ The resulting panel will have these 3 alignments.
 
 <p><u>Table...</u>
 <ul>
-<li><b>Show Columns Stats:</b> Popup a table of statistics for the numeric columns in the table. 
+<li><b>Show Columns Stats:</b> Popup a table of statistics for the numeric columns in the table.
 <br>&nbsp;
 <li><b>Show Table Stats:</b> (NT-mTCW only) Popup a table of the coding and KaKs statistics for the pairs in the
 table. <i>This only works for pairs that have coding sequence statistics.</i>
 <br>&nbsp;
-<li><b>Copy Table</b>: Copies the table to the clipboard. 
+<li><b>Copy Table</b>: Copies the table to the clipboard.
 <br>&nbsp;
-<li><b>Export Table (.tsv)</b>: Exports the table to file. 
+<li><b>Export Table (.tsv)</b>: Exports the table to file.
 <br>&nbsp;
 <li><b>Export both AA/NT sequences (.fa)</b>: Exports both AA (amino acid) or NT (nucleotide) sequences for all pairs in the table.
 <br>&nbsp;
 <li><b>Export 1st AA/NT sequences (.fa)</b>: Exports the 1st AA or NT sequence of the pair for all pairs in the table.
 <br>&nbsp;
 
-<li><b>Export Pair GOs (.tsv):</b> list GOs associated with the pair sequences in the table. 
+<li><b>Export Pair GOs (.tsv):</b> list GOs associated with the pair sequences in the table.
 If either
 sequence in the pair has a hit with a GO the passes the below filters, the pair is
 counted as having the GO. NOTE: it does NOT use the Pair "Best Anno Hit". The first three are filters::
 <ol>
-<li><i>GO Level</i>: 
+<li><i>GO Level</i>:
 	<ol type='a'>
 	<li>Level 1 is the three ontologies (top level). Level 2 are the GO terms directly beneath
-the top level, etc. 
-	<li>If you leave this blank, it will output all GOs. 
+the top level, etc.
+	<li>If you leave this blank, it will output all GOs.
 	<li>If you just want a couple of levels, e.g. 2 and 3, first export level 2, then export level 3
 to the same file and use the append option (there will be a pop-up asking whether you want to append).
 	</ol>
 
-<li><i>Any Ontology</i>: This toggles through the three main ontologies. If you select one, it will only 
+<li><i>Any Ontology</i>: This toggles through the three main ontologies. If you select one, it will only
 export the GOs in that ontology.
 
 <li><i>E-value</i>: If you leave this blank, it will ignore the E-value. Otherwise,
@@ -79,39 +79,39 @@ at least one sequence in the cluster must have a seq-hit E-value&le; this value.
 it is not written to file.
 <li><i>File Columns</i>:
 	<ol type='a'>
-	<li>Verbose: outputs columns 
+	<li>Verbose: outputs columns
 	<tt>
 	GO-ID	#Pair	Level	Ont	GO-Name
 	</tt>
 	<li>Desc/Count: outputs the name and count by ontology.
 	<br>This can be used in Excel to create graphs.
-	<li>GO/Count: only outputs the <tt>GO ID</tt> and <tt>#Pairs</tt>. 
+	<li>GO/Count: only outputs the <tt>GO ID</tt> and <tt>#Pairs</tt>.
 	<br>This can be used as input to input to REVIGO (http://revigo.irb.hr)
 	</ol>
 </ul>
 
 <h2>Columns</h2>
 
-<ul> 
+<ul>
 <li>Put the mouse over a column name in the <b>Select Columns</b> interface, and a full explanation of the column is shown
 in the lower left corner.
-<li>Columns can be added/removed using the <b>Select Columns</b> button below the table. 
+<li>Columns can be added/removed using the <b>Select Columns</b> button below the table.
 <li>Columns can
-also be rearranged (by dragging the headers) and sorted (by clicking the headers). 
+also be rearranged (by dragging the headers) and sorted (by clicking the headers).
 
 <li>One or more pair rows can be selected using mouse click, shift-click, or ctrl-click.
 </ul>
 The columns available depend on whether the mTCW database was build with nucleotide or protein
-sequences. 
+sequences.
 The sections are as follows, where most columns are adequately explain with the mouse-over,
 except the following:
 
 <table border=0 cellspacing=3>
 <tr><td><b>General</b><td>&nbsp;
 <tr><td valign="top">&nbsp;&nbsp;HitID<td>The best shared hit from the pair
-(see the <a href=http://www.agcol.arizona.edu/software/tcw/doc/mtcw/UserGuide.html#step2>online documentation</a>
-for a description of how this is computed). 
-<br>The <tt>HitID</tt> "*NoShare" indicates the neither seqID of the pair has a BestAnno hit that is 
+(see the <a href="https://csoderlund.github.io/TCW/mtcw/UserGuide.html#pairs">online documentation</a>
+for a description of how this is computed).
+<br>The <tt>HitID</tt> "*NoShare" indicates the neither seqID of the pair has a BestAnno hit that is
 found in the description list of the other seqID of the pair.
 <br>The <tt>HitID</tt> "*Novel" indicates that neither sequence of the pair has any annotation.
 
@@ -119,7 +119,7 @@ found in the description list of the other seqID of the pair.
 This only has values>0 if the datasets have matching condition names.
 
 <tr><td valign="top"><b>Pair Hit</b><td>Results from AA and NT sequence self-blast. All
-columns are directly from the <tt>Blast</tt> or <tt>Diamond</tt> output except the 'cov' columns. 
+columns are directly from the <tt>Blast</tt> or <tt>Diamond</tt> output except the 'cov' columns.
 
 <tr><td valign="top" nowrap>&nbsp;&nbsp;Cov1, Cov2<td>The percent coverage, which is computed from the
 'align' divided by sequence length. <i>The Cov (percent coverage) can be &gt;1;</i> this happens when
@@ -127,7 +127,7 @@ the alignment covers the whole sequence with gaps.
 
 <tr><td valign="top"><b>KaKs</b><td> (NT-mTCW only)
 Ka is the synonymous substitution rate. Ks is the non-synonymous
-substitution rate. KaKs is Ka/Ks. The p-value applies to the KaKs value. 
+substitution rate. KaKs is Ka/Ks. The p-value applies to the KaKs value.
 
 </table>
 

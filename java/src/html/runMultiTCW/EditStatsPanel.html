@@ -1,5 +1,8 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
+<head>
 <title>Stats Settings</title>
+</head>
 <body style="padding:20px;width:650px;font-family:Times">
 <h2>Pair Stats Settings</h2>
 
@@ -11,7 +14,7 @@
 <li><b>Add New Clusters</b> must be executed before the alignments.
 <br>&nbsp;
 
-<li><b>Run Stats</b> with <b>Write</b> selected must be executed 
+<li><b>Run Stats</b> with <b>Write</b> selected must be executed
 before <b>Read</b> can be selected. See KaKs below.
 </ul>
 
@@ -20,7 +23,7 @@ PCC is computed on the TPM for shared conditions. This can be run at anytime aft
 the pairs have been added.
 
 <h3>Alignment of hit pairs in cluster</h3>
-If you execute <b>Run Stats</b> with <b>Compute statistics</b> and <b>KaKs files - Write</b> selected, 
+If you execute <b>Run Stats</b> with <b>Compute statistics</b> and <b>KaKs files - Write</b> selected,
 the following will occur:
 <ol>
 <li>Perform CDS and UTR alignments using dynamic programming on all pairs that (i) have a hit and (ii) are in
@@ -37,7 +40,7 @@ a big dataset, plan to leave it running over night).
 <ol>
 <li>The <b>write</b> will write alignment files into <tt>projcmp/&lt;project name&gt;/KaKs</tt> directory.
 A file called <tt>runKaKs</tt> will also be written into this file. If your computer has N CPUs,
-it will split the alignments into N files, which <tt>runKaKs</tt> will run concurrently. 
+it will split the alignments into N files, which <tt>runKaKs</tt> will run concurrently.
 <br>&nbsp;
 
 <li><tt>runKaKs</tt>: This script runs <tt>KaKs_Calculator</tt>, which is in the <tt>Ext</tt> directory.
@@ -58,19 +61,19 @@ alignment:
 <tr><td nowrap valign=top>Clusters of size &gt;2<td>Use the program <tt>MAFFT</tt>. Occasionally, <tt>MAFFT</tt> fails, in which case, <tt>MUSCLE</tt> is run.
 </table>
 
-<br>The MSA scores are the Sum-of-Pairs and Wentropy, where Wentropy is computed just like the 
-<tt>MstatX</tt> program except the score is (1 - score) to make 1 the best score.  
+<br>The MSA scores are the Sum-of-Pairs and Wentropy, where Wentropy is computed just like the
+<tt>MstatX</tt> program except the score is (1 - score) to make 1 the best score.
 The Sum-of-Pairs is normalized to be between 0-1, where 1 is the best score.
 
-<p>The <tt>MstatX</tt> methods can be used in place of the defaults. 
-In order to obtain more information, run <tt>runMultiTCW -h</tt>; 
-also see www.agcol.arizona.edu/software/tcw/doc/mtcw/UserGuide.html.
+<p>The <tt>MstatX</tt> methods can be used in place of the defaults.
+In order to obtain more information, run <tt>runMultiTCW -h</tt>;
+also see <a href="https://csoderlund.github.io/TCW/mtcw/UserGuide.html#msa">User Guide on MSA score</a>.
 <hr>
 
 <h3>Add additional cluster sets</h3>
 If you add additional cluster sets after executing <b>Run Stats</b> on initial clusters,
 you can <b>Run Stats</b> again and it will only compute the pair and cluster statistics for the
-new data. 
+new data.
 
 <p><b>KaKs</b>:
 If you have already written the KaKs files, run the <tt>KaKs_calculator</tt>, and read in the results;
@@ -82,9 +85,9 @@ cat oTCW* >save_oTCW_files
 </pre>
 Do not prefix the saved file with 'oTCW' or 'iTCW' as TCW writes and reads files with those prefixes.
 
-<p>The KaKs files are written to use the 'YN' method, which executes very fast. 
-If you use a slower method, you may want to only  run the <tt>KaKs_calculator</tt> 
-on the BBH clusters, in which case, add them first, run the statistics 
+<p>The KaKs files are written to use the 'YN' method, which executes very fast.
+If you use a slower method, you may want to only  run the <tt>KaKs_calculator</tt>
+on the BBH clusters, in which case, add them first, run the statistics
 with <b>KaKs Write</b> so only the BBH clusters are written
 to file, then add other cluster sets if desired.
 
@@ -94,7 +97,7 @@ to file, then add other cluster sets if desired.
 <i>the pair statistics will still exist</i>.
 <li>You can remove all pairs and clusters to start over by using the <b>Remove...</b> option
 at the top and select "Pairs and clusters from database".
-</ul> 
-
-
+</ul>
+</body>
 </html>
+
