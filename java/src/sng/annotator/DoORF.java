@@ -908,7 +908,9 @@ public class DoORF {
 				
 				int hitStart = curSeqObj.seqHitStart, hitEnd = curSeqObj.seqHitEnd;
 				int oStart = bestORF.oStart, oEnd=bestORF.oEnd;
-				if (hitStart==oStart && (hitEnd == oEnd ||hitEnd == oEnd-3)) {
+				
+				boolean x = (hitEnd == oEnd-3 && curSeqObj.hasEnd); // CAS403 wasn't checking hasEnd
+				if (hitStart==oStart && (hitEnd == oEnd || x)) {
 					curSeqObj.addRemark(Globals.RMK_ORF_exact);
 					if (bestORF.hasATG && bestORF.hasStop) {
 						curSeqObj.appendRemark(Globals.RMK_ORF_exact_END);

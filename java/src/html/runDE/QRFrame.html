@@ -3,10 +3,10 @@
 <body style="padding:20px;width:650px;font-family:Times;">
 <h1>Differential expression (DE)</h1>
 
-This tool allows you to define groups of conditions and compute their 
+This tool allows you to define groups of conditions and compute their
 differential expression, either using R package <tt>edgeR</tt> or <tt>DESeq2</tt>, or supplying
-an R-script for a given R package that computes DE. 
- 
+an R-script for a given R package that computes DE.
+
 DE-enriched GO categories can also be found using <tt>GOSeq</tt> or a user-supplied R-script.
 See the Online Guide for assistance installing the R packages.
 
@@ -21,12 +21,12 @@ Two methods are provided as example, <tt>edgeRglm.R</tt> and <tt>DESeq2.R</tt>.
 
 <li>Pre-filter:
 <ul>
-<li><u>Count</u>: Any sequence that does not have at least one sample with counts >cutoff is not evaluated. 
+<li><u>Count</u>: Any sequence that does not have at least one sample with counts >cutoff is not evaluated.
 <li><u>CPM</u>: This has two parameters, say N and M.
 Any sequence that does not have CPM &gt; N for &gt;= M samples is not evaluated.
 The CPM for a sequence is the (count/sample_size) * 1E6. For example, if there are 2 conditions
 with 3 replicates each, and N=20 and M=2, then at least 2 of the 6 samples
-must have CPM&gt;20. 
+must have CPM&gt;20.
 
 <li><u>None</u>: No filtering.
 </ul>
@@ -40,17 +40,17 @@ The values will be written to the terminal near the top of the output.
 the filtered sequences will have a 3 for the DE value. If the DE analysis return a
 NA, it will have a value of 2.
 <p>
-<li><u>Fixed dispersion</u>: used when there are no replicates. 
+<li><u>Fixed dispersion</u>: used when there are no replicates.
 <ul>
-<li>For <tt>edgeR</tt>, if there are no replicates and this is not set, it will use a 0.1 dispersion. 
-<li><tt>DESeq2</tt> does not use a  fixed dispersion (see its documentation). 
+<li>For <tt>edgeR</tt>, if there are no replicates and this is not set, it will use a 0.1 dispersion.
+<li><tt>DESeq2</tt> does not use a  fixed dispersion (see its documentation).
 <li>This value will be written to the R environment using the variable 'disp'.
 </ul>
 
 </ol>
 Execute
 <ol>
-<li><b>All Pairs for Group 1</b>: 
+<li><b>All Pairs for Group 1</b>:
 <ul>
 <li>Only check conditions in Group 1.
 <li>Results will be saved in the database with auto-generated column names. If the auto-generated
@@ -58,23 +58,23 @@ name exists in the database, it will not be re-computed.
 <li>Each pair of conditions selected in group 1 will compared; any selections
 in Group 2 are ignored.
 </ul>
-<li><b>Group 1 - Group 2</b>: 
+<li><b>Group 1 - Group 2</b>:
 <ul>
-<li>Select at least one condition from each group. 
+<li>Select at least one condition from each group.
 The condition(s) in Group 1 will be compared with the condition(s) in group 2.
 <li>If you want to store the results in the database:
 <ul>
 <li>Check <u>Save results in P-value column</u>.
 If the groups have been selected, a column name will be auto-generated which you can change.
 <li>When you change the groups for a subsequent execution, uncheck-then-check the column box
-to auto-generated a name for the new groups. 
+to auto-generated a name for the new groups.
 </ul>
 <li>This is the only option that allows you to compute DE without writing to the database,
 e.g. if you want to view the results in R first.
 <li>This option allows you to over-write an existing column with the same name.
 </ul>
 
-<li><b>All Pairs from File</b>: 
+<li><b>All Pairs from File</b>:
 <ul>
 <li>The Condition section is ignored; the conditions to
 compare are specified in the file (see file format in "Details").
@@ -84,12 +84,12 @@ compare are specified in the file (see file format in "Details").
 <li><b>P-values from file</b>
 <ul>
 <li>The Conditions and options are ignored, and R is not used.
-<li>The p-values are read from file (see "Details" below for file format). 
+<li>The p-values are read from file (see "Details" below for file format).
 <li>This option allows you to over-write an existing column with the same name.
 </ul>
 </ol>
 <p><i>A p-value does not distinguish whether condition 1 is greater than condition 2 or vice versa.
-Therefore, if the count for condition 1 is less than the count for condition 2, 
+Therefore, if the count for condition 1 is less than the count for condition 2,
 a negative sign is put before the p-value.</i>
 
 <p>The first three options will leave your terminal in the "R environment", described
@@ -100,55 +100,60 @@ Select <b>Execute</b> to run the specified <u>R-script</u> on the selected colum
 default R-script is <tt>GOseqBH.R</tt> which executes <tt>GOseq</tt> followed by
 Benjamini and Hochberg multiple hypothesis testing correction.
 The data will be entered into the GO table of the database using the p-value column name.
-<p><u>All DE p-value</u>: 
+<p><u>All DE p-value</u>:
 <ol>
 <li>If this drop-down has value "All DE p-value", then the R-script will be run on all DE columns
 in the database. If a GO p-value column exists for one or more of the DE columns, they will <i>not</i>
 be overwritten.
 <li>Either double click this drop-down box, or scroll through the DE p-value columns using the
-arrows. If a DE p-value column is selected, the corresponding GO enrichment will be computed; 
+arrows. If a DE p-value column is selected, the corresponding GO enrichment will be computed;
 if the column exists, it <i>will</i> be overwritten.
 </ol>
 <p><u>Cutoff</u>:
 <ol>
-<li>P-value: If a sequence has a DE p-value less than this amount (e.g. 0.05), 
+<li>P-value: If a sequence has a DE p-value less than this amount (e.g. 0.05),
 it is considered DE. <tt>GOseq</tt>
-takes as input the information as to whether or not each sequence is DE, 
-where a 1 indicates it is and a 0 indicates it is not. 
+takes as input the information as to whether or not each sequence is DE,
+where a 1 indicates it is and a 0 indicates it is not.
 <li>Top X%: Instead of a p-value, you can request that the X% of the sequences with the
 lowest DE be considered DE for input to <tt>GOseq</tt>.
-</ol> 
+</ol>
 
-<!----------------------------------------------------!>
+<!---------------------------------------------------->
 <h2>Remove columns</h2>
 
-Select <b>Remove</b> beside the <b>DE P-val</b> dropdown 
+Select <b>Remove</b> beside the <b>DE P-val</b> dropdown
 to remove the selected p-value column(s) and corresponding GO column (if it exists).
 A value of <u>All DE p-values</u> will remove all p-value columns.
 
-<p>Select <b>Remove</b> beside the <b>GO Enrich</b> dropdown 
+<p>Select <b>Remove</b> beside the <b>GO Enrich</b> dropdown
 to remove the selected GO enrichment column(s).
 A value of <u>All GO enrich</u> will remove all GO enrichment columns.
 <p>For either "Remove", select a existing column as follows:
 Either double click the drop-down box, or scroll through the DE p-value columns using the
 arrows.
-<!----------------------------------------------------!>
+<!---------------------------------------------------->
 <h2>Update, Close and Exit</h2>
 <ol>
 <li><b>Update Overview</b>:
 The "Overview" needs to be updated after changes to the DE columns.
 It will also display the overview; if there have been no changes, it will only display.
 <li><b>Close</b>: Close the window, but do not exit the R environment (if active).
-<li><b>Exit</b>: Close the window, and if there are no other active <tt>runDE</tt>
-windows, exit R.
+<li><b>Exit</b>: Only available if not run from the <b>Database Chooser</b>.
+Close the window and exit the R environment saving the session.
 </ol>
-<!----------------------------------------------------!>
+If at any time you respond to the R prompt:
+<pre>
+Save workspace image? [y/n/c]:
+</pre>
+all windows will close.
+<!---------------------------------------------------->
 <h2>R environment</h2>
 At the end of execution, the terminal will be in the "R environment" so that you can execute
 R commands to view graphs of the results. You can tell when it is in the R environment because there is only a ">" for the prompt.
 
 <p>To exit the R environment,  enter <tt>q()</tt>; it will ask
-you if you want to 
+you if you want to
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<tt>Save workspace image? [y/n/c]</tt>:
 <ul>
 <li> y - exit and saves the environment; you can later restart R
@@ -157,20 +162,20 @@ you if you want to
 </ul>
 <p>
 However, when <tt>runDE</tt> writes to the terminal, you will no longer see the ">"; hit
-carriage return and you will get the "<tt>Save workspace image?</tt>" prompt. 
+carriage return and you will get the "<tt>Save workspace image?</tt>" prompt.
 <p>
 Some R commands of interest:
 <ul>
-<li>Type <tt>ls()</tt> to list the defined variables. 
+<li>Type <tt>ls()</tt> to list the defined variables.
 <li>Type a variable name to view its
-contents. 
+contents.
 <li>The build-in methods print ways to display a plot, e.g. for
 <tt>edgeR</tt>,  it says "<tt>Scatter plot: plotBCV(y)</tt>".
 </ul>
 When querying the R environment from <tt>runDE</tt>, the scroll keys may not work.
 In order to use the scroll keys,
-type q(), followed by 'y', then start the R environment from the command line. 
-<!----------------------------------------------------!>
+type q(), followed by 'y', then start the R environment from the command line.
+<!---------------------------------------------------->
 <hr>
 <h2>Details</h2>
 <h3>Select conditions</h3>
@@ -191,7 +196,7 @@ sure that the condition names and DE column names are the same.
 
 <h3>Get Pairs from File</h3>
 The file can have many rows, where each line contains three columns separated by blanks.
-The first column is group1, the second is group2, and the third is the 
+The first column is group1, the second is group2, and the third is the
 p-value column name. If
 you want multiple conditions for group1, separate them with colons. For example:
 <pre>
@@ -209,7 +214,7 @@ The first line defines the two groups and the p-value column name, using the sam
 as the "Get Pairs from File". All remaining lines have
 a <tt>seqID</tt> followed by the p-value. For example,
 <pre>
-#Example p-value file 
+#Example p-value file
 root stem RoSt
 tra_001	0.14
 tra_002	0.14
@@ -238,6 +243,6 @@ the variables are written to standard out with explanations.
 is created before the R-script execution, so if the order is not changes, it does not
 need to be changed.
 </ol>
-See the existing scripts for examples. The <u>GO enrichment</u> also uses an R-script in 
+See the existing scripts for examples. The <u>GO enrichment</u> also uses an R-script in
 a similar way (see <tt>goSeqBH.R</tt>) and the on-line documentation.
 </html>

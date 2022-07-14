@@ -7,17 +7,17 @@
 
 
 <h1>Sequence Align Hits with DP</h1>
-The alignment shown uses dynamic programming (DP), whereas <tt>BLAST</tt> or <tt>DIAMOND</tt> 
+The alignment shown uses dynamic programming (DP), whereas <tt>BLAST</tt> or <tt>DIAMOND</tt>
 use an heuristic algorithm:
 <ul>
-<li>Hits were assigned to sequences using an heuristic search program (<tt>BLAST</tt> or <tt>DIAMOND</tt>) 
+<li>Hits were assigned to sequences using an heuristic search program (<tt>BLAST</tt> or <tt>DIAMOND</tt>)
  when the database was build, and
 their coordinates stored in the database; any references to 'Hit' indicate these coordinates.
 <li>Dynamic programming is a slower alignment, but is considered more likely to get the correct alignment;
-this display uses a semi-global dynamic programming with affine gaps algorithm. 
+this display uses a semi-global dynamic programming with affine gaps algorithm.
 <li>In the display:
 <ul>
-<li><b>DP:</b> The percentage is the similarity for the dynamic programming algorithm. 
+<li><b>DP:</b> The percentage is the similarity for the dynamic programming algorithm.
 <li><b>Hit:</b> The statistics are from the search program results; they are percent similarity,
 E-value, bit-score and alignment length, respectively.
 </ul>
@@ -27,19 +27,19 @@ E-value, bit-score and alignment length, respectively.
 <b>View Seq/Line</b> Changes the display from a line drawing to the actual sequence. For the <b>Seq</b> view, overhangs are automatically trimmed to first and last 15 bases.
 
 <p><b>Zoom</b> Changes the horizontal zoom. The 1:1 displays each mismatch with no space between adjacent ones.
-The 1:N (N&gt;1) compresses the mismatches. The N:1 (N&gt;1) puts a space between adjacent mismatches, and 
+The 1:N (N&gt;1) compresses the mismatches. The N:1 (N&gt;1) puts a space between adjacent mismatches, and
 increases the width of the mismatch vertical line.
 
-<p><b>Trim</b> Removes the overhangs (i.e. the ends where one sequence is longer than the other). 
+<p><b>Trim</b> Removes the overhangs (i.e. the ends where one sequence is longer than the other).
 
-<p><b>UTRs</b> Highlights the UTRs in yellow (nucleotide databases only). 
-<br><i>Caveats:</i> 
-(1) This is turned off with the <b>Trim</b> mode since the UTR often covers the overhang.  
-(2) The UTR is not displayed for nucleotide hits. 
+<p><b>UTRs</b> Highlights the UTRs in yellow (nucleotide databases only). If the Hit and ORF overlap, the highlight will be aquamarine.
+<br><i>Caveats:</i>
+(1) This is turned off with the <b>Trim</b> mode since the UTR often covers the overhang.
+(2) The UTR is not displayed for nucleotide hits.
 (3) This is not available for "Selected hit(s) in all frames".
 
 <p><b>Hit</b> Highlights the region from the start to end using the sequence hit coordinates; if the
-sequence is nucleotide, they are 
+sequence is nucleotide, they are
 are converted to protein coordinates and shifted to take account of the gaps.
 
 <br><i>Caveats:</i>  (1) The display starts at 0, whereas the search program coords start at 1. (2) This is not
@@ -47,10 +47,10 @@ available for "Selected hit(s) in all frames".
 <p><u>Tool Tip</u> When the Hit is highlighted, mouse over the blue region and it will show the sequence coordinates (adjusted
 for AA sequences) and  the coordinates adjusted for gap insertion.
 
-<p><b>Align....</b> 
+<p><b>Align....</b>
 This provides a multi-line character based alignment.
 This features requires that the 2nd sequence in an alignment pair be selected;
-if none is selected, then the first alignment pair will be aligned. 
+if none is selected, then the first alignment pair will be aligned.
 It pops up with the following options (see last section for definition of terms):
 <ol>
 <li><u>Original semi-global with affine gaps</u>: This shows the same alignment as

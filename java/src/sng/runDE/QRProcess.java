@@ -70,14 +70,16 @@ public class QRProcess {
 		mDB = m;
 		dbName = name;
 	}
-	public boolean rStart(boolean bDE) {
+	public boolean rStart(boolean bDE) { // bDE is DE, else is GO
 		try {
-			String sql = "select schemver from schemver where schemver='" + Schema.currentVerString() + "'";
-			String ver = mDB.executeString(sql);
-			if (ver==null || ver.contentEquals("")) {
-				System.err.println("Database is not current (" + Schema.currentVerString() + ") - viewSingleTCW project to update.");
-				boolean c = Out.yesNo("Continue?"); // CAS321 was just returning false
-				if (!c) return false;				
+			if (re == null) { //CAS403 check the first time - QRprocess is 1-1 with DB
+				String sql = "select schemver from schemver where schemver='" + Schema.currentVerString() + "'";
+				String ver = mDB.executeString(sql);
+				if (ver==null || ver.contentEquals("")) {
+					System.err.println("Database is not current (" + Schema.currentVerString() + ") - viewSingleTCW project to update.");
+					boolean c = Out.yesNo("Continue?"); // CAS321 was just returning false
+					if (!c) return false;				
+				}
 			}
 			if (re == null) {
 				initJRI();
@@ -114,6 +116,15 @@ public class QRProcess {
 				"when done, or perform another Execute.");
 		System.err.print(">");
 		Out.close();
+	}
+	public void rQuit() { // CAS403
+		if (re != null) {
+			Out.Print("Quit R saving session");
+			Out.close();
+			doCmd(false,"q(\"yes\", 0)");
+			re.end();
+			re = null;
+		}
 	}
 	private void createLogFile() {
 		try {
@@ -969,8 +980,7 @@ public class QRProcess {
 	/***********************************************
 	 * XXX JRI
 	 */
-	private void initJRI()
-	{
+	private void initJRI() {
 		try {
 			if (re == null) {
 				Out.Print("\nStartup R");
@@ -978,26 +988,33 @@ public class QRProcess {
 				boolean flag=false;
 			    for (String envName : env.keySet()) {
 		            if (envName.contains("R_HOME")) {
-		            		System.err.format("%s=%s\n\n", envName,env.get(envName));
-		            		flag=true;
+		            	System.err.format("%s=%s\n\n", envName,env.get(envName));
+		            	flag=true;
 		            }
 			    }
 			    if (!flag) Out.PrtWarn("$R_HOME not set\n");
 			    Out.Print("Checking if runDE has the correct java.library.path....");
 				if (!Rengine.versionCheck()) {
-				    Out.PrtError("Version mismatch - Java files don't match library version.");
+				    Out.PrtError("Version mismatch - Java files do not match library version.");
 				    System.exit(1);
 				}
-				re= Rengine.getMainEngine();
-				String[] args = {"--vanilla"};
-				re = new Rengine(args, true, new TextConsole());
-		        Out.Print("Rengine created, waiting for R");
-		        
-				// the engine creates R is a new thread, so we should wait until it's ready
-		        if (!re.waitForR()) {
-		            Out.PrtError("Cannot load R");
-		            return;
-		        }
+				
+				re = Rengine.getMainEngine();
+				if (re == null) { //CAS403 check because may have been started in previous QRProcess Obj
+					String[] args = {"--vanilla"};
+
+					re = new Rengine(args,/*runMainLoop=*/true, new TextConsole()); 
+			        Out.Print("Rengine created, waiting for R");
+			        
+					// the engine creates R is a new thread, so we should wait until it's ready
+			        if (!re.waitForR()) {
+			            Out.PrtError("Cannot load R");
+			            return;
+			        }
+				}
+				else {
+					Out.Print("Use existing R session");
+				}
 			}
 			else {
 				Out.Print("Use existing R session");

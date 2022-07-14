@@ -32,7 +32,7 @@ public class QRMain {
 			 }
 			
 			 if (args.length == 0) 
-				 new QRFrame(hostsObj, dbList);
+				 new QRChooser(hostsObj, dbList);
 			 else { 
 				if (args.length>1 && args[1].equals("-v")) {
 					verbose = true;
@@ -55,7 +55,7 @@ public class QRMain {
 					}
 					System.exit(-1);
 				}
-				new QRFrame(hostsObj, dbObj);
+				new QRFrame(hostsObj, dbObj, null);
 			 }
 		}
 		catch(java.lang.UnsatisfiedLinkError e)

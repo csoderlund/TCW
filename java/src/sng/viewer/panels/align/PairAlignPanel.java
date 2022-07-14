@@ -197,6 +197,7 @@ public class PairAlignPanel extends PairBasePanel {
 	*************************************************************/
 	
 	private void highlightHit( ) {
+		hitStart = hitEnd= -1;
 		if (alignData.getHitData()==null) return; 
 		
 		try {
@@ -228,12 +229,16 @@ public class PairAlignPanel extends PairBasePanel {
 			double low = dSeq1Low + fInsetGap / 2.0;
 			
 			super.setupHitPanels(tip, gapStart, gapStop, top, low); 
+			hitStart = gapStart; hitEnd = gapStop;
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Showing hit region");}
 	}
-	
+	private int hitStart=-1, hitEnd=-1;
 	/********************************************
 	 * CAS333 rewrote - was extending UTR over hit overhang
+	 * CAS403 detect UTR overlap Hit - happens when Stop in hit; hit drawn first
+	 *    -------------- Hit			-----------------
+	 *  ----          -----  UTRs       ---           ---
 	 */
 	private void highlightUTR() {
 	try {
@@ -243,22 +248,44 @@ public class PairAlignPanel extends PairBasePanel {
 		CodingRegion orf = alignData.getORFCoding1 ();
 			
 		int oFrame = 	Math.abs(orf.getFrame());
-		int oEnd5 = 	orf.getBegin()-oFrame;
-		int oStart3 =  	orf.getEnd()-oFrame;
-		
+		int oEnd5 = 	orf.getBegin()-oFrame;     // CDS start-1; 5'End
+		int oStart3 =  	orf.getEnd()-oFrame + 1;   // CDS end;     3'End+1 CAS403 add +1
+
 		oEnd5 =   (oEnd5/3)+1; 		
 		oStart3 = (oStart3/3)+1;		
 		
 		int gapEnd5 =  	  addGaps(alignSeq1, oEnd5)-1; 
 		int gapStart3 =   addGaps(alignSeq1, oStart3)-1;
-			
+
+		// 5'UTR
 		if (nTrimStart1 != gapEnd5) {
-			String tip5 = String.format("5'UTRs  Gapped Coords %d-%d", nTrimStart1, gapEnd5-1);
-			super.setupUtrPanels(tip5, nTrimStart1, gapEnd5, top, bottom); 
+			String tip5 = String.format("5'UTR Gap adjust: %d-%d",  nTrimStart1, gapEnd5-1);
+			if (hitStart!=-1 && gapEnd5>hitStart) {
+				if (nTrimStart1==hitStart) 
+					super.setupUtrPanels(tip5, nTrimStart1, gapEnd5, top, bottom, true); 
+				else {
+					super.setupUtrPanels(tip5, nTrimStart1, hitStart, top, bottom, false); 
+					super.setupUtrPanels(tip5, hitStart, gapEnd5, top, bottom, true); 
+				}
+			}
+			else {
+				super.setupUtrPanels(tip5, nTrimStart1, gapEnd5, top, bottom, false); 
+			}
 		}
-		if (gapStart3 < nTrimStop1) {
-			String tip3 = String.format("3'UTRs  Gapped Coords %d-%d", gapStart3, nTrimStop1);
-			super.setupUtrPanels(tip3, gapStart3, nTrimStop1, top, bottom); 
+		// 3'UTR
+		if (gapStart3 < nTrimStop1+1) { 
+			String tip3 = String.format("3'UTR Gap adjust: %d-%d",  gapStart3, nTrimStop1);
+			if (hitEnd!= -1 && gapStart3<hitEnd) {
+				if (nTrimStop1+1==hitEnd) 
+					super.setupUtrPanels(tip3, gapStart3, nTrimStop1+1, top, bottom, true); 
+				else {
+					super.setupUtrPanels(tip3, gapStart3, hitEnd+1, top, bottom, true); 
+					super.setupUtrPanels(tip3, hitEnd+1, nTrimStop1+1, top, bottom, false); 
+				}
+			}
+			else {
+				super.setupUtrPanels(tip3, gapStart3, nTrimStop1+1, top, bottom, false); 
+			}
 		}
 	}
 	catch (Exception e) {ErrorReport.prtReport(e, "Showing UTRs region");}

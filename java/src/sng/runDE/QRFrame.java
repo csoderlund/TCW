@@ -8,8 +8,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.sql.ResultSet;
@@ -19,7 +17,6 @@ import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -29,18 +26,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
-import javax.swing.JTree;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeNode;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
 
 import sng.database.DBInfo;
 import sng.database.Globals;
@@ -58,21 +45,30 @@ import util.ui.UserPrompt;
 
 /****************************************
  * Graphical interface for computing DE (runDE)
+ * This has both the DBchooser frame and the DE frame
+ * Chooser
+ * 		Close - just close chooser and none of the DE frames
+ * 		Exit all - close chooser and DE frames
+ * DE frame
+ * 		Close - close DE frame but not R
+ * 		Exit  - close DE frame and R
+ * 
  * v2.11 - remove built-in DE methods, make them scripts
  * v3.0.3 - change all showOptionDialog(null,.. to showOptionDialog(getInstance(); the null hide window on Java 14.
  * v3.2.1 - changed GOseq to be script. Rearrange interface. Made Remove and GO separate
  * v3.2.6 - Add GO Remove. Only add GO enrich if not exist. Redo the checking...
  * 			Use getInstance() for all Popups
+ * v4.0.3 - Move DB Chooser to separate method and fix Exits
  */
 public class QRFrame extends JDialog implements WindowListener {
 	private static final long serialVersionUID = 6227242983434722745L;
 	private static String helpHTML = "html/runDE/QRFrame.html";
-	public static double dispersion = 0.1;
 	
+	public static double dispersion = 0.1;
 	public static final String allColsDE = "All DE p-value";
-	public static final String noColsDE = "No DE p-value";
+	public static final String noColsDE =  "No DE p-value";
 	public static final String allColsGO = "All GO p-value";
-	public static final String noColsGO = "No GO p-value";
+	public static final String noColsGO =  "No GO p-value";
 	
 	private final String RSCRIPT1= Globalx.RSCRIPTSDIR + "/edgeRglm.R";
 	private final String RSCRIPT2= Globalx.RSCRIPTSDIR + "/goSeqBH.R";
@@ -87,65 +83,45 @@ public class QRFrame extends JDialog implements WindowListener {
 	private final String defPVal = "0.05";
 	
 	private final String BADCOLNAME = "Invalid column name, use up to 15 letters/numbers/underscores";
-	private boolean bPopUp=false, bStderr=true;
+	
 	private final int COLUMN_LABEL_WIDTH = 80;
 	private final int COLUMN_WIDTH = 140;
 	private final int NUMBER_WIDTH = 2;
 	private final int FILE_WIDTH=25;
 	
-	private static Vector<QRFrame> openWindows = null;
-	private static boolean hasChooser=false;
-	/************************************************
-	 * Called from QRmain to open TCW selection panel
-	 */
-	public QRFrame(HostsCfg h, Vector <DBInfo> list) {		
-		hostsObj = h;
-		hasChooser=true;
-		
-		openWindows = new Vector<QRFrame> ();
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); 
-		
-		JPanel selectPanel = createTCWdbSelectionPanel(list);
-		
-		try {setTitle("runDE Database Chooser ");}
-		catch (Exception e){ setTitle("runDE");}
-		
-		setResizable(true);
-		add(selectPanel);
-		setWindowSettings("deframechooser");
-		setVisible(true);		
-	}
+	private boolean bPopUp=false, bStderr=true;
 	
 	/*********************************************************
-	 * Called from QRmain or from the TCW selection panel 
-	 * with the name of the TCWdb. 
+	 * XXX Called from QRmain or from the TCW selection panel with the name of the TCWdb. 
 	 * The DE window will open with the libraries of the specified TCWdb
 	 */
-	public QRFrame(HostsCfg h, DBInfo d)  throws Exception {
-		hostsObj = h;
-		dbObj = d;
-		
-		// if window is launched from viewSingleTCW, this has not been initialized
-		if(openWindows == null) openWindows = new Vector<QRFrame> ();
-		openWindows.add(this);
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); 
-		
-		addWindowListener(this);
-		
-		if (!dbObj.checkDBver(hostsObj)) System.exit(-1); // CAS321
-		dbSetConnection(dbObj.getdbName()); // opens mDB for this database
-		
-		hasGO = mDB.tableExists("go_info");
-		qrProcess = new QRProcess(dbObj.getID(), mDB);
-		
-		createMainPanel();
-
-		updateColumnList();
-
-		setResizable(true);
-		add(mainPanel);
-		setWindowSettings("runDE");
-		setVisible(true);
+	
+	public QRFrame(HostsCfg h, DBInfo d, QRChooser q)  {
+		try {
+			hostsObj = h;
+			dbObj = d;
+			chooseObj = q;
+			
+			setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE); 
+			
+			addWindowListener(this);
+			
+			if (!dbObj.checkDBver(hostsObj)) System.exit(-1); // CAS321
+			dbSetConnection(dbObj.getdbName()); // opens mDB for this database
+			
+			hasGO = mDB.tableExists("go_info");
+			qrProcess = new QRProcess(dbObj.getID(), mDB);
+			
+			createMainPanel();
+	
+			updateColumnList();
+	
+			setResizable(true);
+			add(mainPanel);
+			setWindowSettings("runDE");
+			setVisible(true);
+		}
+		catch (Exception e) {ErrorReport.prtReport(e, "Starting DE");}
 	}
 	private void setWindowSettings(final String prefix) {
 		Static.centerScreen(this);
@@ -762,26 +738,22 @@ public class QRFrame extends JDialog implements WindowListener {
 		
 		createLibSelections(); 
 		
-		mainPanel.add(new JSeparator());
-		mainPanel.add(Box.createVerticalStrut(10));
+		mainPanel.add(new JSeparator());	 mainPanel.add(Box.createVerticalStrut(10));
 		createDEmethodPanel();
 		
 		mainPanel.add(Box.createVerticalStrut(10));
 		createDEexecPanel();
 		
-		mainPanel.add(new JSeparator());
-		mainPanel.add(Box.createVerticalStrut(10));
+		mainPanel.add(new JSeparator());	mainPanel.add(Box.createVerticalStrut(10));
 		createGOPanel();
 		
-		mainPanel.add(new JSeparator());
-		mainPanel.add(Box.createVerticalStrut(10));
+		mainPanel.add(new JSeparator());	mainPanel.add(Box.createVerticalStrut(10));
 		createRemovePanel();
 		
 		mainPanel.add(Box.createVerticalStrut(10));
 		
-		mainPanel.add(new JSeparator());
-		mainPanel.add(Box.createVerticalStrut(10));
-		createExitPanel();
+		mainPanel.add(new JSeparator());	mainPanel.add(Box.createVerticalStrut(10));
+		createButtonPanel();
 		
 		mainPanel.setMaximumSize(mainPanel.getPreferredSize());
 		mainPanel.setMinimumSize(mainPanel.getPreferredSize());
@@ -1362,7 +1334,7 @@ public class QRFrame extends JDialog implements WindowListener {
 		if (hasGO) mainPanel.add(row);
 	}	
 
-	private void createExitPanel() {
+	private void createButtonPanel() {
 		JPanel row = Static.createRowPanel();
 		JButton btnFinishExit = Static.createButtonPopup("Update Overview", true);
 		btnFinishExit.addActionListener(new ActionListener() {
@@ -1376,9 +1348,11 @@ public class QRFrame extends JDialog implements WindowListener {
 		JButton btnClose = Static.createButton("Close", true);
 		btnClose.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				openWindows.remove(getInstance()); // CAS316 was 'this'
+				Out.Print("Closing runDE for " + dbObj.getdbName());
+				
+				if (chooseObj!=null) chooseObj.removeWindow(getInstance()); // CAS316 was 'this'
+				
 				dispose();
-				if  (qrProcess==null || qrProcess.noR()) System.exit(0);// CAS326
 			}
 		});
 		row.add(btnClose);
@@ -1387,20 +1361,21 @@ public class QRFrame extends JDialog implements WindowListener {
 		JButton btnExit = Static.createButton("Exit", true);
 		btnExit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				openWindows.remove(getInstance()); // CAS316 was 'this'
-				dispose();
-			
-				if(!hasChooser && (openWindows == null || openWindows.size()<=1)) {
-					Out.Print("Exiting R and runDE for " + dbObj.getdbName());
-					System.exit(0);
+				Out.Print("Exiting runDE for " + dbObj.getdbName());
+				qrProcess.rQuit();
+				
+				if (chooseObj!=null) {
+					chooseObj.removeWindow(getInstance()); // CAS316 was 'this'
+					dispose();
 				}
-				else Out.Print("Exiting runDE for " + dbObj.getdbName());
+				else System.exit(0);
 			}
 		});
-		row.add(btnExit);
-		row.add(Box.createHorizontalStrut(10));
-		row.add(Box.createHorizontalGlue());
-		
+		if (chooseObj==null) {
+			row.add(btnExit);
+			row.add(Box.createHorizontalStrut(10));
+			row.add(Box.createHorizontalGlue());
+		}
 		final JButton btnHelp = Static.createButtonHelp("Help", true);
 	       btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -1464,161 +1439,6 @@ public class QRFrame extends JDialog implements WindowListener {
 		return rb;
 	}
 	
-	/******************************************************
-	 * TCWdb chooser methods
-	 */
-	private JPanel createTCWdbSelectionPanel(Vector<DBInfo> dbList) 
-	{
-	       JPanel selectTCWdbPanel = new JPanel();
-	       selectTCWdbPanel.setBackground(Color.WHITE);
-
-	       // Create a tree of the hosts
-	       DefaultMutableTreeNode hostTree = new DefaultMutableTreeNode("");
-	       DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(hostsObj.host());
-		   hostTree.add(newNode);
-		   DefaultMutableTreeNode start = newNode;
-
-	       for (int i = 0; i < hostTree.getChildCount(); i++) {
-	           DefaultMutableTreeNode hostNode = (DefaultMutableTreeNode) hostTree.getChildAt(i);
-	           
-               for (DBInfo dbi : dbList) {
-                   hostNode.add(new DefaultMutableTreeNode(dbi));
-               } 
-	       }
-
-	       // Create display tree
-	       DefaultTreeModel dbModel = new DefaultTreeModel(hostTree);
-	       final JTree dbTree = new JTree(dbModel);
-	       dbTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-	       dbTree.setRootVisible(false);
-	       dbTree.setToggleClickCount(1);
-	       ((DefaultTreeCellRenderer) dbTree.getCellRenderer()).setLeafIcon(null);
-	       if (dbTree.getRowCount() == 1) dbTree.expandRow(0);
-
-	       dbTree.addMouseListener(new MouseAdapter() {
-	           public void mouseClicked(MouseEvent e) {
-	        	   try {
-		               TreePath path = dbTree.getSelectionPath();
-		               if (path != null) {
-		                   int depth = path.getPathCount();
-		                   if (e.getClickCount() == 2 && depth >= 3) {
-		                       DefaultMutableTreeNode node =
-		                           (DefaultMutableTreeNode) dbTree.getLastSelectedPathComponent();
-		                       DBInfo dbi = (DBInfo) node.getUserObject();
-				               new QRFrame(hostsObj, dbi);
-		                   }
-		               }
-	        	   }
-	        	   catch(Exception ex) {ErrorReport.prtReport(ex, "Error launching DE window");}
-	           }
-	       });
-
-	       final JScrollPane assemblyScrollPane = new JScrollPane(dbTree);
-	       assemblyScrollPane.setPreferredSize(new Dimension(400, 400));
-	       Dimension dim = assemblyScrollPane.getMaximumSize();
-	       assemblyScrollPane.setMaximumSize(new Dimension(Math.max(400,
-	               (int) dim.getWidth()), Math.max(400, (int) dim.getHeight())));
-	       assemblyScrollPane.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-	       final JButton btnViewAssembly = Static.createButtonPopup("Launch", false);
-	       btnViewAssembly.setAlignmentX(Component.CENTER_ALIGNMENT);
-	     
-	       btnViewAssembly.addActionListener(new ActionListener() {
-	           public void actionPerformed(ActionEvent event) {
-	        	   try {
-		               DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-		                   dbTree.getLastSelectedPathComponent();
-		               DBInfo dbi = (DBInfo) node.getUserObject();
-		               new QRFrame(hostsObj, dbi);
-	        	   }
-	        	   catch(Exception e) {ErrorReport.prtReport(e, "Error launching DE window");}
-	           }
-	       });
-	       
-			final JButton btnGetState = Static.createButtonPopup("Overview", false);
-			btnGetState.setAlignmentX(Component.LEFT_ALIGNMENT);
-			btnGetState.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent arg0) {
-					try {
-						DefaultMutableTreeNode node = (DefaultMutableTreeNode) dbTree.getLastSelectedPathComponent();
-						DBInfo dbi = (DBInfo) node.getUserObject();
-						String dbName = dbi.getdbName();
-						DBConn dbc = hostsObj.getDBConn(dbName);
-						dbOverview(dbName, dbc);
-						dbc.close();
-					}
-					catch(Exception e) {ErrorReport.prtReport(e, "Error getting overview");}
-				}
-			});
-
-			final JButton btnClose = new JButton("Close");
-			btnClose.setBackground(Color.WHITE);
-			btnClose.addActionListener(new ActionListener() {
-		    	   public void actionPerformed(ActionEvent arg0) {
-		    		   hasChooser=false;
-		    		   dispose();
-		    	   }
-			});
-		       
-	       final JButton btnCloseAll = new JButton("Exit All");
-	       btnCloseAll.setBackground(Color.WHITE);
-	       btnCloseAll.addActionListener(new ActionListener() {
-		    	   public void actionPerformed(ActionEvent arg0) {
-		    		   if(openWindows != null) {
-		    			   for(int x=0; x<openWindows.size(); x++) {
-		    				   openWindows.get(x).dispose();
-		    			   }
-		    			   openWindows.removeAllElements();
-		    		   }
-		    		   dispose();
-		    		   Out.Print("Exiting R and runDE");
-		    		   System.exit(0); // cause exit out of R too.
-		    	   }
-	       });      
-	       	       
-	       dbTree.addTreeSelectionListener(new TreeSelectionListener() {
-	           public void valueChanged(TreeSelectionEvent e) {
-	               int depth = dbTree.getSelectionPath().getPathCount();
-	               btnViewAssembly.setEnabled(depth >= 3);
-	               btnGetState.setEnabled(depth >= 3);
-	           }
-	       });
-
-	       // Select current host in list
-	       if (start != null) {
-	           TreeNode[] nodes = dbModel.getPathToRoot(start.getFirstLeaf());
-	           TreePath path = new TreePath(nodes);
-	           dbTree.scrollPathToVisible(path);
-	           dbTree.setSelectionPath(path);
-	       }
-
-	       JPanel buttonPanel = new JPanel();
-	       buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
-	       buttonPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-	       buttonPanel.setBackground(Color.WHITE);
-	       buttonPanel.add(btnViewAssembly);
-	       buttonPanel.add(Box.createHorizontalStrut(10));
-	       buttonPanel.add(btnGetState);
-	       buttonPanel.add(Box.createHorizontalStrut(10));
-	       buttonPanel.add(btnClose);
-	       buttonPanel.add(Box.createHorizontalStrut(10));
-	       buttonPanel.add(btnCloseAll);
-	       
-	       buttonPanel.setMaximumSize(buttonPanel.getPreferredSize());
-	       buttonPanel.setMinimumSize(buttonPanel.getPreferredSize());
-	       
-	       selectTCWdbPanel.setLayout(new BoxLayout(selectTCWdbPanel,
-	               BoxLayout.Y_AXIS));
-	       selectTCWdbPanel.add(Box.createVerticalStrut(20));
-	       selectTCWdbPanel.add(Static.createCenteredLabel("singleTCW Databases"));
-	       selectTCWdbPanel.add(assemblyScrollPane);
-	       selectTCWdbPanel.add(Box.createVerticalStrut(5));
-	       selectTCWdbPanel.add(buttonPanel);
-	       selectTCWdbPanel.add(Box.createVerticalStrut(20));
-	       selectTCWdbPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-	       return selectTCWdbPanel;
-	}
 	
 	private QRFrame getInstance() { return this; }
 
@@ -1777,10 +1597,7 @@ public class QRFrame extends JDialog implements WindowListener {
 		catch(Exception e) {ErrorReport.prtReport(e, "Error getting overview for " + dbName);}
 	}
 	//Window event code
-	public void windowClosed(WindowEvent arg0) {
-		if(openWindows != null)
-			openWindows.remove(this); 
-	}
+	public void windowClosed(WindowEvent arg0) {}
 	public void windowActivated(WindowEvent arg0) {}
 	public void windowClosing(WindowEvent arg0) {}
 	public void windowDeactivated(WindowEvent arg0) {}
@@ -1788,6 +1605,10 @@ public class QRFrame extends JDialog implements WindowListener {
 	public void windowIconified(WindowEvent arg0) {}
 	public void windowOpened(WindowEvent arg0) {}
 	
+	public void rQuit() {
+		qrProcess.rQuit();
+	}
+	public String toString() {return dbObj.toString();}
 	/***************************************************************
 	 * Object variables
 	 */
@@ -1820,13 +1641,13 @@ public class QRFrame extends JDialog implements WindowListener {
 	
 	private JTextField txtPercent = null, txtPVal = null;
 	
-	private QRProcess qrProcess = null;
-
 	private String [] theLibraryNames = null;
 
 	private DBConn mDB=null;
 	private HostsCfg hostsObj=null;
 	private DBInfo dbObj=null;
+	private QRChooser chooseObj = null;
+	private QRProcess qrProcess = null;
 
 	private double disp = -1;
 	private int filCPM = -1, filCPMn=-1, filCnt = -1;

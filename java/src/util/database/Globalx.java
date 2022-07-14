@@ -10,8 +10,8 @@ import util.methods.Static;
 public class Globalx {
 	public static boolean debug = false; // changed in STCWMain or MTCWMain from command line 
 	
-	public static final String strRelDate = "(7-July-22)"; 
-	public static final String strTCWver = "4.0.2";  //  must be 3 digits
+	public static final String strRelDate = "(14-July-22)"; 
+	public static final String strTCWver = "4.0.3";  //  must be 3 digits
 	public static final String URL =     "http://www.agcol.arizona.edu";
 	public static final String GITURL	= "https://github.com/csoderlund";
 	

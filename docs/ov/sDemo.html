@@ -1,28 +1,25 @@
-<!DOCTYPE html>
 <html>
-<head>
-<title>sTCW_demoTra overview</title>
-</head>
+<head><title>tra overview</title></head>
 <body>
 <center>
 <h2>Overview for sTCW_demoTra </h2>
-<table style="border: 1px solid black; border-spacing: 0px;  border-collapse: collapse; width=700"><tr><td>
+<table width=700 border=1><tr><td>
 <pre>
 Project:  tra   #Seqs: 211   #Hits: 12,296   #GOs: 6,144    TPM  Seq-DE  GO-Enrich   Pairs
 
-15-Mar-22 Build Database  sequences loaded from external source
-15-Mar-22 Last Annotation with sTCW v4.0.0
+13-Jul-22 Build Database  sequences loaded from external source
+13-Jul-22 Last Annotation with sTCW v4.0.3
 
 INPUT
    Counts:
-      SEQID  ID          SIZE  #REPS
-      tra    Stem   1,865,201      5
-      tra    Root     955,097      5
-      tra    Oleaf    474,551      5
+      SEQID  ID          SIZE  TITLE            #REPS
+      tra    Stem   1,865,201  Tissue Stem          5
+      tra    Root     955,097  Tissue Root          5
+      tra    Oleaf    474,551  Tissue Old Leaf      5
 
    Sequences:
-      SEQID  SIZE  TITLE                                   AVG-len  MED-len
-      tra     211  Demo of assembled Illumina transcripts    1,079      861
+      SEQID  SIZE  TITLE                             AVG-len  MED-len
+      tra     211  Demo of assembled Illumina reads    1,079      861
 
 ANNOTATION
    Hit statistics:
@@ -96,7 +93,7 @@ SEQUENCES
    ORF stats:   Average length 862
       Has Hit            210  (99.5%)    Both Ends     69  (32.7%)    Multi-frame    6   (2.8%)
       Is Longest ORF     192  (91.0%)    ORF&gt;=300     190  (90.0%)    Stops in Hit   6   (2.8%)
-      Markov Best Score  210  (99.5%)    ORF=Hit      109  (51.7%)    &gt;=9 Ns in ORF  1    (&lt;1%)
+      Markov Best Score  210  (99.5%)    ORF=Hit      103  (48.8%)    &gt;=9 Ns in ORF  1    (&lt;1%)
       All of the above   191  (90.5%)      with Ends   32  (15.2%)
 
    GC content: 48.65%
@@ -120,17 +117,17 @@ LOCATIONS
 PROCESSING INFORMATION
    AnnoDB files:
       Type  Taxo           FILE                                DB DATE    ADD DATE   EXECUTE
-      sp    plants         uniprot_sprot_plants.fasta          27-Jan-21  15-Mar-22  diamond  --masking 0
-      sp    invertebrates  uniprot_sprot_invertebrates.fasta   27-Jan-21  15-Mar-22  diamond  --masking 0
-      sp    fungi          uniprot_sprot_fungi.fasta           27-Jan-21  15-Mar-22  diamond  --masking 0
-      sp    bacteria       uniprot_sprot_bacteria.fasta        27-Jan-21  15-Mar-22  diamond  --masking 0
-      sp    full_BFIP      uniprot_sprot_xBFxIxPxxx.fasta      27-Jan-21  15-Mar-22  diamond  --masking 0
-      tr    plants         uniprot_trembl_plants.fasta         27-Jan-21  15-Mar-22  diamond  --masking 0
-      tr    invertebrates  uniprot_trembl_invertebrates.fasta  27-Jan-21  15-Mar-22  diamond  --masking 0
+      sp    plants         uniprot_sprot_plants.fasta          21-Dec-21  13-Jul-22  diamond  --masking 0
+      sp    invertebrates  uniprot_sprot_invertebrates.fasta   21-Dec-21  13-Jul-22  diamond  --masking 0
+      sp    fungi          uniprot_sprot_fungi.fasta           21-Dec-21  13-Jul-22  diamond  --masking 0
+      sp    bacteria       uniprot_sprot_bacteria.fasta        21-Dec-21  13-Jul-22  diamond  --masking 0
+      sp    full_BFIP      uniprot_sprot_xBFxIxPxxx.fasta      21-Dec-21  13-Jul-22  diamond  --masking 0
+      tr    plants         uniprot_trembl_plants.fasta         21-Dec-21  13-Jul-22  diamond  --masking 0
+      tr    invertebrates  uniprot_trembl_invertebrates.fasta  21-Dec-21  13-Jul-22  diamond  --masking 0
 
    Prune: none
 
-   Gene ontology: go-basic.obo-Nov2021  GOdb: go_demo  [GOs added with sTCW v4.0.0]
+   Gene ontology: go-basic.obo-Nov2021  GOdb: go_demo  [GOs added with sTCW v4.0.3]
    GO slim: goslim_plant
 
    ORF finder:

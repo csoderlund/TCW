@@ -99,8 +99,8 @@ public class PairBasePanel extends JPanel {
 		reDrawPanels ( ); 
 	}	
 	
-	public void setShowORF ( boolean b ) {bShowORF = b; reDrawPanels ( );};
-	public void setShowHit ( boolean b ) {bShowHit = b; reDrawPanels ( );};
+	public void setShowORF ( boolean b ) {bShowORF = b; reDrawPanels ( );}
+	public void setShowHit ( boolean b ) {bShowHit = b; reDrawPanels ( );}
 	
 	public boolean isShowORF() 	{return bShowORF;}
 	public boolean isShowHit() 	{return bShowHit;}
@@ -392,13 +392,14 @@ public class PairBasePanel extends JPanel {
 		double dRight = calculateX(e+1);
 		createHighlightPanel (tip, colorHIT, dLeft, dRight, dYTop, dYBottom);
 	}
-	protected void setupUtrPanels(String tip, int aStart, int aStop,  double dYTop, double dYBottom) {		
+	protected void setupUtrPanels(String tip, int aStart, int aStop,  double dYTop, double dYBottom, boolean isOlp) {		
 		if (!bShowORF) return;
 		
 		double dLeft =  calculateX(aStart);
 		double dRight = calculateX(aStop);
 		
-		createHighlightPanel (tip, colorORF, dLeft, dRight, dYTop, dYBottom );
+		if (isOlp) createHighlightPanel (tip, colorBoth, dLeft, dRight, dYTop, dYBottom );
+		else       createHighlightPanel (tip, colorORF,  dLeft, dRight, dYTop, dYBottom );
 	}
 	private void drawHighlightPanels(Graphics2D g2) {
 		Iterator<JPanel> iterPanel = highlightPanels.iterator();
@@ -449,15 +450,16 @@ public class PairBasePanel extends JPanel {
    
     // For drawing    
  	private static final Color anyHangUnk = Globalx.anyHang; // new Color(180, 180, 180); mediumGray
-	private static final Color anyGap 	= Globalx.anyGap;  // new Color(0,200,0); light green; shared with aaZappo
+	private static final Color anyGap 	= 	Globalx.anyGap;  // new Color(0,200,0); light green; shared with aaZappo
 	
 	private static final Color ntMisMatch = Globalx.ntMisMatch; // Color.red;
 	
-	private static final Color aaLtZero 	= Globalx.aaLtZero; // Color.red; 		
-	private static final Color aaEqZero	= Globalx.aaEqZero; // new Color(255, 173, 190);  light red
-	private static final Color aaGtZero 	= Globalx.aaGtZero; // Color.blue; 	
-	private static final Color aaStop	= Globalx.aaStop;   // new Color(138, 0, 184); 	purple; shared with aaZappo
+	private static final Color aaLtZero = 	Globalx.aaLtZero; // Color.red; 		
+	private static final Color aaEqZero	= 	Globalx.aaEqZero; // new Color(255, 173, 190);  light red
+	private static final Color aaGtZero = 	Globalx.aaGtZero; // Color.blue; 	
+	private static final Color aaStop	= 	Globalx.aaStop;   // new Color(138, 0, 184); 	purple; shared with aaZappo
  	
 	private static final Color colorORF = Color.YELLOW;
-	private static final Color colorHIT = new Color(157, 189, 242);
+	private static final Color colorHIT = new Color(157, 189, 242); // blue
+	private static final Color colorBoth = new Color(127, 255, 212); // Aquamarine
 }

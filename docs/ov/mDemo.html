@@ -1,35 +1,26 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>mTCW_ex overview</title>
-</head>
-
-<body>
-<center>
+<html><head><title>mTCW_ex overview</title></head><body><center>
 <h2>mTCW overview for ex</h2>
-<table style="border: 1px solid black; border-spacing: 0px;  border-collapse: collapse; width=600">
-<tr><td>
-<pre>Project: ex  Cluster: 1.0k  Pairs: 846  Seqs: 707  Hits: 4.0k  GOs: 8.0k   PCC Stats KaKs Multi
+<table width=600 border=1><tr><td><pre>Project: ex  Cluster: 1.0k  Pairs: 846  Seqs: 707  Hits: 2.2k   PCC Stats KaKs Multi
 
-Created: 21-Mar-22 v4.0.0     Last Update: 04-Apr-22 v4.0.1
+Created: 13-Jul-22 v4.0.3
 
 DATASETS: 3
            Type  #Seq  #annotated  #annoDB  Created    Remark
-      bar  NT     250         250        3  15-Mar-22  exBar
-      fly  NT     207         207        3  15-Mar-22  exFly
-      foo  NT     250         250        3  15-Mar-22  exFoo
+      bar  NT     250         250        3  06-Jul-22  exBar
+      fly  NT     207         207        3  06-Jul-22  exFly
+      foo  NT     250         250        3  06-Jul-22  exFoo
 
 CLUSTER SETS: 5
    Statistics
       Prefix  Method         conLen  sdLen     Score1  SD    Score2  SD
-      CL      Closure        579.75  58.50       3.72  1.06    0.78  0.15
-      OM      orthoMCL.OM-4  606.38  85.26       3.30  1.40    0.75  0.16
-      B12     BBH bar,fly    540.22  62.63       3.58  1.10    0.72  0.18
-      B13     BBH bar,foo    558.75  34.11       4.09  0.82    0.79  0.15
+      CL      Closure        579.80  58.52       3.72  1.06    0.78  0.15
+      OM      orthoMCL.OM-4  606.33  85.28       3.30  1.40    0.75  0.16
+      B12     BBH bar,fly    540.34  62.71       3.58  1.10    0.72  0.18
+      B13     BBH bar,foo    558.76  34.07       4.09  0.83    0.79  0.15
       B23     BBH fly,foo    559.57  70.82       3.98  1.28    0.80  0.21
 
    Sizes
-      Prefix   =2   =3  4-5  6-10  11-15  16-20  21-25  >25  Total  #Seqs
+      Prefix   =2   =3  4-5  6-10  11-15  16-20  21-25  &gt;25  Total  #Seqs
       CL       93  150    1     1      0      0      0    0    245  91.5%
       OM       50  186    3     3      0      0      0    0    242  98.0%
       B12     157    0    0     0      0      0      0    0    157  44.4%
@@ -51,37 +42,37 @@ PAIRS: 846
 
                      Pos1   Pos2   Pos3  Total                   GC  CpG-Nt  CpG-Cd
       Transition     9.3%   5.1%  35.0%  49.4%       Both     38.0%    3.9%    2.2%
-      Transversion  12.1%   8.2%  30.2%  50.6%       Either   54.6%   11.4%    5.8%
+      Transversion  12.1%   8.3%  30.3%  50.6%       Either   54.6%   11.4%    5.8%
       ts/tv          0.77   0.62   1.16   0.98       Jaccard   0.70    0.35    0.37
 
    KaKs method: YN    Pairs: 700
       Ka/Ks           Quartiles             Average            P-value
       NA       16     Q1(Lower)   0.019     Ka       0.102     NA        48
       KaKs&lt;1  675     Q2(Median)  0.044     Ks       2.793     &lt;1E-100  419
-      KaKs~1    0     Q3(Upper)   0.113     P-value  0.036      &lt;1E-10    85
-      KaKs&gt;1    9                                               &lt;1.0     148
+      KaKs~1    0     Q3(Upper)   0.113     P-value  0.036     &lt;1E-10    85
+      KaKs&gt;1    9                                              &lt;1.0     148
 
 SEQUENCES: 707
            Average  Lengths              %GC                     CpG O/E
               5UTR      CDS   3UTR       5UTR    CDS   3UTR         5UTR    CDS   3UTR
-      bar    170.1   1612.4  230.2      39.0%  51.0%  38.5%        0.750  0.695  0.733
+      bar    170.8   1612.4  229.6      39.1%  51.0%  38.4%        0.754  0.695  0.730
       fly    135.2   1520.2  314.4      36.8%  46.6%  35.5%        0.751  0.693  0.663
       foo    193.2   1539.8  336.8      40.5%  47.0%  36.7%        0.779  0.702  0.742
 
    Counts
-                  C1       C2       C3
+                  Cx       Cy       Cz
       bar    812,745  665,939  853,758
       fly    736,627  605,318  772,927
       foo  1,009,851  706,578  537,403
 
-   Differential Expression (p-value  &lt; 0.001)
-           C1C2  C1C3  C2C3
+   Differential Expression (p-value &lt; 0.001)
+           CxCy  CxCz  CyCz
       bar     0    17    17
       fly     0    16    14
       foo     6    16    18
 ----------------------------------------------------
 PROCESSING:
-AA: diamond --masking 0 --query-cover 25 --subject-cover 25
+AA: diamond --masking 0  --query-cover 25 --subject-cover 25
 NT: blastn -evalue 1e-05 -max_hsps 1  -max_target_seqs 25
 
 MSA: Score1=Sum-of-Pairs    Score2=Wentropy

@@ -61,7 +61,7 @@
 There have been many improvements, but the following provides some recent critical points.
 <font size="2">
 <table>
-<tr><td><a href="#v400">v4.0.2</a><td>7-July-22<td><ttp>Online help<td>Install at csoderlund.github.io/tcw
+<tr><td><a href="#v403">v4.0.3</a><td>14-July-22<td><ttp>All<td>Small improvements.
 <tr><td><a href="#v339">v3.3.9</a><td>27-Dec-21<td><ttp><ttp>runAS</ttp></ttp><td>Improved interface for full subset UniProt; updated Demo.
 <tr><td><a href="#v335">v3.3.5</a><td>04-Nov-21<td><ttp>viewSingle</ttp><td>log2FC TPM analysis
 <tr><td><a href="#v334">v3.3.4</a><td>18-Oct-21<td><ttp>runSingle</ttp><td><ttl>ORF finder</ttl> improvements
@@ -76,7 +76,36 @@ There have been many improvements, but the following provides some recent critic
 </table>
 </font>
 
-<a id=v400></a>
+<a id=v403></a>
+<h4>v4.0.3 14-July-2022</h4>
+
+<ttp>runDE</ttp>
+<ul>
+<li>The <ttc>Close</ttc> and <ttc>Exit</ttc> did not work quite right in either the
+<ttp>runDE Database Chooser</ttp> or <ttp>runDE</ttp> window.
+These have been tidied up with additional Help added.
+</ul>
+
+<ttp>runSingleTCW</ttp>
+<ul>
+<li>ORF finder:
+<ol>
+<li>Really tiny bug: Very occasionally, it was assigning ORF=Hit remark incorrectly when ORF=Hit-3 and
+there was one AA at the end instead of stop codon (e.g. demoTra, tra_005).
+</ol>
+</ul>
+
+
+<ttp>viewSingleTCW</ttp>
+<ul>
+<li>Seq-Hit align:
+<ol>
+<li>The hit-ORF overlaps are highlighted in aquamarine (this happens when there is a stop codon in the hit region).
+<li>Really tiny bug: The 3'UTR was starting one early sometimes.
+</ol>
+</ul>
+
+<a id=v402></a>
 <h4>v4.0.2 7-July-2022</h4>
 Most documentation is in the TCW desktop applications except for the extensive
 documentation for building a single or comparative TCW database, which has
@@ -111,7 +140,7 @@ it was not being removed before finding unique descriptions.
 BioRxiv publication
 </ul>
 
-<a id=v343></a>
+<a id=v400></a>
 <h4>v4.0.0 22-Mar-2022</h4>
 
 <p>General
