@@ -116,7 +116,7 @@ public class DBInfo {
 		return str;
 	}
 	public String getDescription() {
-		return Version.sTCWtitle + "   " + dbName + "::" + id;
+		return "viewSingleTCW v" + Globalx.strTCWver + "   " + dbName + "::" + id;
 	}
 	public String getID() {return id;}
 	public String getdbName() {return dbName;}

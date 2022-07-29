@@ -1032,7 +1032,7 @@ public class ManagerData {
 				BufferedWriter out = new BufferedWriter(new FileWriter(projFile));
 				TCWprops theProps = new TCWprops(TCWprops.PropType.Assem);
 				
-				out.write("# " + strProjDir + " sTCW.cfg " + Version.strTCWver + "\n");
+				out.write("# " + strProjDir + " sTCW.cfg v" + Globalx.strTCWver + "\n");
 				out.write("SingleID = " + strProjID + "      # singleTCW ID\n");
 				out.write("STCW_db    = " + strTCWdb +      "      # Database (same as in LIB.cfg)\n");
 				out.write("CPUs = " + getNumCPUs() + "\n\n");

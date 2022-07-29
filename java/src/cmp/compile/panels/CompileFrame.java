@@ -37,7 +37,7 @@ public class CompileFrame extends JFrame {
 	private void runMultiTCW() {
 		Vector<String> hostNames = new Vector<String>();
 		hostNames.add(hostsObj.host());
-		setTitle("runMultiTCW " + Globalx.strTCWver); 
+		setTitle("runMultiTCW v" + Globalx.strTCWver); 
 		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		

@@ -77,6 +77,7 @@ public class StatsPanel extends JPanel {
 		
 		try {
 			long time = Out.getTime();
+			Out.prtHeader("Run Stats");
 			Out.createLogFile(theCompilePanel.getCurProjAbsDir(), Globals.statsFile);
 	
 			DBinfo info = theCompilePanel.getDBInfo();

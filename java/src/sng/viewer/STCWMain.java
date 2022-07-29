@@ -15,19 +15,14 @@ import util.methods.Out;
 
 public class STCWMain
 {	
-	public static final String TCW_VERSION = "v" + Version.strTCWver; 
-	public static final String TCW_VERSION_STRING = "viewSingleTCW " + 
-		TCW_VERSION + " " + Version.strRelDate +" - " +  Version.URL; 
-
 	public static boolean updateMSG = false; // update Overview, accessed from database.Overview
 	public static int COVER1=0, COVER2=0;
 	public static boolean doTIME = false;
 
-	public static void main(String[] args)
-	{   
+	public static void main(String[] args){   
 		//System.err.println("Starting with: \n" + Runtime.getRuntime().freeMemory() + " bytes free");
 		//System.err.println((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) + " bytes used");
-		Out.prt("\n" + STCWMain.TCW_VERSION_STRING);
+		Globalx.printHeader();
 		
 		if (!Version.checkJavaSupported())
 			System.exit(-1);

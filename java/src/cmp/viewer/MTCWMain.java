@@ -5,11 +5,9 @@ import util.methods.Out;
 
 public class MTCWMain {
 	public static boolean test = false;
-	public static final String mTCW_VERSION_STRING = "viewMultiTCW " + 
-			"v" + Globalx.strTCWver + " " + Globalx.strRelDate +" - " +  Globalx.URL; 
 	
 	public static void main(String[] args) {
-		System.err.println(mTCW_VERSION_STRING);
+		Globalx.printHeader();;
 		
 		MTCWFrame mainWindow = null;
 		

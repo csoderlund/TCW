@@ -604,4 +604,7 @@ public class Static {
     	DecimalFormat df = new DecimalFormat("#,###,###");
     	return df.format(num);
     }
+    public static String minusChar(String x) {
+    	return x.substring(0, x.length()-1);
+    }
 }

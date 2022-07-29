@@ -195,7 +195,7 @@ public class DoUniProt
 			
     	String file = hitFile.toString();
     	file = file.substring(file.lastIndexOf("/")+1);
-    	Out.PrtSpMsg(2,"DB#" + dbNum + " hits: " + file);
+    	Out.PrtSpTimeMsg(2,"DB#" + dbNum + " add hits: " + file);
 		
     	BufferedReader reader = null;
     	String line="";
@@ -458,7 +458,7 @@ public class DoUniProt
        	BufferedReader reader = null;
        	long time = Out.getTime();
        	int total = hitsAddToDB.size();
-		Out.PrtSpMsg(2,"DB#" + dbNum + " descriptions: " + hitObj.getDBfastaNoPath(ix) );
+		Out.PrtSpTimeMsg(2, "DB#" + dbNum + " add desc: " + hitObj.getDBfastaNoPath(ix) );
         try {
     		mDB.renew();
     		mDB.openTransaction(); // CAS338

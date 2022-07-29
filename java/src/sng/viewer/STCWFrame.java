@@ -150,7 +150,7 @@ public class STCWFrame extends JFrame {
 		try {
 			setTitle(title + " on " + InetAddress.getLocalHost().getHostName());
 		} catch (Exception e) {
-			setTitle(title + " " + STCWMain.TCW_VERSION );
+			setTitle(title + " v" + Globalx.strTCWver );
 		}
 		tabbedPane = new HiddenTabbedPane();
 		tabbedPane.setBorder(BorderFactory.createLineBorder(Color.GRAY));

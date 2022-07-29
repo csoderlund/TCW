@@ -42,7 +42,7 @@ public class DoUP {
 			
 			if (spTaxo.size()>0) {
 				long downTime = Out.getTime(); //CAS331 add sub-times
-				Out.PrtSpDateMsg(1, "Download SwissProt files");
+				Out.PrtSpTimeMsg(1, "Download SwissProt files");
 				for (int i=0; i<spTaxo.size(); i++) {
 					if (!spHasDat.get(i)) {
 						String f = spTaxo.get(i);
@@ -55,7 +55,7 @@ public class DoUP {
 			if (trTaxo.size()>0) {
 				long downTime = Out.getTime();
 				Out.PrtSpMsg(1,"");
-				Out.PrtSpDateMsg(1, "Download TrEMBL files");
+				Out.PrtSpTimeMsg(1, "Download TrEMBL files");
 				for (int i=0; i<trTaxo.size(); i++) {
 					if (!trHasDat.get(i)) {
 						String f = trTaxo.get(i);
@@ -67,7 +67,7 @@ public class DoUP {
 			
 			long createTime=Out.getTime();
 			Out.PrtSpMsg(1,"");
-			Out.PrtSpDateMsg(1, "Create FASTA files");
+			Out.PrtSpTimeMsg(1, "Create FASTA files");
 			DoUPdat datObj = new DoUPdat(frameObj);
 			GlobalAS fileObj = new GlobalAS(targetUpDir);
 			
@@ -107,12 +107,12 @@ public class DoUP {
 		GlobalAS fileObj = new GlobalAS(targetUpDir);
 		
 		if (noSPdat) {
-			Out.PrtSpDateMsg(1, "Download SwissProt");
+			Out.PrtSpTimeMsg(1, "Download SwissProt");
 			if (!mkCheckDir(fileObj.mkNameDir(SP, fullTaxo))) return false;
 			if (!runDownload(SP, "", fullTaxo)) return false;	
 		}
 		if (noTRdat) {
-			Out.PrtSpDateMsg(1, "Download TrEMBL");
+			Out.PrtSpTimeMsg(1, "Download TrEMBL");
 			if (!mkCheckDir(fileObj.mkNameDir(TR, fullTaxo))) return false;
 			if (!runDownload(TR,  "", fullTaxo)) return false;	
 		}

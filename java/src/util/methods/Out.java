@@ -29,25 +29,19 @@ public class Out {
 		bStdout=stdout;
 		createLogFile(path,file);
 	}
-	// CAS326 runDE may not know project name, so all logs go into projects/DElogs
-	 static public void createDELogFile(String path, String file) 
-	{	  
-		createLog(path, file);
-		PrtDateMsg("RunDE v" + Globalx.strTCWver);	
-	}
+	
 	// Used by everything else
     static public void createLogFile(String path, String file) 
 	{	
 		createLog(path + "/" + Globalx.pLOGDIR, file);
 	}
     
-    static private void createLog(String logPath, String file) // CAS326 separate from createLogFile
+    static public void createLog(String logPath, String file) // CAS326 separate from createLogFile
     {
 		if (logFileObj!=null) {
 			System.err.println("TCW error: previous log file not closed");
 			logFileObj.close();
 		}
-		
 		// Make sure log directory exists
 		File logDir = new File(logPath);
 		if (!logDir.exists()) {
@@ -67,9 +61,9 @@ public class Out {
 		
 		try {
 			if (fileSize>0)
-				System.err.println("Trace output to stderr and Log file (append): " + logFileRelName + "   Size: " + FileHelpers.getSize(fileSize));
+				System.err.println("Log file (append): " + logFileRelName + "   Size: " + FileHelpers.getSize(fileSize));
 			else 
-				System.err.println("Trace output to stderr and Log file: " + logFileRelName);
+				System.err.println("Log file: " + logFileRelName);
 			FileWriter out = new FileWriter(logFile.getAbsolutePath(), true); // append
 			logFileObj = new PrintWriter(out); 
 		}
@@ -78,8 +72,7 @@ public class Out {
   
 	static public void close() {
 		if (logFileObj==null) return;
-		
-		Print("-----------------------------------------------------\n");
+		Print("----------------------------------------------------");
 		logFileObj.close();
 		logFileObj=null;
 	}
@@ -90,10 +83,17 @@ public class Out {
 		long fileSize = logFile.length();
 		System.err.println("Close Log file: " + logFileRelName + "   Size: " + FileHelpers.getSize(fileSize));
 		
-		Print("-----------------------------------------------------\n");
+		Print("----------------------------------------------------");
 		logFileObj.close();
 		logFileObj=null;
 	}
+	static public void prtHeader(String step) {
+		int len = step.length();
+		String pad="---";
+		for (int i=len; i<50; i+=2) pad += "-";
+		PrtDateMsg(pad + " " + step + " "+ pad);
+	}
+	/************************************************************************/
 	static public void Print(String s) {
 		if (bStdout) System.out.println(s);
 		else 		 System.err.println(s);
@@ -191,15 +191,19 @@ public class Out {
 	
 	// Date and time
 	static public void PrtDateMsg (String msg) {
-		String str = String.format("%-50s %20s", msg, TimeHelpers.getDate());
+		String str = String.format("%-64s %20s", msg, TimeHelpers.getDateTime());
+	    Print(str);
+	}
+	static public void PrtTimeMsg (String msg) { // CAS404 add
+		String str = String.format("%-64s %20s", msg, TimeHelpers.getTimeOnly());
 	    Print(str);
 	}	
-	static public void PrtSpDateMsg (int sp, String msg) {
-		PrtSpMsg(sp, String.format("%-50s %20s", msg, TimeHelpers.getDate()));
+	static public void PrtSpTimeMsg (int sp, String msg) {
+		PrtSpMsg(sp, String.format("%-50s %20s", msg, TimeHelpers.getTimeOnly()));
 	}	
     static public void PrtDateMsgTime (String msg, long t)
     {
-    	String str = String.format("%-50s %20s  %s", msg, TimeHelpers.getDate(), TimeHelpers.getElapsedNanoTime(t));
+    	String str = String.format("%-50s %20s  %s", msg, TimeHelpers.getDateTime(), TimeHelpers.getElapsedNanoTime(t));
         Print(str);
     }
     static public void PrtMsgTime (String msg, long t)
@@ -809,8 +813,6 @@ public class Out {
 		return x;
 	}
 	
-	
-	
 	// if projcmp is prefix and /usr/tcw/projcmp/ex is path, return /projcmp/ex
 	static public String mkPathRelative(String prefix, String filePath) {
 		if (filePath.contains(prefix)) {
@@ -819,4 +821,5 @@ public class Out {
 		}
 		else return filePath;
 	}
+	public static String minusChar(String x) {return x.substring(0, x.length()-1);}
 }

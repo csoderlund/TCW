@@ -158,7 +158,7 @@ public class ManagerFrame extends JFrame {
 			}
 		});
 		try {
-			setTitle("runSingleTCW " + Version.strTCWver); 
+			setTitle("runSingleTCW v" + Globalx.strTCWver); 
 		}
 		catch(Exception e) {setTitle("runSingleTCW");}
 		
@@ -1312,7 +1312,7 @@ public class ManagerFrame extends JFrame {
 				Out.PrtSpMsg(2, "This is not a project directory - it is for the user's miscellaneous files");
 				userFile.mkdir();
 			}
-			if (first) System.err.println("Reading projects from directory '" + PROJDIR + "'");
+			if (first) System.err.println("Reading projects from directory /" + Static.minusChar(PROJDIR));
 		
 			Vector<String> dirs = new Vector<String> ();
 			String [] files = dir.list();

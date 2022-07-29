@@ -12,7 +12,7 @@ import java.net.*;
 import javax.swing.JOptionPane;
 
 
-import sng.database.Version;
+import util.database.Globalx;
 import util.methods.ErrorReport;
 import util.methods.Out;
 
@@ -22,7 +22,7 @@ public class ASMain {
 	private static final String logFile = "runAS.log";
 	
 	public static void main(String[] args) {
-		Out.PrtDateMsg("Annotation Setup " + Version.TCWhead );
+		Globalx.printHeader();
 		Out.createLogFile(annoDir, logFile, true); // write to stdout
 		
 		if (hasArg(args, "-h") || hasArg(args, "-help") || hasArg(args, "?")) {

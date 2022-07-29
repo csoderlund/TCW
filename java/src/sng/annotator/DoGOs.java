@@ -121,7 +121,7 @@ public class DoGOs
 	/** Create Overview message for processing info: assem_msg.go_msg **/
 	private boolean do1_assem_msg() {
 		try {
-			String msg = "GOdb: " + godbName + "  [GOs added with " + Globalx.sTCWver + "]"; // CAS318 added GOdb
+			String msg = "GOdb: " + godbName + "  [GOs added with " + Globalx.TCWver + "]"; // CAS318 added GOdb
 			if (goDB.tableExists(goMetaTable)) {
 				String file = goDB.executeString("select filename from " + goMetaTable);
 				if (file!=null) msg = file + "  " + msg; 

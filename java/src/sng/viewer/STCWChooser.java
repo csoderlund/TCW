@@ -14,7 +14,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.net.InetAddress;
 import java.sql.ResultSet;
 import java.util.Vector;
 
@@ -50,7 +49,7 @@ import util.database.Globalx;
 
 public class STCWChooser extends JFrame {
 	private static final long serialVersionUID = 6434887265792656100L;
-	private static final String title = "viewSingleTCW";
+	private static final String title = "viewSingleTCW v" + Globalx.strTCWver;
 	
 	/**
 	 *  Open the Single TCW Database List Window
@@ -247,7 +246,7 @@ public class STCWChooser extends JFrame {
 	}
 	
 	private void setConnection(String dbName) {
-		setTitle(title + " " + STCWMain.TCW_VERSION + ":   " + dbName);
+		setTitle(title + " v" + Globalx.strTCWver + ":   " + dbName);
 		System.err.println(title + " " + dbName);
 
 		try {

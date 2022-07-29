@@ -151,26 +151,29 @@ public class QRFrame extends JDialog implements WindowListener {
 		if (addCol) 
 			if (!colNameOK(colName, bPopUp)) return; 
 
+		String msg="";
 		if (addCol) {
 			int ret = JOptionPane.showOptionDialog(getInstance(), // CAS303 change null to getInstance()
 					"Compute " + colName + " \nContinue?",
 					"Save Result in p-value column", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 			if (ret == JOptionPane.NO_OPTION) return;
-			Out.Print("\nStart DE execution - add results to column " + colName);
+			Out.Print("\n");
+			msg = "Start DE execution - add results to column " + colName;
 		}
 		else {
 			int ret = JOptionPane.showOptionDialog(getInstance(), 
 					"You have not selected to Save results in TCW database. \nContinue?",
 					"Save Result in p-value column", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 			if (ret == JOptionPane.NO_OPTION) return;
-			Out.Print("\nStart DE execution - results not added to database");
+			Out.Print("\n");
+			msg = "Start DE execution - results not added to database";
 		}
 	
 		String pColName = pValColPrefix + colName;
 		
-		if (qrProcess.rStart(true)) {
+		if (qrProcess.rStart(msg, true)) {
 			Out.Print("****************************************************************");
-			Out.Print("******** Start DE execution for column: " + colName + " *********");
+			Out.PrtDateMsg("      Start DE execution for column: " + colName);
 			Out.Print("****************************************************************");
 			
 			qrProcess.deRun(true, rScriptFile, filCnt, filCPM, filCPMn, disp,  pColName, addCol,  grp1, grp2);
@@ -234,7 +237,7 @@ public class QRFrame extends JDialog implements WindowListener {
 		}
 		chkSaveCol.setSelected(true);
 		
-		if (!qrProcess.rStart(true)) return;
+		if (!qrProcess.rStart("All Group 1", true)) return;
 		
 		int ex=0;
 		for(int x=0; x<libNames.size(); x++) {
@@ -252,7 +255,7 @@ public class QRFrame extends JDialog implements WindowListener {
 				if (!doCol.contains(pColName)) continue;
 		
 				Out.Print("****************************************************************");
-				Out.Print("******** " + (ex+1) + ". Start DE execution for column: " + pColName + " *********");
+				Out.PrtDateMsg("         " + (ex+1) + ". Start DE execution for column: " + pColName);
 				Out.Print("****************************************************************");
 				
 				pColName = pValColPrefix + pColName;
@@ -362,7 +365,7 @@ public class QRFrame extends JDialog implements WindowListener {
 			TreeSet<String> grp1 = new TreeSet <String> ();
 			TreeSet<String> grp2 = new TreeSet <String> ();
 			
-			if (!qrProcess.rStart(true)) return;
+			if (!qrProcess.rStart("Pair File", true)) return;
 			
 			for (int j=0; j<addLines.size(); j++) {
 				line = addLines.get(j);
@@ -383,7 +386,7 @@ public class QRFrame extends JDialog implements WindowListener {
 				pColName = pValColPrefix + col[2];
 			
 				Out.Print("****************************************************************");
-				Out.Print("******** " + (j+1) + ". Start DE execution for column: " + col[2] + " *********");
+				Out.PrtDateMsg("       " + (j+1) + ". Start DE execution for column: " + col[2]);
 				Out.Print("****************************************************************");
 			
 				boolean rc = qrProcess.deRun((j==0), rScriptFile, filCnt, filCPM, filCPMn, 
@@ -713,11 +716,11 @@ public class QRFrame extends JDialog implements WindowListener {
 					"GO enrichment", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 			if (ret == JOptionPane.NO_OPTION) return;
 		}
-		if (!qrProcess.rStart(false)) return;
+		if (!qrProcess.rStart("GO Enrich", false)) return;
 		int ex=1;
 		for (String colName : doCols) {	
 			Out.Print("****************************************************************");
-			Out.Print("******** " + ex + "/" + doCols.size() + ". GO enrichment for column: " + colName + " *********");
+			Out.PrtDateMsg("        " + ex + "/" + doCols.size() + ". GO enrichment for column: " + colName);
 			Out.Print("****************************************************************");
 			
 			qrProcess.goRun((ex==1), colName, usePercent, thresh, rScriptFile);
@@ -1446,7 +1449,7 @@ public class QRFrame extends JDialog implements WindowListener {
 	 * XXX Database methods
 	 */
 	private String dbSetConnection(String db) {
-		setTitle("runDE " + Globalx.strTCWver + ":   " + db);
+		setTitle("runDE v" + Globalx.strTCWver + ":   " + db);
 		Out.Print("Opening " + db);
 
 		try {

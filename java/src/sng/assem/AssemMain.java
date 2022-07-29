@@ -23,7 +23,6 @@ import sng.assem.enums.*;
 import sng.assem.helpers.*;
 import sng.database.Globals;
 import sng.database.Schema;
-import sng.database.Version;
 import util.database.DBConn;
 import util.database.Globalx;
 import util.database.HostsCfg;
@@ -90,8 +89,6 @@ public class AssemMain
 	// -q and -r only apply to execAssm
 	public static void main(String[] args)
 	{
-		Version.printTCWversion();
-		
 		if (args.length == 0 || Utils.hasOption(args, "-h") || Utils.hasOption(args, "-help")  || Utils.hasOption(args, "--help"))
 			printUsage();
 
@@ -111,6 +108,7 @@ public class AssemMain
 
 	private AssemMain(String dir, String cfg) throws Exception
 	{
+		Out.prtHeader("Instantiate");
 		mName2Clone = new Str2Obj<Clone>();
 		mID2Clone = new ID2Obj<Clone>();
 		mSingleCliques = new Stack<TreeSet<Integer>>();
@@ -159,13 +157,13 @@ public class AssemMain
 		mLogDir = new File(mProjDir,Globalx.pLOGDIR);
 		Utils.checkCreateDir(mLogDir);
 		
-		File logfile = new File(mLogDir, Globals.assmFile); 
-		new Log(logfile); // sets log file
+		File logfile = new File(mLogDir, Globals.assmFile);  // Set log file
+		new Log(logfile); 
 		Log.addLogAction(LogLevel.Basic, LogAction.Terminal);
 		Log.addLogAction(LogLevel.Basic, LogAction.Log);
 		ErrorReport.setErrorReportFileName(Log.errFile); // CAS304 shared methods use ErrorReport
 
-		Log.head("Begin instantiate " + dir,LogLevel.Basic);
+		Log.head1("Begin instantiate " + dir,LogLevel.Basic);
 		
 		long maxMem = Runtime.getRuntime().maxMemory()/(1024*1024);
 		Log.indentMsg("Using " + maxMem + "M memory", LogLevel.Basic);
@@ -2182,7 +2180,7 @@ public class AssemMain
 	
 	private static void printUsage()
 	{
-		System.err.println("Usage:  AssemMain <project> [optional flags");
+		System.err.println("\nUsage:  AssemMain <project> [optional flags");
 		System.err.println("    The <project> directory must be under the 'projects' directory");
 		System.err.println("    A configuration file STCW.cfg must be located in this directory.");
 		System.err.println("    Using the values in STCW.cfg, datasets will be loaded to the MySQL database.");

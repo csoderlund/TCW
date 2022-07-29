@@ -12,11 +12,9 @@ import sng.assem.enums.LogAction;
 import sng.assem.enums.LogLevel;
 import sng.database.Globals;
 import sng.database.Schema;
-import sng.database.Version;
 import util.database.DBConn;
 import util.database.Globalx;
 import util.database.HostsCfg;
-import util.file.FileHelpers;
 import util.methods.TCWprops;
 import util.methods.Out;
 import util.methods.ErrorReport;
@@ -44,7 +42,6 @@ public class LoadLibMain
 	
 	public static void main(String[] args)
 	{
-		Version.printTCWversion();
 		try {
 			new LoadLibMain();
 			LoadLibMain.run(true, args);
@@ -57,8 +54,10 @@ public class LoadLibMain
 	private static void run(boolean exitWhenComplete, String[] args)
 	{
 		if (args.length == 0 || args.length > 3 || 
-				Utils.hasOption(args,"-h") || Utils.hasOption(args, "--help") || Utils.hasOption(args, "-help")) printUsage();
+				Utils.hasOption(args,"-h") || Utils.hasOption(args, "--help") || Utils.hasOption(args, "-help")) 
+					printUsage();
 			
+		Out.prtHeader("Build Database - Load lib");
 		if (Utils.hasOption(args, "-n")) mNoPrompts = true;
 		
 		mProj = args[0];
@@ -102,26 +101,20 @@ public class LoadLibMain
 	
 	private static void setLog() {
 		try {
-			File logDir =  new File(mLibDir, Globalx.pLOGDIR);
-			if (!logDir.exists()) {
-				System.err.println("Creating project log directory ...");
-				if (!logDir.mkdir())  {
-					System.err.println("*** Failed to create project log directory '" +  logDir.getAbsolutePath() + "'.");
-					return;
-				}
-			};
+			File logDir = new File(mLibDir,Globalx.pLOGDIR);
+			Utils.checkCreateDir(logDir);
 			
-			File logFile = new File(logDir, Globals.loadFile);
-
-			new Log(logFile);
-			Log.setDebugLog(logFile);
-
+			File logfile = new File(logDir, Globals.loadFile);  // Set log file
+			new Log(logfile); 
 			Log.addLogAction(LogLevel.Basic, LogAction.Terminal);
 			Log.addLogAction(LogLevel.Basic, LogAction.Log);
+			ErrorReport.setErrorReportFileName(Log.errFile); // CAS304 shared methods use ErrorReport
+			
+			/** CAS404 copied AssemMain - it was recreating log file every time, now it doesn't
+			Log.setDebugLog(logFile);
 			Log.addLogAction(LogLevel.Basic, LogAction.DebugLog);
 			Log.addLogAction(LogLevel.Detail, LogAction.DebugLog);	
-			
-			ErrorReport.setErrorReportFileName(Log.errFile);
+			**/
 		}
 		catch (Exception e) {e.printStackTrace(); Log.die("Cannot create log file");}
 	}
@@ -145,7 +138,7 @@ public class LoadLibMain
 	}
 	private static void checkDB() {
 		try {
-			Log.head("Check database",LogLevel.Basic);
+			Log.head1("Check database",LogLevel.Basic);
 			
 			dbName = mProps.getProperty("STCW_db");
 			if (dbName==null) Log.die("Missing STCW_db in LIB.cfg");
@@ -294,7 +287,7 @@ public class LoadLibMain
 	
 	private static void printUsage()
 	{
-		System.err.println("Usage:  LoadLibMain <project> [optional flags]");
+		System.err.println("\nUsage:  LoadLibMain <project> [optional flags]");
 		System.err.println("    The <project> directory must be under the 'project' directory");
 		System.err.println("    A configuration file LIB.cfg must be located in this directory.");
 		System.err.println("    Using the values in LIB.cfg, datasets will be loaded to the MySQL database.");

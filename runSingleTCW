@@ -1,2 +1,4 @@
 #!/bin/sh
-java -Xmx8192m -classpath java/jars/stcw.jar sng.amanager.ManagerMain $@ 
+mem="8192m";
+echo ">>>> runSingleTCW ($mem)    `date` <<<<"
+java -Xmx$mem -classpath java/jars/stcw.jar sng.amanager.ManagerMain $@ 

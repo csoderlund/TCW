@@ -74,6 +74,7 @@ public class ProjectPanel extends JPanel {
 		row2.add(new JLabel("Project"));
 		row2.add(Box.createHorizontalStrut(5));
 		
+		Out.prt("Reading comparison projects from directory /" + Globals.PROJECTDIR);
 		String [] projNames = findProjcmpDirs();
 		cmbProject = new ButtonComboBox();
 		cmbProject.addItems(projNames);

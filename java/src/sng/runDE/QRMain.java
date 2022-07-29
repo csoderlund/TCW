@@ -2,18 +2,18 @@ package sng.runDE;
 
 import java.util.Vector;
 
-
 import sng.database.DBInfo;
 import sng.database.Globals;
-import sng.database.Version;
+import util.database.Globalx;
 import util.database.HostsCfg;
+import util.methods.Out;
 
 public class QRMain {
 	public static boolean verbose=false;
 	public static void main(String[] args) {
 
 		 try {
-			 System.err.println("\nrunDE " + Version.TCWhead);
+			 Globalx.printHeader();
 			 if (args.length>0 && args[0].startsWith("-h")) {
 				 System.err.println("Execute runDE with no arguments to get TCW database list to choose from");
 				 System.err.println("Or: runDE <ID>");
@@ -24,7 +24,7 @@ public class QRMain {
 			 }
 			 HostsCfg hostsObj = new HostsCfg();  
 			 
-				String dbstr = (args.length>0) ? args[0] : ""; 
+			 String dbstr = (args.length>0) ? args[0] : ""; 
 			 Vector <DBInfo> dbList = DBInfo.getDBlist(hostsObj, dbstr);
 			 if (dbList==null || dbList.size()==0) {
 				System.err.println("No sTCW databases on " + hostsObj.host());

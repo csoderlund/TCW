@@ -576,8 +576,8 @@ public class DoBlast {
     	
     	String file = dbInfo.get(ix).DBfastaNoPath;
   
-		Out.PrtSpMsg(2, "DB#" + dbInfo.get(ix).dbNum + " " + file  + " " +
-				FileHelpers.getSize(dbInfo.get(ix).fileSize) + "       " + TimeHelpers.getDate());
+		Out.PrtSpTimeMsg(2, "DB#" + dbInfo.get(ix).dbNum + " " + file  + " " +
+				FileHelpers.getSize(dbInfo.get(ix).fileSize));
 
 		// Execute........
 		dbFile = (new File(dbFile)).getAbsolutePath();

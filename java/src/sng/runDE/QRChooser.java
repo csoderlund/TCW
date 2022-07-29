@@ -3,7 +3,6 @@ package sng.runDE;
 /*********************************************************
  * CAS403 made DB chooser a separate method and fixed exits
  */
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -35,6 +34,7 @@ import javax.swing.tree.TreeSelectionModel;
 import sng.database.DBInfo;
 import sng.database.Overview;
 import util.database.DBConn;
+import util.database.Globalx;
 import util.database.HostsCfg;
 import util.methods.ErrorReport;
 import util.methods.Out;
@@ -60,8 +60,7 @@ public class QRChooser  extends JDialog implements WindowListener {
 		
 		JPanel selectPanel = createTCWdbSelectionPanel(list);
 		
-		try {setTitle("runDE Database Chooser ");}
-		catch (Exception e){ setTitle("runDE");}
+		setTitle("runDE v" + Globalx.strTCWver);
 		
 		setResizable(true);
 		add(selectPanel);

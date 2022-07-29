@@ -50,7 +50,7 @@ public class runMTCWMain {
 	
 	public static void main(String[] args) {
 		try {
-			System.out.println("--------- runMultiTCW v" + Globalx.strTCWver + " " + Globalx.strRelDate + "----------");
+			Globalx.printHeader();
 			
 			printHelp(args);
 			
@@ -187,7 +187,8 @@ public class runMTCWMain {
 	 ***************************************************************/
 	public boolean buildDatabase() {
 		try {
-			Out.PrtDateMsg("\nStart Build Database");
+			Out.Print("");
+			Out.prtHeader("Build Database");
 			Out.createLogFile(theCompilePanel.getCurProjAbsDir(), Globals.buildFile);
 			
 	   		long startTime = Out.getTime();
@@ -226,7 +227,7 @@ public class runMTCWMain {
 	 ***************************************************************/
 	public boolean buildGO() {
 		try {
-			Out.PrtDateMsg("\nStart Adding GOs");
+			Out.prtHeader("Add GOs");
 			Out.createLogFile(theCompilePanel.getCurProjAbsDir(), Globals.buildFile);
 			
 	   		long startTime = Out.getTime();
@@ -263,6 +264,7 @@ public class runMTCWMain {
 							
 			long startTime = Out.getTime();
 			
+			Out.prtHeader("Add methods");
 			Out.createLogFile(theCompilePanel.getCurProjAbsDir(), Globals.methodFile);
 			MethodPanel methodPanel = theCompilePanel.getMethodPanel();
 			

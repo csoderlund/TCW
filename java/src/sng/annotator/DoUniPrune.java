@@ -52,7 +52,7 @@ public class DoUniPrune {
 	public void compute() {
 		try {
 			String stype = (pruneType==1) ? "alignment" : "description";
-			Out.PrtSpDateMsg(2, "Remove same " + stype + " hits");
+			Out.PrtSpTimeMsg(2, "Remove same " + stype + " hits");
 			
 			long time = Out.getTime();
 			init(); 			if (!bRC) return;

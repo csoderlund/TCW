@@ -8,14 +8,7 @@ import util.database.Globalx;
  */
 
 public class Version {
-	// These top two are used for both sTCW and mTCW. Everything else is strictly sTCW.
-	public static final String strRelDate = 	Globalx.strRelDate; 
-	public static final String strTCWver = 	Globalx.strTCWver;
-	public static final String URL = 		Globalx.URL;
-	public static final String TCWhead = 	Globalx.TCWhead;
-	
-	public static final String sTCWhead = "sTCW v" + strTCWver + " " + strRelDate; 	
-	public static final String sTCWtitle = "viewSingleTCW v" + strTCWver;
+	public static final String sTCWhead = "sTCW v" + Globalx.strTCWver + " " + Globalx.strRelDate; 	
 	private static final int REQUIRED_JAVA_MAJOR_VERSION = 1; 
 	private static final int REQUIRED_JAVA_MINOR_VERSION = 7; 
 	
@@ -55,10 +48,5 @@ public class Version {
 
 	private static String getInstalledJavaVersionStr() {
 		return System.getProperty("java.version");
-	}
-
-	public static void printTCWversion()
-	{
-		System.err.println("\nTCW (Transcriptome Computational Workbench) v" + Globalx.strTCWver + "\n");
 	}
 }

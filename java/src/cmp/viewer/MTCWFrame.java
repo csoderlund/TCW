@@ -47,6 +47,7 @@ import cmp.viewer.table.FieldData;
 
 import util.database.DBConn;
 import util.database.HostsCfg;
+import util.database.Globalx;
 import util.file.FileHelpers;
 import cmp.database.Version;
 import util.methods.ErrorReport;
@@ -105,8 +106,8 @@ public class MTCWFrame extends JFrame {
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		
 		try {
-			setTitle("viewMultiTCW " + InetAddress.getLocalHost().getHostName());
-
+			// setTitle("viewMultiTCW " + InetAddress.getLocalHost().getHostName()); // CAS404
+			setTitle("viewMultiTCW v" + Globalx.strTCWver);
 			mainPanel = Static.createPagePanel();
 			DatabaseSelectPanel thePanel = new DatabaseSelectPanel(Globals.MTCW, null);
 			
@@ -179,7 +180,7 @@ public class MTCWFrame extends JFrame {
 			theSettings = new ViewerSettings(this);
 			setWindowSettings("viewMultiTCW");
 			
-			setTitle("viewMultiTCW " + Globals.VERSION + " : " + dbName);
+			setTitle("viewMultiTCW v" + Globals.VERSION + " : " + dbName);
 			buildFrame();
 		}
 		catch(Exception e) {ErrorReport.prtReport(e, "Error finding server name");}

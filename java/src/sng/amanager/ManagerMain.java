@@ -1,14 +1,15 @@
 package sng.amanager;
 
-import sng.database.Version;
 import util.database.HostsCfg;
 import util.database.Globalx;
 
+/************************************************
+ * runSingleTCW
+ */
 public class ManagerMain {
 	
 	public static void main(String[] args) {
-		System.out.println("\n----- runSingleTCW v" + Version.strTCWver + " " + 
-				Version.strRelDate + " " + Version.URL + "-----");
+		Globalx.printHeader();
 		
 		if (hasArgStart(args, "-h") || hasArgStart(args, "--h")) {
 			System.out.println("Usage: runSingleTCW [-v]");

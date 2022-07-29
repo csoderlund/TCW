@@ -1,2 +1,4 @@
 #!/bin/sh
-java -Xmx8192m -classpath java/jars/mtcw.jar cmp.compile.runMTCWMain $@ 
+mem="8192m";
+echo ">>>> runSingleTCW ($mem)   `date` <<<<"
+java -Xmx$mem -classpath java/jars/mtcw.jar cmp.compile.runMTCWMain $@ 

@@ -88,7 +88,7 @@ public class ErrorReport {
 		else System.err.println("Error: see " + strFileName);
 	
 		String x = (debugInfo!=null) ? debugInfo : "";
-		pWriter.println("\n" + Globalx.TCWhead + " " + TimeHelpers.getDate() + " " + x); 
+		pWriter.println("\n" + Globalx.TCWver + " " + TimeHelpers.getDateTime() + " " + x); 
 		e.printStackTrace(pWriter);
 		pWriter.close();
 	}

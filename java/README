@@ -1,6 +1,9 @@
 tar xvf classes_ext.tar.gz
+
 # Edit top line of Makefile to set JAVA_PATH 
 make
 
-Download TCW_4.tar.gz, and extract the /Ext directory to put under the TCW_4
-directory. This contains the external programs used by TCW.
+# Download TCW_4.tar.gz, and put the following two in the TCW_4 directory:
+#   the /Ext directory, which contains the external programs used by TCW.
+#   the /projects directory, which contains the demo files 
+#                              and provides the data directory structure.

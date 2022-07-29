@@ -174,7 +174,7 @@ public class Overview {
     private boolean computeSections(Vector<String> lines, boolean ask) {
     	try {
 		    Out.prt("\nUpdating overview, this can take awhile on large databases, " +
-		    		" but only is done when database content has changed...");
+		    		"but only is done when database content has changed...");
 		    Out.prtSp(0, "Dataset statistics....");
 			
 		    if (!topSection(lines)) return false;
@@ -266,7 +266,7 @@ public class Overview {
     		if (annoVer != null) { 							// CAS318 put this second
     			msg += "with sTCW v" + annoVer;
     			// CAS331 this no longer happens - I think
-    			if (!annoVer.equals(Version.strTCWver)) msg += "    Updated with v" + Version.strTCWver;
+    			if (!annoVer.equals(Globalx.strTCWver)) msg += "    Updated with v" + Globalx.strTCWver;
     		}
             lines.add(msg);
             lines.add("");
@@ -1588,10 +1588,17 @@ public class Overview {
 			return false;
 	   }
 	}
-	// HTML
+	// HTML CAS404 make html pass BBEdit test
 	 private void writeHTML(String text) {
 		try {
 			if (strDBID==null) return; // CASz 10oct19
+			
+			String [] lines = text.split("\n");
+			for (int i=0; i<lines.length; i++) {
+				lines[i] = lines[i].replaceAll("&", "&amp;");
+				lines[i] = lines[i].replaceAll(">", "&gt;");
+				lines[i] = lines[i].replaceAll("<", "&lt;");
+			}
 			String db = strDBname.replace(Globalx.STCW, "");
 			String file= db + ".html";	// CAS340 use database name instead of id
 			if (new File("./projects").exists()) {
@@ -1605,17 +1612,18 @@ public class Overview {
 			Out.prtSp(1, "Writing overview HTML file: " + file);
 			FileOutputStream out = new FileOutputStream(file);
 			PrintWriter fileObj = new PrintWriter(out); 
+			fileObj.println("<!DOCTYPE html>");	// CAS404 html5
 			fileObj.println("<html>");
-			fileObj.println("<title>" + strDBID + " overview</title>");
+			fileObj.println("<head><title>Overview " + strDBname + "</title></head>");
 			fileObj.println("<body>");
 			fileObj.println("<center>");
-			fileObj.println("<h2>Overview for " + strDBname + " </h2>"); // CAS340 add DBname
-			fileObj.println("<table width=700 border=1><tr><td>");
+			fileObj.println("<h2>Overview for " + strDBname +" (" + strDBID + ") </h2>"); // CAS340 add DBname
+			fileObj.println("<table style=\"width: 750px; border: 2px solid #999999;\"><tr><td>");
 			fileObj.println("<pre>");
-    		fileObj.println(text);
+			for (int i=0; i<lines.length; i++)  fileObj.println(lines[i]);
     		fileObj.println("</pre>");
     		
-    		fileObj.println("</body>");
+    		fileObj.println("</table></center></body>");
     		fileObj.println("</html>");
     		fileObj.close();
 		}

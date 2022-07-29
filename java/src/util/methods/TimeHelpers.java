@@ -11,10 +11,10 @@ import java.util.HashMap;
 public class TimeHelpers 
 {
 	// called by assembler and annotator
-    static public String getDate ( )
+    static public String getDateTime ( )
     {
         Date date=new Date();
-        SimpleDateFormat sdf=new SimpleDateFormat("dd-MMM-yy HH:mm:ss"); 
+        SimpleDateFormat sdf=new SimpleDateFormat("HH:mm:ss dd-MMM-yy"); 
         return sdf.format(date);
     }
     
@@ -22,6 +22,12 @@ public class TimeHelpers
     {
         Date date=new Date();
         SimpleDateFormat sdf=new SimpleDateFormat("dd-MMM-yy"); 
+        return sdf.format(date);
+    }
+    static public String getTimeOnly ( ) // CAS404 added
+    {
+        Date date=new Date();
+        SimpleDateFormat sdf=new SimpleDateFormat("HH:mm:ss"); 
         return sdf.format(date);
     }
     static public String getDBDate ( ) // For ASFrame to print the DB date 2018-09-30

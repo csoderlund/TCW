@@ -1,2 +1,4 @@
 #!/bin/sh
-java -Xmx8192m -classpath java/jars/stcw.jar:jpave/jars/mysql-connector-java-5.0.5-bin.jar sng.assem.LoadLibMain $@ 
+mem="8192m";
+echo ">>>> execLoadLib ($mem)    `date` <<<<"
+java -Xmx$mem -classpath java/jars/stcw.jar:jpave/jars/mysql-connector-java-5.0.5-bin.jar sng.assem.LoadLibMain $@ 

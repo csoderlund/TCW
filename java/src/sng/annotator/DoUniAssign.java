@@ -332,7 +332,7 @@ public class DoUniAssign {
 			if (annoSeqSet.size() == 0) return true;
 			
 			System.err.println();
-	 		Out.PrtSpMsg(2, "Creating species table");
+	 		Out.PrtSpTimeMsg(2, "Creating species table");
 			long t = Out.getTime();
 			
 			int nSpe = mDB.executeCount("SELECT COUNT(*) FROM pja_db_species");

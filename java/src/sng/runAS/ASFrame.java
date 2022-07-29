@@ -80,7 +80,7 @@ public class ASFrame extends JDialog implements WindowListener{
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);	
 		setResizable(true);
 		add(mainPanel);
-		setWindowSettings("TCW Anno Setup " + Globalx.strTCWver);
+		setWindowSettings("TCW Anno Setup v" + Globalx.strTCWver);
 		setVisible(true);
 		
 		upObj = new DoUP(this);

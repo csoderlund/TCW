@@ -113,6 +113,7 @@ public class BlastPanel extends JPanel {
 	 * Add blast pairs
 	 */
 	public void createPairsFromBlast() {
+		Out.prtHeader("Add pairs");
 		Out.createLogFile(theCompilePanel.getCurProjAbsDir(), Globals.searchFile);
 	
 		if (theCompilePanel.getDBInfo().getCntPair()>0) {
@@ -120,7 +121,7 @@ public class BlastPanel extends JPanel {
 			return;
 		}
 		try {
-			Out.PrtDateMsg("Create pairs from search result files");
+			Out.PrtTimeMsg("Create pairs from search result files");
 			long time = Out.getTime();
 			
 			Pairwise pw = new Pairwise(theCompilePanel);
@@ -148,6 +149,7 @@ public class BlastPanel extends JPanel {
 	}
 	
 	public void runBlast() { 
+		Out.prtHeader("Run Search");
 		Out.createLogFile(theCompilePanel.getCurProjAbsDir(), Globals.searchFile);
 	
 		String blastDir = theCompilePanel.getCurProjAbsDir() +  "/" + Globals.Search.BLASTDIR; 

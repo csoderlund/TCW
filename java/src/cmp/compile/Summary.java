@@ -95,7 +95,7 @@ public class Summary {
 	 			text += lines.get(i) + "\n";
 	 	
 	 		mDB.executeUpdate("UPDATE info SET summary = \"" + text + "\""); 
-	     	writeOverview(text);
+	     	writeHTML(text);
 	     	Out.PrtSpMsg(0, "Complete overview");
 		}
 		catch (Exception e) {ErrorReport.die(e, "create/get summary");}
@@ -632,12 +632,20 @@ public class Summary {
 	catch (Exception e) {ErrorReport.prtReport(e, "processing");}	
     }
    
-	public void writeOverview(String text) {
+    // HTML CAS404 make html pass BBEdit test
+	public void writeHTML(String text) {
 		String projDir = Globals.PROJECTDIR;
 		String sumDir = Globals.summaryPath;
 		String overFilePath = sumDir + "/" + dbName + ".html";
 		try {
 			if (!new File(projDir).exists()) return; // should exist
+			
+			String [] lines = text.split("\n");
+			for (int i=0; i<lines.length; i++) {
+				lines[i] = lines[i].replaceAll("&", "&amp;");
+				lines[i] = lines[i].replaceAll(">", "&gt;");
+				lines[i] = lines[i].replaceAll("<", "&lt;");
+			}
 			
 			File h = new File(sumDir);
 			if (!h.exists()) {
@@ -646,12 +654,22 @@ public class Summary {
 			}
 			FileOutputStream out = new FileOutputStream(overFilePath);
 			PrintWriter fileObj = new PrintWriter(out); 
-			// CAS310 make centered table
-			String head = "<html><title>mTCW_" + dbName + " overview</title><body><center>"
-					+ "\n<h2>mTCW overview for " + dbName + "</h2>"
-					+ "\n<table width=600 border=1><tr><td><pre>";
-			String foot = "\n</pre></table></body></html>";
-    		fileObj.println(head + text + foot);
+			
+    		Out.prtSp(1, "Writing overview HTML file: " + overFilePath);
+			
+			fileObj.println("<!DOCTYPE html>");	// CAS404 html5
+			fileObj.println("<html>");
+			fileObj.println("<head><title>Overview mTCW_" + dbName + "</title></head>");
+			fileObj.println("<body>");
+			fileObj.println("<center>");
+			fileObj.println("<h2>Overview for mTCW_" + dbName + " </h2>"); 
+			fileObj.println("<table style=\"width: 800px; border: 2px solid #999999;\"><tr><td>");
+			fileObj.println("<pre>");
+			for (int i=0; i<lines.length; i++)  fileObj.println(lines[i]);
+    		fileObj.println("</pre>");
+    		
+    		fileObj.println("</table></center></body>");
+    		fileObj.println("</html>");
     		fileObj.close();
 		}
 		catch (Exception e){ErrorReport.prtReport(e, "Error writing to " + overFilePath);}

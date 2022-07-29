@@ -22,6 +22,7 @@ import sng.database.Globals;
 import sng.database.Schema;
 import util.database.DBConn;
 import util.database.Globalx;
+import util.file.FileHelpers;
 import util.methods.ErrorReport;
 import util.methods.Out;
 
@@ -70,7 +71,7 @@ public class QRProcess {
 		mDB = m;
 		dbName = name;
 	}
-	public boolean rStart(boolean bDE) { // bDE is DE, else is GO
+	public boolean rStart(String msg, boolean bDE) { // bDE is DE, else is GO
 		try {
 			if (re == null) { //CAS403 check the first time - QRprocess is 1-1 with DB
 				String sql = "select schemver from schemver where schemver='" + Schema.currentVerString() + "'";
@@ -85,6 +86,8 @@ public class QRProcess {
 				initJRI();
 				packages = new HashSet<String>();
 				getPackages(packages);
+				
+				Out.Print("");
 			}
 			
 			if (!bDE) {
@@ -105,22 +108,27 @@ public class QRProcess {
 	    		}
 	    		doCmd(true, "suppressPackageStartupMessages(library(goseq))");
 			}
+			
+			Out.prtHeader(msg);
 			createLogFile();
 			return true;
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Cannot start R"); return false;}	
 	}
 	public void rFinish() {
+		Out.close();
+		
 		re.startMainLoop();
 		Out.Print("The console is in R, you may run R commands -- q() or Cntl-C " +
 				"when done, or perform another Execute.");
 		System.err.print(">");
-		Out.close();
+		
 	}
 	public void rQuit() { // CAS403
+		Out.close();
+		
 		if (re != null) {
 			Out.Print("Quit R saving session");
-			Out.close();
 			doCmd(false,"q(\"yes\", 0)");
 			re.end();
 			re = null;
@@ -133,8 +141,11 @@ public class QRProcess {
 			if (!f.exists()) return; // no log file
 			
 			path += "/" + Globalx.DEDIR;
-			
-			Out.createDELogFile(path, file);
+			if (!FileHelpers.existDir(path)) {
+				System.out.println("Create " + path);
+				 FileHelpers.createDir(path); // CAS404 RunDE did not exists in DL
+			}
+			Out.createLog(path, file);
 		}
 		catch (Exception e) {ErrorReport.prtReport(e, "Cannot start R");}
 	}

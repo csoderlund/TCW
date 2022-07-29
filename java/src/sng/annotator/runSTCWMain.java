@@ -23,8 +23,6 @@ import util.methods.Out;
 */
 public class runSTCWMain 
 {	
-	public static final String sTCW_VERSION_STRING = "TCW annotation v" + 
-			Globalx.strTCWver + " " + Globalx.strRelDate;;
 	private static String blastDir = Globalx.pHITDIR;  // seqs are written and search is run
 	private static final String ProjDirName = Globalx.PROJDIR + "/";
 	
@@ -56,8 +54,6 @@ public class runSTCWMain
 		if (!Version.checkJavaSupported())
 			System.exit(-1);
 			
-		System.out.println("\n----- " + sTCW_VERSION_STRING + " -----");
-		
 		/**  Parameter processing */
 		if (hasOption(args, "-h") 
 				|| hasOption(args, "-help") 
@@ -98,8 +94,8 @@ public class runSTCWMain
 		
 		// 3. create log file
 		if (bdoAnno || doGO || doRecalcORF || doPrune) {
+			Out.prtHeader("Annotate Sequences");
 			Out.createLogFile(getCurProjPath(), Globals.annoFile);
-			Out.PrtDateMsg("\n--------------- Annotate Sequences ---------------");
 		}
 		
 		// 4. create database connection
@@ -259,8 +255,8 @@ public class runSTCWMain
 		try {
 			mDB.executeUpdate("update assem_msg set pja_msg = NULL where AID = 1");
 			
-			mDB.executeUpdate("update schemver set annoVer='" +  Version.strTCWver + "'");
-			mDB.executeUpdate("update schemver set annoDate='" + Version.strRelDate + "'");
+			mDB.executeUpdate("update schemver set annoVer='" +  Globalx.strTCWver + "'");
+			mDB.executeUpdate("update schemver set annoDate='" + Globalx.strRelDate + "'");
 			
 			if (bSuccess) 
 				 mDB.executeUpdate("UPDATE assembly SET annotationdate=(CAST(NOW() as DATE)) WHERE AID=1");	

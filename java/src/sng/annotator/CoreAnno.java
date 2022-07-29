@@ -94,7 +94,7 @@ public class CoreAnno {
 		String delim = ";";
 		
 		Out.Print("");
-		Out.PrtDateMsg("Start creating Pairs");
+		Out.PrtTimeMsg("Start creating Pairs");
 		long time = Out.getTime();
 		
 		// Only false if blast fails. Otherwise, (1) Not selected (2) blast succeed (3) tab file exists

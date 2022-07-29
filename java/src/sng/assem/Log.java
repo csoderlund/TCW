@@ -10,9 +10,8 @@ import java.util.HashMap;
 
 import sng.assem.enums.LogAction;
 import sng.assem.enums.LogLevel;
-import sng.database.Version;
+import util.file.FileHelpers;
 import util.methods.TimeHelpers;
-
 
 // Logging helper class. 
 // Initialize it once to set the static members, and then all methods can be called statically, so
@@ -21,7 +20,6 @@ import util.methods.TimeHelpers;
 // Most calls take a LogLevel enum, which tells which log to  put the message in, and whether to display it to the screen.
 // (These actions are set up during initialization, using the LogAction enum). 
 //
-// 
 
 
 public class Log
@@ -55,7 +53,14 @@ public class Log
 	public Log(File file) throws Exception {
 		this(new FileWriter(file, true));
 		logFile = file;
-		System.err.println("Log File:" + file.getAbsolutePath()); 
+		
+		long fileSize = file.length();
+		String fname = FileHelpers.removeRootPath(file.getAbsolutePath()); // CAS404
+		if (fileSize==0)
+			System.err.println("Log File: " + fname);
+		else
+			System.err.println("Log file (append): " + fname 
+				+ "   Size: " + FileHelpers.getSize(fileSize)); // CAS404 add size
 	}
 	public static void setDebugLog(File file) throws Exception
 	{
@@ -69,21 +74,25 @@ public class Log
 
 		mActions.get(lvl).add(action);
 	}
-	
-	public static String head(String s, LogLevel lvl) 
+	public static String head1(String s, LogLevel lvl) // CAS404 date-time
 	{		
 		String x = String.format("%-40s", s);
-		return msg("\n>>>" + x + " " + TimeHelpers.getDate() + "\n",lvl);
+		return msg("\n>>>" + x + " " + TimeHelpers.getDateTime() + "\n",lvl);
+	}
+	public static String head(String s, LogLevel lvl) // CAS404 changed to time only
+	{		
+		String x = String.format("%-40s", s);
+		return msg("\n>>>" + x + " " + TimeHelpers.getTimeOnly() + "\n",lvl);
 	}
 	public static String head(String s) 
 	{		
 		String x = String.format("%-40s", s);
-		return msg("\n>>>" + x + " " + TimeHelpers.getDate() + "\n", LogLevel.Basic);
+		return msg("\n>>>" + x + " " + TimeHelpers.getTimeOnly() + "\n", LogLevel.Basic);
 	}
 	public static String head2(String s) // no initial newline
 	{		
 		String x = String.format("%-40s", s);
-		return msg(">>>" + x + " " + TimeHelpers.getDate() + "\n", LogLevel.Basic);
+		return msg(">>>" + x + " " + TimeHelpers.getTimeOnly() + "\n", LogLevel.Basic);
 	}
 
 	public static String indentMsg(String s, LogLevel lvl)

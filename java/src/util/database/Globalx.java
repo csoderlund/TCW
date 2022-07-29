@@ -3,6 +3,7 @@ package util.database;
 import java.awt.Color;
 import java.awt.Font;
 
+import util.methods.Out;
 import util.methods.Static;
 
 // shared by sTCW and mTCW
@@ -10,14 +11,26 @@ import util.methods.Static;
 public class Globalx {
 	public static boolean debug = false; // changed in STCWMain or MTCWMain from command line 
 	
-	public static final String strRelDate = "(14-July-22)"; 
-	public static final String strTCWver = "4.0.3";  //  must be 3 digits
-	public static final String URL =     "http://www.agcol.arizona.edu";
-	public static final String GITURL	= "https://github.com/csoderlund";
+	public static final String strRelDate = "(29-July-22)"; 
+	public static final String strTCWver = "4.0.4";  //  must be 3 digits
 	
-	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate;
-	public static final String sTCWver = "sTCW v" + strTCWver;
-	public static final String mTCWver = "mTCW v" + strTCWver;
+	public static final String URL =     "http://www.agcol.arizona.edu";
+	public static final String GITURL	= "https://csoderlund.github.io/TCW";
+	
+	public static final String TCWver = "TCW v" + strTCWver;
+	// CAS404 all interfaces use this string
+	public static final String TCWhead = "TCW v" + strTCWver + " " + strRelDate + "   " + GITURL + "    ";
+	
+	public static void printHeader() {
+		Out.Print("\n" + getTCWheader());
+	}
+	public static String getTCWheader() { // CAS404 run programs Out.PrtDateMsg(Globalx.getJavaMem());
+		//return "Java Version " + System.getProperty("java.version") + 
+		//		", mem: " + (Runtime.getRuntime().maxMemory() / (1024*1024)) + "m" + "\n" + TCWhead;
+		return TCWhead 
+				+ "Java v" + System.getProperty("java.version") + " (" + (Runtime.getRuntime().maxMemory() / (1024*1024)) + "m"
+				+ ")  ";
+	}
 	public static final String error="***";
 	
 	public final static String extDir =   "Ext"; // CAS303 changed from external and external_osx

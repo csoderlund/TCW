@@ -163,7 +163,7 @@ public class DoORF {
 		try { 
 			long time = Out.getTime();
 			
-			Out.PrtSpMsg(1,"Annotate with GC and ORF " + filterStr);
+			Out.PrtSpTimeMsg(1,"Annotate with GC and ORF " + filterStr);
 		
 			if (!train.setMode()) return;
 			
