@@ -13,4 +13,4 @@ All other external software used by TCW is contained in the package tar file. TC
 **TCW github code:** To build, see TCW/java/README.
 
 **Reference:** C. Soderlund (2022) Transcriptome computational workbench (TCW): analysis of single and comparative transcriptomes. 
-Published at [BioRxiv](https://www.biorxiv.org/content/10.1101/733311v1).
+Published at [BioRxiv](https://www.biorxiv.org/content/10.1101/733311).
