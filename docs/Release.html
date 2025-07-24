@@ -10,10 +10,10 @@
 	mark.green {color:green;background: none;}
 	mark.white {font-family:verdana; font-size:12px; color:white;background:none;}
 	td {padding: 0 15px;}
+	ttp  {font-family: Arial, monospace; font-size: 14px; font-weight: 600; color: #556B2F; }
 	ttx  {font-family: 'Lucida Console', monospace; font-size: 14px; }
 	ttc  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 700; color: DarkSlateGrey;}
 	ttl  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 600; color: DarkSlateGrey;}
-	ttp  {font-family: 'Lucida Console', monospace; font-size: 16px; font-weight: 400; font-variant: small-caps;}
 	body {font-family:  Verdana, Arial, Helvetica,  sans-serif;  font-size: 14px; }
 </style>
 </head>
@@ -57,24 +57,19 @@
 
 	<tr><td style='vertical-align: top; text-align: left; padding:15px;'>
 	<!---- START BODY -->
+You must have Java v17.0.11 or later, starting with TCW v4.0.5.
 
-There have been many improvements, but the following provides some recent critical points.
-<font size="2">
-<table>
-<tr><td><a href="#v403">v4.0.4</a><td>29-July-22<td><ttp>All<td>Small improvements.
-<tr><td><a href="#v339">v3.3.9</a><td>27-Dec-21<td><ttp><ttp>runAS</ttp></ttp><td>Improved interface for full subset UniProt; updated Demo.
-<tr><td><a href="#v335">v3.3.5</a><td>04-Nov-21<td><ttp>viewSingle</ttp><td>log2FC TPM analysis
-<tr><td><a href="#v334">v3.3.4</a><td>18-Oct-21<td><ttp>runSingle</ttp><td><ttl>ORF finder</ttl> improvements
-<tr><td><a href="#v331">v3.3.1</a><td>01-Sep-21<td><ttp>runSingle</ttp><td> Add Prune Hits algorithm
-<tr><td><a href="#v330">v3.3.0</a><td>15-Aug-21<td>All<td>Update Diamond and Blast and default parameters
-<tr><td><a href="#v327">v3.2.7</a><td>20-Jul-21<td><ttp>viewSingle</ttp><td>Add enhanced Decimal Display (highlight p-values)
-<tr><td><a href="#v325">v3.2.5</a><td>04-Jun-21<td><ttp>runMulti</ttp><td>Fix <ttp>orthoMCL</ttp> to work with MariaDB
-<tr><td><a href="#v325">v3.2.3</a><td>09-May-21<td><ttp>viewSingle</ttp><td>Enhance the Hit-GO evidence codes query and display
-<tr><td><a href="#v321">v3.2.1</a><td>09-Apr-21<td><ttp>runDE</ttp><td>The built-in GOseq was changed to any script that is run by runDE.
-<tr><td><a href="#v318">v3.1.8</a><td>18-Mar-21<td><ttp>runAS</ttp><td>Changed the source of GO to the go-basic.obo file
-<tr><td><a href="#early">Earlier</a><td>2020<td>&nbsp;<td>&nbsp;
-</table>
-</font>
+
+<a id=v405></a>
+<h4>v4.0.5 24-July-2025</h4>
+The released code was compiled with Java 17.0.10.
+<ul>
+<li>Updated the MySQL connection library.
+<li>Updated the code to work with Java 24 and MySQL.
+<li>Add Mac M4 executables; see <a href="Install.html#test">tested machines.</a>
+<li>Tested <ttp>runAS</ttp> to make sure it still works with UniProt and GO.
+Tested <ttp>runDE</ttp> with the latest R release.
+</ul>
 
 <a id=v404></a>
 <h4>v4.0.4 29-July-2022</h4>

@@ -11,9 +11,10 @@
 	.ty caption {padding-bottom: 0.5em;}
 	.ty th {border: 1px  solid black; padding: 3px; }
 	.ty td {border: 1px  solid black; padding: 3px; }
-	ttp  {font-family: 'Lucida Console', monospace; font-size: 16px; font-weight: 400; font-variant: small-caps;}
+	ttp  {font-family: Arial, monospace; font-size: 14px; font-weight: 600; color: #556B2F; }
 	tt {font-size:13px}
 	pre {font-size:13px}
+	ul {margin-top: 0; }
 	body {font-family:  Verdana, Arial, Helvetica, sans-serif;  font-size: 14px; }
 </style>
 </head>
@@ -73,36 +74,62 @@
 		<ttp>TCW</ttp> is written in Java and was developed under Linux and Mac
 		(see <a href=Mac-OSX.html class="ext" target="_blank">Mac Installation</a>).
 		A 64-bit multi-processor is needed to build the TCW database(s).
-		<ttp>TCW</ttp> was compiled into a jar file using Java version 1.8,
+		<ttp>TCW</ttp> was compiled into a jar file using Java version 17.0.10,
 		so should work on any subsequent Java release.
 <p>
-Required:
+<u>Required</u>:
 <p>
-	<table class="ty">
+	<table class="ty" style="font-family: Verdana, Arial, Helvetica, sans-serif; font-size:10pt">
 	<tr><td><i>Software</i></td> <td><i>Version</i></td> <td><i>Source</i></td> <td><i>Additional info</i></td></tr>
 	<tr>
 
-	<td>MySQL</td><td>5.0 or later</td>
+	<td>MySQL</td><td>Tested with v8</td>
 	<td><a href="http://www.mysql.com" class="ext" target="_blank">www.mysql.com</a></td>
 	<td>MariaDB also works.
 	</td>
 
 	<tr>
 	<td>Java</td>
-	<td>1.8 or later</td>
+	<td>17.0.10 or later</td>
 	<td><a href="http://adoptopenjdk.net" class="ext" target="_blank">OpenJDK Java</a>
 	<br><a href="http://www.java.com/en/download/" class="ext" target="_blank">Oracle Java</a>
 	<td>Get the Java JRE or JDK</td>
 	</tr>
 	</table>
 
-<p>It has been tested on:
-<table class="ty" style="font-size: 12px;">
-<tr><th>OS<th>Architecture<th>Purchased<th>Database<th>Java<th>Test
-<tr><td>Linux x86.64 (Centos 7) <td>3.2 Ghz AMD 24-Core, 128Gb<td style="text-align: center">2011<td>MariaDB v10.4.12<td>v1.8<td>Build and View
-<tr><td>Linux x86.64 (Centos 7)  <td>2.0 Ghz AMD 4-Core, 20Gb<td style="text-align: center">2008<td>MariaDB v5.5.60<td>v1.7<td>View
-<tr><td>MacOS (Catalina 10.15.4)<td>3.2 GHz Intel 6-Core i7, 64Gb<td style="text-align: center">2020<td>MySQL v8.0.17<td>v14.0<td>Build and View
-<tr><td>MacOS (Maverick 10.9.5) <td>2.4 Ghz Intel 2-Core i5, 16Gb<td style="text-align: center">2012<td>MySQL v5.6.21<td>v1.7<td>View
+<a id="test"></a>
+<p>&nbsp;<p><u>TCW v4.0.5 (July 2025)</u>: Test <i>all</i> TCW programs using the demo files, plus downloaded a UniProt database and GO
+with <ttp>runAS</ttp> and verified it worked. <ttp>RunDE</ttp> was tested with <ttp>edgeR</ttp> and <ttp>goSeq</ttp>.
+
+<table class="ty" style="font-family: Verdana, Arial, Helvetica, sans-serif; font-size:9pt">
+<tr><td><b>Machine</b><td><b>MySQL</b><td><b>Java</b><td><b>Core (CPU)</b><td><b>Memory</b><td><b>Purchased</b>
+<tr><td>&nbsp;&nbsp;1. <ttl>MacOS M4</ttl> (aarch64)<sup>1</sup>
+	<td>MySQL v8.0.42
+	<td>24 from <a href="https://www.oracle.com/java/" class="ext" target="_blank">Oracle</a>
+	<td>M4 12-Core<td>&nbsp;48Gb<td>2025
+<tr><td>&nbsp;&nbsp;2. <ttl>MacOS x86_64</ttl>
+	<td>MySQL v8.0.33,<br>MariaDB 11.0.2
+	<td>17, 20, 24 from
+	<br><a href="https://adoptium.net" class="ext" target="_blank">Adoptium</a> and <a href="https://www.oracle.com/java/" class="ext" target="_blank">Oracle</a>
+	<td>3.2 GHz 6-Core<td>&nbsp;64Gb<td>2018
+<tr><td>&nbsp;&nbsp;3. <a href="http://linode.com" class="ext" target="_blank"><ttl>Linode</ttl><sup>2</sup></a> (Ubuntu 22.04.2 LTS)
+	<td>MySQL 8.0.33<td>17<td>Nanode<td>&nbsp;&nbsp;1Gb<td>2023
+</table>
+<sup>1</sup><small>MacOS M4: Cap3, OrthoMCL and Muscle are not supplied for this machine.
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    The user can supply Cap3 in the <tt>Ext/macM4/cap3</tt> directory if they want assembly to work.</small>
+<br><sup>2</sup><small>Linux/Linode: <tt>rJava</tt> did not install successfully,
+			so the <ttp>runDE</ttp> could not be tested.</small>
+
+<p><u>TCW v4.0.4 (July 2022)</u>: Used to create multiple large TCW comparative projects with expression levels.
+<table class="ty" style="font-family: Verdana, Arial, Helvetica, sans-serif; font-size:9pt">
+<tr><td><b>Machine</b><td><b>MySQL</b><td><b>Java</b><td><b>Core (CPU)</b><td><b>Memory</b><td><b>Purchased</b>
+<tr><td>Linux x86.64 (Centos 7)
+	<td>MariaDB v10.4.12
+	<td>v1.8
+	<td>3.2 Ghz AMD 24-Core
+	<td>128Gb
+	<td style="text-align: center">2011
 </table>
 <br>See <a href="Summary.html#time" class="ext" target="_blank">Summary</a> for timings.
 
@@ -135,13 +162,13 @@ To verify, type:
 </pre>
 The program should prompt you for the password, and then
 display the "mysql>" prompt. Type "exit" to return to the shell command line.
-	<p>Note:
-	<ul>
+<p>Note:
+<ul>
 	<li>The user must have sufficient privileges to create a new database.
 	<li>If you will be using the optional <a href="stcw/AssemGuide.html" class="ext" target="_blank">assembly feature</a>, Innodb table must be enabled.
 	<li>Execute "<tt>./runSingletTCW -v</tt>", which will check some variable that can influence execution times.
 		<br>Also see <a href="Trouble.html#mysql" class="ext" target="_blank">Trouble MySQL</a>.
-	</ul>
+</ul>
 
 <p><u><i><b>Step 3:</b></i></u> Open the <tt>HOSTS.cfg</tt> file in an editor.
 	<pre>
@@ -173,7 +200,7 @@ Other annotation databases can also be used, but TCW provides GO support with Un
 <h2>Optional software</h2>
 <td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
-<table class="ty">
+<table class="ty" style="font-family: Verdana, Arial, Helvetica, sans-serif; font-size:9pt">
 	<tr><td><i>Software</i></td> <td><i>Source</i></td> <td><i>Additional info</i></td></tr>
 
 	<tr><td>R</td><td><a href="http://www.r-project.org/" class="ext" target="_blank">R Project</a></td>
@@ -219,7 +246,6 @@ In order to use <ttp>edgeR</ttp>, <ttp>DEseq2</ttp> and <ttp>GOseq</ttp>, start 
 <pre>
    >if (!requireNamespace("biocManager", quietly=TRUE))
    >install.packages("BiocManager")
-   >BiocManager::install(version = "3.11")
    >BiocManager::install("edgeR")
    >BiocManager::install("goseq")
    >BiocManager::install("DESeq2")
@@ -267,7 +293,6 @@ You do not need to do anything to use the supplied packages. They are in the rel
 		</tr>
 
 	<tr><td colspan=4><i>Supplied packages for multiTCW</i></td>
-
          <tr>
 			<td><ttp>OrthoMCL</ttp><sup>1</sup></td><td>2.0.3</td>
 			<td><a href="http://orthomcl.org" class="ext" target="_blank">
@@ -275,7 +300,7 @@ You do not need to do anything to use the supplied packages. They are in the rel
          	<td>One of four available methods for clustering</td>
 		</tr>
          <tr>
-			<td><ttp>MCL</ttp></td><td>10-201</td>
+			<td>&nbsp;&nbsp;<ttp>MCL</ttp></td><td>10-201</td>
 			<td><a href="http://micans.org/mcl/" class="ext" target="_blank">
 			micans.org/mcl</a></td>
          	<td>Used by <ttp>OrthoMCL</ttp></td>
@@ -287,7 +312,7 @@ You do not need to do anything to use the supplied packages. They are in the rel
          	<td>Computing multiple alignment of clusters for scoring and viewing</td>
 		</tr>
 		<tr>
-			<td><ttp>MUSCLE</ttp><sup>2</sup></td><td>3.8.31</td>
+			<td><ttp>MUSCLE</ttp></td><td>3.8.31</td>
 			<td><a href="http://www.drive5.com/muscle" class="ext" target="_blank">
 			www.drive5.com/muscle</a></td>
          	<td>Computing multiple alignment of clusters for scoring and viewing</td>
@@ -299,7 +324,7 @@ You do not need to do anything to use the supplied packages. They are in the rel
          	<td>Scoring multiple alignment of clusters</td>
 		</tr>
 
-        <tr><td><ttp>KaKs_Calculator</ttp><sup>2</sup></td>
+        <tr><td><ttp>KaKs_Calculator</ttp></td>
         	<td>v.1.2
 			<td><a href="http://bigd.big.ac.cn/tools/kaks/download" class="ext" target="_blank">
 		    bigd.big.ac.cn/tools/<br>kaks/download</a></td>
@@ -308,18 +333,17 @@ You do not need to do anything to use the supplied packages. They are in the rel
 		</table>
 <sup>1</sup> <ttp>OrthoMCL</ttp>:
 <ul>
-<li>It did not work with MariaDB v10.4.12. It was fixed by editing the orthoLoadBlast script to set the MySQL local_infile from within the script.
-Also, orthoBlastParser was edited to accept ".fa" suffixes
-<li>It works on MacOS 10.9, but has not been tested on MacOS 10.15 (problems with installing DBI:MySQL).
+<li><ttp>OrthoMCL</ttp> is still available from <ttp>TCW</ttp>, but takes some effort on the user to install DBI:MySQL.
+There could be additional new dependency problems. I could not install DBI:MySQL on MacOS 10.15, and did not try
+it on anything else for a long time.
+<p>
 <li>If <ttp>OrthoMCL</ttp> does not work on your machine and
 you want an alternative to the TCW supplied clustering algorithms, you may download and run a ortholog computing program
 and then import the clusters using the <ttp>runMultiTCW</ttp> "User Supplied" option.
+<p>
+<li>It did not work with MariaDB v10.4.12. It was fixed by editing the orthoLoadBlast script to set the MySQL local_infile from within the script.
+Also, orthoBlastParser was edited to accept ".fa" suffixes
 </ul>
-
-<p><sup>2</sup> <ttp>MUSCLE</ttp> and <ttp>KaKs_Calculator</ttp>
-in the <tt>/Ext/mac</tt> directory work for MacOS 10.15, but not for MacOS 10.9. For
-10.9, move the <ttp>MUSCLE</ttp> and <ttp>KaKS_Calculator</ttp> from <tt>/Ext/mac0</tt> to <tt>/Ext/mac</tt>,
-as these work. If your using MacOS 10.10 to 10.14, try them from the command line to see what works.
 
 <p><font color=red>MacOS Verify</font> Catalina and later versions require verification of external software. See
 (see <a href="Mac-OSX.html#ext" class="ext" target="_blank">Running Ext/mac external programs</a>).
