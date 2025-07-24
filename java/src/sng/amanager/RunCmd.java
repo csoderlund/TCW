@@ -48,7 +48,8 @@ public class RunCmd {
 			final String classPath = JAR + ":" + JAR_DIR + "/mysql-connector-java-5.0.5-bin.jar";
 			final String cmd = "java -Xmx" + MAXMEM + "m -cp " + classPath + " sng.assem.LoadLibMain " + curManData.getProjDir();
 
-			Process pr = Runtime.getRuntime().exec(cmd);
+			String [] x = cmd.split("\\s+");
+			Process pr = Runtime.getRuntime().exec(x); // CAS405 must be array
 			
 			pr.getOutputStream().flush();
 			OutputHandler oh = new OutputHandler(pr.getErrorStream());
@@ -131,7 +132,8 @@ public class RunCmd {
 			final String classPath = JAR;
 			final String cmd = "java -Xmx" + maxMem + "m -cp " + classPath + " sng.assem.AssemMain " + curManData.getProjDir();
 
-			Process pr = Runtime.getRuntime().exec(cmd);
+			String [] x = cmd.split("\\s+");
+			Process pr = Runtime.getRuntime().exec(x);
 			pr.getOutputStream().flush();
 			OutputHandler oh = new OutputHandler(pr.getErrorStream());
 			InputHandler ih = new InputHandler(pr.getOutputStream());
@@ -175,8 +177,14 @@ public class RunCmd {
 					" sng.annotator.runSTCWMain " + curManData.getProjDir() + " -n";
 			Process pr;
 			
-			if (prompt) pr = Runtime.getRuntime().exec(cmd);
-			else pr = Runtime.getRuntime().exec(cmdn);
+			if (prompt) {
+				String [] x = cmd.split("\\s+");
+				pr = Runtime.getRuntime().exec(x);
+			}
+			else {
+				String [] x = cmdn.split("\\s+");
+				pr = Runtime.getRuntime().exec(x);
+			}
 			
 			pr.getOutputStream().flush();
 			OutputHandler oh = new OutputHandler(pr.getErrorStream());
@@ -210,7 +218,8 @@ public class RunCmd {
 			final String classPath = JAR;
 			final String cmd = "java -Xmx" + MAXMEM + "m -cp " + classPath + " sng.annotator.runSTCWMain " + 
 					curManData.getProjDir() + " " + opt;
-			Process pr = Runtime.getRuntime().exec(cmd);
+			String [] x = cmd.split("\\s+");
+			Process pr = Runtime.getRuntime().exec(x);
 			pr.getOutputStream().flush();
 			OutputHandler oh = new OutputHandler(pr.getErrorStream());
 			InputHandler ih = new InputHandler(pr.getOutputStream());
@@ -246,7 +255,8 @@ public class RunCmd {
 
 			System.err.println("Launching viewSingleTCW for " + 
 					host + ":" + curManData.getTCWdb() + ":" + curManData.getProjID());
-			Process pr = Runtime.getRuntime().exec(cmd);
+			String [] x = cmd.split("\\s+");
+			Process pr = Runtime.getRuntime().exec(x);
 			pr.getOutputStream().flush();
 			OutputHandler oh = new OutputHandler(pr.getErrorStream());
 			InputHandler ih = new InputHandler(pr.getOutputStream());
@@ -278,7 +288,8 @@ public class RunCmd {
 				System.err.println("You must set the R_HOME environment variable to the location of the R installation.");
 				return;
 			}
-			Process pr = Runtime.getRuntime().exec(cmd,null);
+			String [] x = cmd.split("\\s+");
+			Process pr = Runtime.getRuntime().exec(x,null);
 			pr.getOutputStream().flush();
 			OutputHandler oh = new OutputHandler(pr.getErrorStream());
 			InputHandler ih = new InputHandler(pr.getOutputStream());

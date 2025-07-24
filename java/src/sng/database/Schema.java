@@ -80,7 +80,7 @@ public class Schema
 			if (!db.tablesExist()) return; 
 			
 			ResultSet rs = mDB.executeQuery("select schemver from schemver");
-			rs.first();
+			rs.next();
 			dbVerStr = rs.getString("schemver");
 			
 			if (dbVerStr.equals("3.5"))			dbVer = DBVer.Ver35;
@@ -108,8 +108,8 @@ public class Schema
 	public void loadSchema() throws Exception
 	{
 		try {
-		ResultSet rs = mDB.executeQuery("show tables");
-		if (rs.first()){ErrorReport.die("Cannot create database: tables already exist!");}
+		ResultSet rs = mDB.executeQuery("show tables"); 
+		if (rs.next()){ErrorReport.die("Cannot create database: tables already exist!");}// CAS405 first->next
 		
 		String sql = 
 			"create table schemver ( " +
@@ -668,7 +668,7 @@ public class Schema
 	private void addRstat() throws Exception
 	{
 		ResultSet rs = mDB.executeQuery("show tables like 'rstat_thresh'");
-		if (!rs.first())
+		if (!rs.next())
 		{
 			String sql = 
 				"create table rstat_thresh ( " +
@@ -1295,7 +1295,7 @@ public class Schema
 		}
 
 		rs = mDB.executeQuery("show columns from pja_databases where field='nOnlyDB'");
-		if (!rs.first()) {
+		if (!rs.next()) {
 			mDB.executeUpdate("alter table pja_databases add nOnlyDB int unsigned default 0");
 			mDB.executeUpdate("alter table pja_db_species add nBestHits  int unsigned default 0");
 		}

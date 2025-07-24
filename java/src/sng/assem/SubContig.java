@@ -502,7 +502,7 @@ public class SubContig
 		if (mAllClonesID.size() != 1) throw(new Exception("not a one-clone subcontig : " + mID));
 		int cid = mAllClonesID.first();
 		ResultSet rs = db.executeQuery("select sequence, quality from clone where cid=" + cid);
-		rs.first();
+		rs.next();
 		mCCS = rs.getString("sequence");
 		mQual = rs.getString("quality");
 		rs.close();
@@ -859,7 +859,7 @@ public class SubContig
 	public boolean finalized(DBConn db) throws Exception
 	{
 		ResultSet rs = db.executeQuery("select finalized from contig where ctgid=" + mID);
-		rs.first();
+		rs.next();
 		boolean finalized = rs.getBoolean("finalized");
 		return finalized;
 	}
@@ -2117,7 +2117,7 @@ public class SubContig
 	public void loadCCS(DBConn db) throws Exception
 	{
 		ResultSet rs = db.executeQuery("select consensus,quality from contig where ctgid=" + mID);
-		rs.first();
+		rs.next();
 		mCCS = rs.getString("consensus");
 		mQual = rs.getString("quality");
 		rs.close();
@@ -2125,14 +2125,14 @@ public class SubContig
 	public void loadCCS_orig(DBConn db) throws Exception
 	{
 		ResultSet rs = db.executeQuery("select orig_ccs from contig where ctgid=" + mID);
-		rs.first();
+		rs.next();
 		mCCS = rs.getString("orig_ccs");
 		if (mCCS == null)
 		{
 			// We must have been interrupted during finalizing. Set the orig_ccs.
 			db.executeUpdate("update contig set orig_ccs=consensus where ctgid=" + mID);
 			rs = db.executeQuery("select orig_ccs from contig where ctgid=" + mID);
-			rs.first();
+			rs.next();
 			mCCS = rs.getString("orig_ccs");			
 		}
 		rs.close();

@@ -455,8 +455,8 @@ public class AlignPairOrig
         {	    		
     		if (strGapHorz.charAt(i) == chGap || strGapVert.charAt(i) == chGap) {	 
     			OLPgap++;
-        		if (isOpen && bUseAffineGap) OLPscore -= gapExtend;
-        		else OLPscore -= gapOpen;
+        		if (isOpen && bUseAffineGap) OLPscore -= (int) gapExtend; // CAS405 add int
+        		else OLPscore -= (int) gapOpen;
         		isOpen = true;
         		if (strGapHorz.charAt(i) == stopCh || strGapVert.charAt(i) == stopCh) OLPstops++;
         	}
@@ -469,7 +469,7 @@ public class AlignPairOrig
         		else {
         			double s = cmp(strGapHorz.charAt(i), strGapVert.charAt(i));
         			if (s>0) OLPmatch++;
-        			OLPscore +=  s;
+        			OLPscore +=  (int) s;
         		}
         	}  
         } 

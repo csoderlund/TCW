@@ -92,7 +92,7 @@ public class Edge implements Comparable <Edge>
 	{
 			// check that its not already redundant
 		ResultSet rs = db.executeQuery("select * from ASM_tc_edge where SCID1=" + mC1.mID + " and SCID2=" + mC2.mID);
-		if (rs.first())
+		if (rs.next())
 		{
 			mID = 0;
 			return;

@@ -20,6 +20,7 @@ import cmp.viewer.groups.GrpTablePanel;
 import cmp.viewer.seq.SeqsTablePanel;
 import cmp.viewer.hits.HitTablePanel;
 import cmp.viewer.seqDetail.SeqTopRowPanel;
+import util.file.FileHelpers;
 import util.methods.Static;
 import util.ui.UserPrompt;
 
@@ -167,7 +168,7 @@ public class AlignButtons {
  				opMultiAlign(MUSCLE, Globals.AA);
  			}
  		});
-	    multiPop.add(itemMuscle);
+	    if (!FileHelpers.isMacM4()) multiPop.add(itemMuscle); // CAS405 not available
 	    
 	    itemMafftAA = new JMenuItem(new AbstractAction("MAFFT-AA"+hit) {
  			private static final long serialVersionUID = 1L;

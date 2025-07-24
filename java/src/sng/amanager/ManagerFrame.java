@@ -1126,7 +1126,7 @@ public class ManagerFrame extends JFrame {
 			DBConn mDB = hostsObj.getDBConn(curManData.getTCWdb());
 			ResultSet rs = mDB.executeQuery("SELECT pja_msg, meta_msg FROM assem_msg");
 				
-			if(rs.first()) {
+			if(rs.next()) { // CAS405 was first
 				val = rs.getString(1);
 				if (val==null || (val != null && val.length() <= 10)) {
 					Overview ov = new Overview(mDB);

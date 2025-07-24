@@ -79,7 +79,7 @@ public class MethodOrthoMCL {
 		
 		Out.PrtSpMsg(2, "Create OrthoMCL temporary database");
 		rs = cmpDBC.executeQuery("show databases like '" + tempDB + "'");
-		if (rs.first()) {
+		if (rs.next()) {// CAS405 was first
 			cmpDBC.executeUpdate("drop database " + tempDB);
 		}
 		DBConn odb = cmpDBC.createDBAndNewConnection(tempDB);
@@ -133,7 +133,10 @@ public class MethodOrthoMCL {
 		File tempFasta = new File(tmpDir,"fasta_temp");
 		if (tempFasta.exists()) FileHelpers.clearDir(tempFasta);
 		else tempFasta.mkdir();
-		Runtime.getRuntime().exec("ln -s " + combFile.getAbsolutePath() + " " + tempFasta.getAbsolutePath());
+		
+		String run = "ln -s " + combFile.getAbsolutePath() + " " + tempFasta.getAbsolutePath();
+		String [] x = run.split("\\s+");
+		Runtime.getRuntime().exec(x); // CAS405 add split
 
 		long t = Out.getTime();
 		File ssFile = new File(tmpDir,"simSeq.txt");

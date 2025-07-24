@@ -38,7 +38,7 @@ public class AutoArray<E>
 	}
 	public int size()
 	{
-		synchronized(syncObj)
+		//synchronized(syncObj) CAS405 remove
 		{
 			return mNumFilled;
 		}
@@ -55,7 +55,7 @@ public class AutoArray<E>
 	
 	public void add (E val) throws Exception
 	{
-		synchronized(syncObj)
+		//synchronized(syncObj)
 		{
 			if (mNumFilled >= mObjList.length)
 			{

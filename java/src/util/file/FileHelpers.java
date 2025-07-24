@@ -29,8 +29,20 @@ public class FileHelpers
 	public static boolean isMac() {
 		return System.getProperty("os.name").toLowerCase().contains("mac");
 	}
-	public static String getExtDir() {
-		if (isMac()) return Globalx.macDir;
+	public static boolean isMacM4() {
+		return System.getProperty("os.arch").toLowerCase().equals("aarch64");
+	}
+	public static String getExtDir() { // CAS405 changed to include macM4
+		String plat =  System.getProperty("os.name").toLowerCase();
+		
+		if (plat.contains("linux")) return Globalx.lintelDir;
+			
+		String arch =  System.getProperty("os.arch").toLowerCase();
+		if (arch.equals("aarch64")) return Globalx.macM4Dir;
+		if (arch.equals("x86_64")) return Globalx.macDir;
+			
+		System.err.println("TCW does not recognize your OS name (should be lintel64 or Mac OS X)");
+		System.err.println("There are no executables for your machine; will try 'linux'");
 		return Globalx.lintelDir;
 	}
 	static public String getFileSize(String fileName) {// CAS315
@@ -324,7 +336,8 @@ public class FileHelpers
     public static boolean tryExec(String pgm, boolean prt) 
     {
     	try {
-    		Process p = Runtime.getRuntime().exec(pgm);
+    		String [] x = pgm.split("\\s+");
+    		Process p = Runtime.getRuntime().exec(x); // CAS405 split
     		p.waitFor();
     		return true;
     	}
@@ -439,7 +452,8 @@ public class FileHelpers
 	}
 	static public boolean systemCall(String cmd) {
 		try {
-			Process p = Runtime.getRuntime().exec(cmd);
+			String [] x = cmd.split("\\s+");
+			Process p = Runtime.getRuntime().exec(x);
 			
 			String line;
 			BufferedReader input = new BufferedReader(new InputStreamReader(p.getErrorStream()));

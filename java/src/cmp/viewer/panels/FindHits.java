@@ -447,7 +447,8 @@ public class FindHits extends JPanel
 			long startTime = Out.getTime();
 			if (traceCheck.isSelected()) Out.prt("Executing: " + blastCmd);
 			
-			Process p = Runtime.getRuntime().exec(blastCmd);
+			String [] x = blastCmd.split("\\s+");
+			Process p = Runtime.getRuntime().exec(x); // CAS405 add split
 			p.waitFor();
 			
 			if (!outFile.isFile()) {
@@ -721,7 +722,8 @@ public class FindHits extends JPanel
 			else {
 				String cmd = BlastArgs.getDiamondFormat(dbPath, dbPath);
 				if (traceCheck.isSelected()) Out.prt("Executing: " + cmd);
-				Process pFormatDB = Runtime.getRuntime().exec(cmd);
+				String [] x = cmd.split("\\s+");
+				Process pFormatDB = Runtime.getRuntime().exec(x);
 				pFormatDB.waitFor();
 			}
 			String diamondPath = BlastArgs.getDiamondPath() + " " + action + " ";
@@ -768,7 +770,8 @@ public class FindHits extends JPanel
 			if (doFormat) {
 				String cmd = (isSubjAA ? BlastArgs.getFormatp(dbPath) : BlastArgs.getFormatn(dbPath));
 				if (traceCheck.isSelected()) Out.prt("Executing: " + cmd);
-				Process pFormatDB = Runtime.getRuntime().exec(cmd);
+				String [] x = cmd.split("\\s+");
+				Process pFormatDB = Runtime.getRuntime().exec(x);
 				pFormatDB.waitFor();
 			}
 			String blastPath = BlastArgs.getBlastPath() + action; // CAS303

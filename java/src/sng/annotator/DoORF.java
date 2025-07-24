@@ -1790,14 +1790,14 @@ public class DoORF {
 			baseCntMap.put("c", 0); baseCntMap.put("g", 0);
 			try {
 				ResultSet rs = mDB.executeQuery("show table status like 'tuple_usage'");
-				if (!rs.first()) {
+				if (!rs.next()) { // CAS405 was first
 					mDB.executeUpdate("create table tuple_usage " +
 						"(tuple varchar(10),  freq  double default 0.0, INDEX(tuple)) ENGINE=MyISAM;");		
 				}
 				else mDB.tableDelete("tuple_usage");
 				
 				rs = mDB.executeQuery("show table status like 'tuple_orfs'");
-				if (!rs.first()) {
+				if (!rs.next()) {
 					mDB.executeUpdate("create table tuple_orfs " +
 						"(CTGid bigint,  value tinytext, INDEX(CTGid)) ENGINE=MyISAM;");		
 				}

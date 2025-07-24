@@ -53,17 +53,10 @@ public class Str2Obj<E>
 		mStrList = null;
 		mNumKeys = 0;
 	}
-	public int numKeys()
-	{
-		synchronized(syncObj)
-		{
-			return mNumKeys;
-		}
-	}
+	
 	public boolean containsKey(String key) throws Exception
 	{
-		synchronized(syncObj)
-		{
+		//synchronized(syncObj){ CAS405 remove
 			if (!mSorted)
 			{
 				throw(new Exception("containsKey on unsorted Str2Obj! "));
@@ -71,13 +64,12 @@ public class Str2Obj<E>
 			@SuppressWarnings("rawtypes")
 			int idx = Arrays.binarySearch((Comparable[])mStrList, (Comparable)key, new ObjCmp());
 			return (idx >= 0);
-		}
+		//}
 	}
 	@SuppressWarnings("unchecked")
 	public E get(String key) throws Exception
 	{	
-		synchronized(syncObj)
-		{
+		//synchronized(syncObj){
 			if (!mSorted)
 			{
 				throw(new Exception("get on unsorted Str2Obj! "));
@@ -86,12 +78,12 @@ public class Str2Obj<E>
 			int idx = Arrays.binarySearch((Comparable[])mStrList, (Comparable)key, new ObjCmp());
 			if (idx < 0) return null;
 			return (E)mObjList[idx];
-		}
+		//}
 		//return null;
 	}
 	public void put (String key, E val) throws Exception
 	{
-		synchronized(syncObj)
+		//synchronized(syncObj)
 		{
 			mSorted = false;
 

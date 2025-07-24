@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.FileReader;
 
 import sng.database.Globals; // cmp does not access anything that accesses this, otherwise, would crash
-import util.database.Globalx;
 import util.file.FileHelpers;
 
 /**
@@ -626,10 +625,9 @@ public class TCWprops
 		}
 	}
 	
-	public static String getExtDir() // this is also in FileHelpers
+	public static String getExtDir() 
 	{
-		if (FileHelpers.isMac()) return Globalx.macDir;
-		return Globalx.lintelDir;
+		return FileHelpers.getExtDir(); // CAS405 use this instead of repeating
 	}
 	public static void newDB() {
 		mProps=null;

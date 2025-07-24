@@ -32,7 +32,7 @@ public class DBConn
 	public String mHost;
     public String jdbcStr = "";
     static private String chrSQL = "characterEncoding=utf8"; // utf8mb4, CAS303
-    static public String driver = "com.mysql.jdbc.Driver";
+    static public String driver = "com.mysql.cj.jdbc.Driver"; // CAS405 update driver using SyMAPs; add .cj.
 
 	Connection mConn = null;
 	Statement mStmt = null;
@@ -117,7 +117,18 @@ public class DBConn
 		}
 		return rs;
 	}
-
+	public boolean execute(String sql) {// CAS405 now needed for non-result command
+		try {
+			Statement stmt = getStatement();
+			stmt.execute(sql);
+			return true;
+		}
+		catch (Exception ee) {
+			System.err.println("Query failed: " + sql);
+			System.err.println(ee.getMessage());
+			return false;
+		}
+	}
 	public int executeUpdate(String sql) throws Exception
 	{
 		if (mConn == null || mConn.isClosed()) renew();
@@ -236,7 +247,7 @@ public class DBConn
 	{
 		boolean ret = false;
 		ResultSet rs = executeQuery("show tables");
-		if (rs!=null && rs.first()) ret = true;
+		if (rs!=null && rs.next()) ret = true;
 		if (rs!=null) rs.close();
 		return ret;
 	}
@@ -415,15 +426,15 @@ public class DBConn
 	}	
 	public void openTransaction() throws Exception
 	{
-		executeQuery("BEGIN");
+		//executeQuery("BEGIN"); CAS405 fails 
 	}
 	public void closeTransaction() throws Exception
 	{
-		executeQuery("COMMIT");
+		//executeQuery("COMMIT"); CAS405 fails
 	}	
 	public void rollbackTransaction() throws Exception
 	{
-		executeQuery("ROLLBACK");
+		//executeQuery("ROLLBACK"); executed in exceptions
 	}	
 
 	public  PreparedStatement prepareStatement(String st) throws SQLException
@@ -432,15 +443,15 @@ public class DBConn
 	}
 	public void foreignKeysOff() throws Exception
 	{
-		executeQuery("set foreign_key_checks=0");	
+		execute("set foreign_key_checks=0");	
 	}
 	public void foreignKeysOn() throws Exception
 	{
-		executeQuery("set foreign_key_checks=1");	
+		execute("set foreign_key_checks=1");	
 	}	
 	public void writeLockTable(String table) throws Exception
 	{
-		executeQuery("lock tables " + table + " write");	
+		execute("lock tables " + table + " write");	
 	}
 	public void lockAllTables() throws Exception
 	{
@@ -464,7 +475,7 @@ public class DBConn
 	public void checkInnodbBufPool() throws Exception
 	{
 		ResultSet rs = executeQuery("show variables like 'innodb_buffer_pool_size'");
-		if (rs.first())
+		if (rs.next())
 		{
 			long size = rs.getLong(2);
 			if (size < 100000000L)
@@ -556,13 +567,13 @@ public class DBConn
 			con = DriverManager.getConnection(dbstr, user, pass);
 			Statement s = con.createStatement();
 			ResultSet rs = s.executeQuery("show tables like 'clone'");
-			if (!rs.first()) 
+			if (!rs.next()) 
 			{
 				con.close();
 				return true;
 			}
 			rs = s.executeQuery("select count(*) from clone");
-			rs.first();
+			rs.next();
 			int nClones = rs.getInt(1);
 			rs.close();
 			con.close();

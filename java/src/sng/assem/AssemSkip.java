@@ -47,7 +47,7 @@ public class AssemSkip {
 		if (bUseRPKM)      Log.indentMsg("\tCompute RPKM instead of TPM", LogLevel.Basic);
 		if (bUseTransName) Log.indentMsg("\tUse names from sequence file", LogLevel.Basic);
 		
-		mDB.executeQuery("set foreign_key_checks = 0");
+		mDB.execute("set foreign_key_checks = 0");//  CAS405 fails
 		
 	// add assemlib
 		for (Library lib : mSeqLibs) {
@@ -88,7 +88,7 @@ public class AssemSkip {
 
 		mDB.tableCheckDropColumn("contig", "tmpCID");
 		
-		mDB.executeQuery("set foreign_key_checks = 1");
+		mDB.execute("set foreign_key_checks = 1");
 		
 	// Normalize
 		normalize();

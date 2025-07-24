@@ -393,10 +393,11 @@ public class FindHits extends Tab
 			if (queryFH.exists()) queryFH.delete();
 			// CAS330 queryFile.createNewFile();
 			
+			if (traceCheck.isSelected()) Out.prt("Writing file: " + queryFH.getCanonicalPath()); // CAS405
 			BufferedWriter w = new BufferedWriter(new FileWriter(queryFH));
 			w.write(wholeSeq); w.newLine();
 			w.close();
-		} catch (Exception e) {ErrorReport.prtReport(e, "Writng input.fa"); showErr("Failed writing input"); return;}
+		} catch (Exception e) {ErrorReport.prtReport(e, "Writing input.fa"); showErr("Failed writing input"); return;}
 
 	// Setting for search
 		boolean bIsTabOutput = tabCheck.isSelected();
@@ -436,11 +437,13 @@ public class FindHits extends Tab
 			long startTime = Out.getTime();
 			if (traceCheck.isSelected()) Out.prt("Executing: " + blastCmd);
 			
-			Process p = Runtime.getRuntime().exec(blastCmd);
+			String [] x = blastCmd.split("\\s+");
+			Process p = Runtime.getRuntime().exec(x); // CAS405 Java20
 			p.waitFor();
 			
 			if (!outFH.isFile() || outFH.length()==0) { // CAS330 add check on length
 				showErr("No resulting output file (see Help)");
+				if (traceCheck.isSelected())  Out.prt("No resulting file");
 				return;
 			}
 			if (traceCheck.isSelected())  Out.PrtMsgTime("Complete search", startTime);
@@ -456,6 +459,7 @@ public class FindHits extends Tab
 			br.close();
 			if (nrows == 0) {
 				showErr("No results found (see Help).");
+				if (traceCheck.isSelected())  Out.prt("Search failed to produce results");
 				return;
 			}	
 		} catch (Exception e) {ErrorReport.prtReport(e, "Execution"); showErr("Failed execution"); return;}
@@ -763,7 +767,8 @@ public class FindHits extends Tab
 			else {
 				String cmd = BlastArgs.getDiamondFormat(dbPath, dbPath);
 				if (traceCheck.isSelected()) Out.prt("Executing: " + cmd);
-				Process pFormatDB = Runtime.getRuntime().exec(cmd);
+				String [] x = cmd.split("\\s+");
+				Process pFormatDB = Runtime.getRuntime().exec(x);
 				pFormatDB.waitFor();
 			}
 			String diamondPath = BlastArgs.getDiamondPath() + " " + action + " ";
@@ -810,7 +815,8 @@ public class FindHits extends Tab
 			if (doFormat) {
 				String cmd = (isSubjAA ? BlastArgs.getFormatp(dbPath) : BlastArgs.getFormatn(dbPath));
 				if (traceCheck.isSelected()) Out.prt("Executing: " + cmd);
-				Process pFormatDB = Runtime.getRuntime().exec(cmd);
+				String [] x = cmd.split("\\s+");
+				Process pFormatDB = Runtime.getRuntime().exec(x);
 				pFormatDB.waitFor();
 			}
 			String blastPath = BlastArgs.getBlastPath() + action; // CAS303

@@ -734,7 +734,7 @@ public class MainTable extends MainTableSort {
 	        int nrows = 0;
 	        for (int gonum : goCntMap.keySet()) {
 	        	rs = mdb.executeQuery(query + gonum);
-	        	if (rs.first()) {
+	        	if (rs.next()) {
 	        		StringBuffer sb = new StringBuffer();
 	        		sb.append(String.format(GO_FORMAT,gonum));
 	        		sb.append(delim + String.format("%5d", goCntMap.get(gonum))); // count

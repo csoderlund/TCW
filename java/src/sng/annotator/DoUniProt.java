@@ -314,7 +314,7 @@ public class DoUniProt
 			  "bit_score , e_value, dbtype, taxonomy, blast_rank, isProtein, ctg_cov, prot_cov) " +
 			  "VALUES (?,1,0,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?, ?,?)");
 	    	
-	    	mDB.openTransaction(); 
+	    	//mDB.openTransaction(); CAS405 causes it to fail
 	    		
        		for (int i=0; i<curHitDataForSeq.size(); i++) {
        			BlastHitData hitData = curHitDataForSeq.get(i);
@@ -361,7 +361,7 @@ public class DoUniProt
        		}
        		ps.executeBatch(); // CAS338
        		ps.close();
-       		mDB.closeTransaction();
+       		// mDB.closeTransaction();
        		
        		nAnnoSeq++;
        		// CAS304

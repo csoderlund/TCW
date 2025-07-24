@@ -286,7 +286,8 @@ public class BlastArgs {
 		String pgm = getBlastnExec();
     	try
     	{
-    		Process p = Runtime.getRuntime().exec(pgm);
+    		String [] x = pgm.split("\\s+");
+    		Process p = Runtime.getRuntime().exec(x); // CAS405 add split
     		p.waitFor();
     		return true;
     	}

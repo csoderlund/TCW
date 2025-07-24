@@ -48,7 +48,8 @@ public class BlastRun {
 		try {
 			Out.PrtSpMsg(3, searchCmd);
 			
-			Process p = Runtime.getRuntime().exec(searchCmd);
+			String [] x = searchCmd.split("\\s+");
+			Process p = Runtime.getRuntime().exec(x); // CAS405 add split
 			
 			String line;
 			BufferedReader input = new BufferedReader(new InputStreamReader(p.getErrorStream()));
@@ -123,7 +124,8 @@ public class BlastRun {
 			Out.PrtSpMsg(3, formatdbCmd);
 			long time = Out.getTime();
 			
-			Process p = Runtime.getRuntime().exec(formatdbCmd);
+			String [] x = formatdbCmd.split("\\s+");
+			Process p = Runtime.getRuntime().exec(x);
 			p.waitFor();
 			if (p.exitValue() != 0) {
 				Out.PrtError("failed with exit value = " + p.exitValue());

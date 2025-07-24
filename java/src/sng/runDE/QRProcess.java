@@ -239,7 +239,7 @@ public class QRProcess {
 			Out.PrtSpMsg(0, "Replicates:");
 			for (String libName : allGrp) {
 				rs = mDB.executeQuery("select reps,lid from library where libid='" + libName + "'");
-				rs.first();
+				rs.next();
 				String reps = rs.getString(1).trim(); // name of reps, e.g. root1, root2, etc
 				int lid = rs.getInt(2);
 				
@@ -590,7 +590,7 @@ public class QRProcess {
 			
 		/* add column or set to default 3 */
 			ResultSet rs = mDB.executeQuery("show columns from contig where field= '" + pColName + "'");
-			if (!rs.first()) {
+			if (!rs.next()) {
 				Out.PrtSpMsg(1, "Adding column to database...");
 				mDB.executeUpdate("alter table contig add " + pColName + 
 						" double default " + Globalx.dStrNoDE);
@@ -634,9 +634,9 @@ public class QRProcess {
 				String col1 = RPKM + grp1.first();
 				String col2 = RPKM + grp2.first();
 				rs = mDB.executeQuery("show columns from contig where field='" + col1 + "'");
-				boolean col1Exists = rs.first();
+				boolean col1Exists = rs.next();
 				rs = mDB.executeQuery("show columns from contig where field='" + col2 + "'");
-				boolean col2Exists = rs.first();
+				boolean col2Exists = rs.next();
 				if (col1Exists && col2Exists) {
 					mDB.executeUpdate("update contig set " + pColName + " =-" + pColName + 
 							" where " + col1 + "<" + col2);						
@@ -674,7 +674,7 @@ public class QRProcess {
 			else Out.die("TCW error in save method");
 			
 			ResultSet rs = mDB.executeQuery("Select title from libraryDE where pCol='" + pColName + "'");
-			if (rs.first()) {
+			if (rs.next()) {
 				Out.PrtSpMsg(1, "Overwrite existing " + pColName);
 				if (mDB.tableExists("go_info")) { //CAS321 was not removing Go data
 					String goMethod = mDB.executeString("select goMethod from libraryDE where pCol='" + pColName + "'");
@@ -937,7 +937,7 @@ public class QRProcess {
 			Out.Print("\nSaving " + String.format("%,d",scores.size()) + " values to database");
 			
 			ResultSet rs = mDB.executeQuery("show columns from go_info where field='" + pColName + "'");
-        	if (!rs.first()) {
+        	if (!rs.next()) {
         		Out.PrtSpMsg(1, "Adding column to go_info table");
         		mDB.executeUpdate("alter table go_info add " + pColName + " double default " + Globalx.dStrNoDE);             
         	}

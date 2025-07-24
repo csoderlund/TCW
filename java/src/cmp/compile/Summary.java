@@ -37,7 +37,7 @@ public class Summary {
 		String sum="";
 		try {
 			ResultSet rs = mDB.executeQuery("SELECT summary FROM info");
-			if(rs.first()) sum  = rs.getString(1);
+			if (rs.next()) sum  = rs.getString(1); // CAS405 was first
 			rs.close();
 			if (sum==null || sum.trim().equals("")) sum = updateSummary();
 		}
@@ -265,7 +265,7 @@ public class Summary {
 	   			}
 	   			else {
 	   				x += " ???";
-	   				Out.PrtWarn("TCW error - cannot determine method '" + desc + "'");
+	   				Out.PrtWarn("TCW error - cannot determine method '" + type + "'  '" + desc + "'  " + n);
 	   			}
 	   			m.method = x;
 	            methods.add(m);

@@ -4,9 +4,8 @@ package util.ui;
  */
 // CAS304 removed applet stuff
 import java.awt.*;
-
 import javax.swing.*;
-import java.net.URL;
+import java.net.URI;
 
 public class UIHelpers 
 { 
@@ -134,7 +133,7 @@ public class UIHelpers
                 centerScreen ( win );
     }  
 	// this is only used from MultilineTextPanel for SeqDetailPanel (which is no called for Mac)
-	public static boolean tryOpenURL ( URL theLink )
+	public static boolean tryOpenURL ( URI theLink ) // CAS405 URL->URI
     {
 		// Otherwise unless we become a web start application
     	// we are stuck with the below...  I copied this from: http://www.centerkey.com/java/browser/.
@@ -150,7 +149,9 @@ public class UIHelpers
     		} 
     		else if (osName.startsWith("Windows")) 
     		{
-    			Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + theLink); 
+    			String str = "rundll32 url.dll,FileProtocolHandler " + theLink;
+    			String [] x = str.split("\\s+");
+    			Runtime.getRuntime().exec(x); // CAS405 add split
     			return true;
     		}
     		else 

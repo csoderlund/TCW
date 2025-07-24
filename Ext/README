@@ -5,6 +5,7 @@ Contents of the TCW_4.tar.gz /Ext directory:
 The /linux directory are either downloaded as a linux executable or compiled on a linux x86_63.
 The /mac directory are either downloaded as a MacOS executable or compiled on a version 10.15 (Catalina). 
 The /mac0 directory contain executables that run on a MacOS 10.9 (Maverick); if you need to use these, see Trouble.html#ext.
+The /macM4 directory contains executables for Mac M4 ((aarch64))
 
 jri/
 Used by runDE for differential expression to provide the interface to R. 

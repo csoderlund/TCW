@@ -98,7 +98,7 @@ public class Clone
 	public void loadSequences(DBConn db) throws Exception
 	{
 		ResultSet rs = db.executeQuery("select sequence,quality from clone where cid=" + mID);
-		rs.first();
+		rs.next();
 		mSeq = rs.getString("sequence");
 		mQual = rs.getString("quality");
 		mSeqLen = mSeq.length();
@@ -113,7 +113,7 @@ public class Clone
 	{
 		String ret = "";
 		ResultSet rs = db.executeQuery("select quality from clone where cid=" + mID);
-		if (rs.first())
+		if (rs.next())
 		{
 			ret = rs.getString("quality");
 		}

@@ -109,7 +109,7 @@ public class AddRemarkPanel extends JPanel {
 			mDB.executeUpdate("update assem_msg set pja_msg=NULL");
 			
 			rs = mDB.executeQuery("show columns from contig where field='seq_group'");
-			if (!rs.first()) {
+			if (!rs.next()) { // CAS405 was first
 				mDB.executeUpdate("alter table contig add seq_group VARCHAR(30) ");
 				mDB.executeUpdate("alter table contig add seq_start bigint default 0 ");
 				mDB.executeUpdate("alter table contig add seq_end bigint default 0 ");
@@ -180,7 +180,7 @@ public class AddRemarkPanel extends JPanel {
 			}	
 			
 			rs = mDB.executeQuery("show columns from assem_msg like 'hasLoc'");
-			if (!rs.first()) 
+			if (!rs.next()) // CAS405 was first 
 				mDB.executeUpdate("alter table assem_msg add hasLoc tinyint");
 			
 			rs.close(); mDB.close();

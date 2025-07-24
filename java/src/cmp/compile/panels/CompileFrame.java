@@ -103,13 +103,14 @@ public class CompileFrame extends JFrame {
 				return;
 			}
 			checkExternal(cmdPath + Globals.Ext.mafftExe);
-			checkExternal(cmdPath + Globals.Ext.muscleExe);
 			checkExternal(cmdPath + Globals.Ext.mstatxExe);
 			checkExternal(cmdPath + Globals.Ext.kaksExe);
-			checkExternal(cmdPath + Globals.Ext.orthoTryExe);
+			if (!FileHelpers.isMacM4()) { // CAS405 too old to support
+				checkExternal(cmdPath + Globals.Ext.muscleExe);
+				checkExternal(cmdPath + Globals.Ext.orthoTryExe);
+			}
 		}
 		catch(Exception e) {System.err.println("Error reading HOSTS.cfg"); }
-
 	}
 	private void checkExternal(String filePath) {
 		try {

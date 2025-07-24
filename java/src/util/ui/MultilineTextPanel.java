@@ -11,7 +11,7 @@ import java.util.Vector;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
-import java.net.URL;
+import java.net.URI;
 import java.awt.event.MouseListener;
 
 /***********************************************
@@ -30,7 +30,7 @@ public class MultilineTextPanel extends JPanel
 	   		nWidth = nInWidth;
 	   		nInset = nInInset;
 	   		textLines = new String [ inTextLines.size() ];
-	   		htmlLines = new URL [ inTextLines.size() ];
+	   		htmlLines = new URI [ inTextLines.size() ];
 	   		nColumnSpace = nInInset * 3;
 	   		int nMaxColumnWidth = ( nWidth - nInset * 2 + nColumnSpace ) / nMinColumns - nColumnSpace;
         
@@ -49,7 +49,7 @@ public class MultilineTextPanel extends JPanel
 	            String [] strList = str.split( "\n" );
 	            textLines [i] = strList[0];
 	            if ( strList.length > 1 )
-	            		htmlLines [i] = new URL ( strList[1] );
+	            		htmlLines [i] = new URI ( strList[1] ); // CAS405 URL->URI
 	            
 	            nColumnWidth = Math.max( metrics.stringWidth( textLines [i] ), nColumnWidth );
 	            nColumnWidth = Math.min( nColumnWidth, nMaxColumnWidth );
@@ -96,7 +96,7 @@ public class MultilineTextPanel extends JPanel
        catch (Exception e) {ErrorReport.reportError(e, "Internal error in MultilineTextPanel");}
     }
     
-    private JLabel createLabel ( String strText, final URL theLink )
+    private JLabel createLabel ( String strText, final URI theLink )
     { 	
 	    	JLabel label = null;
 	    	
@@ -160,7 +160,7 @@ public class MultilineTextPanel extends JPanel
     }
     
     private String textLines [] = null;
-    private URL htmlLines [] = null;
+    private URI htmlLines [] = null;
     private int nColumnSpace;
     private int nRowHeight;
     private int nColumnWidth;

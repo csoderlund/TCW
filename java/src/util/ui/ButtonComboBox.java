@@ -94,8 +94,10 @@ public class ButtonComboBox extends JPanel {
 	
 	public void setSelectedIndex(int index) {
 		if (index>=theSelections.size()) {
-			Out.prt("TCW error on ButtonComboBox.setSelectedIndex: " + index + " " + theSelections.size());
-			for (String x : theSelections) Out.prt("   " + x);
+			if (theSelections.size()>0) {// CAS405
+				Out.prt("TCW error on ButtonComboBox.setSelectedIndex: " + index + " " + theSelections.size());
+				for (String x : theSelections) Out.prt("   " + x);
+			}
 			return;
 		}
 		nCurrentSelection = index;
@@ -142,6 +144,7 @@ public class ButtonComboBox extends JPanel {
 	public boolean isEnabled() { return btnSelection.isEnabled(); }
 	
 	public String getSelectedItem() {
+		if (nCurrentSelection<0) return "none"; // CAS405
 		return theSelections.get(nCurrentSelection);
 	}
 	

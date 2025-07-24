@@ -41,14 +41,14 @@ public class ID2Obj<E>
 	}
 	public int numKeys()
 	{
-		synchronized(syncObj)
+		//synchronized(syncObj) CAS405 remove
 		{
 			return mNumKeys;
 		}
 	}
 	public boolean containsKey(int key) throws Exception
 	{
-		synchronized(syncObj)
+		//synchronized(syncObj)
 		{
 			if (mMinKey == -1)
 			{
@@ -62,7 +62,7 @@ public class ID2Obj<E>
 	@SuppressWarnings("unchecked")
 	public E get(int key) throws Exception
 	{	
-		synchronized(syncObj)
+		//synchronized(syncObj)
 		{
 			if (mMinKey == -1)
 			{
@@ -77,7 +77,7 @@ public class ID2Obj<E>
 	}
 	public void checkGrow(int key) throws Exception
 	{
-		synchronized(syncObj)
+		//synchronized(syncObj)
 		{
 			key -= mMinKey;
 			if (key >= mObjList.length)
@@ -102,7 +102,7 @@ public class ID2Obj<E>
 	}
 	public void put (int key, E val) throws Exception
 	{
-		synchronized(syncObj)
+		//synchronized(syncObj)
 		{
 			if (mMinKey == -1)
 			{
@@ -154,7 +154,7 @@ public class ID2Obj<E>
 	}
 	public int minKey() throws Exception
 	{
-		synchronized(syncObj)
+		//synchronized(syncObj)
 		{
 			if (mMinKey == -1)
 			{
@@ -178,14 +178,14 @@ public class ID2Obj<E>
 	}
 	public int maxKey()
 	{
-		synchronized(syncObj)
+		//synchronized(syncObj)
 		{
 			return mObjList.length - 1 + mMinKey;
 		}
 	}
 	public int numSpaces()
 	{
-		synchronized(syncObj)
+		//synchronized(syncObj)
 		{
 			return mObjList.length;
 		}		

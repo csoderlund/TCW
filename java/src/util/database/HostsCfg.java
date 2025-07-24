@@ -200,7 +200,9 @@ public class HostsCfg
 		if (System.getenv().containsKey("HOSTNAME")) name = System.getenv("HOSTNAME");
 		if (!name.contentEquals("")) return name;
 		
-        Process p = Runtime.getRuntime().exec("uname -n");
+		String cmd = "uname -n";
+		String [] x = cmd.split("\\s+");
+        Process p = Runtime.getRuntime().exec(x); // CAS405 cannot be string
         BufferedReader stdInput = new BufferedReader(new 
              InputStreamReader(p.getInputStream()));
         name = stdInput.readLine().trim();       

@@ -211,7 +211,7 @@ public class AssemMain
 			bSkipAssembly=false;
 			
 			rs = mDB.executeQuery("show columns from assem_msg like 'peptide'");
-			if (rs.first()) {
+			if (rs.next()) { // CAS405 was first
 				Utils.termOut("");
 				Utils.termOut("This is a protein project and cannot be assembled.");
 				Utils.termOut("Set 'Skip Assembly' to instantiate proteins.");
@@ -221,7 +221,7 @@ public class AssemMain
 		
 		
 		rs = mDB.executeQuery("select AID from assembly where assemblyid != '" + mIDStr + "'");
-		if (rs.first()) {
+		if (rs.next()) {
 			Utils.termOut("\n\nA different assembly/instantiation already exists in this database. " +
 					"Multiple assemblies per database are no longer supported.");
 			System.exit(0);
@@ -331,7 +331,7 @@ public class AssemMain
 		int maxTCnum = 0;
 		if (resume && !bSkipAssembly) {
 			rs = mDB.executeQuery("select max(tcnum) as maxt from ASM_tc_iter where aid=" + mAID);
-			if (rs.first())
+			if (rs.next())
 			{
 				maxTCnum = rs.getInt("maxt");
 				if (maxTCnum > 0)
@@ -532,7 +532,7 @@ public class AssemMain
 		Log.head("Delete previous instantiation", LogLevel.Basic);
 		ResultSet rs = null;
 		rs = mDB.executeQuery("select count(*) as count from contig where aid=" + aid);
-		rs.first();
+		rs.next();
 		int nctg = rs.getInt("count");
 		if (nctg > 100000)
 		{
@@ -2006,7 +2006,7 @@ public class AssemMain
 		for (Library lib : mSeqLibs)
 		{
 			rs = mDB.executeQuery("select count(*) as count from clone where LID=" + lib.mLID + " and mate_CID > 0");
-			rs.first();
+			rs.next();
 			int count = rs.getInt("count");
 			if (count % 2 != 0)
 			{
@@ -2023,7 +2023,7 @@ public class AssemMain
 		for (Library lib : mSeqLibs)
 		{
 			rs = mDB.executeQuery("select min(CID) as minc, max(CID) as maxc, count(*) as count from clone where LID=" + lib.mLID + "");
-			rs.first();
+			rs.next();
 			int min = rs.getInt("minc");
 			int max = rs.getInt("maxc");
 			if (minID == -1) minID = min;
@@ -2378,7 +2378,7 @@ public class AssemMain
 		
 		// Did we start the cliques?
 		rs = mDB.executeQuery("select TCID from ASM_tc_iter where AID=" + mAID + " and tcnum=0");
-		if (rs.first())
+		if (rs.next())
 		{
 			TCID = rs.getInt("TCID");
 		}
@@ -2700,7 +2700,7 @@ public class AssemMain
 				" join contig on contig.ctgid=contclone.ctgid where contig.aid=" + mAID);
 		ResultSet rs2 = mDB2.executeQuery("select sum(length) as nbases from clone join contclone on contclone.cid=clone.cid " + 
 						" join contig on contig.ctgid=contclone.ctgid where contig.aid=" + mAID);
-		if (rs.first() && rs2.first())
+		if (rs.next() && rs2.next())
 		{
 			float mis = rs.getFloat("mis");
 			float ex = rs.getFloat("ex");
@@ -2899,7 +2899,7 @@ public class AssemMain
 		boolean started = false;
 		ResultSet rs = mDB.executeQuery("select TCID, finished from ASM_tc_iter where AID='"
 						+ mAID + "' and tcnum='" + tc + "'");
-		if (rs.first())
+		if (rs.next())
 		{
 			started = true;
 			TCID = rs.getInt("TCID");
@@ -2973,7 +2973,7 @@ public class AssemMain
 		
 		int iteration = 0;
 		rs = mDB.executeQuery("select clustiter_done from ASM_tc_iter where tcid=" + TCID);
-		if (rs.first())
+		if (rs.next())
 		{
 			iteration = rs.getInt("clustiter_done");
 		}
@@ -2981,7 +2981,7 @@ public class AssemMain
 		Utils.recordTime("TC" + tc + " begin assembly",mAID,mDB);
 		
 		rs = mDB.executeQuery("select count(*) as count from ASM_tc_edge where attempted=0 and tcid=" + TCID);
-		rs.first();
+		rs.next();
 		
 		Log.indentMsg("Begin " + tcstr + " merges",LogLevel.Basic);
 		long tstart = TimeHelpers.getTime();
@@ -3065,7 +3065,7 @@ public class AssemMain
 		String timeMsg = TimeHelpers.getElapsedTimeStr(tstart);
 		Log.indentMsg(tcstr + " merges finished: elapsed time " + timeMsg,LogLevel.Basic);
 		rs = mDB.executeQuery("select merges_tried,merges_ok,ctgs_end from ASM_tc_iter where tcid=" + TCID);
-		rs.first();
+		rs.next();
 		int tried = rs.getInt("merges_tried");
 		int ok = rs.getInt("merges_ok");
 		int ctgsend = rs.getInt("ctgs_end");
@@ -3077,7 +3077,7 @@ public class AssemMain
 	{
 		ResultSet rs = null;
 		rs = mDB.executeQuery("select min(ASM_scontig.SCID) as mins, max(ASM_scontig.SCID) as maxs from ASM_scontig where AID=" + mAID );
-		rs.first();
+		rs.next();
 		mergesDone.clear();
 		mergesDone.setMinMax(rs.getInt("mins"),rs.getInt("maxs"));
 		
@@ -3107,7 +3107,7 @@ public class AssemMain
 		ResultSet rs = null; 
 
 		rs = mDB.executeQuery("select count(*) as count from ASM_tc_edge where TCID=" + TCID + " and attempted=1" );
-		rs.first();
+		rs.next();
 		int nDone = rs.getInt("count");
 		if (nDone > 0) 
 		{
@@ -3117,7 +3117,7 @@ public class AssemMain
 		rs.close();
 		
 		rs = mDB.executeQuery("select count(*) as count from ASM_tc_edge where TCID=" + TCID + " and attempted=0" );
-		rs.first();
+		rs.next();
 		int nToLoad = rs.getInt("count");
 		Log.msg("Scanning " + nToLoad + " edges, and updating for prior merges",LogLevel.Detail);
 		
@@ -3177,7 +3177,7 @@ public class AssemMain
 			// we will retry it. 
 
 			ResultSet rs2 = mDB2.executeQuery("select eid, errstr from ASM_tc_edge join ASM_tc_iter on ASM_tc_edge.tcid=ASM_tc_iter.tcid where ASM_tc_iter.aid=" + mAID + " and scid1=" + scid1 + " and scid2=" + scid2 + " and eid !=" + eid);
-			if (rs2.first())
+			if (rs2.next())
 			{
 				int oldEID = rs2.getInt("eid");
 				String errStr = rs2.getString("errstr");
@@ -3839,7 +3839,7 @@ public class AssemMain
 				" where contig.AID=" + mAID + " ";
 		if (unmergedOnly) query += 	" and ASM_scontig.merged_to = ASM_scontig.scid ";
 		rs = mDB.executeQuery(query);
-		rs.first();
+		rs.next();
 
 		mID2SubContig.setMinMax(rs.getInt("minid"),rs.getInt("maxid"));
 		rs.close();
@@ -3893,7 +3893,7 @@ public class AssemMain
 		rs = mDB.executeQuery("select min(SCID) as mins, max(SCID) as maxs " +
 				" from ASM_scontig  where ASM_scontig.AID=" + mAID );
 		if (unmergedOnly) query +=  " and merged_to = SCID " ;
-		rs.first();
+		rs.next();
 		mID2Contig.setMinMax(rs.getInt("mins"), rs.getInt("maxs"));
 		rs.close();
 		
@@ -4493,7 +4493,7 @@ public class AssemMain
 		int tcid = 0;
 		ResultSet rs = mDB.executeQuery("select TCID, finished from ASM_tc_iter where AID='"
 				+ mAID + "' and tcnum='" + finalTC + "'");
-		if (rs.first())
+		if (rs.next())
 		{
 			int finished = rs.getInt("finished");
 			tcid = rs.getInt("TCID");
@@ -4517,7 +4517,7 @@ public class AssemMain
 		}
 
 		rs = mDB.executeQuery("select erate, exrate from assembly where aid=" + mAID);
-		rs.first();
+		rs.next();
 		mERate = rs.getFloat("erate");
 		mExRate = rs.getFloat("exrate");
 		if (mProps.mUserKeys.contains("BASECALL_ERROR_RATE") || mERate == 0)
@@ -4545,7 +4545,7 @@ public class AssemMain
 
 		// in case we already started this process, get the first number to start with
 		rs = mDB.executeQuery("select count(*) count from contig where tcid=" + tcid);
-		rs.first();
+		rs.next();
 		int startingNum = 1 + rs.getInt("count");
 		
 		loadContigs(true,false,true);
@@ -4718,7 +4718,7 @@ public class AssemMain
 				db.executeUpdate("delete from ASM_scontig where scid=" + oldID);
 			}	
 			ResultSet rs2 = db.executeQuery("select count(*) as numclones from contclone where ctgid=" + newSC.mID);
-			rs2.first();
+			rs2.next();
 			int numClones = rs2.getInt("numclones");
 			rs2.close();
 			
@@ -4844,7 +4844,7 @@ public class AssemMain
 					" join ASM_scontig on ASM_scontig.scid=contig.sctgid " +
 					" where contclone.cid=" + cid + 
 					" and ASM_scontig.merged_to=ASM_scontig.scid and contig.aid=" + mAID);
-			rs.first();
+			rs.next();
 			int count = rs.getInt("count");
 			rs.close();
 			if (count == 0) 
@@ -4875,7 +4875,7 @@ public class AssemMain
 			if (!force && !mProps.getProperty("DEBUG").equals("1")) return;
 			
 			rs = mDB.executeQuery("select count(*) as count from contig where AID=" + mAID);
-			rs.first();
+			rs.next();
 			if (rs.getInt("count") == 0) return;
 			rs.close();
 			
@@ -4989,7 +4989,7 @@ public class AssemMain
 			// 8. All contigs have nonempty consensus
 			
 			rs = mDB.executeQuery("select count(*) as count from contig where consensus=''");
-			rs.first();
+			rs.next();
 			int count = rs.getInt("count");
 			if (count > 0)
 			{
@@ -5001,7 +5001,7 @@ public class AssemMain
 			
 			rs = mDB.executeQuery("select count(*) as count from ASM_tc_edge join ASM_tc_iter on ASM_tc_edge.tcid=ASM_tc_iter.tcid where ASM_tc_iter.aid=" + mAID + 
 					" and ASM_tc_edge.errstr != '' and ASM_tc_edge.errstr != 'OK' and ASM_tc_edge.scid_result != 0" );
-			rs.first();
+			rs.next();
 			count = rs.getInt("count");
 			if (count > 0)
 			{
@@ -5506,34 +5506,34 @@ public class AssemMain
 		statsMsg.append(Log.indentMsg("Total reads:  " + mClones.length, LogLevel.Basic));
 		
 		rs = mDB.executeQuery("select count(*) as count from buryclone where aid=" + mAID);
-		rs.first();
+		rs.next();
 		int nBuried = rs.getInt("count");
 		rs = mDB.executeQuery("select count(*) as count from buryclone where aid=" + mAID + " and bcode='cap'");
-		rs.first();
+		rs.next();
 		int nCapBuried = rs.getInt("count");
 		statsMsg.append(Log.indentMsg("Total buried: " + nBuried + "  Initial buries: " + (nBuried-nCapBuried) + "   Buried during assembly: " + nCapBuried,LogLevel.Basic));
 		
 		// Contig EST counts
 		rs = mDB.executeQuery("select max(tcid) as max from ASM_tc_iter where aid=" + mAID);
-		rs.first();
+		rs.next();
 		int maxTC = rs.getInt("max");
 		
 		rs = mDB.executeQuery("select count(*) as count from contig where tcid=" + maxTC);
-		rs.first();
+		rs.next();
 		int nContigs = rs.getInt("count");
 		rs = mDB.executeQuery("select count(*) as count from contig where tcid=" + maxTC + " and numclones=1");
-		rs.first();
+		rs.next();
 		int nSingletons = rs.getInt("count");
 		
 		// Get the contigs which are just one paired EST 
 		rs = mDB.executeQuery("select count(*) as count from contclone join clone on clone.cid=contclone.cid join contig on contig.ctgid=contclone.ctgid " +
 						" where contig.tcid=" + maxTC + " and contig.numclones=2 and clone.mate_CID > 0");
-		rs.first();
+		rs.next();
 		int nSinglePair = rs.getInt("count")/2;	
 		
 		// obsolete?
 		rs = mDB.executeQuery("select count(*) as count from contig where tcid=" + maxTC + " and notes like '%suspect%'");
-		rs.first();
+		rs.next();
 		int nSuspect = rs.getInt("count");		
 		
 		statsMsg.append(Log.newLine(LogLevel.Basic));
@@ -5556,7 +5556,7 @@ public class AssemMain
 		for (int i = 0; i < rangeMin.length; i++)
 		{
 			rs = mDB.executeQuery("select count(*) as count from contig where numclones >= " + rangeMin[i] + " and numclones <= " + rangeMax[i] + " and tcid=" + maxTC);
-			rs.first();
+			rs.next();
 			counts[i] = rs.getInt("count");
 		}
 		

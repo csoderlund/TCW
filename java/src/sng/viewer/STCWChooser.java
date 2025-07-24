@@ -168,7 +168,7 @@ public class STCWChooser extends JFrame {
 						
 						setConnection(dbName);
 						ResultSet rset = mDB.executeQuery("SELECT pja_msg, meta_msg FROM assem_msg");
-						if(rset.first()) {
+						if(rset.next()) {
 							val = rset.getString(1);
 							if (val==null || (val != null && val.length() <= 10)) {
 								Overview ov = new Overview(mDB);

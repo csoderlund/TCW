@@ -7,10 +7,8 @@ import java.awt.Desktop;
 import java.awt.Font;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.awt.Dimension;
 
 import javax.swing.BorderFactory;
@@ -353,9 +351,9 @@ public class UserPrompt extends JDialog {
 	   	if (theLink == null) return false;
 	   	
 	   	try {
-	   		new URL(theLink); // make sure it works
+	   		new URI(theLink); // make sure it works
 	   	}
-	   	catch (MalformedURLException e) {
+	   	catch (Exception e) {
 	   		System.out.println("Malformed URL: " + theLink);
 	   		return false;
 	   	}
@@ -385,7 +383,9 @@ public class UserPrompt extends JDialog {
 		// Copied this from: http://www.centerkey.com/java/browser/   
 	   	try { 
 	   		if (isWindows()) {
-	   			Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + theLink); // no idea if this works
+	   			String cmd = "rundll32 url.dll,FileProtocolHandler " + theLink;// CAS405 
+	   			String [] x = cmd.split("\\s+");
+	   			Runtime.getRuntime().exec(x); // no idea if this works
 	   			return true;
 	   		}
 	   		else { 

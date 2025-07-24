@@ -101,7 +101,8 @@ public class ASMain {
 	    try {
 	    	//URLConnection con = url.openConnection();
 	    	//BufferedInputStream in =     new BufferedInputStream(con.getInputStream());
-		    URL u = new URL(url + inFile);
+		    URI ui = new URI(url + inFile);	// CAS405 cannot open URL in Java20
+		    URL u = ui.toURL();
 		    InputStream os = u.openStream();         
 		    BufferedInputStream in = new BufferedInputStream(os);
 		    FileOutputStream out = new FileOutputStream(outPath);

@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 
 import util.ui.ButtonComboBox;
 import util.ui.UserPrompt;
+import util.file.FileHelpers;
 import util.methods.Out;
 import util.methods.Static;
 import cmp.database.Globals;
@@ -80,7 +81,7 @@ public class EditMethodPanel extends JPanel {
 		add(pnlBBH);
 		add(pnlTrans);
 		add(pnlHit);
-		add(pnlOrtho);
+		if (!FileHelpers.isMacM4()) add(pnlOrtho); // CAS405 not going to try compiling for M4
 		add(pnlLoad);
 		
 		// button row of buttons

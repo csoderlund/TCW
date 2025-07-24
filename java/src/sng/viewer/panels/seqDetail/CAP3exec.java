@@ -141,7 +141,8 @@ public class CAP3exec {
     public static int runCommand ( String strCommand, Writer outWriter ) throws Exception
     {
         boolean bDone = false;
-        Process cap3 = Runtime.getRuntime().exec( strCommand );
+        String [] x = strCommand.split("\\s+");
+        Process cap3 = Runtime.getRuntime().exec( x ); // CAS405 add split
         InputStream stdout = cap3.getInputStream();       
         InputStreamReader osr = new InputStreamReader(stdout);
         BufferedReader brOut = new BufferedReader(osr);

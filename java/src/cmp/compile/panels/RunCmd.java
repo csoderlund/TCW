@@ -146,7 +146,8 @@ public class RunCmd {
 					final String cmd = "java -Xmx" + MAXMEM + "m -cp " + classPath + " cmp.viewer.MTCWMain " + dbName;
 
 					System.err.println("Launching viewMultiTCW for " + dbName);
-					Process pr = Runtime.getRuntime().exec(cmd);
+					String [] x = cmd.split("\\s+");
+					Process pr = Runtime.getRuntime().exec(x); // CAS405 add split
 					pr.getOutputStream().flush();
 					OutputHandler oh = new OutputHandler(pr.getErrorStream());
 					InputHandler ih = new InputHandler(pr.getOutputStream());

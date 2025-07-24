@@ -238,7 +238,7 @@ public class DatabaseSelectPanel extends JPanel {
 				DBConn conn = new DBConn(hosts.host(), dbname, hosts.user(), hosts.pass());
 				ResultSet rset = conn.executeQuery("SELECT pja_msg FROM assem_msg where AID=1");
 				
-				if(rset.first()) {
+				if(rset.next()) { // CAS405 was first
 					val = rset.getString(1);
 					if (val != null && val.length() <= 5) {
 						val = "Bad Overview for " + dbname + "\nRun viewSingleTCW with -o to update it\n";

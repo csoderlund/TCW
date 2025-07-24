@@ -449,15 +449,15 @@ public class Utils
 	// Save off a command string to the DB, so we have an unambiguous record of what is being run with what params
 	static void recordCmd(int aid, String desc, String cmd, DBConn db) throws Exception
 	{
-		db.executeQuery("lock tables ASM_cmdlist write");
+		// CAS405 fails db.executeQuery("lock tables ASM_cmdlist write");
 		db.executeUpdate("insert ignore into ASM_cmdlist (aid,descr,cmdstr) values('" + aid + "','" + desc + "','" + cmd + "')");
-		db.executeQuery("unlock tables");
+		// db.executeQuery("unlock tables");
 	}
 	static int finalTC(DBConn db, int aid) throws Exception
 	{
 		ResultSet rs = db.executeQuery("select tcid from ASM_tc_iter where aid=" + aid + " and tctype='final'");
 		int tcid = 0;
-		if (rs.first())
+		if (rs.next())
 			tcid = rs.getInt("tcid");
 		else
 			Log.die("The assembly is not completed!");

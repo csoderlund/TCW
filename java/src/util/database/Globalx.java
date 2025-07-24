@@ -11,8 +11,8 @@ import util.methods.Static;
 public class Globalx {
 	public static boolean debug = false; // changed in STCWMain or MTCWMain from command line 
 	
-	public static final String strRelDate = "(29-July-22)"; 
-	public static final String strTCWver = "4.0.4";  //  must be 3 digits
+	public static final String strRelDate = "(24-July-25)"; 
+	public static final String strTCWver = "4.0.5";  //  must be 3 digits
 	
 	public static final String URL =     "http://www.agcol.arizona.edu";
 	public static final String GITURL	= "https://csoderlund.github.io/TCW";
@@ -27,15 +27,16 @@ public class Globalx {
 	public static String getTCWheader() { // CAS404 run programs Out.PrtDateMsg(Globalx.getJavaMem());
 		//return "Java Version " + System.getProperty("java.version") + 
 		//		", mem: " + (Runtime.getRuntime().maxMemory() / (1024*1024)) + "m" + "\n" + TCWhead;
-		return TCWhead 
-				+ "Java v" + System.getProperty("java.version") + " (" + (Runtime.getRuntime().maxMemory() / (1024*1024)) + "m"
-				+ ")  ";
+		String userArch = System.getProperty("os.name") + ":" + System.getProperty("os.arch");
+		String cur = "Running on " + userArch + " with Java v" + System.getProperty("java.version") ;
+		return TCWhead + "\n" + cur; // CAS405 change header
 	}
 	public static final String error="***";
 	
 	public final static String extDir =   "Ext"; // CAS303 changed from external and external_osx
 	public final static String lintelDir = extDir + "/linux";
 	public final static String macDir =    extDir + "/mac";
+	public final static String macM4Dir =    extDir + "/macM4"; // CAS405 add
 	
 	public final static String diamondSuffix = ".dmnd";
 	
@@ -46,7 +47,7 @@ public class Globalx {
 	public static final String goPreDB = "go_";
 
 	// on MAC, directory names are case in-sensitive
-	public static final String PROJDIR 	= "projects";// 11/18/18 libraries directory merged with projects
+	public static final String PROJDIR 	= "projects";
 	public static final String CMPDIR 	= "projcmp";
 	public static final String RSCRIPTSDIR 	= "R-scripts";
 	
