@@ -11,7 +11,7 @@ import util.methods.Static;
 public class Globalx {
 	public static boolean debug = false; // changed in STCWMain or MTCWMain from command line 
 	
-	public static final String strRelDate = "(24-July-25)"; 
+	public static final String strRelDate = "(27-July-25)"; 
 	public static final String strTCWver = "4.0.5";  //  must be 3 digits
 	
 	public static final String URL =     "http://www.agcol.arizona.edu";

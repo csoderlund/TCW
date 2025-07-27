@@ -3,8 +3,6 @@ package sng.amanager;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -40,7 +38,6 @@ import sng.annotator.CoreDB;
 import sng.annotator.runSTCWMain;
 import sng.database.Globals;
 import sng.database.Overview;
-import sng.database.Version;
 import util.database.DBConn;
 import util.database.Globalx;
 import util.database.HostsCfg;
@@ -293,10 +290,11 @@ public class ManagerFrame extends JFrame {
 		tempRow.add(Box.createHorizontalStrut(5));
 		tempRow.add(chkUseTransName);
 		tempRow.add(Box.createHorizontalStrut(5));
-		tempRow.add(chkSkipAssembly);
-		tempRow.add(Box.createHorizontalStrut(5));
-		tempRow.add(btnAssemOptions);
-		
+		if (hasCAP()) {
+			tempRow.add(chkSkipAssembly);
+			tempRow.add(Box.createHorizontalStrut(5));
+			tempRow.add(btnAssemOptions);
+		}
 		mainPanel.add(tempRow);
 		
 		// 3. ///////////////////////////////////////////////////////
@@ -1633,6 +1631,11 @@ public class ManagerFrame extends JFrame {
 	public boolean isAAtcw() {return isAAtcw;}
 	public ManagerData getCurManData() { return curManData;}
 	
+	private boolean hasCAP() { // CAS405 add; Path also exists in HostsCfg
+		String capExe = 	"/CAP3/cap3";
+		String path = FileHelpers.getExtDir();
+		return FileHelpers.fileExists(path + capExe);
+	}
 	/****************************************************
 	 * Remove pop-up
 	 */
@@ -1873,7 +1876,6 @@ public class ManagerFrame extends JFrame {
 	private JButton btnUpdateORF = null;
 
 	private JLabel lblAnno = null;
-	private JLabel lblSim = null;
 	
 	//AnnoDB controls
 	private ManagerTable annoDBTable = null;

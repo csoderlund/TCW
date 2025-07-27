@@ -103,7 +103,7 @@ public class QRProcess {
 	        		return false;
 				}
 	    		if (!checkPackage("goseq")) {
-	    			Out.PrtError("GOseq package does not exist");
+	    			if (packages!=null) Out.PrtError("GOseq package does not exist"); // CAS405 add 
 	    			return false;
 	    		}
 	    		doCmd(true, "suppressPackageStartupMessages(library(goseq))");
@@ -1051,6 +1051,10 @@ public class QRProcess {
     	}		
 	}
 	private boolean checkPackage(String pkg) {
+		if (packages==null) {// CAS405 this is happening
+			Out.Print("+++++ Please exit and restart runDE ++++++++");
+			return false;
+		}
 		if (!packages.contains(pkg)) {
 			Out.Print("*****R package " + pkg + " needs to be installed.******");
 			return false;

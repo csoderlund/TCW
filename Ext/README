@@ -4,19 +4,7 @@ All external software used by TCW have open source licenses.
 Contents of the TCW_4.tar.gz /Ext directory:
 The /linux directory are either downloaded as a linux executable or compiled on a linux x86_63.
 The /mac directory are either downloaded as a MacOS executable or compiled on a version 10.15 (Catalina). 
-The /mac0 directory contain executables that run on a MacOS 10.9 (Maverick); if you need to use these, see Trouble.html#ext.
-The /macM4 directory contains executables for Mac M4 ((aarch64))
-
-jri/
-Used by runDE for differential expression to provide the interface to R. 
-This may be an older version than your R installation (it is v3.0), in which case it will need to be replaced. 
-https://cran.r-project.org/bin/macosx/
-
-CAP3/
-Used for runSingleTCW assembler.
-VersionDate: 12/21/07 
-Also provided: cap3.linux.i686_xeon64 "an old version (2009) of 64-bit Linux system with an Intel processor".
-http://seq.cs.iastate.edu/cap3.html
+The /macM4 directory is for MacOS M4 (aarch64); it is missing CAP3, OrthoMCL, Muscle, which are no longer necessary.
 
 diamond/
 Used by both singleTCW and multiTCW.
@@ -28,15 +16,11 @@ Used by both singleTCW and multiTCW.
 ncbi-blast-2.10.0+
 https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
 
-OrthoMCL/
-Used by runMultiTCW to create clusters.
-mcl-14-137 
-http://www.micans.org/mcl/src/mcl-latest.tar.gz
-orthomclSoftware-v2.0.9
-https://orthomcl.org/common/downloads/software/v2.0/
-Note: this requires the Perl-MySQL module. The following changes were made:
--It did not work with MariaDB v10.4.12. It was fixed by editing the orthoLoadBlast script to set the MySQL local_infile from within the script.
--Also, orthoBlastParser was edited to accept ".fa" suffixes
+CAP3/
+Used for runSingleTCW assembler.
+VersionDate: 12/21/07 
+Also provided: cap3.linux.i686_xeon64 "an old version (2009) of 64-bit Linux system with an Intel processor".
+http://seq.cs.iastate.edu/cap3.html
 
 mafft/
 Used by multiTCW to align clusters.
@@ -57,4 +41,18 @@ https://github.com/gcollet/MstatX
 KaKs_Calcutor 1.2
 Used by runMultiTCW to score KaKs
 https://bigd.big.ac.cn/tools/kaks/download
+
+------------------------------
+The following is in /linux and /mac, but disabled. Change to the /OrthoMCL directory and 
+read README.TCW to enable it.
+
+OrthoMCL/
+Used by runMultiTCW to create clusters.
+mcl-14-137 
+http://www.micans.org/mcl/src/mcl-latest.tar.gz
+orthomclSoftware-v2.0.9
+https://orthomcl.org/common/downloads/software/v2.0/
+Note: this requires the Perl-MySQL module. The following changes were made:
+-It did not work with MariaDB v10.4.12. It was fixed by editing the orthoLoadBlast script to set the MySQL local_infile from within the script.
+-Also, orthoBlastParser was edited to accept ".fa" suffixes
 

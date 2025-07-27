@@ -97,8 +97,8 @@ projects are created by merging existing sTCW projects.
 							<li><a href="#bbh">BBH</a>
 							<li><a href="#close">Closure</a>
 							<li><a href="#ht">BestHit</a>
-							<li><a href="#omcl">OrthoMCL</a>
 							<li><a href="#selfclust">User-defined clusters</a>
+							<li><a href="#omcl">OrthoMCL</a> (disabled)
 						</ul>
 					<li><a href="#best">Majority hit per cluster</a>
 				</ul>
@@ -158,7 +158,7 @@ Common abbreviations:
 			<li>Compare the AA sequences using <ttp>diamond</ttp> or <ttp>blast</ttp>,
 				and the NT sequences with <ttp>blastn</ttp>.
 			<li>Compute one or more sets of clusters using the following methods:
-			 BBH (bi-directional best hit), Closure, Best hit, orthoMCL<sup>1</sup>,
+			 BBH (bi-directional best hit), Closure, Best hit,
 				and/or user-supplied clusters.
 			<li>For a NT-mTCW database created from only NT-sTCW databases,
 			statistics such as Ka/Ks<sup>2</sup>, synonymous, etc are computed.
@@ -432,7 +432,7 @@ has a hit.
 
 <h4>Methods</h4>
 Click <ttc>Add</ttc> in the <ttl>Cluster Sets</ttl> section  to add a new clustering method; this brings up the
-Method panel. The drop-down beside <ttl>Method</ttl> shows BBH, Closure, BestHit, OrthoMCL, and User defined.
+Method panel. The drop-down beside <ttl>Method</ttl> shows BBH, Closure, BestHit, User defined and OrthoMCL (if enabled).
 You can add any number of cluster methods. You can add the same method multiple times with different parameters,
 where only the "Prefix" has to be different.
 All methods need a unique prefix, which is used to prefix the cluster names, e.g.
@@ -543,27 +543,6 @@ Clusters are formed using the best annotation for each sequences, as follows
 The <a href="#best">representative hit</a> for the cluster may be different than the hit that
 	created the clusters, as it includes more rules, such as the #GOs.
 
-<a id=omcl></a>
-<table style="width: 100%"><tr><td style="text-align: left">
-<h4>OrthoMCL</h4>
-<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
-
-<table class="tx">
-<tr>
-	<td class="top">
-	<ttp>OrthoMCL</ttp> requires numerous steps to run, and uses a temporary MySQL database;
-	TCW organizes all these details. DBD::mysql must be installed for the Perl-MySQL interface.
-	<p><ttp>OrthoMCL</ttp> uses the hit file <tt>hitsAA.tab</tt>. It does not guarantee that
-	all sequences in a cluster have a hit with each other.
-	<p><ttp>OrthoMCL</ttp> occasionally fails -- every time this has happened to me, I rerun and it works.
-	<p>Mac M4 (aarch64): <ttp>OrthoMCL</ttp> is not supplied for Mac M4; this option will not be available.
-
-	<td>
-	<a  href="img/methodOL.png"><img src="img/methodOL.png" alt="" style="border: 1px solid black; width: 350px"></a>
-</td>
-</tr>
-</table>
-
 <a id=selfclust></a>
 <table style="width: 100%"><tr><td style="text-align: left">
 <h4>User-defined clusters</h4>
@@ -585,6 +564,27 @@ The <a href="#best">representative hit</a> for the cluster may be different than
 	(The is the same file format used by all methods.)
 	<td>
 	<a  href="img/methodUD.png"><img src="img/methodUD.png" alt="" style="border: 1px solid black; width: 350px"></a>
+</td>
+</tr>
+</table>
+
+<a id=omcl></a>
+<table style="width: 100%"><tr><td style="text-align: left">
+<h4>OrthoMCL</h4>
+<td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
+<ttp>OrthoMCL</ttp> has been disabled because it requires extra work to get it to run.
+	However, it can be enabled. See <tt>/Ext/linux/OrthoMCL/README.TCW</tt> or
+	<tt>/Ext/mac/OrthoMCL/README.TCW</tt>. It is not available in <tt>/Ext/macM4</tt>.
+<table class="tx">
+<tr>
+	<td class="top">
+	<p><ttp>OrthoMCL</ttp> requires numerous steps to run, and uses a temporary MySQL database;
+	TCW organizes all these details. DBD::mysql must be installed for the Perl-MySQL interface.
+	<p><ttp>OrthoMCL</ttp> uses the hit file <tt>hitsAA.tab</tt>. It does not guarantee that
+	all sequences in a cluster have a hit with each other.
+	<p><ttp>OrthoMCL</ttp> occasionally fails -- every time this has happened to me, I rerun and it works.
+	<td>
+	<a  href="img/methodOL.png"><img src="img/methodOL.png" alt="" style="border: 1px solid black; width: 350px"></a>
 </td>
 </tr>
 </table>

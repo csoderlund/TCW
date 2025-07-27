@@ -88,6 +88,9 @@ public class Summary {
         	 
         	Out.PrtSpMsg(1, "Sequences....");
         	makeSeqs();
+        	
+        	Out.PrtSpMsg(1, "Annotations....");
+        	makeAnno();
        
         	makeProcessing();
 	        	
@@ -375,7 +378,6 @@ public class Summary {
     				rows[r][i] = String.format("%.2f", rs.getDouble(j));
     			}
     		}
-    		
     	}
 	    Out.makeTable(lines, nCol, nMethod, dfields, djust, rows);
     }
@@ -455,10 +457,10 @@ public class Summary {
 			// make Column names for table; indexes are 1 to nLib (0 is assembly name)
 			int nCol = nDE+1;
 			String [][] rows = 		new String[nAsm][nCol];
-			int [][]    deCnt = 		new int[nAsm][nCol];
+			int [][]    deCnt = 	new int[nAsm][nCol];
 		    String[]    deFields = 	new String[nCol];
 		    int []      deJust = 	new int[nCol];
-		    int [][]    allCnt =		new int[nAsm][nCol];
+		    int [][]    allCnt =	new int[nAsm][nCol];
 		    
 	    	deFields[0] = "";
 	    	deJust[0] = 1;
@@ -570,7 +572,17 @@ public class Summary {
 		}
 		catch (Exception e) {ErrorReport.die(e, "create dataset Table for summary");}
     }
-    
+    // Make Annotations and GOs; CAS405b added
+    private void makeAnno() {
+    try {
+    	int hits = mDB.executeCount("select count(*) from unique_hits");
+    	int gos = mDB.executeCount("select count(*) from go_info");
+    	
+    	lines.add("");
+    	lines.add("ANNOTATIONS: " + String.format("%,d  GOs %,d", hits, gos)); 
+    }
+    catch (Exception e) {ErrorReport.die(e, "create annotations for summary");}
+    }
     // XXX Processing
     private void makeProcessing() {
 	try {

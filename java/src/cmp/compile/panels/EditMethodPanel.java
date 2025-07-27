@@ -17,7 +17,6 @@ import javax.swing.JPanel;
 
 import util.ui.ButtonComboBox;
 import util.ui.UserPrompt;
-import util.file.FileHelpers;
 import util.methods.Out;
 import util.methods.Static;
 import cmp.database.Globals;
@@ -33,8 +32,10 @@ public class EditMethodPanel extends JPanel {
 	private final short BB = 0;
 	private final short TR = 1;
 	private final short HT = 2;
-	private final short OM = 3;
-	private final short UD = 4;
+	private final short UD = 3;
+	private final short OM = 4; // CAS405b put at end as only used if not disabled and exist
+	
+	private boolean bHasOM=true;
 
 	public EditMethodPanel(CompilePanel parentPanel) {
 		theCompilePanel = parentPanel;
@@ -47,13 +48,23 @@ public class EditMethodPanel extends JPanel {
 		row1.add(lblMode);
 		row1.add(Box.createHorizontalStrut(5));
 		
+		bHasOM = Globals.isOrtho();
+		
 		// Dropdown of methods: order must match numbers assigned to OR, TR, BB
+		
 		String [] labels = {
 				MethodBBHPanel.getMethodType(),
 				MethodClosurePanel.getMethodType(),
 				MethodHitPanel.getMethodType(),
-				MethodOrthoMCLPanel.getMethodType(),
-				MethodLoadPanel.getMethodType()};
+				MethodLoadPanel.getMethodType(),
+				MethodOrthoMCLPanel.getMethodType()};
+		if (!bHasOM) {
+			labels = new String [4];
+			labels[BB] = MethodBBHPanel.getMethodType();
+			labels[TR] = MethodClosurePanel.getMethodType();
+			labels[HT] = MethodHitPanel.getMethodType();
+			labels[UD] = MethodLoadPanel.getMethodType();
+		}
 		
 		cmbMode =  new ButtonComboBox();
 		cmbMode.addItems(labels);
@@ -74,15 +85,15 @@ public class EditMethodPanel extends JPanel {
 		
 		pnlBBH =   new MethodBBHPanel(theCompilePanel);
 		pnlTrans = new MethodClosurePanel(theCompilePanel);
-		pnlHit = new MethodHitPanel(theCompilePanel);
-		pnlOrtho = new MethodOrthoMCLPanel(theCompilePanel);
+		pnlHit =   new MethodHitPanel(theCompilePanel);
 		pnlLoad  = new MethodLoadPanel(theCompilePanel);
-
+		pnlOrtho = new MethodOrthoMCLPanel(theCompilePanel);
+		
 		add(pnlBBH);
 		add(pnlTrans);
 		add(pnlHit);
-		if (!FileHelpers.isMacM4()) add(pnlOrtho); // CAS405 not going to try compiling for M4
 		add(pnlLoad);
+		if (bHasOM) add(pnlOrtho); 
 		
 		// button row of buttons
 		JPanel buttonPanel = Static.createRowPanel();

@@ -1,15 +1,16 @@
 #!/bin/sh
-# setenv R_HOME to location of complete R install
 mem="8192m";
-echo ">>>> runDE ($mem)   `date` <<<<"
+echo ">>>> runDE ($mem)    `date` <<<<"
 
-# Linux: setenv R_HOME /usr/lib64/R
+# The following two are examples; use your correct R_HOME and JPATH for your machine
+# See Install.html
+
+# Linux: export R_HOME=/usr/lib64/R		
 #JPATH=/usr/lib64/R/library/rJava/jri
-JPATH=Ext/linux/jri
 
-# MacOS: setenv R_HOME /Library/Frameworks/R.framework/Resources
-#JPATH=Ext/mac/jri
-#JPATH=/Library/Frameworks/R.framework/Resources/library/rJava/jri 
+# MacOS: The following two work on my Mac x86_64 and Mac aarch64
+# export R_HOME=/Library/Frameworks/R.framework/Resources 
+#JPATH=/Library/Frameworks/R.framework/Resources/library/rJava/jri    
 
 echo Set java.library.path=$JPATH
-java -Xmx$mem -Djava.library.path=$JPATH -classpath java/jars/stcw.jar sng.runDE.QRMain $@ 
+java --enable-native-access=ALL-UNNAMED -Xmx$mem -Djava.library.path=$JPATH -classpath java/jars/stcw.jar sng.runDE.QRMain $@ 

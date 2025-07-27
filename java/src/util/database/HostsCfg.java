@@ -19,7 +19,7 @@ import util.methods.TCWprops;
 
 public class HostsCfg 
 {
-	final String CAP3_DEF = TCWprops.getExtDir() + "/CAP3/cap3";
+	final String CAP3_DEF = TCWprops.getExtDir() + "/CAP3/cap3"; // CAS405 this path is repeated in ManagerFrame
 	final String HOSTS = Globalx.HOSTS;
 	final String localHost = "localhost";
 	

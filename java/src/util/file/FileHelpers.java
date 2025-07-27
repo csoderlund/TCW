@@ -429,7 +429,7 @@ public class FileHelpers
 			
 			Out.PrtWarn("Directory does not exist: " + newDir);
 			
-			String tarFile = newDir + ".tar.gz";
+			String tarFile = "Ext.tar.gz"; // CAS405b
 			if (!fileExists(tarFile)) {
 				Out.PrtWarn("External tar file does not exist: " + tarFile);
 				return false;

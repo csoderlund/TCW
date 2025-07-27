@@ -1,6 +1,9 @@
 # Makefile for sTCW and mTCW 
-JAVA_PATH=/usr
-#JAVA_PATH=/Library/Java/JavaVirtualMachines/adoptopenjdk-15.jdk/Contents/Home
+#JAVA_PATH=/usr
+JAVA_PATH=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home
+#JAVA_PATH=/Library/Java/JavaVirtualMachines/jdk-20.jdk/Contents/Home
+#JAVA_PATH=/Library/Java/JavaVirtualMachines/jdk-24.jdk/Contents/Home
+#JAVA_PATH=/Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home
 
 
 JAVA_FILES=	./src/sng/runDE/*.java \
@@ -26,9 +29,9 @@ JAVA_FILES=	./src/sng/runDE/*.java \
            	./src/cmp/align/*.java \
 	   		./src/cmp/viewer/*.java \
            	./src/cmp/viewer/panels/*.java \
+           	./src/cmp/viewer/align/*.java \
            	./src/cmp/viewer/seqDetail/*.java \
            	./src/cmp/viewer/seq/*.java \
-           	./src/cmp/viewer/align/*.java \
            	./src/cmp/viewer/groups/*.java \
            	./src/cmp/viewer/pairs/*.java \
            	./src/cmp/viewer/hits/*.java \
@@ -38,6 +41,8 @@ JAVA_FILES=	./src/sng/runDE/*.java \
            	./src/util/file/*.java \
            	./src/util/methods/*.java \
            	./src/util/ui/*.java
+
+JAVAC_FLAGS = -g -Xlint:deprecation #,vars #-Xlint:deprecation 
 	   		
 CLASSES_EXT = -C ./classes_ext netscape -C ./classes_ext sun -C ./classes_ext com -C ./classes_ext org
 CLASSES_STCW  = -C ./classes sng -C ./classes util -C ./src html -C ./src images
@@ -46,7 +51,7 @@ CLASSES_MTCW  = -C ./classes cmp -C ./classes util -C ./src html -C ./src images
 all : clean build jars clean_classes  
 
 build:
-	$(JAVA_PATH)/bin/javac -Xlint -classpath ./classes_ext -sourcepath ./src/cmp:./src/sng:./src/util -d ./classes $(JAVA_FILES)
+	$(JAVA_PATH)/bin/javac $(JAVAC_FLAGS) -classpath ./classes_ext -sourcepath ./src/cmp:./src/sng:./src/util -d ./classes $(JAVA_FILES)
 
 jars: build stcw_jar mtcw_jar
 

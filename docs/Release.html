@@ -59,10 +59,20 @@
 	<!---- START BODY -->
 You must have Java v17.0.11 or later, starting with TCW v4.0.5.
 
-
 <a id=v405></a>
-<h4>v4.0.5 24-July-2025</h4>
-The released code was compiled with Java 17.0.10.
+<h4>v4.0.5 27-July-2025</h4>
+27-July-2025 release:
+<ul>
+<li>Building some of the GO tables on MariaDB was very slow; this has been fixed.
+<li>mTCW Summary: The exact number of annotations and GOs has been added.
+<li>Removed the <tt>/Ext/../jri</tt> directories as that is too out-of-date.
+The user should update the <ttp>runDE</ttp> script with the correct jri path.
+<li>Disable <ttp>OrthoMCL</ttp>. The <tt>/Ext/mac</tt> and <tt>/Ext/linux</tt> directories still have the code with a README on
+how to make them work within TCW.
+<li>CAP3, OrthoMCL, or Muscle will not be available from the interface unless it is available from <tt>/Ext</tt>.
+</ul>
+
+24-July-2025 release: The released code was compiled with Java 17.0.10.
 <ul>
 <li>Updated the MySQL connection library.
 <li>Updated the code to work with Java 24 and MySQL.

@@ -96,7 +96,6 @@ public class CompileFrame extends JFrame {
 			hostsObj = new HostsCfg();
 			
 			// Blast path gets checked in HostsCfg
-			// Check muscle/muscle, mafft, mstat
 			String cmdPath = TCWprops.getExtDir();
 			if (!FileHelpers.existDir(cmdPath)) {
 				Out.PrtError("directory does not exists: " + cmdPath);
@@ -105,10 +104,9 @@ public class CompileFrame extends JFrame {
 			checkExternal(cmdPath + Globals.Ext.mafftExe);
 			checkExternal(cmdPath + Globals.Ext.mstatxExe);
 			checkExternal(cmdPath + Globals.Ext.kaksExe);
-			if (!FileHelpers.isMacM4()) { // CAS405 too old to support
-				checkExternal(cmdPath + Globals.Ext.muscleExe);
-				checkExternal(cmdPath + Globals.Ext.orthoTryExe);
-			}
+			// CAS405b too old to support
+			// checkExternal(cmdPath + Globals.Ext.muscleExe);
+			// checkExternal(cmdPath + Globals.Ext.orthoTryExe);
 		}
 		catch(Exception e) {System.err.println("Error reading HOSTS.cfg"); }
 	}

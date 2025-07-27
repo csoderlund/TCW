@@ -161,6 +161,8 @@ Select <tt>demoTra</tt> from the <ttc>Project</ttc> drop-down list.
 <p>&rarr;A command button will be inactive when it is not valid to run, e.g.
 		the <ttc>Instantiate</ttc> command inactive since the datasets have not been loaded.
 
+<p>&rarr;The <ttc>Skip Assembly</ttc> and <ttc>Options</ttc> will not exist if the <tt>/Ext</tt> directory
+does not have a <tt>CAP3/cap3</tt> executable file for assembly.
 <td>
 <a id="Fig1"></a>
 <a  href="img/runSingleTCW.png">
@@ -541,6 +543,8 @@ If the input is already assembled transcript sequences, or protein sequences, or
 check this option.
 If the datasets are ESTs, or multiple transcript datasets that you want to assemble together,
 do not select this option and see <a href="./AssemGuide.html"  class="ext" target="_blank">Assembly Guide</a>.
+The <ttc>Skip Assembly</ttc> checkbox will not exist if the <tt>/Ext</tt> directory
+does not have a <tt>CAP3/cap3</tt> executable file for assembly.
 
 <p>Press <ttc>Instantiate</ttc> to either assemble or finalize the sequences in the database.
 

@@ -426,15 +426,15 @@ public class DBConn
 	}	
 	public void openTransaction() throws Exception
 	{
-		//executeQuery("BEGIN"); CAS405 fails 
+		execute("BEGIN"); // CAS405 was executeQuery
 	}
 	public void closeTransaction() throws Exception
 	{
-		//executeQuery("COMMIT"); CAS405 fails
-	}	
+		execute("COMMIT"); 
+	}
 	public void rollbackTransaction() throws Exception
 	{
-		//executeQuery("ROLLBACK"); executed in exceptions
+		execute("ROLLBACK"); //executed in exceptions
 	}	
 
 	public  PreparedStatement prepareStatement(String st) throws SQLException

@@ -7,6 +7,7 @@ package cmp.compile;
  */
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Vector;
@@ -113,39 +114,75 @@ public class LoadSingleGO {
 					Out.PrtSpMsg(3, "No GOs in dataset");
 					continue;
 				}
-				String dbName = cmpPanel.getSpeciesDB(x);
 				
-				HashSet <Integer> goDB = new HashSet <Integer> ();
-				rs = sDB.executeQuery("select gonum from go_info");
-				while (rs.next()) goDB.add(rs.getInt(1));
-				rs.close();
+				int n = goMap.size();
+				ArrayList <Integer> relId = new ArrayList <Integer> (n);
+				ArrayList <Integer> dist = new ArrayList <Integer> (n);
+				ArrayList <Integer> child = new ArrayList <Integer> (n);
+				ArrayList <Integer> anc = new ArrayList <Integer> (n);
 				
-				int cnt=0;
-				mDB.openTransaction();
+				// go_graph_path - read from single, write to multi
+				rs = sDB.executeQuery("select relationship_type_id, distance, child, ancestor from "
+						 + " go_graph_path where ancestor>0");
+				
+				while (rs.next()) {
+					int gonum = rs.getInt(3);
+					if (!goMap.containsKey(gonum)) continue;
+					
+					GOinfo gi = goMap.get(gonum);
+					if (gi.added) continue;
+					gi.added=true;
+					
+					relId.add(rs.getInt(1));
+					dist.add(rs.getInt(2));
+					child.add(gonum);
+					anc.add(rs.getInt(4));
+				}
+				sDB.close(); rs.close();
+				
+				PreparedStatement ps = mDB.prepareStatement("INSERT into go_graph_path SET " +
+						"relationship_type_id=?, distance=?, child=?, ancestor=?");
+				int cntSave=0;
+				
+				for (int i=0; i<child.size(); i++) {
+					ps.setInt(1, relId.get(i));
+					ps.setInt(2, dist.get(i));
+					ps.setInt(3, child.get(i));
+					ps.setInt(4, anc.get(i));
+					ps.addBatch();
+					
+					cntSave++; cntAddGO++;
+					if (cntSave==1000) {
+						Out.r("Insert GO ancestor " + (i+1));
+						cntSave=0;
+						ps.executeBatch();
+					}
+				}
+				if (cntSave>0) ps.executeBatch();
+				ps.close();
+				
+				String msg = (x==0) ? "add ancestors from " : "additional    from ";
+				Out.PrtSpCntMsg(2, child.size(), msg + cmpPanel.getSpeciesSTCWid(x));
+				if (cntAddGO>=goMap.size()) break;
+				
+				/* CAS405b this is slow on mariaDB, so broke apart above
+				int cnt=0; mDB.openTransaction();
 				for (int gonum : goMap.keySet()) {
 					GOinfo gi = goMap.get(gonum);
 					if (gi.added) continue;
 					if (!goDB.contains(gonum)) continue;
 					gi.added=true;
-					
-					// CAS318 removed relation_distance as not in OBO
-					mDB.executeUpdate("insert into " +
-					" go_graph_path (relationship_type_id, distance,  child, ancestor) " +
+					mDB.executeUpdate("insert into  go_graph_path (relationship_type_id, distance,  child, ancestor) " +
 					" select g.relationship_type_id, g.distance,  g.child, g.ancestor " +
-					" from " + dbName + ".go_graph_path as g " +
-					" where ancestor>0 and child=" + gonum);
+					" from " + dbName + ".go_graph_path as g  where ancestor>0 and child=" + gonum);
 					
-					cnt++; cntAddGO++;
-					if (cnt%1000==0) Out.r("added GO-ancestors " + cnt);
+					cnt++; cntAddGO++; if (cnt%1000==0) Out.r("added GO-ancestors " + cnt);
 				}
-				if (rs!=null) rs.close();
-				mDB.closeTransaction();
-				sDB.close();
-				
-				String msg = (x==0) ? "add ancestors from " : "additional    from ";
-				Out.PrtSpCntMsg(2, cnt, msg + cmpPanel.getSpeciesSTCWid(x));
-				if (cntAddGO>=goMap.size()) break;
-			}
+				if (rs!=null) rs.close(); mDB.closeTransaction();
+				*/
+			} // end loop through single TCWs
+			Out.PrtSpCntMsgTimeMem(2, cntAddGO, "total added GOs ", time);
+			
 			/************************************************/
 			Out.PrtSpMsg(1, "Add inherited to GO list");
 			rs = mDB.executeQuery("select DISTINCT(child) from go_graph_path");
@@ -161,11 +198,10 @@ public class LoadSingleGO {
 			Out.PrtSpCntMsg(2, goMap.size(), " assigned and inherited GOs");
 			
 			return true;
-		} catch(Exception e) {	
-			ErrorReport.prtReport(e, "Cannot build GO graph table");
-		} catch (OutOfMemoryError error) {
-			ErrorReport.prtReport(error, "Out of memory -- increase memory in runMultiTCW and re-run");
-		}	
+		}
+		catch(Exception e) {ErrorReport.prtReport(e, "Cannot build GO graph table");} 
+		catch (OutOfMemoryError error) {ErrorReport.prtReport(error, "Out of memory -- increase memory in runMultiTCW and re-run");}	
+		
 		return false;
 	}
 	// transfer all assigned and inherited GOs from the singleTCW go_graph_path

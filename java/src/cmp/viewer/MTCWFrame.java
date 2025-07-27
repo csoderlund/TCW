@@ -493,7 +493,6 @@ public class MTCWFrame extends JFrame {
 			hostsObj = new HostsCfg();
 			
 			// Blast path gets checked in HostsCfg
-			// Check muscle/muscle, mafft, mstat
 			System.err.println("Check /Ext");
 			String cmdPath = TCWprops.getExtDir();
 			if (!FileHelpers.existDir(cmdPath)) {
@@ -501,8 +500,8 @@ public class MTCWFrame extends JFrame {
 				return;
 			}
 			checkExternal(cmdPath + Globals.Ext.mafftExe);
-			checkExternal(cmdPath + Globals.Ext.muscleExe);
-			checkExternal(cmdPath + Globals.Ext.mstatxExe);
+			//CAS405b checkExternal(cmdPath + Globals.Ext.muscleExe);
+			//        checkExternal(cmdPath + Globals.Ext.mstatxExe);
 		}
 		catch(Exception e) {System.err.println("Error reading HOSTS.cfg"); }
 	}

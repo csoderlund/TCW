@@ -117,7 +117,7 @@ with <ttp>runAS</ttp> and verified it worked. <ttp>RunDE</ttp> was tested with <
 </table>
 <sup>1</sup><small>MacOS M4: Cap3, OrthoMCL and Muscle are not supplied for this machine.
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    The user can supply Cap3 in the <tt>Ext/macM4/cap3</tt> directory if they want assembly to work.</small>
+    The user can supply cap3 in the <tt>Ext/macM4/CAP3</tt> directory if they want assembly to work.</small>
 <br><sup>2</sup><small>Linux/Linode: <tt>rJava</tt> did not install successfully,
 			so the <ttp>runDE</ttp> could not be tested.</small>
 
@@ -179,14 +179,15 @@ display the "mysql>" prompt. Type "exit" to return to the shell command line.
 Add your database username and password to the two lines <tt>DB_user</tt> and <tt>DB_password</tt>
 
 <p><u><i><b>Step 4:</b></i></u> Test external programs
-Check that the external programs have executable permissions. On linux, check <tt>Ext/linux</tt>; on MacOS, check <tt>Ext/mac</tt>.
+Check that the external programs have executable permissions.
+On linux, check <tt>Ext/linux</tt>; on MacOS x86_64, check <tt>Ext/mac</tt>; on MacOS M4 (aarch64), check <tt>Ext/macM4</tt>.
 You may want to run the compiled programs at the command line to see if they execute, e.g.
 <pre>
    ./diamond
    Error: Syntax: diamond COMMAND [OPTIONS]. To print help message: diamond help
 </pre>
 
-The diamond error indicates it ran. If are running on MacOS 10.15,
+The diamond error indicates it ran. If are running on MacOS,
 see <a href="./Mac-OSX.html#ext"  class="ext" target="_blank">MacOS - External</a>.
 <p>Please read the section below on "Supplied external software.
 
@@ -207,40 +208,31 @@ Other annotation databases can also be used, but TCW provides GO support with Un
 		<td>Used for the TCW <ttp>runDE</ttp> to compute differential expression (DE).
 		</td>
 	</tr>
-
-	<tr><td >Perl and DBD::mysql</td>
-		<td><a href="https://metacpan.org/pod/DBD::mysql::INSTALL" class="ext" target="_blank">Meta::cpan</a></td>
-		<td>Necessary to run <ttp>orthoMCL</ttp> within <ttp>runMultiTCW</ttp>. Perl is typically on all Linux and MacOS
-		machines, but the DBD::mysql (Perl-MySQL interface) is not.
-	</tr>
-
 	</table>
 <a id="R"></a>
-<h4>RJava for DE</h4>
-<u>Step 1.</u> TCW runs R using the RJava (jri) package, which is provided in the <tt>/Ext</tt> directory. However, the <tt>/Ext/.../jri</tt> does not
-work on all machines.
-If the supplied jri package does not work when running <ttp>runDE</ttp>, start R and type:
+<h4>RJava for DE (differential expression)</h4>
+
+<u>Step 1.</u> Start R and type:
 <pre>
    >install.packages("rJava")
+   >system.file("jri", package="rJava")
 </pre>
-<u>Step 2.</u> Edit the <tt>runDE</tt> script, uncomment the correct path or change to the correct path:
-<pre>
-   #JPATH=/usr/lib64/R/library/rJava/jri
-   #JPATH=Ext/linux/jri
-   #echo Using Linux path
+The 2nd command states where the jri package is. Enter it for the JPATH in the next step.
 
-   #JPATH=Ext/mac/jri
-   #JPATH=/Library/Frameworks/R.framework/Resources/library/rJava/jri
-   #echo Using MAC-OS path
-</pre>
-If using your installed rJava, confirm the path is correct.
-
-<p><u>Step 3.</u> You must set the R_HOME environment variable (confirm the path on your machine):
+<p><u>Step 2.</u> Edit the <tt>runDE</tt> script, uncomment the correct path or <i>change to the correct path</i>:
 <pre>
-   setenv R_HOME /usr/lib64/R                              # for Linux using tcsh
-   setenv R_HOME /Library/Frameworks/R.framework/Resources # for MacOS using tcsh
+   #JPATH=/usr/lib64/R/library/rJava/jri				# e.g. linux
+
+   #JPATH=/Library/Frameworks/R.framework/Resources/library/rJava/jri	# e.g. Mac
 </pre>
-The above commands use <tt>tcsh</tt>, adjust if your using a different Unix shell.
+
+<p><u>Step 3.</u> You must set the R_HOME environment variable, e.g.
+<pre>
+   export R_HOME=/usr/lib64/R                              # for Linux using bash or zsh
+
+   export R_HOME=/Library/Frameworks/R.framework/Resources # for MacOS using bash or zsh
+</pre>
+
 <h4>R packages for DE</h4>
 In order to use <ttp>edgeR</ttp>, <ttp>DEseq2</ttp> and <ttp>GOseq</ttp>, start R and type:
 <pre>
@@ -281,11 +273,6 @@ You do not need to do anything to use the supplied packages. They are in the rel
 				<br><ttp>viewMultiTCW</ttp>: Comparing a sequence against AA sequences.
 			</td></tr>
 		<tr><td colspan=4><i>Supplied packages for singleTCW</i></td>
-		<tr>
-			<td>rJava</td><td>0.9-4</td>
-			<td><a href="http://www.rforge.net/JRI/" class="ext" target="_blank">www.rforge.net/JRI</a></td>
-         	<td><ttp>runDE</ttp>: Provides the Java interface to R.  Discussed above.</td>
-		</tr>
          <tr><td><ttp>CAP3</ttp></td><td>2007 </td>
 			<td><a href="http://seq.cs.iastate.edu/cap3.html" class="ext" target="_blank">
 				seq.cs.iastate.edu/cap3.html</a></td>
@@ -293,18 +280,6 @@ You do not need to do anything to use the supplied packages. They are in the rel
 		</tr>
 
 	<tr><td colspan=4><i>Supplied packages for multiTCW</i></td>
-         <tr>
-			<td><ttp>OrthoMCL</ttp><sup>1</sup></td><td>2.0.3</td>
-			<td><a href="http://orthomcl.org" class="ext" target="_blank">
-			orthomcl.org</a></td>
-         	<td>One of four available methods for clustering</td>
-		</tr>
-         <tr>
-			<td>&nbsp;&nbsp;<ttp>MCL</ttp></td><td>10-201</td>
-			<td><a href="http://micans.org/mcl/" class="ext" target="_blank">
-			micans.org/mcl</a></td>
-         	<td>Used by <ttp>OrthoMCL</ttp></td>
-		</tr>
          <tr>
 			<td><ttp>MAFFT</ttp></td><td>v7.407</td>
 			<td><a href="https://mafft.cbrc.jp/alignment/software/" class="ext" target="_blank">
@@ -323,7 +298,6 @@ You do not need to do anything to use the supplied packages. They are in the rel
 			github.com/gcollet/MstatX</a></td>
          	<td>Scoring multiple alignment of clusters</td>
 		</tr>
-
         <tr><td><ttp>KaKs_Calculator</ttp></td>
         	<td>v.1.2
 			<td><a href="http://bigd.big.ac.cn/tools/kaks/download" class="ext" target="_blank">
@@ -331,19 +305,11 @@ You do not need to do anything to use the supplied packages. They are in the rel
 			<td>KaKs analysis in <ttp>runMultiTCW</ttp>.</td>
 		</tr>
 		</table>
-<sup>1</sup> <ttp>OrthoMCL</ttp>:
-<ul>
-<li><ttp>OrthoMCL</ttp> is still available from <ttp>TCW</ttp>, but takes some effort on the user to install DBI:MySQL.
-There could be additional new dependency problems. I could not install DBI:MySQL on MacOS 10.15, and did not try
-it on anything else for a long time.
-<p>
-<li>If <ttp>OrthoMCL</ttp> does not work on your machine and
-you want an alternative to the TCW supplied clustering algorithms, you may download and run a ortholog computing program
-and then import the clusters using the <ttp>runMultiTCW</ttp> "User Supplied" option.
-<p>
-<li>It did not work with MariaDB v10.4.12. It was fixed by editing the orthoLoadBlast script to set the MySQL local_infile from within the script.
-Also, orthoBlastParser was edited to accept ".fa" suffixes
-</ul>
+<p><ttp>OrthoMCL</ttp> is also supplied for <ttp>runMultiTCW</ttp>, but disabled. The <tt>/Ext/mac</tt> and <tt>/Ext/linux</tt> directories
+have the code with a README.TCW on how to make them work within TCW.
+
+<p>By default, <tt>/Ext/macM4</tt> does not have <ttp>CAP3</ttp> or <ttp>Muscle</ttp>.
+These programs will not be available from the interface unless the user provides them.
 
 <p><font color=red>MacOS Verify</font> Catalina and later versions require verification of external software. See
 (see <a href="Mac-OSX.html#ext" class="ext" target="_blank">Running Ext/mac external programs</a>).

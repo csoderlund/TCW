@@ -10,6 +10,7 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Vector;
+import java.util.ArrayList;
 
 import sng.database.MetaData;
 import sng.database.Schema;
@@ -488,6 +489,7 @@ public class DoGOs
 		return false;
 	}
 	/********************************************************
+	 * Transfer info from GO database to TCW
 	 * go_graph_path
 	 * go_term2term
 	 */
@@ -498,25 +500,95 @@ public class DoGOs
 			
 			Out.PrtSpMsg(2, "Create graph_path from " + godbName + " for GOs");
 			long time = Out.getTime();
-			int cnt=0;
-			tcwDB.openTransaction();
-			for (int gonum : goAllSet) { 						// goAllSet
-				tcwDB.executeUpdate("insert into " +
-					" go_graph_path (relationship_type_id, distance,  child, ancestor) " +
-					" select g.relationship_type_id, g.distance, g.child, g.ancestor " +
-					" from " + tab_goGraphPath + " as g " +
-					" where ancestor>0 and child=" + gonum);
 			
-				tcwDB.executeUpdate("insert into " +
-					" go_term2term (relationship_type_id, child, parent) " +
-					" select g.relationship_type_id, g.child, g.parent " +
-					" from " + tab_goTerm2term + " as g " +
-					" where parent>0 and child=" + gonum);
-				cnt++;
-				if (cnt % 1000 == 0) Out.r("Insert GO " + cnt);
+			int n = goAllSet.size();
+			
+			ArrayList <Integer> relId = new ArrayList <Integer> (n);
+			ArrayList <Integer> dist = new ArrayList <Integer> (n);
+			ArrayList <Integer> child = new ArrayList <Integer> (n);
+			ArrayList <Integer> anc = new ArrayList <Integer> (n);
+			
+			// go_graph_path
+			ResultSet rs = goDB.executeQuery("select relationship_type_id, distance, child, ancestor from "
+					+ " graph_path where ancestor>0");
+			
+			while (rs.next()) {
+				int gonum = rs.getInt(3);
+				if (!goAllSet.contains(gonum)) continue;
+				
+				relId.add(rs.getInt(1));
+				dist.add(rs.getInt(2));
+				child.add(gonum);
+				anc.add(rs.getInt(4));
 			}
-			tcwDB.closeTransaction();
-			prtCntMsgMem(cnt,"processed", time);
+			
+			PreparedStatement ps = tcwDB.prepareStatement("INSERT into go_graph_path SET " +
+					"relationship_type_id=?, distance=?, child=?, ancestor=?");
+			int cntSave=0;
+			
+			for (int i=0; i<child.size(); i++) {
+				ps.setInt(1, relId.get(i));
+				ps.setInt(2, dist.get(i));
+				ps.setInt(3, child.get(i));
+				ps.setInt(4, anc.get(i));
+				ps.addBatch();
+				
+				cntSave++;
+				if (cntSave==NLOOP) {
+					Out.r("Insert GO ancestor " + (i+1));
+					cntSave=0;
+					ps.executeBatch();
+				}
+			}
+			if (cntSave>0) ps.executeBatch();
+			ps.close();
+			prtCntMsg(child.size(),"GO ancestors                                ");
+			
+			relId.clear(); dist.clear(); child.clear(); anc.clear();
+			
+			// go_term2term
+			rs = goDB.executeQuery("select relationship_type_id, child, parent from "
+					+ " term2term where parent>0");
+			while (rs.next()) {
+				int gonum = rs.getInt(2);
+				if (!goAllSet.contains(gonum)) continue;
+				
+				relId.add(rs.getInt(1));
+				child.add(gonum);
+				anc.add(rs.getInt(3));
+			}
+			
+			ps = tcwDB.prepareStatement("INSERT into go_term2term SET relationship_type_id=?, child=?, parent=?");
+			cntSave=0;
+			for (int i=0; i<child.size(); i++) {
+				ps.setInt(1, relId.get(i));
+				ps.setInt(2, child.get(i));
+				ps.setInt(3, anc.get(i));
+				ps.addBatch();
+				cntSave++;
+				if (cntSave==NLOOP) {
+					Out.r("Insert GO parent " + (i+1));
+					cntSave=0;
+					ps.executeBatch();
+				}
+			}
+			if (cntSave>0) ps.executeBatch();
+			ps.close();
+			
+			prtCntMsgMem(child.size(),"GO parents", time);
+			
+			relId.clear(); dist.clear(); child.clear(); anc.clear();
+			
+			// CAS405b was direct transfer from the goDB to the tcwDB, which is very slow on MariaDB
+			/*for (int gonum : goAllSet) { 						// goAllSet
+				tcwDB.executeUpdate("insert into go_graph_path (relationship_type_id, distance,  child, ancestor) " +
+					" select g.relationship_type_id, g.distance, g.child, g.ancestor " +
+					" from " + tab_goGraphPath + " as g  where ancestor>0 and child=" + gonum);
+				tcwDB.executeUpdate("insert into go_term2term (relationship_type_id, child, parent) " +
+					" select g.relationship_type_id, g.child, g.parent " +
+					" from " + tab_goTerm2term + " as g where parent>0 and child=" + gonum);
+			}*/
+			
 			return true;
 		}
 		catch(Exception e){ErrorReport.die(e, "Error graph path");}
@@ -664,7 +736,6 @@ public class DoGOs
 				 }
 				 rs.close();
 			}
-			
 			
 			// create cat[i] = asm:inh
 			for (int gonum : goEvMap.keySet()) {

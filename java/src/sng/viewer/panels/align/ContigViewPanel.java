@@ -56,6 +56,7 @@ public class ContigViewPanel extends JPanel implements ClipboardOwner
 	public static int HIDE_BURIED_EST = 0;
 	public static int SHOW_BURIED_EST_LOCATION = 1;
 	public static int SHOW_BURIED_EST_DETAIL = 2;
+	private boolean bDoCAP=false; // CAS405b doesn't work 
 	
 	public void lostOwnership(Clipboard clipboard, Transferable contents) { }
 	
@@ -214,7 +215,7 @@ public class ContigViewPanel extends JPanel implements ClipboardOwner
 		menuContigSort.setMaximumSize(menuContigSort.getPreferredSize());
 		
 		boolean doSelect=false;
-		if (hasCAP3) { // Cap
+		if (hasCAP3 && bDoCAP) { // Cap
 			doSelect = true;
 			btnCAP3 = new JButton("Run CAP3");
 			btnCAP3.setToolTipText("Execute CAP3 on selected ESTs");

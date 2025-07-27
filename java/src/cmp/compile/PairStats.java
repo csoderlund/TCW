@@ -92,10 +92,13 @@ public class PairStats {
 			if (outKsKsCmd!=null) outKsKsCmd.close();  
 			if (outKaKs!=null)    outKaKs.close();
 			
-			if (cntWrite>0)  {
+			if (cntWrite>0)  {// CAS405b make more explicit
 				Out.PrtSpCntMsg(2, cntWrite,  "KaKs alignments written to files");
-				Out.PrtSpMsg(2, "From the projects KaKs directory, execute 'sh " + Globals.KaKsCmd + "' ");
-				Out.PrtSpMsg(3, "It uses path: " + kaksEx);
+				Out.PrtSpMsg(2, "+++Execute the following to run KaKs, then 'Run Stats' again with 'Read' KaKs");
+				Out.PrtSpMsg(4, "cd " + dirKaKs);
+				Out.PrtSpMsg(4, "sh " + Globals.KaKsCmd);
+				Out.PrtSpMsg(3, "It uses the command: " + kaksEx);
+				Out.PrtSpMsg(2, "");
 				if (cntBadAlign>0 || cntShortCDS>0) {
 					Out.PrtSpMsg(3, "Not written to KaKs files: ");
 					Out.PrtSpCntMsgNz(3, cntBadAlign, "Could not be aligned ");

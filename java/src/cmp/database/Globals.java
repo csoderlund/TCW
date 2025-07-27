@@ -4,6 +4,7 @@ import java.awt.Color;
 
 import cmp.viewer.MTCWFrame;
 import util.database.Globalx;
+import util.file.FileHelpers;
 
 public final class Globals {
 	public static final String VERSION = Globalx.strTCWver;
@@ -82,6 +83,7 @@ public final class Globals {
 		public final static String kaksExe  = "/KaKs_Calculator";
 		public final static String orthoDir = "/OrthoMCL";
 		public final static String orthoTryExe = "/OrthoMCL/bin/orthomclInstallSchema"; // try first one
+		public final static String orthoDisable = "/OrthoMCL/disable"; // CAS405b
 	}
 	
 	public static class MSA {
@@ -184,5 +186,15 @@ public final class Globals {
     	int x = Globals.trimSUM;
     	if (sum.length()>x) sum = sum.substring(0, x) + "...";
     	return sum;
+	}
+	
+	public static boolean isOrtho() {// CAS405b disabled if this file exist
+		String path = FileHelpers.getExtDir();
+		if (!FileHelpers.existDir(path + Globals.Ext.orthoDir)) return false;
+		return !FileHelpers.fileExists(path + Globals.Ext.orthoDisable);
+	}
+	public static boolean isMuscle() {// CAS405b not available for macM4
+		String path = FileHelpers.getExtDir();
+		return FileHelpers.fileExists(path + Globals.Ext.muscleExe);
 	}
 }
