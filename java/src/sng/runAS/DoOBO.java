@@ -298,6 +298,10 @@ public class DoOBO {
 	/** Header lines **/
 			// format-version: 1.2
 			line = inFH.readLine();
+			if (line==null) {
+				Out.PrtErr("OBO file is empty.   " + goDir+"/"+goFile); // CAS405c
+				return false;
+			}
 			String [] tok = line.split(":");
 			if (tok.length!=2 || !tok[0].contains("format-version")) {
 				Out.PrtErr("Incorrect OBO file: " + line);

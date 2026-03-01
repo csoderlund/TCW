@@ -8,6 +8,7 @@
 	a.ext {font-weight: bold;}
 	mark.white {font-family:verdana; font-size:12px; color:white;background:none;}
 	ttp  {font-family: Arial, monospace; font-size: 14px; font-weight: 600; color: #556B2F; }
+	ttl  {font-family: 'Lucida Console', monospace; font-size: 14px; font-weight: 600; color: DarkSlateGrey;}
 	tt {font-size:13px}
 	pre {font-size:13px}
 	body {font-family:  Verdana, Arial, Helvetica, sans-serif;  font-size: 14px; }
@@ -160,17 +161,24 @@ export R_HOME=/Library/Frameworks/R.framework/Resources  # zcsh
 <h3>
 	Running /Ext/mac external programs
 </h3>
-<font color=red>Since the release of MacOS 10.15, it is difficult to run programs downloaded from the web unless its been
-authenticated by Apple.</font> Running external programs from TCW,
-you will either get popup that states "xxx cannot be opened because developer cannot be verified", or
-the program will just fail. Do the following:
+<font color=green>Since the release of MacOS 10.15, it is impossible to run programs downloaded
+from the web unless they have been authenticated.</font> Using MacOS Sequoia 15.7.3, I authenticated <tt>diamond</tt> as follows:
 <ol>
-<li>Using the Finder, select the program and Open With "Terminal" or "iTerm".
-<li>You will get a pop-up, select "Open".
-<li>After that, you will be able to run it via TCW.
+<li>Bring up the <ttl>System Setting</ttl>, select <ttl>Privacy&amp;Security</ttl>.
+<li>Run TCW <ttl>Annotate</ttl>. It will popup a window with '<tt>diamond Not Open</tt>'; select <b>Done</b>.
+<li>On the <ttl>Privacy</ttl> window,
+it will now show '<tt>diamond was blocked to protect your Mac.</tt>';
+select <b>Allow Anyway</b>.
+<li>Run TCW <ttl>Annotate</ttl>. It will popup '<tt>Open diamond?</tt>'; select <b>Open Anyway</b>.
+<li>It will then popup
+a window asking for your password. Finally, <tt>diamond</tt> will run.
 </ol>
-I did not have to do this for <ttp>Blast</ttp>, but I did need to do it for the other <ttx>/Ext/mac</ttx> programs.
-All were straight-forward except for <ttp>mafft</ttp>; I had to authenticate all the following in the <ttx>mafftdir</ttx>
+<a href="./img/macOS.png">
+<img src="./img/macOS.png" alt="MacOS" title="macOS authenticate"  style="width: 700px; border:1px solid black"></a>
+<p>I had to do the same for <tt>makeblastdb</tt>, <tt>blast</tt> and <tt>tblastx</tt> for the <ttp>runSingleTCW</ttp> pair alignment.
+It was easiest to just keep running Annotate until they were all authenticated.
+<p>
+For <ttp>runMultiTCW</ttp> MSA computations, I had to authenticate all the following in the <ttx>mafftdir</ttx>
 directory:
 <pre>
   bin/
@@ -184,12 +192,11 @@ directory:
     dvtditr
     f2cl
 </pre>
-Supposedly, there is a way to allow any downloaded program to execute by using:
-<pre>
-	sudo spctl --master-disable
-</pre>
-Then in Preferences, Security&amp;Privacy, General, select 'anywhere'. I did not try this.
-
+I could move the <tt>/Ext</tt> directory around and it would stay authenticated. But when I downloaded a
+new TCW_4.tar.gz, I would have to re-authenticate it. Therefore, if you download an updated TCW, use your
+previous authenticated <tt>/Ext</tt> directory.
+<p>
+There may be an easier way to do this, but this works.
 	<!---- END BODY -->
 <p><a href="#top">Go to top</a>
 	</td></tr>

@@ -75,7 +75,7 @@ public class ASMain {
 	    	}
 		    	
 // download
-		    String cmd = "curl " + url + inFile + " -o " + outPath;
+		    String cmd = "curl -L " + url + inFile + " -o " + outPath; // CAS405c follow redirects
 		    System.err.println(cmd);
 		    exitVal = rcd.run(cmd, null); // current directory, print stderr
 		    	 

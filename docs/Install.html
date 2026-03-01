@@ -44,6 +44,7 @@
 				<table style="width: 100%; padding: 0;  border-spacing:0; border-collapse:collapse;">
 					<tr>
 						<td style="background-color: #666666; padding-bottom:4px;">
+						<a href="https://csoderlund.github.io" class="white">AGCoL</a> <mark class="white">|</mark>
 						<a href="https://csoderlund.github.io/TCW" class="white">TCW Home</a> <mark class="white">|</mark>
 						<a href="https://github.com/csoderlund/TCW/releases" class="white">Download</a> <mark class="white">|</mark>
 						<a href="./Docs.html" class="white">Docs</a> <mark class="white">|</mark>
@@ -97,7 +98,8 @@
 	</table>
 
 <a id="test"></a>
-<p>&nbsp;<p><u>TCW v4.0.5 (July 2025)</u>: Test <i>all</i> TCW programs using the demo files, plus downloaded a UniProt database and GO
+
+<p><u>TCW v4.0.5 (July 2025)</u>: All TCW programs were tested using the demo files, plus downloaded a UniProt database and GO
 with <ttp>runAS</ttp> and verified it worked. <ttp>RunDE</ttp> was tested with <ttp>edgeR</ttp> and <ttp>goSeq</ttp>.
 
 <table class="ty" style="font-family: Verdana, Arial, Helvetica, sans-serif; font-size:9pt">
@@ -114,13 +116,19 @@ with <ttp>runAS</ttp> and verified it worked. <ttp>RunDE</ttp> was tested with <
 <tr><td>&nbsp;&nbsp;3. <a href="http://linode.com" class="ext" target="_blank"><ttl>Linode</ttl><sup>2</sup></a> (Ubuntu 22.04.2 LTS)
 	<td>MySQL 8.0.33<td>17<td>Nanode<td>&nbsp;&nbsp;1Gb<td>2023
 </table>
-<sup>1</sup><small>MacOS M4: Cap3, OrthoMCL and Muscle are not supplied for this machine.
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    The user can supply cap3 in the <tt>Ext/macM4/CAP3</tt> directory if they want assembly to work.</small>
-<br><sup>2</sup><small>Linux/Linode: <tt>rJava</tt> did not install successfully,
-			so the <ttp>runDE</ttp> could not be tested.</small>
+<p><sup>1</sup>MacOS M4: Cap3, OrthoMCL and Muscle are not supplied for this machine.
+<ul><li>
+    <ttp>runSingleTCW</ttp>: The user can supply cap3 in the <tt>Ext/macM4/CAP3</tt> directory if they want assembly to work.
+<li>
+	<ttp>runMultiTCW</ttp>: Muscle is not necessary since MAFFTA can be used for the MSA.
+<li>
+    The user can download and run OrthoMCL and input the results to <ttp>runMultiTCW</ttp>, though
+    TCW provides other clustering methods.
+</ul>
+<sup>2</sup>Linux/Linode: <tt>rJava</tt> was installed on Feb2026 and <ttp>runDE</ttp> tested.
+<br><ttp>runAS</ttp> has not been tested on Linode, but was used extensively on the Linux listed below.
 
-<p><u>TCW v4.0.4 (July 2022)</u>: Used to create multiple large TCW comparative projects with expression levels.
+<p><u>TCW v4.0.4 (July 2022)</u>: The following was used to create multiple large TCW comparative projects with expression levels.
 <table class="ty" style="font-family: Verdana, Arial, Helvetica, sans-serif; font-size:9pt">
 <tr><td><b>Machine</b><td><b>MySQL</b><td><b>Java</b><td><b>Core (CPU)</b><td><b>Memory</b><td><b>Purchased</b>
 <tr><td>Linux x86.64 (Centos 7)
@@ -130,7 +138,12 @@ with <ttp>runAS</ttp> and verified it worked. <ttp>RunDE</ttp> was tested with <
 	<td>128Gb
 	<td style="text-align: center">2011
 </table>
-<br>See <a href="Summary.html#time" class="ext" target="_blank">Summary</a> for timings.
+
+<p><u>TCW v4.0.5 (Feb 2026)</u>: All programs and UniProt/GO downloads were tested again with versions
+of Java, MySQL and R less than a year old.
+
+<p>See <a href="Summary.html#time" class="ext" target="_blank">Summary</a> for timings.
+
 
 <a id="install"></a>
 <table style="width: 100%"><tr><td style="text-align: left">
