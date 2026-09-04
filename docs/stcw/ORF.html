@@ -61,9 +61,8 @@
 	</td></tr>
 
 	<tr><td style='vertical-align: top; text-align: left; padding:15px;'>
-	<!---- START BODY -->
 
-This document discusses the <ttp>TCW ORF finder</ttp>.
+This document discusses the <ttp>TCW ORF finder</ttp> v4.0.6.
 <p><b>Contents:</b></p>
 <ol>
 	<li><a href="#overview">ORF Finder</a>
@@ -84,17 +83,16 @@ This document discusses the <ttp>TCW ORF finder</ttp>.
 <h2>ORF Finder</h2>
 
 The <ttp>runSingleTCW</ttp> annotation step computes the best ORF for each sequence using the annotation hits,
-5th-order Markov model<sup>2,3</sup> and length of candidate ORF. It outputs a protein sequence for
-every transcript. This document has been updated for v3.3.4.
+5th-order Markov model<sup>2,3</sup> and length of candidate ORF.
 
 <table class="tx">
 <tr>
 	<td  class="top">
 		<ttp>runSingleTCW</ttp> has an <ttc>Option</ttc> menu that allows the user to
-		set the ORF options, which is shown on the right.
+		set the ORF options, which are shown on the right.
 
 		<p>This ORF finder algorithm was designed to find the 'best' ORF for input into <ttp>runMultiTCW</ttp>.
-		However, a file of all the 'good' ORFs is output (see <a href="#out">Output files</a>).</p>
+		However, a file of all the 'good' ORFs can be output (see <a href="#out">Output files</a>).</p>
 
 	<td class="top">
 		<a href="img/ORFfinderOptions.png">
@@ -110,90 +108,60 @@ every transcript. This document has been updated for v3.3.4.
 <td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
 The algorithm for computing the best ORF for a given sequence is:
-<pre>
-1. For each of the 6 frames, find the best ORF as follows:
-   If there is a good hit (E-value &lt;= N or %HitSim&gt;=M), use the hit frame.
-      If the hit terminates with a Start and Stop codon, use the corresponding coordinates.
-      Else compute all ORFs surrounding the hit and select the best based on the Rules.
-   If there is not a good hit, find all possible ORFs and select the best based on the Rules.
-2. From the 6 ORFs found in Step 1, find the best ORF using all Rules.
-</pre>
-<h4>Rules</h4>
-When comparing two ORFs, the following rules are applied in order.
-<p>&rarr; <ttl>Rule 1: Use best hit frame if E-value &lt;= N or %HitSim &gt;= M.</ttl>
-
-<p>&rarr;<ttl>Rules
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2: Compute lgLen=log ratio of the lengths
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3: Compute lgMk=log ratio of Markov scores.</ttl>
-<br>&nbsp;&nbsp;Evaluate the following in order:
-<ol type=A>
-<li><ttl>If (lgLen&gt;len-cutoff && (len1&gt;100 || len2&gt;100)) use ORF with longest length</ttl>
-<li><ttl>If (lgMK&gt;MK-cutoff && (Mk1&gt;10.0 || Mk2&gt;10.0)) use ORF with best Markov score</ttl>
-<li><ttl>If (lgLen&gt;len-cutoff) use ORF with longest length</ttl>
-<li><ttl>If (lgMK&gt;MK-cutoff)  use ORF with best Markov score</ttl>
+<ol>
+<li> For each of the 6 frames, find the best ORF as follows:
+   <br>If there is a good hit with e-value &lt; 1E-10 and similarity&gt;20, use the hit frame.
+   <br>&nbsp;&nbsp;&nbsp;If the hit terminates with a Start and Stop codon, use the corresponding coordinates.
+   <br>&nbsp;&nbsp;&nbsp;Else compute all ORFs surrounding the hit and select the best based on the weight score.
+   <br>If there is not a good hit, find all possible ORFs and select the best using a weighted score.
+<p>
+<li> To find the assigned ORF from the 6 ORFs found in Step 1, find the best ORF using the weighted score.
+<p>
+<li> <u>Weighted score</u>
+	<ul><li>The weighted score uses: (a) Hit bitscore, similarity, and coverage, (b) length of ORF,
+   (c) whether it has ATG and/or Stop, and (4) Markov score.
+   <li>The weights are set so that a long ORF is selected over an ORF with a poor hit,
+   and an ORF with a good hit is selected over a longer ORF. The Markov
+   score and ATG/Stop do not have as much weight, but contribute to nudge it one way or another on close calls.
+   <li>A full-length ORF with ATG/Stop takes precedence, regardless of hit and Markov score.
+   </ul>
 </ol>
-<p>&rarr; <ttl>Rule 4: Use the ORF with start and stop codons</ttl>.
 
-<p>&rarr; <ttl>If all else fails:</ttl> Use a poor hit frame or the longest ORF.
-
+<h4>Markov training set</h4>
 <p>The Markov model is trained using either of following:
 <ul>
-	<li><ttl>Train with Best Hits (E-value &lt;= N or %HitSim &gt;= M). Minimum Set [default 500] </ttl>
-		<br>There must be at least <ttl>Minimum Set</ttl> sequences that pass
-		the <ttl>E-value</ttl> and <ttl>%Sim</ttl>
-		cutoffs, otherwise Rule 3 is ignored. The training set is created from the exact nucleotide regions of
-		hit alignments from the top longest ORFs and best hits.
+	<li><ttl>Train with Best Hits. Minimum Set [default 200] </ttl>
+	<br>1. The algorithm makes a list of sequences with a unique Uniprot ID and the top bitscore.
+	<br>2. It sorts the list on bitscore and take the top 2000 (or maximum sequences).
+	<br>3. It uses the sequence from hit-start to hit-end for the training set.
 	<br>&nbsp;
 	<li><ttl>Train with CDS file [default none]</ttl>
 		<br>The file name of a FASTA file of nucleotide coding sequences.
 </ul>
 
-<p>If the lengths of two candidate ORFs are very different, than it is best to
-use the longest ORF. Considering log ratio cutoffs using length as an example:
-<table class="tx">
-<tr>
-	<td>
-		To determine if their lengths are 'very' different,
-		the log length ratio is used.
-
-		<p>For example, in the Table 1 on the right, the 0.3, 0.4 and 0.5 are Log Ratio cutoffs.
-		<p>A value of 'T' indicates that the longest ORF will be selected.
-	<td>
-	<table class="ty">
-		<tr><th colspan="3"><th colspan="3">&nbsp;&nbsp;Cutoff
-		<tr><th>Length 1<th>Length 2<th>Log Ratio<th>0.3<th>0.4<th>0.5
-		<tr><td>30<td>45<td>0.40547 <td>T<td>T<td>F
-		<tr><td>300<td>450<td>0.40547<td>T<td>T<td>F
-		<tr><td>3000<td>4500<td>0.40547<td>T<td>T<td>F
-	</table>
-</tr>
-</table>
-
-
-<h4>Markov training set</h4>
-The default requires at least 500 sequences (<ttc>Minimum Set</ttc>). The algorithm
+The default requires at least 200 sequences (<ttc>Minimum Set</ttc>). The algorithm
 finds the 2000 unique longest sequences to train with; if there is not 2000, all unique sequences
 will be used. The <ttc>Minimum Set</ttc> can be changed in the interface. The number of training sequences
 can be changed by running the <ttl>ORF finder</ttl> from the command line, e.g.
 <pre>
    ./execAnno &lt;project&gt; -r -t 5000
 </pre>
-The training set that TCW uses to create the Markov model can make a big difference in the Markov scores, hence, resulting ORFs.
-If your dataset is small and there is a file of CDS sequences available, use it!
+The training set that TCW uses to create the Markov model can make a big difference in the Markov scores,
+hence, resulting ORFs. If your dataset is small and there is a file of CDS sequences available, use it!
 
 <a id="rule"></a>
 <h4>Additional heuristics</h4>
 <i>Length</i>: An ORF must be greater than 30bp unless the sequence length is less than 30bp, then it must
 be at least 9bps.
-</p>
-<p><i>Rule 1</i>:
+
 <ul>
-	<li><u>Multi-frame</u>: The best hit frame will be used if it is a good hit, else, the hit is ignored.
+	<li><u>Multi-frame</u>: The best hit frame will be used if it has e-value &lt; 1E-10 and similarity&gt;20,
+	else the sequence is not assigned a hit for ORF finding.
 	<br>&nbsp;
 	<li><u>Stops in Hit</u>: All possible ORFs are computed, and the selected one will be from those that
-	cover a region of the hit.
+	cover the largest region of the hit.
 	<br>&nbsp;
-	<li><u>Nucleotide Best Bit-score</u>: The 'Best Anno' hit will be used instead (assuming its protein).
+	<li><u>Nucleotide Hit is Best Bits</u>: If the 'Best Anno' is a protein hit, it will be used.
 </ul>
 
 <!--   ===========Running============ -->
@@ -213,7 +181,7 @@ Running from the command line will use the options set using <ttp>runSingleTCW</
 <h3>Output files</h3>
 <td style="text-align: right"><a href="#top">Go to top</a></td></tr></table>
 
-The following files are written into the <tt>&lt;project&gt;orfFiles</tt> directory.
+If <ttc>Write ORFs to File</ttc> is selected, the following files are written into the <tt>&lt;project&gt;orfFiles</tt> directory.
 
 <p>Table 2. Output files of the <ttp>TCW ORF finder</ttp>.</p>
 <table class="ty">

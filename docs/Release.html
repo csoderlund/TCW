@@ -60,7 +60,21 @@
 You must have Java v17.0.11 or later, starting with TCW v4.0.5.
 
 <a id=v405></a>
-<h4>v4.0.5 1-March-2025</h4>
+<h4>v4.0.6 4-Sept-2026</h4>
+Changes for annotating sequences.
+<ul>
+<li><ttp>runAS</ttp>: UniProt changed it download site; TCW is updated with the new site.
+<li><ttp>ORF finder</ttp>:
+<ol>
+<li>The rule for selecting the best ORF has changed to be the one with the best weighted score.
+It was giving too much emphasize on the best hit frame, and passing over a much longer ORF.
+<li>Writing the ORF files is now an option.
+</ol>
+<li><ttp>Annotate</ttp>: Improvements to the error messages on UniProt sequences being too long.
+</ul>
+
+<a id=v405></a>
+<h4>v4.0.5 1-March-2026</h4>
 1-March-2026 release:
 <ul>
 <li>The GO database no longer would download. This was fixed by adding the <tt>-L</tt> argument to <tt>curl</tt>.
