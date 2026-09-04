@@ -36,7 +36,7 @@ public class CfgAnno {
 	 * load sTCW.cfg for annotator, calls TCWprops
 	 * 
 	 * if change parameter, change:
-	 *  1. TCWprops sets defaults
+	 *  1. util.Methods.TCWprops sets defaults
 	 *  2. ManagerData.readSTCWkeyVal
 	 *  3. MangerData.saveLIBcfg_sTCWcfg and create get/set methods for parameter.
 	 *     Manager saves any changes before calling runSTCWMain to then load sTCW.cfg again
@@ -75,15 +75,15 @@ public class CfgAnno {
 	private boolean cfgGO() {
 		try {
 			String godb = 			mProps.getAnnoProperty("Anno_GO_DB").trim(); 
-			String noGO = 			mProps.getAnnoProperty("Anno_No_GO").trim(); // CAS331 add
+			String noGO = 			mProps.getAnnoProperty("Anno_No_GO").trim(); 
 			String goSlimSubset = 	mProps.getAnnoProperty("Anno_SLIM_SUBSET").trim(); 
 			String goSlimOBOFile = 	mProps.getAnnoProperty("Anno_SLIM_OBOFile").trim(); 
 			runSTCWMain.setGOparameters(godb, goSlimSubset, goSlimOBOFile, noGO);
 			
 			if (Globals.hasVal(godb)) 			{
-				Out.PrtSpMsg(1,"GO_DB = " + godb); // CAS316 added prints
+				Out.PrtSpMsg(1,"GO_DB = " + godb); 
 				
-				if (Globals.hasVal(noGO) && noGO!=Globals.pNO_GO) //CAS331
+				if (Globals.hasVal(noGO) && noGO!=Globals.pNO_GO) 
 					Out.PrtSpMsg(1,"Do not add GOs on 'Annotate'");
 			}
 			if (Globals.hasVal(goSlimSubset)) 	Out.PrtSpMsg(1,"GO SLIM = " + goSlimSubset);
@@ -169,29 +169,23 @@ public class CfgAnno {
 	
 	private void cfgORFParams() {
 		try {
-			boolean bAlt=false;
+			boolean bAlt=false, bOut=false; // CAS406 add outFiles; remove rule params
 			
 			int type = Integer.parseInt(mProps.getAnnoProperty("Anno_ORF_alt_start"));
 			if (type==1) {
 				bAlt=true;
 				Out.PrtSpMsg(1,"ORF use alternative starts");
 			}
-			
-			// prints in argDouble and argInt if not key
-			double hitEval =    argDouble("Anno_ORF_hit_evalue", "ORF Hit E-value");
-			int hitSim 	=		argInt("Anno_ORF_hit_sim", "ORF %Sim of Hit");
-			
-			double diffLen = 	argDouble("Anno_ORF_len_diff", "ORF Log Len Ratio");
-			
-			double diffMk = 	argDouble("Anno_ORF_mk_diff", "ORF Log Markov Ratio"); // CAS334
-		
-			int trSet	 =		argInt("Anno_ORF_train_min_set", "ORF minimal training set");
-			
-			String cdsFile = mProps.getAnnoProperty("Anno_ORF_train_CDS_file"); 
-			if (Globals.hasVal(cdsFile)) {
-				Out.PrtSpMsg(1,"ORF Training CDS file = " + cdsFile);
+			type = Integer.parseInt(mProps.getAnnoProperty("Anno_ORF_out_files"));
+			if (type==1) {
+				bOut=true;
+				Out.PrtSpMsg(1,"Output ORF files");
 			}
-			orfObj.setParams(bAlt, hitEval, hitSim, diffLen, diffMk, trSet, cdsFile);
+			int trSet	 =	 argInt("Anno_ORF_train_min_set", "ORF minimal training set");		
+			String cdsFile = mProps.getAnnoProperty("Anno_ORF_train_CDS_file"); 
+			if (Globals.hasVal(cdsFile)) Out.PrtSpMsg(1,"ORF Training CDS file = " + cdsFile);
+			
+			orfObj.setParams(bAlt, bOut, trSet, cdsFile);
 		}
 		catch (Exception e) {ErrorReport.reportError(e, "getting annoDB parameters");}
 	}
@@ -199,12 +193,12 @@ public class CfgAnno {
 		try {	
 			int flank =  argInt("Anno_flanking_region", "Flanking region");	
 			int spPref = argInt("Anno_SwissProt_pref", "SwissProt preference");
-			int rmPref = argInt("Anno_Remove_ECO", "Remove {ECO...} string"); // CAS305
+			int rmPref = argInt("Anno_Remove_ECO", "Remove {ECO...} string"); 
 			int bit =    argInt("Anno_min_bitscore", "Minimum bitscore");
 			int prune =  argInt("Anno_Prune_type", "Prune type");
 	
 			String godbName = mProps.getAnnoProperty("Anno_GO_DB").trim(); // So DoUniProt can pass to DoUniPrune
-			uniObj.setCfgAnnoParams(rmPref==1, spPref==1, flank, bit, prune, godbName); // CAS331 change from 4 to 1 method call
+			uniObj.setCfgAnnoParams(rmPref==1, spPref==1, flank, bit, prune, godbName); 
 			if (!bAnno) return true; // is bPrune
 			
 			for (int i=1; i < Globals.numDB; i++) {

@@ -29,7 +29,7 @@ public class DoUniProt
 	private boolean bUseSP = false; // Best Anno only replaces 'uncharcterized'unless true
 	private boolean bRmECO = true;  // Remove {ECO... string
 	
-	private final int COMMIT = 1000; // CAS339 was 10000
+	private final int COMMIT = 1000; 
 	private final int maxHitSeq = 32000;
 	private final String badHitFile = BlastHitData.badHits;
 	
@@ -39,7 +39,6 @@ public class DoUniProt
 		hitObj = bObj;
 		mDB = d;
 	}
-	
 	 /**
      * called from CoreAnno.run to annotate all sequences with hits
      * 1. updates pja_db_unitrans_hits with hits that pass sTCW.cfg filters
@@ -66,7 +65,9 @@ public class DoUniProt
 	 	step0_processAllHitFiles();
 	 	if (!pRC) return false;  
 	 	
-	 	Out.PrtSpCntMsgZero(1, nTotalBadHits, "hits ignored -- see " + badHitFile);
+	 	if (nTotalBadHits<BlastHitData.maxBadWarn)
+	 		 Out.PrtSpCntMsgZero(1, nTotalBadHits, "hits ignored -- see " + badHitFile);
+	    else Out.PrtSpCntMsgZero(1, nTotalBadHits, "hits ignored -- first " + BlastHitData.maxBadWarn + " listed in " + badHitFile);
 	 	Out.PrtSpCntMsgZero(1, notFoundSeq.size(), "not found in database  -- see file " + badHitFile);
 	 	Out.PrtSpCntMsgZero(1, nSeqTooLong, "sequence > " + maxHitSeq + ": truncated -- see file " + badHitFile);
 	 	Out.PrtSpCntMsgZero(1, LineParser.badSpeciesLen, "hits with species length> " + 
@@ -74,8 +75,7 @@ public class DoUniProt
 	 	Out.PrtSpCntMsgZero(1, LineParser.badDescriptLen, "hits with description length> " + 
 	 				LineParser.maxDescriptLen + ": truncated -- see file " + badHitFile);
 	 	
-	 	
-	     // CAS331 - UniPrune calls Step2&Step3 so it can run stand-alone from command line
+	     // UniPrune calls Step2&Step3 so it can run stand-alone from command line
 	 	if (pruneType==1 || pruneType==2) {
 	 		new DoUniPrune(mDB, godbName, isAAstcwDB, bUseSP, flank, pruneType, false, 0); 
 	 	}
@@ -99,12 +99,12 @@ public class DoUniProt
 	 	
 	 	return pRC; 
 	}
-	private void init() { // CAS326
+	private void init() { 
 		try {
 			if (mDB.tableColumnExists("assem_msg", "anno_msg"))
 		 		mDB.executeUpdate("update assem_msg set anno_msg=''");
 			
-			if (!mDB.tableColumnExists("assem_msg", "prune")) // CAS332 - also run in DoUniPrune
+			if (!mDB.tableColumnExists("assem_msg", "prune")) // also run in DoUniPrune
 				mDB.tableCheckAddColumn("assem_msg", "prune", "tinyint default -1", null);
 			mDB.executeUpdate("update assem_msg set prune = " + pruneType);
 			
@@ -189,7 +189,7 @@ public class DoUniProt
        	BlastHitData hitData = null;
        	int nHitNum=0, nTotalDups=0;
        	String curSeqName="", curHitName="";
-       	HashSet <String> dupIDs = new HashSet <String> (); // CAS309 avoid multiple counts (added for Full SP)
+       	HashSet <String> dupIDs = new HashSet <String> (); // avoid multiple counts (added for Full SP)
        	nAnnoSeq = nTotalHits = 0;
     	long time = Out.getTime();
 			
@@ -226,7 +226,6 @@ public class DoUniProt
 							curHitDataForSeq.clear();
 						}
 					}
-					
 					if (!seqIdMap.containsKey(newSeqName)) {
 						if (!notFoundSeq.contains(newSeqName)) {
 							BlastHitData.printWarning("Sequence " + newSeqName + " in hit file but not in database");
@@ -236,7 +235,7 @@ public class DoUniProt
 					}
 					curSeqName = newSeqName;					
 			        curSeqData.clearAnno();
-			        curSeqData = new ContigData (); // CAS338 was loading sequence, but don't need
+			        curSeqData = new ContigData (); 
 			       
 			        curSeqData.setContigID(curSeqName); 
 			        curSeqData.setCTGID(seqIdMap.get(curSeqName));
@@ -251,13 +250,10 @@ public class DoUniProt
 				if (curHitName.equals(newHitName)) continue;
 				curHitName = newHitName;
 				
-				// cntHits++;
-				//if (cntHits>maxHitsPerAnno) continue; // CAS331 allow user to control
-				
 		    	// create list of hits for current seq
 		    	hitData = new BlastHitData (isAAannoDB, line);
 		    	
-		    	// CAS339 loading SPfull after SP-taxos
+		    	// loading SPfull after SP-taxos
 		    	if (hitsInDB.contains(hitData.getHitID())) {
 		    		if (!dupIDs.contains(hitData.getHitID())) dupIDs.add(hitData.getHitID());
 		    		continue;
@@ -304,9 +300,9 @@ public class DoUniProt
     // gathered all hits in hitDataForCtg per sequence per annoDB. Save each hit. 
     private void step2x_saveHitDataForSeq() {
 	    try {
-	    	int seqLen = idLenMap.get(curSeqData.getCTGID()); // CAS338 was from database everytime
+	    	int seqLen = idLenMap.get(curSeqData.getCTGID()); 
 				
-	    	Collections.sort(curHitDataForSeq); // CAS317 was blast (eval/bitsore) order, make TCW (bitscore/eval) order
+	    	Collections.sort(curHitDataForSeq); // TCW (bitscore/eval) order
 	    	
 	    	PreparedStatement ps = mDB.prepareStatement("INSERT INTO pja_db_unitrans_hits " + 
 			  "(CTGID, AID, DUHID, contigid, uniprot_id, percent_id, alignment_len," +
@@ -359,12 +355,10 @@ public class DoUniProt
        			
 				nTotalHits++;
        		}
-       		ps.executeBatch(); // CAS338
+       		ps.executeBatch(); 
        		ps.close();
-       		// mDB.closeTransaction();
        		
        		nAnnoSeq++;
-       		// CAS304
        		String name = curSeqData.getContigID();
        		int id = seqIdMap.get(name);
 		    if (!annoSeqSet.contains(id)) annoSeqSet.add(id);
@@ -448,11 +442,10 @@ public class DoUniProt
         }
     }
     // add sequences found in hit file
-    private void step3_addUniqueFromFastaFile(int ix)  
-    {
+    private void step3_addUniqueFromFastaFile(int ix)  {
         int cnt_add=0, read=0, failParse=0, cntPrt=0;
         String hitID="",  line=null, hitSeq=null;
-        StringBuilder hitSeqBuf = new StringBuilder (); // CAS338 - not thread safe
+        StringBuilder hitSeqBuf = new StringBuilder (); 
         
         LineParser lp = new LineParser();
        	BufferedReader reader = null;
@@ -461,7 +454,7 @@ public class DoUniProt
 		Out.PrtSpTimeMsg(2, "DB#" + dbNum + " add desc: " + hitObj.getDBfastaNoPath(ix) );
         try {
     		mDB.renew();
-    		mDB.openTransaction(); // CAS338
+    		mDB.openTransaction(); 
     		boolean addHit = false;
     	
     		reader = FileHelpers.openGZIP(hitObj.getDBfastaFile(ix));
@@ -479,18 +472,18 @@ public class DoUniProt
 				if (line.charAt(0) != '>') {
 					if (addHit) 
 						hitSeqBuf.append(line);
-				
 					continue;
 				}
 		// > description line 
-				
 				if (addHit) { // Add previous 
 					String desc = (bRmECO) ? BestAnno.rmECO(lp.getDescription()) : lp.getDescription();
 					
 					hitSeq = hitSeqBuf.toString();
-					if (hitSeq.length()+line.length() > maxHitSeq) {
-						if (hitSeq.length() == 0) hitSeq = line.substring(0,maxHitSeq-1);  
-						BlastHitData.printWarning(lp.getHitID() + " > " + maxHitSeq + "; truncated to " + hitSeq.length() + " to put in database");
+					//if (hitSeq.length()+line.length() > maxHitSeq) {// CAS406 makes no sense
+					//	if (hitSeq.length() == 0) hitSeq = line.substring(0,maxHitSeq-1);  
+					if (hitSeq.length() > maxHitSeq) {
+						BlastHitData.printWarning(lp.getHitID() + " > " + maxHitSeq + "; truncated from " + hitSeq.length() + " for database");
+						hitSeq = hitSeq.substring(0,maxHitSeq-1);  
 						nSeqTooLong++;
 					}
 					
@@ -498,12 +491,12 @@ public class DoUniProt
 						lp.getOtherID(), desc, lp.getSpecies(), hitSeq, 0);
 					cnt_add++;
 					
-					cntPrt++; // CAS330 moved from end of loop
+					cntPrt++; 
 					if (cntPrt == COMMIT) {	                
 				         Out.rp("Read " + read + "  Add", cnt_add, total); 
-				         ps.executeBatch(); // CAS338
+				         ps.executeBatch(); 
 				         cntPrt=0;
-				         System.gc(); // CAS338 Mac was running out of memory on tr_plants
+				         System.gc(); // Mac was running out of memory on tr_plants
 					}
 				}
 					
@@ -541,7 +534,7 @@ public class DoUniProt
 				cnt_add++; cntPrt++;
 			}
 			if (cntPrt>0) ps.executeBatch();
-			mDB.closeTransaction(); // CAS338
+			mDB.closeTransaction(); 
 			
 			if ( reader != null ) reader.close();
 			Out.rClear();
@@ -575,7 +568,7 @@ public class DoUniProt
     	try {
     		Out.r("update indices.....");
     		
-    		// CAS338 do all it once - update all unitran records with DUHID duidMap.put(hitID, DUHID);
+    		// do all it once - update all unitran records with DUHID duidMap.put(hitID, DUHID);
     		HashMap <String, Integer> duidMap = new HashMap <String, Integer> ();
      		ResultSet rs = mDB.executeQuery("select hitID, DUHID from pja_db_unique_hits");
     		while (rs.next()) duidMap.put(rs.getString(1), rs.getInt(2));
@@ -694,7 +687,7 @@ public class DoUniProt
 		this.pruneType = pruneType;
 		this.godbName = godbName; // only necessary to pass on to UniPrune
 	}
-	public boolean getUseSP() {return bUseSP;} // CAS331 one method for setting, three get's for command line Prune
+	public boolean getUseSP() {return bUseSP;} 
 	public int     getFlank() {return flank;}
 	public int     getPrune() {return pruneType;}
 	
@@ -702,7 +695,6 @@ public class DoUniProt
 		if (hitsAddToDB!=null) hitsAddToDB.clear();
 		if (hitsInDB!=null) hitsInDB.clear();
 		if (curHitDataForSeq!=null) curHitDataForSeq.clear();
-		// if (ctgMap!=null) ctgMap.clear(); - not this one, was passed from caller
 		if (annoSeqSet!=null) annoSeqSet.clear();
 		if (hitAddSet!=null) hitAddSet.clear();
 		if (notFoundSeq!=null) notFoundSeq.clear();
@@ -723,7 +715,7 @@ public class DoUniProt
    	
     private TreeMap<String, Integer> seqIdMap = new TreeMap<String, Integer> (); // sequences in database 
     private HashMap<Integer, Integer> idLenMap = new HashMap<Integer, Integer> ();
-    private HashSet<Integer> annoSeqSet = new HashSet<Integer> (); // sequences with annotation (CAS317 was Map)
+    private HashSet<Integer> annoSeqSet = new HashSet<Integer> (); // sequences with annotation 
     
 	private int flank = 0, minBitScore = 0; // neither of these are ever set, but can be
 	private HashSet <String> hitAddSet = new HashSet <String> ();

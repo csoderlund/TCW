@@ -46,7 +46,7 @@ public class CoreAnno {
 			/*****************************************************************
 			   Step 1: Annotate contigs    
 			*******************************************************************/
-			Out.PrtDateMsg("Start annotating sequences");
+			Out.Print("Start annotating sequences");
 			long time = Out.getTime();
 			if (!bReCalcORF && doBlastObj.numDB() > 0) 
 			{

@@ -227,7 +227,7 @@ public class ManagerFrame extends JFrame {
 						rCmd.actionLoadLibrary();
 						dbExists=tcwDBexists();
 						updateUI();
-						tcwDBselectLoadStatus(); // CAS314 was not getting isAA
+						tcwDBselectLoadStatus(); 
 					}
 				});
 				buildThread.setPriority(Thread.MIN_PRIORITY);
@@ -246,7 +246,7 @@ public class ManagerFrame extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {	
 				boolean bSkip = chkSkipAssembly.isSelected(); 
 				curManData.setSkipAssembly(bSkip);				// and added !
-				if (!bSkip) curManData.setUseTransNames(false); // CAS304 CAS311 was (bSkip) BUG
+				if (!bSkip) curManData.setUseTransNames(false); 
 				updateUI();
 			}
 		});
@@ -257,7 +257,7 @@ public class ManagerFrame extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				boolean bUse = chkUseTransName.isSelected();
 				curManData.setUseTransNames(bUse);
-				if (bUse) curManData.setSkipAssembly(true); // CAS304 
+				if (bUse) curManData.setSkipAssembly(true); 
 				updateUI();
 			}
 		});
@@ -425,7 +425,7 @@ public class ManagerFrame extends JFrame {
 		tempRow.add(Box.createHorizontalStrut(5));
 		
 		lblAnno = new JLabel("");
-		tempRow.add(lblAnno); // CAS331 merged lblGO and lblSim
+		tempRow.add(lblAnno); 
 		mainPanel.add(tempRow);
 		
 		mainPanel.add(new JSeparator());
@@ -1124,7 +1124,7 @@ public class ManagerFrame extends JFrame {
 			DBConn mDB = hostsObj.getDBConn(curManData.getTCWdb());
 			ResultSet rs = mDB.executeQuery("SELECT pja_msg, meta_msg FROM assem_msg");
 				
-			if(rs.next()) { // CAS405 was first
+			if(rs.next()) { 
 				val = rs.getString(1);
 				if (val==null || (val != null && val.length() <= 10)) {
 					Overview ov = new Overview(mDB);
@@ -1304,7 +1304,7 @@ public class ManagerFrame extends JFrame {
 			    	System.err.println("Error: could not create /" + PROJDIR + " Check permissions"); 
 			    	return new String [0];
 			    }
-			    // CAS316 was under creating new project
+			    
 				File userFile = new File(PROJDIR + Globalx.USERDIR);
 				Out.PrtSpMsg(1,"Creating: " + userFile.getAbsolutePath());
 				Out.PrtSpMsg(2, "This is not a project directory - it is for the user's miscellaneous files");

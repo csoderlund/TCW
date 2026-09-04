@@ -41,7 +41,6 @@ public class Markov {
 	
 	public String scoreSeq(String tag, int type, String seq) {
 		scoreSeqAllFrames(type, seq); 
-		// CAS338 i removed the good frame score, and now I'm putting it back
 		return String.format(" %-6s %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f  %s\n",
 				tag, score[0], score[1], score[2],score[3], score[4], score[5], allFramesStr); 
 	}
@@ -53,7 +52,7 @@ public class Markov {
 	 * DoORF for writing to Frames.txt
 	 * SeqFramePanel for 'Score' view
 	 */
-	private void scoreSeqAllFrames(int type, String seq) {
+	private void scoreSeqAllFrames(int type, String seq) { // seq is in the right orientation, starting in the computed frame
 		try {
 			if (type==fnMarkov) {
 				int markov_order=5;
@@ -178,7 +177,7 @@ public class Markov {
 	}
 	private boolean isGood=false;
 	private int nScore=3;
-	private String allFramesStr=""; // CAS334 was printing on Detail Frame, but just confusing
+	private String allFramesStr=""; 
 	private double allFramesScore=0;
 	private double [] score = new double [6];
 	private double expectedCodonLog = Math.log(1.0/64.0);

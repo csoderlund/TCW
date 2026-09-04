@@ -1001,7 +1001,7 @@ public class GrpTablePanel extends JPanel {
 			scores = String.format("   (%.3f, %.3f)", s1, s2); 
 		}
 		String sum = "";
-		if (theTable.getRowCount()>1) sum = "Row " + (row+1) + "/" + theTable.getRowCount() + "   ";
+		// CAS504d if (theTable.getRowCount()>1) sum = "Row " + (row+1) + "/" + theTable.getRowCount() + "   ";
 		sum +=  Globals.tagGRP + name + "   " + desc + scores;
     	
 		return  sum;

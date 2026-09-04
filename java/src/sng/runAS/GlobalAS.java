@@ -5,14 +5,15 @@ import util.database.Globalx;
 import util.methods.Out;
 
 /**************************************************************
- * CAS339 new file for all statics
+ * new file for all statics
  */
 public class GlobalAS {
-
-	public static final String upTaxURL = 
-			"ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/taxonomic_divisions/";
-	public static final String upFullURL = 
-			"ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/";
+	// CAS406 URL changed between last release of 4-March-26 and 27-Aug-2026
+	// was "ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/taxonomic_divisions/";
+	private static final String upURL = "https://ftp.ebi.ac.uk/pub/databases/uniprot/current_release/";
+	public static final String upTaxURL = upURL + "knowledgebase/taxonomic_divisions/";
+			
+	public static final String upFullURL = upURL + "/knowledgebase/complete/";
 				
 	public static final String goURL = "http://current.geneontology.org/ontology/";
 	public static final String goFile = "go-basic.obo";
@@ -22,8 +23,8 @@ public class GlobalAS {
 	public static final String goDirOBO = rootDir + "/GO_obo";
 	public static final String goPreDB =  Globalx.goPreDB;
 	
-	public static final String cfgPrefix = Globalx.PROJDIR +  "/AnnoDBs_"; // UniProt_date is added; CAS316 remove ./
-	public static final String cfgSuffix = Globalx.CFG; // CAS315 added
+	public static final String cfgPrefix = Globalx.PROJDIR +  "/AnnoDBs_"; // UniProt_date is added 
+	public static final String cfgSuffix = Globalx.CFG; 
 	
 	public static final String spPre = "uniprot_sprot", trPre = "uniprot_trembl";
 	public static final String fullTaxo = "full";

@@ -1091,7 +1091,7 @@ public class PairTablePanel extends JPanel {
     		desc +=  " (no hit sequence)";
     	}
     	String sum="";
-    	if (theTable.getRowCount()>1)  sum =  "Row " + (row+1) + "/" + theTable.getRowCount() + "   ";
+    	// CAS504d if (theTable.getRowCount()>1)  sum =  "Row " + (row+1) + "/" + theTable.getRowCount() + "   ";
     	sum += Globals.tagPAIR +  " #" +   name + "  " + id1 + " " + id2 + "   ";
     	sum += Globals.tagHIT +  desc;	
    

@@ -76,11 +76,7 @@ public class Globals {
 	static public final String ORF_NoMARK = 			"-";
 	
 	// Anno Option parameters - put in one place
-	static public final String pHIT_EVAL = "1E-10";
-	static public final String pHIT_SIM = "20";
-	static public final String pDIFF_LEN = "0.5"; 
-	static public final String pDIFF_MK = "0.4"; // CAS334 new
-	static public final String pTRAIN_MIN = "500"; // CAS334 changed from 50
+	static public final String pTRAIN_MIN = "200"; // CAS406 change from 500
 	static public final String pSP_PREF = "0";
 	static public final String pRM_ECO = "1";
 	static public final String pPRUNE = "0"; // Also change in AnnoOption Defaults

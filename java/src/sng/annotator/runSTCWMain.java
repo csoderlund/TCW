@@ -18,8 +18,7 @@ import util.methods.Out;
 
 /**
  * Main routine - called from execAnno or from runSingleTCW on annotate 
- * 	annotate a specified dataset using its sTCW.cfg parameters.
- * 	2/6/19 rename CoreMain to runSTCWMain
+ * 	annotate a specified dataset using its sTCW.cfg parameters
 */
 public class runSTCWMain 
 {	
@@ -38,9 +37,9 @@ public class runSTCWMain
 	public static final String optORF = "-r -n";		// used by the manager for ORF only
 	public static final String optRM  = "-s -n";		// used by the manager for Hit Rm only
 	
-	// if -r, then the following 5 can be set
-	private static int ORF_Type_Param=0, ORF_Transcoder_Param=0, ORF_Filter= -1;
-	private static int ORF_Seq_Cov= -1, ORF_Hit_Cov= -1;
+	// if -r, then the following 2 can be set at command line
+	private static int ORF_Transcoder_Param=0, ORF_Train= -1; // remove 3 hidden params CAS406
+	private static boolean ORF_Vote = true; // CAS406 add
 	
 	// if -o overview, then -o1 and -o2 can be set.
 	private static int cover1=0, cover2=0; 
@@ -105,7 +104,7 @@ public class runSTCWMain
 			if (mDB==null) ErrorReport.die("Error creating database connection for " + stcwDB);
 			
 			Schema s = new Schema(mDB);
-			s.update(); // CAS314 was checking ifCurrent(), but then cannot 'force' update for testing
+			s.update(); 
 						
 			sqlObj = new CoreDB(mDB, bdoAnno, stcwDB, stcwID);
 			isAAstcwDB = sqlObj.setIsAAtcw();
@@ -153,18 +152,18 @@ public class runSTCWMain
 				
 				if (!firstAnno && !doAnnoDB && !doSelf) { 
 					Out.Print("No annoDB or pairs annotation to be done\n");
-					doRecalcORF = yesNo("Perform GC and ORF computations?"); // CAS334 changed from Out.yesNO 
+					doRecalcORF = yesNo("Perform GC and ORF computations?"); 
 				}
 				if (!sqlObj.isAAtcw()) { 
 					if (blastObj.numDB()==0 && !doRecalcORF) {
 						if (!sqlObj.hasORFs()) 
-							doRecalcORF = yesNo("Perform GC and ORF computations?"); // CAS334 added check
+							doRecalcORF = yesNo("Perform GC and ORF computations?"); 
 					}
 				}
 				
 				doGO = false;
 				if (doAnnoDB || !hasGO) { 
-					if (!goNoAdd) { // CAS331
+					if (!goNoAdd) { 
 						Out.Print("Check GO database ");
 						if (checkGODB(false, true)) doGO=true;
 					}
@@ -190,7 +189,7 @@ public class runSTCWMain
 		if (doAnnoDBParams) {
 			if (!cfgObj.cfgDBParams(true)) {
 				finish();
-				return; // weren't read earlier because bdoAnno=false
+				return; 
 			}
 			uniObj.updateAnnoDBParams();
 		}
@@ -201,7 +200,7 @@ public class runSTCWMain
 		if (bdoAnno || doRecalcORF) {
 			BlastHitData.startHitWarnings("Warnings for " + projName);
 			if (!bdoAnno && doRecalcORF) 
-				orfObj.setCmdParam(ORF_Type_Param, ORF_Transcoder_Param, ORF_Filter, ORF_Seq_Cov, ORF_Hit_Cov);
+				orfObj.setCmdParam(ORF_Transcoder_Param, ORF_Train, ORF_Vote);
 		
 			successAnno = annoObj.run(getCurProjPath(), orfObj);
 		}
@@ -210,7 +209,7 @@ public class runSTCWMain
 			if (doPrune) {
 				int pt = (pruneType!=-1) ? pruneType : uniObj.getPrune();
 				new DoUniPrune(mDB, godbName, isAAstcwDB, uniObj.getUseSP(), 
-						uniObj.getFlank(), pt, bRestore, nPrtPrune); // CAS331
+						uniObj.getFlank(), pt, bRestore, nPrtPrune); 
 			}
 			else if (doGO) {
 				new DoGOs(sqlObj,godbName, goSlimSubset, goSlimOBOFile); // dies if anything fails
@@ -220,7 +219,7 @@ public class runSTCWMain
 			
 			// 8. Create Overview -- file is written in overview.java 
 			try {
-				if (bdoAnno || doRecalcORF || doGO || doPrune) updateState(true); // CAS319 add here
+				if (bdoAnno || doRecalcORF || doGO || doPrune) updateState(true); 
 				
 				Overview viewObj;
 				if (cover1>0 || cover2>0) viewObj = new Overview(mDB, cover1, cover2);
@@ -249,7 +248,7 @@ public class runSTCWMain
 		return true;
 	}
 	/*********************************************
-	 * CAS319 These were all over the place. Used in Overview only
+	 * Used in Overview only
 	 */
 	static private void updateState(boolean bSuccess) {
 		try {
@@ -274,7 +273,7 @@ public class runSTCWMain
 		flags.add("-g");
 		flags.add("-o"); flags.add("-o1"); flags.add("-o2");
 		flags.add("-r"); flags.add("-t");  flags.add("-f");  flags.add("-ff"); flags.add("-hc");flags.add("-sc"); 
-		flags.add("-s"); flags.add("-x");  flags.add("-b");
+		flags.add("-s"); flags.add("-x");  flags.add("-b");  flags.add("-a");
 		
 		for (int i=0; i<args.length; i++) {
 			if (args[i].startsWith("-")) {
@@ -355,35 +354,19 @@ public class runSTCWMain
 			bdoAnno=false;
 			doRecalcORF = true; 
 			
-			if (hasOption(args, "-t")) { // CAS334 added
-				ORF_Filter = getOptionNum(args,"-t");
-				if (ORF_Filter == 0) Out.prt("   Use all sequences for training");
-				else Out.prt("   Use N longest ORFs to train Markov Model: N=" + ORF_Filter);
+			if (hasOption(args, "-t")) { 
+				ORF_Train = getOptionNum(args,"-t");
+				if (ORF_Train == 0) Out.prt("   Use all sequences for training");
+				else                 Out.prt("   Use N longest ORFs to train Markov Model: N=" + ORF_Train);
 			}
-			// the following are not printed on usage_exit
-			ORF_Type_Param = getOptionNum(args,"-r");
-			if (ORF_Type_Param>0) {
-				if (ORF_Type_Param==1)      Out.prt("   Use longest ORF ");
-				else if (ORF_Type_Param==2) Out.prt("   Use Best Markov Score ");
-				else {
-					Out.prt("Invalid ORF type " + ORF_Type_Param);
-					ORF_Type_Param=0;
-				}
+			if (hasOption(args, "-a")) { 
+				ORF_Vote = false;
+				Out.prt("   Use rule-based ORF algorithm");
 			}
-			if (hasOption(args, "-f")) {
+			if (hasOption(args, "-f")) { // option not shown on -h; produces same output as TransCoder
 				ORF_Transcoder_Param=1;
-				Out.prt("   Use TransDecoder Base Frequency calculation");
+				Out.prt("   Use TransDecoder Base Frequency calculation"); 
 			}	
-			if (hasOption(args, "-sc")) {
-				ORF_Seq_Cov = getOptionNum(args,"-sc");
-				if (ORF_Seq_Cov<0) Out.die("-sc requires an integer following this flag");
-				else               Out.prt("   Minimum sequence coverage: " + ORF_Seq_Cov);
-			}
-			if (hasOption(args, "-hc")) {
-				ORF_Hit_Cov = getOptionNum(args,"-hc");
-				if (ORF_Hit_Cov<0) Out.die("-hc requires an integer following this flag");
-				else               Out.prt("   Minimum hit coverage: " + ORF_Hit_Cov);
-			}
 		}	
 	}
 	/**************************************************************/
@@ -402,20 +385,17 @@ public class runSTCWMain
 				+ "        -pp <integer> Print first n pruned seq-hits per annoDB\n"	
 				+ "        -pr Save/restore hit tables before processing    \n"
 				+ "  -r Recalculate ORFs\n"
-				//+ "     optionally followed by 1=Use Longest ORF, 2=Use Best Markov Score\n" 
 				// + "     -f Use TransDecoder Base Frequency calculation\n"
-				+ "        -t <integer> Use N longest ORFs to train Markov Model \n"
-				+ "           If N = 0, all good hit sequences will be used for training\n"
-				+ "           with no duplicate removal (Only works with Best Hits)\n"
-				//+ "        -sc <integer> minimum seq coverage\n"
-				//+ "        -hc <integer> minimum hit coverage\n"
+				+ "        -a Use rule-based ORF algorithm \n"
+				+ "        -t N Use N longest ORFs to train Markov Model [default 2000]\n"
+				+ "             If  N = 0, all good hit sequences will be used for training\n"
+				+ "                       with no duplicate removal (Only works with Best Hits)\n"
 				+ "  -o Regenerate Overview\n" 
 				+ "     -o1 <integer> set the 1st cover cutoff (default 50)\n"
 				+ "     -o2 <integer> set the 2nd cover cutoff (default 90)\n"
 				+ "  -x Delete annotation\n"
 				+ "  -b Enter search program parameters into database based on defaults (for Hit Reload)\n"
 				+ "  -s Delete similar pairs\n"
-				
 				);
 			System.exit(-1);
 	}

@@ -284,7 +284,7 @@ public class Out {
 		System.err.println(msg);
 	}
 	static public void tmp(String msg) { // allow finding temporary print statements
-		System.err.println(msg);
+		System.out.println(msg);
 	}
 	static public void prt(String msg) {
 		if (bStdout) System.out.println(msg);

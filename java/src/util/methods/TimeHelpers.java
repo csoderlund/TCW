@@ -14,7 +14,7 @@ public class TimeHelpers
     static public String getDateTime ( )
     {
         Date date=new Date();
-        SimpleDateFormat sdf=new SimpleDateFormat("HH:mm:ss dd-MMM-yy"); 
+        SimpleDateFormat sdf=new SimpleDateFormat("hh:mm a dd-MMM-yy"); // CAS406 was "HH:mm:ss",
         return sdf.format(date);
     }
     
@@ -24,10 +24,10 @@ public class TimeHelpers
         SimpleDateFormat sdf=new SimpleDateFormat("dd-MMM-yy"); 
         return sdf.format(date);
     }
-    static public String getTimeOnly ( ) // CAS404 added
+    static public String getTimeOnly ( ) 
     {
         Date date=new Date();
-        SimpleDateFormat sdf=new SimpleDateFormat("HH:mm:ss"); 
+        SimpleDateFormat sdf=new SimpleDateFormat("hh:mm a"); // CAS406 was "HH:mm:ss", which looked same as time execution
         return sdf.format(date);
     }
     static public String getDBDate ( ) // For ASFrame to print the DB date 2018-09-30

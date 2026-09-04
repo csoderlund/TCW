@@ -28,7 +28,6 @@ public class CoreDB {
 	public boolean isFirstAnno() { return !bAnnoExists;}
 	public boolean existsGO() { return bGO;}
 	
-	
 	// Used only by ManagerFrame to deleteAnnotation
 	public CoreDB (DBConn db) 
 	{
@@ -74,7 +73,7 @@ public class CoreDB {
 	   
 	    	username = rs.getString("username");
 	    	projectpath = rs.getString("projectpath");
-	    	if (projectpath.contains("/./")) projectpath = projectpath.replace("/./", "/"); // CAS314
+	    	if (projectpath.contains("/./")) projectpath = projectpath.replace("/./", "/");
 	    	assemblydate = rs.getString("assemblydate");
 	    	try {
 	    		annotationdate = rs.getString("annotationdate");
@@ -107,11 +106,11 @@ public class CoreDB {
 			isAAtcw = mDB.tableColumnExists("assem_msg", "peptide");
 	    	String type = (isAAtcw) ? "AA-sTCW" : "NT-sTCW";
 	    	
-	    	Out.PrtSpMsg(1, "sTCW ID:  " + strAssemblyID);
-	    	Out.PrtSpMsg(1, "Database: " + type);
-	    	Out.PrtSpMsg(1, "Create:   " + assemblydate);
-	    	Out.PrtSpMsg(1, "User:     " + username);
-	    	Out.PrtSpMsg(1, "Path:     " + projectpath);
+	    	Out.PrtSpMsg(1, "sTCW ID: " + strAssemblyID);
+	    	Out.PrtSpMsg(1, "Type:    " + type);    // CAS406 was 'Database:' which seemed like the database name
+	    	Out.PrtSpMsg(1, "Create:  " + assemblydate);
+	    	Out.PrtSpMsg(1, "User:    " + username);
+	    	Out.PrtSpMsg(1, "Path:    " + projectpath);
 	    	Out.PrtSpMsg(1, anno);
 	    
 	    	if (doAnno && bAnnoExists) { 
@@ -129,7 +128,6 @@ public class CoreDB {
 	    		}
 	    		else System.err.println("Add to existing annotation");
 	    	}	
-	    	// CAs319 was looking for gotree
 	    	bGO = mDB.tableExists("go_info");
 	    	if (bGO)
 	    		bGO = (mDB.executeCount("select count(*) from go_info limit 1")>0);
@@ -185,19 +183,19 @@ public class CoreDB {
        		   
        	   mDB.executeUpdate("UPDATE assembly SET annotationdate=null WHERE AID=1");
        	   
-       	   Out.PrtSpMsg(1, "Remove annotation tables..."); // CAS338 add Out.r
+       	   Out.PrtSpMsg(1, "Remove annotation tables..."); 
        	   Out.r("   Remove pairwise"); 	mDB.tableDelete("pja_pairwise");			
        	   Out.r("   Remove seq hits");	mDB.tableDelete("pja_db_unitrans_hits");
        	   Out.r("   Remove unique hits");	mDB.tableDelete("pja_db_unique_hits");
        	   Out.r("   Remove annoDBs");		mDB.tableDelete("pja_databases");
        	   Out.r("   Remove species");		mDB.tableDelete("pja_db_species");
-       	   Out.r("   Remove ORF tuples");	mDB.tableDelete("tuple_orfs"); // CAS305
-       	   Out.r("   Remove tuple usage");	mDB.tableDelete("tuple_usage");// CAS305
+       	   Out.r("   Remove ORF tuples");	mDB.tableDelete("tuple_orfs"); 
+       	   Out.r("   Remove tuple usage");	mDB.tableDelete("tuple_usage");
        	   Out.rClear();
         
-       	   Schema.dropGOtables(mDB); // CAS332 was dropping from here, and not complete
+       	   Schema.dropGOtables(mDB); 
        	   
-       	   // CAS331 Created during prune from command-line
+       	   // Created during prune from command-line
        	   mDB.tableDrop(DoUniPrune.tmp_hit);
     	   mDB.tableDrop(DoUniPrune.tmp_seq);
     	   if (mDB.tableColumnExists("assem_msg", "prune"))
@@ -275,7 +273,7 @@ public class CoreDB {
          }
  	}
     /***********************************************************
-     * Write ORFs for DoBlast for Similar Pairs CAS314
+     * Write ORFs for DoBlast for Similar Pairs 
      * sng.util.MainTable also writes ORF file, but from a table of sequences
      */
     public int writeOrfFile(File f) 
@@ -401,7 +399,7 @@ public class CoreDB {
          return count;
      }
      /************************************************************************
-      * Update hit_type CAS314
+      * Update hit_type 
       */
     public int loadPairsFromDB(String delim, HashMap <String, String> pairTypeMap) {
  		try {
@@ -485,7 +483,7 @@ public class CoreDB {
                 	Out.PrtWarn("Hit Type too long: '" + type + "' for " + alignObj.getName1() + ", " + alignObj.getName2());
                 	type = type.substring(0, 39);
                 }
-                ps.setString(13, type); // CAS314 was 3 tinyints
+                ps.setString(13, type); 
                
                 ps.setDouble(14, hitData.getEVal() ); 
                 ps.setInt(15, (int) hitData.getPercentID());
@@ -501,7 +499,7 @@ public class CoreDB {
         }
         catch (Exception e) {ErrorReport.prtReport(e, "cannot save pairwise data");} 	
     }
-    private void savePairAlignAA ( Vector<AlignData> alignList ) { // CAS314
+    private void savePairAlignAA ( Vector<AlignData> alignList ) { 
         if ( alignList.isEmpty() )return;
       
         try {
@@ -523,7 +521,7 @@ public class CoreDB {
                 	
                 BlastHitData hitData = aaObj.getHitData();
                 ps.setString(i++, hitData.getSharedHitID());
-                ps.setString(i++, hitData.getPairHitType()); // CAS314 was 3 tinyints
+                ps.setString(i++, hitData.getPairHitType()); 
                
                 ps.setDouble(i++, hitData.getEVal() ); 
                 ps.setInt(i++, (int) hitData.getPercentID());
@@ -539,7 +537,7 @@ public class CoreDB {
         }
         catch (Exception e) {ErrorReport.prtReport(e, "cannot save pairwise data");} 	
     }
-    public void savePairMsg (String msg) { // CAS314
+    public void savePairMsg (String msg) { 
     	try {
     		if (mDB.tableColumnExists("assem_msg", "pair_msg"))
     			mDB.executeUpdate("update assem_msg set pair_msg='" + msg + "'");
@@ -585,7 +583,6 @@ public class CoreDB {
            String seqString = (getStringFromReader(rset.getCharacterStream(1))).trim();       
            SequenceData consensus = new SequenceData ("consensus");
            consensus.setName( ctgName );
-           // CAS313 consensus.setSequence ( SequenceData.normalizeBases( seqString, '*', Globals.gapCh ) ); 
            consensus.setSequence (seqString );
            
            curContig.setSeqData( consensus );
@@ -627,9 +624,7 @@ public class CoreDB {
 		char[] chChars = new char [ 2000 ]; 
 		int nNumRead = 0;
 	
-		do 
-		{
-			// Keep filling the buffer until we exhaust the stream
+		do {// Keep filling the buffer until we exhaust the stream
 			nNumRead = reader.read( chChars );
 			if ( nNumRead <= 0 ) break;		
 			// Append to the output string

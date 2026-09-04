@@ -22,32 +22,33 @@ import util.database.Globalx;
 import util.methods.ErrorReport;
 import util.methods.Out;
 
-public class BlastHitData implements Serializable, Comparable <BlastHitData> 
-{
+public class BlastHitData implements Serializable, Comparable <BlastHitData> {
 	public static final String badHits = "hitsWarnings.log"; 
 	public static final short BLASTFILE = 0;
 	public static final short DB_UNITRANS = 1;
 	public static final short DB_PAIRWISE = 2;
+	public static final int maxBadWarn=500;
 	private static int parseWarnings = 0;
 	private static int prtWarn=0;
+	private static int prtBad=0; // CAS406 stop writing after maxBadWarn
 	private static String prtHead=null;
 
-	static public void startHitWarnings(String msg) { // CAS311 only start file if a warning is ever printed
+	static public void startHitWarnings(String msg) { // only start file if a warning is ever printed
 		prtHead=msg;
 		prtWarn=0;
 	}
 	static public void printWarning(String msg) {
 		try{
 			BufferedWriter out=null;
-			
-			if (prtWarn==0) {
+			if (prtWarn==0) {											// truncate file on first use
 				out = new BufferedWriter(new FileWriter(badHits,false));
 				out.write(prtHead + "\n");
 			}
-			else out = new BufferedWriter(new FileWriter(badHits,true));
+			else out = new BufferedWriter(new FileWriter(badHits,true)); // then append
 			
 			out.write(msg + "\n");
 			out.close();
+			
 			prtWarn++;
 		}
 		catch (Exception e){ErrorReport.prtReport(e, "Print warning about blast hit");}
@@ -56,10 +57,10 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 	public boolean badHitData(int maxCoord, int minBitScore) {
 		boolean rc=false;
 		String err="";
-		
+		// The Uniprot sequence goes in truncated at 32k; if the hit is passed that, can't be used
 		if (hitStart > maxCoord || hitEnd > maxCoord || seqStart > maxCoord || seqEnd > maxCoord) {
-			err = "Database entry: coordinates exceed limit of " + maxCoord + " -- ignoring " +
-			 "\n   " + contigID + " " + hitID + " " + seqStart + " " + seqEnd + " " + hitStart + " " + hitEnd;
+			err = "Hit coordinates exceeds " + maxCoord + " -- ignoring: " +
+			 "  " + contigID + " " + hitID + " Align to: " + seqStart + "-" + seqEnd;
 			rc = true;
 		}
 		// XXX Heuristic for blast files; 32-bit on 64-bit machine causes this error
@@ -70,12 +71,9 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 		}
 		if (rc == false) return false;
 		
-		try{
-			FileWriter fstream = new FileWriter(badHits,true);
-			BufferedWriter out = new BufferedWriter(fstream);
-			out.write(err + "\n");
-			out.close();
-		}catch (Exception e){ErrorReport.prtReport(e, "Print ignored hit");}
+		prtBad++;
+		if (prtBad==maxBadWarn) Out.PrtWarn("Maximum warnings " + maxBadWarn + ": no additional hit warnings will be written to " + badHits);
+		if (prtBad<maxBadWarn)  printWarning(err); // CAS406 was writing to file here, which would later truncate in printWarning
 		return true;		  
 	}
 	// View: LoadFromDB.loadBlastHitData for Basic AnnoDB
@@ -183,9 +181,9 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 		}	
 	}
 	/******************************************************************************/
-	// XXX sorting blast hits for pairwise comparison  CAS314 sort on bitscore only
+	// XXX sorting blast hits for pairwise comparison  sort on bitscore only
 	// Called in CoreAnno on pairs
-	// CAS317 called on DoUniProt for adding sequence hitList for an annoDB
+	// called on DoUniProt for adding sequence hitList for an annoDB
 	public int compareTo(BlastHitData b) {
 		if (this.bitScore > b.bitScore) return -1;
 		if (this.bitScore < b.bitScore) return 1;
@@ -296,7 +294,7 @@ public class BlastHitData implements Serializable, Comparable <BlastHitData>
 			if (frame==0) frame = 3;
 			if (orient<0) frame = -frame;
 		}
-		else { // CAS314
+		else { 
 			frame = (orient<0) ? -1 : 1;
 		}
 		return frame;

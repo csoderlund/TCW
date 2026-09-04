@@ -58,7 +58,6 @@ public class AnnoOptionsPanel extends JPanel {
 	 */
 	private static final int BLASTARGS_TEXT_WIDTH = 25;
 	private static final int NUM_LG_FIELD_WIDTH = 4;
-	private static final int NUM_SM_FIELD_WIDTH = 2;
 	private static final int INDENT_RADIO = 25;
 	private static final int VERT1 = 5, VERT2=10;
 	private final String helpHTML = Globals.helpRunDir + "AnnotationOptions.html";
@@ -122,7 +121,6 @@ public class AnnoOptionsPanel extends JPanel {
 			}
 		});
 		
-		// CAS339 add two level help
 		final JPopupMenu popup = new JPopupMenu();
 		popup.add(new JMenuItem(new AbstractAction("Options") {
 			private static final long serialVersionUID = 4692812516440639008L;
@@ -173,42 +171,19 @@ public class AnnoOptionsPanel extends JPanel {
 		JPanel row = Static.createRowPanel();
 		chkAltStart = new JCheckBox("Use Alternative starts");
 		chkAltStart.setBackground(Globalx.BGCOLOR);
-		row.add(chkAltStart);
-		innerPanel.add(row);
-		innerPanel.add(Box.createVerticalStrut(VERT1));
+		row.add(chkAltStart); row.add(Box.createHorizontalStrut(150));
 		
-		// Rule 1
-		row = Static.createRowPanel();		
-		ntJLabel[0] = new JLabel("  Rule 1: Best hit frame if E-value <=");
-		row.add(ntJLabel[0]);
-		row.add(Box.createHorizontalStrut(1));
-		txtHitEval  = Static.createTextField("0", NUM_LG_FIELD_WIDTH);
-		row.add(txtHitEval);	row.add(Box.createHorizontalStrut(1));
-		
-		ntJLabel[1] = new JLabel(" or %Sim>="); // CAS318 %Identity from file, was HitSim;
-		row.add(ntJLabel[1]);	row.add(Box.createHorizontalStrut(1));
-		txtHitSim  = Static.createTextField("0", NUM_LG_FIELD_WIDTH);
-		row.add(txtHitSim);
+		chkOutFiles = new JCheckBox("Write ORFs to file");
+		chkOutFiles.setBackground(Globalx.BGCOLOR);
+		row.add(chkOutFiles);
 		
 		innerPanel.add(row);
 		innerPanel.add(Box.createVerticalStrut(VERT1));
 		
-	// Rule 2
-		row = Static.createRowPanel();	
-		ntJLabel[2] = new JLabel("  Rule 2: Longest ORF if the log ratio >");
-		row.add(ntJLabel[2]);	row.add(Box.createHorizontalStrut(1));
-		txtLenDiff = Static.createTextField("0", NUM_SM_FIELD_WIDTH);
-		row.add(txtLenDiff);
-		innerPanel.add(row);
-		innerPanel.add(Box.createVerticalStrut(VERT1));
-		
-	// Rule 3 Training
+	// Training
 		row = Static.createRowPanel();
-		ntJLabel[3] = new JLabel("  Rule 3: Best Markov score if the log ratio >");
-		row.add(ntJLabel[3]);	
-		row.add(Box.createHorizontalStrut(1));
-		txtMkDiff = Static.createTextField("0", NUM_SM_FIELD_WIDTH);
-		row.add(txtMkDiff);
+		ntJLabel[0] = new JLabel("Markov score");
+		row.add(ntJLabel[0]);	
 		innerPanel.add(row);
 		innerPanel.add(Box.createVerticalStrut(VERT1));
 		
@@ -216,7 +191,7 @@ public class AnnoOptionsPanel extends JPanel {
 		row = Static.createRowPanel();
 		row.add(Box.createHorizontalStrut(INDENT_RADIO));
 		
-		radTrainHit = new JRadioButton("Train with Best Hits (Rule 1)");
+		radTrainHit = new JRadioButton("Train with Best Hits");
 		radTrainHit.setBackground(Globalx.BGCOLOR);
 		radTrainHit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -225,8 +200,8 @@ public class AnnoOptionsPanel extends JPanel {
 		});
 		row.add(radTrainHit);
 		row.add(Box.createHorizontalStrut(5));
-		ntJLabel[4] = new JLabel("Minimum Set");
-		row.add(ntJLabel[4]);	row.add(Box.createHorizontalStrut(1));
+		ntJLabel[1] = new JLabel("Minimum Set");
+		row.add(ntJLabel[1]);	row.add(Box.createHorizontalStrut(1));
 		txtTrainMinSet  = Static.createTextField("0", NUM_LG_FIELD_WIDTH);
 		row.add(txtTrainMinSet);
 	
@@ -266,7 +241,7 @@ public class AnnoOptionsPanel extends JPanel {
 		});
 		row.add(btnTrainCDSfile);
 		
-		ButtonGroup group = new ButtonGroup(); // CAS327
+		ButtonGroup group = new ButtonGroup(); 
 		group.add(radTrainHit);
 		group.add(radTrainCDSfile);
 		radTrainHit.setSelected(true);
@@ -291,8 +266,8 @@ public class AnnoOptionsPanel extends JPanel {
 		
 		row = Static.createRowPanel();	
 		row.add(Box.createHorizontalStrut(INDENT_RADIO));
-		ntJLabel[5] = new JLabel("Params ");
-		row.add(ntJLabel[5]);
+		ntJLabel[2] = new JLabel("Params ");
+		row.add(ntJLabel[2]);
 		txtSelfNargs = new JTextField(BLASTARGS_TEXT_WIDTH);
 		row.add(txtSelfNargs);	
 		
@@ -308,13 +283,13 @@ public class AnnoOptionsPanel extends JPanel {
 		
 		row = Static.createRowPanel();	
 		row.add(Box.createHorizontalStrut(INDENT_RADIO));
-		row.add(ntJLabel[5]);
+		row.add(ntJLabel[2]);
 		txtSelfXargs = new JTextField(BLASTARGS_TEXT_WIDTH);
 		row.add(txtSelfXargs);	
 		innerPanel.add(row);
 		innerPanel.add(Box.createVerticalStrut(VERT2));
 		
-		// Blastp for AA-ORFs or AA-stcw CAS314 add
+		// Blastp for AA-ORFs or AA-stcw 
 		row = Static.createRowPanel();
 		chkSelfP = Static.createCheckBox("BlastP (AA-AA: AA-ORFs or AAsTCW)", false);
 		row.add(chkSelfP);
@@ -375,7 +350,7 @@ public class AnnoOptionsPanel extends JPanel {
 		innerPanel.add(row);
 		innerPanel.add(Box.createVerticalStrut(VERT2));
 		
-		row = Static.createRowPanel();	// CAS331 add prune; if change - change in Overview
+		row = Static.createRowPanel();	// if change - change in Overview
 		row.add(Static.createLabel("Prune hits")); 	row.add(Box.createHorizontalStrut(5));
 		radPrNone = Static.createRadioButton("None", false);
 		row.add(radPrNone);
@@ -384,7 +359,7 @@ public class AnnoOptionsPanel extends JPanel {
 		radPrDesc = Static.createRadioButton("Description", false);
 		row.add(radPrDesc);						row.add(Box.createHorizontalStrut(5));
 		
-		ButtonGroup group = new ButtonGroup(); // CAS327
+		ButtonGroup group = new ButtonGroup(); 
 		group.add(radPrDesc); group.add(radPrAlign); group.add(radPrNone);
 		innerPanel.add(row);
 		innerPanel.add(Box.createVerticalStrut(VERT2+5));
@@ -410,7 +385,7 @@ public class AnnoOptionsPanel extends JPanel {
 		});
 		row.add(cmbGODB);	row.add(Box.createHorizontalStrut(35)); 
 		
-		chkNoGO = Static.createCheckBox("Ignore on Annotate", false);// CAS331 add 
+		chkNoGO = Static.createCheckBox("Ignore on Annotate", false); 
 		row.add(chkNoGO);
 		
 		innerPanel.add(row);
@@ -474,7 +449,7 @@ public class AnnoOptionsPanel extends JPanel {
 		retVal.add("   None   ");
 		try {
 			Class.forName(DBConn.driver);
-			String dbstr = DBConn.createDBstr(hostsObj.host() + "/", null); // CAS303
+			String dbstr = DBConn.createDBstr(hostsObj.host() + "/", null); 
 
 			Connection con = DriverManager.getConnection(dbstr, hostsObj.user(), hostsObj.pass());
 			Statement st = con.createStatement();	
@@ -600,7 +575,7 @@ public class AnnoOptionsPanel extends JPanel {
 				curManData.setGODB("");
 			}
 		}
-		if (curManData.getNoGO().contentEquals("0")) chkNoGO.setSelected(false); //CAS331
+		if (curManData.getNoGO().contentEquals("0")) chkNoGO.setSelected(false); 
 		else 										 chkNoGO.setSelected(true);
 		
 		String file="";
@@ -614,7 +589,7 @@ public class AnnoOptionsPanel extends JPanel {
 		else 									chkRmECO.setSelected(false);
 		
 		String pruneType = annoObj.getPruneType();
-		if (pruneType.contentEquals("1")) 		radPrAlign.setSelected(true); // CAS331
+		if (pruneType.contentEquals("1")) 		radPrAlign.setSelected(true); 
 		else if (pruneType.contentEquals("2")) 	radPrDesc.setSelected(true);
 		else 									radPrNone.setSelected(true);
 		
@@ -646,11 +621,8 @@ public class AnnoOptionsPanel extends JPanel {
 		if (annoObj.getORFaltStart().equals("1")) chkAltStart.setSelected(true);
 		else chkAltStart.setSelected(false);
 		
-		txtHitEval.setText(annoObj.getORFhitEval());
-		txtHitSim.setText(annoObj.getORFhitSim());
-		
-		txtLenDiff.setText(annoObj.getORFlenDiff());
-		txtMkDiff.setText(annoObj.getORFmkDiff());
+		if (annoObj.getORFoutFiles().equals("1")) chkOutFiles.setSelected(true); // CAS406 add
+		else chkOutFiles.setSelected(false);
 		
 		txtTrainMinSet.setText(annoObj.getORFtrainMinSet());
 		setTrain(true, false);
@@ -675,10 +647,10 @@ public class AnnoOptionsPanel extends JPanel {
 				if (radSlimOBOFile.isSelected() && txtSlimOBOFile.getText().trim()!="") 
 					curManData.setSlimFile(txtSlimOBOFile.getText());
 			
-			if (chkNoGO.isSelected()) 	curManData.setNoGO("1"); //CAS331
+			if (chkNoGO.isSelected()) 	curManData.setNoGO("1"); 
 			else 						curManData.setNoGO("0");
 		}
-		else if (!radPrNone.isSelected()) { // CAS331
+		else if (!radPrNone.isSelected()) { 
 			String msg = "If you have created the GO database, please define it; it can help with pruning";
 			JOptionPane.showMessageDialog(this, msg, "No GOdb", JOptionPane.PLAIN_MESSAGE);
 		}
@@ -693,28 +665,15 @@ public class AnnoOptionsPanel extends JPanel {
 		else annoObj.setRmECO("0");
 		
 		
-		if (radPrAlign.isSelected()) 		annoObj.setPruneType("1");// CAS331
+		if (radPrAlign.isSelected()) 		annoObj.setPruneType("1");
 		else if (radPrDesc.isSelected()) 	annoObj.setPruneType("2"); 
 		else 								annoObj.setPruneType("0");
 		
 		if (chkAltStart.isSelected()) annoObj.setORFaltStart("1");
 		else annoObj.setORFaltStart("0");
 		
-		x = txtHitEval.getText();
-		if (Static.isDouble("Hit E-value", x)) annoObj.setORFhitEval(x);
-		else return rcMsg("Hit E-value", "Must be double '" + x + "'");
-		
-		x = txtHitSim.getText();
-		if (Static.isInteger("Hit %Similarity", x)) annoObj.setORFhitSim(x);
-		else return rcMsg("Hit %Similarity", "Must be integer '" + x + "'");
-		
-		x = txtLenDiff.getText();
-		if (Static.isDouble("Length Difference", x)) annoObj.setORFlenDiff(x);
-		else return rcMsg("Length Difference", "Must be double '" + x + "'");
-		
-		x = txtMkDiff.getText();
-		if (Static.isDouble("Markov Difference", x)) annoObj.setORFmkDiff(x);
-		else return rcMsg("Markov Difference", "Must be double '" + x + "'");
+		if (chkOutFiles.isSelected()) annoObj.setORFoutFiles("1");
+		else annoObj.setORFoutFiles("0");
 			
 		x = txtTrainMinSet.getText();
 		if (Static.isInteger("Minimum number of sequences used for training", x)) annoObj.setORFtrainMinSet(x);
@@ -746,7 +705,7 @@ public class AnnoOptionsPanel extends JPanel {
 		annoObj.setSelfBlastpPgm(cmbSearchPgms.getSelectedItem());
 		
 		x = txtPairsLimit.getText();
-		int limit=0; //CAS331 set even if no selected
+		int limit=0; 
 		if(x.length() > 0) {
 			try {
 				limit = Integer.parseInt(x);
@@ -769,10 +728,10 @@ public class AnnoOptionsPanel extends JPanel {
 		chkSPpref.setSelected(false);
 		chkRmECO.setSelected(true);
 		
-		radPrNone.setSelected(true); //CAS331
+		radPrNone.setSelected(true); 
 		
 		cmbGODB.setSelectedIndex(0); 
-		chkNoGO.setSelected(false); chkNoGO.setEnabled(false);//CAS331
+		chkNoGO.setSelected(false); chkNoGO.setEnabled(false);
 		cmbSlimSubset.setSelectedIndex(0);
 		
 		boolean bNTdb = !isAAdb; // everything is disabled
@@ -780,12 +739,7 @@ public class AnnoOptionsPanel extends JPanel {
 		
 		// ORF
 		chkAltStart.setEnabled(bNTdb);
-		txtHitEval.setEnabled(bNTdb);
-		txtHitSim.setEnabled(bNTdb);
-		
-		txtLenDiff.setEnabled(bNTdb);
-		txtMkDiff.setEnabled(bNTdb);
-		
+		chkOutFiles.setEnabled(bNTdb);
 		txtTrainMinSet.setEnabled(bNTdb);
 		radTrainHit.setEnabled(bNTdb); 
 		radTrainCDSfile.setEnabled(bNTdb);
@@ -797,7 +751,7 @@ public class AnnoOptionsPanel extends JPanel {
 		chkSelfX.setSelected(false);  						chkSelfX.setEnabled(bNTdb);
 		txtSelfXargs.setText(BlastArgs.getTblastxArgs());	txtSelfXargs.setEnabled(bNTdb);
 		
-		chkSelfP.setSelected(false);  						chkSelfP.setEnabled(true); //CAS330
+		chkSelfP.setSelected(false);  						chkSelfP.setEnabled(true); 
 		txtSelfPargs.setText(BlastArgs.getDiamondArgsORF());txtSelfPargs.setEnabled(true);
 		
 		chkSelfP.setSelected(false);  						chkSelfP.setEnabled(true);
@@ -808,7 +762,7 @@ public class AnnoOptionsPanel extends JPanel {
 		
 		txtPairsLimit.setText(mProps.getProperty("Anno_pairs_limit"));
 		
-		for (int i=0; i<6; i++) ntJLabel[i].setEnabled(bNTdb);
+		for (int i=0; i<3; i++) ntJLabel[i].setEnabled(bNTdb);
 		
 		if (isAAdb) return; /***************/
 		
@@ -817,13 +771,11 @@ public class AnnoOptionsPanel extends JPanel {
 		boolean check = (bAlt.equals("1")) ? true : false;
 		chkAltStart.setSelected(check);
 		
-		txtHitEval.setText(mProps.getProperty("Anno_ORF_hit_evalue")); 
-		txtHitSim.setText(mProps.getProperty("Anno_ORF_hit_sim")); 
+		String bOut = mProps.getProperty("Anno_ORF_out_files");
+		check = (bOut.equals("1")) ? true : false;
+		chkOutFiles.setSelected(check);
 		
-		txtLenDiff.setText(mProps.getProperty("Anno_ORF_len_diff")); 
-		txtMkDiff.setText(mProps.getProperty("Anno_ORF_mk_diff")); 
-		
-		radTrainHit.setSelected(true);  // CAS327 was enabled
+		radTrainHit.setSelected(true);  
 		txtTrainMinSet.setText(mProps.getProperty("Anno_ORF_train_min_set")); 
 		txtTrainCDSfile.setText(""); 
 	}
@@ -839,7 +791,7 @@ public class AnnoOptionsPanel extends JPanel {
 	
 	// Best Anno
 	private JCheckBox chkSPpref = null;
-	private JCheckBox chkRmECO = null; // CAS305
+	private JCheckBox chkRmECO = null; 
 	private JRadioButton radPrDesc = null, radPrAlign = null, radPrNone = null;
 	
 	// GO
@@ -854,10 +806,7 @@ public class AnnoOptionsPanel extends JPanel {
 	private JButton   btnSlimOBOFile = null;
 	
 	// ORF
-	private JCheckBox chkAltStart = null;
-	
-	private JTextField txtHitEval=null, txtHitSim=null, txtLenDiff=null, txtMkDiff= null;
-	
+	private JCheckBox chkAltStart = null, chkOutFiles = null;
 	private JRadioButton  radTrainHit=null, radTrainCDSfile=null;
 	private JTextField 	  txtTrainMinSet=null;
 	
@@ -866,7 +815,7 @@ public class AnnoOptionsPanel extends JPanel {
 	
 	// Similarity
 	private JCheckBox     chkSelfN = null, chkSelfX=null, chkSelfP=null;
-	private JTextField     txtSelfNargs = null, txtSelfXargs = null, txtSelfPargs = null; // CAS314 was JTextArea
+	private JTextField     txtSelfNargs = null, txtSelfXargs = null, txtSelfPargs = null; 
 	private ButtonComboBox cmbSearchPgms = null;
 	private JTextField    txtPairsLimit = null;
 	

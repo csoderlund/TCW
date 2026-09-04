@@ -75,7 +75,7 @@ public class Stats
 	 * This uses the method that divides the list in half to get 1st and 3rd
 	 * Tested with: https://www.hackmath.net/en/calculator/quartile-q1-q3 Method 2
 	 */
-	 static public double [] setQuartiles(Vector <Double> vals, double noVal) { // CAS313 make noVal argument
+	 static public double [] setQuartiles(Vector <Double> vals, double noVal) { 
 		double [] qrt = {0.0,0.0,0.0}; 
 		
 		int n = 0;
@@ -127,9 +127,9 @@ public class Stats
 	
 		return qrt;
 	 }
-	 // CAS313 added for ScoreMulti - which is not using Vector and needs min,max
+	 // For ScoreMulti and DoORF
 	 static public double [] setQuartiles(double [] vals) {
-		double [] qrt = {0.0,0.0,0.0, 0.0, 0.0}; // CAS313 1st, median, 3rd
+		double [] qrt = {0.0, 0.0, 0.0, 0.0, 0.0}; //  1st, median, 3rd, min, max
 		 
 		double [] dArr = vals.clone();
 		Arrays.sort(dArr);
@@ -140,36 +140,39 @@ public class Stats
 		
 		int q1U, q3L;
 		
-		// median
-		if (x == Math.floor(x) && !Double.isInfinite(x))  { // odd n
-			qrt[1] = dArr[q2];
-			q1U=q2-1;
-			q3L=q2+1;
-		}
-		else {
-			qrt[1] = (dArr[q2]+dArr[q2+1])/2.0;
-			q1U=q2;
-			q3L=q2+1;
-		}
-		// 1st quartile
-		x = (double)q1U/2.0;
-		int q1 = (int) x;
-		if (q1>=0 && q1<(n-1)) {
-			if (x == Math.floor(x) && !Double.isInfinite(x)) 
-				qrt[0] = dArr[q1];
-			else qrt[0] = (dArr[q1]+dArr[q1+1])/2.0;
-		}
-		else qrt[0] = dArr[0];
-		
-		// 3rd quartile
-		x = ((double)((n-1)-q3L)/2.0) + q3L;
-		int q3 = (int) x;
-		if (q3>=0 && q3<(n-1)) {
-			if (x == Math.floor(x) && !Double.isInfinite(x)) 
-				qrt[2] = dArr[q3];
-			else qrt[2] = (dArr[q3]+dArr[q3+1])/2.0;
-		}	
-		else qrt[2] = dArr[n-1];
+		try {
+			// median
+			if (x == Math.floor(x) && !Double.isInfinite(x))  { // odd n
+				qrt[1] = dArr[q2];
+				q1U=q2-1;
+				q3L=q2+1;
+			}
+			else {
+				qrt[1] = (dArr[q2]+dArr[q2+1])/2.0;
+				q1U=q2;
+				q3L=q2+1;
+			}
+			// 1st quartile
+			x = (double)q1U/2.0;
+			int q1 = (int) x;
+			if (q1>=0 && q1<(n-1)) {
+				if (x == Math.floor(x) && !Double.isInfinite(x)) 
+					qrt[0] = dArr[q1];
+				else qrt[0] = (dArr[q1]+dArr[q1+1])/2.0;
+			}
+			else qrt[0] = dArr[0];
+			
+			// 3rd quartile
+			x = ((double)((n-1)-q3L)/2.0) + q3L;
+			int q3 = (int) x;
+			if (q3>=0 && q3<(n-1)) {
+				if (x == Math.floor(x) && !Double.isInfinite(x)) 
+					qrt[2] = dArr[q3];
+				else qrt[2] = (dArr[q3]+dArr[q3+1])/2.0;
+			}	
+			else qrt[2] = dArr[n-1];
+		} 
+		catch (Exception e) {Out.Print("Num " + dArr.length + " q2 " + q2); ErrorReport.prtReport(e, "Getting quartiles");}
 		
 		qrt[3] = dArr[0];
 		qrt[4] = dArr[n-1];

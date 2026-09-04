@@ -802,7 +802,7 @@ public class HitTablePanel  extends JPanel {
 		String name = (String)theTableData.getValueAt(row, theTableData.getColumnHeaderIndex(HITID));
 		
 		String sum = "";
-		if (theTable.getRowCount()>1) sum = "Row " + (row+1) + "/" + theTable.getRowCount() + "   ";
+		// CAS504d if (theTable.getRowCount()>1) sum = "Row " + (row+1) + "/" + theTable.getRowCount() + "   ";
 		sum += Globals.tagHIT + " " + name + "    " + desc;
 		return sum;
 	}

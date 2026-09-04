@@ -31,7 +31,7 @@ public class Overview {
 
 	public Overview(DBConn dbC) {
 		mDB = dbC;
-		try { // CAS342 always do full update
+		try { 
 			mDB.executeUpdate("update assem_msg set anno_msg=''");
 		}
 		catch ( Exception err ) {ErrorReport.reportError(err,"Regenerate overview");}
@@ -42,7 +42,7 @@ public class Overview {
 		if (c1!=0) COVER1 = c1;
 		if (c2!=0) COVER2 = c2;
 		Out.Print("Using Cover values " + COVER1 + " " + COVER2);
-		try { // CAS326
+		try { 
 			mDB.executeUpdate("update assem_msg set anno_msg=''");
 		}
 		catch ( Exception err ) {ErrorReport.reportError(err,"Regenerate overview");}
@@ -209,7 +209,7 @@ public class Overview {
 	        	hasTranscripts=false;
 	        	lines.add( "Project: Not instantiated yet");
 	        }
-	        else { // CAS303 add more information in header
+	        else { 
 	        	String h = "Project:  " + strDBID ;
 	        	if (isProteinDB) h += "  Protein";
 	        	
@@ -229,7 +229,6 @@ public class Overview {
 	        }
         	lines.add(" ");
 
-        // CAS319 put dates at top
         // build
         	String assemblyDate = mDB.executeString ( "SELECT assemblydate FROM assembly");
     		if (assemblyDate==null) return true;
@@ -263,9 +262,9 @@ public class Overview {
             msg = String.format("%s %-15s ", TimeHelpers.convertDate(annotationDate), "Last Annotation");
             
             String annoVer = mDB.executeString( "SELECT annoVer from schemver");
-    		if (annoVer != null) { 							// CAS318 put this second
+    		if (annoVer != null) { 							
     			msg += "with sTCW v" + annoVer;
-    			// CAS331 this no longer happens - I think
+    			// this no longer happens - I think
     			if (!annoVer.equals(Globalx.strTCWver)) msg += "    Updated with v" + Globalx.strTCWver;
     		}
             lines.add(msg);
@@ -415,7 +414,7 @@ public class Overview {
 		return true;
     }
     /*************************************************************
-     * CAS326 create once and store
+     * create once and store
      */
     private String annoCreate(boolean ask) {
     	try {
@@ -512,9 +511,6 @@ public class Overview {
 	     	int [] noHit = new int [maxIdx];
 	     	int badRank=0;
 	     	
-	        // CAS332 Instead of checking rank=1, I was checking for the first hit because
-	        // some sequences end up with rank=2 due to duplicates. Still fixing...
-	     
 	     	for (int dbid=1; dbid < nDB; dbid++) {
 	     		for (int i=0; i<maxIdx; i++) noHit[i]=0;
 	     		
@@ -527,8 +523,8 @@ public class Overview {
 	     		
      			while (rs.next()) {
      				int i=1;
-	    			double pSim = rs.getDouble(i++); // CAS342 was int causing round-off
-	    			int hitCov = rs.getInt(i++); // CAS332 was prot_end-prot_start
+	    			double pSim = rs.getDouble(i++); 
+	    			int hitCov = rs.getInt(i++); 
 	    			int rank = rs.getInt(i++);
 	    			int idx = rs.getInt(i++);
 	    			
@@ -559,7 +555,7 @@ public class Overview {
 	    		else Out.prtSpCnt(1, hitSeq[dbid], "Seqs with hits for DB#" + dbid + "             ");
 	     	}
 	     	
-	   /* Loop through annoDBs creating table */ // CAS327 change BEST HIT to Rank=1
+	   /* Loop through annoDBs creating table */ 
 	        String [] dfields =  {"ANNODB",  "ONLY", "BITS", "ANNO", "UNIQUE", "TOTAL", "AVG", "Rank", "HAS (%Seqs)", "AVG", "COVER", "COVER"};
 	        String [] dfields2 = {"",          "",     "",    "",    "",        "",     "%SIM"," =1 ", "HIT        ", "%SIM", ">="+COVER1, ">="+COVER2};
 	        int [] djust = {1,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -816,7 +812,7 @@ public class Overview {
         try {     
         	boolean isGO = table.contentEquals("go_info");
             String strQ=  "SELECT ";
-            ResultSet rset = mDB.executeQuery("select pCol, goCutoff from libraryDE"); // CAS326 changed to use libraryDE
+            ResultSet rset = mDB.executeQuery("select pCol, goCutoff from libraryDE"); 
             Vector <String> rowLab = new Vector <String> ();
             while(rset.next()) {
                 String col = rset.getString(1);
@@ -1101,7 +1097,7 @@ public class Overview {
 		{"<=100", "101-500", "501-1000", "1001-2000", "2001-3000", "3001-4000", "4001-5000", ">5000"};
         int [] djust = {0, 0, 0, 0, 0, 0, 0, 0};
 		
-	    int[] start= {-1,  100, 500, 1000,2000, 3000,4000,5000}; // CAS334 catch zero length seqences with -1
+	    int[] start= {-1,  100, 500, 1000,2000, 3000,4000,5000}; 
 	    int[] end =  {100,500, 1000,2000,3000, 4000,5000,100000000};
 	    int n = start.length;
 	    rows = new String[3][n+1];
@@ -1110,12 +1106,16 @@ public class Overview {
 		    for (int i = 0; i<n; i++) {
 		       int cntLen = mDB.executeCount (  "SELECT count(*) FROM contig " +
 		         "WHERE consensus_bases > " + start[i] + " AND consensus_bases <= " + end[i]);
+		       
 		        rows[0][i] = Out.kbFText(cntLen) + Out.perItxtP(cntLen, numSeqs);
+		        
 		        cnt += cntLen;
 		    }
 		    if (!isProteinDB) lines.add("   Sequence lengths:");
-		    else             lines.add("   Protein lengths:");
+		    else              lines.add("   Protein lengths:");
+		    
 		    makeTable(n, 1, dfields, djust, lines);
+		    
 		    if (cnt!=numSeqs) Out.PrtErr("Incorrect sequence lengths count " + cnt);
 	    }
 	    catch (Exception err) {
@@ -1214,10 +1214,11 @@ public class Overview {
         try {
 	        int nPairs = mDB.executeCount( "SELECT COUNT(*) FROM pja_pairwise");     
 	        
+	        lines.add("              "); // CAS405 add
 	        lines.add(subtitle("Similar pairs: " + nPairs));
 	        
-        	String msg = mDB.executeString( "SELECT pair_msg from assem_msg"); // CAS314
-        	if (msg==null || msg.contentEquals("")) return true; // CAS317
+        	String msg = mDB.executeString( "SELECT pair_msg from assem_msg"); 
+        	if (msg==null || msg.contentEquals("")) return true; 
         	
         	String [] tok = msg.split("::");
         	int cntAA=0, cntNT=0, cntORF=0;
@@ -1394,7 +1395,7 @@ public class Overview {
     			String go = mDB.executeString( "Select go_msg from assem_msg");
     			if (go!=null && !go.equals("")) {
     				if (go.endsWith(".tar.gz")) go = go.replace(".tar.gz", "");
-    				lines.add("   Gene ontology: " + go); // CAS318 had 'Over-represented'
+    				lines.add("   Gene ontology: " + go); 
     				
     				if (mDB.tableColumnExists("assem_msg", "go_slim")) { 
         				String slim = mDB.executeString( "Select go_slim from assem_msg");
@@ -1551,7 +1552,7 @@ public class Overview {
   	       }
   	       if (libs.size()>0) {
   	    	   hasNorm=true;
-  	    	   if (mDB.tableColumnExists("assem_msg", "norm"))  // CAS304
+  	    	   if (mDB.tableColumnExists("assem_msg", "norm"))  
   	    		   normType = mDB.executeString("select norm from assem_msg");
   	    	   else 
   	    		 normType="RPKM";
@@ -1565,7 +1566,7 @@ public class Overview {
                if(col.startsWith(Globals.PVALUE)) hasSeqDE=true;
            }
            
-           if (mDB.tableExists("go_info")) { // CAS319 318 bug had go_tree
+           if (mDB.tableExists("go_info")) { 
                hasGO = true;
            
                nUniqueGOs = mDB.executeCount( "SELECT count(*) FROM go_info ");
@@ -1588,10 +1589,10 @@ public class Overview {
 			return false;
 	   }
 	}
-	// HTML CAS404 make html pass BBEdit test
+
 	 private void writeHTML(String text) {
 		try {
-			if (strDBID==null) return; // CASz 10oct19
+			if (strDBID==null) return; 
 			
 			String [] lines = text.split("\n");
 			for (int i=0; i<lines.length; i++) {
@@ -1600,7 +1601,7 @@ public class Overview {
 				lines[i] = lines[i].replaceAll("<", "&lt;");
 			}
 			String db = strDBname.replace(Globalx.STCW, "");
-			String file= db + ".html";	// CAS340 use database name instead of id
+			String file= db + ".html";	
 			if (new File("./projects").exists()) {
 				File h = new File("./projects/" + Globalx.HTMLDIR);
 				if (!h.exists()) {
@@ -1612,12 +1613,12 @@ public class Overview {
 			Out.prtSp(1, "Writing overview HTML file: " + file);
 			FileOutputStream out = new FileOutputStream(file);
 			PrintWriter fileObj = new PrintWriter(out); 
-			fileObj.println("<!DOCTYPE html>");	// CAS404 html5
+			fileObj.println("<!DOCTYPE html>");	
 			fileObj.println("<html>");
 			fileObj.println("<head><title>Overview " + strDBname + "</title></head>");
 			fileObj.println("<body>");
 			fileObj.println("<center>");
-			fileObj.println("<h2>Overview for " + strDBname +" (" + strDBID + ") </h2>"); // CAS340 add DBname
+			fileObj.println("<h2>Overview for " + strDBname +" (" + strDBID + ") </h2>"); 
 			fileObj.println("<table style=\"width: 750px; border: 2px solid #999999;\"><tr><td>");
 			fileObj.println("<pre>");
 			for (int i=0; i<lines.length; i++)  fileObj.println(lines[i]);

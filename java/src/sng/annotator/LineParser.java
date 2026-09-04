@@ -19,7 +19,6 @@ public class LineParser {
 	static int badHitNameLen=0;
 	static int badSpeciesLen =0;
 	static int badDescriptLen=0;
-	static String badHitFile = BlastHitData.badHits;
 	
 	public LineParser() {}
 	
@@ -40,7 +39,6 @@ public class LineParser {
 		return r[0] + " " + r[1];
 	}
 	// return description to be compared with other "similar" descriptions
-	// CAS338 quite removing uncharacterized descriptions, and a few other changed
 	public String getUniqueDesc(String fulldesc) {
 		String desc = fulldesc.trim().toLowerCase();
 	
@@ -50,13 +48,13 @@ public class LineParser {
 				desc = desc.substring(0,ix).trim();
 			
 			if (desc.endsWith("-like")) 
-				desc = desc.replace("-like", "").trim(); // CAS338
+				desc = desc.replace("-like", "").trim(); 
 			
 			String [] words = desc.split(" "); 
 			if (words.length>2) {
 				String lastWord = words[words.length-1];
 				if (BestAnno.isName(lastWord)) 
-					desc = desc.substring(0, desc.lastIndexOf(" ")); // CAS338
+					desc = desc.substring(0, desc.lastIndexOf(" ")); 
 			}
 			
 			String [] prefix = {"putative", "probable", "uncharacterized"}; // after removing isName
@@ -163,7 +161,6 @@ public class LineParser {
 				}
 				rc = matchGeneral(line);
 			}
-			// CAS317 was checking description length and #species here
 				
 			if (rc==false) return false;
 			return true;
@@ -172,7 +169,6 @@ public class LineParser {
 	}
 	// uniprot line
     //>sp|Q9V2L2|1A1D_PYRAB Putative 1-ami OS=Pyrococcus abyssi GN=PYRAB00630 PE=3 SV=1v
-	// CAS338 rewrote removing dependancy on Java RE, but didn't make much difference
 	private boolean matchUniProt(String line) {
 		try {	
 			strDesc = strOS = "unk";
@@ -325,7 +321,7 @@ public class LineParser {
 	public String getHitID() {return strHitID;}
 	public String getOtherID() {return strOtherID;}
 	public String getDescription() {
-		if (strDesc.length() > maxDescriptLen ) { // CAS317 only check ones that are to be saved
+		if (strDesc.length() > maxDescriptLen ) { // only check ones that are to be saved
 			String d = strDesc.substring(0,maxDescriptLen-1);
 			if (!badDesc.contains(d)) {
 				if (badDescriptLen<100) { 

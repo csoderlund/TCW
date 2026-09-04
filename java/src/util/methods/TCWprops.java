@@ -143,7 +143,7 @@ public class TCWprops
 			 *   ManagerData - read sTCW.cfg for interface and sends values to interface methods
 			 * 		Defaults: STCWmethods: some defaults are hard coded. 
 			 * 			      Search Args: in STCWmethods, EditAnnoPanel, AnnoOptionsPanel
-			 *	 CAS314 Search args must have a value 
+			 *	 Search args must have a value 
 			*  getProperty() 		returns default; 
 			*  getAnnoProperty() 	returns user supplied or default
 			*  getNotDefault() 		only return value if user supplied.
@@ -156,15 +156,15 @@ public class TCWprops
 			mProps.setProperty("Anno_min_bitscore", "-1");    // not documented
 			
 			mProps.setProperty("Anno_SwissProt_pref", Globals.pSP_PREF); 
-			mProps.setProperty("Anno_Remove_ECO", Globals.pRM_ECO); // CAS305
+			mProps.setProperty("Anno_Remove_ECO", Globals.pRM_ECO); 
 			
-			mProps.setProperty("Anno_Prune_type", Globals.pPRUNE); // CAS331
-			mProps.setProperty("Anno_No_GO", Globals.pNO_GO); // CAS331
+			mProps.setProperty("Anno_Prune_type", Globals.pPRUNE);
+			mProps.setProperty("Anno_No_GO", Globals.pNO_GO); 
 			
 			mProps.setProperty("Anno_DBdate", "-");  // Global DBdate if individual DBdata not set   
 			
 			for (int i=1; i<Globals.numDB; i++) {
-				mProps.setProperty("Anno_DBtab_" +   Integer.toString(i), "-"); // CAS314 was "Anno_unitrans_DBblast_"
+				mProps.setProperty("Anno_DBtab_" +   Integer.toString(i), "-"); 
 				mProps.setProperty("Anno_DBfasta_" + Integer.toString(i), "-");
 				mProps.setProperty("Anno_DBtaxo_" +  Integer.toString(i), "-");
 				mProps.setProperty("Anno_DBargs_" +  Integer.toString(i), "-"); 
@@ -184,15 +184,9 @@ public class TCWprops
 			
 			// NOTE defaults are hardcoded in ManagerData!!!
 			mProps.setProperty("Anno_ORF_alt_start", "0"); 
-			mProps.setProperty("Anno_ORF_hit_evalue", Globals.pHIT_EVAL); 
-			mProps.setProperty("Anno_ORF_hit_sim", Globals.pHIT_SIM);     
-			
-			mProps.setProperty("Anno_ORF_len_diff", Globals.pDIFF_LEN);
-			mProps.setProperty("Anno_ORF_mk_diff", Globals.pDIFF_MK);	// CAS334
-			
-			mProps.setProperty("Anno_ORF_train_evalue", "1E-75"); // obsolete.
+			mProps.setProperty("Anno_ORF_out_files", "0"); // CAS406 add removel rule stuff
 			mProps.setProperty("Anno_ORF_train_min_set", Globals.pTRAIN_MIN); 
-			mProps.setProperty("Anno_ORF_train_CDS_file", "-"); // CAS327 was -1
+			mProps.setProperty("Anno_ORF_train_CDS_file", "-"); 
  
 			mProps.setProperty("Anno_GO_DB", ""); 
 			mProps.setProperty("Anno_SLIM_SUBSET", ""); 
@@ -203,7 +197,7 @@ public class TCWprops
 			mProps.setProperty("MTCW_db", "");
 			mProps.setProperty("MTCW_host", "");
 			
-			// CAS316 AA is always run, but can change search program and parameters
+			// AA is always run, but can change search program and parameters
 			mProps.setProperty("MTCW_DBsearch_pgm", "diamond"); 
 			mProps.setProperty("MTCW_search_params", "");	// set to defaults
 			
@@ -228,7 +222,7 @@ public class TCWprops
 				mProps.setProperty("CLST_method_prefix"+ Integer.toString(i), "");
 				mProps.setProperty("CLST_file"+ Integer.toString(i), "");
 				mProps.setProperty("CLST_comment"+ Integer.toString(i), "");
-				mProps.setProperty("CLST_settings"+ Integer.toString(i), ""); // CAS325 missing 's'
+				mProps.setProperty("CLST_settings"+ Integer.toString(i), ""); 
 			}
 			break;
 			
@@ -262,7 +256,7 @@ public class TCWprops
 	{
 		return mProps.containsKey(key);
 	}
-	public boolean hasSetKey(String key) // CAS325
+	public boolean hasSetKey(String key) 
 	{
 		return mUserKeys.contains(key);
 	}

@@ -16,18 +16,12 @@ public class ManagerMain {
 			System.out.println("       -v print important MySQL variables and Search paths");
 			System.exit(0);
 		}
-		if (hasArg(args, "-d")) {
-			Globalx.debug=true;
-			System.out.println("Running in global debug mode");
-		}
 		if (hasArg(args, "-v")) {
 			System.out.println("Check variables and search paths");
 			new HostsCfg(true);
 			System.exit(0);
 		}
-		//FileHelpers.mergeDir(Globals.OLDLIBDIR, Globalx.PROJDIR, true); CAS314 don't need anymore
-		
-		ManagerFrame mf = new ManagerFrame();
+		ManagerFrame mf = new ManagerFrame(); // Executions are done in RunCmd -- no command line are passed to it
 		mf.setVisible(true);
 	}
 	static boolean hasArg(String [] args, String arg) {

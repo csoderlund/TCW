@@ -1115,7 +1115,7 @@ public class SeqsTablePanel extends JPanel {
 		
  	private String getSumLine(int row,  String name) {
  		String sum = "";
-		if (theTable.getRowCount()>1) sum = "Row " + (row+1) + "/" + theTable.getRowCount() + "   ";
+		// CAS504d if (theTable.getRowCount()>1) sum = "Row " + (row+1) + "/" + theTable.getRowCount() + "   ";
 		sum += Globals.tagSEQ + name;
 		return sum;
 	}

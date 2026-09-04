@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 
 import sng.database.Globals;
-import sng.database.Version;
 import util.database.DBConn;
 import util.database.Globalx;
 import util.database.HostsCfg;
@@ -35,6 +34,7 @@ import util.ui.UserPrompt;
 // CAS304 for -Xlint
 //  changed SeqData and CountData extends Attributes to having an attribute object 
 //  removed equal method for CountData and AnnodbData
+// CAS406 add Out Files option and removed some others
 
 public class ManagerData {
 	private boolean debug=false;
@@ -232,7 +232,7 @@ public class ManagerData {
 	 */
 	public  String [] readLibCountsFromFile(File sourceFile) {
 		try {
-			BufferedReader projReader = FileHelpers.openGZIP(sourceFile.getAbsolutePath()); // CAS315
+			BufferedReader projReader = FileHelpers.openGZIP(sourceFile.getAbsolutePath()); 
 			String line = "";
 			
 			String [] repNames = null;
@@ -464,8 +464,8 @@ public class ManagerData {
 	
 	public void setGODB(String dbName) { strGODB = dbName;  }
 	public String getGODB() { return strGODB; }
-	public void setNoGO(String b) {strNoGO=b;} // CAS331 add
-	public String getNoGO() {return strNoGO;}  // CAS331 add
+	public void setNoGO(String b) {strNoGO=b;} 
+	public String getNoGO() {return strNoGO;}  
 	public void setSlimSubset(String x) { strSlimSubset = x.trim();  }
 	public String getSlimSubset() { return strSlimSubset; }
 	public void setSlimFile(String x) { strSlimFile = x.trim(); }
@@ -715,10 +715,10 @@ public class ManagerData {
 		public void setSPpref(String b) {strSPpref=b;}
 		public String getSPpref() {return strSPpref;}
 		
-		public void setRmECO(String b) {strRmECO=b;} // CAS305
+		public void setRmECO(String b) {strRmECO=b;} 
 		public String getRmECO() {return strRmECO;}
 		
-		public void setPruneType(String b) {strPruneType=b;} // CAS331
+		public void setPruneType(String b) {strPruneType=b;} 
 		public String getPruneType() {return strPruneType;}
 
 	// similarity - the filename is fixed in CfgAnno
@@ -758,17 +758,8 @@ public class ManagerData {
 		public void setORFaltStart(String r) { strORFaltStart = r; }
 		public String getORFaltStart() { return strORFaltStart; }
 				
-		public void setORFhitEval(String r) { strORFhitEval = r; }
-		public String getORFhitEval() { return strORFhitEval; }
-		
-		public void setORFhitSim(String r) { strORFhitSim = r; }
-		public String getORFhitSim() { return strORFhitSim; }
-		
-		public void setORFlenDiff(String r) { strORFlenDiff = r; }
-		public String getORFlenDiff() { return strORFlenDiff; }
-		
-		public void setORFmkDiff(String r) { strORFmkDiff = r; }
-		public String getORFmkDiff() { return strORFmkDiff; }
+		public void setORFoutFiles(String r) { strORFoutFiles = r; }
+		public String getORFoutFiles() { return strORFoutFiles; }
 		
 		public void setORFtrainMinSet(String r) { strORFtrainMinSet = r; }
 		public String getORFtrainMinSet() { return strORFtrainMinSet; }
@@ -777,12 +768,7 @@ public class ManagerData {
 		public String getORFtrainCDSfile() { return strORFtrainCDSfile; }
 				
 		private String strORFaltStart="0";
-		
-		private String strORFhitEval= Globals.pHIT_EVAL; 			// Automatically use this frame
-		private String strORFhitSim = Globals.pHIT_SIM;  		
-		
-		private String strORFlenDiff=Globals.pDIFF_LEN;
-		private String strORFmkDiff=Globals.pDIFF_MK;		// CAS334 Log difference of markov scores
+		private String strORFoutFiles="0";
 		
 		private String strORFtrainMinSet=Globals.pTRAIN_MIN;
 		private String strORFtrainCDSfile="";
@@ -1096,18 +1082,7 @@ public class ManagerData {
 					out.write("\n# ORF finding\n");
 					
 					if (annoObj.strORFaltStart.equals("1")) out.write("Anno_ORF_alt_start = 1\n");
-					
-					if (!annoObj.strORFhitEval.equalsIgnoreCase(theProps.getProperty("Anno_ORF_hit_evalue")))
-						out.write("Anno_ORF_hit_evalue = " + annoObj.strORFhitEval + "\n");
-					
-					if (!annoObj.strORFhitSim.equals(theProps.getProperty("Anno_ORF_hit_sim")))
-						out.write("Anno_ORF_hit_sim = " + annoObj.strORFhitSim + "\n");
-					
-					if (!annoObj.strORFlenDiff.equals(theProps.getProperty("Anno_ORF_len_diff")))
-						out.write("Anno_ORF_len_diff = " + annoObj.strORFlenDiff + "\n");
-					
-					if (!annoObj.strORFmkDiff.equals(theProps.getProperty("Anno_ORF_mk_diff")))
-						out.write("Anno_ORF_mk_diff = " + annoObj.strORFmkDiff + "\n");
+					if (annoObj.strORFoutFiles.equals("1")) out.write("Anno_ORF_out_files = 1\n");
 					
 					String file = annoObj.strORFtrainCDSfile;
 					if(file != null && !file.equals("") && !file.equals("-1")) 
@@ -1156,7 +1131,7 @@ public class ManagerData {
 					else if (strSlimFile.length()>0)
 						out.write("Anno_SLIM_OBOFile = " + strSlimFile + "\n");
 					
-					if (strNoGO.contentEquals("1")) out.write("Anno_No_GO = 1\n"); // CAS331
+					if (strNoGO.contentEquals("1")) out.write("Anno_No_GO = 1\n"); 
 				}
 				
 		// Anno DBs		
@@ -1165,7 +1140,7 @@ public class ManagerData {
 				if (annoObj.strSPpref.equals("1")) {out.write("Anno_SwissProt_pref = 1\n"); sp=true;}
 				if (annoObj.strRmECO.equals("0"))  {out.write("Anno_Remove_ECO = 0\n");  sp=true;}
 				if (!annoObj.strPruneType.equals(Globals.pPRUNE))  
-						{out.write("Anno_Prune_type = " + annoObj.strPruneType + "\n");  sp=true;}// CAS331
+						{out.write("Anno_Prune_type = " + annoObj.strPruneType + "\n");  sp=true;}
 				if (sp) out.write("\n");
 				
 				for(int x=0; x<getNumAnnoDBs(); x++) {
@@ -1293,7 +1268,7 @@ public class ManagerData {
 					cntErrors++;
 				}
 			}
-			else if(key.equalsIgnoreCase("Anno_Prune_type")) { // CAS331
+			else if(key.equalsIgnoreCase("Anno_Prune_type")) { 
 				if (value.equals("1") || value.equals("0") || value.equals("2")) annoObj.strPruneType = value;
 				else {
 					Out.PrtWarn("Anno_Prune_type must be 0, 1 or 2 - ignore line");
@@ -1308,17 +1283,12 @@ public class ManagerData {
 					cntErrors++;
 				}
 			}
-			else if(key.equalsIgnoreCase("Anno_ORF_hit_evalue")) {
-				if (isDouble("Anno_ORF_hit_evalue", value)) annoObj.strORFhitEval = value;
-			}
-			else if(key.equalsIgnoreCase("Anno_ORF_hit_sim")) {
-				if (isInteger("Anno_ORF_hit_sim", value)) annoObj.strORFhitSim = value;
-			}
-			else if(key.equalsIgnoreCase("Anno_ORF_len_diff")) {
-				if (isDouble("Anno_ORF_len_diff", value)) annoObj.strORFlenDiff = value;
-			}
-			else if(key.equalsIgnoreCase("Anno_ORF_mk_diff")) {
-				if (isDouble("Anno_ORF_mk_diff", value)) annoObj.strORFmkDiff = value;
+			else if(key.equalsIgnoreCase("Anno_ORF_out_files")) {
+				if (value.equals("1") || value.equals("0")) annoObj.strORFoutFiles = value;
+				else {
+					Out.PrtWarn("Anno_ORF_out_files must be 0 or 1 - ignore line");
+					cntErrors++;
+				}
 			}
 			else if(key.equalsIgnoreCase("Anno_ORF_train_min_set")) {
 				if (isInteger("Anno_ORF_train_min_set", value)) annoObj.strORFtrainMinSet = value;
@@ -1327,7 +1297,6 @@ public class ManagerData {
 				annoObj.strORFtrainCDSfile = checkFile(value, FileC.dPROJ, FileC.fFASTA);
 			}
 			
-		// Similarity CAS314 change keywords - not backward compatible
 			// Even if not blast is selected, save any parameters in case they reset
 			else if(key.equalsIgnoreCase("Anno_pairs_limit")) {
 				if (Static.isInteger(value)) annoObj.nPairsLimit = Integer.parseInt(value);
@@ -1349,7 +1318,7 @@ public class ManagerData {
 			
 		// GO
 			else if(key.equalsIgnoreCase("Anno_GO_DB")) 		strGODB = value;
-			else if(key.equalsIgnoreCase("Anno_No_GO")) 		strNoGO = value; // CAS331 add
+			else if(key.equalsIgnoreCase("Anno_No_GO")) 		strNoGO = value; 
 			else if(key.equalsIgnoreCase("Anno_SLIM_SUBSET")) 	strSlimSubset = value;
 			else if(key.equalsIgnoreCase("Anno_SLIM_OBOFile")) 	strSlimFile = value;
 			else isAnnoDB=true;
@@ -1423,12 +1392,7 @@ public class ManagerData {
 			}
 			return true;
 		}
-		private boolean isDouble(String msg, String d) {
-			if (Static.isDouble(d)) return true;
-			Out.PrtWarn(msg + " the value '" + d + "' is not a floating point number");
-			cntErrors++;
-			return false;
-		}
+		
 		private boolean isInteger(String msg, String d) {
 			if (Static.isInteger(d)) return true;
 			Out.PrtWarn(msg + " the value '" + d + "' is not an integer");
@@ -1476,14 +1440,13 @@ public class ManagerData {
 							found = getAnnoDBAt(y).getFastaDB().equals(tempAnnos[x].getFastaDB());
 					}
 					if(!found) {
-						tempAnnos[x].setDefaults(); // CAS315
+						tempAnnos[x].setDefaults(); 
 						annoObjList.add(tempAnnos[x]);
 					}
 				}
 			}
 			catch(Exception e) {ErrorReport.prtReport(e, "Error importing annoDBs");}
 		}
-		
 	}
 	
 	// The manager data for a project consists of the following arrays of data
@@ -1510,7 +1473,7 @@ public class ManagerData {
 	private boolean bSkipAssembly = true;
 	private boolean bUseTransNames = false;
 	private String strGODB = "";
-	private String strNoGO="0"; //CAS331
+	private String strNoGO="0"; 
 	private String strSlimSubset="";
 	private String strSlimFile="";
 	
